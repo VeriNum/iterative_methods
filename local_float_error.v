@@ -9,7 +9,6 @@ Import List ListNotations.
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify Float_notations Automate.
 Set Bullet Behavior "Strict Subproofs". 
 
-
 Require Import model_mat_lemmas real_model float_model inf_norm_properties lemmas vcfloat_lemmas.
 
 Local Open Scope float32_scope.
