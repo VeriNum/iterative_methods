@@ -3,7 +3,8 @@ COQDEO=coqdep
 VCFLOAT_LOC=../vcfloat/vcfloat
 COQFLAGS= -Q $(VCFLOAT_LOC) vcfloat 
 
-all: _CoqProject specific_matrix_lemmas.vo infinity_norm_properties.vo float_model.vo lemmas.vo error_real.vo vcfloat_lemmas.vo  error_float.vo  
+target: _CoqProject lemmas.vo float_model.vo real_model.vo vcfloat_lemmas.vo inf_norm_properties.vo model_mat_lemmas.vo local_float_error.vo global_float_error.vo     
+	
 
 _CoqProject: Makefile
 	echo $(COQFLAGS) >_CoqProject

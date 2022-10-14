@@ -328,27 +328,6 @@ apply /RleP. apply bigmax_le.
 Qed.
 
 
-Lemma matrix_norm_sum {n:nat} (f : nat -> 'M[R]_n.+1) (k:nat):
-  matrix_inf_norm
-   (\sum_(j < k.+1) f j) <= 
-  \sum_(j < k.+1) (matrix_inf_norm (f j)).
-Proof.
-induction k.
-+ rewrite !big_ord_recr //= !big_ord0 !add0r. by apply /RleP; nra.
-+ rewrite big_ord_recr //=.
-  assert (\sum_(j < k.+2) matrix_inf_norm (f j) = 
-          \sum_(j < k.+1) matrix_inf_norm (f j) + matrix_inf_norm (f k.+1)).
-  { by rewrite big_ord_recr //=. } rewrite H.
-  apply /RleP. 
-  apply Rle_trans with 
-  (matrix_inf_norm (\sum_(i < k.+1) f i) + matrix_inf_norm (f k.+1))%Re.
-  - apply /RleP. apply matrix_norm_add.
-  - rewrite -RplusE. 
-    apply Rplus_le_compat_r.
-    by apply /RleP.
-Qed.
-
-
 Lemma matrix_norm_add {n:nat}:
   forall (A B : 'M[R]_n.+1),
   matrix_inf_norm (A + B) <= matrix_inf_norm A + matrix_inf_norm B.
@@ -391,6 +370,28 @@ apply /RleP. apply bigmax_le.
          by rewrite size_map size_enum_ord.
   - by rewrite size_map size_enum_ord in H.
 Qed.
+
+
+Lemma matrix_norm_sum {n:nat} (f : nat -> 'M[R]_n.+1) (k:nat):
+  matrix_inf_norm
+   (\sum_(j < k.+1) f j) <= 
+  \sum_(j < k.+1) (matrix_inf_norm (f j)).
+Proof.
+induction k.
++ rewrite !big_ord_recr //= !big_ord0 !add0r. by apply /RleP; nra.
++ rewrite big_ord_recr //=.
+  assert (\sum_(j < k.+2) matrix_inf_norm (f j) = 
+          \sum_(j < k.+1) matrix_inf_norm (f j) + matrix_inf_norm (f k.+1)).
+  { by rewrite big_ord_recr //=. } rewrite H.
+  apply /RleP. 
+  apply Rle_trans with 
+  (matrix_inf_norm (\sum_(i < k.+1) f i) + matrix_inf_norm (f k.+1))%Re.
+  - apply /RleP. apply matrix_norm_add.
+  - rewrite -RplusE. 
+    apply Rplus_le_compat_r.
+    by apply /RleP.
+Qed.
+
 
 
 Lemma matrix_inf_norm_1 {n:nat}:
@@ -443,6 +444,7 @@ induction i.
     * apply /RleP. apply matrix_norm_pd.
     * apply IHi.
 Qed.
+
 
 
 

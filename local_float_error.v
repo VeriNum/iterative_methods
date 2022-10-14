@@ -1,3 +1,6 @@
+(** This file contains theorems for the componentwise floating-point error 
+of each element of the solution vector **) 
+
 From Coq Require Import ZArith Reals Psatz.
 From Flocq Require Import Binary.
 
@@ -7,7 +10,7 @@ From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify Float_notations
 Set Bullet Behavior "Strict Subproofs". 
 
 
-Require Import error_real lemmas float_model vcfloat_lemmas.
+Require Import model_mat_lemmas real_model float_model inf_norm_properties lemmas vcfloat_lemmas.
 
 Local Open Scope float32_scope.
 

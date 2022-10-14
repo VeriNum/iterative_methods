@@ -1,3 +1,6 @@
+(** This file contains the floating-point functional model for Jacobi 
+iterations on a small model problem **)
+
 From Coq Require Import ZArith Reals Psatz.
 From Flocq Require Import Binary.
 
@@ -5,7 +8,6 @@ Import List ListNotations.
 
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify Float_notations Automate.
 Set Bullet Behavior "Strict Subproofs". 
-
 
 
 Local Open Scope float32_scope.

@@ -1,3 +1,7 @@
+(** This file contains random necessary lemmas for the project, 
+including the definition of error_sum used in the conclusion of the 
+main global accuracy theorem **)
+
 From Coq Require Import ZArith Reals Psatz.
 From Flocq Require Import Binary.
 

@@ -1,3 +1,5 @@
+(** This file contains definitions of the VCFloat data structures **) 
+
 From Coq Require Import ZArith Reals Psatz.
 From Flocq Require Import Binary.
 
@@ -7,7 +9,7 @@ From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify Float_notations
 Set Bullet Behavior "Strict Subproofs". 
 
 
-Require Import error_real float_model lemmas.
+Require Import real_model float_model lemmas.
 
 Local Open Scope float32_scope.
 
@@ -52,9 +54,6 @@ Definition varmap (s: state) : valmap :=
  ltac:(let z := compute_PTree (valmap_of_list (assoc_list s)) in exact z).
 
 
-(* NOTE 5/12 : the idea is to derive these bounds on each
-component using the norm of powers of S (in this case =1)
-and the initial guess on the solution vector. *)
 Definition bmap_list : list varinfo := 
   [ Build_varinfo Tsingle _x1 (-100)  100 ;  
     Build_varinfo Tsingle _x2 (-100)  100 ;

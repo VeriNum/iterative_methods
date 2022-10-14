@@ -1,3 +1,5 @@
+(** This file contains the main accuracy theorem **) 
+
 From Coq Require Import ZArith Reals Psatz.
 From Flocq Require Import Binary.
 
@@ -7,7 +9,7 @@ From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify Float_notations
 Set Bullet Behavior "Strict Subproofs". 
 
 
-Require Import local_float_error error_real lemmas float_model vcfloat_lemmas.
+Require Import local_float_error real_model float_model lemmas vcfloat_lemmas.
 
 Local Open Scope float32_scope.
 
