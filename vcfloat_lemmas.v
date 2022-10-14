@@ -197,5 +197,21 @@ destruct H.
   assert (2%Re <> 0%Re -> 2 != 0). { intros. by apply /eqP. } apply H5; nra.
 Qed.
 
+
+Ltac unfold_all_fval :=  (* move this to vcfloat *)
+ repeat
+  match goal with
+  | |- context [fval (env_ ?e) ?x] =>
+     pattern (fval (env_ e) x);
+     let M := fresh in match goal with |- ?MM _ => set (M := MM) end;
+     unfold fval; try unfold x; unfold type_of_expr; unfold_fval;
+    repeat match goal with |- context [env_ ?a ?b ?c] => 
+       let u := constr:(env_ a b c) in 
+       let u1 := eval hnf in u in
+      change u with u1
+     end;
+    subst M; cbv beta
+end.
+
 End WITHNANS.
 
