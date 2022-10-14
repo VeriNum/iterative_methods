@@ -9,19 +9,23 @@ From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify Float_notations
 Set Bullet Behavior "Strict Subproofs". 
 
 
-Require Import local_float_error real_model float_model lemmas vcfloat_lemmas.
+Require Import inf_norm_properties local_float_error real_model float_model.
+Require Import model_mat_lemmas lemmas vcfloat_lemmas.
 
 Local Open Scope float32_scope.
 
 Section WITHNANS.
 Context {NANS: Nans}.
 
-
 Import IntervalFlocq3.Tactic.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
+
+From mathcomp Require Import matrix bigop all_algebra all_ssreflect.
+From mathcomp.analysis Require Import Rstruct.
+From Coquelicot Require Import Lub Rbar.
 
 (** We will open the real scope and the Ring scope 
   separately **)
