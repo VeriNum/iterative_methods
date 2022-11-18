@@ -5,8 +5,9 @@ From mathcomp Require Import all_ssreflect ssralg ssrnat all_algebra seq matrix.
 
 Import List ListNotations.
 
-From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify Float_notations Automate.
-Require Import generalize dot_prod_defn.
+From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
+                            Float_notations Automate.
+Require Import dot_prod_defn.
 Set Bullet Behavior "Strict Subproofs". 
 
 Set Implicit Arguments.
@@ -32,19 +33,18 @@ Definition addmx_float {ty} {m n:nat} (A B: 'M[ftype ty]_(m,n))
   : 'M[ftype ty]_(m,n) :=
   \matrix_(i, j) (sum ty (A i j) (B i j)).
 
-
-(** A coercion from vector to lists **)
 Fixpoint vec_to_list_float {ty} {n:nat} (m:nat) (v :'cV[ftype ty]_n.+1)
    : list (ftype ty) := 
    match m with 
    | O => []
-   | S p => vec_to_list_float p v ++ [v (@inord n p) ord0]
+   | S p => [v (@inord n p) ord0] ++ vec_to_list_float p v
    end.
 
 
 (** Matrix multiplication as dot product  **)
 Definition mulmx_float {ty} {m n p : nat} 
-  (A: 'M[ftype ty]_(m.+1,n.+1)) (B: 'M[ftype ty]_(n.+1,p.+1)) : 'M[ftype ty]_(m.+1,p.+1):=
+  (A: 'M[ftype ty]_(m.+1,n.+1)) (B: 'M[ftype ty]_(n.+1,p.+1)) : 
+  'M[ftype ty]_(m.+1,p.+1):=
   \matrix_(i, k)
     let l1 := vec_to_list_float n.+1 (\row_(j < n.+1) A i j)^T in
     let l2 := vec_to_list_float n.+1 (\col_(j < n.+1) B j k) in
@@ -72,7 +72,7 @@ assert (@ord0 2%N == 0%N :> nat).
 { by []. } rewrite H.
 assert (@inord 1 0 == 0%N :> nat).
 { by rewrite inordK. } rewrite H0.
-assert (@inord 1 1 == 0%N :> nat = false).
+assert (@inord 1 (1-0) == 0%N :> nat = false).
 { by rewrite inordK. } rewrite H1.
 unfold dot_prodF. 
 unfold prod_fixF. unfold prod, sum.
@@ -100,7 +100,8 @@ Notation "-f A" := (opp_mat A) (at level 50).
 Notation "A *f B" := (mulmx_float A B) (at level 70).
 
 
-Fixpoint X_m {ty} (m n: nat) x0 b (inv_A1 A2: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
+Fixpoint X_m {ty} (m n: nat) x0 b (inv_A1 A2: 'M[ftype ty]_n.+1) : 
+  'cV[ftype ty]_n.+1 :=
   match m with
   | O => x0
   | S p => ((-f (inv_A1 *f A2)) *f (X_m p x0 b inv_A1 A2)) +f
