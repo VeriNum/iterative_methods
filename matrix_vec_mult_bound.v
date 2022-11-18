@@ -58,86 +58,65 @@ Notation "-f A" := (opp_mat A) (at level 50).
 Notation "A *f B" := (mulmx_float A B) (at level 70).
 
 
-(** Proof that that the rounding error for 
-    matrix vector mult is bounded by  'mat_vec_mult_err_bnd'
+(** an equivalence between real dot product defined using the mathcomp
+    sum and our dot product definition using the lists
 **)
 
-
-
-(**
-HeqL : L =
-       combine
-         (vec_to_list_float n.+1
-            (\row_j A (inord i) j)^T)
-         (vec_to_list_float n.+1 v)
-H0 : \sum_j
-        (\matrix_(i0, j0) FT2R (A i0 j0))
-          (inord i) j *
-        (\matrix_(i0, j0) FT2R (v i0 j0)) j 0 =
-     \sum_j FT2R (A (inord i) j) * FT2R (v j 0)
-______________________________________(1/1)
-\sum_j FT2R (A (inord i) j) * FT2R (v j 0) =
-dot_prodR (Flist_to_Rlist_pair L)
-
-
-***)
-
-Fixpoint vecR_to_listR {n:nat} (m:nat) (v : 'cV[R]_n.+1) : list R := 
-   match m with 
-   | O => []
-   | S p => [v (@inord n (n - p)%nat) ord0] ++ vecR_to_listR p v
-   end.
-
-
-
-
-Lemma sum_dot {n:nat} {ty} :
+Lemma sum_dot {n:nat} (m:nat) {ty} (le_n_m : (m <= n.+1)%nat) :
   forall (v1 v2: 'cV[ftype ty]_n.+1),
-  let l1 := vec_to_list_float n.+1 v1 in 
-  let l2 := vec_to_list_float n.+1 v2 in 
+  let l1 := @vec_to_list_float _ n m v1 in 
+  let l2 := @vec_to_list_float _ n m v2 in 
   let L := combine l1 l2 in
-  \sum_j (FT2R (v1 j 0) * FT2R (v2 j 0)) = 
+  \sum_(j < m) (FT2R (v1 (@widen_ord m n.+1 le_n_m j) 0) * 
+                FT2R (v2 (@widen_ord m n.+1 le_n_m j) 0)) = 
   dot_prodR (Flist_to_Rlist_pair L).
 Proof.
 intros.
-induction n.
-+ simpl. rewrite big_ord_recl //= big_ord0. 
-  unfold dot_prodR, sum_fixR, prod_fixR. simpl.
-  rewrite Rplus_0_r addr0. rewrite RmultE //=.
-  assert (ord0 = @inord 0 0). 
-  { admit. } by rewrite -H. 
-+ rewrite big_ord_recl. 
-  unfold L.
-  assert (l1 = [v1 (inord (n.+1 - n.+1)) ord0] ++ vec_to_list_float n.+1 v1).
-  { by unfold l1. }
-  assert (l2 = [v2 (inord (n.+1 - n.+1)) ord0] ++ vec_to_list_float n.+1 v2).
-  { by unfold l2. }
-  rewrite H H0. 
-  assert (combine
-            ([v1 (inord (n.+1 - n.+1)) ord0] ++  vec_to_list_float n.+1 v1)%list
-            ([v2 (inord (n.+1 - n.+1)) ord0] ++ vec_to_list_float n.+1 v2)%list = 
-          [(v1 (inord (n.+1 - n.+1)) ord0, v2 (inord (n.+1 - n.+1)) ord0)] ++
-          combine (vec_to_list_float n.+1 v1) (vec_to_list_float n.+1 v2)).
-  { by unfold combine. } rewrite H1. clear H1.
+induction m.
++  rewrite big_ord0 //=. 
++ simpl. rewrite big_ord_recr //=.
   assert (dot_prodR
-            (Flist_to_Rlist_pair
-               ([(v1 (inord (n.+1 - n.+1)) ord0,
-                  v2 (inord (n.+1 - n.+1)) ord0)] ++
-                combine (vec_to_list_float n.+1 v1)
-                  (vec_to_list_float n.+1 v2))%list) = 
-          (FT2R (v1 (inord (n.+1 - n.+1)) ord0) * FT2R (v2 (inord (n.+1 - n.+1)) ord0))+
-          dot_prodR (Flist_to_Rlist_pair (combine (vec_to_list_float n.+1 v1)
-                  (vec_to_list_float n.+1 v2)))).
-  { by unfold dot_prodR, sum_fixR, prod_fixR. } rewrite H1.
-  clear H H0 H1.
-  assert (\sum_(i < n.+1) FT2R (v1 (lift ord0 i) 0) * FT2R (v2 (lift ord0 i) 0) = 
+            ((FT2R (v1 (inord m) ord0),
+              FT2R (v2 (inord m) ord0))
+             :: Flist_to_Rlist_pair
+                  (combine (vec_to_list_float m v1)
+                     (vec_to_list_float m v2))) = 
+          (FT2R (v1 (inord m) ord0) * 
+              FT2R (v2 (inord m) ord0)) +
+          dot_prodR (Flist_to_Rlist_pair
+                      (combine (vec_to_list_float m v1)
+                       (vec_to_list_float m v2)))).
+  { by unfold dot_prodR. } rewrite H. clear H.
+  assert (\sum_(i < m)
+             FT2R (v1
+                  (widen_ord (m:=n.+1) le_n_m
+                     (widen_ord (m:=m.+1) (leqnSn m) i)) 0) *
+               FT2R
+                 (v2
+                    (widen_ord (m:=n.+1) le_n_m
+                       (widen_ord (m:=m.+1) (leqnSn m) i)) 0) = 
            dot_prodR
-              (Flist_to_Rlist_pair
-                 (combine (vec_to_list_float n.+1 v1)
-                    (vec_to_list_float n.+1 v2)))).
-  { admit. }
-  rewrite H. admit.
-Admitted.
+            (Flist_to_Rlist_pair
+               (combine (vec_to_list_float m v1)
+                  (vec_to_list_float m v2)))).
+  { unfold L in IHm.  
+    assert ((m <= n.+1)%nat). { by apply ltnW. }
+    specialize (IHm H). rewrite -IHm.
+    apply eq_big. by [].
+    intros. 
+    assert ((widen_ord (m:=n.+1) le_n_m
+                  (widen_ord (m:=m.+1) (leqnSn m) i))= 
+             (widen_ord (m:=n.+1) H i)).
+    { unfold widen_ord. 
+      apply val_inj. by simpl.
+    } by rewrite H1.
+  } rewrite H. rewrite addrC. 
+  assert ((widen_ord (m:=n.+1) le_n_m ord_max) = (inord m)).
+  { unfold widen_ord. 
+    apply val_inj. simpl. by rewrite inordK.
+  } by rewrite H0.
+Qed.
+
 
 Lemma length_veclist {ty} {n m:nat} (v: 'cV[ftype ty]_n.+1):
   length (@vec_to_list_float _ n m v) = m.
@@ -146,6 +125,12 @@ induction m.
 + simpl. auto.
 + simpl. by rewrite IHm.
 Qed.
+
+
+(***  Bound for matrix vector multiplication from the bound for
+      dot product of vectors
+***)
+
 
 Lemma mat_vec_err_bnd_holds {n:nat}:
   forall (A: 'M[ftype Tsingle]_n.+1) (v: 'cV[ftype Tsingle]_n.+1),
@@ -227,7 +212,13 @@ apply Rle_trans with (e_i (@inord n i) A v).
     assert (\sum_j FT2R (A (inord i) j) * FT2R (v j 0) = 
              \sum_j FT2R ((\row_j A (inord i) j)^T j 0) * FT2R (v j 0)).
     { apply eq_big. by []. intros. by rewrite !mxE. } rewrite H5.
-    rewrite sum_dot. rewrite HeqL //=.
+    pose proof (@sum_dot n n.+1 Tsingle (leqnn n.+1)) .
+    specialize (H6 (\row_j0 A (inord i) j0)^T v).
+    rewrite HeqL.  rewrite -H6.
+    apply eq_big. by []. intros. rewrite !mxE.
+    assert (widen_ord (m:=n.+1) (leqnn n.+1) i0 = i0).
+    { unfold widen_ord. apply val_inj. by simpl. }
+    by rewrite H8. 
   } rewrite H4. rewrite -RminusE. unfold d, e. rewrite HeqL in H2.
   rewrite HeqL. 
   assert (vec_to_list_float n.+1 (\col_j v j 0) = vec_to_list_float n.+1 v).
@@ -244,10 +235,6 @@ apply Rle_trans with (e_i (@inord n i) A v).
   rewrite size_map size_enum_ord.
   by rewrite size_map size_enum_ord in H1.
 Qed.
-
-
-
-
 
 
 End WITHNANS.
