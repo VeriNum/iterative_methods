@@ -1557,7 +1557,7 @@ Lemma forward_error_dot_aux:
 Proof.
 intros.
 induction L.
-+ simpl in n. rewrite /n in H. contradict H. lia.
++ simpl in n. rewrite /n in H. contradict H. lia. 
 + unfold dot_prodF, dot_prodR. simpl. 
   remember (length L) as m.
   assert (n = (m+1)%nat). { unfold n. simpl. rewrite Heqm. lia. }
