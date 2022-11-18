@@ -100,11 +100,11 @@ Notation "-f A" := (opp_mat A) (at level 50).
 Notation "A *f B" := (mulmx_float A B) (at level 70).
 
 
-Fixpoint X_m {ty} (m n: nat) x0 b (inv_A1 A2: 'M[ftype ty]_n.+1) : 
+Fixpoint X_m_generic {ty} (m n: nat) x0 b (inv_A1 A2: 'M[ftype ty]_n.+1) : 
   'cV[ftype ty]_n.+1 :=
   match m with
   | O => x0
-  | S p => ((-f (inv_A1 *f A2)) *f (X_m p x0 b inv_A1 A2)) +f
+  | S p => ((-f (inv_A1 *f A2)) *f (X_m_generic p x0 b inv_A1 A2)) +f
            (inv_A1 *f b)
   end.
 
