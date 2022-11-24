@@ -4,11 +4,12 @@
 
 From Coq Require Import ZArith Reals Psatz.
 From Flocq Require Import Binary.
-From mathcomp Require Import all_ssreflect ssralg all_algebra seq matrix.
-From mathcomp.analysis Require Import Rstruct.
+From mathcomp Require Import all_ssreflect ssralg all_algebra seq matrix classical_sets.
+From mathcomp.analysis Require Import Rstruct reals.
 Require Import dot_prod_defn generalize float_model_generic 
      inf_norm_properties lemmas matrix_vec_mult_bound matrix_matrix_mult_bound
      real_func_model_generic.
+
 
 Import List ListNotations.
 
@@ -36,16 +37,61 @@ Notation "A +f B" := (addmx_float A B) (at level 80).
 Notation "-f A" := (opp_mat A) (at level 50).
 Notation "A *f B" := (mulmx_float A B) (at level 70).
 
-Definition FT2R_list (l : list (ftype Tsingle)) : list R :=  map FT2R l.
+
+Definition FT2R_list (l : list (ftype Tsingle)) : list R :=  map FT2R l. 
+
+
+(** Define theta_x **)
+Definition theta_x  {n:nat} (k:nat)
+ (x_hat : nat ->'cV[ftype Tsingle]_n.+1) (x: 'cV[R]_n.+1) :=
+ sup [set (vec_inf_norm (@FT2R_mat n 0%nat (x_hat k)) / vec_inf_norm x)%Re].
+
+
+
+Definition tau {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
+  (x_hat : nat ->'cV[ftype Tsingle]_n.+1)
+  (inv_A1 A1 A2 : 'M[ftype Tsingle]_n.+1)
+  (b : 'cV[ftype Tsingle]_n.+1):=
+  let e := / 2 * Raux.bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle) in
+  let d := / 2 * Raux.bpow Zaux.radix2 (- fprec Tsingle + 1) in
+  let S := - (FT2R_mat inv_A1) * (FT2R_mat A2) in 
+  let f := FT2R_mat (inv_A1) *m (FT2R_mat b) in
+  let E_1 := mat_vec_mult_err_bnd inv_A1 b in 
+  let E_2 := mat_mat_mult_err_bnd inv_A1 A2 in
+  let S_hat := (-f (inv_A1 *f A2)) in
+  let E_3 := mat_vec_mult_err_bnd S_hat (x_hat k) in
+  (matrix_inf_norm S * d + E_2 * d + E_2) * (theta_x k x_hat x) * vec_inf_norm x + 
+  (E_3 * d + (vec_inf_norm f) * d + E_1* d + E_3 + E_1 + e).
+
 
 
 (** not entirely in correct form. need to connect A, A1^{-1}. A2 **)
 Theorem iterative_round_off_error {n:nat} :
+  (1 < n.+1 /\ n.+1< (Z.to_nat (Z.pow_pos 2 23) - 1)%coq_nat)%coq_nat ->
+  let e := / 2 * Raux.bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle) in
+  let d := / 2 * Raux.bpow Zaux.radix2 (- fprec Tsingle + 1) in
+  let nr := INR n.+1 in 
+  (forall i k:nat, (i < n.+1)%nat /\ (k < n.+1)%nat -> 
+    (forall (a b : ftype Tsingle) (A1 A2: 'M[ftype Tsingle]_n.+1),
+      In (a, b)
+        (combine (vec_to_list_float n.+1 (\row_j A1 (inord i) j)^T)
+           (vec_to_list_float n.+1 (\col_j (A2 j (inord k))))) ->
+      is_finite (fprec Tsingle) (femax Tsingle) a = true /\
+      is_finite (fprec Tsingle) (femax Tsingle) b = true /\
+      (Rabs (FT2R a) <=
+       sqrt (F' / (nr * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re /\
+      (Rabs (FT2R b) <=
+       sqrt (F' / (nr * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re))->
+
   forall (A A1 A2 inv_A1: 'M[ftype Tsingle]_n.+1),
-  (** ||A_1^{-1}|| < 1 **)
+  (** ||A_1^{-1}A_2|| < 1 **)
   matrix_inf_norm (S_mat (FT2R_mat inv_A1) (FT2R_mat A2)) < 1 ->
   (** Relation between A, A_1, A_2 **)
+  matrix_inf_norm (FT2R_mat (A +f (-f (A1 +f A2)))) <=
+  matrix_inf_norm (FT2R_mat A) * d + e ->
   (** Relation between A_1, inv_A1 **)
+  matrix_inf_norm (FT2R_mat (A1 *f inv_A1 ) - (FT2R_mat A1) *m (FT2R_mat inv_A1)) <=
+  mat_mat_mult_err_bnd A1 inv_A1 ->
   forall (x_l b: list (ftype Tsingle)),
   let x0 := listR_to_vecR (FT2R_list x_l) in
   let b_real := listR_to_vecR (FT2R_list b) in
