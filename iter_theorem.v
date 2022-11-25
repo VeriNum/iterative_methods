@@ -169,6 +169,51 @@ apply Rmult_le_compat_l.
     rewrite sup1. nra.
 Qed.
 
+
+Lemma theta_x_ge_0  {n:nat} (k:nat)
+ (x_hat : nat ->'cV[ftype Tsingle]_n.+1) (x: 'cV[R]_n.+1):
+  x != 0 ->
+ (0 <= theta_x k x_hat x)%Re.
+Proof.
+intros.
+unfold theta_x.
+apply Rle_trans with (vec_inf_norm (FT2R_mat (x_hat k)) / vec_inf_norm x)%Re.
++ apply Rmult_le_pos.
+  - apply /RleP. apply vec_norm_pd.
+  - apply Rlt_le, Rinv_0_lt_compat. by apply vec_norm_definite.
++ rewrite sup1. nra.
+Qed. 
+
+Lemma mat_vec_mult_err_bnd_pd {n:nat} 
+ (A: 'M[ftype Tsingle]_n.+1) (v: 'cV[ftype Tsingle]_n.+1):
+ (0 <= mat_vec_mult_err_bnd A v)%Re.
+Proof.
+unfold mat_vec_mult_err_bnd.
+apply /RleP.
+apply bigmax_le_0.
++ apply /RleP. apply Rle_refl.
++ intros. rewrite seq_equiv. 
+  rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
+  unfold e_i. apply /RleP.
+  apply Rplus_le_le_0_compat.
+  - apply Rplus_le_le_0_compat.
+    * apply Rmult_le_pos.  unfold dot_prodR.
+      apply sum_abs_pair_rel. apply Rge_le. apply Rge_minus. apply Rle_ge.
+      apply pow_R1_Rle. rewrite -!RmultE. simpl; nra.
+    * repeat apply Rmult_le_pos.
+      ++ apply pos_INR.
+      ++ nra.
+      ++ simpl; nra.
+      ++ apply pow_le . rewrite -!RmultE. simpl;nra.
+  - rewrite -!RmultE. apply Rmult_le_pos.
+    * apply Rmult_le_pos.
+      ++ simpl;nra.
+      ++ apply Rge_le. apply Rge_minus. apply Rle_ge.
+         apply pow_R1_Rle. simpl; nra.
+    * simpl;nra.
+Qed. 
+
+
 (** not entirely in correct form. need to connect A, A1^{-1}. A2 **)
 Theorem iterative_round_off_error {n:nat} :
   (1 < n.+1 /\ n.+1< (Z.to_nat (Z.pow_pos 2 23) - 1)%coq_nat)%coq_nat ->
@@ -201,12 +246,54 @@ Theorem iterative_round_off_error {n:nat} :
   let b_real := listR_to_vecR (FT2R_list b) in
   let x0_f := list_to_vec_float x_l in
   let b_f := list_to_vec_float b in
-  exists f:R,
+  let x := invmx (FT2R_mat A) *m b_real in
+  x != 0 ->
   forall k:nat, 
-  vec_inf_norm (listR_to_vecR (FT2R_list
-                (vec_to_list_float n.+1 (@X_m_generic _ _ n n x0_f b_f inv_A1 A2))) - 
-                @X_m_real_generic n n x0 b_real (FT2R_mat inv_A1) (FT2R_mat A2)) <=
+  let f:= tau k x (fun m:nat => @X_m_generic _ _ m n x0_f b_f inv_A1 A2) inv_A1 A1 A2 b_f in
+  vec_inf_norm (FT2R_mat (@X_m_generic _ _ k n x0_f b_f inv_A1 A2) - 
+                @X_m_real_generic n k x0 b_real (FT2R_mat inv_A1) (FT2R_mat A2)) <=
   f *  error_sum k.+1 (@matrix_inf_norm n.+1 (S_mat (FT2R_mat inv_A1) (FT2R_mat A2))).
+Proof.
+intros.
+induction k.
++ assert (FT2R_mat (X_m_generic 0 x0_f b_f inv_A1 A2) -
+           X_m_real_generic 0 x0 b_real (FT2R_mat inv_A1) (FT2R_mat A2) = 0).
+  { unfold X_m_real_generic, X_m_generic. apply matrixP. unfold eqrel.
+    intros. rewrite !mxE. 
+    destruct (nat_of_ord x1);
+    ( unfold FT2R_list; simpl;
+    rewrite -map_nth; simpl; apply /eqP; by rewrite subr_eq0).
+  } rewrite H5. simpl. 
+  rewrite /tau /error_sum //=. simpl in d, e. fold d e.
+  rewrite big_ord_recr //= big_ord0 add0r expr0 mulr1.
+  rewrite vec_inf_norm_0_is_0. apply /RleP.
+  repeat apply Rplus_le_le_0_compat.
+  - apply Rmult_le_pos.
+    * repeat apply Rplus_le_le_0_compat.
+      ++ apply Rmult_le_pos.
+         -- apply /RleP. apply matrix_norm_pd.
+         -- unfold d;simpl. rewrite -RmultE. nra.
+      ++ apply Rmult_le_pos.
+         -- apply /RleP. apply mat_err_bnd_pd.
+         -- unfold d;simpl. rewrite -RmultE. nra.
+      ++ apply /RleP. apply mat_err_bnd_pd.
+    * apply Rmult_le_pos. 
+      ++ by apply theta_x_ge_0.
+      ++ apply /RleP. apply vec_norm_pd.
+  - apply Rmult_le_pos.
+    ++ apply mat_vec_mult_err_bnd_pd .
+    ++ unfold d;simpl. rewrite -RmultE. nra.
+  - apply Rmult_le_pos.
+    ++ apply /RleP. apply vec_norm_pd.
+    ++ unfold d;simpl. rewrite -RmultE. nra.
+  - apply Rmult_le_pos.
+    ++ apply mat_vec_mult_err_bnd_pd .
+    ++ unfold d;simpl. rewrite -RmultE. nra.
+  - apply mat_vec_mult_err_bnd_pd .
+  - apply mat_vec_mult_err_bnd_pd .
+  - unfold e;simpl. rewrite -RmultE. nra.
++ admit.
+
 Admitted.
 
 
