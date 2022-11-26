@@ -213,6 +213,22 @@ apply bigmax_le_0.
     * simpl;nra.
 Qed. 
 
+Lemma X_m_real_iter {n:nat} (k: nat) (x0 b: 'cV[R]_n.+1) 
+  (A2 inv_A1: 'M[ftype Tsingle]_n.+1) :
+   let xkr := X_m_real_generic k x0 b (FT2R_mat inv_A1) (FT2R_mat A2) in
+    X_m_real_generic k.+1 x0 b (FT2R_mat inv_A1) (FT2R_mat A2) = 
+    X_m_real_generic 1 xkr b (FT2R_mat inv_A1) (FT2R_mat A2).
+Proof. simpl; auto. Qed.
+
+
+Lemma add_vec_distr {n:nat}:
+  forall a b c: 'cV[R]_n,
+  a - b + b - c = (a-b) + (b-c).
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE. by rewrite -addrA.
+Qed.
+
 
 (** not entirely in correct form. need to connect A, A1^{-1}. A2 **)
 Theorem iterative_round_off_error {n:nat} :
@@ -292,7 +308,38 @@ induction k.
   - apply mat_vec_mult_err_bnd_pd .
   - apply mat_vec_mult_err_bnd_pd .
   - unfold e;simpl. rewrite -RmultE. nra.
-+ admit.
++ (** Induction step **)
+  set (xkr := (X_m_real_generic k x0 b_real (FT2R_mat inv_A1)(FT2R_mat A2))) in *.
+  assert (X_m_real_generic k.+1 x0 b_real (FT2R_mat inv_A1) (FT2R_mat A2) = 
+          X_m_real_generic 1 xkr b_real (FT2R_mat inv_A1) (FT2R_mat A2)) by 
+  apply X_m_real_iter.
+  set (xkf := FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2)) in *.
+  set (xkpf := FT2R_mat (X_m_generic k.+1 x0_f b_f inv_A1 A2)).
+  assert (xkpf - X_m_real_generic k.+1 x0 b_real (FT2R_mat inv_A1) (FT2R_mat A2) = 
+          xkpf - X_m_real_generic 1 xkf b_real (FT2R_mat inv_A1) (FT2R_mat A2) + 
+          X_m_real_generic 1 xkf b_real (FT2R_mat inv_A1) (FT2R_mat A2) - 
+          X_m_real_generic 1 xkr b_real (FT2R_mat inv_A1) (FT2R_mat A2)).
+  { rewrite H5. apply vec_sum_simpl. } rewrite H6.
+  apply /RleP. eapply Rle_trans.
+  - apply /RleP. by apply cs_ineq_vec_inf_norm. 
+  - rewrite -RmultE. 
+    assert (error_sum k.+2
+         (matrix_inf_norm
+            (S_mat (FT2R_mat inv_A1) (FT2R_mat A2))) = 
+      (1 + (matrix_inf_norm
+            (S_mat (FT2R_mat inv_A1) (FT2R_mat A2))) * 
+          error_sum k.+1
+             (matrix_inf_norm
+                (S_mat (FT2R_mat inv_A1) (FT2R_mat A2))))%Re).
+    { rewrite !error_sum_equiv. rewrite -error_sum_aux2.
+      by rewrite addrC.
+    } rewrite H7.
+    rewrite Rmult_plus_distr_l. 
+    apply Rplus_le_compat.
+    * admit.
+    * admit.
+
+
 
 Admitted.
 
