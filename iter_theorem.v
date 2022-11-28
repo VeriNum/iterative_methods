@@ -323,7 +323,12 @@ intros. apply matrixP. unfold eqrel.
 intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
 Qed.
 
-(*
+Lemma theta_eq {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
+  (x_hat : nat ->'cV[ftype Tsingle]_n.+1):
+  theta_x k x_hat x = theta_x k.+1 x_hat x.
+Admitted.
+
+
 Lemma tau_rel {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
   (x_hat : nat ->'cV[ftype Tsingle]_n.+1)
   (inv_A1 A1 A2 : 'M[ftype Tsingle]_n.+1)
@@ -348,9 +353,53 @@ apply Rplus_le_compat.
     * apply /RleP. apply mat_err_bnd_pd.
   - apply Rmult_le_compat_r.
     ++ apply /RleP. apply vec_norm_pd.
-    ++ admit.
+    ++ rewrite theta_eq;nra.
 + repeat apply Rplus_le_compat.
-*)
+  unfold E_3. 
+  apply Rmult_le_compat_r; try nra.
+  - rewrite Heqd. rewrite -RmultE. simpl;nra.
+  - assert ([seq e_i_real i k (-f (inv_A1 *f A2)) b
+                    x_hat x
+                | i <- enum 'I_n.+1] = 
+            [seq e_i_real i k.+1
+                    (-f (inv_A1 *f A2)) b x_hat x
+                | i <- enum 'I_n.+1]).
+    { rewrite !seq_equiv. 
+      assert ((fun i : nat =>
+                  e_i_real (inord i) k (-f (inv_A1 *f A2)) b x_hat x) = 
+               (fun i : nat =>
+                  e_i_real (inord i) k.+1 (-f (inv_A1 *f A2)) b x_hat x)).
+      { apply Logic.FunctionalExtensionality.functional_extensionality.
+        move=>i. unfold e_i_real.
+        repeat apply Rplus_eq_compat_r. 
+        repeat apply Rmult_eq_compat_r.
+        apply theta_eq.
+      } by rewrite H.
+    } rewrite H. nra.
+  - nra.
+  - nra.
+  - unfold E_3. 
+    assert ([seq e_i_real i k (-f (inv_A1 *f A2)) b
+                      x_hat x
+                  | i <- enum 'I_n.+1] = 
+              [seq e_i_real i k.+1
+                      (-f (inv_A1 *f A2)) b x_hat x
+                  | i <- enum 'I_n.+1]).
+      { rewrite !seq_equiv. 
+        assert ((fun i : nat =>
+                    e_i_real (inord i) k (-f (inv_A1 *f A2)) b x_hat x) = 
+                 (fun i : nat =>
+                    e_i_real (inord i) k.+1 (-f (inv_A1 *f A2)) b x_hat x)).
+        { apply Logic.FunctionalExtensionality.functional_extensionality.
+          move=>i. unfold e_i_real.
+          repeat apply Rplus_eq_compat_r. 
+          repeat apply Rmult_eq_compat_r.
+          apply theta_eq.
+        } by rewrite H.
+      } rewrite H. nra.
+  - nra.
+  - nra.
+Qed.
 
 Lemma E_3_err_bnd_pd {n:nat} (k:nat) 
   (A : 'M[ftype Tsingle]_n.+1) (b : 'cV[ftype Tsingle]_n.+1) 
@@ -520,8 +569,7 @@ induction k.
             ** rewrite -RmultE. apply Rmult_le_compat_r.
                +++ apply /RleP. apply error_sum_ge_0.
                    apply matrix_norm_pd.
-               +++ admit.
-        
+               +++ apply tau_rel.       
 Admitted.
 
 
