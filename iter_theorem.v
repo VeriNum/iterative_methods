@@ -42,10 +42,22 @@ Definition FT2R_list (l : list (ftype Tsingle)) : list R :=  map FT2R l.
 
 
 (** Define theta_x **)
+
+(*
+Definition theta_x  {n:nat} (k:nat)
+ (x_hat : nat ->'cV[ftype Tsingle]_n.+1) (x: 'cV[R]_n.+1):=
+ let s:= [seq (INR (nat_of_ord i)) | i <- enum 'I_k] in
+ sup [set x | x \in s].
+*)
+
+(** Since, we have a finite set, I can just use bigmaxr instead of
+    sup
+**)
 Definition theta_x  {n:nat} (k:nat)
  (x_hat : nat ->'cV[ftype Tsingle]_n.+1) (x: 'cV[R]_n.+1) :=
- sup [set (vec_inf_norm (@FT2R_mat n 0%nat (x_hat k)) / vec_inf_norm x)%Re].
-
+ let s := [seq (vec_inf_norm (@FT2R_mat n 0%nat (x_hat (nat_of_ord i))) 
+                / vec_inf_norm x)%Re | i <- enum 'I_k.+1] in
+ bigmaxr 0%Re s.
 
 
 
@@ -250,8 +262,17 @@ apply Rmult_le_compat_l.
   - apply /RleP. apply mat_err_bnd_pd.
 + unfold theta_x. apply pow_invert_2. 
   - by apply vec_norm_definite.
-  - remember (vec_inf_norm (FT2R_mat (x_hat k)) / vec_inf_norm x)%Re as v.
-    rewrite sup1. nra.
+  - apply Rle_trans with
+    ([seq (vec_inf_norm (FT2R_mat (x_hat (nat_of_ord i))) /
+        vec_inf_norm x)%Re
+      | i <- enum 'I_k.+1]`_k).
+    * rewrite seq_equiv. rewrite nth_mkseq; last by [].
+      rewrite inordK; last by []. nra.
+    * apply /RleP. 
+      apply (@bigmaxr_ler _ 0%Re 
+              [seq (vec_inf_norm (FT2R_mat (x_hat (nat_of_ord i))) /
+                  vec_inf_norm x)%Re| i <- enum 'I_k.+1] k).
+      by rewrite size_map size_enum_ord.
 Qed.
 
 
@@ -266,7 +287,17 @@ apply Rle_trans with (vec_inf_norm (FT2R_mat (x_hat k)) / vec_inf_norm x)%Re.
 + apply Rmult_le_pos.
   - apply /RleP. apply vec_norm_pd.
   - apply Rlt_le, Rinv_0_lt_compat. by apply vec_norm_definite.
-+ rewrite sup1. nra.
++ apply Rle_trans with
+    ([seq (vec_inf_norm (FT2R_mat (x_hat (nat_of_ord i))) /
+        vec_inf_norm x)%Re
+      | i <- enum 'I_k.+1]`_k).
+    * rewrite seq_equiv. rewrite nth_mkseq; last by [].
+      rewrite inordK; last by []. nra.
+    * apply /RleP. 
+      apply (@bigmaxr_ler _ 0%Re 
+              [seq (vec_inf_norm (FT2R_mat (x_hat (nat_of_ord i))) /
+                  vec_inf_norm x)%Re| i <- enum 'I_k.+1] k).
+      by rewrite size_map size_enum_ord.
 Qed. 
 
 Lemma mat_vec_mult_err_bnd_pd {n:nat} 
