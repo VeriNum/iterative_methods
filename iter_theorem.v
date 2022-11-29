@@ -350,6 +350,25 @@ intros. apply matrixP. unfold eqrel.
 intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
 Qed.
 
+
+Lemma add_vec_distr_2 {n:nat}:
+  forall a b c: 'cV[R]_n,
+  (a-b) + (b-c) = a - c.
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+Qed.
+
+
+Lemma add_vec_distr_3 {n:nat}:
+  forall a b c d: 'cV[R]_n,
+  (a+b) - (c+d) = (a-c) + (b-d).
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+Qed.
+
+
 Print enum.
 
 
@@ -487,6 +506,51 @@ repeat apply Rplus_le_le_0_compat.
     * simpl;nra.
 Qed.
 
+Lemma add_vec_float_le {n:nat}:
+  forall (v1 v2: 'cV[ftype Tsingle]_n.+1),
+  let e := / 2 * Raux.bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle) in
+  let d := / 2 * Raux.bpow Zaux.radix2 (- fprec Tsingle + 1) in
+  (forall i: nat, boundsmap_denote (@bmap Tsingle 2)
+                        (vmap (v1 (inord i) 0) (v2 (inord i) 0))) ->
+  (vec_inf_norm (FT2R_mat (v1 +f v2) - (FT2R_mat v1 + FT2R_mat v2)) <=
+  (vec_inf_norm (FT2R_mat v1) + vec_inf_norm (FT2R_mat v2)) * d + e)%Re.
+Proof.
+intros.
+unfold vec_inf_norm. apply bigmax_le.
++ by rewrite size_map size_enum_ord.
++ intros.
+  apply Rle_trans with 
+  (([seq Rabs (FT2R_mat v1 i0 0)
+       | i0 <- enum 'I_n.+1]`_i + 
+    [seq Rabs (FT2R_mat v2 i0 0)
+       | i0 <- enum 'I_n.+1]`_i) * d + e)%Re.
+  - rewrite !seq_equiv. 
+    rewrite !nth_mkseq; last by rewrite size_map size_enum_ord in H0.
+    * rewrite !mxE. rewrite -!RplusE -!RoppE. 
+      apply Rle_trans with
+      (Rabs ((FT2R (v1 (inord i) ord0)) + (FT2R (v2 (inord i) ord0))) * d + e)%Re.
+      unfold d,e. rewrite -!RmultE. apply (prove_rndoff _ _ 2%nat).
+      ++ lia.
+      ++ by [].
+      ++ apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+         -- unfold d. rewrite -RmultE. simpl;nra.
+         -- apply Rabs_triang.
+    * by rewrite size_map size_enum_ord in H0.
+    * by rewrite size_map size_enum_ord in H0.
+  - apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+    * unfold d. rewrite -RmultE. simpl;nra.
+    * apply Rplus_le_compat.
+      ++ apply /RleP. 
+         apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v1 i0 0)
+                       | i0 <- enum 'I_n.+1] i).
+         rewrite size_map size_enum_ord.
+         by rewrite size_map size_enum_ord in H0.
+      ++ apply /RleP. 
+         apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v2 i0 0)
+                      | i0 <- enum 'I_n.+1] i).
+         rewrite size_map size_enum_ord.
+         by rewrite size_map size_enum_ord in H0.
+Qed.
 
 
 (** not entirely in correct form. need to connect A, A1^{-1}. A2 **)
@@ -615,7 +679,58 @@ induction k.
     } rewrite H7.
     rewrite Rmult_plus_distr_l. 
     apply Rplus_le_compat.
-    * admit.
+    * unfold xkpf. simpl.
+      remember (-f (inv_A1 *f A2)) as S_hat.
+      remember (S_mat (FT2R_mat inv_A1) (FT2R_mat A2)) as S.
+      assert (FT2R_mat
+                (S_hat *f X_m_generic k x0_f b_f inv_A1 A2 +f inv_A1 *f b_f) -
+                (S *m xkf + FT2R_mat inv_A1 *m b_real) = 
+              ((FT2R_mat
+                (S_hat *f X_m_generic k x0_f b_f inv_A1 A2 +f inv_A1 *f b_f) - 
+               (FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2) +
+                FT2R_mat (inv_A1 *f b_f))) +
+               ((FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2) +
+                FT2R_mat (inv_A1 *f b_f)) - (S *m xkf + FT2R_mat inv_A1 *m b_real)))).
+      { by rewrite add_vec_distr_2. } rewrite H8.
+      eapply Rle_trans.
+      ++ apply /RleP. apply triang_ineq.
+      ++ rewrite -RplusE.
+         assert ((FT2R_mat
+                      (S_hat *f X_m_generic k x0_f b_f inv_A1 A2) +
+                  FT2R_mat (inv_A1 *f b_f)) - (S *m xkf + FT2R_mat inv_A1 *m b_real) = 
+                  (FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2) - 
+                   S *m xkf) + (FT2R_mat (inv_A1 *f b_f) - FT2R_mat inv_A1 *m b_real)).
+         { apply add_vec_distr_3. } rewrite H9. clear H8 H9. 
+         apply Rle_trans with 
+         (vec_inf_norm
+           (FT2R_mat
+              (S_hat *f
+               X_m_generic k x0_f b_f inv_A1 A2 +f
+               inv_A1 *f b_f) -
+            (FT2R_mat
+               (S_hat *f
+                X_m_generic k x0_f b_f inv_A1 A2) +
+             FT2R_mat (inv_A1 *f b_f))) +
+         (vec_inf_norm
+           (FT2R_mat
+              (S_hat *f
+               X_m_generic k x0_f b_f inv_A1 A2)) +
+          vec_inf_norm  (S *m xkf +
+            (FT2R_mat (inv_A1 *f b_f) -
+             FT2R_mat inv_A1 *m b_real))))%Re.
+        -- apply Rplus_le_compat_l. apply /RleP. rewrite RplusE. admit.
+        -- 
+
+
+
+
+
+
+
+
+
+
+admit.
     * simpl. 
       assert (S_mat (FT2R_mat inv_A1) (FT2R_mat A2) *m xkf +
                 FT2R_mat inv_A1 *m b_real -
