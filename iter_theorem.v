@@ -526,7 +526,8 @@ Lemma add_vec_float_le {n:nat}:
   forall (v1 v2: 'cV[ftype Tsingle]_n.+1),
   let e := / 2 * Raux.bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle) in
   let d := / 2 * Raux.bpow Zaux.radix2 (- fprec Tsingle + 1) in
-  (forall i: nat, boundsmap_denote (@bmap Tsingle 2)
+  (forall i: nat, (i < n.+1)%nat -> 
+                  boundsmap_denote (@bmap Tsingle 2)
                         (vmap (v1 (inord i) 0) (v2 (inord i) 0))) ->
   (vec_inf_norm (FT2R_mat (v1 +f v2) - (FT2R_mat v1 + FT2R_mat v2)) <=
   (vec_inf_norm (FT2R_mat v1) + vec_inf_norm (FT2R_mat v2)) * d + e)%Re.
@@ -547,7 +548,7 @@ unfold vec_inf_norm. apply bigmax_le.
       (Rabs ((FT2R (v1 (inord i) ord0)) + (FT2R (v2 (inord i) ord0))) * d + e)%Re.
       unfold d,e. rewrite -!RmultE. apply (prove_rndoff _ _ 2%nat).
       ++ lia.
-      ++ by [].
+      ++ apply H. by rewrite size_map size_enum_ord in H0.
       ++ apply Rplus_le_compat_r. apply Rmult_le_compat_r.
          -- unfold d. rewrite -RmultE. simpl;nra.
          -- apply Rabs_triang.
@@ -575,8 +576,9 @@ Theorem iterative_round_off_error {n:nat} :
   let e := / 2 * Raux.bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle) in
   let d := / 2 * Raux.bpow Zaux.radix2 (- fprec Tsingle + 1) in
   let nr := INR n.+1 in 
-  (forall i k:nat, (i < n.+1)%nat /\ (k < n.+1)%nat -> 
-    (forall (a b : ftype Tsingle) (A1 A2: 'M[ftype Tsingle]_n.+1),
+  (forall i k m n p :nat, (i < m.+1)%nat /\ (k < n.+1)%nat -> 
+    (forall (a b : ftype Tsingle) (A1: 'M[ftype Tsingle]_(m.+1, n.+1))
+            (A2: 'M[ftype Tsingle]_(n.+1, p.+1)),
       In (a, b)
         (combine (vec_to_list_float n.+1 (\row_j A1 (inord i) j)^T)
            (vec_to_list_float n.+1 (\col_j (A2 j (inord k))))) ->
@@ -752,7 +754,35 @@ induction k.
                   S *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2)))) +
              vec_inf_norm (FT2R_mat (inv_A1 *f b_f) - FT2R_mat inv_A1 *m b_real)))%Re.
             ** apply Rplus_le_compat.
-               +++ admit.
+               +++ apply add_vec_float_le. intros.
+                   (** bounds map proof **)
+                   apply boundsmap_denote_i.
+                   2: repeat apply list_forall_cons; try apply list_forall_nil; simpl; auto.
+                   repeat apply list_forall_cons; try apply list_forall_nil;
+                    (eexists; split; [|split;[|split]]; try reflexivity; auto;
+                      try unfold List.nth; try nra; auto).
+                   --- rewrite !mxE. apply forward_error_dot_aux.
+                       *** rewrite  combine_length. rewrite !length_veclist.
+                           lia.
+                       *** rewrite  combine_length. rewrite !length_veclist. lia.
+                       *** intros. 
+                           remember (combine
+                                         (vec_to_list_float n.+1 (\row_j inv_A1 (inord i) j)^T)
+                                         (vec_to_list_float n.+1 (\col_j b_f j 0))) as L.
+                           assert (length L = n.+1).
+                           { rewrite HeqL combine_length. rewrite !length_veclist. lia. }
+                           rewrite H11. rewrite -/nr. 
+                           unfold d,e in H0. rewrite -!RmultE in H0.
+                           specialize (H0 i 0%nat n n 0%nat).
+                           assert ((i < n.+1)%nat /\ (0 < n.+1)%nat).
+                           { split;try apply H9; by []. } specialize (H0 H12).
+                           specialize (H0 a b0 inv_A1 b_f).
+                           apply H0. rewrite HeqL in H10. 
+                           assert (@inord 0 0 = 0). 
+                           { by rewrite ord1. } by rewrite H13.
+                   ---  apply generalize.Rabs_ineq. admit.
+                   --- admit.
+                   --- admit.
                +++ apply Rplus_le_compat_r. apply /RleP. apply triang_ineq.
             ** admit.
 
