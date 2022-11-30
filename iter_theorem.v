@@ -59,6 +59,7 @@ Definition theta_x  {n:nat} (k:nat)
                 / vec_inf_norm x)%Re | i <- enum 'I_k.+1] in
  bigmaxr 0%Re s.
 
+Print bigmaxr.
 
 
 (** Revising the bound E_3 **)
@@ -404,11 +405,26 @@ Proof.
 Admitted.
 
 
+Check big_mkord.
+Lemma bigmax_rel {k:nat} (f : nat -> R):
+(bigmaxr 0%Re
+  [seq (f (nat_of_ord i)) | i <- enum 'I_k.+1] <=
+ bigmaxr 0%Re
+   [seq (f (nat_of_ord i)) | i <- enum 'I_k.+2])%Re.
+Proof.
+Admitted.
+
 Lemma theta_eq {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
   (x_hat : nat ->'cV[ftype Tsingle]_n.+1):
   (theta_x k x_hat x <= theta_x k.+1 x_hat x)%Re.
 Proof.
-unfold theta_x. rewrite enum_dissoc. simpl. 
+unfold theta_x.
+
+
+
+
+
+ rewrite enum_dissoc. simpl. 
 rewrite -cats1 //=. 
 rewrite (@seq_decompose _ (fun m: nat => (vec_inf_norm (FT2R_mat (x_hat m)) /
         vec_inf_norm x)%Re)).
@@ -714,23 +730,32 @@ induction k.
          (vec_inf_norm
            (FT2R_mat
               (S_hat *f
-               X_m_generic k x0_f b_f inv_A1 A2)) +
-          vec_inf_norm  (S *m xkf +
-            (FT2R_mat (inv_A1 *f b_f) -
-             FT2R_mat inv_A1 *m b_real))))%Re.
-        -- apply Rplus_le_compat_l. apply /RleP. rewrite RplusE. admit.
-        -- 
+               X_m_generic k x0_f b_f inv_A1 A2) -
+            S *m xkf) +
+          vec_inf_norm (FT2R_mat (inv_A1 *f b_f) -
+                          FT2R_mat inv_A1 *m b_real)))%Re.
+         -- apply Rplus_le_compat_l. apply /RleP. apply triang_ineq.
+         -- assert (FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2) - S *m xkf =
+                    (FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2) - 
+                     (FT2R_mat S_hat *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2))) +
+                    (FT2R_mat S_hat *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2) -
+                     S *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2))). 
+            { by rewrite add_vec_distr_2. } rewrite H8.
+            apply Rle_trans with
+            (((vec_inf_norm (FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2)) +
+              vec_inf_norm (FT2R_mat (inv_A1 *f b_f)))* d + e) +
+            ((vec_inf_norm
+              (FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2) -
+               FT2R_mat S_hat *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2)) +
+             vec_inf_norm 
+              ((FT2R_mat S_hat *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2) -
+                  S *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2)))) +
+             vec_inf_norm (FT2R_mat (inv_A1 *f b_f) - FT2R_mat inv_A1 *m b_real)))%Re.
+            ** apply Rplus_le_compat.
+               +++ admit.
+               +++ apply Rplus_le_compat_r. apply /RleP. apply triang_ineq.
+            ** admit.
 
-
-
-
-
-
-
-
-
-
-admit.
     * simpl. 
       assert (S_mat (FT2R_mat inv_A1) (FT2R_mat A2) *m xkf +
                 FT2R_mat inv_A1 *m b_real -
