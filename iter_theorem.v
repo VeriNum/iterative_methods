@@ -699,25 +699,25 @@ induction k.
     apply Rplus_le_compat.
     * unfold xkpf. simpl.
       remember (-f (inv_A1 *f A2)) as S_hat.
-      remember (S_mat (FT2R_mat inv_A1) (FT2R_mat A2)) as S.
+      remember (S_mat (FT2R_mat inv_A1) (FT2R_mat A2)) as Sm.
       assert (FT2R_mat
                 (S_hat *f X_m_generic k x0_f b_f inv_A1 A2 +f inv_A1 *f b_f) -
-                (S *m xkf + FT2R_mat inv_A1 *m b_real) = 
+                (Sm *m xkf + FT2R_mat inv_A1 *m b_real) = 
               ((FT2R_mat
                 (S_hat *f X_m_generic k x0_f b_f inv_A1 A2 +f inv_A1 *f b_f) - 
                (FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2) +
                 FT2R_mat (inv_A1 *f b_f))) +
                ((FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2) +
-                FT2R_mat (inv_A1 *f b_f)) - (S *m xkf + FT2R_mat inv_A1 *m b_real)))).
+                FT2R_mat (inv_A1 *f b_f)) - (Sm *m xkf + FT2R_mat inv_A1 *m b_real)))).
       { by rewrite add_vec_distr_2. } rewrite H8.
       eapply Rle_trans.
       ++ apply /RleP. apply triang_ineq.
       ++ rewrite -RplusE.
          assert ((FT2R_mat
                       (S_hat *f X_m_generic k x0_f b_f inv_A1 A2) +
-                  FT2R_mat (inv_A1 *f b_f)) - (S *m xkf + FT2R_mat inv_A1 *m b_real) = 
+                  FT2R_mat (inv_A1 *f b_f)) - (Sm *m xkf + FT2R_mat inv_A1 *m b_real) = 
                   (FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2) - 
-                   S *m xkf) + (FT2R_mat (inv_A1 *f b_f) - FT2R_mat inv_A1 *m b_real)).
+                   Sm *m xkf) + (FT2R_mat (inv_A1 *f b_f) - FT2R_mat inv_A1 *m b_real)).
          { apply add_vec_distr_3. } rewrite H9. clear H8 H9. 
          apply Rle_trans with 
          (vec_inf_norm
@@ -733,15 +733,15 @@ induction k.
            (FT2R_mat
               (S_hat *f
                X_m_generic k x0_f b_f inv_A1 A2) -
-            S *m xkf) +
+            Sm *m xkf) +
           vec_inf_norm (FT2R_mat (inv_A1 *f b_f) -
                           FT2R_mat inv_A1 *m b_real)))%Re.
          -- apply Rplus_le_compat_l. apply /RleP. apply triang_ineq.
-         -- assert (FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2) - S *m xkf =
+         -- assert (FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2) - Sm *m xkf =
                     (FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2) - 
                      (FT2R_mat S_hat *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2))) +
                     (FT2R_mat S_hat *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2) -
-                     S *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2))). 
+                     Sm *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2))). 
             { by rewrite add_vec_distr_2. } rewrite H8.
             apply Rle_trans with
             (((vec_inf_norm (FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2)) +
@@ -751,7 +751,7 @@ induction k.
                FT2R_mat S_hat *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2)) +
              vec_inf_norm 
               ((FT2R_mat S_hat *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2) -
-                  S *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2)))) +
+                  Sm *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2)))) +
              vec_inf_norm (FT2R_mat (inv_A1 *f b_f) - FT2R_mat inv_A1 *m b_real)))%Re.
             ** apply Rplus_le_compat.
                +++ apply add_vec_float_le. intros.
@@ -931,90 +931,103 @@ induction k.
                                                   *** apply Rlt_le. rewrite INR_IZR_INZ. apply IZR_lt. lia.
                                                   *** unfold e. rewrite -RmultE. simpl. unfold F', F_max; simpl; nra.
                                       } rewrite H15. rewrite H11.
-                                      assert (S m = (n-1)%nat). { lia. } rewrite H8.
-                                      assert ((n - 1 - 1)%nat = (n-2)%nat). { lia. } rewrite H9.
-                                      clear H8 H9.
-                                      assert ((F' / (nr * (1 + u0) ^ (n + 1)) - u) * INR (n - 1) *
-                                                (1 + u0) ^ (n - 1) + INR (n - 1) * u * (1 + u0) ^ (n - 2) +
-                                                u * ((1 + u0) ^ (n - 2) - 1) / u0 = 
-                                              (F' / (nr * (1 + u0) ^ (n + 1)) * INR (n-1) *(1 + u0) ^ (n - 1)) + 
-                                              ((INR (n - 1) * u * (1 + u0) ^ (n - 2) - INR (n - 1) * u  * (1 + u0) ^ (n - 1)) +
-                                              u * ((1 + u0) ^ (n - 2) - 1) / u0)).
-                                      { nra. } rewrite H8. clear H8.
-                                      apply Rplus_le_compat.
-                                      ---- unfold nr. 
-                                         assert (F' / (INR n * (1 + u0) ^ (n + 1)) * INR (n - 1) *
-                                                    (1 + u0) ^ (n - 1) = 
-                                                 (F' * / (INR n * (1 + u0) ^ (n + 1))) * INR (n - 1) *
-                                                    (1 + u0) ^ (n - 1)). { nra. } rewrite H8. clear H8.
-                                         rewrite Rinv_mult_distr.
-                                         replace (F' * (INR n - 1) / INR n) with ((F' * (INR n - 1) / INR n) * 1) by nra.
-                                         assert (F' * (/ INR n * / (1 + u0) ^ (n + 1)) * INR (n - 1) *
-                                                    (1 + u0) ^ (n - 1) = 
-                                                 (F' * (INR n - 1) / INR n) * ((1 + u0) ^ (n - 1) /(1 + u0) ^ (n + 1))).
-                                         { rewrite minus_INR. simpl; nra. lia. } rewrite H8. clear H8.
-                                         apply Rmult_le_compat_l.
-                                         ****  apply Rmult_le_pos.
-                                             +++++ apply Rmult_le_pos; try (unfold F', F_max; simpl; nra); try apply pos_INR.
-                                                 apply Rge_le. apply Rge_minus. apply Rle_ge. 
-                                                 replace 1 with (INR 1) by (simpl; nra). apply le_INR;lia.
-                                             +++++ apply Rlt_le. apply Rinv_0_lt_compat. apply lt_0_INR; lia.
-                                         **** assert (1 = (1+u0)^(n+1) / (1+u0)^(n+1)).
-                                            { symmetry. apply Rinv_r. apply pow_nonzero .
-                                              unfold u0;simpl;nra.
-                                            } 
-                                            assert ( (1 + u0) ^ (n - 1) / (1 + u0) ^ (n + 1) <= 
-                                                      (1+u0)^(n+1) / (1+u0)^(n+1) ->
-                                                       (1 + u0) ^ (n - 1) / (1 + u0) ^ (n + 1) <= 1).
-                                            { rewrite -H8; nra. } apply H9. apply Rmult_le_compat_r.
-                                            +++++ apply Rlt_le, Rinv_0_lt_compat. apply x_pow_gt_0. unfold u0;simpl;nra.
-                                            +++++ apply Rle_pow. unfold u0;simpl;nra. lia.
-                                         **** apply not_0_INR. lia.
-                                         **** apply pow_nonzero. unfold u0;simpl;nra.
-                                      ---- match goal with |-context[ _ <= ?a]=>
-                                           replace a with (0 + a) by nra
-                                         end. apply Rplus_le_compat.
-                                         **** assert ((n - 1)%nat = (S (n-2))%nat). { lia. }
-                                            rewrite H8. 
-                                            assert (INR (S (n - 2)) * u * (1 + u0) ^ (n - 2) -
-                                                      INR (S (n - 2)) * u * (1 + u0) ^ S (n - 2)  =
-                                                    - (u0 * INR (S (n - 2)) * u * (1 + u0) ^ (n - 2))).
-                                            { simpl; nra. } rewrite H9.
-                                            apply Rge_le. apply Ropp_0_le_ge_contravar.
-                                            repeat apply Rmult_le_pos; try (simpl;nra); try nra; try apply pos_INR;
-                                            try (apply Rlt_le, x_pow_gt_0; unfold u0; simpl; nra).
-                                         **** rewrite -/u -/u0. 
-                                            replace (u * ((1 + u0) ^ (n - 2) - 1) / u0) with 
-                                            (((1 + u0) ^ (n - 2) - 1) * (u / u0)) by nra.
-                                            replace (2 * u / u0) with (2 * (u/u0)) by nra.
-                                            apply Rmult_le_compat_r.
-                                            +++++ unfold u,u0; simpl; nra.
-                                            +++++ apply Rlt_le. apply (delta_bound (n-2)%nat).
-                                                apply lt_trans with n; lia.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        admit.
+                                      assert (((F' / (nr * (1 + d) ^ (n.+1 + 1)%coq_nat) - e) *
+                                               INR n.+1 *
+                                               (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+                                               ^ n.+1 +
+                                               INR n.+1 *
+                                               (/ 2 *
+                                                bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
+                                               (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+                                               ^ (n.+1 - 1)%coq_nat +
+                                               / 2 *
+                                               bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle) *
+                                               ((1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+                                                ^ (n.+1 - 1)%coq_nat - 1) /
+                                               (/ 2 * bpow Zaux.radix2 (- fprec Tsingle + 1)))%Re = 
+                                              ((((F' / (nr * (1 + d) ^ (n.+1 + 1)%coq_nat)) * INR n.+1 * 
+                                               (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1)) ^ n.+1) -
+                                               (INR n.+1 * e * (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+                                               ^ n.+1 - INR n.+1 *
+                                               (/ 2 *
+                                                bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
+                                               (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+                                               ^ (n.+1 - 1)%coq_nat)) + / 2 *
+                                               bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle) *
+                                               ((1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+                                                ^ (n.+1 - 1)%coq_nat - 1) /
+                                               (/ 2 * bpow Zaux.radix2 (- fprec Tsingle + 1)))%Re).
+                                      { nra. } rewrite H16. clear H16. apply Rplus_le_compat.
+                                      **** assert ((F' * (INR 2 - 1) / INR 2)%Re = ((F' * (INR 2 - 1) / INR 2) + 0)%Re).
+                                           { nra. } rewrite H16. apply Rplus_le_compat.
+                                           +++++ admit.
+                                           +++++ unfold e. rewrite -RmultE.
+                                                 assert ((INR n.+1 *
+                                                          (/ 2 *
+                                                           bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
+                                                          (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+                                                          ^ n.+1 -
+                                                          INR n.+1 *
+                                                          (/ 2 *
+                                                           bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
+                                                          (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+                                                          ^ (n.+1 - 1)%coq_nat)%Re = 
+                                                          ((INR n.+1 *  (/ 2 *
+                                                           bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
+                                                          (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+                                                          ^ (n.+1 - 1)%coq_nat * (/ 2 * bpow Zaux.radix2 (- fprec Tsingle + 1)))%Re)).
+                                                { assert (n.+1 = S ((n.+1 - 1)%coq_nat)). { lia. } 
+                                                  assert ((INR n.+1 *
+                                                             (/ 2 *
+                                                              bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
+                                                             (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+                                                             ^ n.+1 -
+                                                             INR n.+1 *
+                                                             (/ 2 *
+                                                              bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
+                                                             (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+                                                             ^ (n.+1 - 1)%coq_nat)%Re = 
+                                                           (INR n.+1 *
+                                                             (/ 2 *
+                                                              bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
+                                                             (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+                                                             ^ S ((n.+1 - 1)%coq_nat) -
+                                                             INR n.+1 *
+                                                             (/ 2 *
+                                                              bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
+                                                             (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+                                                             ^ (n.+1 - 1)%coq_nat)%Re).
+                                                 { by rewrite -H17. } rewrite H18. clear H18.
+                                                 assert ((INR n.+1 *
+                                                           (/ 2 *
+                                                            bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
+                                                           (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+                                                           ^ (n.+1 - 1)%coq_nat.+1)%Re = 
+                                                          (INR n.+1 *
+                                                           (/ 2 *
+                                                            bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
+                                                           (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+                                                           ^ (n.+1 - 1)%coq_nat * (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1)))%Re).
+                                                 { simpl. nra. } rewrite H18. clear H18. nra. 
+                                               } rewrite H17. clear H17. apply Rge_le. apply Ropp_0_le_ge_contravar .
+                                               repeat apply Rmult_le_pos.
+                                               ----- apply pos_INR.
+                                               ----- nra.
+                                               ----- simpl;nra.
+                                               ----- apply pow_le . simpl; nra.
+                                               ----- nra.
+                                               ----- simpl;nra.
+                                      **** remember (/ 2 *
+                                                        bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle))%Re as ee.
+                                           remember  ( / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))%Re as de.
+                                           assert ((ee * ((1 + de) ^ (n.+1 - 1)%coq_nat - 1) / de)%Re = 
+                                                    (((1 + de) ^ (n.+1 - 1)%coq_nat - 1) * (ee / de))%Re).
+                                           { nra. } rewrite H16.
+                                           assert ( (2 * ee / de)%Re = (2 * (ee / de))%Re).
+                                           { nra. } rewrite H17. apply Rmult_le_compat_r.
+                                           rewrite Heqde Heqee;simpl;nra.
+                                           apply Rlt_le. rewrite Heqde. apply (delta_bound (n.+1 - 1)%coq_nat).
+                                           lia.
                    --- rewrite !mxE. apply forward_error_dot_aux.
                        *** rewrite  combine_length. rewrite !length_veclist.
                            lia.
