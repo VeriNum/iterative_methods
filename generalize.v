@@ -3025,15 +3025,24 @@ induction L.
                                           (1 + u0) ^ (n - 1) = 
                                        (F' * (INR n - 1) / (INR n+1)) * ((1 + u0) ^ (n - 1) /(1 + u0) ^ (n + 1))).
                                { rewrite minus_INR. simpl; nra. lia. } rewrite H10. clear H10.
-                               repeat apply Rmult_le_compat.
+                                apply Rmult_le_compat.
                                **  apply Rmult_le_pos.
                                    +++ apply Rmult_le_pos; try (unfold F', F_max; simpl; nra); try apply pos_INR.
                                        apply Rge_le. apply Rge_minus. apply Rle_ge. 
                                        replace 1 with (INR 1) by (simpl; nra). apply le_INR;lia.
-                                   +++ apply Rlt_le. apply Rinv_0_lt_compat. apply lt_0_INR; lia.
-                               ** assert (1 = (1+u0)^(n+1) / (1+u0)^(n+1)).
+                                   +++ apply Rlt_le. apply Rinv_0_lt_compat. apply Rplus_lt_0_compat. apply lt_0_INR; lia. nra.
+                               ** apply Rmult_le_pos. apply pow_le. unfold u0;simpl;nra.
+                                  apply Rlt_le, Rinv_0_lt_compat, x_pow_gt_0. unfold u0;simpl;nra.
+                               ** repeat apply Rmult_le_compat_l.
+                                  +++ apply Rmult_le_pos. unfold F',F_max;simpl;nra.
+                                      apply Rge_le, Rge_minus,Rle_ge. replace 1 with (INR 1) by (simpl;nra).
+                                      apply le_INR. lia.
+                                  +++ apply Rlt_le. apply Rinv_lt_contravar. apply Rmult_lt_0_compat.
+                                      apply lt_0_INR. lia. apply Rplus_lt_0_compat.  apply lt_0_INR. lia. nra. nra.
+                              ** assert (1 = (1+u0)^(n+1) / (1+u0)^(n+1)).
                                   { symmetry. apply Rinv_r. apply pow_nonzero .
                                     unfold u0;simpl;nra.
+
                                   } 
                                   assert ( (1 + u0) ^ (n - 1) / (1 + u0) ^ (n + 1) <= 
                                             (1+u0)^(n+1) / (1+u0)^(n+1) ->
@@ -3041,7 +3050,8 @@ induction L.
                                   { rewrite -H10; nra. } apply H11. apply Rmult_le_compat_r.
                                   +++ apply Rlt_le, Rinv_0_lt_compat. apply x_pow_gt_0. unfold u0;simpl;nra.
                                   +++ apply Rle_pow. unfold u0;simpl;nra. lia.
-                               ** apply not_0_INR. lia.
+                               ** assert (0 < INR n + 1 -> INR n + 1 <> 0). { nra. } apply H10.
+                                  apply Rplus_lt_0_compat. apply lt_0_INR. lia. nra.
                                ** apply pow_nonzero. unfold u0;simpl;nra.
                             -- match goal with |-context[ _ <= ?a]=>
                                  replace a with (0 + a) by nra
@@ -3081,7 +3091,7 @@ induction L.
                                { destruct a. simpl. auto. } specialize (H1 H9).
                                fold u u0. destruct H1 as [Hfa1 [Hfa2 [Ha1 Ha2]]].
                                 apply Rle_trans with 
-                                (sqrt (F' / (nr * (1 + u0) ^ (n + 1)) - u)).
+                                (sqrt (F' / ((nr+1) * (1 + u0) ^ (n + 1)) - u)).
                                 *** nra.
                                 *** apply sqrt_le_1_alt. apply Rplus_le_compat_r.
                                   apply Rmult_le_compat_l. unfold F',F_max;simpl;nra.
@@ -3091,12 +3101,14 @@ induction L.
                                         **** apply lt_0_INR. lia.
                                         **** apply x_pow_gt_0. unfold u0; simpl; nra.
                                     ---- apply Rmult_lt_0_compat.
-                                        **** unfold nr. apply lt_0_INR. lia.
+                                        **** unfold nr. apply Rplus_lt_0_compat. apply lt_0_INR. lia. nra.
                                         **** apply x_pow_gt_0. unfold u0; simpl; nra.
                                   ++++ apply Rmult_lt_compat.
                                     ---- apply pos_INR.
                                     ---- apply Rlt_le, x_pow_gt_0. unfold u0; simpl; nra.
-                                    ---- unfold nr. apply lt_INR. lia.
+                                    ---- unfold nr.
+                                         assert (1 < INR n -> INR 2 < INR n + 1). { simpl;nra. }
+                                         apply H1. replace 1 with (INR 1) by (simpl;nra). apply lt_INR. lia.
                                     ---- apply Rlt_pow. unfold u0; simpl; nra. lia.
                            --- specialize (H1 (fst a) (snd a)).
                                assert (In (fst a, snd a) (a :: L)).
@@ -3108,7 +3120,7 @@ induction L.
                                { destruct a. simpl. auto. } specialize (H1 H9).
                                fold u u0. destruct H1 as [Hfa1 [Hfa2 [Ha1 Ha2]]].
                                 apply Rle_trans with 
-                                (sqrt (F' / (nr * (1 + u0) ^ (n + 1)) - u)).
+                                (sqrt (F' / ((nr+1) * (1 + u0) ^ (n + 1)) - u)).
                                 *** nra.
                                 *** apply sqrt_le_1_alt. apply Rplus_le_compat_r.
                                   apply Rmult_le_compat_l. unfold F',F_max;simpl;nra.
@@ -3118,12 +3130,14 @@ induction L.
                                         **** apply lt_0_INR. lia.
                                         **** apply x_pow_gt_0. unfold u0; simpl; nra.
                                     ---- apply Rmult_lt_0_compat.
-                                        **** unfold nr. apply lt_0_INR. lia.
+                                        **** unfold nr. apply Rplus_lt_0_compat. apply lt_0_INR. lia. nra.
                                         **** apply x_pow_gt_0. unfold u0; simpl; nra.
                                   ++++ apply Rmult_lt_compat.
                                     ---- apply pos_INR.
                                     ---- apply Rlt_le, x_pow_gt_0. unfold u0; simpl; nra.
-                                    ---- unfold nr. apply lt_INR. lia.
+                                    ---- unfold nr. 
+                                         assert (1 < INR n -> INR 2 < INR n + 1). { simpl;nra. }
+                                         apply H1. replace 1 with (INR 1) by (simpl;nra). apply lt_INR. lia.
                                     ---- apply Rlt_pow. unfold u0; simpl; nra. lia.
                       +++ auto. 
                    + apply Rabs_ineq. 
@@ -3134,9 +3148,9 @@ induction L.
                      remember (fst a) as a1.
                      remember (snd a) as a2.
                      assert (Rabs (FT2R a1) <=
-                               sqrt (F' / (nr * (1 + u0) ^ (n + 1)) - u) /\
+                               sqrt (F' / ((nr+1) * (1 + u0) ^ (n + 1)) - u) /\
                                Rabs (FT2R a2) <=
-                               sqrt (F' / (nr * (1 + u0) ^ (n + 1)) - u)).
+                               sqrt (F' / ((nr+1) * (1 + u0) ^ (n + 1)) - u)).
                      { specialize (H1 a1 a2).
                         assert (In (a1, a2) (a :: L)).
                         { left. simpl. rewrite Heqa1 Heqa2. destruct a. simpl. auto.  }
@@ -3156,7 +3170,7 @@ induction L.
                           apply H1.
                         + apply Rabs_ineq. fold u u0. unfold nr in Ha2.
                           apply Rle_trans with 
-                          (sqrt (F' / (nr * (1 + u0) ^ (n + 1)) - u)).
+                          (sqrt (F' / ((nr+1) * (1 + u0) ^ (n + 1)) - u)).
                           - apply Ha2.
                           - apply sqrt_le_1_alt. apply Rplus_le_compat_r.
                             apply Rmult_le_compat_l. unfold F',F_max;simpl;nra.
@@ -3166,12 +3180,14 @@ induction L.
                                  -- apply lt_0_INR. lia.
                                  -- apply x_pow_gt_0. unfold u0; simpl; nra.
                               ++ apply Rmult_lt_0_compat.
-                                 -- unfold nr. apply lt_0_INR. lia.
+                                 -- unfold nr. apply Rplus_lt_0_compat. apply lt_0_INR. lia. nra.
                                  -- apply x_pow_gt_0. unfold u0; simpl; nra.
                             * apply Rmult_lt_compat.
                               ++ apply pos_INR.
                               ++ apply Rlt_le, x_pow_gt_0. unfold u0; simpl; nra.
-                              ++ unfold nr. apply lt_INR. lia.
+                              ++ unfold nr. 
+                                 assert (1 < INR n -> INR 2 < INR n + 1). { simpl;nra. }
+                                         apply H13. replace 1 with (INR 1) by (simpl;nra). apply lt_INR. lia.
                               ++ apply Rlt_pow. unfold u0; simpl; nra. lia.
                         + specialize (H1 a1 a2).
                           assert (In (a1, a2) (a :: L)).
@@ -3180,7 +3196,7 @@ induction L.
                         + apply Rabs_ineq.
                           fold u u0. unfold nr in Ha2.
                           apply Rle_trans with 
-                          (sqrt (F' / (nr * (1 + u0) ^ (n + 1)) - u)).
+                          (sqrt (F' / ((nr+1) * (1 + u0) ^ (n + 1)) - u)).
                           - apply Ha1.
                           - apply sqrt_le_1_alt. apply Rplus_le_compat_r.
                             apply Rmult_le_compat_l. unfold F',F_max;simpl;nra.
@@ -3190,12 +3206,14 @@ induction L.
                                  -- apply lt_0_INR. lia.
                                  -- apply x_pow_gt_0. unfold u0; simpl; nra.
                               ++ apply Rmult_lt_0_compat.
-                                 -- unfold nr. apply lt_0_INR. lia.
+                                 -- unfold nr. apply Rplus_lt_0_compat. apply lt_0_INR. lia. nra.
                                  -- apply x_pow_gt_0. unfold u0; simpl; nra.
                             * apply Rmult_lt_compat.
                               ++ apply pos_INR.
                               ++ apply Rlt_le, x_pow_gt_0. unfold u0; simpl; nra.
-                              ++ unfold nr. apply lt_INR. lia.
+                              ++ unfold nr.
+                                 assert (1 < INR n -> INR 2 < INR n + 1). { simpl;nra. }
+                                 apply H13. replace 1 with (INR 1) by (simpl;nra). apply lt_INR. lia.
                               ++ apply Rlt_pow. unfold u0; simpl; nra. lia.
                       } specialize (H12 H13). 
                       apply Rabs_triang_inv_impl in H12.  apply side_switch in H12.
@@ -3206,8 +3224,8 @@ induction L.
                       ++ nra.
                       ++ rewrite -/u0.
                          apply Rle_trans with 
-                         ((sqrt (F' / (nr * (1 + u0) ^ (n + 1)) - u) *
-                                   sqrt (F' / (nr * (1 + u0) ^ (n + 1)) - u)) * (1 + u0) + u).
+                         ((sqrt (F' / ((nr+1) * (1 + u0) ^ (n + 1)) - u) *
+                                   sqrt (F' / ((nr+1) * (1 + u0) ^ (n + 1)) - u)) * (1 + u0) + u).
                         -- rewrite Rabs_mult. 
                            assert (Rabs (FT2R a1) * Rabs (FT2R a2) +
                                     (Rabs (FT2R a1) * Rabs (FT2R a2) * u0 + u) = 
@@ -3219,19 +3237,19 @@ induction L.
                            apply Rabs_pos. apply Rabs_pos.
                         -- rewrite sqrt_def .
                            ** unfold nr.
-                              assert ((F' / (INR n * (1 + u0) ^ (n + 1)) - u) * (1 + u0) + u = 
-                                       (F' / (INR n * (1 + u0) ^ (n + 1)) * (1+u0)) - u * u0).
+                              assert ((F' / ((INR n+1) * (1 + u0) ^ (n + 1)) - u) * (1 + u0) + u = 
+                                       (F' / ((INR n+1) * (1 + u0) ^ (n + 1)) * (1+u0)) - u * u0).
                               { nra. } rewrite H14. 
-                              assert (F' / (INR n * (1 + u0) ^ (n + 1)) * (1 + u0) = F' / (INR n * (1 + u0) ^ n)).
-                              { assert (F' / (INR n * (1 + u0) ^ (n + 1)) * (1 + u0) =
-                                        F' * ( (1+u0) * / (INR n * (1 + u0) ^ (n + 1)))).
+                              assert (F' / ((INR n +1)* (1 + u0) ^ (n + 1)) * (1 + u0) = F' / ((INR n+1) * (1 + u0) ^ n)).
+                              { assert (F' / ((INR n+1) * (1 + u0) ^ (n + 1)) * (1 + u0) =
+                                        F' * ( (1+u0) * / ((INR n+1) * (1 + u0) ^ (n + 1)))).
                                 { nra. } rewrite H15.
-                                assert (((1 + u0) * / (INR n * (1 + u0) ^ (n + 1))) = 
-                                          / (INR n * (1 + u0) ^ n)).
+                                assert (((1 + u0) * / ((INR n+1) * (1 + u0) ^ (n + 1))) = 
+                                          / ((INR n+1) * (1 + u0) ^ n)).
                                 { rewrite Rinv_mult_distr.
                                   + rewrite Rinv_mult_distr.
-                                    - assert ((1 + u0) * (/ INR n * / (1 + u0) ^ (n + 1)) = 
-                                              / INR n * ((1+u0) * / (1+u0)^(n+1))).
+                                    - assert ((1 + u0) * (/ (INR n+1) * / (1 + u0) ^ (n + 1)) = 
+                                              / (INR n+1) * ((1+u0) * / (1+u0)^(n+1))).
                                       { nra. } rewrite H16. 
                                       assert (((1 + u0) * / (1 + u0) ^ (n + 1)) = / (1 + u0) ^ n).
                                       { assert ((n+1)%nat = S n). { lia. } rewrite H17. 
@@ -3247,33 +3265,46 @@ induction L.
                                         + unfold u0; simpl; nra.
                                         + apply pow_nonzero. unfold u0; simpl; nra.
                                       } rewrite H17. nra.
-                                    - apply not_0_INR. lia.
+                                    - assert (0 < INR n +1 -> INR n + 1 <> 0). { nra. } apply H16.
+                                      apply Rplus_lt_0_compat. apply lt_0_INR;lia. nra.
                                     - apply  pow_nonzero. unfold u0; simpl; nra.
-                                  + apply not_0_INR. lia.
+                                  + assert (0 < INR n +1 -> INR n + 1 <> 0). { nra. } apply H16.
+                                      apply Rplus_lt_0_compat. apply lt_0_INR;lia. nra.
+
                                   + apply  pow_nonzero. unfold u0; simpl; nra.
                                 } rewrite H16. nra.
-                              } rewrite H15. unfold u, u0; simpl; nra.
+                              } rewrite H15. 
+                              apply Rle_trans with (F' / ((INR n + 1) * (1 + u0) ^ n)).
+                              +++ unfold u, u0; simpl; nra.
+                              +++ apply Rmult_le_compat_l. unfold F',F_max;simpl;nra.
+                                  apply Rlt_le. apply Rinv_lt_contravar.
+                                  --- apply Rmult_lt_0_compat.
+                                      *** apply Rmult_lt_0_compat. apply lt_0_INR;lia.
+                                          apply x_pow_gt_0. unfold u0;simpl;nra.
+                                      *** apply Rmult_lt_0_compat. apply Rplus_lt_0_compat.
+                                          apply lt_0_INR. lia. nra. apply x_pow_gt_0. unfold u0;simpl;nra.
+                                  --- apply Rmult_lt_compat_r. apply x_pow_gt_0. unfold u0;simpl;nra. nra.
                            **  apply Rge_le. apply Rge_minus. apply Rle_ge.
                                apply pow_invert.
-                                * apply Rmult_lt_0_compat. apply lt_0_INR. lia. 
+                                * apply Rmult_lt_0_compat. apply Rplus_lt_0_compat. apply lt_0_INR. lia. nra. 
                                   apply x_pow_gt_0. unfold u0; simpl; nra.
                                 * apply Rle_trans with 
-                                  (u * (INR n * 3)).
+                                  (u * ((INR n+1) * 3)).
                                   +++ repeat apply Rmult_le_compat_l.
                                      --- unfold u; simpl; nra.
-                                     --- apply pos_INR.
+                                     --- apply Rplus_le_le_0_compat. apply pos_INR. nra.
                                      --- apply Rlt_le. 
                                          pose proof  (delta_bound (n+1)%nat).
                                          assert ( (n + 1 < Z.to_nat (Z.pow_pos 2 23))%nat).
                                          { lia. } specialize (H14 H15).
                                         fold u0 in H14.
                                         nra.
-                                  +++ replace (u * (INR n * 3)) with (INR n * (3 * u)) by nra.
+                                  +++ replace (u * ((INR n+1) * 3)) with ((INR n+1) * (3 * u)) by nra.
                                      apply pow_invert_1.
                                      --- unfold u;simpl;nra.
                                      --- apply Rle_trans with 
-                                          (IZR (Z.pow_pos 2 23)).
-                                        *** apply Rlt_le. rewrite INR_IZR_INZ. apply IZR_lt. lia.
+                                          (IZR (Z.pow_pos 2 23) +1 ).
+                                        *** apply Rlt_le. rewrite INR_IZR_INZ. apply Rplus_lt_compat_r. apply IZR_lt. lia.
                                         *** unfold u. simpl. unfold F', F_max; simpl; nra.
                  } specialize (H7 H9). fold u u0 in H7.
                  apply Rle_trans with 
@@ -3299,9 +3330,9 @@ induction L.
                      remember (fst a) as a1.
                      remember (snd a) as a2.
                      assert (Rabs (FT2R a1) <=
-                               sqrt (F' / (nr * (1 + u0) ^ (n + 1)) - u) /\
+                               sqrt (F' / ((nr+1) * (1 + u0) ^ (n + 1)) - u) /\
                                Rabs (FT2R a2) <=
-                               sqrt (F' / (nr * (1 + u0) ^ (n + 1)) - u)).
+                               sqrt (F' / ((nr+1) * (1 + u0) ^ (n + 1)) - u)).
                      { specialize (H1 a1 a2).
                         assert (In (a1, a2) (a :: L)).
                         { rewrite Heqa1 Heqa2. destruct a. simpl. auto.  }
@@ -3320,29 +3351,29 @@ induction L.
                           apply H1. auto.
                         + apply Rabs_ineq. fold u u0. unfold nr in Ha2.
                           apply Rle_trans with 
-                          (sqrt (F' / (nr * (1 + u0) ^ (n + 1)) - u)).
+                          (sqrt (F' / ((nr+1) * (1 + u0) ^ (n + 1)) - u)).
                           - apply Ha2.
                           - apply sqrt_le_1_alt. apply Rplus_le_compat_r. apply Rmult_le_compat_l.
                             unfold F', F_max; simpl; nra.
                             assert (n= 2%nat \/ (2 < n)%nat). { lia. } destruct H14.
                             * unfold nr. rewrite H14. rewrite Rinv_mult_distr. 
-                              ++ rewrite Rinv_mult_distr. apply Rmult_le_compat_l. simpl; nra.
-                                 apply Rlt_le. apply Rinv_lt_contravar. 
-                                 apply Rmult_lt_0_compat. unfold u0; simpl; nra.
-                                 unfold u0; simpl; nra. apply Rlt_pow. unfold u0; simpl; nra.
-                                 lia. simpl; nra. unfold u0; simpl; nra.
+                              ++ rewrite Rinv_mult_distr. apply Rmult_le_compat. simpl; nra.
+                                 apply Rlt_le. apply Rinv_0_lt_compat.  
+                                 try (unfold u0;simpl;nra). simpl;nra. try (unfold u0;simpl;nra).
+                                 simpl;nra. unfold u0; simpl; nra.
                               ++ simpl; nra.
                               ++ unfold u0; simpl; nra.
                             * apply Rlt_le. apply Rinv_lt_contravar.
                               ++ apply Rmult_lt_0_compat.
                                  -- unfold u0; simpl; nra.
                                  -- apply Rmult_lt_0_compat.
-                                    ** unfold nr. apply lt_0_INR; lia.
+                                    ** unfold nr. apply Rplus_lt_0_compat. apply lt_0_INR; lia. nra.
                                     ** apply x_pow_gt_0. unfold u0; simpl; nra. 
                               ++ unfold nr. apply Rmult_lt_compat.
                                  -- simpl; nra.
                                  -- unfold u0; simpl; nra.
-                                 -- apply lt_INR; lia.
+                                 -- assert (1 < INR n -> INR 2 < INR n + 1). { simpl;nra. }
+                                    apply H15. replace 1 with (INR 1) by (simpl;nra). apply lt_INR; lia.
                                  -- apply Rlt_pow. unfold u0; simpl; nra. lia.
                         + specialize (H1 a1 a2).
                           assert (In (a1, a2) (a :: L)).
@@ -3350,29 +3381,27 @@ induction L.
                           apply H1. auto.
                         + apply Rabs_ineq. fold u u0. unfold nr in Ha1.
                           apply Rle_trans with 
-                          (sqrt (F' / (nr * (1 + u0) ^ (n + 1)) - u)).
+                          (sqrt (F' / ((nr+1) * (1 + u0) ^ (n + 1)) - u)).
                           - apply Ha1.
                           - apply sqrt_le_1_alt. apply Rplus_le_compat_r. apply Rmult_le_compat_l.
                             unfold F', F_max; simpl; nra.
                             assert (n= 2%nat \/ (2 < n)%nat). { lia. } destruct H14.
                             * unfold nr. rewrite H14. rewrite Rinv_mult_distr. 
-                              ++ rewrite Rinv_mult_distr. apply Rmult_le_compat_l. simpl; nra.
-                                 apply Rlt_le. apply Rinv_lt_contravar. 
-                                 apply Rmult_lt_0_compat. unfold u0; simpl; nra.
-                                 unfold u0; simpl; nra. apply Rlt_pow. unfold u0; simpl; nra.
-                                 lia. simpl; nra. unfold u0; simpl; nra.
+                              ++ rewrite Rinv_mult_distr. unfold u0; simpl; nra.
+                                 simpl; nra. unfold u0; simpl; nra.
                               ++ simpl; nra.
                               ++ unfold u0; simpl; nra.
                             * apply Rlt_le. apply Rinv_lt_contravar.
                               ++ apply Rmult_lt_0_compat.
                                  -- unfold u0; simpl; nra.
                                  -- apply Rmult_lt_0_compat.
-                                    ** unfold nr. apply lt_0_INR; lia.
+                                    ** unfold nr. apply Rplus_lt_0_compat. apply lt_0_INR; lia. nra.
                                     ** apply x_pow_gt_0. unfold u0; simpl; nra. 
                               ++ unfold nr. apply Rmult_lt_compat.
                                  -- simpl; nra.
                                  -- unfold u0; simpl; nra.
-                                 -- apply lt_INR; lia.
+                                 -- assert (1 < INR n -> INR 2 < INR n + 1). { simpl;nra. }
+                                    apply H15. replace 1 with (INR 1) by (simpl;nra). apply lt_INR; lia.
                                  -- apply Rlt_pow. unfold u0; simpl; nra. lia.
                        } specialize (H13 H14). fold u u0 in H13.
                        unfold dot_prodF, dot_prodR in IHL.
@@ -3526,17 +3555,7 @@ Qed.
 
 
 
-
-
-
-
-
-
-
-
-
-
-  
+(*
 Lemma forward_error_dot_aux:
   forall (L: list ((ftype Tsingle) * (ftype Tsingle))),
   let ty := Tsingle in 
@@ -5294,7 +5313,7 @@ Qed.
 
 
 
-
+*)
 (** Using Coq's combine function to combibe two lists to get a 
     list of pairs
 **)
@@ -5314,8 +5333,8 @@ Lemma forward_error_dot_precise:
               (femax Tsingle) a = true /\
               Binary.is_finite (fprec Tsingle)
                 (femax Tsingle) b = true /\
-              Rabs (FT2R a) <=  sqrt( F' / (nr * (1+u0)^(n+1)) - u ) /\
-              Rabs (FT2R b) <=  sqrt( F' / (nr * (1+u0)^(n+1)) - u )) ->
+              Rabs (FT2R a) <=  sqrt( F' / ((nr+1) * (1+u0)^(n+1)) - u ) /\
+              Rabs (FT2R b) <=  sqrt( F' / ((nr+1) * (1+u0)^(n+1)) - u )) ->
   is_finite (fprec Tsingle) (femax Tsingle)
   (dot_prodF _ L) = true /\
   Rabs (FT2R (dot_prodF _ L) - dot_prodR (Flist_to_Rlist_pair L)) <=
