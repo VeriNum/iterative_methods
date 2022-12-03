@@ -1317,83 +1317,9 @@ apply add_vec_float_le.
                         { lia. } rewrite H12. simpl;nra. lia.
                         rewrite Heqde. simpl;nra.
                         rewrite Heqde. simpl;nra.
-                   **** 
-  
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- apply Rplus_le_compat.
-                         **** assert ((F' * (INR 2 - 1) / INR 2)%Re = ((F' * (INR 2 - 1) / INR 2) + 0)%Re).
-                              { simpl;nra. } rewrite H8. apply Rplus_le_compat.
-                              +++++ unfold d. rewrite -RmultE.
-                                    remember (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))%Re as de.
-                                    unfold nr. 
-                                    assert (((F'/2) / ((INR n.+1 + 1) * de ^ (n.+1 + 1)%coq_nat) *
-                                                            INR n.+1 * de ^ n.+1)%Re = 
-                                                          (((F'/2) * (de ^ n.+1 / de ^ (n.+1 + 1)%coq_nat)) * 
-                                                           (INR n.+1 / (INR n.+1 + 1)))%Re).
-                                    { assert (((F'/2) / ((INR n.+1 + 1) * de ^ (n.+1 + 1)%coq_nat) *
-                                                            INR n.+1 * de ^ n.+1)%Re = 
-                                                            ((F'/2) * / ((INR n.+1 + 1) * de ^ (n.+1 + 1)%coq_nat) * 
-                                                              INR n.+1 * de ^ n.+1)%Re).
-                                      { nra. } rewrite H9. clear H9.
-                                      assert ((/ ((INR n.+1 + 1) * de ^ (n.+1 + 1)%coq_nat))%Re  = 
-                                                           (/ (INR n.+1 + 1) * / (de ^ (n.+1 + 1)%coq_nat))%Re).
-                                      { rewrite Rinv_mult_distr. nra. 
-                                        assert ( (0 < INR n.+1 + 1)%Re ->  (INR n.+1 + 1)%Re <> 0%Re).
-                                        { nra. } apply H9. apply Rplus_lt_0_compat. apply lt_0_INR. lia.
-                                        nra. 
-                                        assert ((0 < de ^ (n.+1 + 1)%coq_nat)%Re ->  (de ^ (n.+1 + 1)%coq_nat)%Re <> 0%Re).
-                                        { nra. } apply H9. apply pow_lt. rewrite Heqde;simpl;nra.
-                                      } rewrite H9. nra.
-                                    } rewrite H9. 
-                                    assert ((F' * (INR 2 - 1) / INR 2)%Re = ((F'/2) * 1)%Re).
-                                    { simpl;nra. } rewrite H10. apply Rmult_le_compat.
-                                    ----- apply Rmult_le_pos. unfold F',F_max;simpl;nra. 
-                                          apply Rmult_le_pos. apply pow_le. rewrite Heqde;simpl;nra.
-                                          apply Rlt_le, Rinv_0_lt_compat. apply pow_lt.
-                                          rewrite Heqde;simpl;nra.
-                                    ----- apply Rmult_le_pos. apply pos_INR. apply Rlt_le.
-                                          apply Rinv_0_lt_compat. apply Rplus_lt_0_compat.
-                                          apply lt_0_INR. lia. nra.
-                                    ----- assert (((F'/2) * (de ^ n.+1 / de ^ (n.+1 + 1)%coq_nat) <= (F'/2) * 1)%Re ->
-                                                               ((F'/2) * (de ^ n.+1 / de ^ (n.+1 + 1)%coq_nat) <= (F'/2))%Re).
-                                          { nra. } apply H11. apply Rmult_le_compat_l. unfold F',F_max;simpl;nra.
-                                          assert (1%Re = (de ^ (n.+1 + 1)%coq_nat */ de ^ (n.+1 + 1)%coq_nat)%Re).
-                                          { rewrite Rinv_r. nra.
-                                            assert ((0 < de ^ (n.+1 + 1)%coq_nat)%Re -> (de ^ (n.+1 + 1)%coq_nat)%Re <> 0%Re).
-                                            { nra. } apply H12. apply pow_lt. rewrite Heqde;simpl;nra.
-                                          } rewrite H12. apply Rmult_le_compat_r.
-                                          apply Rlt_le, Rinv_0_lt_compat,pow_lt. rewrite Heqde;simpl;nra.
-                                          apply Rle_pow. rewrite Heqde;simpl;nra. lia.
-                                    ----- assert (1%Re = ((INR n.+1 +1) */ (INR n.+1 + 1))%Re).
-                                          { rewrite Rinv_r. nra.
-                                            assert ((0 < (INR n.+1 + 1)%Re)%Re ->(INR n.+1 + 1)%Re <> 0%Re).
-                                            { nra. } apply H11. apply Rplus_lt_0_compat. apply lt_0_INR;lia. nra.
-                                          }
-                                          assert ((INR n.+1 / (INR n.+1 + 1) <= (INR n.+1 + 1) / (INR n.+1 + 1))%Re ->
-                                                  (INR n.+1 / (INR n.+1 + 1) <= 1)%Re). { nra. } apply H12.
-                                          apply Rmult_le_compat_r. apply Rlt_le, Rinv_0_lt_compat.
-                                          apply Rplus_lt_0_compat. apply lt_0_INR;lia. nra. nra.
-                            +++++ unfold e. rewrite -RmultE.
-                                  assert ((INR n.+1 *
-                                                          (/ 2 *
-                                                           bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
+                   **** unfold e. rewrite -RmultE.
+                        assert ((INR n.+1 *  (/ 2 *
+                                                  bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
                                                           (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
                                                           ^ n.+1 -
                                                           INR n.+1 *
@@ -1405,8 +1331,8 @@ apply add_vec_float_le.
                                                            bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
                                                           (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
                                                           ^ (n.+1 - 1)%coq_nat * (/ 2 * bpow Zaux.radix2 (- fprec Tsingle + 1)))%Re)).
-                                   { assert (n.+1 = S ((n.+1 - 1)%coq_nat)). { lia. } 
-                                     assert ((INR n.+1 *
+                         { assert (n.+1 = S ((n.+1 - 1)%coq_nat)). { lia. } 
+                           assert ((INR n.+1 *
                                                              (/ 2 *
                                                               bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
                                                              (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
@@ -1426,8 +1352,8 @@ apply add_vec_float_le.
                                                               bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
                                                              (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
                                                              ^ (n.+1 - 1)%coq_nat)%Re).
-                                      { by rewrite -H9. } rewrite H10. clear H10.
-                                      assert ((INR n.+1 *
+                             {  by rewrite -H8. } rewrite H9. clear H9.
+                             assert ((INR n.+1 *
                                                            (/ 2 *
                                                             bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
                                                            (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
@@ -1437,35 +1363,55 @@ apply add_vec_float_le.
                                                             bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)) *
                                                            (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
                                                            ^ (n.+1 - 1)%coq_nat * (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1)))%Re).
-                                                 { simpl. nra. } rewrite H10. clear H10. nra. 
-                                } rewrite H9. clear H9. apply Rge_le. apply Ropp_0_le_ge_contravar .
-                                repeat apply Rmult_le_pos.
-                                ----- apply pos_INR.
-                                ----- nra.
-                                ----- simpl;nra.
-                                ----- apply pow_le . simpl; nra.
-                                ----- nra.
-                                ----- simpl;nra.
-                        **** remember (/ 2 *
-                                                        bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle))%Re as ee.
-                                           remember  ( / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))%Re as de.
-                                           assert ((ee * ((1 + de) ^ (n.+1 - 1)%coq_nat - 1) / de)%Re = 
-                                                    (((1 + de) ^ (n.+1 - 1)%coq_nat - 1) * (ee / de))%Re).
-                             { nra. } rewrite H8.
-                             assert ( (2 * ee / de)%Re = (2 * (ee / de))%Re).
-                             { nra. } rewrite H9. apply Rmult_le_compat_r.
-                             rewrite Heqde Heqee;simpl;nra.
-                             apply Rlt_le. rewrite Heqde. apply (delta_bound (n.+1 - 1)%coq_nat).
-                             lia.
-
-
-
-
-
-
-
-     admit.
-
+                                                 { simpl. nra. } rewrite H9. clear H9. nra. 
+                          } rewrite H8. clear H8. apply Rge_le. apply Ropp_0_le_ge_contravar .
+                          remember (/ 2 *  bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle))%Re as ee.
+                          remember  ( / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))%Re as de.
+                          assert ((INR n.+1 * ee *
+                                     (1 + de) ^ (n.+1 - 1)%coq_nat * de -
+                                     ee * ((1 + de) ^ (n.+1 - 1)%coq_nat - 1) /
+                                     de)%Re = ((ee * (1 + de) ^ (n.+1 - 1)%coq_nat ) * 
+                                    (INR n.+1 * de - (1 - 1 / (1+de) ^(n.+1 - 1)%coq_nat) * / de))%Re).
+                          { assert ( (INR n.+1 * ee *
+                                     (1 + de) ^ (n.+1 - 1)%coq_nat * de -
+                                     ee * ((1 + de) ^ (n.+1 - 1)%coq_nat - 1) /
+                                     de)%Re = 
+                                    (INR n.+1 * ee *
+                                     (1 + de) ^ (n.+1 - 1)%coq_nat * de -
+                                     ee * ((1 + de) ^ (n.+1 - 1)%coq_nat - 
+                                      (1 + de) ^ (n.+1 - 1)%coq_nat * / (1 + de) ^ (n.+1 - 1)%coq_nat) * /
+                                     de)%Re).
+                            { rewrite Rinv_r. nra. apply pow_nonzero. rewrite Heqde;simpl;nra. }
+                            rewrite H8. 
+                            assert ((INR n.+1 * ee *
+                                       (1 + de) ^ (n.+1 - 1)%coq_nat * de -
+                                       ee *
+                                       ((1 + de) ^ (n.+1 - 1)%coq_nat -
+                                        (1 + de) ^ (n.+1 - 1)%coq_nat *
+                                        / (1 + de) ^ (n.+1 - 1)%coq_nat) * 
+                                       / de)%Re = 
+                                     ((ee * (1 + de) ^ (n.+1 - 1)%coq_nat) * (INR n.+1 * de) - 
+                                      (ee * (1 + de) ^ (n.+1 - 1)%coq_nat) *
+                                      ((1 - / (1 + de) ^ (n.+1 - 1)%coq_nat) * / de))%Re).
+                            { nra. } rewrite H9. clear H8 H9. nra. 
+                          } rewrite H8.
+                          repeat apply Rmult_le_pos.
+                          ----- rewrite Heqee;simpl;nra.
+                          ----- apply pow_le. rewrite Heqde;simpl;nra.
+                          ----- apply Rle_trans with
+                                (INR n.+1 * de - / de)%Re.
+                                ****** admit.
+                                ****** apply Rplus_le_compat_l. apply Ropp_le_contravar.
+                                       assert (((1 - 1 / (1 + de) ^ (n.+1 - 1)%coq_nat) */ de <= (1 - 0) * / de)%Re ->
+                                                ((1 - 1 / (1 + de) ^ (n.+1 - 1)%coq_nat) * / de <= / de)%Re).
+                                       { nra. } apply H9. apply Rmult_le_compat_r.
+                                       rewrite Heqde;simpl;nra.
+                                       apply Rplus_le_compat_l.
+                                       apply Ropp_le_contravar.
+                                       apply Rlt_le. 
+                                       replace (1 / (1 + de) ^ (n.+1 - 1)%coq_nat)%Re with
+                                                ( / (1 + de) ^ (n.+1 - 1)%coq_nat)%Re by nra.
+                                       apply Rinv_0_lt_compat. apply pow_lt. rewrite Heqde;simpl;nra.
 
 Admitted.
 
