@@ -1308,7 +1308,16 @@ apply add_vec_float_le.
                          apply Rlt_le, Rinv_0_lt_compat. unfold nr. apply lt_0_INR;lia.
                          rewrite -H10. unfold nr.
                          apply Rle_trans with 
-                         (
+                         ((/ 2 * bpow Zaux.radix2 (- fprec Tsingle + 1)) *
+                          INR (Z.to_nat (Z.pow_pos 2 23) - 1)%coq_nat)%Re.
+                         apply Rmult_le_compat_l. simpl;nra.
+                         apply le_INR. lia. rewrite minus_INR.
+                         rewrite INR_IZR_INZ. 
+                        assert ((Z.of_nat (Z.to_nat (Z.pow_pos 2 23))) = Z.pow_pos 2 23).
+                        { lia. } rewrite H12. simpl;nra. lia.
+                        rewrite Heqde. simpl;nra.
+                        rewrite Heqde. simpl;nra.
+                   **** 
   
   
 
