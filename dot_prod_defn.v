@@ -56,10 +56,10 @@ Definition bmap_list {ty} (n : nat) : list varinfo :=
   let e  := / 2 * Raux.bpow Zaux.radix2 (3 - femax ty - fprec ty) in
   let d := / 2 * Raux.bpow Zaux.radix2 (- fprec ty + 1) in 
   [ Build_varinfo Tsingle _a 
-      (- (F' / (nr * (1+d)^n)) ) (F' / (nr * (1+d)^n)) ;
+      (- (F' / (nr * (1+d)^n) + 2* e/d) ) ((F' / (nr * (1+d)^n)) + 2* e/d) ;
     Build_varinfo Tsingle _b 
-      (- (F' * (nr - 1) / nr + 2 * e/d))
-      (F' * (nr - 1) / nr + 2 * e/d ) ].
+      (- (F' * (nr - 1) / nr + 2*  e/d))
+      (F' * (nr - 1) / nr + 2* e/d ) ].
 
 
 
