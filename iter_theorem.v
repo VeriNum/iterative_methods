@@ -370,65 +370,43 @@ intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
 Qed.
 
 
-Print enum.
 
-
-Lemma enum_list:
-  enum 'I_2 = [:: ord0;  1].
+Lemma bigmax_rel_iota k (F : nat -> R) :
+  (bigmaxr 0%Re [seq F i | i <- iota 0 k.+1] <=
+   bigmaxr 0%Re [seq F i | i <- iota 0 k.+2]).
 Proof.
-apply: (inj_map val_inj); rewrite val_enum_ord.
-rewrite /iota //=.
-Qed.
-
-Lemma enum_list1:
-  enum 'I_1 = [:: ord0].
-Proof.
-apply: (inj_map val_inj); rewrite val_enum_ord.
-rewrite /iota //=.
-Qed. 
-
-Lemma enum_dissoc {n:nat}:
-  enum 'I_n.+2 = rcons (map (widen_ord (leqnSn _)) (enum 'I_n.+1)) ord_max.
-Proof.
-by rewrite enum_ordSr.
+apply/bigmaxr_lerP.
+  by rewrite size_map size_iota.
+move=> i; rewrite size_map size_iota => ilt.
+have -> : seq.nth 0%Re [seq F i | i <- iota 0 k.+1] i =
+          seq.nth 0%Re [seq F i | i <- iota 0 k.+2] i.
+  by rewrite !(nth_map 0%nat) // ?nth_iota // ?size_iota // (leq_trans ilt).
+apply: bigmaxr_ler.
+by rewrite size_map size_iota (leq_trans ilt).
 Qed.
 
 
-Lemma seq_decompose {k:nat} (f : nat -> R):
-  [seq (f (nat_of_ord i)) | i <- map
-                     (widen_ord (m:=k.+2)
-                        (leqnSn k.+1))
-                     (enum 'I_k.+1) ++ [ord_max]] = 
-  ([seq (f (nat_of_ord i)) | i <- enum 'I_k.+1] ++
-  [:: (f (nat_of_ord (@ord_max k.+2)))])%SEQ.
-Proof.
-Admitted.
 
 
-Check big_mkord.
 Lemma bigmax_rel {k:nat} (f : nat -> R):
 (bigmaxr 0%Re
   [seq (f (nat_of_ord i)) | i <- enum 'I_k.+1] <=
  bigmaxr 0%Re
    [seq (f (nat_of_ord i)) | i <- enum 'I_k.+2])%Re.
 Proof.
-Admitted.
+apply /RleP.
+by rewrite map_comp [in X in (_ <= X)]map_comp !val_enum_ord bigmax_rel_iota.
+Qed.
+
 
 Lemma theta_eq {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
   (x_hat : nat ->'cV[ftype Tsingle]_n.+1):
   (theta_x k x_hat x <= theta_x k.+1 x_hat x)%Re.
 Proof.
 unfold theta_x.
-
-
-
-
-
- rewrite enum_dissoc. simpl. 
-rewrite -cats1 //=. 
-rewrite (@seq_decompose _ (fun m: nat => (vec_inf_norm (FT2R_mat (x_hat m)) /
+apply (@bigmax_rel k (fun m:nat => (vec_inf_norm (FT2R_mat (x_hat m)) /
         vec_inf_norm x)%Re)).
-Admitted.
+Qed.
 
 
 Lemma tau_rel {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
@@ -1592,7 +1570,41 @@ induction k.
                      assert (@inord 0 0 = 0). { apply ord1. } by rewrite H13.
                    } rewrite H12 in H10. specialize (H0 H10). apply H0.  
                +++ apply Rplus_le_compat_r. apply /RleP. apply triang_ineq.
-            ** admit.
+            ** rewrite -mulmxBl.
+               apply Rle_trans with
+               ((vec_inf_norm
+                    (FT2R_mat
+                       (S_hat *f
+                        X_m_generic k x0_f b_f inv_A1 A2)) +
+                  vec_inf_norm (FT2R_mat (inv_A1 *f b_f))) *
+                 d + e +
+                 (vec_inf_norm
+                    (FT2R_mat
+                       (S_hat *f
+                        X_m_generic k x0_f b_f inv_A1 A2) -
+                     FT2R_mat S_hat *m FT2R_mat
+                                         (X_m_generic k
+                                            x0_f b_f inv_A1
+                                            A2)) +
+                  matrix_inf_norm (FT2R_mat S_hat - Sm) * 
+                  vec_inf_norm
+                    (FT2R_mat
+                       (X_m_generic k x0_f b_f inv_A1 A2)) +
+                  vec_inf_norm
+                    (FT2R_mat (inv_A1 *f b_f) -
+                     FT2R_mat inv_A1 *m b_real)))%Re.
+               +++ repeat apply Rplus_le_compat_l, Rplus_le_compat_r.
+                   apply Rplus_le_compat_l. apply /RleP. apply submult_prop.
+               +++ 
+
+
+
+
+
+
+
+
+ admit.
 
     * simpl. 
       assert (S_mat (FT2R_mat inv_A1) (FT2R_mat A2) *m xkf +
