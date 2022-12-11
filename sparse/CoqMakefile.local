@@ -1,0 +1,2 @@
+sparse.v: sparse.c
+	clightgen -flongdouble -normalize $< -o $@ 
