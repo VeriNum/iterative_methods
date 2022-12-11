@@ -1372,6 +1372,34 @@ apply add_vec_float_le.
 Qed.                   
 
 
+(** lemma for bound on ||\hat x_m|| **)
+(*vec_inf_norm
+                    (FT2R_mat
+                       (X_m_generic k x0_f b_f inv_A1 A2))
+*)(*
+Lemma x_m_hat_bound {n:nat}:
+  forall (A A1 A2 inv_A1: 'M[ftype Tsingle]_n.+1) 
+  (x0_f b_f: 'cV[ftype Tsingle]_n.+1),
+  let x := invmx (FT2R_mat A) *m (FT2R_mat b_f) in
+  x != 0 ->
+  let Sm:= (@matrix_inf_norm n.+1 (S_mat (FT2R_mat inv_A1) (FT2R_mat A2))) in
+  (exists K:R, vec_inf_norm ((FT2R_mat x0_f) - x) <= K) -> 
+  exists K:R,  
+  forall k:nat,
+  (vec_inf_norm  (FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2)) <=
+  (vec_inf_norm x + Sm^k * K))%Re.
+Proof.
+move=> A A1 A2 inv_A1 x0_f b_f x Hf Sm [K H].
+exists K.
+intros.
+induction k.
++ simpl.
+  apply (@reverse_triang_ineq n (FT2R_mat x0_f) x K) in H.
+  assert ((vec_inf_norm (FT2R_mat x0_f) - vec_inf_norm x <= K)%Re).
+  { by apply /RleP. } nra.
++ simpl.
+*)
+
 
 
 
@@ -1595,17 +1623,13 @@ induction k.
                      FT2R_mat inv_A1 *m b_real)))%Re.
                +++ repeat apply Rplus_le_compat_l, Rplus_le_compat_r.
                    apply Rplus_le_compat_l. apply /RleP. apply submult_prop.
-               +++ 
-
-
-
-
-
-
-
-
- admit.
-
+               +++ remember (mat_mat_mult_err_bnd inv_A1 A2) as E_2.
+                   remember (mat_vec_mult_err_bnd inv_A1 b_f) as E_1.
+                   remember (mat_vec_mult_err_bnd S_hat (X_m_generic k x0_f b_f inv_A1 A2)) as E3_m.
+                   apply Rle_trans with 
+                   (@tau_m n k.+1 x (fun m:nat=> (X_m_generic m x0_f b_f inv_A1 A2)) inv_A1 A1 A2 b_f).
+                   --- admit.
+                   --- by rewrite Rmult_1_r; apply tau_bounds_tau_m.
     * simpl. 
       assert (S_mat (FT2R_mat inv_A1) (FT2R_mat A2) *m xkf +
                 FT2R_mat inv_A1 *m b_real -
