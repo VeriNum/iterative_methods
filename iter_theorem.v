@@ -1466,7 +1466,34 @@ Proof.
 intros. apply /RleP. unfold Sm, S_hat.  
 rewrite FT2R_mat_opp.
 + rewrite /S_mat matrix_inf_norm_opp_opp /E_2. 
-  apply: mat_mat_err_bnd_holds. apply H. admit.
+  apply: mat_mat_err_bnd_holds. apply H.
+  intros. specialize (H0 i k n n n H1 a b inv_A1 A2 H2).
+  destruct H0 as [H0fa [H0fb [Ha Hb]]].
+  repeat split; try by [].
+  - apply Rle_trans with 
+         (sqrt ((F' / 2) /
+         ( (nr + 1) * (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+          ^ (n.+1 + 1)%coq_nat) -
+         / 2 *  bpow Zaux.radix2 (3 - femax Tsingle -  fprec Tsingle)))%Re.
+         -- apply Ha.
+         -- apply sqrt_le_1_alt. apply Rplus_le_compat_r.
+            apply Rmult_le_compat_r.
+            ** apply Rlt_le, Rinv_0_lt_compat. apply Rmult_lt_0_compat.
+               +++ apply Rplus_lt_0_compat. unfold nr. apply lt_0_INR;lia. nra.
+               +++ apply pow_lt.  rewrite -RmultE. simpl;nra.
+            ** unfold F',F_max;simpl;nra.
+  - apply Rle_trans with 
+         (sqrt ((F' / 2) /
+         ( (nr + 1) * (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+          ^ (n.+1 + 1)%coq_nat) -
+         / 2 *  bpow Zaux.radix2 (3 - femax Tsingle -  fprec Tsingle)))%Re.
+         -- apply Hb.
+         -- apply sqrt_le_1_alt. apply Rplus_le_compat_r.
+            apply Rmult_le_compat_r.
+            ** apply Rlt_le, Rinv_0_lt_compat. apply Rmult_lt_0_compat.
+               +++ apply Rplus_lt_0_compat. unfold nr. apply lt_0_INR;lia. nra.
+               +++ apply pow_lt.  rewrite -RmultE. simpl;nra.
+            ** unfold F',F_max;simpl;nra.
 + intros.
   pose proof forward_error_dot_aux. rewrite !mxE.
   remember (combine (vec_to_list_float n.+1 (\row_j inv_A1 x j)^T)
@@ -1514,7 +1541,7 @@ rewrite FT2R_mat_opp.
                +++ apply Rplus_lt_0_compat. unfold nr. apply lt_0_INR;lia. nra.
                +++ apply pow_lt. simpl;nra.
             ** unfold F',F_max;simpl;nra.
-Admitted.
+Qed.
  
 
 
@@ -1744,7 +1771,7 @@ induction k.
                    apply Rle_trans with 
                    (@tau_m n k.+1 x (fun m:nat=> (X_m_generic m x0_f b_f inv_A1 A2)) inv_A1 A1 A2 b_f).
                    --- assert ((matrix_inf_norm (FT2R_mat S_hat - Sm) <= E_2)%Re).
-                       { 
+                       { rewrite HeqE_2. apply mat_norm_S_hat_minus_S_bounds.
 
 
 
