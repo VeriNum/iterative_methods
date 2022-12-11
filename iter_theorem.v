@@ -1369,7 +1369,9 @@ apply add_vec_float_le.
                                        rewrite Heqde Heqee;simpl;nra.
                                        apply Rlt_le. rewrite Heqde. apply (delta_bound (n.+1 - 1)%coq_nat).
                                        lia.
-Qed.                   
+Qed.
+
+                   
 
 
 (** lemma for bound on ||\hat x_m|| **)
@@ -1401,6 +1403,119 @@ induction k.
 *)
 
 
+Lemma FT2R_mat_opp {m n:nat}:
+  forall (A: 'M[ftype Tsingle]_(m.+1,n.+1)),
+  (forall x y, is_finite _ _ (A x y) = true)->
+  FT2R_mat (-f A) = -FT2R_mat A.
+Proof.
+intros. rewrite /FT2R_mat. apply /matrixP. unfold eqrel.
+move=> x y /=. rewrite !mxE /=. unfold FT2R. apply B2R_Bopp.
+Qed.
+
+Lemma matrix_inf_norm_opp {n:nat}:
+  forall A: 'M[R]_n.+1,  
+  matrix_inf_norm A = matrix_inf_norm (-A).
+Proof.
+intros. rewrite /matrix_inf_norm. 
+assert ([seq  (row_sum A i) | i <- enum 'I_n.+1] = 
+        [seq  (row_sum (- A) i) | i <- enum 'I_n.+1]).
+{ apply eq_map. unfold eqfun. intros.
+  assert (row_sum A x = row_sum (- A) x).
+  { rewrite /row_sum. apply eq_big. by []. intros. rewrite !mxE.
+    rewrite -RoppE. by rewrite Rabs_Ropp.
+  } by rewrite H /=.
+} by rewrite H. 
+Qed.
+
+Lemma matrix_inf_norm_opp_opp {n:nat}:
+  forall A B: 'M[R]_n.+1,
+  matrix_inf_norm (-A - (-B)) = matrix_inf_norm (A - B).
+Proof.
+intros. 
+assert ((-A - (-B))= - (A - B)).
+{ apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+  rewrite -!RplusE -!RoppE. nra.
+} by rewrite H -matrix_inf_norm_opp.
+Qed.
+
+
+
+Lemma mat_norm_S_hat_minus_S_bounds {n:nat}:
+  forall (A2 inv_A1: 'M[ftype Tsingle]_n.+1),
+  let Sm := S_mat (FT2R_mat inv_A1) (FT2R_mat A2) in
+  let E_2 := mat_mat_mult_err_bnd inv_A1 A2 in
+  (1 < n.+1 /\ n.+1< (Z.to_nat (Z.pow_pos 2 23) - 1)%coq_nat)%coq_nat ->
+  let e := / 2 * Raux.bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle) in
+  let d := / 2 * Raux.bpow Zaux.radix2 (- fprec Tsingle + 1) in
+  let nr := INR n.+1 in 
+  (forall i k m n p :nat, (i < m.+1)%nat /\ (k < n.+1)%nat -> 
+    (forall (a b : ftype Tsingle) (A1: 'M[ftype Tsingle]_(m.+1, n.+1))
+            (A2: 'M[ftype Tsingle]_(n.+1, p.+1)),
+      In (a, b)
+        (combine (vec_to_list_float n.+1 (\row_j A1 (inord i) j)^T)
+           (vec_to_list_float n.+1 (\col_j (A2 j (inord k))))) ->
+      is_finite (fprec Tsingle) (femax Tsingle) a = true /\
+      is_finite (fprec Tsingle) (femax Tsingle) b = true /\
+      (Rabs (FT2R a) <=
+       sqrt ((F'/2) / ((nr+1) * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re /\
+      (Rabs (FT2R b) <=
+       sqrt ((F'/2) / ((nr+1) * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re))->
+  let S_hat := -f (inv_A1 *f A2) in 
+  (matrix_inf_norm (FT2R_mat S_hat - Sm) <= E_2)%Re.
+Proof.
+intros. apply /RleP. unfold Sm, S_hat.  
+rewrite FT2R_mat_opp.
++ rewrite /S_mat matrix_inf_norm_opp_opp /E_2. 
+  apply: mat_mat_err_bnd_holds. apply H. admit.
++ intros.
+  pose proof forward_error_dot_aux. rewrite !mxE.
+  remember (combine (vec_to_list_float n.+1 (\row_j inv_A1 x j)^T)
+                      (vec_to_list_float n.+1 (\col_j A2 j y))) as L.
+  specialize (H1 L).
+  assert (length L = n.+1).
+  { rewrite HeqL combine_length. rewrite !length_veclist. lia. }
+  rewrite H2 in H1.
+  assert ((1 < n.+1)%coq_nat). { destruct H. apply H. }
+  assert ((n.+1 < (Z.to_nat (Z.pow_pos 2 23) - 1)%coq_nat)%coq_nat).
+  { destruct H. apply H4. } specialize (H1 H3 H4).
+  rewrite HeqL in H1. apply H1. intros.
+  specialize (H0 (nat_of_ord x) (nat_of_ord y) n n n).
+  assert (((nat_of_ord x) < n.+1)%nat /\ ((nat_of_ord y) < n.+1)%nat).
+  { split; try by []. } specialize (H0 H6 a b inv_A1 A2). 
+  assert (In (a, b)
+           (combine
+              (vec_to_list_float n.+1
+                 (\row_j inv_A1 (inord x) j)^T)
+              (vec_to_list_float n.+1
+                 (\col_j A2 j (inord y))))).
+  { rewrite !inord_val. apply H5. } specialize (H0 H7).
+  repeat split; try apply H0.
+  ++ apply Rle_trans with 
+         (sqrt ((F' / 2) /
+         ( (nr + 1) * (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+          ^ (n.+1 + 1)%coq_nat) -
+         / 2 *  bpow Zaux.radix2 (3 - femax Tsingle -  fprec Tsingle)))%Re.
+         -- apply H0.
+         -- apply sqrt_le_1_alt. apply Rplus_le_compat_r.
+            apply Rmult_le_compat_r.
+            ** apply Rlt_le, Rinv_0_lt_compat. apply Rmult_lt_0_compat.
+               +++ apply Rplus_lt_0_compat. unfold nr. apply lt_0_INR;lia. nra.
+               +++ apply pow_lt. simpl;nra.
+            ** unfold F',F_max;simpl;nra.
+   ++ apply Rle_trans with 
+         (sqrt ((F' / 2) /
+         ( (nr + 1) * (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+          ^ (n.+1 + 1)%coq_nat) -
+         / 2 *  bpow Zaux.radix2 (3 - femax Tsingle -  fprec Tsingle)))%Re.
+         -- apply H0.
+         -- apply sqrt_le_1_alt. apply Rplus_le_compat_r.
+            apply Rmult_le_compat_r.
+            ** apply Rlt_le, Rinv_0_lt_compat. apply Rmult_lt_0_compat.
+               +++ apply Rplus_lt_0_compat. unfold nr. apply lt_0_INR;lia. nra.
+               +++ apply pow_lt. simpl;nra.
+            ** unfold F',F_max;simpl;nra.
+Admitted.
+ 
 
 
 (** not entirely in correct form. need to connect A, A1^{-1}. A2 **)
@@ -1628,7 +1743,18 @@ induction k.
                    remember (mat_vec_mult_err_bnd S_hat (X_m_generic k x0_f b_f inv_A1 A2)) as E3_m.
                    apply Rle_trans with 
                    (@tau_m n k.+1 x (fun m:nat=> (X_m_generic m x0_f b_f inv_A1 A2)) inv_A1 A1 A2 b_f).
-                   --- admit.
+                   --- assert ((matrix_inf_norm (FT2R_mat S_hat - Sm) <= E_2)%Re).
+                       { 
+
+
+
+
+
+
+
+
+
+ admit.
                    --- by rewrite Rmult_1_r; apply tau_bounds_tau_m.
     * simpl. 
       assert (S_mat (FT2R_mat inv_A1) (FT2R_mat A2) *m xkf +
@@ -1659,6 +1785,7 @@ induction k.
                    apply matrix_norm_pd.
                +++ apply tau_rel.       
 Admitted.
+
 
 
 
