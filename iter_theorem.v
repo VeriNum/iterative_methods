@@ -1542,7 +1542,83 @@ rewrite FT2R_mat_opp.
                +++ apply pow_lt. simpl;nra.
             ** unfold F',F_max;simpl;nra.
 Qed.
- 
+
+(**(FT2R_mat (inv_A1 *f b_f) - FT2R_mat inv_A1 *m b_real) **)
+
+
+Lemma vec_norm_f_hat_bounds {n:nat}:
+  forall (inv_A1: 'M[ftype Tsingle]_n.+1) (b_f : 'cV[ftype Tsingle]_n.+1),
+  let b_real := FT2R_mat b_f in
+  let E_1 := mat_vec_mult_err_bnd inv_A1 b_f in
+  (1 < n.+1 /\ n.+1< (Z.to_nat (Z.pow_pos 2 23) - 1)%coq_nat)%coq_nat ->
+  let e := / 2 * Raux.bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle) in
+  let d := / 2 * Raux.bpow Zaux.radix2 (- fprec Tsingle + 1) in
+  let nr := INR n.+1 in 
+  (forall i k m n p :nat, (i < m.+1)%nat /\ (k < n.+1)%nat -> 
+    (forall (a b : ftype Tsingle) (A1: 'M[ftype Tsingle]_(m.+1, n.+1))
+            (A2: 'M[ftype Tsingle]_(n.+1, p.+1)),
+      In (a, b)
+        (combine (vec_to_list_float n.+1 (\row_j A1 (inord i) j)^T)
+           (vec_to_list_float n.+1 (\col_j (A2 j (inord k))))) ->
+      is_finite (fprec Tsingle) (femax Tsingle) a = true /\
+      is_finite (fprec Tsingle) (femax Tsingle) b = true /\
+      (Rabs (FT2R a) <=
+       sqrt ((F'/2) / ((nr+1) * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re /\
+      (Rabs (FT2R b) <=
+       sqrt ((F'/2) / ((nr+1) * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re))-> 
+  (vec_inf_norm (FT2R_mat (inv_A1 *f b_f) - FT2R_mat inv_A1 *m b_real) <= E_1)%Re.
+Proof.
+intros. apply /RleP. apply: mat_vec_err_bnd_holds.
++ apply H.
++ intros. specialize (H0 i 0%nat n n 0%nat).
+  assert ((i < n.+1)%nat /\ (0 < n.+1)%nat).
+  { split;try by []. } specialize (H0 H3 a b inv_A1 b_f).
+  assert (In (a, b)
+           (combine
+              (vec_to_list_float n.+1 (\row_j inv_A1 (inord i) j)^T)
+              (vec_to_list_float n.+1 (\col_j b_f j (inord 0))))).
+  { assert (b_f = (\col_j b_f j (inord 0))). 
+    { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+      assert (y = 0). { by apply ord1. } by rewrite H4 ord1.
+    } by rewrite -H4.
+  } specialize (H0 H4). 
+  destruct H0 as [H0fa [H0fb [Ha Hb]]].
+  repeat split; try by [].
+  - apply Rle_trans with 
+         (sqrt ((F' / 2) /
+         ( (nr + 1) * (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+          ^ (n.+1 + 1)%coq_nat) -
+         / 2 *  bpow Zaux.radix2 (3 - femax Tsingle -  fprec Tsingle)))%Re.
+         -- apply Ha.
+         -- apply sqrt_le_1_alt. apply Rplus_le_compat_r.
+            apply Rmult_le_compat_r.
+            ** apply Rlt_le, Rinv_0_lt_compat. apply Rmult_lt_0_compat.
+               +++ apply Rplus_lt_0_compat. unfold nr. apply lt_0_INR;lia. nra.
+               +++ apply pow_lt.  rewrite -RmultE. simpl;nra.
+            ** unfold F',F_max;simpl;nra.
+  - apply Rle_trans with 
+         (sqrt ((F' / 2) /
+         ( (nr + 1) * (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+          ^ (n.+1 + 1)%coq_nat) -
+         / 2 *  bpow Zaux.radix2 (3 - femax Tsingle -  fprec Tsingle)))%Re.
+         -- apply Hb.
+         -- apply sqrt_le_1_alt. apply Rplus_le_compat_r.
+            apply Rmult_le_compat_r.
+            ** apply Rlt_le, Rinv_0_lt_compat. apply Rmult_lt_0_compat.
+               +++ apply Rplus_lt_0_compat. unfold nr. apply lt_0_INR;lia. nra.
+               +++ apply pow_lt.  rewrite -RmultE. simpl;nra.
+            ** unfold F',F_max;simpl;nra.
+Qed.
+
+Lemma FT2R_list_eq :
+forall n l1 b, 
+FT2R (List.nth n l1 b) = List.nth n (FT2R_list l1) (FT2R b).
+Proof.
+intros.
+symmetry.
+apply map_nth.
+Qed.
+
 
 
 (** not entirely in correct form. need to connect A, A1^{-1}. A2 **)
@@ -1771,7 +1847,16 @@ induction k.
                    apply Rle_trans with 
                    (@tau_m n k.+1 x (fun m:nat=> (X_m_generic m x0_f b_f inv_A1 A2)) inv_A1 A1 A2 b_f).
                    --- assert ((matrix_inf_norm (FT2R_mat S_hat - Sm) <= E_2)%Re).
-                       { rewrite HeqE_2. apply mat_norm_S_hat_minus_S_bounds.
+                       { rewrite HeqE_2. rewrite HeqSm HeqS_hat. by apply mat_norm_S_hat_minus_S_bounds. }   
+                       assert ((vec_inf_norm (FT2R_mat (inv_A1 *f b_f) - FT2R_mat inv_A1 *m b_real) <= E_1)%Re).
+                       { rewrite HeqE_1. 
+                         assert (b_real = FT2R_mat b_f). 
+                         { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                           case: (nat_of_ord x1) => [ |m]; by rewrite FT2R_list_eq /=.
+                         }  rewrite H10.
+                         by apply vec_norm_f_hat_bounds.
+                       } 
+
 
 
 
