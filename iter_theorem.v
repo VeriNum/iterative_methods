@@ -1620,6 +1620,317 @@ apply map_nth.
 Qed.
 
 
+Lemma sum_dot_abs {n:nat} (m:nat) {ty} (le_n_m : (m <= n.+1)%nat) :
+  forall (v1 v2: 'cV[ftype ty]_n.+1),
+  let l1 := @vec_to_list_float _ n m v1 in 
+  let l2 := @vec_to_list_float _ n m v2 in 
+  let L := combine l1 l2 in
+  \sum_(j < m) (Rabs (FT2R (v1 (@widen_ord m n.+1 le_n_m j) 0)) * 
+                Rabs (FT2R (v2 (@widen_ord m n.+1 le_n_m j) 0))) = 
+  dot_prodR (Flist_to_Rlist_pair_abs L).
+Proof.
+intros.
+induction m.
++  rewrite big_ord0 //=. 
++ simpl. rewrite big_ord_recr //=.
+  assert (dot_prodR
+            ((Rabs (FT2R (v1 (inord m) ord0)),
+              Rabs (FT2R (v2 (inord m) ord0)))
+             :: Flist_to_Rlist_pair_abs
+                  (combine (vec_to_list_float m v1)
+                     (vec_to_list_float m v2))) = 
+          (Rabs (FT2R (v1 (inord m) ord0)) * 
+              Rabs (FT2R (v2 (inord m) ord0))) +
+          dot_prodR (Flist_to_Rlist_pair_abs
+                      (combine (vec_to_list_float m v1)
+                       (vec_to_list_float m v2)))).
+  { by unfold dot_prodR. } rewrite H. clear H.
+  assert (\sum_(i < m)
+             Rabs (FT2R (v1
+                  (widen_ord (m:=n.+1) le_n_m
+                     (widen_ord (m:=m.+1) (leqnSn m) i)) 0)) *
+               Rabs (FT2R
+                 (v2
+                    (widen_ord (m:=n.+1) le_n_m
+                       (widen_ord (m:=m.+1) (leqnSn m) i)) 0)) = 
+           dot_prodR
+            (Flist_to_Rlist_pair_abs
+               (combine (vec_to_list_float m v1)
+                  (vec_to_list_float m v2)))).
+  { unfold L in IHm.  
+    assert ((m <= n.+1)%nat). { by apply ltnW. }
+    specialize (IHm H). rewrite -IHm.
+    apply eq_big. by [].
+    intros. 
+    assert ((widen_ord (m:=n.+1) le_n_m
+                  (widen_ord (m:=m.+1) (leqnSn m) i))= 
+             (widen_ord (m:=n.+1) H i)).
+    { unfold widen_ord. 
+      apply val_inj. by simpl.
+    } by rewrite H1.
+  } rewrite H. rewrite addrC. 
+  assert ((widen_ord (m:=n.+1) le_n_m ord_max) = (inord m)).
+  { unfold widen_ord. 
+    apply val_inj. simpl. by rewrite inordK.
+  } by rewrite H0.
+Qed.
+
+
+Lemma sum_dot_abs_real {n:nat} (m:nat) (le_n_m : (m <= n.+1)%nat) :
+  forall (v1: 'cV[ftype Tsingle]_n.+1) (v2: 'cV[R]_n.+1),
+  let l1 := @vec_to_list_real n m (FT2R_mat v1) in 
+  let l2 := @vec_to_list_real n m v2 in 
+  let L := combine l1 l2 in
+  \sum_(j < m) (Rabs ((FT2R_mat v1 (@widen_ord m n.+1 le_n_m j) 0)) * 
+                Rabs ((v2 (@widen_ord m n.+1 le_n_m j) 0))) = 
+  dot_prodR (Rlist_pair_abs L).
+Proof.
+intros.
+induction m.
++  rewrite big_ord0 //=. 
++ simpl. rewrite big_ord_recr //=.
+  assert (dot_prodR
+            ((Rabs ((FT2R_mat v1 (inord m) ord0)),
+              Rabs ( (v2 (inord m) ord0)))
+             :: Rlist_pair_abs
+                  (combine (vec_to_list_real m (FT2R_mat v1))
+                     (vec_to_list_real m v2))) = 
+          (Rabs ((FT2R_mat v1 (inord m) ord0)) * 
+              Rabs ((v2 (inord m) ord0))) +
+          dot_prodR (Rlist_pair_abs
+                      (combine (vec_to_list_real m (FT2R_mat v1))
+                       (vec_to_list_real m v2)))).
+  { by unfold dot_prodR. } rewrite H. clear H.
+  assert (\sum_(i < m)
+             Rabs ((FT2R_mat v1
+                  (widen_ord (m:=n.+1) le_n_m
+                     (widen_ord (m:=m.+1) (leqnSn m) i)) 0)) *
+               Rabs (
+                 (v2
+                    (widen_ord (m:=n.+1) le_n_m
+                       (widen_ord (m:=m.+1) (leqnSn m) i)) 0)) = 
+           dot_prodR
+            (Rlist_pair_abs
+               (combine (vec_to_list_real m (FT2R_mat v1))
+                  (vec_to_list_real m v2)))).
+  { unfold L in IHm.  
+    assert ((m <= n.+1)%nat). { by apply ltnW. }
+    specialize (IHm H). rewrite -IHm.
+    apply eq_big. by [].
+    intros. 
+    assert ((widen_ord (m:=n.+1) le_n_m
+                  (widen_ord (m:=m.+1) (leqnSn m) i))= 
+             (widen_ord (m:=n.+1) H i)).
+    { unfold widen_ord. 
+      apply val_inj. by simpl.
+    } by rewrite H1.
+  } rewrite H. rewrite addrC. 
+  assert ((widen_ord (m:=n.+1) le_n_m ord_max) = (inord m)).
+  { unfold widen_ord. 
+    apply val_inj. simpl. by rewrite inordK.
+  } by rewrite H0.
+Qed.
+
+(*
+Lemma norm_elem_rel {n:nat}:
+  forall (i: 'I_n.+1) (v1 v2: 'cV[R]_n.+1),
+  v2 != 0 ->
+  (Rabs (v1 i ord0) <= Rabs (v2 i ord0) * (vec_inf_norm v1 / vec_inf_norm v2))%Re.
+Proof.
+intros. 
+assert (Rabs (v1 i ord0) = ((Rabs (v1 i ord0) * vec_inf_norm v2) */ vec_inf_norm v2)%Re).
+{ assert (((Rabs (v1 i ord0) * vec_inf_norm v2) */ vec_inf_norm v2)%Re = 
+          (Rabs (v1 i ord0) * (vec_inf_norm v2 */ vec_inf_norm v2))%Re).
+  { nra. } rewrite H0. rewrite Rinv_r. nra.
+  assert ((0 < vec_inf_norm v2)%Re -> vec_inf_norm v2 <> 0%Re).
+  { nra. } apply H1. by apply vec_norm_definite.
+} rewrite H0.
+assert (( Rabs (v2 i ord0) * (vec_inf_norm v1 / vec_inf_norm v2))%Re =
+        ((Rabs (v2 i ord0) * vec_inf_norm v1) * / vec_inf_norm v2)%Re).
+{ nra. } rewrite H1.
+apply Rmult_le_compat_r. 
++ apply Rlt_le, Rinv_0_lt_compat. by apply vec_norm_definite.
++ unfold vec_inf_norm. rewrite !RmultE.
+  rewrite -!bigmaxr_mulr.
+  - apply Rle_trans with 
+    ([seq (Rabs (v2 i ord0) * Rabs (v1 i0 0))%Ri
+      | i0 <- enum 'I_n.+1]`_(nat_of_ord i)).
+    * apply bigmax_le.
+
+*)
+
+
+
+
+
+
+
+Lemma vec_norm_S_hat_X_m_bounds {n:nat}:
+  forall (inv_A1 A2: 'M[ftype Tsingle]_n.+1) (x0_f b_f : 'cV[ftype Tsingle]_n.+1) 
+         (x : 'cV[R]_n.+1) (k:nat),
+  x != 0 ->
+  let b_real := FT2R_mat b_f in
+  let E_1 := mat_vec_mult_err_bnd inv_A1 b_f in
+  (1 < n.+1 /\ n.+1< (Z.to_nat (Z.pow_pos 2 23) - 1)%coq_nat)%coq_nat ->
+  let e := / 2 * Raux.bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle) in
+  let d := / 2 * Raux.bpow Zaux.radix2 (- fprec Tsingle + 1) in
+  let nr := INR n.+1 in 
+  (forall i k m n p :nat, (i < m.+1)%nat /\ (k < n.+1)%nat -> 
+    (forall (a b : ftype Tsingle) (A1: 'M[ftype Tsingle]_(m.+1, n.+1))
+            (A2: 'M[ftype Tsingle]_(n.+1, p.+1)),
+      In (a, b)
+        (combine (vec_to_list_float n.+1 (\row_j A1 (inord i) j)^T)
+           (vec_to_list_float n.+1 (\col_j (A2 j (inord k))))) ->
+      is_finite (fprec Tsingle) (femax Tsingle) a = true /\
+      is_finite (fprec Tsingle) (femax Tsingle) b = true /\
+      (Rabs (FT2R a) <=
+       sqrt ((F'/2) / ((nr+1) * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re /\
+      (Rabs (FT2R b) <=
+       sqrt ((F'/2) / ((nr+1) * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re))->
+  let S_hat := (-f (inv_A1 *f A2)) in
+  let E_3_def := E_3 k S_hat b_f (fun m: nat => X_m_generic m x0_f b_f inv_A1 A2) x in
+  (vec_inf_norm
+    (FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2) -
+     FT2R_mat S_hat *m FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2)) <= E_3_def)%Re.
+Proof.
+intros.
+apply Rle_trans with (mat_vec_mult_err_bnd S_hat  (X_m_generic k x0_f b_f inv_A1 A2)).
++ apply /RleP. apply: mat_vec_err_bnd_holds.
+  apply H0. intros. specialize (H1 i 0%nat n n 0%nat).
+  assert ((i < n.+1)%nat /\ (0 < n.+1)%nat).
+  { split;try by []. } 
+  specialize (H1 H4 a b S_hat (X_m_generic k x0_f b_f inv_A1 A2)).
+  assert (In (a, b)
+           (combine
+              (vec_to_list_float n.+1 (\row_j S_hat (inord i) j)^T)
+              (vec_to_list_float n.+1 (\col_j (X_m_generic k x0_f b_f inv_A1
+                A2) j (inord 0))))).
+  { assert ((X_m_generic k x0_f b_f inv_A1 A2) = 
+            (\col_j (X_m_generic k x0_f b_f inv_A1
+                A2) j (inord 0))). 
+    { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+      assert (y = 0). { by apply ord1. } by rewrite H5 ord1.
+    } by rewrite -H5.
+  } specialize (H1 H5). 
+  destruct H1 as [H1fa [H1fb [Ha Hb]]].
+  repeat split; try by [].
+  - apply Rle_trans with 
+         (sqrt ((F' / 2) /
+         ( (nr + 1) * (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+          ^ (n.+1 + 1)%coq_nat) -
+         / 2 *  bpow Zaux.radix2 (3 - femax Tsingle -  fprec Tsingle)))%Re.
+         -- apply Ha.
+         -- apply sqrt_le_1_alt. apply Rplus_le_compat_r.
+            apply Rmult_le_compat_r.
+            ** apply Rlt_le, Rinv_0_lt_compat. apply Rmult_lt_0_compat.
+               +++ apply Rplus_lt_0_compat. unfold nr. apply lt_0_INR;lia. nra.
+               +++ apply pow_lt.  rewrite -RmultE. simpl;nra.
+            ** unfold F',F_max;simpl;nra.
+  - apply Rle_trans with 
+         (sqrt ((F' / 2) /
+         ( (nr + 1) * (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))
+          ^ (n.+1 + 1)%coq_nat) -
+         / 2 *  bpow Zaux.radix2 (3 - femax Tsingle -  fprec Tsingle)))%Re.
+         -- apply Hb.
+         -- apply sqrt_le_1_alt. apply Rplus_le_compat_r.
+            apply Rmult_le_compat_r.
+            ** apply Rlt_le, Rinv_0_lt_compat. apply Rmult_lt_0_compat.
+               +++ apply Rplus_lt_0_compat. unfold nr. apply lt_0_INR;lia. nra.
+               +++ apply pow_lt.  rewrite -RmultE. simpl;nra.
+            ** unfold F',F_max;simpl;nra.
++ unfold mat_vec_mult_err_bnd, E_3_def, E_3. fold d e.
+  apply bigmax_le.
+  - by rewrite size_map size_enum_ord.
+  - intros. intros. rewrite seq_equiv. 
+    rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H2.
+    apply Rle_trans with 
+    (theta_x k
+     (fun m : nat =>
+      X_m_generic m x0_f b_f inv_A1 A2) x *
+       [seq e_i_real i k S_hat x
+            | i <- enum 'I_n.+1]`_i *
+       ((1 + d) ^ n.+1 - 1) +
+       INR n.+1 * e * (1 + d) ^ (n.+1 - 1)%coq_nat +
+       e * ((1 + d) ^ (n.+1 - 1)%coq_nat - 1) / d)%Re.
+    * rewrite seq_equiv. 
+      rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H2.
+      unfold e_i, e_i_real. fold d e.
+      repeat apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+      ++ apply Rge_le. apply Rge_minus. apply Rle_ge. apply pow_R1_Rle .
+         unfold d; rewrite -RmultE;simpl;nra.
+      ++ rewrite -sum_dot_abs. 
+         assert ((\row_j FT2R_mat S_hat (inord i) j)^T = 
+                 FT2R_mat (\row_j S_hat (inord i) j)^T).
+         { apply matrixP. unfold eqrel. intros. by rewrite !mxE. }
+         rewrite H3. rewrite -sum_dot_abs_real. rewrite big_distrr /=.
+         apply /RleP. apply big_sum_ge_ex_abstract. intros.
+         rewrite -!RmultE. 
+         assert (Rabs (FT2R
+                    ((\row_j S_hat (inord i) j)^T
+                       (widen_ord (m:=n.+1) (leqnn n.+1) i0) 0)) = 
+                 Rabs
+                  (FT2R_mat (\row_j S_hat (inord i) j)^T
+                     (widen_ord (m:=n.+1) (leqnn n.+1) i0) 0)).
+         { by rewrite !mxE. } rewrite H5.
+         assert ((theta_x k
+                   (fun m : nat => X_m_generic m x0_f b_f inv_A1 A2)
+                   x *
+                 (Rabs
+                    (FT2R_mat (\row_j S_hat (inord i) j)^T
+                       (widen_ord (m:=n.+1) (leqnn n.+1) i0) ord0) *
+                  Rabs (x (widen_ord (m:=n.+1) (leqnn n.+1) i0) ord0)))%Re =
+                 (Rabs
+                    (FT2R_mat (\row_j S_hat (inord i) j)^T
+                       (widen_ord (m:=n.+1) (leqnn n.+1) i0) ord0) * 
+                 (theta_x k
+                   (fun m : nat => X_m_generic m x0_f b_f inv_A1 A2)
+                   x * Rabs (x (widen_ord (m:=n.+1) (leqnn n.+1) i0) ord0)))%Re).
+         { nra. } rewrite H6. clear H6. apply Rmult_le_compat_l.
+         -- apply Rabs_pos.
+         -- unfold theta_x. rewrite Rmult_comm. rewrite RmultE.
+            rewrite -bigmaxr_mulr.
+            apply Rle_trans with
+            ([seq (Rabs
+                 (x (widen_ord (m:=n.+1) (leqnn n.+1) i0)
+                    ord0) *
+                     (vec_inf_norm
+                        (FT2R_mat
+                           (X_m_generic (nat_of_ord i1) x0_f b_f inv_A1 A2)) /
+                      vec_inf_norm x)%Re)%Ri
+                  | i1 <- enum 'I_k.+1]`_k).
+             ** rewrite seq_equiv. rewrite nth_mkseq; last by [].
+                rewrite -RmultE. 
+
+
+
+
+
+
+admit.
+             ** apply /RleP. 
+                apply (@bigmaxr_ler _ _ [seq (Rabs
+                             (x (widen_ord (m:=n.+1) (leqnn n.+1) i0)
+                                ord0) *
+                           (vec_inf_norm
+                              (FT2R_mat
+                                 (X_m_generic (nat_of_ord i1) x0_f b_f inv_A1 A2)) /
+                            vec_inf_norm x)%Re)%Ri
+                        | i1 <- enum 'I_k.+1] k).
+                by rewrite size_map size_enum_ord.
+             ** apply /RleP. apply Rabs_pos.
+    * repeat apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+      ++ apply Rge_le. apply Rge_minus. apply Rle_ge. apply pow_R1_Rle .
+         unfold d; rewrite -RmultE;simpl;nra.
+      ++ apply Rmult_le_compat_l. by apply theta_x_ge_0.
+         apply /RleP. 
+         apply (@bigmaxr_ler _ _ [seq e_i_real i k S_hat x
+                                    | i <- enum 'I_n.+1] i).
+         rewrite size_map size_enum_ord.
+         by rewrite size_map size_enum_ord in H2.
+Admitted.
+
+
+
 
 (** not entirely in correct form. need to connect A, A1^{-1}. A2 **)
 Theorem iterative_round_off_error {n:nat} :
