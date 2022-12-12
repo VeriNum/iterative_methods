@@ -54,20 +54,21 @@ Definition theta_x  {n:nat} (k:nat)
     sup
 **)
 
-(**
+
 Definition theta_x  {n:nat} (k:nat)
  (x_hat : nat ->'cV[ftype Tsingle]_n.+1) (x: 'cV[R]_n.+1) :=
  let s := [seq (vec_inf_norm (@FT2R_mat n 0%nat (x_hat (nat_of_ord i))) 
                 / vec_inf_norm x)%Re | i <- enum 'I_k.+1] in
  bigmaxr 0%Re s.
 
-**)
+(*
 Definition theta_x  {n:nat} (k:nat)
  (x_hat : nat ->'cV[ftype Tsingle]_n.+1) (x: 'cV[R]_n.+1) :=
- let s := [seq (bigmaxr 0%Re [seq (Rabs (FT2R ((x_hat (nat_of_ord i)) j ord0)) /
-                                   Rabs (x j ord0))%Re | j <- enum 'I_n.+1])
-           | i <- enum 'I_k.+1] in
+ let s := [seq (bigmaxr 0%Re [seq (Rabs (FT2R (x_hat (nat_of_ord i) j ord0))/ 
+                                   Rabs (x j ord0))%Re | j <- enum 'I_n.+1 & (x j 0 != 0)])
+               |  i <- enum 'I_k.+1] in
  bigmaxr 0%Re s.
+*)        
 
 Print bigmaxr.
 
@@ -97,7 +98,15 @@ induction L.
   apply /RleP. apply IHL.
 Qed.
 
+Definition e_i_real {n:nat}  (i : 'I_n.+1) (k:nat)
+  (A : 'M[ftype Tsingle]_n.+1) :=
+  let A_real := FT2R_mat A in 
+  let l1 := vec_to_list_real n.+1 (\row_(j < n.+1) A_real i j)^T in
+  let l2 := vec_to_list_real n.+1 1 in
+  let L := combine l1 l2 in
+  dot_prodR (Rlist_pair_abs L).
 
+(*
 Definition e_i_real {n:nat}  (i : 'I_n.+1) (k:nat)
   (A : 'M[ftype Tsingle]_n.+1) (x: 'cV[R]_n.+1) :=
   let A_real := FT2R_mat A in 
@@ -105,6 +114,19 @@ Definition e_i_real {n:nat}  (i : 'I_n.+1) (k:nat)
   let l2 := vec_to_list_real n.+1 x in
   let L := combine l1 l2 in
   dot_prodR (Rlist_pair_abs L).
+*)
+
+Definition E_3 {n:nat} (k:nat) 
+  (A : 'M[ftype Tsingle]_n.+1) (b : 'cV[ftype Tsingle]_n.+1) 
+  (x_hat : nat -> 'cV[ftype Tsingle]_n.+1) (x : 'cV[R]_n.+1) :=
+  let e := / 2 * Raux.bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle) in
+  let d := / 2 * Raux.bpow Zaux.radix2 (- fprec Tsingle + 1) in
+  let nr := INR n.+1 in
+  ((theta_x k x_hat x) * vec_inf_norm x * bigmaxr 0%Re [seq (e_i_real i k A) | i <- enum 'I_n.+1]
+    * ((1 + d)^n.+1 -1) + nr * e * (1+d)^(n.+1 -1)%coq_nat + 
+   e * ((1+d)^(n.+1-1)%coq_nat -1) / d)%Re.
+
+(*
 
 Definition E_3 {n:nat} (k:nat) 
   (A : 'M[ftype Tsingle]_n.+1) (b : 'cV[ftype Tsingle]_n.+1) 
@@ -115,6 +137,7 @@ Definition E_3 {n:nat} (k:nat)
   ((theta_x k x_hat x) * bigmaxr 0%Re [seq (e_i_real i k A x) | i <- enum 'I_n.+1]
     * ((1 + d)^n.+1 -1) + nr * e * (1+d)^(n.+1 -1)%coq_nat + 
    e * ((1+d)^(n.+1-1)%coq_nat -1) / d)%Re.
+*)
 
 
 Definition tau {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
@@ -248,83 +271,21 @@ apply bigmax_le_0.
 Qed.
 
 
-Lemma tau_bounds_tau_m {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
-  (x_hat : nat ->'cV[ftype Tsingle]_n.+1)
-  (inv_A1 A1 A2 : 'M[ftype Tsingle]_n.+1)
-  (b : 'cV[ftype Tsingle]_n.+1) :
-  x != 0 ->
-  (tau_m  k x x_hat inv_A1 A1 A2 b <= tau k x x_hat inv_A1 A1 A2 b)%Re.
+Lemma Rinv_1_lt_contravar_1: forall (r1 r2:R),
+  (0 < r1)%Re -> (0 < r2)%Re ->
+  (r1 <= r2)%Re -> (/r2 <= /r1)%Re.
 Proof.
 intros.
-unfold tau_m, tau.
-apply Rplus_le_compat_r. 
-apply Rmult_le_compat_l.
-+ repeat apply Rplus_le_le_0_compat. 
-  - apply Rmult_le_pos.
-    * apply /RleP. apply matrix_norm_pd.
-    * rewrite -RmultE. simpl;nra.
-  - apply Rmult_le_pos.
-    * apply /RleP. apply mat_err_bnd_pd.
-    * rewrite -RmultE. simpl;nra.
-  - apply /RleP. apply mat_err_bnd_pd.
-+ unfold theta_x. apply pow_invert_2. 
-  - by apply vec_norm_definite.
-  - apply Rle_trans with 
-      ([seq bigmaxr 0%Re
-          [seq (Rabs (FT2R (x_hat (nat_of_ord i) j ord0)) /
-               Rabs (x j ord0))%Re
-             | j <- enum 'I_n.+1]
-      | i <- enum 'I_k.+1]`_k).
-    * assert ((vec_inf_norm (FT2R_mat (x_hat k)) /
-                vec_inf_norm x)%Re = 
-              ((/vec_inf_norm x) * (vec_inf_norm (FT2R_mat (x_hat k))))%Re).
-      { nra. } rewrite H0.
-      rewrite [in X in (_ * X <= _)%Re] /vec_inf_norm. rewrite RmultE.
-      rewrite -bigmaxr_mulr.
-      ++ apply bigmax_le.
-         -- by rewrite size_map size_enum_ord.
-         -- intros. rewrite [in X in (_ <= X)%Re]seq_equiv. 
-            rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H1.
-            apply Rle_trans with 
-            ([seq (Rabs (FT2R (x_hat (@inord k k) j ord0)) /
-                       Rabs (x j ord0))%Re
-                    | j <- enum 'I_n.+1]`_i).
-            ** rewrite !seq_equiv. rewrite !nth_mkseq. rewrite -RmultE.
-               rewrite Rmult_comm. rewrite !mxE. 
-               rewrite inordK. apply Rmult_le_compat_l.
-               apply Rabs_pos.
-
-
-
-
-
-apply Rle_trans with
-    ([seq (vec_inf_norm (FT2R_mat (x_hat (nat_of_ord i))) /
-        vec_inf_norm x)%Re
-      | i <- enum 'I_k.+1]`_k).
-    * rewrite seq_equiv. rewrite nth_mkseq; last by [].
-      rewrite inordK; last by []. nra.
-    * apply Rle_trans with 
-      ([seq bigmaxr 0%Re
-          [seq Rabs (FT2R (x_hat (nat_of_ord i) j ord0)) /
-               Rabs (x j ord0)
-             | j <- enum 'I_n.+1]
-      | i <- enum 'I_k.+1]`_k).
-      ++ rewrite 
-
-
-
- apply /RleP. 
-      apply (@bigmaxr_ler _ 0%Re 
-              [seq bigmaxr 0%Re
-                   [seq (Rabs (FT2R (x_hat (nat_of_ord i) j ord0)) /
-                         Rabs (x j ord0))%Re
-                      | j <- enum 'I_n.+1]
-               | i <- enum 'I_k.+1] k).
-      by rewrite size_map size_enum_ord.
+replace (/r1)%Re with (1 * /r1)%Re by nra.
+assert ((/ r2)%Re = ((/r2 * r1) * /r1)%Re).
+{ assert (((/r2 * r1) * /r1)%Re = (/r2 * (r1 * /r1))%Re).
+  { nra. } rewrite H2. by rewrite Rinv_r;nra.
+} rewrite H2. apply Rmult_le_compat_r.
++ apply Rlt_le, Rinv_0_lt_compat. nra.
++ assert (1%Re = (/r2 * r2)%Re).
+  { rewrite Rinv_l; nra. } rewrite H3. apply Rmult_le_compat_l.
+  apply Rlt_le, Rinv_0_lt_compat; nra. nra.
 Qed.
-
-
 
 
 Lemma tau_bounds_tau_m {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
@@ -497,7 +458,6 @@ apply (@bigmax_rel k (fun m:nat => (vec_inf_norm (FT2R_mat (x_hat m)) /
         vec_inf_norm x)%Re)).
 Qed.
 
-
 Lemma tau_rel {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
   (x_hat : nat ->'cV[ftype Tsingle]_n.+1)
   (inv_A1 A1 A2 : 'M[ftype Tsingle]_n.+1)
@@ -537,7 +497,71 @@ apply Rplus_le_compat.
          rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
          unfold e_i_real.  unfold dot_prodR. 
          apply sum_Rabs_pair_rel. 
-    * apply theta_eq. 
+    * (*apply theta_eq. *) apply /RleP. apply vec_norm_pd.
+    * apply theta_eq.
+  - nra.
+  - nra.
+  - unfold E_3. rewrite -!RmultE.
+    repeat apply Rplus_le_compat_r. 
+    repeat apply Rmult_le_compat_r.
+    * apply Rge_le. apply Rge_minus. apply Rle_ge.
+      apply pow_R1_Rle. simpl;nra.
+    * apply /RleP. apply bigmax_le_0.
+      ++ apply /RleP. apply Rle_refl.
+      ++ intros. rewrite seq_equiv. 
+         rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
+         unfold e_i_real.  unfold dot_prodR. 
+         apply sum_Rabs_pair_rel.   
+    * apply /RleP. apply vec_norm_pd.
+    * apply theta_eq.
+  - nra.
+  - nra.
+  - nra.
+  - nra.
+Qed.
+
+
+(*
+Lemma tau_rel {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
+  (x_hat : nat ->'cV[ftype Tsingle]_n.+1)
+  (inv_A1 A1 A2 : 'M[ftype Tsingle]_n.+1)
+  (b : 'cV[ftype Tsingle]_n.+1):
+  (tau k x x_hat inv_A1 A1 A2 b <= tau k.+1 x x_hat inv_A1 A1 A2 b)%Re.
+Proof.
+unfold tau. 
+remember (/ 2 *
+   bpow Zaux.radix2 (- fprec Tsingle + 1)) as d.
+remember (/ 2 *
+  bpow Zaux.radix2
+    (3 - femax Tsingle - fprec Tsingle)) as e.
+apply Rplus_le_compat.
++ apply Rmult_le_compat_l.
+  - repeat apply Rplus_le_le_0_compat. 
+    * apply Rmult_le_pos.
+      ++ apply /RleP. apply matrix_norm_pd.
+      ++ rewrite Heqd. rewrite -RmultE. simpl;nra.
+    * apply Rmult_le_pos.
+      ++ apply /RleP. apply mat_err_bnd_pd.
+      ++ rewrite Heqd. rewrite -RmultE. simpl;nra.
+    * apply /RleP. apply mat_err_bnd_pd.
+  - apply Rmult_le_compat_r.
+    ++ apply /RleP. apply vec_norm_pd.
+    ++ apply theta_eq;nra.
++ repeat apply Rplus_le_compat.
+  apply Rmult_le_compat_r; try nra.
+  - rewrite Heqd. rewrite -RmultE. simpl;nra.
+  - unfold E_3. rewrite -!RmultE.
+    repeat apply Rplus_le_compat_r. 
+    repeat apply Rmult_le_compat_r.
+    * apply Rge_le. apply Rge_minus. apply Rle_ge.
+      apply pow_R1_Rle. simpl;nra.
+    * apply /RleP. apply bigmax_le_0.
+      ++ apply /RleP. apply Rle_refl.
+      ++ intros. rewrite seq_equiv. 
+         rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
+         unfold e_i_real.  unfold dot_prodR. 
+         apply sum_Rabs_pair_rel. 
+    * (*apply theta_eq. *) 
   - nra.
   - nra.
   - unfold E_3. rewrite -!RmultE.
@@ -558,6 +582,8 @@ apply Rplus_le_compat.
   - nra.
 Qed.
 
+*)
+
 Lemma E_3_err_bnd_pd {n:nat} (k:nat) 
   (A : 'M[ftype Tsingle]_n.+1) (b : 'cV[ftype Tsingle]_n.+1) 
   (x_hat : nat -> 'cV[ftype Tsingle]_n.+1) (x : 'cV[R]_n.+1):
@@ -572,8 +598,11 @@ repeat apply Rplus_le_le_0_compat.
   - apply /RleP. apply bigmax_le_0.
     * apply /RleP. apply Rle_refl.
     * intros. rewrite seq_equiv. rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H0.
-      unfold e_i_real. unfold dot_prodR.
-      apply sum_Rabs_pair_rel.
+      apply /RleP. apply Rabs_pos.
+  - apply /RleP. apply bigmax_le_0. apply /RleP. apply Rle_refl.
+    intros. rewrite seq_equiv. rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H0.
+    unfold e_i_real. unfold dot_prodR.
+    apply sum_Rabs_pair_rel. 
   - apply Rge_le. apply Rge_minus. apply Rle_ge.
          apply pow_R1_Rle. rewrite -RmultE.  simpl; nra.
 + repeat apply Rmult_le_pos.
