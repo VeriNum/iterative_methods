@@ -2409,8 +2409,20 @@ induction k.
                        { assert ((vec_inf_norm
                                    (FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2)) <=
                                  vec_inf_norm (FT2R_mat S_hat *m FT2R_mat
-                                                     (X_m_generic k x0_f b_f inv_A1  A2)))%Re).
-                         {
+                                                     (X_m_generic k x0_f b_f inv_A1  A2)) + E3)%Re).
+                         { move: H11 => /RleP H11. apply reverse_triang_ineq in H11. 
+                           move: H11 => /RleP H11. rewrite -RminusE in H11. nra.
+                         } eapply Rle_trans.
+                         + apply H14.
+                         + apply Rle_trans with
+                           ( matrix_inf_norm (FT2R_mat S_hat) * 
+                             vec_inf_norm (FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2)) + E3)%Re.
+                           - apply Rplus_le_compat_r. apply /RleP. rewrite RmultE.
+                             apply submult_prop.
+                           - apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+                             * apply /RleP. apply vec_norm_pd.
+                             * apply H13.
+                       } 
   
 
 
