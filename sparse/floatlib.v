@@ -73,6 +73,8 @@ Definition strict_float_eqv {t: type} (x y : ftype t) : Prop :=
     | _, _ => False
   end.
 
+Definition finite {t} (x: ftype t) := strict_float_eqv x x.
+
 Lemma strict_float_eqv_refl {t: type}: forall (x: ftype t),
  Binary.is_finite _ _ x = true -> strict_float_eqv x x.
 Proof.
