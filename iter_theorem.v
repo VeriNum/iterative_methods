@@ -1685,38 +1685,6 @@ induction m.
   } by rewrite H0.
 Qed.
 
-(*
-Lemma norm_elem_rel {n:nat}:
-  forall (i: 'I_n.+1) (v1 v2: 'cV[R]_n.+1),
-  v2 != 0 ->
-  (Rabs (v1 i ord0) <= Rabs (v2 i ord0) * (vec_inf_norm v1 / vec_inf_norm v2))%Re.
-Proof.
-intros. 
-assert (Rabs (v1 i ord0) = ((Rabs (v1 i ord0) * vec_inf_norm v2) */ vec_inf_norm v2)%Re).
-{ assert (((Rabs (v1 i ord0) * vec_inf_norm v2) */ vec_inf_norm v2)%Re = 
-          (Rabs (v1 i ord0) * (vec_inf_norm v2 */ vec_inf_norm v2))%Re).
-  { nra. } rewrite H0. rewrite Rinv_r. nra.
-  assert ((0 < vec_inf_norm v2)%Re -> vec_inf_norm v2 <> 0%Re).
-  { nra. } apply H1. by apply vec_norm_definite.
-} rewrite H0.
-assert (( Rabs (v2 i ord0) * (vec_inf_norm v1 / vec_inf_norm v2))%Re =
-        ((Rabs (v2 i ord0) * vec_inf_norm v1) * / vec_inf_norm v2)%Re).
-{ nra. } rewrite H1.
-apply Rmult_le_compat_r. 
-+ apply Rlt_le, Rinv_0_lt_compat. by apply vec_norm_definite.
-+ unfold vec_inf_norm. rewrite !RmultE.
-  rewrite -!bigmaxr_mulr.
-  - apply Rle_trans with 
-    ([seq (Rabs (v2 i ord0) * Rabs (v1 i0 0))%Ri
-      | i0 <- enum 'I_n.+1]`_(nat_of_ord i)).
-    * apply bigmax_le.
-
-*)
-
-
-
-
-
 
 
 Lemma vec_norm_S_hat_X_m_bounds {n:nat}:
