@@ -2423,6 +2423,25 @@ induction k.
                              * apply /RleP. apply vec_norm_pd.
                              * apply H13.
                        } 
+                       apply Rle_trans with
+                       (((((matrix_inf_norm Sm + E_2) *
+                           vec_inf_norm
+                             (FT2R_mat  (X_m_generic k x0_f b_f inv_A1 A2)) + E3) +
+                        (vec_inf_norm (FT2R_mat inv_A1 *m b_real) + E_1)) * d + e) +
+                       (E3 + E_2 * vec_inf_norm
+                                    (FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2)) + 
+                       E_1))%Re.
+                       *** apply Rplus_le_compat.
+                           ++++ apply Rplus_le_compat_r, Rmult_le_compat_r. 
+                                unfold d;rewrite -RmultE;simpl;nra. 
+                                by apply Rplus_le_compat; try apply H14; try nra.
+                           ++++ apply Rplus_le_compat.
+                                ---- apply Rplus_le_compat; try nra.
+                                     apply Rmult_le_compat_r.
+                                     **** apply /RleP. apply vec_norm_pd.
+                                     **** try nra.
+                                ---- try nra.
+                       *** 
   
 
 
