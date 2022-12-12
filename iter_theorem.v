@@ -2119,6 +2119,28 @@ apply Rle_trans with (mat_vec_mult_err_bnd S_hat  (X_m_generic k x0_f b_f inv_A1
              by rewrite size_map size_enum_ord in H2.
 Qed.  
 
+Lemma reverse_triang_mat_ineq:
+  forall n a b c, 
+  @matrix_inf_norm n.+1 (a - b) <= c -> 
+  @matrix_inf_norm n.+1 (a) - @matrix_inf_norm n.+1 (b) <= c.
+Proof.
+intros. apply /RleP. rewrite -RminusE.
+apply Rle_trans with (matrix_inf_norm (a - b)).
++ assert (forall x y z:R, (x  <= y + z)%Re -> (x  - y <= z)%Re).
+  { intros. nra. } apply H0.
+  apply Rle_trans with (matrix_inf_norm (b + (a - b))).
+  - assert (a = b + (a - b)).
+    { apply matrixP. unfold eqrel. intros. rewrite !mxE. 
+      rewrite -RplusE -RminusE.
+      assert ((b x y + (a x y - b x y))%Re = a x y).
+      { nra. } by rewrite H1.
+    } rewrite -H1. apply Rle_refl.
+  - apply /RleP. apply matrix_norm_add. 
++ by apply /RleP.
+Qed.
+
+
+
 
 (** not entirely in correct form. need to connect A, A1^{-1}. A2 **)
 Theorem iterative_round_off_error {n:nat} :
@@ -2202,8 +2224,12 @@ induction k.
         * apply /RleP. apply Rle_refl.
         * intros. rewrite seq_equiv. 
           rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H6.
-          unfold e_i_real. unfold dot_prodR.
-          apply sum_Rabs_pair_rel.
+          apply /RleP. apply Rabs_pos.
+    ++ apply /RleP. apply bigmax_le_0. apply /RleP. apply Rle_refl.
+       intros. rewrite seq_equiv. 
+       rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H6.
+       unfold e_i_real. unfold dot_prodR.
+       apply sum_Rabs_pair_rel.
     ++ apply Rge_le. apply Rge_minus. apply Rle_ge.
          apply pow_R1_Rle. rewrite -RmultE. simpl; nra.
   - repeat apply Rmult_le_pos.
@@ -2342,7 +2368,7 @@ induction k.
                    apply Rplus_le_compat_l. apply /RleP. apply submult_prop.
                +++ remember (mat_mat_mult_err_bnd inv_A1 A2) as E_2.
                    remember (mat_vec_mult_err_bnd inv_A1 b_f) as E_1.
-                   remember (mat_vec_mult_err_bnd S_hat (X_m_generic k x0_f b_f inv_A1 A2)) as E3_m.
+                   remember (E_3 k S_hat b_f (fun m: nat => X_m_generic m x0_f b_f inv_A1 A2) x) as E3.
                    apply Rle_trans with 
                    (@tau_m n k.+1 x (fun m:nat=> (X_m_generic m x0_f b_f inv_A1 A2)) inv_A1 A1 A2 b_f).
                    --- assert ((matrix_inf_norm (FT2R_mat S_hat - Sm) <= E_2)%Re).
@@ -2355,6 +2381,37 @@ induction k.
                          }  rewrite H10.
                          by apply vec_norm_f_hat_bounds.
                        } 
+                       assert ((vec_inf_norm
+                                  (FT2R_mat
+                                     (S_hat *f
+                                      X_m_generic k x0_f b_f inv_A1 A2) -
+                                   FT2R_mat S_hat *m 
+                                   FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2)) <= E3)%Re).
+                       { rewrite  HeqE3 HeqS_hat. by apply vec_norm_S_hat_X_m_bounds. }
+                       assert ((vec_inf_norm (FT2R_mat (inv_A1 *f b_f)) <= E_1 + 
+                                vec_inf_norm (FT2R_mat inv_A1 *m b_real))%Re).
+                       { assert (vec_inf_norm
+                                   (FT2R_mat (inv_A1 *f b_f) -
+                                    FT2R_mat inv_A1 *m b_real) <= E_1).
+                         { by apply /RleP. } apply reverse_triang_ineq in H12.
+                         move: H12 => /RleP H12. rewrite -RminusE in H12. nra.
+                       }
+                       assert ((matrix_inf_norm (FT2R_mat S_hat) <= matrix_inf_norm Sm + E_2)%Re).
+                       { move: H9 => /RleP H9. apply reverse_triang_mat_ineq in H9.
+                         move: H9 => /RleP H9. rewrite -RminusE in H9. nra.
+                       } 
+                       assert ((vec_inf_norm
+                                (FT2R_mat
+                                   (S_hat *f
+                                    X_m_generic k x0_f b_f inv_A1 A2)) <=
+                                (matrix_inf_norm Sm + E_2) *
+                                vec_inf_norm (FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2)) + E3)%Re).
+                       { assert ((vec_inf_norm
+                                   (FT2R_mat (S_hat *f X_m_generic k x0_f b_f inv_A1 A2)) <=
+                                 vec_inf_norm (FT2R_mat S_hat *m FT2R_mat
+                                                     (X_m_generic k x0_f b_f inv_A1  A2)))%Re).
+                         {
+  
 
 
 
