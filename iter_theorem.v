@@ -43,12 +43,6 @@ Definition FT2R_list (l : list (ftype Tsingle)) : list R :=  map FT2R l.
 
 (** Define theta_x **)
 
-(*
-Definition theta_x  {n:nat} (k:nat)
- (x_hat : nat ->'cV[ftype Tsingle]_n.+1) (x: 'cV[R]_n.+1):=
- let s:= [seq (INR (nat_of_ord i)) | i <- enum 'I_k] in
- sup [set x | x \in s].
-*)
 
 (** Since, we have a finite set, I can just use bigmaxr instead of
     sup
@@ -60,17 +54,6 @@ Definition theta_x  {n:nat} (k:nat)
  let s := [seq (vec_inf_norm (@FT2R_mat n 0%nat (x_hat (nat_of_ord i))) 
                 / vec_inf_norm x)%Re | i <- enum 'I_k.+1] in
  bigmaxr 0%Re s.
-
-(*
-Definition theta_x  {n:nat} (k:nat)
- (x_hat : nat ->'cV[ftype Tsingle]_n.+1) (x: 'cV[R]_n.+1) :=
- let s := [seq (bigmaxr 0%Re [seq (Rabs (FT2R (x_hat (nat_of_ord i) j ord0))/ 
-                                   Rabs (x j ord0))%Re | j <- enum 'I_n.+1 & (x j 0 != 0)])
-               |  i <- enum 'I_k.+1] in
- bigmaxr 0%Re s.
-*)        
-
-Print bigmaxr.
 
 
 (** Revising the bound E_3 **)
@@ -109,15 +92,6 @@ Definition e_i_real {n:nat}  (i : 'I_n.+1) (k:nat)
   let L := combine l1 l2 in
   dot_prodR (Rlist_pair_abs L).
 
-(*
-Definition e_i_real {n:nat}  (i : 'I_n.+1) (k:nat)
-  (A : 'M[ftype Tsingle]_n.+1) (x: 'cV[R]_n.+1) :=
-  let A_real := FT2R_mat A in 
-  let l1 := vec_to_list_real n.+1 (\row_(j < n.+1) A_real i j)^T in
-  let l2 := vec_to_list_real n.+1 x in
-  let L := combine l1 l2 in
-  dot_prodR (Rlist_pair_abs L).
-*)
 
 Definition E_3 {n:nat} (k:nat) 
   (A : 'M[ftype Tsingle]_n.+1) (b : 'cV[ftype Tsingle]_n.+1) 
@@ -128,19 +102,6 @@ Definition E_3 {n:nat} (k:nat)
   ((theta_x k x_hat x) * vec_inf_norm x * bigmaxr 0%Re [seq (e_i_real i k A) | i <- enum 'I_n.+1]
     * ((1 + d)^n.+1 -1) + nr * e * (1+d)^(n.+1 -1)%coq_nat + 
    e * ((1+d)^(n.+1-1)%coq_nat -1) / d)%Re.
-
-(*
-
-Definition E_3 {n:nat} (k:nat) 
-  (A : 'M[ftype Tsingle]_n.+1) (b : 'cV[ftype Tsingle]_n.+1) 
-  (x_hat : nat -> 'cV[ftype Tsingle]_n.+1) (x : 'cV[R]_n.+1) :=
-  let e := / 2 * Raux.bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle) in
-  let d := / 2 * Raux.bpow Zaux.radix2 (- fprec Tsingle + 1) in
-  let nr := INR n.+1 in
-  ((theta_x k x_hat x) * bigmaxr 0%Re [seq (e_i_real i k A x) | i <- enum 'I_n.+1]
-    * ((1 + d)^n.+1 -1) + nr * e * (1+d)^(n.+1 -1)%coq_nat + 
-   e * ((1+d)^(n.+1-1)%coq_nat -1) / d)%Re.
-*)
 
 
 Definition tau {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
@@ -157,23 +118,6 @@ Definition tau {n:nat} (k:nat) (x: 'cV[R]_n.+1)
   let E_3_def := E_3 k S_hat b x_hat x in 
   ((matrix_inf_norm S * d + E_2 * d + E_2) * ((theta_x k x_hat x) * vec_inf_norm x) + 
   (E_3_def * d + (vec_inf_norm f) * d + E_1* d + E_3_def + E_1 + e))%Re.
-
-(*
-Definition tau {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
-  (x_hat : nat ->'cV[ftype Tsingle]_n.+1)
-  (inv_A1 A1 A2 : 'M[ftype Tsingle]_n.+1)
-  (b : 'cV[ftype Tsingle]_n.+1):=
-  let e := / 2 * Raux.bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle) in
-  let d := / 2 * Raux.bpow Zaux.radix2 (- fprec Tsingle + 1) in
-  let S := - (FT2R_mat inv_A1) * (FT2R_mat A2) in 
-  let f := FT2R_mat (inv_A1) *m (FT2R_mat b) in
-  let E_1 := mat_vec_mult_err_bnd inv_A1 b in 
-  let E_2 := mat_mat_mult_err_bnd inv_A1 A2 in
-  let S_hat := (-f (inv_A1 *f A2)) in
-  let E_3 := mat_vec_mult_err_bnd S_hat (x_hat k) in
-  ((matrix_inf_norm S * d + E_2 * d + E_2) * ((theta_x k x_hat x) * vec_inf_norm x) + 
-  (E_3 * d + (vec_inf_norm f) * d + E_1* d + E_3 + E_1 + e))%Re.
-*)
 
 
 Definition tau_m {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
@@ -192,23 +136,6 @@ Definition tau_m {n:nat} (k:nat) (x: 'cV[R]_n.+1)
   (E_3_def * d + (vec_inf_norm f) * d + E_1* d + E_3_def + E_1 + e))%Re.
 
 
-(*
-Definition tau_m {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
-  (x_hat : nat ->'cV[ftype Tsingle]_n.+1)
-  (inv_A1 A1 A2 : 'M[ftype Tsingle]_n.+1)
-  (b : 'cV[ftype Tsingle]_n.+1):=
-  let e := / 2 * Raux.bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle) in
-  let d := / 2 * Raux.bpow Zaux.radix2 (- fprec Tsingle + 1) in
-  let S := - (FT2R_mat inv_A1) * (FT2R_mat A2) in 
-  let f := FT2R_mat (inv_A1) *m (FT2R_mat b) in
-  let E_1 := mat_vec_mult_err_bnd inv_A1 b in 
-  let E_2 := mat_mat_mult_err_bnd inv_A1 A2 in
-  let S_hat := (-f (inv_A1 *f A2)) in
-  let E_3 := mat_vec_mult_err_bnd S_hat (x_hat k) in
-  ((matrix_inf_norm S * d + E_2 * d + E_2) * vec_inf_norm (FT2R_mat (x_hat k)) + 
-  (E_3 * d + (vec_inf_norm f) * d + E_1* d + E_3 + E_1 + e))%Re.
-
-*)
 
 
 Lemma pow_invert_2: forall x y z :R,
@@ -522,70 +449,6 @@ apply Rplus_le_compat.
   - nra.
   - nra.
 Qed.
-
-
-(*
-Lemma tau_rel {n:nat} (k:nat) (x: 'cV[R]_n.+1) 
-  (x_hat : nat ->'cV[ftype Tsingle]_n.+1)
-  (inv_A1 A1 A2 : 'M[ftype Tsingle]_n.+1)
-  (b : 'cV[ftype Tsingle]_n.+1):
-  (tau k x x_hat inv_A1 A1 A2 b <= tau k.+1 x x_hat inv_A1 A1 A2 b)%Re.
-Proof.
-unfold tau. 
-remember (/ 2 *
-   bpow Zaux.radix2 (- fprec Tsingle + 1)) as d.
-remember (/ 2 *
-  bpow Zaux.radix2
-    (3 - femax Tsingle - fprec Tsingle)) as e.
-apply Rplus_le_compat.
-+ apply Rmult_le_compat_l.
-  - repeat apply Rplus_le_le_0_compat. 
-    * apply Rmult_le_pos.
-      ++ apply /RleP. apply matrix_norm_pd.
-      ++ rewrite Heqd. rewrite -RmultE. simpl;nra.
-    * apply Rmult_le_pos.
-      ++ apply /RleP. apply mat_err_bnd_pd.
-      ++ rewrite Heqd. rewrite -RmultE. simpl;nra.
-    * apply /RleP. apply mat_err_bnd_pd.
-  - apply Rmult_le_compat_r.
-    ++ apply /RleP. apply vec_norm_pd.
-    ++ apply theta_eq;nra.
-+ repeat apply Rplus_le_compat.
-  apply Rmult_le_compat_r; try nra.
-  - rewrite Heqd. rewrite -RmultE. simpl;nra.
-  - unfold E_3. rewrite -!RmultE.
-    repeat apply Rplus_le_compat_r. 
-    repeat apply Rmult_le_compat_r.
-    * apply Rge_le. apply Rge_minus. apply Rle_ge.
-      apply pow_R1_Rle. simpl;nra.
-    * apply /RleP. apply bigmax_le_0.
-      ++ apply /RleP. apply Rle_refl.
-      ++ intros. rewrite seq_equiv. 
-         rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
-         unfold e_i_real.  unfold dot_prodR. 
-         apply sum_Rabs_pair_rel. 
-    * (*apply theta_eq. *) 
-  - nra.
-  - nra.
-  - unfold E_3. rewrite -!RmultE.
-    repeat apply Rplus_le_compat_r. 
-    repeat apply Rmult_le_compat_r.
-    * apply Rge_le. apply Rge_minus. apply Rle_ge.
-      apply pow_R1_Rle. simpl;nra.
-    * apply /RleP. apply bigmax_le_0.
-      ++ apply /RleP. apply Rle_refl.
-      ++ intros. rewrite seq_equiv. 
-         rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
-         unfold e_i_real.  unfold dot_prodR. 
-         apply sum_Rabs_pair_rel. 
-    * apply theta_eq.
-  - nra.
-  - nra.
-  - nra.
-  - nra.
-Qed.
-
-*)
 
 Lemma E_3_err_bnd_pd {n:nat} (k:nat) 
   (A : 'M[ftype Tsingle]_n.+1) (b : 'cV[ftype Tsingle]_n.+1) 
@@ -1492,36 +1355,6 @@ apply add_vec_float_le.
                                        lia.
 Qed.
 
-                   
-
-
-(** lemma for bound on ||\hat x_m|| **)
-(*vec_inf_norm
-                    (FT2R_mat
-                       (X_m_generic k x0_f b_f inv_A1 A2))
-*)(*
-Lemma x_m_hat_bound {n:nat}:
-  forall (A A1 A2 inv_A1: 'M[ftype Tsingle]_n.+1) 
-  (x0_f b_f: 'cV[ftype Tsingle]_n.+1),
-  let x := invmx (FT2R_mat A) *m (FT2R_mat b_f) in
-  x != 0 ->
-  let Sm:= (@matrix_inf_norm n.+1 (S_mat (FT2R_mat inv_A1) (FT2R_mat A2))) in
-  (exists K:R, vec_inf_norm ((FT2R_mat x0_f) - x) <= K) -> 
-  exists K:R,  
-  forall k:nat,
-  (vec_inf_norm  (FT2R_mat (X_m_generic k x0_f b_f inv_A1 A2)) <=
-  (vec_inf_norm x + Sm^k * K))%Re.
-Proof.
-move=> A A1 A2 inv_A1 x0_f b_f x Hf Sm [K H].
-exists K.
-intros.
-induction k.
-+ simpl.
-  apply (@reverse_triang_ineq n (FT2R_mat x0_f) x K) in H.
-  assert ((vec_inf_norm (FT2R_mat x0_f) - vec_inf_norm x <= K)%Re).
-  { by apply /RleP. } nra.
-+ simpl.
-*)
 
 
 Lemma FT2R_mat_opp {m n:nat}:
@@ -2370,7 +2203,7 @@ induction k.
                    remember (mat_vec_mult_err_bnd inv_A1 b_f) as E_1.
                    remember (E_3 k S_hat b_f (fun m: nat => X_m_generic m x0_f b_f inv_A1 A2) x) as E3.
                    apply Rle_trans with 
-                   (@tau_m n k.+1 x (fun m:nat=> (X_m_generic m x0_f b_f inv_A1 A2)) inv_A1 A1 A2 b_f).
+                   (@tau_m n k x (fun m:nat=> (X_m_generic m x0_f b_f inv_A1 A2)) inv_A1 A1 A2 b_f).
                    --- assert ((matrix_inf_norm (FT2R_mat S_hat - Sm) <= E_2)%Re).
                        { rewrite HeqE_2. rewrite HeqSm HeqS_hat. by apply mat_norm_S_hat_minus_S_bounds. }   
                        assert ((vec_inf_norm (FT2R_mat (inv_A1 *f b_f) - FT2R_mat inv_A1 *m b_real) <= E_1)%Re).
@@ -2441,20 +2274,40 @@ induction k.
                                      **** apply /RleP. apply vec_norm_pd.
                                      **** try nra.
                                 ---- try nra.
-                       *** 
-  
-
-
-
-
-
-
-
-
-
-
- admit.
-                   --- by rewrite Rmult_1_r; apply tau_bounds_tau_m.
+                       *** assert ((((matrix_inf_norm Sm + E_2) *
+                                      vec_inf_norm
+                                        (FT2R_mat
+                                           (X_m_generic k x0_f b_f inv_A1 A2)) +
+                                      E3 +
+                                      (vec_inf_norm (FT2R_mat inv_A1 *m b_real) +
+                                       E_1)) * d + e +
+                                     (E3 +
+                                      E_2 *
+                                      vec_inf_norm
+                                        (FT2R_mat
+                                           (X_m_generic k x0_f b_f inv_A1 A2)) +
+                                      E_1))%Re = 
+                                      ((matrix_inf_norm Sm * d + E_2 * d + E_2) * 
+                                      vec_inf_norm
+                                        (FT2R_mat
+                                           (X_m_generic k x0_f b_f inv_A1 A2)) + 
+                                      (E3 * d + vec_inf_norm (FT2R_mat inv_A1 *m b_real) * d + 
+                                        E_1*d + E3 + E_1 + e))%Re).
+                           { nra. } rewrite H15. clear H15. unfold tau_m.
+                           rewrite !RmultE. fold d e. rewrite -!RmultE.
+                           rewrite  -HeqE_2 -HeqE_1 -HeqS_hat -HeqE3 . 
+                           rewrite /S_mat in HeqSm. rewrite  !mulNr -HeqSm.
+                           assert (b_real = FT2R_mat b_f). 
+                           { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                             case: (nat_of_ord x1) => [ |m]; by rewrite FT2R_list_eq /=.
+                           } rewrite H15. nra. 
+                     --- apply Rle_trans with 
+                         (tau k x
+                           (fun m : nat =>
+                            X_m_generic m x0_f b_f inv_A1 A2) inv_A1
+                           A1 A2 b_f).
+                         *** by apply tau_bounds_tau_m.
+                         *** rewrite Rmult_1_r. apply tau_rel.
     * simpl. 
       assert (S_mat (FT2R_mat inv_A1) (FT2R_mat A2) *m xkf +
                 FT2R_mat inv_A1 *m b_real -
@@ -2483,7 +2336,7 @@ induction k.
                +++ apply /RleP. apply error_sum_ge_0.
                    apply matrix_norm_pd.
                +++ apply tau_rel.       
-Admitted.
+Qed.
 
 
 
