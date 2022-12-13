@@ -1,2 +1,30 @@
+VSTLIB=$(COQMF_COQLIB)/user-contrib/VSTlib
+INCLUDE=$(VSTLIB)/include
+CFLAGS= -I$(INCLUDE) -O2
+
 sparse.v: sparse.c
 	clightgen -flongdouble -normalize $< -o $@ 
+
+main.o: main.c parsparse.h
+	$(CC) $(CFLAGS) -c $<
+
+sparse.o: sparse.c sparse.h
+	$(CC) $(CFLAGS) -c $<
+
+parsplit.o: parsplit.c parsplit.h
+	$(CC) $(CFLAGS) -c $<
+
+parsparse.o: parsparse.c sparse.h parsplit.h
+	$(CC) $(CFLAGS) -c $<
+
+threads.o: $(VSTLIB)/src/threads.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+locks.o: $(VSTLIB)/src/locks.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+SC_atomics.o: $(VSTLIB)/src/SC_atomics.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+run: main.o sparse.o parsplit.o parsparse.o threads.o locks.o SC_atomics.o
+	$(CC) $(CFLAGS) $^ -o $@
