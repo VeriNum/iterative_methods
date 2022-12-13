@@ -88,9 +88,9 @@ int main (int argc, char **argv) {
   read_Abx(n,filename,A,b,x);
 
   jacobi_method(n,A,b,x,eps,max_it);
-  printf("\n");
+  printf("\n");a
   printf("solution x: \n");
-  for (int i = 0; i<2; i++) {printf("%.6f\n",x[i]);}
+  for (int i = 0; i < n; i++) {printf("%.6f\n",x[i]);}
 
   free(A);
   free(b);
