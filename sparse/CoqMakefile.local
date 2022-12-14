@@ -1,6 +1,6 @@
 VSTLIB=$(COQMF_COQLIB)/user-contrib/VSTlib
 INCLUDE=$(VSTLIB)/include
-CFLAGS= -I$(INCLUDE) -O2
+CFLAGS= -I$(INCLUDE) -O4
 
 sparse.v: sparse.c
 	clightgen -flongdouble -normalize $< -o $@ 
@@ -9,6 +9,9 @@ main.o: main.c parsparse.h
 	$(CC) $(CFLAGS) -c $<
 
 sparse.o: sparse.c sparse.h
+	$(CC) $(CFLAGS) -c $<
+
+jacobi.o: jacobi.c sparse.h
 	$(CC) $(CFLAGS) -c $<
 
 parsplit.o: parsplit.c parsplit.h
