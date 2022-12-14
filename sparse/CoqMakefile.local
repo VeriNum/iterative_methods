@@ -26,5 +26,8 @@ locks.o: $(VSTLIB)/src/locks.c
 SC_atomics.o: $(VSTLIB)/src/SC_atomics.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+test: example.o sparse.o parsplit.o parsparse.o threads.o locks.o SC_atomics.o
+	$(CC) $(CFLAGS) $^ -o $@
+
 run: main.o sparse.o parsplit.o parsparse.o threads.o locks.o SC_atomics.o
 	$(CC) $(CFLAGS) $^ -o $@
