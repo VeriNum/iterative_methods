@@ -25,12 +25,11 @@ endif
 
 run-clightgen: sparse.v
 
-include CoqMakefile.local
-
 clean:
 	rm -f CoqMakefile CoqMakefile.conf
 	rm -f sparse.v
 	rm -f *.vo *.vos *.vok *.glob
+	rm -f *.o run
 
 # This should be the last rule, to handle any targets not declared above
 %: invoke-coqmakefile

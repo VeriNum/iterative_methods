@@ -1,12 +1,6 @@
 #include <stdlib.h>
 #include <math.h>
-
-struct sparsevec {
-  unsigned *index;
-  double *val;
-  unsigned k;
-  unsigned n;
-};
+#include "sparse.h"
 
 void *surely_malloc(size_t n) {
   void *p = malloc(n);
@@ -73,20 +67,6 @@ double densedotprod(double *vec1, double *vec2, unsigned n) {
   return result;
 }
 
-
-/* Compressed Row Storage (CRS) representation of matrix,
-   see section 4.3.1 of 
-   "Templates for the Solution of Linear Systems: Building Blocks 
-    for Iterative Methods" by Richard Barrett et al., 
-    https://netlib.org/templates/templates.pdf
-*/
-struct crs_matrix {
-  double *val;
-  unsigned *col_ind;
-  unsigned *row_ptr;
-  unsigned rows, cols;
-};
-
 /* crs_matrix_vector_multiply(m,v,p)
       multiplies a sparse matrix m by a dense vector v,
       putting the result into the (already allocated) dense vector p
@@ -112,3 +92,16 @@ void crs_matrix_vector_multiply (struct crs_matrix *m, double *v, double *p) {
   }
 }
 
+/* Let D be a diagonal matrix, whose diagonal is represented
+   as the vector diag.  Let A be a matrix with number of rows equal
+   to dimension of D.  let m represent A.
+   Then diag_mult(diag,m) sets m to represent D*A */
+void diag_mult(double *diag, struct crs_matrix *m) {
+  unsigned i, rows=m->rows;
+  for (i=0; i<row; i++) {
+    unsigned k=m->row_ptr(i+1);
+    unsigned x = diag[i];
+    for (h=m->row_ptr(i); h<k; h++)
+      m->val[h] *= x;
+  }
+}
