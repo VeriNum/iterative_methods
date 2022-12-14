@@ -109,4 +109,74 @@ Fixpoint X_m_generic {ty} (m n: nat) x0 b (inv_A1 A2: 'M[ftype ty]_n.+1) :
   end.
 
 
+(** Functional model for Jacobi iteration **)
+Definition A1_inv_J {n:nat} (A: 'M[ftype Tsingle]_n.+1) : 'M[ftype Tsingle]_n.+1:=
+  \matrix_(i,j) 
+    (if (i==j :> nat) then (1 / (A i i))%F32 else 0%F32).
+
+
+
+Definition A2_J {n:nat} (A: 'M[ftype Tsingle]_n.+1): 
+  'M[ftype Tsingle]_n.+1 :=
+  \matrix_(i,j) 
+    if (i==j :> nat) then 0%F32 else A i j.
+
+
+
+Definition jacobi_iter {n:nat} x0 b (A: 'M[ftype Tsingle]_n.+1) : 
+  'cV[ftype Tsingle]_n.+1 :=
+   let S_J := (-f ((A1_inv_J A) *f (A2_J A))) in 
+   let f_J := ((A1_inv_J A) *f b) in 
+   (S_J *f x0 +f f_J).
+
+Fixpoint iter {A} (f : A -> A) (n:nat) (x:A) :=
+  match n with 
+  | O => x 
+  | S n' => iter f n' (f x)
+  end.
+
+
+Fixpoint X_m_Jacobi  {n:nat} m x0 b (A: 'M[ftype Tsingle]_n.+1) :
+  'cV[ftype Tsingle]_n.+1 :=
+  match m with 
+  | O => x0
+  | p.+1 => jacobi_iter (X_m_Jacobi p x0 b A) b A
+  end.
+
+(*
+Fixpoint X_m_Jacobi_1 (m n: nat) x0 b  (A: 'M[ftype Tsingle]_n.+1): 
+  'cV[ftype Tsingle]_n.+1 :=
+  match m with
+  | O => x0
+  | S p => let S_J := (-f ((A1_inv_J A) *f (A2_J A))) in 
+           let f_J := ((A1_inv_J A) *f b) in 
+           (S_J *f (X_m_Jacobi_1 p x0 b A)) +f f_J 
+  end.
+*)
+
+
+Lemma jacobi_equiv (m n: nat) x0 b  (A: 'M[ftype Tsingle]_n.+1):
+  jacobi_iter (X_m_Jacobi m x0 b A) b A =
+  X_m_Jacobi m (jacobi_iter x0 b A) b A.
+Proof.
+induction m.
++ by simpl.
++ simpl. by rewrite IHm.
+Qed.
+
+
+
+Lemma iter_check (m n: nat) x0 b  (A: 'M[ftype Tsingle]_n.+1):
+  X_m_Jacobi m x0 b A = 
+  iter (fun x0 => jacobi_iter x0 b A) m x0.
+Proof.
+elim: m x0 => [ |m IHm] x0.
++ by simpl.
++ simpl. specialize (IHm (jacobi_iter x0 b A)).
+  by rewrite -IHm jacobi_equiv. 
+Qed.
+  
+
+
+
 End WITHNANS.
