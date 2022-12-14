@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <sys/time.h>
 #include "parsplit.h"
 #include "sparse.h"
 #include "parsparse.h"
@@ -106,9 +107,15 @@ double *par_eigenvector(struct crs_matrix *m, unsigned iterations, unsigned T) {
 }
 
 
+double timediff(struct timeval *start, struct timeval *finish) {
+  return (finish->tv_sec-start->tv_sec)+
+    (((double)finish->tv_usec)-((double)start->tv_usec))/1000000.0;
+}
+
 int main (int argc, char **argv) {
   struct crs_matrix *m; double *v;
   unsigned N, D, K, T;
+  struct timeval start,finish,diff;
   if (argc!=5) {
    fprintf(stderr, "Usage: test N D K T\n\
    makes a random NxN matrix A with D nonzeros per row in addition\n\
@@ -123,6 +130,9 @@ int main (int argc, char **argv) {
   /*  dump_crs_matrix(m);
   printf("\n");
   print_crs_matrix(m); */
+  gettimeofday(&start,NULL);
   v=par_eigenvector(m,K,T);  
+  gettimeofday(&finish,NULL);
+  printf("Time: %f\n", timediff(&start,&finish));
   return 0;
 }
