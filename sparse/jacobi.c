@@ -11,16 +11,16 @@ void vector_add(double *x, double *y, double *r, unsigned N) {
 }
 
 /* jacobi_aux(y,b,x,N) 
-   adds vectors y+b and stores result into x;
+   subtracts vectors b-y and stores result into x;
    returns square of Euclidean distance from old x to new x. */
 double jacobi_aux (double *y, double *b, double *x, unsigned N) {
   unsigned i; double s=0.0;
   for (i=0; i<N; i++) {
     double yi = y[i];
-    double r = yi+b[i];
-    double d = x[i]-yi;
+    double r = b[i]-yi;
+    double d = x[i]-r;
     s = fma(d,d,s);
-    x[i]=d;
+    x[i]=r;
   }
   return s;
 }
@@ -28,6 +28,9 @@ double jacobi_aux (double *y, double *b, double *x, unsigned N) {
 /* vector A1 represents the diagonal of NxN matrix A.
    matrix A2 is A-A1.
    b and x are vectors of length N.
+   At start, x is initialized to some arbitraryish vector.
+   At finish, x is some vector that's within acc^2 Euclidean distance 
+   of (A x - b).
  */
 void jacobi(double *A1, struct crs_matrix *A2, double *b, double *x, double acc) {
   unsigned i, N=A2->rows;
@@ -59,8 +62,9 @@ void phase0 (struct jtask *p) {
   crs_matrix_vector_multiply(&p->A2,x,y);    
   for (i=0; i<N; i++) {
     double yi = y[i];
-    double r = yi+b[i];
-    double d = x[i+delta]-y[i];
+    double r = b[i]-yi;
+    double d = x[i+delta]-r;
+    y[i]=r;
     s = fma(d,d,s);
   }
   p->s=s;
