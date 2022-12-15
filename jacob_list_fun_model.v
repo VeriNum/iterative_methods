@@ -29,4 +29,24 @@ Definition matrix_matrix_mult {t: type} (m1 m2: matrix t) : matrix t :=
   map (fun col => matrix_vector_mult m1 col) m2.
 
 
-Check matrix_matrix_mult.
+Definition opp_matrix {t:type} (m: matrix t) : matrix t :=
+  map (fun row => map (fun x => BOPP t x) row) m.
+
+Definition vector_add {t:type} (v1 v2 : vector t) :=
+  map (fun s => BPLUS t (fst s) (snd s)) (List.combine v1 v2).
+
+
+Definition jacobi_iter {t: type} x0 b (A1 A2: matrix t) : vector t :=
+  let S_J :=  opp_matrix (matrix_matrix_mult A1 A2) in
+  let f_J := matrix_vector_mult A1 b in
+  vector_add (matrix_vector_mult S_J x0) f_J.
+  
+
+
+Fixpoint iter {A} (f : A -> A) (n:nat) (x:A) :=
+  match n with 
+  | O => x 
+  | S n' => iter f n' (f x)
+  end.
+
+
