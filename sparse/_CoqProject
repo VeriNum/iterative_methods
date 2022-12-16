@@ -1,4 +1,4 @@
--Q . Sparse
+-Q . sparse
 sparse.v
 spec_sparse.v
 verif_sparse.v

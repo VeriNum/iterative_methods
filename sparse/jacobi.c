@@ -13,11 +13,10 @@ void vector_add(double *x, double *y, double *r, unsigned N) {
 /* jacobi_aux(y,b,x,N) 
    subtracts vectors b-y and stores result into x;
    returns square of Euclidean distance from old x to new x. */
-double jacobi_aux (double *y, double *b, double *x, unsigned N) {
+double jacobi_aux (double *A1, double *y, double *b, double *x, unsigned N) {
   unsigned i; double s=0.0;
   for (i=0; i<N; i++) {
-    double yi = y[i];
-    double r = b[i]-yi;
+    double r = A1[i]*(b[i]-y[i]);
     double d = x[i]-r;
     s = fma(d,d,s);
     x[i]=r;
@@ -37,17 +36,16 @@ void jacobi(double *A1, struct crs_matrix *A2, double *b, double *x, double acc)
   double *y = (double *)surely_malloc(N*sizeof(double));
   double s;
   for (i=0; i<N; i++) A1[i] = 1.0/A1[i];
-  for (i=0; i<N; i++) b[i] *= A1[i];
-  diag_mult(A1,A2);
   do {
     crs_matrix_vector_multiply(A2,x,y);
-    s=jacobi_aux(y,b,x,N);
+    s=jacobi_aux(A1,y,b,x,N);
   } while (s>acc);
   free(y);
 }
 
 struct jtask {
   struct crs_matrix A2;
+  double *A1;
   double *b;
   double *x;
   double *y;
@@ -57,12 +55,11 @@ struct jtask {
 };
 
 void phase0 (struct jtask *p) {
-  double *b = p->b, *x = p->x, *y = p->y, s=0;
+  double *A1=p->A1, *b = p->b, *x = p->x, *y = p->y, s=0;
   unsigned i, delta=p->delta, N=p->A2.rows;
   crs_matrix_vector_multiply(&p->A2,x,y);    
   for (i=0; i<N; i++) {
-    double yi = y[i];
-    double r = b[i]-yi;
+    double r = A1[i]*(b[i]-y[i]);
     double d = x[i+delta]-r;
     y[i]=r;
     s = fma(d,d,s);
@@ -99,7 +96,6 @@ void par_jacobi(double *A1, struct crs_matrix *A2, double *b, double *x, double 
   struct task *tasks = make_tasks(T);
   double s;
   for (i=0; i<N; i++) A1[i] = 1.0/A1[i];
-  for (i=0; i<N; i++) b[i] *= A1[i];
   delta=0;
   for (t=0; t<T; t++) {
     struct jtask *p = jt+t; /* need this workaround for VST issue #613 */
@@ -109,6 +105,7 @@ void par_jacobi(double *A1, struct crs_matrix *A2, double *b, double *x, double 
     p->A2.row_ptr=A2->row_ptr+delta;
     p->A2.rows=delta_next-delta;
     p->A2.cols=A2->cols;
+    p->A1=A1;
     p->b=b;
     p->x=x;
     p->y=y+delta;

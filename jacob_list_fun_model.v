@@ -2,7 +2,6 @@ Require Import VST.floyd.proofauto.
 Require Import vcfloat.VCFloat.
 Require Import vcfloat.FPCompCert.
 
-
 Set Bullet Behavior "Strict Subproofs".
 
 Definition BFMA {NAN: Nans} {t: type} : forall (x y z: ftype t), ftype t :=
@@ -111,10 +110,31 @@ Lemma Zlength_diag_of_matrix: forall {t} (m: matrix t),
 Proof.
  intros.
  unfold matrix_cols, matrix_rows in *.
- assert (Forall (fun r => Z.le (Zlength m) (Zlength r)) m). {
-   forget (Zlength m) as a. induction H; constructor; auto; try list_solve. 
+ assert (Forall (fun r => Nat.le (length m) (length r)) m). {
+   rewrite Zlength_correct in H.
+   forget (length m) as a.
+   induction H; constructor; auto.
+   rewrite Zlength_correct in H. lia.
 } clear H.
-Admitted. 
+remember (length m) as n.
+rewrite !Zlength_correct.
+f_equal.
+revert m Heqn H0; 
+induction n; intros; destruct m; inv Heqn; rewrite diag_of_matrix_equation.
+reflexivity.
+inv H0.
+destruct l. inv H2.
+simpl in H2|-*.
+f_equal.
+rewrite IHn; clear IHn.
+apply map_length.
+symmetry; apply map_length.
+clear - H3.
+forget (length m) as k.
+induction H3; constructor.
+destruct x; simpl in *; try lia.
+apply IHForall.
+Qed.
 
 Lemma rows_matrix_of_diag: forall {t} (v: diagmatrix t),
    matrix_rows (matrix_of_diag v) = Zlength v.
@@ -140,7 +160,24 @@ Qed.
  
 Lemma Forall_diag_of_matrix {t}: forall (P: ftype t -> Prop) (m: matrix t),
  Forall (Forall P) m -> Forall P (diag_of_matrix m).
-Admitted.
+Proof.
+intros.
+remember (length m) as n.
+revert m Heqn H; induction n; destruct m; simpl; intros; inv Heqn;
+  rewrite diag_of_matrix_equation.
+constructor.
+inv H.
+destruct l; constructor; inv H2; auto.
+apply IHn.
+symmetry; apply map_length.
+clear - H3.
+induction H3.
+constructor.
+constructor; auto.
+clear - H.
+destruct x; simpl; auto.
+inv H; auto.
+Qed.
 
 Lemma remove_plus_diag: forall {t} (m: matrix t),
    matrix_cols m (matrix_rows m) ->
