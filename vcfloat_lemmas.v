@@ -9,7 +9,7 @@ From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify Float_notations
 Set Bullet Behavior "Strict Subproofs". 
 
 
-Require Import real_model float_model lemmas.
+From Iterative Require Import real_model float_model lemmas.
 
 Local Open Scope float32_scope.
 
@@ -78,7 +78,7 @@ Definition bmap_list : list varinfo :=
 Definition bmap : boundsmap :=
  ltac:(let z := compute_PTree (boundsmap_of_list bmap_list) in exact z).
 
-Import IntervalFlocq3.Tactic.
+Import Interval.Tactic.
 
 Open Scope R_scope.
 
@@ -170,7 +170,7 @@ destruct H.
   f_equal.
   f_equal.
   simpl; apply FT2R_list_eq.
-  assert (2%Re <> 0%Re -> 2 != 0). { intros. by apply /eqP. } apply H4; nra.
+  assert (2 <> 0 -> 2 != 0)%Re. { intros. by apply /eqP. } apply H4; nra.
 + destruct H.
   - rewrite H //=. rewrite !big_ord_recr //= !big_ord0 !add0r !mxE.
     assert (widen_ord (leqnSn 2) (widen_ord (leqnSn 1) ord_max) = 0).
@@ -190,7 +190,7 @@ destruct H.
   simpl; apply FT2R_list_eq.
   f_equal.
   simpl; apply FT2R_list_eq.
-  assert (2%Re <> 0%Re -> 2 != 0). { intros. by apply /eqP. } apply H4; nra.
+  assert (2 <> 0 -> 2 != 0)%Re. { intros. by apply /eqP. } apply H4; nra.
   - rewrite H //=.
     assert (nat_of_ord (@inord 2 2) = 2%N :> nat ). { by rewrite inordK. } rewrite H0.
     rewrite !big_ord_recr //= !big_ord0 !add0r !mxE.
@@ -209,7 +209,7 @@ destruct H.
   f_equal.
   f_equal.
   simpl; apply FT2R_list_eq.
-  assert (2%Re <> 0%Re -> 2 != 0). { intros. by apply /eqP. } apply H5; nra.
+  assert (2 <> 0 -> 2 != 0)%Re. { intros. by apply /eqP. } apply H5; nra.
 Qed.
 
 

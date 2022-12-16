@@ -1,1 +1,16 @@
--Q ../vcfloat/vcfloat vcfloat
+-Q . Iterative
+lemmas.v
+float_model.v
+real_model.v
+vcfloat_lemmas.v
+inf_norm_properties.v
+model_mat_lemmas.v
+local_float_error.v
+global_float_error.v
+
+sparse/sparse.v
+sparse/spec_sparse.v
+sparse/verif_sparse.v
+sparse/sparse_model.v
+sparse/floatlib.v
+

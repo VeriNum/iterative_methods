@@ -7,7 +7,7 @@ Import List ListNotations.
 
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
                             Float_notations Automate.
-Require Import dot_prod_defn.
+From Iterative Require Import dot_prod_defn.
 Set Bullet Behavior "Strict Subproofs". 
 
 Set Implicit Arguments.

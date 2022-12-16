@@ -8,7 +8,7 @@ From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify Float_notations
 Set Bullet Behavior "Strict Subproofs". 
 
 
-Require Import infinity_norm_properties error_real lemmas float_model vcfloat_lemmas.
+From Iterative Require Import infinity_norm_properties error_real lemmas float_model vcfloat_lemmas.
 
 Local Open Scope float32_scope.
 

@@ -9,15 +9,15 @@ From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify Float_notations
 Set Bullet Behavior "Strict Subproofs". 
 
 
-Require Import inf_norm_properties local_float_error real_model float_model.
-Require Import model_mat_lemmas lemmas vcfloat_lemmas.
+From Iterative Require Import inf_norm_properties local_float_error real_model float_model.
+From Iterative Require Import model_mat_lemmas lemmas vcfloat_lemmas.
 
 Local Open Scope float32_scope.
 
 Section WITHNANS.
 Context {NANS: Nans}.
 
-Import IntervalFlocq3.Tactic.
+Import Interval.Tactic.
 
 Set Implicit Arguments.
 Unset Strict Implicit.
@@ -186,7 +186,7 @@ eapply Rle_trans.
 eapply Rplus_le_compat_r.
 rewrite_scope.
 apply concrete_roundoff_k; try apply ltnW; auto.
-nra. 
+compute; lra.
 Qed.
 
 

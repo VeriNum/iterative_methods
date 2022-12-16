@@ -9,7 +9,7 @@ Import List ListNotations.
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify Float_notations Automate.
 Set Bullet Behavior "Strict Subproofs". 
 
-Require Import model_mat_lemmas real_model float_model inf_norm_properties lemmas vcfloat_lemmas.
+From Iterative Require Import model_mat_lemmas real_model float_model inf_norm_properties lemmas vcfloat_lemmas.
 
 Local Open Scope float32_scope.
 
@@ -17,7 +17,7 @@ Section WITHNANS.
 Context {NANS: Nans}.
 
 
-Import IntervalFlocq3.Tactic.
+Import Interval.Tactic.
 
 Open Scope R_scope.
 
@@ -30,7 +30,7 @@ Lemma prove_roundoff_bound_x1_aux:
 Proof.
 intros. 
 prove_roundoff_bound.
-- prove_rndval; unfold list_nth in *; interval. 
+- prove_rndval;  unfold list_nth in *; interval. 
 - prove_roundoff_bound2; unfold list_nth in *.
 simpl.
 match goal with |- context[ Rabs ?a <= _] => 
@@ -103,16 +103,15 @@ Delimit Scope R_scope with Re.
   it for reals **)
 Import Order.TTheory GRing.Theory Num.Def Num.Theory.
 
-
 (** define a vector of the elementwise floating point errors
 derived using VCFloat in the lemmas prove_roundoff_bound_x3_aux,
 prove_roundoff_bound_x2_aux, and prove_roundoff_bound_x1_aux *)
 Definition round_off_error :=  
-  vec_inf_norm (@listR_to_vecR 3%nat [9.04e-06; 1.5e-05; 9.0004e-06]).
+  vec_inf_norm (@listR_to_vecR 3%nat [9.04e-06; 1.5e-05; 9.0004e-06])%Re.
 
 Lemma Rabs_list_vecR (i : 'I_3):
-  Rabs (listR_to_vecR [:: 9.04e-6; 1.5e-5; 9.0004e-6] i 0) = 
-   listR_to_vecR [:: 9.04e-6; 1.5e-5; 9.0004e-6] i 0.
+  Rabs (listR_to_vecR [:: 9.04e-6; 1.5e-5; 9.0004e-6]%Re i 0) = 
+   listR_to_vecR [:: 9.04e-6; 1.5e-5; 9.0004e-6]%Re i 0.
 Proof.
 rewrite !mxE.
 case: (nat_of_ord i).
@@ -126,9 +125,9 @@ case: (nat_of_ord i).
 Qed.
 
 Lemma Rabs_list_cons:
-  [seq listR_to_vecR [:: 9.04e-6; 1.5e-5; 9.0004e-6] i 0
+  [seq listR_to_vecR [:: 9.04e-6; 1.5e-5; 9.0004e-6]%Re i 0
           | i <- enum 'I_3] = 
-          mkseq (fun i => nth 0 [:: 9.04e-6; 1.5e-5; 9.0004e-6] i) 3.
+          mkseq (fun i => nth 0 [:: 9.04e-6; 1.5e-5; 9.0004e-6]%Re i) 3.
 Proof.
 unfold mkseq. rewrite -val_enum_ord.
 rewrite -[in RHS]map_comp.
@@ -144,26 +143,26 @@ case: (nat_of_ord x).
 Qed.
 
 Lemma round_off_error_bound :
-round_off_error = 1.5e-5.
+round_off_error = 1.5e-5%Re.
 Proof.
 rewrite /round_off_error /vec_inf_norm.
 assert ([seq Rabs
              (listR_to_vecR
-                [:: 9.04e-6; 1.5e-5; 9.0004e-6] i 0)
+                [:: 9.04e-6; 1.5e-5; 9.0004e-6]%Re i 0)
              | i <- enum 'I_3] = 
-          [seq (listR_to_vecR [:: 9.04e-6; 1.5e-5; 9.0004e-6] i 0) 
+          [seq (listR_to_vecR [:: 9.04e-6; 1.5e-5; 9.0004e-6]%Re i 0) 
             | i <- enum 'I_3]).
 { apply eq_map. unfold eqfun. intros. apply Rabs_list_vecR. }
 rewrite H. clear H.
-assert ([seq listR_to_vecR [:: 9.04e-6; 1.5e-5; 9.0004e-6] i 0
+assert ([seq listR_to_vecR [:: 9.04e-6; 1.5e-5; 9.0004e-6]%Re i 0
           | i <- enum 'I_3] = 
-          mkseq (fun i => nth 0 [:: 9.04e-6; 1.5e-5; 9.0004e-6] i) 3).
+          mkseq (fun i => nth 0 [:: 9.04e-6; 1.5e-5; 9.0004e-6]%Re i) 3).
 { apply Rabs_list_cons. }
 rewrite H.
 apply bigmaxrP.
 split.
 - unfold mkseq.
-  assert (1.5e-5 = (fun i => nth 0 [:: 9.04e-6; 1.5e-5; 9.0004e-6] i) 1%N).
+  assert (1.5e-5 = (fun i => nth 0 [:: 9.04e-6; 1.5e-5; 9.0004e-6] i) 1%N)%Re.
   { by simpl. } rewrite H0. rewrite inE //=. apply /orP.
   right. rewrite inE //=. apply /orP. by left.
 - intros. rewrite size_map in H0.
@@ -239,12 +238,12 @@ apply bigmax_le.
               (rval (env_ (varmap xb)) x3' - FT2R (fval (env_ (varmap xb)) x3'))]).
   { apply matrixP. unfold eqrel. intros. rewrite !mxE.
     case: (nat_of_ord x).
-    + rewrite /List.nth //=.
+    + rewrite /FT2R_list /map /List.nth //. 
     + intros. case: n. 
-      - rewrite /List.nth //=.
+      - rewrite /FT2R_list /map /List.nth //. 
       - destruct n.
-        * rewrite /List.nth //=.
-        * rewrite /List.nth //=.
+        * rewrite /FT2R_list /map /List.nth //. 
+        * rewrite /FT2R_list /map /List.nth //. 
           destruct n ; by rewrite subr0.
   } rewrite H1. clear H1. 
   assert ([seq Rabs
@@ -274,12 +273,12 @@ apply bigmax_le.
             | i0 <- enum 'I_3]).
   { apply eq_map. unfold eqfun. intros. rewrite !mxE.
     case: (nat_of_ord x).
-    + rewrite /List.nth //=.
+    + rewrite /FT2R_list /map /List.nth //. 
     + intros. case: n. 
-      - rewrite /List.nth //=.
+      - rewrite /FT2R_list /map /List.nth //. 
       - destruct n.
-        * rewrite /List.nth //=.
-        * rewrite /List.nth //=. destruct n; by apply Rabs_R0.
+        * rewrite /FT2R_list /map /List.nth //. 
+        * rewrite /FT2R_list /map /List.nth //. destruct n; by apply Rabs_R0.
   } rewrite H1. clear H1.
   assert ([seq listR_to_vecR
                 [:: Rabs
@@ -336,7 +335,7 @@ apply bigmax_le.
                         (rval (env_ (varmap xb)) x3' -
                          FT2R (fval (env_ (varmap xb)) x3'))]
                   (@inord 3 x) 0).
-    { by simpl. }
+    { reflexivity. }
     rewrite H1. clear H1. rewrite mxE.
     assert (nat_of_ord (@inord 3 x) = x :> nat).
     { rewrite inordK. 
@@ -365,7 +364,7 @@ apply bigmax_le.
                   (- (FT2R (fval (env_ (varmap xb)) x1')  
                           - rval (env_ (varmap xb)) x1'))%Re).
          { nra. } rewrite H2. clear H2. rewrite Rabs_Ropp.
-         apply Rle_trans with 9.04e-06.
+         apply Rle_trans with 9.04e-06%Re.
          -- by apply prove_roundoff_bound_x1.
          -- nra.
       ++ by [].
@@ -386,7 +385,7 @@ apply bigmax_le.
                   (- (FT2R (fval (env_ (varmap xb)) x3')  
                           - rval (env_ (varmap xb)) x3'))%Re).
              { nra. } rewrite H2. clear H2. rewrite Rabs_Ropp.
-             apply Rle_trans with 9.0004e-06.
+             apply Rle_trans with 9.0004e-06%Re.
              ** by apply prove_roundoff_bound_x3.
              ** nra.
          -- by [].
@@ -426,7 +425,7 @@ Theorem boundsmap_succ_step :
   (exists c, vec_inf_norm (@X_m_real (k.+1) len x0r br 1) <= c
     /\ exists a, 
     vec_inf_norm (@X_m_real (k.+1) len x0r br 1 - listR_to_vecR (FT2R_list (X_m (k.+1) x0 b_float 1%F32))) <= a
-    /\ a + c <= 100 ) ->   
+    /\ a + c <= 100%Re ) ->   
   boundsmap_denote bmap (varmap (X_m (k.+1) x0 b_float 1%F32)).
 Proof.
 intros ? ? ? BMD ? ? ? ? H.
@@ -435,7 +434,7 @@ apply boundsmap_denote_i.
 2: repeat apply list_forall_cons; try apply list_forall_nil; simpl; auto.
 set (h := 1%F32).
 assert
-(@vec_inf_norm len (listR_to_vecR (FT2R_list (X_m (k.+1) x0 b_float h))) <= 100).
+(@vec_inf_norm len (listR_to_vecR (FT2R_list (X_m (k.+1) x0 b_float h))) <= 100%Re).
 assert (Hyp1: forall n a b , @vec_inf_norm n (a - b) = @vec_inf_norm n (b- a)) .
 { intros. rewrite vec_inf_norm_opp. 
   assert (b - a0 = - (a0 - b)).
@@ -483,9 +482,9 @@ try apply FT2R_list_eq.
 replace (@List.nth R 2 (FT2R_list (X_m (k.+1) x0 b_float h)) 0)
   with (@FT2R Tsingle (list_nth 2 (X_m (k.+1) x0 b_float h))) in H6;
 try apply FT2R_list_eq.
-pose proof (Rabs_le_inv (@FT2R Tsingle (list_nth 0 (X_m (k.+1) x0 b_float h))) 100).
-pose proof (Rabs_le_inv (@FT2R Tsingle (list_nth 1 (X_m (k.+1) x0 b_float h))) 100).
-pose proof (Rabs_le_inv (@FT2R Tsingle (list_nth 2 (X_m (k.+1) x0 b_float h))) 100).
+pose proof (Rabs_le_inv (@FT2R Tsingle (list_nth 0 (X_m (k.+1) x0 b_float h))) 100%Re).
+pose proof (Rabs_le_inv (@FT2R Tsingle (list_nth 1 (X_m (k.+1) x0 b_float h))) 100%Re).
+pose proof (Rabs_le_inv (@FT2R Tsingle (list_nth 2 (X_m (k.+1) x0 b_float h))) 100%Re).
 repeat apply list_forall_cons; try apply list_forall_nil;
 (eexists; split; [|split;[|split]]; try reflexivity; auto;
   try unfold List.nth; try nra; auto).
@@ -529,7 +528,7 @@ Qed.
 Lemma concrete_roundoff_k : 
   forall k: nat,
   (k <= 100)%nat -> 
-  round_off_error * error_sum k.+2 (@matrix_inf_norm 3 (S_mat _ 1)) <= 0.0016.
+  round_off_error * error_sum k.+2 (@matrix_inf_norm 3 (S_mat _ 1)) <= 0.0016%Re.
 Proof.
 intros; rewrite_scope; eapply Rle_trans.
 apply Rmult_le_compat_l. try apply roundoff_pos.
@@ -539,8 +538,8 @@ apply matrix_norm_pd.
 apply S_mat_norm_lt_1; try nra.
 rewrite error_sum_1.
 unfold round_off_error.
-assert (@vec_inf_norm 3 (listR_to_vecR [:: 9.04e-6; 1.5e-5; 9.0004e-6]) =  1.5e-5).
-{ assert (round_off_error = 1.5e-5).
+assert (@vec_inf_norm 3 (listR_to_vecR [:: 9.04e-6; 1.5e-5; 9.0004e-6]) =  1.5e-5)%Re.
+{ assert (round_off_error = 1.5e-5)%Re.
   { apply round_off_error_bound. } by unfold round_off_error in H0.
 }
 rewrite H0.
@@ -706,7 +705,7 @@ eapply Rle_trans.
 eapply Rplus_le_compat_r.
 rewrite_scope.
 apply concrete_roundoff_k; try apply ltnW; auto.
-nra. 
+compute. lra.
 Qed.
 
 
