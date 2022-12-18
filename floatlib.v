@@ -1,7 +1,6 @@
 Require Import VST.floyd.proofauto.
 Require Import vcfloat.VCFloat.
 Require Import vcfloat.FPCompCert.
-Require Import VSTlib.spec_math.
 
 Set Bullet Behavior "Strict Subproofs".
 
