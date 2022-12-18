@@ -552,3 +552,6 @@ rewrite matrix_index_diag.
 unfold remove_diag, matrix_add.
 (* . . . and on and on . . . *)
 Abort.
+
+End Experiment.
+
