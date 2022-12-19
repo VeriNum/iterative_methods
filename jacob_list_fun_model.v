@@ -21,30 +21,11 @@ Definition matrix_vector_mult {t: type} (m: matrix t) (v: vector t) : vector t :
 Definition map2 {A B C: Type} (f: A -> B -> C) al bl :=
   map (uncurry f) (List.combine al bl).
 
-
-Function diag_of_matrix {t: type} (m: matrix t) {measure length m} : diagmatrix t :=
-  match m with
-  | (x::r)::m' => x :: diag_of_matrix (map (@tl (ftype t)) m')
-  | _ => nil
-  end.
-Proof. intros. subst. simpl. rewrite map_length. constructor. Qed.
-
-Arguments diag_of_matrix {t} m : rename.
-
-Fixpoint matrix_of_diag {t} (d: diagmatrix t) :=
- match d with
- | x::r => (x :: map (fun _ => Zconst t 0) r)::map (cons (Zconst t 0))(matrix_of_diag r)
- | nil => nil
- end.
-
 Definition opp_matrix {t:type} (m: matrix t) : matrix t :=
   map (map (BOPP t)) m.
 
 Definition matrix_add {t} : matrix t -> matrix t -> matrix t :=
   map2 (map2 (BPLUS t)).
-
-Definition remove_diag {t} (m: matrix t) : matrix t :=
- matrix_add m (opp_matrix (matrix_of_diag (diag_of_matrix m))).
 
 Definition diagmatrix_vector_mult {t}: diagmatrix t -> vector t -> vector t :=
   map2 (BMULT t).
@@ -66,6 +47,24 @@ Definition vector_add {t:type} (v1 v2 : vector t) :=
 Definition vector_sub {t:type} (v1 v2 : vector t) :=
   map2 (BMINUS t) v1 v2.
 
+Definition matrix_index {t} (m: matrix t) (i j: nat) :=
+ nth j (nth i m nil) (Zconst t 0).
+
+Definition matrix_by_index {t} (rows cols: nat) 
+          (f: nat -> nat -> ftype t) : matrix t :=
+     map (fun i => map (f i) (seq 0 cols)) (seq 0 rows).
+
+Definition diag_of_matrix {t: type} (m: matrix t) : diagmatrix t :=
+  map (fun i => matrix_index m i i) (seq 0 (matrix_rows m)).
+
+Definition remove_diag {t} (m: matrix t) : matrix t :=
+ matrix_by_index (matrix_rows m) (matrix_rows m)
+  (fun i j => if Nat.eq_dec i j then Zconst t 0 else matrix_index m i j).
+
+Definition matrix_of_diag {t} (d: diagmatrix t) : matrix t :=
+ matrix_by_index (length d) (length d)
+  (fun i j => if Nat.eq_dec i j then nth i d (Zconst t 0) else Zconst t 0).
+
 Definition jacobi_iter {t: type} (A1inv: diagmatrix t) (A2: matrix t) (b: vector t) (x: vector t) : vector t :=
    diagmatrix_vector_mult A1inv (vector_sub b (matrix_vector_mult A2 x)).
 
@@ -78,7 +77,7 @@ Fixpoint iter {A} (f : A -> A) (n:nat) (x:A) :=
 Definition jacobi {t: type} (A: matrix t) (b: vector t) (x: vector t) (n: nat) : vector t :=
    let A1 := diag_of_matrix  A in 
    let A1inv := invert_diagmatrix A1 in
-   let A2 := matrix_add A (opp_matrix (matrix_of_diag A1)) in
+   let A2 := remove_diag A in 
    iter (jacobi_iter A1inv A2 b) n x.
 
 Definition old_jacobi_iter {t: type} x0 b (A1: diagmatrix t) (A2: matrix t) : vector t :=
@@ -153,133 +152,6 @@ Add Parametric Relation {t: type}: (matrix t) (@matrix_eqv t)
   transitivity proved by matrix_eqv_trans
    as matrix_eqv_rel.
 
-Lemma Zlength_diag_of_matrix: forall {t} (m: matrix t),
-   matrix_cols m (matrix_rows m) ->
-   length (diag_of_matrix m) = matrix_rows m.
-Proof.
- intros.
- unfold matrix_cols, matrix_rows in *.
-remember (length m) as n.
-revert m Heqn H; 
-induction n; intros; destruct m; inv Heqn; rewrite diag_of_matrix_equation.
-reflexivity.
-inv H.
-destruct l. inv H2.
-simpl in H2|-*.
-f_equal.
-rewrite IHn; clear IHn; auto.
-symmetry; apply map_length.
-clear - H3.
-set (k := length m) in *; clearbody k.
-induction H3; constructor.
-destruct x; simpl in *; try lia.
-apply IHForall.
-Qed.
-
-Lemma rows_matrix_of_diag: forall {t} (v: diagmatrix t),
-   matrix_rows (matrix_of_diag v) = length v.
-Proof.
-induction v.
-reflexivity.
-unfold matrix_rows in *.
-simpl.
-rewrite map_length. f_equal; auto.
-Qed.
-
-Lemma cols_matrix_of_diag: forall {t} (v: diagmatrix t),
-   matrix_cols (matrix_of_diag v) (length v).
-Proof.
-induction v.
-constructor.
-constructor.
-simpl. f_equal. apply map_length.
-fold (matrix_of_diag v).
-induction IHv. constructor. constructor; auto.
-simpl; auto.
-Qed.
- 
-Lemma Forall_diag_of_matrix {t}: forall (P: ftype t -> Prop) (m: matrix t),
- Forall (Forall P) m -> Forall P (diag_of_matrix m).
-Proof.
-intros.
-remember (length m) as n.
-revert m Heqn H; induction n; destruct m; simpl; intros; inv Heqn;
-  rewrite diag_of_matrix_equation.
-constructor.
-inv H.
-destruct l; constructor; inv H2; auto.
-apply IHn.
-symmetry; apply map_length.
-clear - H3.
-induction H3.
-constructor.
-constructor; auto.
-clear - H.
-destruct x; simpl; auto.
-inv H; auto.
-Qed.
-
-Lemma BPLUS_BOPP_diag: 
-  forall {t} (x: ftype t), finite x -> BPLUS t x (BOPP t x) = Zconst t 0.
-Proof.
-intros.
-destruct x,s; inv H; try reflexivity;
-unfold BPLUS, BOPP, BINOP, Binary.Bplus, Binary.Bopp, Binary.BSN2B,
-   BinarySingleNaN.binary_normalize, BinarySingleNaN.binary_normalize,
-   BinarySingleNaN.binary_normalize; simpl;
- unfold BinarySingleNaN.binary_normalize, BinarySingleNaN.Fplus_naive,
-  SpecFloat.cond_Zopp;
-replace (_ + _) with 0 by lia; reflexivity.
-Qed.
-
-Lemma diag_of_matrix_of_diag:
-  forall {t} (d: diagmatrix t),
-  diag_of_matrix (matrix_of_diag d) = d.
-Proof.
-induction d; simpl; intros; rewrite diag_of_matrix_equation; auto.
-f_equal; auto.
-rewrite map_map. simpl.
-etransitivity; [ | apply IHd].
-f_equal.
-clear.
-induction (matrix_of_diag _).
-reflexivity.
-simpl.
-f_equal; auto.
-Qed.
-
-Definition matrix_index {t} (m: matrix t) (i j: nat) :=
- nth j (nth i m nil) (Zconst t 0).
-
-Open Scope nat.
-
-Lemma matrix_extensionality: 
-  forall {t} (m1 m2: matrix t) cols,
-  matrix_rows m1 = matrix_rows m2 ->
-  matrix_cols m1 cols -> matrix_cols m2 cols ->
-  (forall i j, i < matrix_rows m1 -> j < cols ->
-        float_eqv (matrix_index m1 i j) (matrix_index m2 i j)) ->
-  matrix_eqv m1 m2.
-Proof.
- unfold matrix_eqv.
- induction m1; destruct m2; simpl; intros; inv H; auto.
- inv H0. inv H1.
- constructor. 
- clear - H3 H2.
- specialize (H2 O).
- unfold matrix_index in H2. simpl in H2.
- revert l H3 H2; induction a; destruct l; simpl; intros; inv H3; auto.
- constructor.
- apply (H2 O); try lia.
- apply IHa; auto. intros j ? ?. apply (H2 (S j)); try lia.
- eapply IHm1; eauto.
- intros i j ? ?. apply (H2 (S i) j); lia.
-Qed.
-
-Definition matrix_by_index {t} (rows cols: nat) 
-          (f: nat -> nat -> ftype t) : matrix t :=
-     map (fun i => map (f i) (seq 0 cols)) (seq 0 rows).
-
 Lemma matrix_by_index_rows:
   forall {t} rows cols (f: nat -> nat -> ftype t),
   matrix_rows (matrix_by_index rows cols f) = rows.
@@ -288,6 +160,8 @@ intros.
 unfold matrix_by_index, matrix_rows.
 rewrite map_length. rewrite seq_length. auto.
 Qed.
+
+Local Open Scope nat.
 
 Lemma matrix_by_index_cols:
   forall {t} rows cols (f: nat -> nat -> ftype t),
@@ -328,6 +202,169 @@ Proof.
  unfold matrix_index, matrix_by_index.
  rewrite nth_map_seq; auto.
  rewrite nth_map_seq; auto.
+Qed.
+
+Lemma matrix_extensionality_strong: 
+  forall {t} (m1 m2: matrix t) cols,
+  matrix_rows m1 = matrix_rows m2 ->
+  matrix_cols m1 cols -> matrix_cols m2 cols ->
+  (forall i j, i < matrix_rows m1 -> j < cols ->
+        matrix_index m1 i j = matrix_index m2 i j) ->
+    m1 = m2.
+Proof.
+ induction m1; destruct m2; simpl; intros; inv H; auto.
+ inv H0. inv H1.
+ f_equal.
+ clear - H3 H2.
+ specialize (H2 O).
+ unfold matrix_index in H2. simpl in H2.
+ revert l H3 H2; induction a; destruct l; simpl; intros; inv H3; f_equal; auto.
+ apply (H2 O); try lia.
+ apply IHa; auto. intros j ? ?. apply (H2 (S j)); try lia.
+ eapply IHm1; eauto.
+ intros i j ? ?. apply (H2 (S i) j); lia.
+Qed.
+
+Lemma matrix_extensionality: 
+  forall {t} (m1 m2: matrix t) cols,
+  matrix_rows m1 = matrix_rows m2 ->
+  matrix_cols m1 cols -> matrix_cols m2 cols ->
+  (forall i j, i < matrix_rows m1 -> j < cols ->
+        float_eqv (matrix_index m1 i j) (matrix_index m2 i j)) ->
+  matrix_eqv m1 m2.
+Proof.
+ unfold matrix_eqv.
+ induction m1; destruct m2; simpl; intros; inv H; auto.
+ inv H0. inv H1.
+ constructor. 
+ clear - H3 H2.
+ specialize (H2 O).
+ unfold matrix_index in H2. simpl in H2.
+ revert l H3 H2; induction a; destruct l; simpl; intros; inv H3; auto.
+ constructor.
+ apply (H2 O); try lia.
+ apply IHa; auto. intros j ? ?. apply (H2 (S j)); try lia.
+ eapply IHm1; eauto.
+ intros i j ? ?. apply (H2 (S i) j); lia.
+Qed.
+
+Lemma length_diag_of_matrix: forall {t} (m: matrix t),
+   matrix_cols m (matrix_rows m) ->
+   length (diag_of_matrix m) = matrix_rows m.
+Proof.
+ intros.
+ unfold diag_of_matrix.
+ rewrite map_length. rewrite seq_length. auto.
+Qed.
+
+Lemma rows_matrix_of_diag: forall {t} (v: diagmatrix t),
+   matrix_rows (matrix_of_diag v) = length v.
+Proof.
+intros.
+unfold matrix_of_diag.
+apply matrix_by_index_rows.
+Qed.
+
+Lemma cols_matrix_of_diag: forall {t} (v: diagmatrix t),
+   matrix_cols (matrix_of_diag v) (length v).
+Proof.
+intros.
+unfold matrix_of_diag.
+apply matrix_by_index_cols.
+Qed.
+
+Lemma Forall_map: forall  {A B} (P: B -> Prop) (f: A -> B) (al: list A),
+  Forall (Basics.compose P f) al ->
+  Forall P (map f al).
+Proof.
+induction 1; constructor; auto.
+Qed.
+
+Lemma Forall_seq: forall (P: nat -> Prop) (lo n: nat),
+  (forall i, lo <= i < lo+n -> P i) ->
+  Forall P (seq lo n).
+Proof.
+intros.
+revert lo H; induction n; simpl; intros; constructor.
+apply H. lia.
+apply IHn; intros.
+apply H; lia.
+Qed.
+
+Lemma Forall_diag_of_matrix {t}: forall (P: ftype t -> Prop) (m: matrix t),
+ matrix_cols m (matrix_rows m) ->
+ Forall (Forall P) m -> Forall P (diag_of_matrix m).
+Proof.
+intros.
+apply Forall_map.
+apply Forall_seq.
+intros.
+red.
+red in H.
+unfold matrix_index.
+unfold matrix_rows in *.
+rewrite Forall_nth in H0.
+specialize (H0 i nil ltac:(lia)).
+rewrite Forall_nth in H0.
+apply (H0 i (Zconst t 0)).
+rewrite Forall_forall in H.
+specialize (H (nth i m nil)).
+rewrite H. lia.
+apply nth_In. lia.
+Qed.
+
+Lemma BPLUS_BOPP_diag: 
+  forall {t} (x: ftype t), finite x -> BPLUS t x (BOPP t x) = Zconst t 0.
+Proof.
+intros.
+destruct x,s; inv H; try reflexivity;
+unfold BPLUS, BOPP, BINOP, Binary.Bplus, Binary.Bopp, Binary.BSN2B,
+   BinarySingleNaN.binary_normalize, BinarySingleNaN.binary_normalize,
+   BinarySingleNaN.binary_normalize; simpl;
+ unfold BinarySingleNaN.binary_normalize, BinarySingleNaN.Fplus_naive,
+  SpecFloat.cond_Zopp;
+replace (_ + _)%Z with 0%Z by lia; reflexivity.
+Qed.
+
+Lemma all_nth_eq:
+ forall {A} d (al bl: list A),
+  length al = length bl ->
+  (forall i, i < length al -> nth i al d = nth i bl d) -> 
+  al=bl.
+Proof.
+induction al; destruct bl; simpl; intros; try discriminate; f_equal.
+apply (H0 0 ltac:(lia)).
+apply IHal.
+lia.
+intros.
+apply (H0 (S i)). lia.
+Qed.
+
+
+Lemma diag_of_matrix_of_diag:
+  forall {t} (d: diagmatrix t),
+  diag_of_matrix (matrix_of_diag d) = d.
+Proof.
+intros.
+unfold diag_of_matrix, matrix_of_diag.
+apply (all_nth_eq (Zconst t 0));
+rewrite map_length, seq_length, matrix_by_index_rows. auto.
+intros.
+set (f := fun _ => _).
+transitivity (nth i (map f (seq 0 (length d))) (f (length d))).
+f_equal. subst f. simpl.
+unfold matrix_by_index.
+unfold matrix_index.
+rewrite nth_overflow; auto.
+rewrite nth_overflow; auto.
+simpl; lia.
+rewrite map_length. rewrite seq_length. lia.
+rewrite map_nth.
+rewrite seq_nth by auto.
+simpl.
+subst f. simpl.
+rewrite matrix_by_index_index by auto.
+destruct (Nat.eq_dec i); try contradiction; auto.
 Qed.
 
 Lemma matrix_binop_by_index:
@@ -388,18 +425,21 @@ Lemma matrix_rows_remove_diag: forall {t} (m: matrix t),
   matrix_rows m = matrix_rows (remove_diag m).
 Proof.
  intros.
- unfold matrix_rows in *.
- unfold remove_diag.
- unfold matrix_add.
- unfold map2 at 1. rewrite map_length.
- rewrite combine_length.
- unfold opp_matrix.
- rewrite map_length.
- change (length (matrix_of_diag ?x)) with (matrix_rows (matrix_of_diag x)).
- rewrite rows_matrix_of_diag.
- rewrite Zlength_diag_of_matrix.
- unfold matrix_rows. lia.
- auto.
+ symmetry;
+ apply matrix_by_index_rows.
+Qed.
+
+Lemma matrix_rows_matrix_binop:
+ forall {t} (op: ftype t -> ftype t -> ftype t) (m1 m2: matrix t),
+ matrix_rows m1 = matrix_rows m2 ->
+ matrix_rows (map2 (map2 op) m1 m2) = matrix_rows m1.
+Proof.
+intros.
+unfold matrix_rows in *.
+unfold map2.
+rewrite map_length.
+rewrite combine_length.
+lia.
 Qed.
 
 Lemma matrix_cols_matrix_binop:
@@ -434,17 +474,12 @@ rewrite map_length. auto.
 apply IHForall.
 Qed.
 
-
 Lemma matrix_cols_remove_diag: forall {t} (m: matrix t),
     matrix_cols m (matrix_rows m) ->
   matrix_cols (remove_diag m) (matrix_rows m).
 Proof.
 intros.
-unfold remove_diag.
-apply matrix_cols_matrix_binop; auto.
-apply matrix_cols_matrix_unop; auto.
-rewrite <- Zlength_diag_of_matrix by auto.
-apply cols_matrix_of_diag.
+ apply matrix_by_index_cols.
 Qed.
 
 Lemma matrix_index_prop:
@@ -472,59 +507,38 @@ Qed.
 
 Lemma matrix_index_diag:
  forall {t} (d: diagmatrix t) i j,
+   i < length d -> j < length d ->
    matrix_index (matrix_of_diag d) i j =
     if (Nat.eq_dec i j) then nth i d (Zconst t 0) else Zconst t 0.
 Proof.
-unfold matrix_index.
-induction d; intros.
-destruct i,j; simpl; auto.
-destruct (Nat.eq_dec i j); auto.
-destruct i,j; simpl; auto.
--
-clear.
-revert j; induction d; destruct j; simpl; auto.
--
-clear.
-revert i; induction (matrix_of_diag d); destruct i; simpl; auto.
--
-transitivity (nth j (nth i (matrix_of_diag d) []) (Zconst t 0)).
-clear.
-revert i; induction (matrix_of_diag d); destruct i,j; simpl; auto.
-rewrite IHd.
-destruct (Nat.eq_dec i j); auto.
+intros.
+unfold matrix_of_diag.
+apply matrix_by_index_index; auto.
 Qed.
 
-Lemma matrix_index_diag':
- forall {t} (m: matrix t),
-    matrix_cols m (matrix_rows m) ->
-   forall i, 
-   matrix_index m i i = nth i (diag_of_matrix m) (Zconst t 0).
+Lemma binop_matrix_index:
+ forall {t} (f: ftype t -> ftype t -> ftype t)
+  (m1 m2: matrix t) cols,
+  matrix_rows m1 = matrix_rows m2 ->
+  matrix_cols m1 cols -> matrix_cols m2 cols ->
+  forall i j, i < matrix_rows m1 -> j < cols ->
+  matrix_index (map2 (map2 f) m1 m2) i j =
+  f (matrix_index m1 i j) (matrix_index m2 i j).
 Proof.
-intros.
-remember (matrix_rows m) as N.
-unfold matrix_index.
-revert m HeqN H i; induction N; destruct m,i; intros; inv HeqN; 
- simpl; rewrite diag_of_matrix_equation; simpl; auto.
-destruct l. auto.
-simpl. auto.
-destruct l; simpl; auto.
-inv H.
-inv H2.
-inv H.
-simpl in H2.
-erewrite  <- IHN; clear IHN.
-clear.
-replace (@nil (ftype t)) with (tl (@nil (ftype t))).
-rewrite map_nth.
-simpl.
-destruct (nth i m nil); auto.
-destruct i; auto.
-auto.
-unfold matrix_rows. rewrite map_length; auto.
-clear - H3.
-set (N := matrix_rows m) in *; clearbody N.
-induction H3; constructor. destruct x; inv H; auto.
-auto.
+unfold matrix_rows.
+induction m1; destruct m2; simpl; intros; inv H.
+simpl in H2. lia.
+inv H0.
+inv H1.
+destruct i.
+unfold matrix_index. simpl.
+unfold map2.
+clear - H3 H4.
+revert j H3 l H4; induction a; destruct l,j; simpl; intros; inv H4; auto.
+simpl in H3; lia. simpl in H3; lia.
+simpl in H3. apply IHa; auto. lia.
+apply (IHm1 m2 (length a)); auto.
+lia.
 Qed.
 
 Lemma remove_plus_diag: forall {t} (m: matrix t),
@@ -533,25 +547,57 @@ Lemma remove_plus_diag: forall {t} (m: matrix t),
    matrix_eqv (matrix_add  (matrix_of_diag (diag_of_matrix m)) (remove_diag m)) m.
 Proof.
 intros.
-unfold matrix_add.
-rewrite matrix_binop_by_index with (cols := matrix_rows m).
- 2: rewrite <- matrix_rows_remove_diag by auto;
-   rewrite rows_matrix_of_diag, Zlength_diag_of_matrix; auto.
-2: rewrite <- Zlength_diag_of_matrix by auto; 
-   apply cols_matrix_of_diag.
-2: apply matrix_cols_remove_diag; auto.
-rewrite rows_matrix_of_diag.
-rewrite Zlength_diag_of_matrix by auto.
 apply matrix_extensionality with (cols := matrix_rows m); auto.
-apply matrix_by_index_rows.
+unfold matrix_add.
+rewrite matrix_rows_matrix_binop.
+unfold matrix_of_diag.
+rewrite matrix_by_index_rows.
+apply length_diag_of_matrix; auto.
+unfold matrix_of_diag.
+rewrite matrix_by_index_rows.
+rewrite length_diag_of_matrix; auto.
+unfold remove_diag.
+rewrite matrix_by_index_rows; auto.
+apply matrix_cols_matrix_binop.
+replace (matrix_rows m) with (length (diag_of_matrix m)).
 apply matrix_by_index_cols.
-rewrite matrix_by_index_rows. 
+apply length_diag_of_matrix; auto.
+apply matrix_by_index_cols.
+unfold matrix_add at 1.
+rewrite matrix_rows_matrix_binop.
+2:{ unfold matrix_of_diag. rewrite matrix_by_index_rows.
+    unfold remove_diag.  rewrite matrix_by_index_rows.
+    apply length_diag_of_matrix; auto.
+}
+unfold matrix_of_diag at 1.
+rewrite matrix_by_index_rows; auto.
+rewrite length_diag_of_matrix; auto.
 intros.
-rewrite matrix_by_index_index by auto.
-rewrite matrix_index_diag.
-unfold remove_diag, matrix_add.
-(* . . . and on and on . . . *)
-Abort.
+unfold matrix_add.
+rewrite binop_matrix_index with (cols := matrix_rows m); auto.
+unfold matrix_of_diag, remove_diag.
+rewrite !matrix_by_index_index; auto.
+destruct (Nat.eq_dec i j).
+unfold diag_of_matrix.
+rewrite nth_map_seq; auto.
+subst j.
+apply BPLUS_0_r.
+eapply matrix_index_prop; eauto.
+apply BPLUS_0_l.
+eapply matrix_index_prop; eauto.
+rewrite length_diag_of_matrix; auto.
+rewrite length_diag_of_matrix; auto.
+unfold matrix_of_diag, remove_diag.
+rewrite !matrix_by_index_rows; auto.
+apply length_diag_of_matrix; auto.
+replace (matrix_rows m) with (length (diag_of_matrix m)).
+apply matrix_by_index_cols.
+apply length_diag_of_matrix; auto.
+apply matrix_by_index_cols.
+unfold matrix_of_diag.
+rewrite matrix_by_index_rows; auto.
+rewrite length_diag_of_matrix; auto.
+Qed.
 
 End Experiment.
 
