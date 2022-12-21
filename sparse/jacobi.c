@@ -31,15 +31,37 @@ double jacobi_aux (double *A1, double *y, double *b, double *x, unsigned N) {
    At finish, x is some vector that's within acc^2 Euclidean distance 
    of (A x - b).
  */
-void jacobi(double *A1, struct crs_matrix *A2, double *b, double *x, double acc) {
+void jacobi(double *A1, struct crs_matrix *A2, double *b, double *x, double acc, unsigned maxiter) {
   unsigned i, N=A2->rows;
   double *y = (double *)surely_malloc(N*sizeof(double));
   double s;
   for (i=0; i<N; i++) A1[i] = 1.0/A1[i];
   do {
+    if (maxiter-- == 0) break;
     crs_matrix_vector_multiply(A2,x,y);
     s=jacobi_aux(A1,y,b,x,N);
   } while (s>acc);
+  free(y);
+}
+
+void jacobi2(double *A1, struct crs_matrix *A2, double *b, double *x, double acc, unsigned maxiter) {
+  unsigned i, N=A2->rows;
+  double s, *t, *z=x, *y = (double *)surely_malloc(N*sizeof(double));
+  for (i=0; i<N; i++) A1[i] = 1.0/A1[i];
+  do {
+    if (maxiter-- == 0) break;
+    s = 0.0;
+    for (i=0; i<N; i++) {
+      double r = A1[i]*(b[i] - crs_row_vector_multiply(A2,z,i));
+      double d = y[i]-r;
+      s += d*d;
+      y[i] = d;
+    }
+    t=z; z=y; y=t;
+  } while (s>acc);
+  if (y!=x)
+    for (i=0; i<N; i++) x[i]=y[i];
+  else y=z;
   free(y);
 }
 
