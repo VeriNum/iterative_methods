@@ -44,19 +44,25 @@ void jacobi(double *A1, struct crs_matrix *A2, double *b, double *x, double acc,
   free(y);
 }
 
+double jacobi2_oneiter(double *A1inv, struct crs_matrix *A2, double *b, double *x, double *y) {
+  unsigned i, N=crs_matrix_rows(A2);
+  double s = 0.0;
+  for (i=0; i<N; i++) {
+      double r = A1inv[i]*(b[i] - crs_row_vector_multiply(A2,x,i));
+      double d = x[i]-r;
+      s = fma(d,d,s);
+      y[i] = r;
+    }
+  return s;
+}
+
 void jacobi2(double *A1, struct crs_matrix *A2, double *b, double *x, double acc, unsigned maxiter) {
   unsigned i, N=A2->rows;
   double s, *t, *z=x, *y = (double *)surely_malloc(N*sizeof(double));
   for (i=0; i<N; i++) A1[i] = 1.0/A1[i];
   do {
     if (maxiter-- == 0) break;
-    s = 0.0;
-    for (i=0; i<N; i++) {
-      double r = A1[i]*(b[i] - crs_row_vector_multiply(A2,z,i));
-      double d = y[i]-r;
-      s += d*d;
-      y[i] = d;
-    }
+    s = jacobi2_oneiter(A1,A2,b,z,y);
     t=z; z=y; y=t;
   } while (s>acc);
   if (y!=x)

@@ -23,7 +23,7 @@ endif
 ##                      Your targets here                         ##
 ####################################################################
 
-run-clightgen: sparse.v jacobi.v
+run-clightgen: sparse/sparse.v sparse/jacobi.v
 
 clean:
 	rm -f CoqMakefile CoqMakefile.conf
