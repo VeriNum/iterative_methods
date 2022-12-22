@@ -25,7 +25,7 @@ Proof.
       rewrite Zlength_combine.
       rewrite Zlength_map.
       rewrite Zlength_combine.
-      unfold jacob_list_fun_model.matrix_vector_mult.
+      unfold matrix_vector_mult.
       rewrite Zlength_map. unfold matrix_rows in *. lia.
 Qed.
 
@@ -78,8 +78,7 @@ Lemma Znth_jacobi_iter {t}:
 Proof.
 intros. unfold matrix_rows in *.
  unfold jacobi_iter, diagmatrix_vector_mult, vector_sub, map2,
-   jacob_list_fun_model.matrix_vector_mult.
-change jacob_list_fun_model.dotprod with (@dotprod t).
+   matrix_vector_mult.
   rewrite Znth_map.
 2:rewrite Zlength_combine, Zlength_map,
      Zlength_combine, Zlength_map; lia.
@@ -228,7 +227,7 @@ forward.
 pose (r := jacobi_iter A1 A2 b x).
 set (N := matrix_rows A2) in *.
 assert (0 <= N < Int.max_unsigned) by (unfold matrix_rows in N; rep_lia).
-clear H0 H1; rename H6 into H0.
+clear H0 H1; rename H5 into H0.
 assert_PROP (Zlength A1 = N /\ Zlength b = N /\ Zlength x = N).
   entailer!. rewrite Zlength_map in *. auto. 
 forward_for_simple_bound N
@@ -267,7 +266,7 @@ forward_for_simple_bound N
    forward.
    autorewrite with float_elim in *.
    pose proof (Zlength_jacobi_iter A1 A2 b x ltac:(lia) ltac:(lia) ltac:(lia)).
-   fold r in H10.
+   fold r in H9.
   change (Binary.Bfma _ _ _ _ _ _ ?x ?y ?z) with (BFMA x y z).
    Exists (y ++ [Znth i A1 * (Znth i b - y')]%F64).
    EExists.
@@ -285,7 +284,7 @@ forward_for_simple_bound N
      symmetry; eapply Znth_jacobi_iter; eauto; lia.
   *
     rewrite norm2_snoc.
-    clear - H8 H9 H5 H2 H3 H4 H H1 H6 H10 .
+    clear - H7 H8 H5 H2 H3 H4 H H1 H6 H9 .
     destruct H1 as [? [? ?]].
     rewrite Znth_vector_sub by lia.
     apply BFMA_xx_mor; auto.
@@ -294,28 +293,28 @@ forward_for_simple_bound N
    erewrite Znth_jacobi_iter; eauto.
  +
    apply derives_refl'; f_equal.
-   clear - H10 H6 H1 H0 H21.  list_solve.
+   clear - H9 H5 H1 H0 H20.  list_solve.
 -
  Intros y s. forward. Exists y s.
  rewrite Z.sub_diag, Zrepeat_0, app_nil_r.
  unfold crs_rep. Intros.
  entailer!.
  pose proof (Zlength_jacobi_iter A1 A2 b x ltac:(lia) ltac:(lia) ltac:(lia)).
- fold r in H22|-*. 
+ fold r in H21|-*. 
   set (N := matrix_rows A2) in *.
   assert (Zlength (vector_sub x r) = N). {
      unfold vector_sub, map2. rewrite Zlength_map, Zlength_combine. lia.
   } 
- rewrite sublist_same in H6,H7 by lia.
+ rewrite sublist_same in H6,H5 by lia.
  split; auto.
- rewrite H7.
+ rewrite H6.
  clearbody r. clearbody N.
  destruct H1 as [_ [_ ?]].
- clear - H22 H6 H5 H1.
+ clear - H21 H5 H4 H1.
  apply norm2_loose_congr.
  apply vector_sub_congr; auto.
+ clear - H4. induction H4; constructor; auto.
  clear - H5. induction H5; constructor; auto.
- clear - H6. induction H6; constructor; auto.
  symmetry; auto.
 Qed.
 
