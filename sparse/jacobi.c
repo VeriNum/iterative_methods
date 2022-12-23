@@ -56,19 +56,25 @@ double jacobi2_oneiter(double *A1inv, struct crs_matrix *A2, double *b, double *
   return s;
 }
 
-void jacobi2(double *A1, struct crs_matrix *A2, double *b, double *x, double acc, unsigned maxiter) {
-  unsigned i, N=A2->rows;
-  double s, *t, *z=x, *y = (double *)surely_malloc(N*sizeof(double));
-  for (i=0; i<N; i++) A1[i] = 1.0/A1[i];
+double jacobi2(double *A1, struct crs_matrix *A2, double *b, double *x, double acc, unsigned maxiter) {
+  unsigned i, N=crs_matrix_rows(A2);
+  double s=0.0,  /* need to initialize s just to keep the proof happy */
+     *t, *z=x, 
+    *y = (double *)surely_malloc(N*sizeof(double)),
+    *A1inv = (double *)surely_malloc(N*sizeof(double));
+  for (i=0; i<N; i++) A1inv[i] = 1.0/A1[i];
   do {
-    if (maxiter-- == 0) break;
-    s = jacobi2_oneiter(A1,A2,b,z,y);
+    s = jacobi2_oneiter(A1inv,A2,b,z,y);
     t=z; z=y; y=t;
-  } while (s>acc);
-  if (y!=x)
-    for (i=0; i<N; i++) x[i]=y[i];
-  else y=z;
+    maxiter--;
+  } while (s*0==0.0 && s>acc && maxiter);
+  if (z!=x) {
+    for (i=0; i<N; i++) x[i]=z[i];
+    y=z;
+  }
   free(y);
+  free (A1inv);
+  return s;
 }
 
 struct jtask {

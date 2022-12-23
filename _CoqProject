@@ -17,6 +17,7 @@ sparse/verif_sparse_byrows.v
 sparse/jacobi.v
 sparse/spec_jacobi.v
 sparse/verif_jacobi.v
+sparse/verif_jacobi2.v
 sparse/sparse_model.v
 
 
