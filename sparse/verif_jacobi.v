@@ -1,6 +1,6 @@
 Require Import VST.floyd.proofauto.
 From Iterative Require Import floatlib jacob_list_fun_model.
-From Iterative.sparse Require Import jacobi sparse_model spec_sparse spec_jacobi.
+From Iterative.sparse Require Import jacobi sparse_model spec_sparse spec_jacobi fun_model_lemmas.
 Require Import vcfloat.VCFloat.
 Require Import vcfloat.FPCompCert.
 Require Import VSTlib.spec_math.
@@ -36,7 +36,6 @@ forward_for_simple_bound N
    data_at shx (tarray tdouble N) (map Vfloat x) xp;
    data_at shy (tarray tdouble N) (map Vfloat y ++ Zrepeat Vundef (N-i)) yp))%assert.
 - Exists (@nil (ftype Tdouble)) (Zconst Tdouble 0). entailer!.
-   rewrite sublist_nil. constructor. simpl app.
    apply derives_refl.
 - forward_call (shA2,shx,shy, A2p, A2, xp, x, i).
    replace (Zlength x) with N by (clear - H1; lia).  cancel.

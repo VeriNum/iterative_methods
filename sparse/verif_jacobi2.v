@@ -1,6 +1,6 @@
 Require Import VST.floyd.proofauto.
 From Iterative Require Import floatlib jacob_list_fun_model.
-From Iterative.sparse Require Import jacobi sparse_model spec_sparse spec_jacobi.
+From Iterative.sparse Require Import jacobi sparse_model spec_sparse spec_jacobi fun_model_lemmas.
 Require Import vcfloat.VCFloat.
 Require Import vcfloat.FPCompCert.
 Require Import VSTlib.spec_math.
@@ -25,86 +25,6 @@ Definition surely_malloc_spec :=
        SEP (mem_mgr gv; malloc_token Ews t p * data_at_ Ews t p).
 
 Definition Gprog: funspecs := surely_malloc_spec :: JacobiASI ++ SparseASI ++ MathASI ++ MallocASI.
-
-Lemma matrix_by_index_prop:
- forall {t} (f: nat -> nat -> ftype t) (P: ftype t -> Prop) rows cols,
-  P (Zconst t 0) ->
-  (forall i j, (i < rows)%nat -> (j < cols)%nat -> P (f i j)) ->
-  Forall (Forall P) (matrix_by_index rows cols f).
-Proof.
-intros.
-unfold matrix_by_index.
-apply Forall_nth; intros.
-rewrite map_length, seq_length in H1.
-rewrite nth_map_seq by auto.
-apply Forall_nth; intros.
-rewrite map_length, seq_length in H2.
-rewrite nth_map_seq by auto.
-apply H0; auto.
-Qed.
-
-Lemma Zmatrix_cols_nat: 
- forall {t} (m: matrix t) cols,
-  matrix_cols_nat m cols  <-> matrix_cols m (Z.of_nat cols).
-Proof.
-induction m; simpl; intros; split; intro; inv H; constructor; auto.
-apply Zlength_correct.
-clear - H3.
-induction H3; constructor; auto. rewrite <- H; apply Zlength_correct.
-rewrite Zlength_correct in H2. lia.
-clear - H3.
-induction H3; constructor; auto. rewrite Zlength_correct in H; lia.
-Qed.
-
-Lemma Zlength_seq: forall lo n, Zlength (seq lo n) = Z.of_nat n.
-Proof.
-intros. rewrite Zlength_correct. f_equal. apply seq_length.
-Qed.
-#[export] Hint Rewrite Zlength_seq : sublist rep_lia.
-
-Lemma Zmatrix_rows_nat: forall {t} (m: matrix t), Z.of_nat (matrix_rows_nat m) = matrix_rows m.
-Proof.
-unfold matrix_rows.
-induction m; simpl; auto. list_solve.
-Qed.
-
-Lemma matrix_cols_remove_diag:
-  forall {t} (m: matrix t), matrix_cols m (matrix_rows m) ->
-    matrix_cols (remove_diag m) (matrix_rows m).
-Proof.
- unfold remove_diag. intros.
- rewrite <- Zmatrix_rows_nat.
- rewrite <- Zmatrix_cols_nat.
- apply matrix_by_index_cols.
-Qed.
-
-Lemma finite_remove_diag:
- forall {t} (m: matrix t),
-   matrix_cols m (matrix_rows m) ->
-   Forall (Forall finite) m ->
-   Forall (Forall finite) (remove_diag m).
-Proof.
-intros.
- apply matrix_by_index_prop.
- constructor.
- intros.
- if_tac. constructor.
- eapply matrix_index_prop; eauto.
- rewrite <- Zmatrix_rows_nat in H.
- rewrite <- Zmatrix_cols_nat in H.
- auto.
-Qed.
-
-Lemma matrix_rows_remove_diag: forall {t} (m: matrix t), 
-     matrix_rows (remove_diag m) = matrix_rows m.
-Proof.
-intros.
-rewrite <- !Zmatrix_rows_nat.
-f_equal.
-apply matrix_by_index_rows.
-Qed.
-
-#[export] Hint Rewrite @Zmatrix_rows_nat : sublist rep_lia.
 
 Definition first_loop : statement.
 let c := constr:(f_jacobi2) in
@@ -202,144 +122,6 @@ intros. unfold choose. rewrite Nat.odd_succ, <-Nat.negb_odd;
         destruct (Nat.odd n); auto.
 Qed.
 
-Lemma floatlist_eqv_refl {t}: forall (x: vector t), floatlist_eqv x x.
-Proof.
-induction x; constructor; auto.
-Qed.
-
-Lemma jacobi_iter_congr: 
- forall {t} A1 A2 (b: vector t) x x',
-  strict_floatlist_eqv x x' ->
-  Forall finite A1 ->
-  Forall (Forall finite) A2 ->
-  Forall finite b ->  
-   Zlength b = matrix_rows A2 ->
-   Zlength A1 = matrix_rows A2 ->
-   matrix_cols A2 (Zlength x) ->
-   floatlist_eqv (jacobi_iter A1 A2 b x) (jacobi_iter A1 A2 b x') .
-Proof.
-intros.
-unfold jacobi_iter.
-unfold diagmatrix_vector_mult.
-unfold map2.
-apply Forall2_map.
-rewrite <- Zmatrix_rows_nat in *.
-rewrite Zlength_correct in *.
-apply Zmatrix_cols_nat in H5.
-apply Nat2Z.inj in H3,H4.
-unfold matrix_rows_nat in *.
-revert A1 A2 H0 H1 H3 H4 H5; induction H2; 
-   destruct A1 as [|A1r A1]; destruct A2 as [|A2r A2]; intros;
-  try inv H0; try inv H1; try inv H3; try inv H4; constructor; auto;
-   inv H5; inv H6.
--
-unfold uncurry.
- apply BMULT_congr; auto.
- apply BMINUS_congr; auto.
- apply dotprod_congr; auto.
--
- apply IHForall; auto.
-Qed.
-
-Lemma floatlist_eqv_trans: forall {t} (x y z: list (ftype t)),
-  floatlist_eqv x y -> floatlist_eqv y z -> floatlist_eqv x z.
-Proof.
-induction x; destruct y,z; intros; inv H; inv  H0; constructor; auto.
-rewrite H4; auto.
-eapply IHx; eauto.
-Qed.
-
-Lemma strict_floatlist_eqv_i1: 
-   forall {t} (a b: list (ftype t)),
-    Forall finite a -> floatlist_eqv a b -> strict_floatlist_eqv a b.
-Proof.
-induction 2; inv H;constructor.
-apply strict_float_eqv_i1; auto.
-apply IHForall2; auto.
-Qed.
-
-Lemma finite_is_finite: forall {t} (x: ftype t),
-   finite x <-> Binary.is_finite _ _ x = true.
-Proof.
-split; intros;
-destruct x; inv H; try reflexivity.
-constructor; auto.
-Qed.
-
-Lemma float_eqv_strict_float_eqv:
- forall {t} (x y: ftype t),
-   finite x -> float_eqv x y -> strict_float_eqv x y.
-Proof.
- intros.
- destruct x; inv H; destruct y; inv H0; constructor; auto.
-Qed.
-
-Lemma strict_float_eqv_finite1:
-  forall {t} (x y: ftype t),
-    strict_float_eqv x y -> finite x.
-Proof.
-intros.
-destruct x,y; inv H; constructor; auto.
-Qed.
-
-Lemma finite_dotprod_e: forall {t} (x y: vector t),
-  Zlength x = Zlength y ->
-  finite (dotprod x y) -> Forall finite x /\ Forall finite y.
-Proof.
-intros.
-rewrite !Zlength_correct in H. apply Nat2Z.inj in H.
-unfold dotprod in H0.
-rewrite <- fold_left_rev_right in H0.
-rewrite rev_combine in H0 by auto.
-rewrite <- (rev_length x), <- (rev_length y) in H.
-assert (Forall finite (rev x) /\ Forall finite (rev y)).
-2:rewrite <- (rev_involutive x), <- (rev_involutive y);
-   destruct H1; split; apply Forall_rev; auto.
-forget (rev x) as a; forget (rev y) as b.
-revert b H H0; induction a; destruct b; intros; inv H.
-split; constructor.
-specialize (IHa _ H2).
-simpl in H0.
-set (u := fold_right _ _ _) in *. clearbody u.
-assert (finite a /\ finite f /\ finite u); [ | split; constructor; tauto].
-clear - H0.
-apply finite_is_finite in H0.
-destruct a,f,u; inv H0; try solve [split3; constructor; auto].
-destruct s,s0,s1; inv H1.
-destruct s,s0,s1; inv H1.
-destruct s,s0,s1; inv H1.
-Qed.
-
-
-Lemma finite_norm2_e: forall {t} (x: vector t),
-  finite (norm2 x) -> Forall finite x.
-Proof.
-intros.
-apply finite_dotprod_e in H; auto.
-destruct H; auto.
-Qed.
-
-Lemma finite_norm2_sub: 
-  forall {t} s (x y: vector t), 
-  Zlength x = Zlength y ->
-  finite s -> 
-  float_eqv s (norm2 (vector_sub x y)) ->
-  Forall finite y.
-Proof.
-  intros.
-   apply float_eqv_strict_float_eqv in H1; auto.
-   apply strict_float_eqv_sym in H1.
-   apply strict_float_eqv_finite1 in H1. clear s H0.
-   apply finite_norm2_e in H1.
-   rewrite !Zlength_correct in H. apply Nat2Z.inj in H.
-   revert y H H1; induction x; destruct y; simpl; intros; 
-     inv H; inv H1; constructor; auto.
-   clear - H3.
-   rewrite finite_is_finite in H3.
-   destruct a, f; inv H3; try constructor; auto.
-   destruct s,s0; inv H0.
-Qed.
-
 Lemma jacobi2_second_loop: forall {Espec : OracleKind}
  (shA1 shA2 shb shx shy : share)
   (A : matrix Tdouble)
@@ -355,13 +137,13 @@ Lemma jacobi2_second_loop: forall {Espec : OracleKind}
   (SHy : writable_share shy)
   (N := matrix_rows A : Z)
   (COLS: matrix_cols A N)
-  (H1 : Forall (Forall finite) A)
-  (H1': Forall finite (invert_diagmatrix (diag_of_matrix A)))
-  (H2 : Forall finite b)
-  (H3 : Forall finite x)
-  (H4 : finite acc)
-  (H5 : 0 < maxiter <= Int.max_unsigned)
-  (H0 : 0 < N < Int.max_unsigned)
+  (FINA : Forall (Forall finite) A)
+  (FINA1inv: Forall finite (invert_diagmatrix (diag_of_matrix A)))
+  (FINb : Forall finite b)
+  (FINx : Forall finite x)
+  (FINacc : finite acc)
+  (Hmaxiter : 0 < maxiter <= Int.max_unsigned)
+  (HN : 0 < N < Int.max_unsigned)
   (yp  A1ip : val)
   (FR1 : list mpred),
 semax (func_tycontext f_jacobi2 Vprog Gprog [])
@@ -378,10 +160,9 @@ semax (func_tycontext f_jacobi2 Vprog Gprog [])
       data_at shA1 (tarray tdouble (matrix_rows A))
           (map Vfloat (invert_diagmatrix (diag_of_matrix A))) A1ip)) second_loop
   (normal_ret_assert
-     (EX (n : nat) (z : vector Tdouble) (s : ftype Tdouble),
-      PROP (0 < Z.of_nat n <= maxiter; floatlist_eqv z (jacobi_n A b x n);
-      float_eqv s (norm2 (vector_sub (jacobi_n A b x (Init.Nat.pred n)) z));
-      Z.of_nat n = maxiter \/ BCMP Tdouble Gt true s acc = false \/ ~finite s)
+     (EX (n: nat) (z : vector Tdouble) (s : ftype Tdouble),
+      PROP (float_eqv s (fst (jacobi A b x acc (Z.to_nat maxiter)));
+                floatlist_eqv z (snd  (jacobi A b x acc (Z.to_nat maxiter))))
       LOCAL (temp _A1inv A1ip; temp _y (choose n xp yp); temp _z (choose n yp xp);
       temp _N (Vint (Int.repr (matrix_rows A))); gvars gv; 
       temp _A1 A1p; temp _A2 A2p; temp _b bp; temp _x xp; 
@@ -396,163 +177,254 @@ semax (func_tycontext f_jacobi2 Vprog Gprog [])
 Proof.
 intros.
 unfold second_loop.
+assert (FINA2 := finite_remove_diag A COLS FINA).
+subst N.
+rewrite <- matrix_rows_remove_diag in *.
+set (A2 := remove_diag A) in *.
+set (N := matrix_rows A2) in *.
 abbreviate_semax.
+assert_PROP (Zlength b = N /\ Zlength x = N) as LENbx. {
+  entailer!. clear - H4 H1; unfold matrix_rows in *; split;  list_solve.
+}
+destruct LENbx as [LENb LENx].
+set (A1inv := invert_diagmatrix (diag_of_matrix A)) in *.
+assert (LENA1inv: Zlength A1inv = N). {
+  unfold A1inv, N, A2, invert_diagmatrix.
+   rewrite Zlength_map, Zlength_diag_of_matrix, matrix_rows_remove_diag; auto.
+}
+assert (COLS2: matrix_cols A2 N). {
+  subst A2 N. 
+  rewrite matrix_rows_remove_diag in COLS|-*; apply matrix_cols_remove_diag; auto.
+}
+pose (f := jacobi_iter A1inv A2 b).
+assert (CONGR_f: forall x x', Zlength x = N -> strict_floatlist_eqv x x' -> floatlist_eqv (f x) (f x')). {
+  intros. apply jacobi_iter_congr; auto. rewrite H; auto.
+}
+apply semax_loop_unroll1
+ with (P' := (EX y:vector Tdouble, EX s:ftype Tdouble, 
+  PROP (floatlist_eqv y (f x);
+          float_eqv s (dist2 x y))
+  LOCAL (temp _maxiter (Vint (Int.sub (Int.repr maxiter) (Int.repr 1)));
+    temp _y xp; temp _z yp; temp _t xp; temp _s (Vfloat s);
+    temp _A1inv A1ip; temp _N (Vint (Int.repr N)); 
+    gvars gv; temp _A1 A1p; temp _A2 A2p; temp _b bp; 
+    temp _x xp; temp _acc (Vfloat acc))
+  SEP (data_at shA1 (tarray tdouble (matrix_rows A2)) 
+            (map Vfloat A1inv) A1ip; crs_rep shA2 A2 A2p;
+        data_at shb (tarray tdouble (matrix_rows A2)) (map Vfloat b) bp;
+        data_at shx (tarray tdouble (matrix_rows A2)) (map Vfloat x) xp;
+        data_at shy (tarray tdouble (matrix_rows A2)) (map Vfloat y) yp;
+     FRZL FR1))%assert)
+ (Q := (EX y:vector Tdouble, EX s:ftype Tdouble, 
+  PROP (floatlist_eqv y (f x); 
+          float_eqv s (dist2 x y);
+          stop s acc = true; maxiter>1)
+  LOCAL (temp _maxiter (Vint (Int.repr (maxiter -1)));
+    temp _y xp; temp _z yp; temp _t xp; temp _s (Vfloat s);
+    temp _A1inv A1ip; temp _N (Vint (Int.repr N)); 
+    gvars gv; temp _A1 A1p; temp _A2 A2p; temp _b bp; 
+    temp _x xp; temp _acc (Vfloat acc))
+  SEP (data_at shA1 (tarray tdouble (matrix_rows A2)) 
+            (map Vfloat A1inv) A1ip; crs_rep shA2 A2 A2p;
+        data_at shb (tarray tdouble (matrix_rows A2)) (map Vfloat b) bp;
+        data_at shx (tarray tdouble (matrix_rows A2)) (map Vfloat x) xp;
+        data_at shy (tarray tdouble (matrix_rows A2)) (map Vfloat y) yp;
+     FRZL FR1))%assert).
+-
+forward_call (shA1,shA2,shb,  shx, shy, A1ip, A1inv, A2p, A2, bp, b, xp, x, yp).
+Intros a; destruct a as [y s]. unfold fst,snd in H,H0|-*.
+forward. forward. forward. forward.
+Exists y s; entailer!!.
+-
+Intros y s.
+forward_if (temp _t'4 (Val.of_bool (stop s acc))).
+  { forward. 
+    entailer!!.
+   change (Float.cmp Cgt s acc) with ((s>acc)%F64).
+   unfold stop.
+   replace (Binary.is_finite _ _ _) with true; auto.
+   destruct s; try discriminate; reflexivity.
+  } 
+  { forward.
+    entailer!!. unfold stop.
+   replace (Binary.is_finite _ _ _) with false; auto.
+   clear - H1.
+   destruct s; try discriminate; try reflexivity.
+  }
+ rewrite sub_repr.
+ forward_if (temp _t'5 (Val.of_bool (stop s acc &&  Z.gtb maxiter 1))).
+  { forward. change 1024 with (femax Tdouble) in H1.  rewrite H1. 
+    entailer!!. simpl andb.     
+    destruct (Z.gtb_spec maxiter 1).
+    rewrite Int.eq_false. reflexivity.
+   intro Hx. apply repr_inj_unsigned in Hx; try rep_lia.
+   replace (maxiter - 1) with 0 by lia.
+   rewrite Int.eq_true. reflexivity.
+  }
+  { change 1024 with (femax Tdouble) in H1.  rewrite H1.
+    forward. entailer!!. rewrite H1. reflexivity.
+  }
+ forward_if.
+ + forward. Exists y s. entailer!!.
+   rewrite andb_true_iff in H1; destruct H1; auto.
+ + forward. Exists 1%nat y s.
+   entailer!!.
+   unfold jacobi. fold A1inv. fold A2. fold f.
+   destruct (Z.to_nat maxiter) eqn:?H; [ lia | ].
+   simpl. 
+   destruct n. simpl iter_stop. unfold fst, snd. split; auto.
+   rewrite <- H; auto.
+   rewrite andb_false_iff in H1.
+   destruct H1; [ | lia].
+   change 1024 with (femax Tdouble) in H1.
+   iter_stop_S.
+   rewrite H in H0.
+  rewrite (stop_mor _ _ _ H0 _ _ FINacc) in H1. rewrite H1.
+   split; auto.
+-
+
+Intros fx s.
+
 forward_loop 
-  (EX n:nat, EX z: vector Tdouble, EX s: ftype Tdouble,
-   PROP (0 <= Z.of_nat n < maxiter;
-             floatlist_eqv z (jacobi_n A b x n);
-             Forall finite z;
-             (n>0)%nat -> float_eqv s (norm2 (vector_sub (jacobi_n A b x (Init.Nat.pred n)) z)))
+  (EX n:nat, EX y: vector Tdouble, EX s: ftype Tdouble,
+   PROP (0 <= Z.of_nat n <= maxiter-1;
+             match iter_stop_n dist2 f n acc x with Some y' => floatlist_eqv y' y | None => False end;
+             Forall finite y)
    LOCAL (temp _A1inv A1ip; temp _y (choose n xp yp); temp _z (choose n yp xp);
-   temp _N (Vint (Int.repr (matrix_rows A))); gvars gv; temp _A1 A1p; 
+   temp _N (Vint (Int.repr N)); gvars gv; temp _A1 A1p; 
    temp _A2 A2p; temp _b bp; temp _x xp; temp _acc (Vfloat acc);
-   temp _maxiter (Vint (Int.repr (maxiter- Z.of_nat n)));
+   temp _maxiter (Vint (Int.repr (maxiter- (Z.of_nat n))));
    temp _s (Vfloat s))
    SEP (FRZL FR1;
    data_at_ (choose n shx shy) (tarray tdouble N) (choose n xp yp); 
-   crs_rep shA2 (remove_diag A) A2p;
+   crs_rep shA2 A2 A2p;
    data_at shb (tarray tdouble N) (map Vfloat b) bp;
-   data_at (choose n shy shx) (tarray tdouble N) (map Vfloat z) (choose n yp xp);
-   data_at shA1 (tarray tdouble (matrix_rows A))
-     (map Vfloat (invert_diagmatrix (diag_of_matrix A))) A1ip))%assert.
--
-Exists O x (Zconst Tdouble 0).
-entailer!.
-unfold jacobi_n. simpl Nat.iter.
-apply floatlist_eqv_refl.
-compute_every @choose.
-auto.
--
-Intros n z s.
-fold N.
+   data_at (choose n shy shx) (tarray tdouble N) (map Vfloat y) (choose n yp xp);
+   data_at shA1 (tarray tdouble N)  (map Vfloat A1inv) A1ip))%assert.
++
+Exists (S O) fx s; entailer!!.
+split.
+simpl.
+change (andb _ _) with (stop (dist2 x (f x)) acc).
+ rewrite H in H0.
+  rewrite (stop_mor _ _ _ H0 _ _ FINacc) in H1. rewrite H1. symmetry; auto.
+ unfold stop in H1. rewrite andb_true_iff in H1. destruct H1 as [? _].
+ apply finite_is_finite in H1.
+ rewrite H0 in H1.
+ apply finite_dist2_e2 in H1; auto.
+ symmetry. rewrite H. rewrite LENx. apply Zlength_jacobi_iter; auto.
++
+clear dependent s.
+Intros n y s.
 progress change float with (ftype Tdouble) in *.
+rename H2 into FINy.
+destruct (iter_stop_n dist2 f n acc x) eqn:?K; try contradiction.
 forward_call (shA1,shA2,shb, choose n shy shx, choose n shx shy,
-                       A1ip, invert_diagmatrix (diag_of_matrix A), A2p, 
-                        (remove_diag A),
+                       A1ip, A1inv, A2p, A2,
                          bp, b, choose n yp xp,
-                         z,   choose n xp yp).
-rewrite matrix_rows_remove_diag.
-fold N. cancel.
-rewrite matrix_rows_remove_diag.
-fold N.
-split3; [ | | split3]; auto; try lia.
-unfold choose; destruct (Nat.odd n); auto. 
+                         y,   choose n xp yp).
 unfold choose; destruct (Nat.odd n); auto.
-apply matrix_cols_remove_diag; auto.
-apply finite_remove_diag; auto.
-Intros a.  clear s H8. destruct a as [y s]. unfold fst, snd in *.
+clear s.
+Intros a. destruct a as [fy s]. unfold fst, snd in *.
+fold f in H2.
 forward.
 forward.
 forward.
 forward.
-forward_if (temp _t'4 (Val.of_bool (Binary.is_finite (fprec Tdouble) (femax Tdouble) s && BCMP _ Gt true s acc))).
+forward_if (temp _t'4 (Val.of_bool (stop s acc))).
   { forward. 
-    entailer!.
-   change (Float.cmp Cgt s acc) with ((s>acc)%F64).
+    entailer!!.
+   change (Float.cmp Cgt ?s acc) with ((s>acc)%F64).
+   unfold stop.
    replace (Binary.is_finite _ _ _) with true; auto.
-   symmetry.
-   clear - H8. destruct s; try discriminate; reflexivity.
+   destruct s; try discriminate; reflexivity.
   } 
   { forward.
-    entailer!.
+    entailer!!.
+    unfold stop.
    replace (Binary.is_finite _ _ _) with false; auto.
-   symmetry. clear - H8. destruct s; try discriminate; try reflexivity.
+    destruct s; try discriminate; try reflexivity.
   }
-forward_if (temp _t'5 (Val.of_bool (Binary.is_finite (fprec Tdouble) (femax Tdouble) s 
-                         && BCMP _ Gt true s acc && Z.gtb maxiter (Z.of_nat n + 1)))).
-  { forward. change 1024 with (femax Tdouble) in H8.  rewrite H8. 
-    entailer!. simpl andb. 
-    destruct (Z.gtb_spec maxiter (Z.of_nat n + 1)).
+ rewrite sub_repr. rewrite <- Z.sub_add_distr.
+ forward_if (temp _t'5 (Val.of_bool (stop s acc &&  Z.gtb maxiter (Z.of_nat n+1)))).
+  { forward. rewrite H5. 
+    entailer!!. 
+    destruct (Z.gtb_spec maxiter (Z.of_nat n+1)).
     rewrite Int.eq_false. reflexivity.
-   intro. apply repr_inj_unsigned in H26; try rep_lia.
-   replace (maxiter - Z.of_nat n - 1) with 0 by lia.
-   rewrite Int.eq_true. reflexivity.
+    intro Hx; apply repr_inj_unsigned in Hx; rep_lia.
+    replace (_ - _) with  0 by lia.
+    rewrite Int.eq_true. reflexivity.
   }
-  { change 1024 with (femax Tdouble) in H8.  rewrite H8.
-    forward. entailer!. rewrite H8. reflexivity.
+  { rewrite H5.
+    forward. entailer!!. rewrite H5. reflexivity.
   }
-forward_if.
-+
-  forward. 
- Exists (S n) y s.
- rewrite !choose_S.
- entailer!.
- * rewrite !andb_true_iff in H8. destruct H8 as [[H8a H8b] H8c].
-   assert (FINy: Forall finite y). { 
-    clear - H25 H22 H8a H10.
+assert (LENv :=  K).
+  apply iter_stop_n_Zlength with (N := matrix_rows A2) in LENv; auto.
+  2: intros; unfold f; rewrite Zlength_jacobi_iter; auto.
+assert (LENy : Zlength y = matrix_rows A2) by (rewrite <- H1; auto).
+fold N in LENv, LENy |-*.
+assert (EQyv: strict_floatlist_eqv y v) by (apply strict_floatlist_eqv_i1; auto; symmetry; auto).
 
-  change 1024 with (femax Tdouble) in H8a.
-  rewrite <- finite_is_finite in H8a.
-  eapply finite_norm2_sub in H10; auto. list_solve.
-  }
-  split; [ | split3]; auto. 
-  --
-     eapply floatlist_eqv_trans; [apply H9 | clear H9].
-     apply jacobi_iter_congr; auto.
-     change (strict_floatlist_eqv z (jacobi_n A b x n)).
-    apply strict_floatlist_eqv_i1; auto.
-     apply finite_remove_diag; auto.
-     clear - H19. rewrite Zlength_map in H19. unfold matrix_rows in *. rep_lia.
-     rewrite Zlength_map in H16; rewrite H16. clear; unfold matrix_rows; rep_lia.
-     rewrite Zlength_map in H22; rewrite H22.
-     rewrite matrix_rows_remove_diag.
-     rewrite Z.max_r by lia.
-     apply matrix_cols_remove_diag. auto.
- --
-   intros _.
-   simpl pred. clear - H10 H6 H8a. 
-   eapply float_eqv_trans; [apply H10 | ].
-   change 1024 with (femax Tdouble) in H8a.
-   apply finite_is_finite in H8a.
-   apply float_eqv_strict_float_eqv in H10; auto.
-   apply strict_float_eqv_sym in H10.
-   apply strict_float_eqv_finite1 in H10. clear s H8a.
-   apply finite_norm2_e in H10.
-   apply norm2_congr.
-   apply vector_sub_congr; auto.
-   apply floatlist_eqv_refl.
- --
-    f_equal. f_equal. lia.
- *
-  rewrite matrix_rows_remove_diag.
-  fold N. cancel.
-+
- forward.
- Exists (S n) y s.
- rewrite !choose_S.
- entailer!.
- *
-    split3; auto.
-  --
-    unfold jacobi_n in *.
-   simpl Nat.iter.
-   eapply floatlist_eqv_trans; [apply H9 | ]. clear y H9 H10 H25 H26.
-   apply jacobi_iter_congr; auto.
-     change (strict_floatlist_eqv z (jacobi_n A b x n)).
-    apply strict_floatlist_eqv_i1; auto.
-     apply finite_remove_diag; auto.
-     clear - H19. rewrite Zlength_map in H19. unfold matrix_rows in *. rep_lia.
-     rewrite Zlength_map in H16; rewrite H16. clear; unfold matrix_rows; rep_lia.
-     rewrite Zlength_map in H22; rewrite H22.
-     rewrite matrix_rows_remove_diag.
-     rewrite Z.max_r by lia.
-     apply matrix_cols_remove_diag. auto.
- --
-   simpl pred.
-   clear - H10 H6.
-   eapply float_eqv_trans; [apply H10 | ]. clear dependent s.
-   apply norm2_congr.
-   apply vector_sub_congr; auto.
-   apply floatlist_eqv_refl.
- --
-     rewrite !andb_false_iff in H8.
-     decompose [or] H8.
-     right; right. clear - H28. intro. destruct s; inv H28; inv H.
-     right. left. auto.
-     left. rewrite inj_S. 
-     destruct (Z.gtb_spec maxiter (Z.of_nat n + 1)); inv H27. lia.
+forward_if.
 *
-  rewrite matrix_rows_remove_diag. fold N. cancel.
+forward.
+Exists (S n) fy s.
+rewrite !choose_S.
+entailer!!.
+clear PNxp PNbp PNA2p PNA1p PNA1ip H9 H8 H7 H6.
+rewrite andb_true_iff in H5.
+destruct H5.
+destruct (Z.gtb_spec maxiter (Z.of_nat n + 1)); try discriminate. clear H6.
+simpl.   
+
+assert (FINs: finite s). {
+  unfold stop in H5. rewrite andb_true_iff in H5. destruct H5.
+   apply finite_is_finite; auto.
+}
+split3; [ | | f_equal; f_equal; lia].
+-- simpl. rewrite K.
+  change (andb _ _) with (stop (dist2 v (f v)) acc).
+  rewrite <- H1 in H4.
+  rewrite (CONGR_f  y v) in H2 by auto.
+  rewrite H2 in H4.
+  rewrite (stop_mor _ _ _ H4 _ _ FINacc) in H5 by auto. rewrite H5.
+  symmetry; auto.
+--
+rewrite H4 in FINs.
+apply finite_dist2_e2 in FINs; auto.
+  rewrite H2. unfold f. rewrite Zlength_jacobi_iter; auto.
+*
+forward.
+Exists (S n) fy s.
+rewrite !choose_S.
+entailer!!.
+clear PNxp PNbp PNA2p PNA1p PNA1ip H9 H8 H7 H6.
+unfold jacobi. fold A1inv. fold A2. fold f.
+destruct (stop s acc) eqn:?H.
+--
+apply iter_stop_n_lem2 in K; auto.
+replace (pred _) with n by lia.
+rewrite K.
+split.
+rewrite H2 in H4.
+rewrite H4. apply dist2_mor; auto. symmetry; auto. rewrite H2; apply CONGR_f; auto.
+   rewrite H2 in H4.
+  rewrite (CONGR_f  y v) in H4 by auto. 
+  rewrite <- H1 in H4.
+  rewrite (stop_mor _ _ _ H4 _ _ FINacc) in H6. apply H6.
+--
+pose (k := (pred (Z.to_nat maxiter) - n)%nat).
+apply iter_stop_n_lem1 with (k:=k) in K; auto.
+replace (pred _) with (n+k)%nat by lia.
+rewrite K.
+rewrite H2. rewrite H4.
+split.
+apply dist2_mor; auto. symmetry; auto. rewrite H2.
+apply CONGR_f; auto.
+apply CONGR_f; auto.
+  rewrite <- H1 in H4. rewrite H2 in H4.
+  rewrite (CONGR_f y v) in H4; auto.
+  rewrite (stop_mor _ _ _ H4 _ _ FINacc) in H6. apply H6.
 Qed.
 
 Lemma body_jacobi2: semax_body Vprog Gprog f_jacobi2 jacobi2_spec.
@@ -613,9 +485,9 @@ apply semax_seq' with
   * rewrite sublist_nil, app_nil_l. entailer!. apply derives_refl.
   * forward. forward. entailer!. apply derives_refl'; f_equal.
      progress change float with (ftype Tdouble) in *.
-     clear - H12 H0 H18. rewrite Zlength_map in H18. simpl.
+     clear - H10 H0 H16. rewrite Zlength_map in H16. simpl.
      forget (matrix_rows A) as N. list_solve.
-  * forward. entailer!. list_simplify.
+  * forward. entailer!. list_solve.
  + forward. entailer!. 
  + forward. entailer!.
 -
@@ -626,7 +498,9 @@ apply semax_seq' with
  forward_call free_spec_sub (A1ip, gv).
  saturate_local. destruct A1ip; try contradiction; simpl. cancel.
  forward.
- Exists z (pred n) s.
- fold N. replace (S (pred n)) with n by lia.
- entailer!.
+ Exists z s.
+ entailer!!.
 Qed.
+
+
+

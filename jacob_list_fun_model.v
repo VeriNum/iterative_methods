@@ -45,12 +45,13 @@ Definition jacobi_n {t: type} (A: matrix t) (b: vector t) (x: vector t) (n: nat)
    let A2 := remove_diag A in 
    Nat.iter n (jacobi_iter A1inv A2 b) x.
 
+Definition dist2 {t: type} (x y: vector t) := norm2 (vector_sub x y).
+
 Definition jacobi {t: type} (A: matrix t) (b: vector t) (x: vector t) (acc: ftype t) (n: nat) :
          ftype t * vector t :=
    let A1 := diag_of_matrix  A in 
    let A1inv := invert_diagmatrix A1 in
    let A2 := remove_diag A in 
-   let dist2 x y := norm2 (vector_sub x y) in 
    iter_stop dist2 (jacobi_iter A1inv A2 b) (pred n) acc x.
 
 Definition old_jacobi_iter {t: type} x0 b (A1: diagmatrix t) (A2: matrix t) : vector t :=
