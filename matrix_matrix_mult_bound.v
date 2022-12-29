@@ -9,7 +9,8 @@ From mathcomp.analysis Require Import Rstruct.
 Require Import dot_prod_defn generalize float_model_generic 
                inf_norm_properties lemmas matrix_vec_mult_bound.
 
-Import List ListNotations.
+Import Coq.Lists.List Coq.Lists.List.ListNotations.
+
 
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
                             Float_notations Automate.
@@ -63,9 +64,9 @@ Lemma mat_mat_err_bnd_holds {n:nat}:
       is_finite (fprec Tsingle) (femax Tsingle) a = true /\
       is_finite (fprec Tsingle) (femax Tsingle) b = true /\
       (Rabs (FT2R a) <=
-       sqrt (F' / (nr * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re /\
+       sqrt (F' / ((nr+1) * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re /\
       (Rabs (FT2R b) <=
-       sqrt (F' / (nr * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re))->
+       sqrt (F' / ((nr+1) * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re))->
   matrix_inf_norm (FT2R_mat (A1 *f A2 ) - (FT2R_mat A1) *m (FT2R_mat A2)) <=
   mat_mat_mult_err_bnd A1 A2.
 Proof.
@@ -118,11 +119,11 @@ apply Rle_trans with
               is_finite (fprec Tsingle) (femax Tsingle) a = true /\
               is_finite (fprec Tsingle) (femax Tsingle) b = true /\
               (Rabs (FT2R a) <=
-                sqrt (F' / (INR n.+1 *
+                sqrt (F' / ((INR n.+1 + 1) *
                    (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))^ (n.+1 + 1)%coq_nat) -
                   / 2 * bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)))%Re /\
               (Rabs (FT2R b) <=
-               sqrt (F' /  (INR n.+1 *
+               sqrt (F' /  ((INR n.+1 + 1) *
                     (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1))^ (n.+1 + 1)%coq_nat) -
                      / 2 * bpow Zaux.radix2(3 - femax Tsingle - fprec Tsingle)))%Re).
     { intros. apply H0. rewrite HeqL in H8; auto. 

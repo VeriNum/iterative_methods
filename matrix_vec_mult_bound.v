@@ -9,7 +9,8 @@ From mathcomp.analysis Require Import Rstruct.
 Require Import dot_prod_defn generalize float_model_generic 
                inf_norm_properties lemmas.
 
-Import List ListNotations.
+Import Coq.Lists.List Coq.Lists.List.ListNotations.
+
 
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
                             Float_notations Automate.
@@ -146,9 +147,9 @@ Lemma mat_vec_err_bnd_holds {n:nat}:
       is_finite (fprec Tsingle) (femax Tsingle) a = true /\
       is_finite (fprec Tsingle) (femax Tsingle) b = true /\
       (Rabs (FT2R a) <=
-       sqrt (F' / (nr * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re /\
+       sqrt (F' / ((nr+1) * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re /\
       (Rabs (FT2R b) <=
-       sqrt (F' / (nr * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re))->
+       sqrt (F' / ((nr+1) * (1 + d) ^ (n.+1 + 1)%coq_nat) - e))%Re))->
   vec_inf_norm (FT2R_mat (A *f v) - (FT2R_mat A) *m (FT2R_mat v)) <=
   mat_vec_mult_err_bnd A v.
 Proof.
@@ -179,13 +180,13 @@ assert (forall a b : ftype Tsingle,
       (Rabs (FT2R a) <=
        sqrt
          (F' /
-          (INR n.+1 *
+          ((INR n.+1 + 1) *
            (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1)) ^ (n.+1 + 1)%coq_nat) -
           / 2 * bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)))%Re /\
       (Rabs (FT2R b) <=
        sqrt
          (F' /
-          (INR n.+1 *
+          ((INR n.+1 + 1)*
            (1 + / 2 * bpow Zaux.radix2 (- fprec Tsingle + 1)) ^ (n.+1 + 1)%coq_nat) -
             / 2 * bpow Zaux.radix2 (3 - femax Tsingle - fprec Tsingle)))%Re).
 { specialize (H0 i).
