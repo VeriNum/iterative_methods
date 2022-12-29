@@ -58,8 +58,7 @@ double jacobi2_oneiter(double *A1inv, struct crs_matrix *A2, double *b, double *
 
 double jacobi2(double *A1, struct crs_matrix *A2, double *b, double *x, double acc, unsigned maxiter) {
   unsigned i, N=crs_matrix_rows(A2);
-  double s=0.0,  /* need to initialize s just to keep the proof happy */
-     *t, *z=x, 
+  double s, *t, *z=x, 
     *y = (double *)surely_malloc(N*sizeof(double)),
     *A1inv = (double *)surely_malloc(N*sizeof(double));
   for (i=0; i<N; i++) A1inv[i] = 1.0/A1[i];

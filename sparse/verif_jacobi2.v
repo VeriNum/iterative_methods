@@ -56,7 +56,7 @@ Lemma jacobi2_first_loop: forall {Espec : OracleKind}
 semax (func_tycontext f_jacobi2 Vprog Gprog nil)
   (PROP ( )
    LOCAL (temp _A1inv A1ip; temp _y yp; temp _z xp; 
-   temp _s (Vfloat (Float.of_bits (Int64.repr 0))); temp _N (Vint (Int.repr N));
+   temp _N (Vint (Int.repr N));
    gvars gv; temp _A1 A1p; temp _A2 A2p; temp _b bp; temp _x xp;
    temp _acc (Vfloat acc); temp _maxiter (Vint (Int.repr maxiter)))
    SEP (FR1; data_at_ Ews (tarray tdouble N) A1ip;
@@ -65,7 +65,7 @@ semax (func_tycontext f_jacobi2 Vprog Gprog nil)
  (normal_ret_assert
   (PROP ( )
    LOCAL (temp _A1inv A1ip; temp _y yp; temp _z xp; 
-   temp _s (Vfloat (Float.of_bits (Int64.repr 0))); temp _N (Vint (Int.repr N));
+   temp _N (Vint (Int.repr N));
    gvars gv; temp _A1 A1p; temp _A2 A2p; temp _b bp; temp _x xp;
    temp _acc (Vfloat acc); temp _maxiter (Vint (Int.repr maxiter)))
    SEP (FR1; data_at Ews (tarray tdouble N) (map Vfloat (invert_diagmatrix (diag_of_matrix A))) A1ip;
@@ -79,7 +79,7 @@ assert (Zlength (diag_of_matrix A) = N)
 forward_for_simple_bound N
   (EX i:Z, PROP ( )
    LOCAL (temp _A1inv A1ip; temp _y yp; temp _z xp;
-   temp _s (Vfloat (Float.of_bits (Int64.repr 0))); temp _N (Vint (Int.repr N)); 
+   temp _N (Vint (Int.repr N)); 
    gvars gv; temp _A1 A1p; temp _A2 A2p; temp _b bp; temp _x xp;
    temp _acc (Vfloat acc); temp _maxiter (Vint (Int.repr maxiter)))
    SEP (FR1; 
@@ -148,7 +148,7 @@ Lemma jacobi2_second_loop: forall {Espec : OracleKind}
   (FR1 : list mpred),
 semax (func_tycontext f_jacobi2 Vprog Gprog [])
   (PROP ( )
-   LOCAL (temp _A1inv A1ip; temp _y yp; temp _z xp; temp _s (Vfloat (Zconst Tdouble 0));
+   LOCAL (temp _A1inv A1ip; temp _y yp; temp _z xp;
    temp _N (Vint (Int.repr (matrix_rows A))); gvars gv; temp _A1 A1p; 
    temp _A2 A2p; temp _b bp; temp _x xp; temp _acc (Vfloat acc);
    temp _maxiter (Vint (Int.repr maxiter)))
@@ -238,7 +238,7 @@ Exists y s; entailer!!.
 -
 Intros y s.
 forward_if (temp _t'4 (Val.of_bool (stop s acc))).
-  { forward. 
+  { forward.
     entailer!!.
    change (Float.cmp Cgt s acc) with ((s>acc)%F64).
    unfold stop.
@@ -433,7 +433,6 @@ start_function.
 forward_call.
 rewrite matrix_rows_remove_diag; lia.
 forward.
-forward.
 rewrite matrix_rows_remove_diag.
 set (N := matrix_rows A) in *.
 forward_call (tarray tdouble N, gv).
@@ -488,8 +487,8 @@ apply semax_seq' with
      clear - H10 H0 H16. rewrite Zlength_map in H16. simpl.
      forget (matrix_rows A) as N. list_solve.
   * forward. entailer!. list_solve.
- + forward. entailer!. 
- + forward. entailer!.
+ + forward. entailer!!. 
+ + forward. entailer!!.
 -
  thaw FR2.
  abbreviate_semax.
