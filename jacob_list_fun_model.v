@@ -147,7 +147,7 @@ Lemma matrix_binop_by_index:
   forall {t} (op: ftype t -> ftype t -> ftype t) (m1 m2: matrix t) cols,
   matrix_rows_nat m1 = matrix_rows_nat m2 ->
   matrix_cols_nat m1 cols -> matrix_cols_nat m2 cols ->  
-  matrix_eqv (map2 (map2 op) m1 m2)
+  Forall2 (Forall2 feq) (map2 (map2 op) m1 m2)
   (matrix_by_index (matrix_rows_nat m1) cols (fun i j => op (matrix_index m1 i j) (matrix_index m2 i j))).
 Proof.
 intros.
@@ -299,7 +299,7 @@ Qed.
 Lemma remove_plus_diag: forall {t} (m: matrix t),
    matrix_cols_nat m (matrix_rows_nat m) ->
    Forall (Forall finite) m ->
-   matrix_eqv (matrix_add  (matrix_of_diag (diag_of_matrix m)) (remove_diag m)) m.
+   Forall2 (Forall2 feq) (matrix_add  (matrix_of_diag (diag_of_matrix m)) (remove_diag m)) m.
 Proof.
 intros.
 apply matrix_extensionality with (cols := matrix_rows_nat m); auto.

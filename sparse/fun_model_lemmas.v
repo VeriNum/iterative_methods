@@ -82,8 +82,8 @@ Lemma Znth_jacobi_iter {t}:
   Zlength b = matrix_rows A2 -> 
   Zlength x = matrix_rows A2 -> 
   0 <= i < matrix_rows A2 ->
-  float_eqv y (dotprod (Znth i A2) x) ->
-  float_eqv (Znth i (jacobi_iter A1 A2 b x))
+  feq y (dotprod (Znth i A2) x) ->
+  feq (Znth i (jacobi_iter A1 A2 b x))
      (BMULT t (Znth i A1)
          (BMINUS t (Znth i b) y)).
 Proof.
@@ -188,48 +188,22 @@ Qed.
 
 #[export] Hint Rewrite @Zmatrix_rows_nat : sublist rep_lia.
 
-Lemma floatlist_eqv_refl {t}: forall (x: vector t), floatlist_eqv x x.
-Proof.
-induction x; constructor; auto.
-Qed.
-
-Lemma floatlist_eqv_sym {t}: forall (x y: vector t),
-   floatlist_eqv x y -> floatlist_eqv y x.
-Proof.
-induction 1; constructor; auto.
-symmetry; auto.
-Qed.
-
-Lemma floatlist_eqv_trans {t}: forall (x y z: vector t),
-   floatlist_eqv x y -> floatlist_eqv y z -> floatlist_eqv x z.
-Proof.
-induction x; destruct y,z; intros; inv H; inv H0; constructor.
-etransitivity; eassumption.
-eapply IHx; eauto.
-Qed.
-
-Add Parametric Relation {t: type}: (vector t) (@floatlist_eqv t)
-  reflexivity proved by floatlist_eqv_refl
-  symmetry proved by floatlist_eqv_sym
-  transitivity proved by floatlist_eqv_trans
-   as floatlist_eqv_rel.
-
 Add Parametric Morphism {t: type}: (@norm2 t)
-  with signature floatlist_eqv ==> float_eqv
+  with signature Forall2 feq ==> feq
  as norm2_mor.
 Proof.
 exact norm2_congr.
 Qed.
 
 Add Parametric Morphism {t: type}: (@vector_sub t)
-  with signature floatlist_eqv ==> floatlist_eqv ==> floatlist_eqv
+  with signature Forall2 feq ==> Forall2 feq ==> Forall2 feq
   as vector_sub_mor.
 Proof.
 intros; eapply vector_sub_congr; eauto.
 Qed.
 
-Add Parametric Morphism {t: type}: (@Zlength (ftype t))
-  with signature floatlist_eqv ==> eq
+Add Parametric Morphism {T: Type} (rel: relation T): (@Zlength T)
+  with signature Forall2 rel ==> eq
   as Zlength_mor.
 Proof.
 induction 1; auto.
@@ -237,33 +211,22 @@ rewrite !Zlength_cons; f_equal; auto.
 Qed.
 
 Add Parametric Morphism {t: type}: (@finite t)
-  with signature float_eqv ==> iff
+  with signature feq ==> iff
   as finite_rel.
 Proof.
 destruct x,y; split; intros; inv H0; inv H; constructor; auto.
 Qed.
 
-Add Parametric Morphism {t: type}: (Forall (@finite t)) 
-   with signature floatlist_eqv ==> iff
-   as Forall_finite_rel.
-Proof.
-induction x; destruct y; intros; inv H; split; auto; intros; inv H; constructor; auto.
-rewrite <- H3; auto.
-apply IHx; auto.
-rewrite H3; auto.
-erewrite IHx; eauto.
-Qed.
-
 Lemma jacobi_iter_congr: 
  forall {t} A1 A2 (b: vector t) x x',
-  strict_floatlist_eqv x x' ->
+  Forall2 strict_feq x x' ->
   Forall finite A1 ->
   Forall (Forall finite) A2 ->
   Forall finite b ->  
    Zlength b = matrix_rows A2 ->
    Zlength A1 = matrix_rows A2 ->
    matrix_cols A2 (Zlength x) ->
-   floatlist_eqv (jacobi_iter A1 A2 b x) (jacobi_iter A1 A2 b x') .
+   Forall2 feq (jacobi_iter A1 A2 b x) (jacobi_iter A1 A2 b x') .
 Proof.
 intros.
 unfold jacobi_iter.
@@ -290,10 +253,10 @@ Qed.
 
 Lemma strict_floatlist_eqv_i1: 
    forall {t} (a b: list (ftype t)),
-    Forall finite a -> floatlist_eqv a b -> strict_floatlist_eqv a b.
+    Forall finite a -> Forall2 feq a b -> Forall2 strict_feq a b.
 Proof.
 induction 2; inv H;constructor.
-apply strict_float_eqv_i1; auto.
+apply strict_feq_i1; auto.
 apply IHForall2; auto.
 Qed.
 
@@ -305,17 +268,17 @@ destruct x; inv H; try reflexivity.
 constructor; auto.
 Qed.
 
-Lemma float_eqv_strict_float_eqv:
+Lemma feq_strict_feq:
  forall {t} (x y: ftype t),
-   finite x -> float_eqv x y -> strict_float_eqv x y.
+   finite x -> feq x y -> strict_feq x y.
 Proof.
  intros.
  destruct x; inv H; destruct y; inv H0; constructor; auto.
 Qed.
 
-Lemma strict_float_eqv_finite1:
+Lemma strict_feq_finite1:
   forall {t} (x y: ftype t),
-    strict_float_eqv x y -> finite x.
+    strict_feq x y -> finite x.
 Proof.
 intros.
 destruct x,y; inv H; constructor; auto.
@@ -391,7 +354,7 @@ Definition stop {t} (s acc: ftype t) :=
    andb (Binary.is_finite (fprec t) (femax t) s) (BCMP _ Gt true s acc).
 
 Add Parametric Morphism {t: type} : (Binary.is_finite (fprec t) (femax t))
-  with signature float_eqv ==> eq
+  with signature feq ==> eq
   as is_finite_mor.
 Proof.
 intros.
@@ -399,7 +362,7 @@ destruct x, y; inv H; reflexivity.
 Qed.
 
 Add Parametric Morphism {t: type} : (@dist2 t)
-  with signature floatlist_eqv ==> floatlist_eqv ==> float_eqv
+  with signature Forall2 feq ==> Forall2 feq ==> feq
   as dist2_mor.
 Proof.
 intros.
@@ -408,7 +371,7 @@ rewrite H, H0. auto.
 Qed.
 
 Add Parametric Morphism {t} : (@stop t)
-  with signature float_eqv ==> strict_float_eqv ==> eq
+  with signature feq ==> strict_feq ==> eq
   as stop_mor.
 Proof.
  intros.
@@ -425,22 +388,15 @@ Ltac iter_stop_S :=
         (if stop (dist2 x (f x)) acc
            then iter_stop dist2 f n acc (f x) else (dist2 x (f x), (f x))).
 
-Lemma strict_float_eqv_unstrict:
-   forall {t} (x y: ftype t), strict_float_eqv x y -> float_eqv x y.
-Proof.
-intros.
-destruct x,y; inv H; simpl; auto.
-Qed.
-
 Lemma strict_floatlist_eqv_unstrict:
-   forall {t} (x y: vector t), strict_floatlist_eqv x y -> floatlist_eqv x y.
+   forall {t} (x y: vector t), Forall2 strict_feq x y -> Forall2 feq x y.
 Proof.
 induction 1; constructor; auto.
-apply strict_float_eqv_unstrict; auto.
+apply subrelation_strict_feq; auto.
 Qed.
 
 Add Parametric Morphism {t}: (BCMP t) 
- with signature eq ==> eq ==> strict_float_eqv ==> strict_float_eqv ==> eq
+ with signature eq ==> eq ==> strict_feq ==> strict_feq ==> eq
  as BCMP_mor.
 Proof.
 intros.
@@ -460,14 +416,14 @@ Qed.
 Lemma iter_stop_congr {t}:
  forall f acc (FINacc: finite acc) n (z z': vector t),
  (forall x, Zlength x = Zlength z -> Zlength (f x) = Zlength x) ->
- (forall x x': vector t, Zlength x = Zlength z -> strict_floatlist_eqv x x' -> floatlist_eqv (f x) (f x')) ->
- strict_floatlist_eqv z z' ->
- floatlist_eqv (snd (iter_stop dist2 f n acc z))
+ (forall x x': vector t, Zlength x = Zlength z -> Forall2 strict_feq x x' -> Forall2 feq (f x) (f x')) ->
+ Forall2 strict_feq z z' ->
+ Forall2 feq (snd (iter_stop dist2 f n acc z))
     (snd (iter_stop dist2 f n acc z')).
 Proof.
 induction n; simpl; intros.
 apply H0;auto.
-assert (float_eqv (dist2 z (f z))  (dist2 z' (f z'))).
+assert (feq (dist2 z (f z))  (dist2 z' (f z'))).
 apply dist2_mor; auto.
 apply strict_floatlist_eqv_unstrict; auto.
 replace  (Binary.is_finite (fprec t) (femax t) (dist2 z' (f z')))
@@ -477,7 +433,7 @@ destruct (Binary.is_finite _ _ _) eqn:?H.
 simpl.
 apply finite_is_finite in H3.
 replace (BCMP t Gt true (dist2 z' (f z')) acc) with (BCMP t Gt true (dist2 z (f z)) acc)
-  by (apply BCMP_mor; auto; apply strict_float_eqv_i1; auto).
+  by (apply BCMP_mor; auto; apply strict_feq_i1; auto).
 destruct (BCMP _ _ _ _ _).
 apply IHn.
 intros; auto. rewrite H in H4; auto. 
@@ -558,7 +514,7 @@ Lemma iter_stop_n_Zlength:
     (LENf: forall x, Zlength x = N -> Zlength (f x) = Zlength x)
     (CONGR_f: forall x x' : list (ftype t),
           Zlength x = N ->
-          strict_floatlist_eqv x x' -> floatlist_eqv (f x) (f x')),
+          Forall2 strict_feq x x' -> Forall2 feq (f x) (f x')),
     Zlength x = N -> Forall finite x ->
     iter_stop_n dist2 f n acc x = Some v ->
     Zlength v = N.

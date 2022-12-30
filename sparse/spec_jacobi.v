@@ -34,8 +34,8 @@ Definition jacobi2_oneiter_spec :=
            data_at_ shy (tarray tdouble (matrix_rows A2)) yp)
  POST [ tdouble ]
    EX y: vector Tdouble, EX s: ftype Tdouble,
-    PROP( floatlist_eqv y  (jacobi_iter A1 A2 b x); 
-              float_eqv s (dist2 x y))
+    PROP( Forall2 feq y  (jacobi_iter A1 A2 b x); 
+              feq s (dist2 x y))
     RETURN(Vfloat s)
     SEP (data_at shA1 (tarray tdouble (matrix_rows A2)) (map Vfloat A1) A1p;
            crs_rep shA2 A2 A2p;
@@ -65,8 +65,8 @@ Definition jacobi2_spec :=
            data_at Ews (tarray tdouble (matrix_rows A)) (map Vfloat x) xp)
  POST [ tdouble ]
    EX y: vector Tdouble, EX s: ftype Tdouble,
-    PROP(floatlist_eqv y  (snd (jacobi A b x acc (Z.to_nat maxiter)));
-             float_eqv s (fst (jacobi A b x acc (Z.to_nat maxiter))))
+    PROP(Forall2 feq y  (snd (jacobi A b x acc (Z.to_nat maxiter)));
+             feq s (fst (jacobi A b x acc (Z.to_nat maxiter))))
     RETURN(Vfloat s)
     SEP (mem_mgr gv;
            data_at shA1 (tarray tdouble (matrix_rows A)) (map Vfloat (diag_of_matrix A)) A1p;

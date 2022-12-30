@@ -161,8 +161,8 @@ semax (func_tycontext f_jacobi2 Vprog Gprog [])
           (map Vfloat (invert_diagmatrix (diag_of_matrix A))) A1ip)) second_loop
   (normal_ret_assert
      (EX (n: nat) (z : vector Tdouble) (s : ftype Tdouble),
-      PROP (float_eqv s (fst (jacobi A b x acc (Z.to_nat maxiter)));
-                floatlist_eqv z (snd  (jacobi A b x acc (Z.to_nat maxiter))))
+      PROP (feq s (fst (jacobi A b x acc (Z.to_nat maxiter)));
+                Forall2 feq z (snd  (jacobi A b x acc (Z.to_nat maxiter))))
       LOCAL (temp _A1inv A1ip; temp _y (choose n xp yp); temp _z (choose n yp xp);
       temp _N (Vint (Int.repr (matrix_rows A))); gvars gv; 
       temp _A1 A1p; temp _A2 A2p; temp _b bp; temp _x xp; 
@@ -197,13 +197,13 @@ assert (COLS2: matrix_cols A2 N). {
   rewrite matrix_rows_remove_diag in COLS|-*; apply matrix_cols_remove_diag; auto.
 }
 pose (f := jacobi_iter A1inv A2 b).
-assert (CONGR_f: forall x x', Zlength x = N -> strict_floatlist_eqv x x' -> floatlist_eqv (f x) (f x')). {
+assert (CONGR_f: forall x x', Zlength x = N -> Forall2 strict_feq x x' -> Forall2 feq (f x) (f x')). {
   intros. apply jacobi_iter_congr; auto. rewrite H; auto.
 }
 apply semax_loop_unroll1
  with (P' := (EX y:vector Tdouble, EX s:ftype Tdouble, 
-  PROP (floatlist_eqv y (f x);
-          float_eqv s (dist2 x y))
+  PROP (Forall2 feq y (f x);
+          feq s (dist2 x y))
   LOCAL (temp _maxiter (Vint (Int.sub (Int.repr maxiter) (Int.repr 1)));
     temp _y xp; temp _z yp; temp _t xp; temp _s (Vfloat s);
     temp _A1inv A1ip; temp _N (Vint (Int.repr N)); 
@@ -216,8 +216,8 @@ apply semax_loop_unroll1
         data_at shy (tarray tdouble (matrix_rows A2)) (map Vfloat y) yp;
      FRZL FR1))%assert)
  (Q := (EX y:vector Tdouble, EX s:ftype Tdouble, 
-  PROP (floatlist_eqv y (f x); 
-          float_eqv s (dist2 x y);
+  PROP (Forall2 feq y (f x); 
+          feq s (dist2 x y);
           stop s acc = true; maxiter>1)
   LOCAL (temp _maxiter (Vint (Int.repr (maxiter -1)));
     temp _y xp; temp _z yp; temp _t xp; temp _s (Vfloat s);
@@ -288,7 +288,7 @@ Intros fx s.
 forward_loop 
   (EX n:nat, EX y: vector Tdouble, EX s: ftype Tdouble,
    PROP (0 <= Z.of_nat n <= maxiter-1;
-             match iter_stop_n dist2 f n acc x with Some y' => floatlist_eqv y' y | None => False end;
+             match iter_stop_n dist2 f n acc x with Some y' => Forall2 feq y' y | None => False end;
              Forall finite y)
    LOCAL (temp _A1inv A1ip; temp _y (choose n xp yp); temp _z (choose n yp xp);
    temp _N (Vint (Int.repr N)); gvars gv; temp _A1 A1p; 
@@ -363,7 +363,7 @@ assert (LENv :=  K).
   2: intros; unfold f; rewrite Zlength_jacobi_iter; auto.
 assert (LENy : Zlength y = matrix_rows A2) by (rewrite <- H1; auto).
 fold N in LENv, LENy |-*.
-assert (EQyv: strict_floatlist_eqv y v) by (apply strict_floatlist_eqv_i1; auto; symmetry; auto).
+assert (EQyv: Forall2 strict_feq y v) by (apply strict_floatlist_eqv_i1; auto; symmetry; auto).
 
 forward_if.
 *

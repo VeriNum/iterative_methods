@@ -24,8 +24,8 @@ assert_PROP (Zlength A1 = N /\ Zlength b = N /\ Zlength x = N).
   entailer!. rewrite Zlength_map in *. auto. 
 forward_for_simple_bound N
   (EX i:Z, EX y: vector Tdouble, EX s: ftype Tdouble,
-   PROP (floatlist_eqv y (sublist 0 i r);
-             float_eqv s (norm2 (sublist 0 i (vector_sub x r))))
+   PROP (Forall2 feq y (sublist 0 i r);
+             feq s (norm2 (sublist 0 i (vector_sub x r))))
    LOCAL (temp _s (Vfloat s);
        temp _N (Vint (Int.repr (matrix_rows A2))); 
        temp _A1inv A1p; temp _A2 A2p; temp _b bp; 
