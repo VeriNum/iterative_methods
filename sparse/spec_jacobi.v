@@ -1,6 +1,7 @@
 Require Import VST.floyd.proofauto.
 From Iterative Require Import floatlib jacob_list_fun_model.
 From Iterative.sparse Require Import jacobi sparse_model.
+Import RelationPairs.
 Require Import vcfloat.VCFloat.
 Require Import vcfloat.FPCompCert.
 Require Import VSTlib.spec_math.
@@ -65,8 +66,7 @@ Definition jacobi2_spec :=
            data_at Ews (tarray tdouble (matrix_rows A)) (map Vfloat x) xp)
  POST [ tdouble ]
    EX y: vector Tdouble, EX s: ftype Tdouble,
-    PROP(Forall2 feq y  (snd (jacobi A b x acc (Z.to_nat maxiter)));
-             feq s (fst (jacobi A b x acc (Z.to_nat maxiter))))
+    PROP(RelProd feq (Forall2 feq) (s,y) (jacobi A b x acc (Z.to_nat maxiter)))
     RETURN(Vfloat s)
     SEP (mem_mgr gv;
            data_at shA1 (tarray tdouble (matrix_rows A)) (map Vfloat (diag_of_matrix A)) A1p;

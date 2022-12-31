@@ -1,6 +1,8 @@
 Require Import VST.floyd.proofauto.
 From Iterative Require Import floatlib jacob_list_fun_model.
-From Iterative.sparse Require Import jacobi sparse_model spec_sparse spec_jacobi fun_model_lemmas.
+From Iterative.sparse Require Import jacobi sparse_model spec_sparse 
+         spec_jacobi fun_model_lemmas vst_improvements.
+Import RelationPairs.
 Require Import vcfloat.VCFloat.
 Require Import vcfloat.FPCompCert.
 Require Import VSTlib.spec_math.
@@ -161,8 +163,7 @@ semax (func_tycontext f_jacobi2 Vprog Gprog [])
           (map Vfloat (invert_diagmatrix (diag_of_matrix A))) A1ip)) second_loop
   (normal_ret_assert
      (EX (n: nat) (z : vector Tdouble) (s : ftype Tdouble),
-      PROP (feq s (fst (jacobi A b x acc (Z.to_nat maxiter)));
-                Forall2 feq z (snd  (jacobi A b x acc (Z.to_nat maxiter))))
+      PROP (RelProd feq (Forall2 feq) (s,z) (jacobi A b x acc (Z.to_nat maxiter)))
       LOCAL (temp _A1inv A1ip; temp _y (choose n xp yp); temp _z (choose n yp xp);
       temp _N (Vint (Int.repr (matrix_rows A))); gvars gv; 
       temp _A1 A1p; temp _A2 A2p; temp _b bp; temp _x xp; 
@@ -288,7 +289,7 @@ Intros fx s.
 forward_loop 
   (EX n:nat, EX y: vector Tdouble, EX s: ftype Tdouble,
    PROP (0 <= Z.of_nat n <= maxiter-1;
-             match iter_stop_n dist2 f n acc x with Some y' => Forall2 feq y' y | None => False end;
+             option_rel (Forall2 feq) (iter_stop_n dist2 f n acc x) (Some y);
              Forall finite y)
    LOCAL (temp _A1inv A1ip; temp _y (choose n xp yp); temp _z (choose n yp xp);
    temp _N (Vint (Int.repr N)); gvars gv; temp _A1 A1p; 
@@ -307,7 +308,8 @@ split.
 simpl.
 change (andb _ _) with (stop (dist2 x (f x)) acc).
  rewrite H in H0.
-  rewrite (stop_mor _ _ _ H0 _ _ FINacc) in H1. rewrite H1. symmetry; auto.
+  rewrite (stop_mor _ _ _ H0 _ _ FINacc) in H1. rewrite H1.
+ constructor.  symmetry; auto.
  unfold stop in H1. rewrite andb_true_iff in H1. destruct H1 as [? _].
  apply finite_is_finite in H1.
  rewrite H0 in H1.
@@ -316,9 +318,10 @@ change (andb _ _) with (stop (dist2 x (f x)) acc).
 +
 clear dependent s.
 Intros n y s.
+inv H1. rename H4 into H1.
 progress change float with (ftype Tdouble) in *.
 rename H2 into FINy.
-destruct (iter_stop_n dist2 f n acc x) eqn:?K; try contradiction.
+destruct (iter_stop_n dist2 f n acc x) eqn:?K; inv H1.
 forward_call (shA1,shA2,shb, choose n shy shx, choose n shx shy,
                        A1ip, A1inv, A2p, A2,
                          bp, b, choose n yp xp,
@@ -326,7 +329,7 @@ forward_call (shA1,shA2,shb, choose n shy shx, choose n shx shy,
 unfold choose; destruct (Nat.odd n); auto.
 clear s.
 Intros a. destruct a as [fy s]. unfold fst, snd in *.
-fold f in H2.
+fold f in H1.
 forward.
 forward.
 forward.
@@ -347,7 +350,7 @@ forward_if (temp _t'4 (Val.of_bool (stop s acc))).
   }
  rewrite sub_repr. rewrite <- Z.sub_add_distr.
  forward_if (temp _t'5 (Val.of_bool (stop s acc &&  Z.gtb maxiter (Z.of_nat n+1)))).
-  { forward. rewrite H5. 
+  { forward. rewrite H4. 
     entailer!!. 
     destruct (Z.gtb_spec maxiter (Z.of_nat n+1)).
     rewrite Int.eq_false. reflexivity.
@@ -355,13 +358,14 @@ forward_if (temp _t'4 (Val.of_bool (stop s acc))).
     replace (_ - _) with  0 by lia.
     rewrite Int.eq_true. reflexivity.
   }
-  { rewrite H5.
-    forward. entailer!!. rewrite H5. reflexivity.
+  { rewrite H4.
+    forward.
+    rewrite H4. entailer!!.
   }
 assert (LENv :=  K).
   apply iter_stop_n_Zlength with (N := matrix_rows A2) in LENv; auto.
   2: intros; unfold f; rewrite Zlength_jacobi_iter; auto.
-assert (LENy : Zlength y = matrix_rows A2) by (rewrite <- H1; auto).
+assert (LENy : Zlength y = matrix_rows A2) by (rewrite <- H6; auto).
 fold N in LENv, LENy |-*.
 assert (EQyv: Forall2 strict_feq y v) by (apply strict_floatlist_eqv_i1; auto; symmetry; auto).
 
@@ -371,34 +375,32 @@ forward.
 Exists (S n) fy s.
 rewrite !choose_S.
 entailer!!.
-clear PNxp PNbp PNA2p PNA1p PNA1ip H9 H8 H7 H6.
-rewrite andb_true_iff in H5.
-destruct H5.
-destruct (Z.gtb_spec maxiter (Z.of_nat n + 1)); try discriminate. clear H6.
+rewrite andb_true_iff in H4.
+destruct H4.
+destruct (Z.gtb_spec maxiter (Z.of_nat n + 1)); try discriminate. clear H5.
 simpl.   
 
 assert (FINs: finite s). {
-  unfold stop in H5. rewrite andb_true_iff in H5. destruct H5.
+  unfold stop in H4. rewrite andb_true_iff in H4. destruct H4.
    apply finite_is_finite; auto.
 }
 split3; [ | | f_equal; f_equal; lia].
 -- simpl. rewrite K.
   change (andb _ _) with (stop (dist2 v (f v)) acc).
-  rewrite <- H1 in H4.
-  rewrite (CONGR_f  y v) in H2 by auto.
-  rewrite H2 in H4.
-  rewrite (stop_mor _ _ _ H4 _ _ FINacc) in H5 by auto. rewrite H5.
-  symmetry; auto.
+  rewrite <- H6 in H2.
+  rewrite (CONGR_f  y v) in H1 by auto.
+  rewrite H1 in H2.
+  rewrite (stop_mor _ _ _ H2 _ _ FINacc) in H4 by auto. rewrite H4.
+ constructor; symmetry; auto.
 --
-rewrite H4 in FINs.
+rewrite H2 in FINs.
 apply finite_dist2_e2 in FINs; auto.
-  rewrite H2. unfold f. rewrite Zlength_jacobi_iter; auto.
+  rewrite H1. unfold f. rewrite Zlength_jacobi_iter; auto.
 *
 forward.
 Exists (S n) fy s.
 rewrite !choose_S.
 entailer!!.
-clear PNxp PNbp PNA2p PNA1p PNA1ip H9 H8 H7 H6.
 unfold jacobi. fold A1inv. fold A2. fold f.
 destruct (stop s acc) eqn:?H.
 --
@@ -406,25 +408,25 @@ apply iter_stop_n_lem2 in K; auto.
 replace (pred _) with n by lia.
 rewrite K.
 split.
-rewrite H2 in H4.
-rewrite H4. apply dist2_mor; auto. symmetry; auto. rewrite H2; apply CONGR_f; auto.
-   rewrite H2 in H4.
-  rewrite (CONGR_f  y v) in H4 by auto. 
-  rewrite <- H1 in H4.
-  rewrite (stop_mor _ _ _ H4 _ _ FINacc) in H6. apply H6.
+rewrite H1 in H2.
+rewrite H2. apply dist2_mor; auto. symmetry; auto. rewrite H1; apply CONGR_f; auto.
+   rewrite H1 in H2.
+  rewrite (CONGR_f  y v) in H2 by auto. 
+  rewrite <- H6 in H2.
+  rewrite (stop_mor _ _ _ H2 _ _ FINacc) in H5. apply H5.
 --
 pose (k := (pred (Z.to_nat maxiter) - n)%nat).
 apply iter_stop_n_lem1 with (k:=k) in K; auto.
 replace (pred _) with (n+k)%nat by lia.
 rewrite K.
-rewrite H2. rewrite H4.
+rewrite H1. rewrite H2.
 split.
-apply dist2_mor; auto. symmetry; auto. rewrite H2.
+apply dist2_mor; auto. symmetry; auto. rewrite H1.
 apply CONGR_f; auto.
 apply CONGR_f; auto.
-  rewrite <- H1 in H4. rewrite H2 in H4.
-  rewrite (CONGR_f y v) in H4; auto.
-  rewrite (stop_mor _ _ _ H4 _ _ FINacc) in H6. apply H6.
+  rewrite <- H6 in H2. rewrite H1 in H2.
+  rewrite (CONGR_f y v) in H2; auto.
+  rewrite (stop_mor _ _ _ H2 _ _ FINacc) in H5. apply H5.
 Qed.
 
 Lemma body_jacobi2: semax_body Vprog Gprog f_jacobi2 jacobi2_spec.
@@ -484,7 +486,7 @@ apply semax_seq' with
   * rewrite sublist_nil, app_nil_l. entailer!. apply derives_refl.
   * forward. forward. entailer!. apply derives_refl'; f_equal.
      progress change float with (ftype Tdouble) in *.
-     clear - H10 H0 H16. rewrite Zlength_map in H16. simpl.
+     clear - H9 H0 H15. rewrite Zlength_map in H15. simpl.
      forget (matrix_rows A) as N. list_solve.
   * forward. entailer!. list_solve.
  + forward. entailer!!. 

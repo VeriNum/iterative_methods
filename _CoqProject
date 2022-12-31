@@ -20,4 +20,4 @@ sparse/verif_jacobi.v
 sparse/verif_jacobi2.v
 sparse/sparse_model.v
 sparse/fun_model_lemmas.v
-
+sparse/vst_improvements.v

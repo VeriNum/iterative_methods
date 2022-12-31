@@ -76,6 +76,52 @@ double jacobi2(double *A1, struct crs_matrix *A2, double *b, double *x, double a
   return s;
 }
 
+double schematic_iteration (double (*oneiter)(void*, double *x, double *y),
+			    void *scheme, unsigned N,
+			    double *x, double acc, unsigned maxiter) {
+  unsigned i;
+  double s, *t, *z=x, 
+    *y = (double *)surely_malloc(N*sizeof(double));
+  do {
+    s = oneiter(scheme,z,y);
+    t=z; z=y; y=t;
+    maxiter--;
+  } while (s*0==0.0 && s>acc && maxiter);
+  if (z!=x) {
+    for (i=0; i<N; i++) x[i]=z[i];
+    y=z;
+  }
+  free(y);
+  return s;
+}
+
+struct jacobi_scheme {
+  double *A1inv;
+  struct crs_matrix *A2;
+  double *b;
+};
+
+double jacobi_scheme_oneiter (void *jscheme, double *x, double *y) {
+  struct jacobi_scheme *p = (struct jacobi_scheme *)jscheme;
+  return jacobi2_oneiter(p->A1inv, p->A2, p->b, x, y);
+}
+
+double schematic_jacobi(double *A1, struct crs_matrix *A2, double *b, double *x,
+			double acc, unsigned maxiter) {
+  struct jacobi_scheme *p = (struct jacobi_scheme *)surely_malloc(sizeof *p);
+  unsigned i, N=crs_matrix_rows(A2);
+  double s, *A1inv = (double *)surely_malloc(N*sizeof(double));
+  for (i=0; i<N; i++) A1inv[i] = 1.0/A1[i];
+  p->A1inv=A1inv;
+  p->A2=A2;
+  p->b=b;
+  s = schematic_iteration(jacobi_scheme_oneiter, p, N, x, acc, maxiter);
+  free(p);
+  free(A1inv);
+  return s;
+}
+ 
+
 struct jtask {
   struct crs_matrix A2;
   double *A1;

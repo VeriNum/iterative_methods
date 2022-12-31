@@ -9,55 +9,6 @@ Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
 
-Ltac entbangbang :=
- intros;
- try lazymatch goal with POSTCONDITION := @abbreviate ret_assert _ |- _ =>
-        clear POSTCONDITION
-      end;
- try lazymatch goal with MORE_COMMANDS := @abbreviate statement _ |- _ =>
-        clear MORE_COMMANDS
-      end;
- lazymatch goal with
- | |- local _ && ?P |-- _ => clean_up_stackframe; go_lower;
-          rewrite ?TT_andp, ?andp_TT; try apply TT_right
- | |- ?P |-- _ =>
-    lazymatch type of P with
-    | ?T => tryif unify T (environ->mpred)
-                 then fail "entailer! found an (environ->mpred) entailment that is missing its 'local' left-hand-side part (that is, Delta)"
-                 else tryif unify T mpred
-                    then (clear_Delta; pull_out_props)
-                    else fail "Unexpected type of entailment, neither mpred nor environ->mpred"
-    end
- | |- _ => fail "The entailer tactic works only on entailments  _ |-- _ "
- end;
- repeat lazymatch goal with
-        | |- context [force_val (sem_binary_operation' ?op ?t1 ?t2 ?v1 ?v2)] =>
-          progress 
-              simpl  (* This simpl is safe, because its argument is not
-                           arbitrarily complex user expressions, it is ASTs
-                           produced by clightgen *)
-                (force_val (sem_binary_operation' op t1 t2 v1 v2))
-        end;
- simpl  (* This simpl is safe, because its argument is not
-                           arbitrarily complex user expressions, it is ASTs
-                           produced by clightgen *)
-        sem_cast;
- (*saturate_local; *)
- ent_iter;
- repeat change (mapsto_memory_block.spacer _ _ _ _) with emp;
- first [ contradiction
-        | simple apply prop_right; my_auto
-        | lazymatch goal with |- ?Q |-- !! _ && ?Q' => constr_eq  Q Q';
-                      simple apply prop_and_same_derives'; my_auto
-          end
-        | simple apply andp_right;
-            [apply prop_right; my_auto 
-            | cancel; rewrite <- ?sepcon_assoc; autorewrite with norm ]
-        | normalize; cancel; rewrite <- ?sepcon_assoc
-        ].
-
-Tactic Notation "entailer" "!!" := entbangbang.
-
 Lemma Zlength_jacobi_iter: 
   forall {t} A1 (A2: matrix t) b x, 
    Zlength A1 = matrix_rows A2 ->
