@@ -6,12 +6,12 @@
  approximately December 2022.  Until then there are workarounds available,
  consult the author if necessary.)
 
-In a Coq Platform that already has CompCert and VST installed, you must also install VSTlib and vcfloat.
-1. Clone the repo https://github.com/VeriNum/vcfloat
+In a Coq Platform that already has CompCert and VST installed, you must also install vcfloat and VSTlib (in that order!).
+1. Clone the repo https://github.com/VeriNum/vcfloat # (or git pull latest version!)
 2. cd vcfloat
 3. make -j
 4. make install # This will put things in your-coq-installation/coq/user-contrib/vcfloat
-5. Clone the repo https://github.com/PrincetonUniversity/VST
+5. Clone the repo https://github.com/PrincetonUniversity/VST # (or git pull latest version!)
 6. cd lib
 7. make -j
 8. make install # This will put things in your-coq-installation/coq/user-contrib/VSTlib

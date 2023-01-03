@@ -14,7 +14,7 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-Require Import lemmas.
+From Iterative Require Import lemmas.
 Import List ListNotations.
 
 Open Scope R_scope.

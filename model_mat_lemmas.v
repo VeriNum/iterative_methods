@@ -9,9 +9,9 @@ From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify Float_notations
 
 Set Bullet Behavior "Strict Subproofs". 
 
-Import IntervalFlocq3.Tactic.
+Import Interval.Tactic.
 
-Require Import inf_norm_properties real_model float_model lemmas vcfloat_lemmas.
+From Iterative Require Import inf_norm_properties real_model float_model lemmas vcfloat_lemmas.
 
 Local Open Scope float32_scope.
 
@@ -578,7 +578,7 @@ assert (k.+1%:R <= 101)%Re.
   + apply Rle_refl.
 }
 apply H2.
-try interval.
+compute; lra.
 Qed.
 
 Lemma matrix_norm_submult {n:nat}:

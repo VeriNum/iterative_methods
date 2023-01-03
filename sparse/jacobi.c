@@ -31,17 +31,96 @@ double jacobi_aux (double *A1, double *y, double *b, double *x, unsigned N) {
    At finish, x is some vector that's within acc^2 Euclidean distance 
    of (A x - b).
  */
-void jacobi(double *A1, struct crs_matrix *A2, double *b, double *x, double acc) {
+void jacobi(double *A1, struct crs_matrix *A2, double *b, double *x, double acc, unsigned maxiter) {
   unsigned i, N=A2->rows;
   double *y = (double *)surely_malloc(N*sizeof(double));
   double s;
   for (i=0; i<N; i++) A1[i] = 1.0/A1[i];
   do {
+    if (maxiter-- == 0) break;
     crs_matrix_vector_multiply(A2,x,y);
     s=jacobi_aux(A1,y,b,x,N);
   } while (s>acc);
   free(y);
 }
+
+double jacobi2_oneiter(double *A1inv, struct crs_matrix *A2, double *b, double *x, double *y) {
+  unsigned i, N=crs_matrix_rows(A2);
+  double s = 0.0;
+  for (i=0; i<N; i++) {
+      double r = A1inv[i]*(b[i] - crs_row_vector_multiply(A2,x,i));
+      double d = x[i]-r;
+      s = fma(d,d,s);
+      y[i] = r;
+    }
+  return s;
+}
+
+double jacobi2(double *A1, struct crs_matrix *A2, double *b, double *x, double acc, unsigned maxiter) {
+  unsigned i, N=crs_matrix_rows(A2);
+  double s, *t, *z=x, 
+    *y = (double *)surely_malloc(N*sizeof(double)),
+    *A1inv = (double *)surely_malloc(N*sizeof(double));
+  for (i=0; i<N; i++) A1inv[i] = 1.0/A1[i];
+  do {
+    s = jacobi2_oneiter(A1inv,A2,b,z,y);
+    t=z; z=y; y=t;
+    maxiter--;
+  } while (s*0==0.0 && s>acc && maxiter);
+  if (z!=x) {
+    for (i=0; i<N; i++) x[i]=z[i];
+    y=z;
+  }
+  free(y);
+  free (A1inv);
+  return s;
+}
+
+double schematic_iteration (double (*oneiter)(void*, double *x, double *y),
+			    void *scheme, unsigned N,
+			    double *x, double acc, unsigned maxiter) {
+  unsigned i;
+  double s, *t, *z=x, 
+    *y = (double *)surely_malloc(N*sizeof(double));
+  do {
+    s = oneiter(scheme,z,y);
+    t=z; z=y; y=t;
+    maxiter--;
+  } while (s*0==0.0 && s>acc && maxiter);
+  if (z!=x) {
+    for (i=0; i<N; i++) x[i]=z[i];
+    y=z;
+  }
+  free(y);
+  return s;
+}
+
+struct jacobi_scheme {
+  double *A1inv;
+  struct crs_matrix *A2;
+  double *b;
+};
+
+double jacobi_scheme_oneiter (void *jscheme, double *x, double *y) {
+  struct jacobi_scheme *p = (struct jacobi_scheme *)jscheme;
+  return jacobi2_oneiter(p->A1inv, p->A2, p->b, x, y);
+}
+
+double schematic_jacobi(double *A1, struct crs_matrix *A2, double *b, double *x,
+			double acc, unsigned maxiter) {
+  struct jacobi_scheme *p = (struct jacobi_scheme *)surely_malloc(sizeof *p);
+  unsigned i, N=crs_matrix_rows(A2);
+  double s, *A1inv = (double *)surely_malloc(N*sizeof(double));
+  for (i=0; i<N; i++) A1inv[i] = 1.0/A1[i];
+  p->A1inv=A1inv;
+  p->A2=A2;
+  p->b=b;
+  s = schematic_iteration(jacobi_scheme_oneiter, p, N, x, acc, maxiter);
+  free(p);
+  free(A1inv);
+  return s;
+}
+ 
 
 struct jtask {
   struct crs_matrix A2;

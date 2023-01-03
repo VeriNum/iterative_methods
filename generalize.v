@@ -1,7 +1,7 @@
 From Coq Require Import ZArith Reals Psatz.
 From Flocq Require Import Binary.
 From mathcomp Require Import ssreflect ssralg all_algebra seq.
-Require Import dot_prod_defn.
+From Iterative Require Import dot_prod_defn.
 
 
 Import List ListNotations.

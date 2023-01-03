@@ -6,7 +6,7 @@ From Coq Require Import ZArith Reals Psatz.
 From Flocq Require Import Binary.
 From mathcomp Require Import all_ssreflect ssralg all_algebra seq matrix classical_sets.
 From mathcomp.analysis Require Import Rstruct reals.
-Require Import dot_prod_defn generalize float_model_generic 
+From Iterative Require Import dot_prod_defn generalize float_model_generic 
      inf_norm_properties lemmas matrix_vec_mult_bound matrix_matrix_mult_bound
      real_func_model_generic.
 
