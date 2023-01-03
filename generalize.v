@@ -4,7 +4,7 @@ From mathcomp Require Import ssreflect ssralg all_algebra seq.
 From Iterative Require Import dot_prod_defn.
 
 
-Import List ListNotations.
+Import Coq.Lists.List Coq.Lists.List.ListNotations.
 
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify Float_notations Automate.
 Set Bullet Behavior "Strict Subproofs". 

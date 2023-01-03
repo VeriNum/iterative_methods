@@ -11,7 +11,7 @@ From Iterative Require Import dot_prod_defn generalize float_model_generic
      real_func_model_generic.
 
 
-Import List ListNotations.
+Import Coq.Lists.List Coq.Lists.List.ListNotations.
 
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
                             Float_notations Automate.
