@@ -8,7 +8,7 @@ Import List ListNotations.
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
                             Float_notations Automate.
 Require Import dot_prod_defn float_model_generic.
-Require Import floatlib.
+Require Import floatlib jacob_list_fun_model.
 Set Bullet Behavior "Strict Subproofs". 
 
 Set Implicit Arguments.
@@ -43,8 +43,8 @@ Print List.nth.
 
 
 
-Definition matrix_inj {t} (A: matrix t)  : 'M[ftype t]_(length A):=
-    \matrix_(i < (length A), j < (length A)) 
+Definition matrix_inj {t} (A: matrix t) n  : 'M[ftype t]_n:=
+    \matrix_(i < n, j < n) 
      nth j (nth i A [::]) (Zconst t 0).
 
 
@@ -87,9 +87,20 @@ case: x. intros.
      ++ simpl.
  *)
 
+Definition vector_inj {t} (v: vector t) n  : 'cV[ftype t]_n :=
+   \col_(i < n) nth i v (Zconst t 0).
 
-Lemma func_model_equiv:
-  @jacobi_n Tsingle 
+
+Lemma func_model_equiv (A: matrix Tsingle) (b: vector Tsingle) (x: vector Tsingle) (n: nat) :
+  let size := (length A).-1 in   
+  let x_v := vector_inj x size.+1 in 
+  let b_v := vector_inj b size.+1 in 
+  let A_v := matrix_inj A size.+1 in 
+  vector_inj (jacobi_n A b x n) size.+1 = @X_m_jacobi size n x_v b_v A_v.
+Proof.
+intros.
+apply /matrixP. unfold eqrel.
+intros. rewrite !mxE.
 
 
 
