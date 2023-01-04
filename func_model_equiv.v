@@ -92,15 +92,30 @@ Definition vector_inj {t} (v: vector t) n  : 'cV[ftype t]_n :=
 
 
 Lemma func_model_equiv (A: matrix Tsingle) (b: vector Tsingle) (x: vector Tsingle) (n: nat) :
-  let size := (length A).-1 in   
+  let size := (length A).-1 in  
   let x_v := vector_inj x size.+1 in 
   let b_v := vector_inj b size.+1 in 
   let A_v := matrix_inj A size.+1 in 
   vector_inj (jacobi_n A b x n) size.+1 = @X_m_jacobi size n x_v b_v A_v.
 Proof.
 intros.
-apply /matrixP. unfold eqrel.
-intros. rewrite !mxE.
+induction n.
++ apply /matrixP. unfold eqrel.
+  intros. by rewrite !mxE /=.  
++ simpl. rewrite -IHn.
+  apply /matrixP. unfold eqrel.
+  intros. rewrite !mxE. 
+  unfold jacob_list_fun_model.jacobi_iter.
+  Print diagmatrix_vector_mult.
+  Print dot_prodF.
+
+
+unfold dot_prodF. sum_fixF.
+   
+elim: n x0  => [ |n IHn ] x0.
++ by rewrite /= /x_v !mxE /=. 
++ simpl. unfold jacobi_iter.
+
 
 
 
