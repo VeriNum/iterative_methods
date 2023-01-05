@@ -35,6 +35,30 @@ Fixpoint vec_to_list_float {ty} {n:nat} (m:nat) (v :'cV[ftype ty]_n.+1)
    | S p => [v (@inord n p) ord0] ++ vec_to_list_float p v
    end.
 
+Lemma nth_vec_to_list_float {ty} {n:nat} i m (v :'cV[ftype ty]_n.+1):
+  (i < m)%nat ->
+  nth (m.-1 -i) (@vec_to_list_float _ n m v) (Zconst ty 0) = v (@inord n i) ord0.
+Proof.
+intros.
+elim: m i H => [ | m IHm] i H.
++ by [].
++ simpl.
+  rewrite leq_eqVlt in H.
+  assert ((i == m) \/ (i < m)%nat).
+  { by apply /orP. } destruct H0.
+  - assert (i = m). { by apply /eqP. }
+    rewrite H1. simpl.
+    assert ((m - m)%nat = 0%N). 
+    { apply /eqP. rewrite subn_eq0. by []. } by rewrite H2 /=.
+  - assert (nth (m.-1 - i) (vec_to_list_float m v)
+                (Zconst ty 0) = v (inord i) ord0).
+    { by apply IHm. } 
+    rewrite -H1. rewrite -[in RHS]predn_sub.
+    rewrite -subn_gt0 in H0. rewrite -predn_sub in H1.
+    by destruct (m - i)%nat.
+Qed.
+
+
 
 (** Matrix multiplication as dot product  **)
 Definition mulmx_float {ty} {m n p : nat} 
@@ -123,13 +147,76 @@ apply nth_ext with (Zconst ty 0) (Zconst ty 0).
 Admitted.
 
 *)
+
+Print BFMA.
+Print map.
+Print fold_left.
+
 (*
-Lemma dotprod_diag:
+Lemma fold_left_pick {ty} i f (l: list ((ftype ty) * (ftype ty))) :
+  ( i < length l)%nat ->
+  (nth i (f (fst l) (snd l) (Zconst ty 0)) (Zconst ty 0)) <> (Zconst ty 0) ->
+  (forall j, (j < length l)%nat -> j <> i -> (nth j (f (fst l) (snd l) (Zconst ty 0)) (Zconst ty 0)) = (Zconst ty 0)) -> 
+  fold_left (fun l s => f (fst l) (snd l) s) l (Zconst ty 0)  = nth i (f (fst l) (snd l) (Zconst ty 0)) (Zconst ty 0).
+Proof.
+intros.
+induction l.
++ by simpl in H.
++ simpl. destruct i.
+  - simpl. simpl in H0. admit.
+  - admit.
+Admitted.
+*)
+
+Print BFMA.
+
+(*
+Lemma dotprod_diag {ty}  (A: matrix ty) (v: vector ty):
+  let size := (length A).-1 in
+  forall (i: 'I_size.+1),
+  let A_v := matrix_inj A size.+1 size.+1 in  
   dotprod
   (vec_to_list_float size.+1
      (\row_j0 A1_inv_J A_v i j0)^T) v = 
-  nth i 
+  BFMA 
+  (nth (nat_of_ord i) (vec_to_list_float size.+1 (\row_j0 A1_inv_J A_v i j0)^T) (Zconst ty 0) )
+  (nth (nat_of_ord i) v (Zconst ty 0) ) (Zconst ty 0).
+Proof.
+intros.
+unfold dotprod.
+rewrite (@fold_left_pick ty _ 
+         (fun (s : ftype ty) (x12 : ftype ty * ftype ty)
+            => BFMA x12.1 x12.2 s) (combine
+     (vec_to_list_float size.+1
+        (\row_j0 A1_inv_J A_v i j0)^T) v)_ .
+
 *)
+
+
+Lemma dotprod_diag {ty} (v1 v2: vector ty) i :
+  length v1 = length v2 ->
+  (i < length v1)%nat -> 
+  nth i v1 (Zconst ty 0) <> (Zconst ty 0) ->
+  (forall j , (j < length v1)%nat -> j <> i -> nth j v1 (Zconst ty 0) = Zconst ty 0) ->
+  dotprod v1 v2 = 
+  BMULT ty (nth i v1 (Zconst ty 0)) (nth i v2 (Zconst ty 0)).
+Proof.
+intros.
+unfold dotprod.
+
+
+
+Admitted.
+
+
+Lemma length_veclist {ty} {n m:nat} (v: 'cV[ftype ty]_n.+1):
+  length (@vec_to_list_float _ n m v) = m.
+Proof.
+induction m.
++ simpl. auto.
++ simpl. by rewrite IHm.
+Qed.
+
 
 Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat) :
   let size := (length A).-1 in  
@@ -152,14 +239,12 @@ induction n.
   unfold diagmatrix_vector_mult, map2, uncurry.
   rewrite (@map_nth _ _ _ _ (Zconst ty 0, Zconst ty 0) _).
   rewrite combine_nth.
-  - 
-
-
-
-
-
-
- admit.
+  - rewrite (@dotprod_diag _ _ _ (nat_of_ord i)).
+    * admit.
+    * by rewrite !length_veclist.
+    * rewrite length_veclist. apply ltn_ord.
+    * admit.
+    * intros. admit.
   - unfold invert_diagmatrix, vector_sub, map2.
     rewrite !map_length combine_length.
     unfold matrix_vector_mult. rewrite !map_length !seq_length.
