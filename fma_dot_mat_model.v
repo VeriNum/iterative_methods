@@ -239,12 +239,20 @@ induction n.
   unfold diagmatrix_vector_mult, map2, uncurry.
   rewrite (@map_nth _ _ _ _ (Zconst ty 0, Zconst ty 0) _).
   rewrite combine_nth.
-  - rewrite (@dotprod_diag _ _ _ (nat_of_ord i)).
-    * admit.
+  - rewrite (@dotprod_diag _ _ _ (size.+1.-1 - (nat_of_ord i))).
+    * repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
+      rewrite !mxE.
+      assert (i == @inord size i :> nat ). { by rewrite inord_val. }
+      rewrite H0. admit.
     * by rewrite !length_veclist.
-    * rewrite length_veclist. apply ltn_ord.
-    * admit.
-    * intros. admit.
+    * rewrite length_veclist. rewrite ltn_subLR. simpl. admit.
+      simpl. apply ltnSE, ltn_ord.
+    * rewrite nth_vec_to_list_float. rewrite !mxE /=.
+      assert (i == @inord size i :> nat ). { by rewrite inord_val. }
+      rewrite H0. admit. apply ltn_ord.
+    * intros. 
+      admit.
+
   - unfold invert_diagmatrix, vector_sub, map2.
     rewrite !map_length combine_length.
     unfold matrix_vector_mult. rewrite !map_length !seq_length.
