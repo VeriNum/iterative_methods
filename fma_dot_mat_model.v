@@ -46,12 +46,124 @@ Definition mulmx_float {ty} {m n p : nat}
     @dotprod ty l1 l2.
 
 
+Definition opp_mat {ty} {m n: nat} (A : 'M[ftype ty]_(m.+1, n.+1)) 
+  : 'M[ftype ty]_(m.+1, n.+1) :=
+  \matrix_(i,j) (BOPP ty (A i j)). 
+
+
+Notation "A +f B" := (addmx_float A B) (at level 80).
+Notation "-f A" := (opp_mat A) (at level 50).
+Notation "A *f B" := (mulmx_float A B) (at level 70).
+
+Print BDIV.
+
+(** Functional model for Jacobi iteration **)
+Definition A1_inv_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'M[ftype ty]_n.+1:=
+  \matrix_(i,j) 
+    (if (i==j :> nat) then (BDIV ty (Zconst ty 1) (A i i)) else (Zconst ty 0)).
+
+Definition A2_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1): 
+  'M[ftype ty]_n.+1 :=
+  \matrix_(i,j) 
+    if (i==j :> nat) then (Zconst ty 0) else A i j.
+
+Definition jacobi_iter {ty} {n:nat} x0 b (A: 'M[ftype ty]_n.+1) : 
+  'cV[ftype ty]_n.+1 :=
+   let r := b +f (-f ((A2_J A) *f x0)) in
+   (A1_inv_J A) *f r.
+
+
+Definition X_m_jacobi {ty} {n:nat} m x0 b (A: 'M[ftype ty]_n.+1) :
+  'cV[ftype ty]_n.+1 :=
+   Nat.iter m  (fun x0 => jacobi_iter x0 b A) x0.
+
+
+
+Definition matrix_inj {t} (A: matrix t) m n  : 'M[ftype t]_(m,n):=
+    \matrix_(i < m, j < n) 
+     nth j (nth i A [::]) (Zconst t 0).
+
+
+Definition vector_inj {t} (v: vector t) n  : 'cV[ftype t]_n :=
+   \col_(i < n) nth i v (Zconst t 0).
+
+(*
+Lemma vector_sub_equiv {ty} (v1 v2: vector ty) :
+  (0 < length (combine v1 v2))%nat ->
+  let size := (length (combine v1 v2)).-1 in
+  let v1_v := vector_inj v1 size.+1 in 
+  let v2_v := vector_inj v2 size.+1 in 
+  rev (vector_sub v1 v2) = 
+  vec_to_list_float size.+1 (\col_j (v1_v +f (-f v2_v)) j ord0).
+Proof.
+intros.
+apply nth_ext with (Zconst ty 0) (Zconst ty 0).
++ admit.
++ intros. rewrite rev_nth.
+  assert ( length (vector_sub v1 v2) = size.+1).
+  { unfold size. rewrite prednK. admit. by []. } rewrite H1.
+  induction n.
+  - simpl. rewrite !mxE /=.
+    unfold vector_sub, map2, uncurry.
+    (*assert (0%F32 = (fun p : ftype Tsingle * ftype Tsingle
+                         => let (x, y) := p in (x - y)%F32)
+                     (Zconst Tsingle 0, Zconst Tsingle 0)).
+    { admit. } once rewrite H1.
+    Print map_nth. 
+*)
+    rewrite (@map_nth _ _ _ _ (Zconst ty 0, Zconst ty 0) _).
+    rewrite combine_nth. 
+    assert ((size - 0)%coq_nat = size). { lia. } rewrite H2.
+    rewrite inordK.  
+    unfold sum. admit.
+    by [].
+    admit.
+  - simpl. rewrite -IHn.
+  - admit.
+Admitted.
+
+*)
+(*
+Lemma dotprod_diag:
+  dotprod
+  (vec_to_list_float size.+1
+     (\row_j0 A1_inv_J A_v i j0)^T) v = 
+  nth i 
+*)
+
+Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat) :
+  let size := (length A).-1 in  
+  let x_v := vector_inj x size.+1 in 
+  let b_v := vector_inj b size.+1 in 
+  let A_v := matrix_inj A size.+1 size.+1 in
+  length b = length A -> 
+  vector_inj (jacobi_n A b x n) size.+1 = @X_m_jacobi ty size n x_v b_v A_v.
+Proof.
+intros.
+induction n.
++ apply /matrixP. unfold eqrel.
+  intros. by rewrite !mxE /=.  
++ simpl. rewrite -IHn.
+  apply /matrixP. unfold eqrel.
+  move=> i j.
+  rewrite !mxE. 
+  unfold jacob_list_fun_model.jacobi_iter.
+  remember (jacobi_n A b x n) as x_n.
+  unfold diagmatrix_vector_mult, map2, uncurry.
+  rewrite (@map_nth _ _ _ _ (Zconst ty 0, Zconst ty 0) _).
+  rewrite combine_nth.
+  - 
 
 
 
 
 
 
-
+ admit.
+  - unfold invert_diagmatrix, vector_sub, map2.
+    rewrite !map_length combine_length.
+    unfold matrix_vector_mult. rewrite !map_length !seq_length.
+    unfold matrix_rows_nat. by rewrite H;lia.
+Admitted.
 
 End WITHNANS.
