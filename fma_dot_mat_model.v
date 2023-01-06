@@ -199,7 +199,7 @@ Lemma dotprod_diag {ty} (v1 v2: vector ty) i :
   nth i v1 (Zconst ty 0) <> (Zconst ty 0) ->
   (forall j , (j < length v1)%nat -> j <> i -> nth j v1 (Zconst ty 0) = Zconst ty 0) ->
   dotprod v1 v2 = 
-  BMULT ty (nth i v1 (Zconst ty 0)) (nth i v2 (Zconst ty 0)).
+  BMULT ty (nth i v1 (Zconst ty 1)) (nth i v2 (Zconst ty 0)).
 Proof.
 intros.
 unfold dotprod.
@@ -297,8 +297,76 @@ induction n.
   apply /matrixP. unfold eqrel.
   move=> i j.
   rewrite !mxE. 
-  unfold jacob_list_fun_model.jacobi_iter.
   remember (jacobi_n A b x n) as x_n.
+  (*nth i
+  (map
+     (fun p : ftype ty * ftype ty =>
+      let (x0, y) := p in BMULT ty x0 y)
+     (combine
+        (invert_diagmatrix
+           (diag_of_matrix A))
+        (vector_sub b
+           (matrix_vector_mult
+              (remove_diag A) x_n))))
+  (Zconst ty 0)
+*)
+  assert (nth i
+            (jacob_list_fun_model.jacobi_iter
+               (invert_diagmatrix (diag_of_matrix A))
+               (remove_diag A) b x_n)
+            (Zconst ty 0) = BMULT ty
+              (nth i
+                 (invert_diagmatrix (diag_of_matrix A))
+                 (Zconst ty 1))
+              (nth i
+                 (vector_sub b
+                    (matrix_vector_mult (remove_diag A)
+                       x_n)) (Zconst ty 0))).
+  { unfold jacob_list_fun_model.jacobi_iter.
+    unfold diagmatrix_vector_mult, map2, uncurry.
+    assert (Zconst ty 0 = BMULT ty (Zconst ty 1) (Zconst ty 0)).
+    { admit. } rewrite H0.
+    admit.
+  } rewrite H0. 
+  assert (dotprod (vec_to_list_float size.+1
+                      (\row_j0 A1_inv_J A_v i j0)^T) 
+          (vec_to_list_float size.+1
+               (\col_j0 (b_v +f
+                         -f (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) = 
+          BMULT ty (nth (size.+1.-1 - (nat_of_ord i)) (vec_to_list_float size.+1
+                      (\row_j0 A1_inv_J A_v i j0)^T) (Zconst ty 1))
+          (nth (size.+1.-1 - (nat_of_ord i)) (vec_to_list_float size.+1
+               (\col_j0 (b_v +f
+                         -f (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) (Zconst ty 0))).
+  { rewrite (@dotprod_diag _ _ _ (size.+1.-1 - (nat_of_ord i))); try by [].
+    + by rewrite !length_veclist.
+    + rewrite length_veclist. rewrite ltn_subLR. simpl. admit.
+      simpl. apply ltnSE, ltn_ord.
+    + rewrite nth_vec_to_list_float. rewrite !mxE /=.
+      assert (i == @inord size i :> nat ). { by rewrite inord_val. }
+      rewrite H1. admit. apply ltn_ord.
+    + intros. 
+      admit.
+  } 
+  assert ((let l1 :=
+             vec_to_list_float size.+1
+               (\row_j0 A1_inv_J A_v i j0)^T in
+           let l2 :=
+             vec_to_list_float size.+1
+               (\col_j0 (b_v +f
+                         -f
+                         (A2_J A_v *f
+                          vector_inj x_n size.+1)) j0
+                          j) in
+           dotprod l1 l2) = 
+           dotprod (vec_to_list_float size.+1
+                      (\row_j0 A1_inv_J A_v i j0)^T) 
+          (vec_to_list_float size.+1
+               (\col_j0 (b_v +f
+                         -f (A2_J A_v *f vector_inj x_n size.+1)) j0 j))).
+   { by []. } rewrite H2 H1. clear H2 H1.
+
+  unfold jacob_list_fun_model.jacobi_iter.
   unfold diagmatrix_vector_mult, map2, uncurry.
   rewrite (@map_nth _ _ _ _ (Zconst ty 0, Zconst ty 0) _).
   rewrite combine_nth.
