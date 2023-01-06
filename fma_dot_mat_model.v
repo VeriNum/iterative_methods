@@ -433,7 +433,15 @@ assert (nth i (matrix_vector_mult (remove_diag A) v)
                    then Zconst ty 0
                    else matrix_index A i0 j)) [])
         v).
-{ admit. } rewrite H0. clear H0. 
+{ unfold matrix_by_index. rewrite nth_map_seq.
+  unfold matrix_vector_mult.
+  rewrite (@map_nth _ _ _ _ [] _ ).
+  unfold remove_diag.
+  unfold matrix_by_index. rewrite nth_map_seq.
+  + admit.
+  + admit.
+  + admit.
+} rewrite H0. clear H0. 
 assert (v = rev (vec_to_list_float size.+1
           (\col_j0 vector_inj v size.+1 j0 ord0))).
 { apply v_equiv. admit. }
@@ -550,7 +558,24 @@ induction n.
                BMINUS ty (nth i b (Zconst ty 0))
                     (nth i  (matrix_vector_mult (remove_diag A)
                             x_n) (Zconst ty 0))).
-       { admit. } rewrite H1. 
+       { unfold vector_sub, map2, uncurry. 
+         rewrite (@map_nth _ _ _ _ (Zconst ty 0, Zconst ty 0) _ ).
+         rewrite combine_nth. 
+         (*Unable to unify
+             "@BMINUS NANS ty
+                (@nth (ftype ty) i b (Zconst ty 0))
+                (@nth (ftype ty) i
+                   (@matrix_vector_mult ty
+                      (@remove_diag ty A) x_n) 
+                   (Zconst ty 0))"
+            with
+             "@BMINUS FPCompCert.nans ty
+                (@nth (ftype ty) i b (Zconst ty 0))
+                (@nth (ftype ty) i
+                   (@matrix_vector_mult ty
+                      (@remove_diag ty A) x_n) 
+                   (Zconst ty 0))". *)
+       admit. } rewrite H1. 
        rewrite !mxE.
        assert (i == @inord size i :> nat ). { by rewrite inord_val. }
        rewrite H2. 
