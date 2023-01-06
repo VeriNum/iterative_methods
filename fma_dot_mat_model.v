@@ -279,6 +279,42 @@ by unfold matrix_rows_nat.
 Admitted.
 
 
+(*
+BMULT ty
+  (BDIV ty (Zconst ty 1)
+     (nth i (nth i A []) (Zconst ty 0)))
+  (nth i
+     (map
+        (fun p : ftype ty * ftype ty =>
+         let (x0, y) := p in BMINUS ty x0 y)
+        (combine b
+           (matrix_vector_mult
+              (remove_diag A) x_n)))
+     (Zconst ty 0)) =
+BMULT ty
+  (BDIV ty (Zconst ty 1)
+     (nth i (nth i A []) (Zconst ty 0)))
+  (BPLUS ty (nth (inord i) b (Zconst ty 0))
+     (BOPP ty
+        (dotprod
+           (vec_to_list_float size.+1
+              (\row_j0 A2_J A_v (inord i) j0)^T)
+           (vec_to_list_float size.+1
+              (\col_j0 vector_inj x_n
+                         size.+1 j0 j)))))
+*)
+
+
+Lemma residual_equiv {ty} (v: vector ty) (A: matrix ty) i:
+  let size := (length A).-1 in   
+  let A_v := matrix_inj A size.+1 size.+1 in
+  nth i (matrix_vector_mult (remove_diag A) v) (Zconst ty 0) = 
+  dotprod (vec_to_list_float size.+1
+              (\row_j0 A2_J A_v (inord i) j0)^T)
+           (vec_to_list_float size.+1
+              (\col_j0 vector_inj v size.+1 j0 ord0)).
+Proof.
+
 
 
 Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat) :
