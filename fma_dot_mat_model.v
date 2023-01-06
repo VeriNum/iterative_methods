@@ -116,88 +116,6 @@ Definition matrix_inj {t} (A: matrix t) m n  : 'M[ftype t]_(m,n):=
 Definition vector_inj {t} (v: vector t) n  : 'cV[ftype t]_n :=
    \col_(i < n) nth i v (Zconst t 0).
 
-(*
-Lemma vector_sub_equiv {ty} (v1 v2: vector ty) :
-  (0 < length (combine v1 v2))%nat ->
-  let size := (length (combine v1 v2)).-1 in
-  let v1_v := vector_inj v1 size.+1 in 
-  let v2_v := vector_inj v2 size.+1 in 
-  rev (vector_sub v1 v2) = 
-  vec_to_list_float size.+1 (\col_j (v1_v +f (-f v2_v)) j ord0).
-Proof.
-intros.
-apply nth_ext with (Zconst ty 0) (Zconst ty 0).
-+ admit.
-+ intros. rewrite rev_nth.
-  assert ( length (vector_sub v1 v2) = size.+1).
-  { unfold size. rewrite prednK. admit. by []. } rewrite H1.
-  induction n.
-  - simpl. rewrite !mxE /=.
-    unfold vector_sub, map2, uncurry.
-    (*assert (0%F32 = (fun p : ftype Tsingle * ftype Tsingle
-                         => let (x, y) := p in (x - y)%F32)
-                     (Zconst Tsingle 0, Zconst Tsingle 0)).
-    { admit. } once rewrite H1.
-    Print map_nth. 
-*)
-    rewrite (@map_nth _ _ _ _ (Zconst ty 0, Zconst ty 0) _).
-    rewrite combine_nth. 
-    assert ((size - 0)%coq_nat = size). { lia. } rewrite H2.
-    rewrite inordK.  
-    unfold sum. admit.
-    by [].
-    admit.
-  - simpl. rewrite -IHn.
-  - admit.
-Admitted.
-
-*)
-
-Print BFMA.
-Print map.
-Print fold_left.
-
-(*
-Lemma fold_left_pick {ty} i f (l: list ((ftype ty) * (ftype ty))) :
-  ( i < length l)%nat ->
-  (nth i (f (fst l) (snd l) (Zconst ty 0)) (Zconst ty 0)) <> (Zconst ty 0) ->
-  (forall j, (j < length l)%nat -> j <> i -> (nth j (f (fst l) (snd l) (Zconst ty 0)) (Zconst ty 0)) = (Zconst ty 0)) -> 
-  fold_left (fun l s => f (fst l) (snd l) s) l (Zconst ty 0)  = nth i (f (fst l) (snd l) (Zconst ty 0)) (Zconst ty 0).
-Proof.
-intros.
-induction l.
-+ by simpl in H.
-+ simpl. destruct i.
-  - simpl. simpl in H0. admit.
-  - admit.
-Admitted.
-*)
-
-Print BFMA.
-
-(*
-Lemma dotprod_diag {ty}  (A: matrix ty) (v: vector ty):
-  let size := (length A).-1 in
-  forall (i: 'I_size.+1),
-  let A_v := matrix_inj A size.+1 size.+1 in  
-  dotprod
-  (vec_to_list_float size.+1
-     (\row_j0 A1_inv_J A_v i j0)^T) v = 
-  BFMA 
-  (nth (nat_of_ord i) (vec_to_list_float size.+1 (\row_j0 A1_inv_J A_v i j0)^T) (Zconst ty 0) )
-  (nth (nat_of_ord i) v (Zconst ty 0) ) (Zconst ty 0).
-Proof.
-intros.
-unfold dotprod.
-rewrite (@fold_left_pick ty _ 
-         (fun (s : ftype ty) (x12 : ftype ty * ftype ty)
-            => BFMA x12.1 x12.2 s) (combine
-     (vec_to_list_float size.+1
-        (\row_j0 A1_inv_J A_v i j0)^T) v)_ .
-
-*)
-
-
 Lemma dotprod_diag {ty} (v1 v2: vector ty) i :
   length v1 = length v2 ->
   (i < length v1)%nat -> 
@@ -222,28 +140,6 @@ induction m.
 + simpl. by rewrite IHm.
 Qed.
 
-(*
-Lemma dotprod_diag {ty} (v1 v2: vector ty) i:
-  dotprod v1 v2 =
-  BMULT 
-  (nth i v1 (Zconst ty 0) (nth i v2 (Zconst ty 0).
-
-*)
-
-
-(***
-BMULT ty
-  (nth i
-     (invert_diagmatrix (diag_of_matrix A))
-     (Zconst ty 0))
-  (nth i
-     (vector_sub b
-        (matrix_vector_mult (remove_diag A)
-           x_n)) (Zconst ty 0)) =
-BMULT ty
-  (BDIV ty (Zconst ty 1)
-     (nth i (nth i A []) (Zconst ty 0)))
-***)
 
 Import jacob_list_fun_model.Experiment.
 
@@ -284,32 +180,6 @@ by unfold matrix_rows_nat.
 Admitted.
 
 
-(*
-BMULT ty
-  (BDIV ty (Zconst ty 1)
-     (nth i (nth i A []) (Zconst ty 0)))
-  (nth i
-     (map
-        (fun p : ftype ty * ftype ty =>
-         let (x0, y) := p in BMINUS ty x0 y)
-        (combine b
-           (matrix_vector_mult
-              (remove_diag A) x_n)))
-     (Zconst ty 0)) =
-BMULT ty
-  (BDIV ty (Zconst ty 1)
-     (nth i (nth i A []) (Zconst ty 0)))
-  (BPLUS ty (nth (inord i) b (Zconst ty 0))
-     (BOPP ty
-        (dotprod
-           (vec_to_list_float size.+1
-              (\row_j0 A2_J A_v (inord i) j0)^T)
-           (vec_to_list_float size.+1
-              (\col_j0 vector_inj x_n
-                         size.+1 j0 j)))))
-*)
-
-
 Lemma v_equiv {ty} (v: vector ty) size:
   length v = size.+1 -> 
   v = rev (vec_to_list_float size.+1
@@ -330,22 +200,6 @@ apply nth_ext with (Zconst ty 0) (Zconst ty 0).
 Qed.
 
 
-(**
-dotprod
-  (nth i
-     (matrix_by_index (matrix_rows_nat A)
-        (matrix_rows_nat A)
-        (fun i0 j : nat =>
-         if is_left (Nat.eq_dec i0 j)
-         then Zconst ty 0
-         else matrix_index A i0 j)) [])
-  (rev
-     (vec_to_list_float size.+1
-        (\col_j0 vector_inj v size.+1 j0 ord0))) =
-dotprod
-  (vec_to_list_float size.+1
-     (\row_j0 A2_J A_v (inord i) j0)^T)
-**)
 Lemma A2_equiv {ty} (A: matrix ty) size i :
   length A = size.+1 ->
   (i < size.+1)%coq_nat ->
@@ -378,10 +232,11 @@ apply nth_ext with (Zconst ty 0) (Zconst ty 0).
          -- unfold is_left.
             case: (Nat.eq_dec i n). 
             ** intros. rewrite a //=. 
-               assert (n == n :>nat = true). { admit. }
+               assert (n == n :>nat = true). 
+               { by apply /eqP. }
                by rewrite H3.
             ** intros.
-               assert ( i == n :> nat = false). { admit. }
+               assert ( i == n :> nat = false). { by apply /eqP. }
                rewrite H3. by unfold matrix_index. 
          -- rewrite /matrix_by_index nth_map_seq in H1.
             ** rewrite map_length seq_length /matrix_rows_nat H in H1.
@@ -400,7 +255,7 @@ apply nth_ext with (Zconst ty 0) (Zconst ty 0).
   - rewrite /matrix_by_index nth_map_seq in H1.
     -- by rewrite map_length seq_length /matrix_rows_nat H in H1.
     -- unfold matrix_rows_nat. by rewrite H.
-Admitted.
+Qed.
 
 Lemma combine_rev {ty} (v1 v2: vector ty):
   (combine (rev v1) (rev v2)) = rev (combine v1 v2).
@@ -435,17 +290,6 @@ Lemma residual_equiv {ty} (v: vector ty) (A: matrix ty) i:
               (\col_j0 vector_inj v size.+1 j0 ord0)).
 Proof.
 intros.
-(*
-nth i
-  (map (dotprod^~ v)
-     (matrix_by_index (matrix_rows_nat A)
-        (matrix_rows_nat A)
-        (fun i0 j : nat =>
-         if Nat.eq_dec i0 j
-         then Zconst ty 0
-         else matrix_index A i0 j)))
-  (Zconst ty 0)
-*)
 assert (nth i (matrix_vector_mult (remove_diag A) v)
           (Zconst ty 0) = 
         dotprod 
@@ -512,18 +356,6 @@ induction n.
   move=> i j.
   rewrite !mxE. 
   remember (jacobi_n A b x n) as x_n.
-  (*nth i
-  (map
-     (fun p : ftype ty * ftype ty =>
-      let (x0, y) := p in BMULT ty x0 y)
-     (combine
-        (invert_diagmatrix
-           (diag_of_matrix A))
-        (vector_sub b
-           (matrix_vector_mult
-              (remove_diag A) x_n))))
-  (Zconst ty 0)
-*)
   assert (nth i
             (jacob_list_fun_model.jacobi_iter
                (invert_diagmatrix (diag_of_matrix A))
