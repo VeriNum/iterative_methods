@@ -381,6 +381,24 @@ apply nth_ext with (Zconst ty 0) (Zconst ty 0).
   - admit.
 Admitted.
 
+Lemma combine_rev {ty} (v1 v2: vector ty):
+  (combine (rev v1) (rev v2)) = rev (combine v1 v2).
+Proof.
+Admitted.
+
+
+
+Lemma dotprod_rev_equiv {ty} (v1 v2: vector ty):
+  dotprod (rev v1) (rev v2) = dotprod v1 v2.
+Proof.
+unfold dotprod.
+assert ((combine (rev v1) (rev v2)) = rev (combine v1 v2)).
+{ admit. } rewrite H. 
+(** with the vec_to_float_list, I am actually implementing a
+    fold right model
+**)
+Admitted.
+
 
 
 Lemma residual_equiv {ty} (v: vector ty) (A: matrix ty) i:
@@ -433,15 +451,11 @@ Check ((matrix_by_index (matrix_rows_nat A)
          else matrix_index A i0 j))).
 Check (nth i A []).
 unfold A2_J.
+Admitted.
 
-
-unfold dotprod.
-Print map_nth.
-Check (fun row => dotprod row v).
-rewrite (@map_nth _ _  (fun row => dotprod row v) (remove_diag A) [(Zconst ty 0)] i ).
-rewrite map_nth.
-
-
+Lemma plus_minus_eqiv {ty} (x y : ftype ty):
+  BPLUS ty x (BOPP ty y) = BMINUS ty x y.
+Admitted.
 
 Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat) :
   let size := (length A).-1 in  
@@ -529,13 +543,29 @@ induction n.
    { by []. } rewrite H2 H1. clear H2 H1.
    rewrite A1_invert_equiv.
    - rewrite nth_vec_to_list_float.
-     * rewrite !mxE.
+     * assert (nth i
+                   (vector_sub b
+                      (matrix_vector_mult (remove_diag A) x_n))
+                   (Zconst ty 0) = 
+               BMINUS ty (nth i b (Zconst ty 0))
+                    (nth i  (matrix_vector_mult (remove_diag A)
+                            x_n) (Zconst ty 0))).
+       { admit. } rewrite H1. 
+       rewrite !mxE.
        assert (i == @inord size i :> nat ). { by rewrite inord_val. }
-       rewrite H1. 
+       rewrite H2. 
        rewrite nth_vec_to_list_float.
-       ++ rewrite !mxE.
-          unfold vector_sub, map2, uncurry,sum.
-          unfold matrix_vector_mult. unfold dotprod.
+       ++ rewrite !mxE. unfold sum. rewrite residual_equiv.
+          rewrite inordK.
+          -- rewrite -/size. rewrite -/A_v.
+             rewrite plus_minus_eqiv. 
+             assert (j = ord0). { apply ord1. } rewrite H3.
+             reflexivity. 
+          -- admit.
+          -- admit.
+       ++ admit.
+     * admit.
+  - admit.
 (*
   - unfold invert_diagmatrix, vector_sub, map2.
     rewrite !map_length combine_length.
