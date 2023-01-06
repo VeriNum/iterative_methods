@@ -217,6 +217,47 @@ induction m.
 + simpl. by rewrite IHm.
 Qed.
 
+(*
+Lemma dotprod_diag {ty} (v1 v2: vector ty) i:
+  dotprod v1 v2 =
+  BMULT 
+  (nth i v1 (Zconst ty 0) (nth i v2 (Zconst ty 0).
+
+*)
+
+
+(***
+BMULT ty
+  (nth i
+     (invert_diagmatrix (diag_of_matrix A))
+     (Zconst ty 0))
+  (nth i
+     (vector_sub b
+        (matrix_vector_mult (remove_diag A)
+           x_n)) (Zconst ty 0)) =
+BMULT ty
+  (BDIV ty (Zconst ty 1)
+     (nth i (nth i A []) (Zconst ty 0)))
+***)
+
+Lemma A1_invert_equiv {ty} (A : matrix ty) i: 
+  nth i
+     (invert_diagmatrix (diag_of_matrix A))
+     (Zconst ty 1) =
+  BDIV ty (Zconst ty 1)
+     (nth i (nth i A []) (Zconst ty 1)).
+Proof.
+unfold invert_diagmatrix.
+assert (Zconst ty 1 = (BDIV ty (Zconst ty 1)) (Zconst ty 1)).
+{ admit. } rewrite [in X in nth _ _ X]H.
+Print map_nth.
+rewrite (@map_nth (diagmatrix ty) _ _ _ (Zconst ty 1) _ ).
+
+
+
+rewrite map_nth.
+
+
 
 Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat) :
   let size := (length A).-1 in  
