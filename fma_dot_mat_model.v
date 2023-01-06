@@ -325,6 +325,49 @@ apply nth_ext with (Zconst ty 0) (Zconst ty 0).
 Qed.
 
 
+(**
+dotprod
+  (nth i
+     (matrix_by_index (matrix_rows_nat A)
+        (matrix_rows_nat A)
+        (fun i0 j : nat =>
+         if is_left (Nat.eq_dec i0 j)
+         then Zconst ty 0
+         else matrix_index A i0 j)) [])
+  (rev
+     (vec_to_list_float size.+1
+        (\col_j0 vector_inj v size.+1 j0 ord0))) =
+dotprod
+  (vec_to_list_float size.+1
+     (\row_j0 A2_J A_v (inord i) j0)^T)
+**)
+Lemma A2_equiv {ty} (A: matrix ty) size i :
+  let A_v := matrix_inj A size.+1 size.+1 in
+  nth i
+     (matrix_by_index (matrix_rows_nat A)
+        (matrix_rows_nat A)
+        (fun i0 j : nat =>
+         if is_left (Nat.eq_dec i0 j)
+         then Zconst ty 0
+         else matrix_index A i0 j)) [] =
+  rev (vec_to_list_float size.+1
+     (\row_j0 A2_J A_v (inord i) j0)^T).
+Proof.
+intros.
+apply nth_ext with (Zconst ty 0) (Zconst ty 0).
++ rewrite rev_length length_veclist. admit.
++ intros.
+  rewrite rev_nth length_veclist.
+  assert ((size.+1 - n.+1)%coq_nat = (size.+1.-1 - n)%coq_nat).
+  { by []. } rewrite H0.
+  rewrite nth_vec_to_list_float.
+  - rewrite !mxE. unfold matrix_by_index.
+    rewrite map_nth.
+
+
+
+
+
 Lemma residual_equiv {ty} (v: vector ty) (A: matrix ty) i:
   let size := (length A).-1 in   
   let A_v := matrix_inj A size.+1 size.+1 in
