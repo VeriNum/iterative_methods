@@ -254,7 +254,13 @@ intros.
 assert (nth i (invert_diagmatrix (diag_of_matrix A))
             (Zconst ty 1) = 
         BDIV ty (Zconst ty 1) (nth i (diag_of_matrix A) (Zconst ty 1))).
-{ admit. } rewrite H0.
+{ rewrite -[in RHS]map_nth. unfold invert_diagmatrix.
+  assert (
+
+
+
+
+admit. } rewrite H0.
 unfold diag_of_matrix.  rewrite nth_map_seq.
 by unfold matrix_index.
 by unfold matrix_rows_nat.
