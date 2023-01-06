@@ -423,9 +423,11 @@ Admitted.
 
 
 Lemma residual_equiv {ty} (v: vector ty) (A: matrix ty) i:
+  (0 < length A)%nat ->
   let size := (length A).-1 in   
   let A_v := matrix_inj A size.+1 size.+1 in
   length A = length v ->
+  (i < length A)%nat ->
   nth i (matrix_vector_mult (remove_diag A) v) (Zconst ty 0) = 
   dotprod (vec_to_list_float size.+1
               (\row_j0 A2_J A_v (inord i) j0)^T)
@@ -459,14 +461,21 @@ assert (nth i (matrix_vector_mult (remove_diag A) v)
   rewrite (@map_nth _ _ _ _ [] _ ).
   unfold remove_diag.
   unfold matrix_by_index. rewrite nth_map_seq.
-  + admit.
-  + admit.
-  + admit.
-} rewrite H0. clear H0. 
+  + rewrite (@map_ext _ _ _ (fun j : nat =>
+      if is_left (Nat.eq_dec i j)
+      then Zconst ty 0
+      else matrix_index A i j)); try by [].
+    intros. unfold is_left.
+    by case: (Nat.eq_dec i a).
+  + unfold matrix_rows_nat. by apply /ssrnat.ltP.
+  + unfold matrix_rows_nat. by apply /ssrnat.ltP.
+} rewrite H2. clear H2. 
 assert (v = rev (vec_to_list_float size.+1
           (\col_j0 vector_inj v size.+1 j0 ord0))).
-{ apply v_equiv. admit. }
-rewrite [in LHS]H0.
+{ apply v_equiv. rewrite -H0. rewrite /size.
+  by rewrite prednK.
+}
+rewrite [in LHS]H2.
 rewrite (@A2_equiv _ _ size _).
 
 
