@@ -362,9 +362,24 @@ apply nth_ext with (Zconst ty 0) (Zconst ty 0).
   { by []. } rewrite H0.
   rewrite nth_vec_to_list_float.
   - rewrite !mxE. unfold matrix_by_index.
-    rewrite map_nth.
-
-
+    rewrite nth_map_seq.
+    * rewrite nth_map_seq.
+      ++ rewrite !inordK.
+         -- unfold is_left.
+            case: (Nat.eq_dec i n). 
+            ** intros. rewrite a //=. 
+               assert (n == n :>nat = true). { admit. }
+               by rewrite H1.
+            ** intros.
+               assert ( i == n :> nat = false). { admit. }
+               rewrite H1. by unfold matrix_index. 
+         -- admit.
+         -- admit.
+      ++ admit.
+    * admit.
+  - admit.
+  - admit.
+Admitted.
 
 
 
@@ -405,6 +420,8 @@ assert (v = rev (vec_to_list_float size.+1
           (\col_j0 vector_inj v size.+1 j0 ord0))).
 { apply v_equiv. admit. }
 rewrite [in LHS]H0.
+rewrite (@A2_equiv _ _ size _).
+
 
 unfold matrix_vector_mult. 
 unfold remove_diag.
