@@ -35,9 +35,9 @@ Fixpoint vec_to_list_float {ty} {n:nat} (m:nat) (v :'cV[ftype ty]_n.+1)
    | S p => [v (@inord n p) ord0] ++ vec_to_list_float p v
    end.
 
-Lemma nth_vec_to_list_float {ty} {n:nat} i m (v :'cV[ftype ty]_n.+1):
+Lemma nth_vec_to_list_float {ty} {n:nat} i m (v :'cV[ftype ty]_n.+1) d:
   (i < m)%nat ->
-  nth (m.-1 -i) (@vec_to_list_float _ n m v) (Zconst ty 0) = v (@inord n i) ord0.
+  nth (m.-1 -i) (@vec_to_list_float _ n m v) d = v (@inord n i) ord0.
 Proof.
 intros.
 elim: m i H => [ | m IHm] i H.
@@ -51,7 +51,7 @@ elim: m i H => [ | m IHm] i H.
     assert ((m - m)%nat = 0%N). 
     { apply /eqP. rewrite subn_eq0. by []. } by rewrite H2 /=.
   - assert (nth (m.-1 - i) (vec_to_list_float m v)
-                (Zconst ty 0) = v (inord i) ord0).
+                d = v (inord i) ord0).
     { by apply IHm. } 
     rewrite -H1. rewrite -[in RHS]predn_sub.
     rewrite -subn_gt0 in H0. rewrite -predn_sub in H1.
@@ -365,29 +365,17 @@ induction n.
                (\col_j0 (b_v +f
                          -f (A2_J A_v *f vector_inj x_n size.+1)) j0 j))).
    { by []. } rewrite H2 H1. clear H2 H1.
-
-  unfold jacob_list_fun_model.jacobi_iter.
-  unfold diagmatrix_vector_mult, map2, uncurry.
-  rewrite (@map_nth _ _ _ _ (Zconst ty 0, Zconst ty 0) _).
-  rewrite combine_nth.
-  - rewrite (@dotprod_diag _ _ _ (size.+1.-1 - (nat_of_ord i))).
-    * repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
-      rewrite !mxE.
-      assert (i == @inord size i :> nat ). { by rewrite inord_val. }
-      rewrite H0. admit.
-    * by rewrite !length_veclist.
-    * rewrite length_veclist. rewrite ltn_subLR. simpl. admit.
-      simpl. apply ltnSE, ltn_ord.
-    * rewrite nth_vec_to_list_float. rewrite !mxE /=.
-      assert (i == @inord size i :> nat ). { by rewrite inord_val. }
-      rewrite H0. admit. apply ltn_ord.
-    * intros. 
-      admit.
-
+   rewrite A1_invert_equiv.
+   - rewrite nth_vec_to_list_float.
+     * rewrite !mxE.
+       assert (i == @inord size i :> nat ). { by rewrite inord_val. }
+       rewrite H1. 
+(*
   - unfold invert_diagmatrix, vector_sub, map2.
     rewrite !map_length combine_length.
     unfold matrix_vector_mult. rewrite !map_length !seq_length.
     unfold matrix_rows_nat. by rewrite H;lia.
+*)
 Admitted.
 
 End WITHNANS.
