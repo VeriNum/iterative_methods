@@ -243,55 +243,23 @@ BMULT ty
 Import jacob_list_fun_model.Experiment.
 
 Lemma A1_invert_equiv {ty} (A : matrix ty) i: 
+  (i < length A)%coq_nat ->
   nth i
      (invert_diagmatrix (diag_of_matrix A))
      (Zconst ty 1) =
   BDIV ty (Zconst ty 1)
-     (nth i (nth i A []) (Zconst ty 1)).
+     (nth i (nth i A []) (Zconst ty 0)).
 Proof.
-(*
-nth i
-  (map (BDIV ty (Zconst ty 1))
-     (diag_of_matrix A)) (Zconst ty 1)
-*)
+intros.
 assert (nth i (invert_diagmatrix (diag_of_matrix A))
             (Zconst ty 1) = 
         BDIV ty (Zconst ty 1) (nth i (diag_of_matrix A) (Zconst ty 1))).
-{ admit. } rewrite H.
+{ admit. } rewrite H0.
+unfold diag_of_matrix.  rewrite nth_map_seq.
+by unfold matrix_index.
+by unfold matrix_rows_nat.
+Admitted.
 
-
-
-unfold invert_diagmatrix.
-asser
-
-
-
-
-induction A.
-+ simpl. admit.
-+ simpl. destruct i.
-  - simpl. rewrite binop_matrix_index.
-
-
-Check (map (BDIV ty (Zconst ty 1))
-     (diag_of_matrix A)).
-rewrite (@map_nth _ _ _ _ (Zconst ty 1) _ ).
-
-
-
-assert (Zconst ty 1 = (BDIV ty (Zconst ty 1)) (Zconst ty 1)).
-{ admit. } rewrite [in X in nth _ _ X]H.
-Print map_nth.
-Check (BDIV ty (Zconst ty 1)).
-Check (invert_diagmatrix (diag_of_matrix A)).
-rewrite (@map_nth (ftype ty) (ftype ty) (BDIV ty (Zconst ty 1))
-            (map
-        (fun i0 : nat =>
-         matrix_index A i0 i0)
-        (seq 0 (matrix_rows_nat A))) 
- (Zconst ty 1) i ).
-
-rewrite map_nth.
 
 
 
