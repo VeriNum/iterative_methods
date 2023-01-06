@@ -305,15 +305,81 @@ BMULT ty
 *)
 
 
+Lemma v_equiv {ty} (v: vector ty) size:
+  length v = size.+1 -> 
+  v = rev (vec_to_list_float size.+1
+          (\col_j0 vector_inj v size.+1 j0 ord0)).
+Proof.
+intros. 
+apply nth_ext with (Zconst ty 0) (Zconst ty 0).
++ rewrite rev_length length_veclist. by []. 
++ intros. rewrite rev_nth length_veclist.
+  assert ((size.+1 - n.+1)%coq_nat = (size.+1.-1 - n)%coq_nat).
+  { by []. } rewrite H1.
+  rewrite nth_vec_to_list_float.
+  - rewrite !mxE /=. rewrite inordK. 
+    * by [].
+    * rewrite -H. by apply /ssrnat.ltP.
+  - rewrite -H. by apply /ssrnat.ltP.
+  - by rewrite -H. 
+Qed.
+
+
 Lemma residual_equiv {ty} (v: vector ty) (A: matrix ty) i:
   let size := (length A).-1 in   
   let A_v := matrix_inj A size.+1 size.+1 in
+  length A = length v ->
   nth i (matrix_vector_mult (remove_diag A) v) (Zconst ty 0) = 
   dotprod (vec_to_list_float size.+1
               (\row_j0 A2_J A_v (inord i) j0)^T)
            (vec_to_list_float size.+1
               (\col_j0 vector_inj v size.+1 j0 ord0)).
 Proof.
+intros.
+(*
+nth i
+  (map (dotprod^~ v)
+     (matrix_by_index (matrix_rows_nat A)
+        (matrix_rows_nat A)
+        (fun i0 j : nat =>
+         if Nat.eq_dec i0 j
+         then Zconst ty 0
+         else matrix_index A i0 j)))
+  (Zconst ty 0)
+*)
+assert (nth i (matrix_vector_mult (remove_diag A) v)
+          (Zconst ty 0) = 
+        dotprod 
+        (nth i (matrix_by_index (matrix_rows_nat A)
+                  (matrix_rows_nat A)
+                  (fun i0 j : nat =>
+                   if Nat.eq_dec i0 j
+                   then Zconst ty 0
+                   else matrix_index A i0 j)) [])
+        v).
+{ admit. } rewrite H0. clear H0. 
+assert (v = rev (vec_to_list_float size.+1
+          (\col_j0 vector_inj v size.+1 j0 ord0))).
+{ apply v_equiv. admit. }
+rewrite [in LHS]H0.
+
+unfold matrix_vector_mult. 
+unfold remove_diag.
+Check ((matrix_by_index (matrix_rows_nat A)
+        (matrix_rows_nat A)
+        (fun i0 j : nat =>
+         if Nat.eq_dec i0 j
+         then Zconst ty 0
+         else matrix_index A i0 j))).
+Check (nth i A []).
+unfold A2_J.
+
+
+unfold dotprod.
+Print map_nth.
+Check (fun row => dotprod row v).
+rewrite (@map_nth _ _  (fun row => dotprod row v) (remove_diag A) [(Zconst ty 0)] i ).
+rewrite map_nth.
 
 
 
