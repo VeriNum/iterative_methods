@@ -370,6 +370,10 @@ induction n.
      * rewrite !mxE.
        assert (i == @inord size i :> nat ). { by rewrite inord_val. }
        rewrite H1. 
+       rewrite nth_vec_to_list_float.
+       ++ rewrite !mxE.
+          unfold vector_sub, map2, uncurry,sum.
+          unfold matrix_vector_mult. unfold dotprod.
 (*
   - unfold invert_diagmatrix, vector_sub, map2.
     rewrite !map_length combine_length.
