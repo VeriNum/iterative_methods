@@ -35,6 +35,11 @@ Fixpoint vec_to_list_float {ty} {n:nat} (m:nat) (v :'cV[ftype ty]_n.+1)
    | S p => [v (@inord n p) ord0] ++ vec_to_list_float p v
    end.
 
+
+Definition vec_to_list_float_1 {ty} {n:nat} (m:nat) (v :'cV[ftype ty]_n.+1) := 
+  rev (vec_to_list_float m v). 
+
+
 Lemma nth_vec_to_list_float {ty} {n:nat} i m (v :'cV[ftype ty]_n.+1) d:
   (i < m)%nat ->
   nth (m.-1 -i) (@vec_to_list_float _ n m v) d = v (@inord n i) ord0.
@@ -65,8 +70,8 @@ Definition mulmx_float {ty} {m n p : nat}
   (A: 'M[ftype ty]_(m.+1,n.+1)) (B: 'M[ftype ty]_(n.+1,p.+1)) : 
   'M[ftype ty]_(m.+1,p.+1):=
   \matrix_(i, k)
-    let l1 := vec_to_list_float n.+1 (\row_(j < n.+1) A i j)^T in
-    let l2 := vec_to_list_float n.+1 (\col_(j < n.+1) B j k) in
+    let l1 := vec_to_list_float_1 n.+1 (\row_(j < n.+1) A i j)^T in
+    let l2 := vec_to_list_float_1 n.+1 (\col_(j < n.+1) B j k) in
     @dotprod ty l1 l2.
 
 
@@ -342,6 +347,8 @@ dotprod
      (\row_j0 A2_J A_v (inord i) j0)^T)
 **)
 Lemma A2_equiv {ty} (A: matrix ty) size i :
+  length A = size.+1 ->
+  (i < size.+1)%coq_nat ->
   let A_v := matrix_inj A size.+1 size.+1 in
   nth i
      (matrix_by_index (matrix_rows_nat A)
@@ -355,11 +362,14 @@ Lemma A2_equiv {ty} (A: matrix ty) size i :
 Proof.
 intros.
 apply nth_ext with (Zconst ty 0) (Zconst ty 0).
-+ rewrite rev_length length_veclist. admit.
++ rewrite rev_length length_veclist. 
+  unfold matrix_by_index. rewrite nth_map_seq.
+  - rewrite map_length. rewrite seq_length. by unfold matrix_rows_nat.
+  - unfold matrix_rows_nat. by rewrite H. 
 + intros.
   rewrite rev_nth length_veclist.
   assert ((size.+1 - n.+1)%coq_nat = (size.+1.-1 - n)%coq_nat).
-  { by []. } rewrite H0.
+  { by []. } rewrite H2.
   rewrite nth_vec_to_list_float.
   - rewrite !mxE. unfold matrix_by_index.
     rewrite nth_map_seq.
@@ -369,16 +379,27 @@ apply nth_ext with (Zconst ty 0) (Zconst ty 0).
             case: (Nat.eq_dec i n). 
             ** intros. rewrite a //=. 
                assert (n == n :>nat = true). { admit. }
-               by rewrite H1.
+               by rewrite H3.
             ** intros.
                assert ( i == n :> nat = false). { admit. }
-               rewrite H1. by unfold matrix_index. 
-         -- admit.
-         -- admit.
-      ++ admit.
-    * admit.
-  - admit.
-  - admit.
+               rewrite H3. by unfold matrix_index. 
+         -- rewrite /matrix_by_index nth_map_seq in H1.
+            ** rewrite map_length seq_length /matrix_rows_nat H in H1.
+               by apply /ssrnat.ltP.
+            ** unfold matrix_rows_nat. by rewrite H. 
+         -- by apply /ssrnat.ltP.
+      ++ rewrite /matrix_by_index nth_map_seq in H1.
+         -- rewrite map_length seq_length /matrix_rows_nat H in H1.
+            by rewrite /matrix_rows_nat H.
+         -- unfold matrix_rows_nat. by rewrite H.
+    * unfold matrix_rows_nat. by rewrite H.
+  - rewrite /matrix_by_index nth_map_seq in H1.
+    -- rewrite map_length seq_length /matrix_rows_nat H in H1.
+       by apply /ssrnat.ltP.
+    -- unfold matrix_rows_nat. by rewrite H.
+  - rewrite /matrix_by_index nth_map_seq in H1.
+    -- by rewrite map_length seq_length /matrix_rows_nat H in H1.
+    -- unfold matrix_rows_nat. by rewrite H.
 Admitted.
 
 Lemma combine_rev {ty} (v1 v2: vector ty):
@@ -506,10 +527,25 @@ induction n.
                  (vector_sub b
                     (matrix_vector_mult (remove_diag A)
                        x_n)) (Zconst ty 0))).
-  { unfold jacob_list_fun_model.jacobi_iter.
+  { assert (nth i
+            (jacob_list_fun_model.jacobi_iter
+               (invert_diagmatrix (diag_of_matrix A))
+               (remove_diag A) b x_n)
+            (Zconst ty 0) = 
+            nth i
+            (jacob_list_fun_model.jacobi_iter
+               (invert_diagmatrix (diag_of_matrix A))
+               (remove_diag A) b x_n)
+            (BMULT ty (Zconst ty 1) (Zconst ty 0))).
+    { assert (Zconst ty 0 = BMULT ty (Zconst ty 1) (Zconst ty 0)).
+      { admit. } rewrite [in LHS]H0. reflexivity.
+    } rewrite H0.
+    unfold jacob_list_fun_model.jacobi_iter.
     unfold diagmatrix_vector_mult, map2, uncurry.
-    assert (Zconst ty 0 = BMULT ty (Zconst ty 1) (Zconst ty 0)).
-    { admit. } rewrite H0.
+    Check ((fun p : ftype ty * ftype ty =>
+      let (x0, y) := p in BMULT ty x0 y)).
+    Search BMULT.
+
     admit.
   } rewrite H0. 
   assert (dotprod (vec_to_list_float size.+1
