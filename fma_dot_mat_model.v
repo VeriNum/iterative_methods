@@ -255,12 +255,24 @@ assert (nth i (invert_diagmatrix (diag_of_matrix A))
             (Zconst ty 1) = 
         BDIV ty (Zconst ty 1) (nth i (diag_of_matrix A) (Zconst ty 1))).
 { rewrite -[in RHS]map_nth. unfold invert_diagmatrix.
-  assert (
-
-
-
-
-admit. } rewrite H0.
+  assert ((BDIV ty (Zconst ty 1) (Zconst ty 1)) = (Zconst ty 1)).
+  { admit. } rewrite H0. 
+  (*Unable to unify
+ "@nth (ftype ty) i
+    (@map (ftype ty) (ftype ty)
+       (@BDIV NANS ty (Zconst ty 1))
+       (@diag_of_matrix ty A)) 
+    (Zconst ty 1)"
+with
+ "@nth (ftype ty) i
+    (@map (ftype ty) (ftype ty)
+       (@BDIV FPCompCert.nans ty
+          (Zconst ty 1))
+       (@diag_of_matrix ty A)) 
+    (Zconst ty 1)".
+*)
+admit.
+ } rewrite H0.
 unfold diag_of_matrix.  rewrite nth_map_seq.
 by unfold matrix_index.
 by unfold matrix_rows_nat.
