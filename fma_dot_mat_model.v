@@ -137,101 +137,20 @@ induction L.
 Qed.
 
 
-Lemma remove_concat {A} (L:list A) (d: A) (b:A) 
-  (eqdec : forall (x y : A), {x = y}+{x <> y}):
-  In b L ->
-  L = (@remove A eqdec b L) ++ [b].
-Admitted.
-
-Lemma fold_left_except_zero {A} (L : list A) (d: A) (f: A -> A -> A) (b:A) 
-  (eqdec : forall (x y : A), {x = y}+{x <> y}):
-  In b L ->
-  (forall a l, In a l -> f d a = d) ->
-  fold_left f L d = f d b.
-Proof.
-intros.
-assert (L =  (@remove A eqdec b L) ++ [b]).
-{ by apply remove_concat. } rewrite H1.
-rewrite fold_left_app .
-assert (fold_left f (remove eqdec b L) d = d).
-{ rewrite fold_left_zero.
-  + by [].
-  + intros. by specialize (H0 a (remove eqdec b L) H2).
-} rewrite H2. by simpl.
-Qed.
-
-
-
 Lemma fold_left_except_zero {A} (L : list A) (d: A) (f: A -> A -> A) (b:A) :
   In b L ->
-  f d b <> d ->
   (forall a, In a L -> a <> b -> f d a = d) ->
   fold_left f L d = f d b.
-Proof.
-intros.
-elim: L d H H0 H1 => [ |a L IHL] d H H0 H1.
-+ contradict H;auto.
-+ simpl. destruct H.
-  - rewrite -H.
-    apply fold_left_zero.
+Admitted.
 
 
-induction L.
-+ contradict H1;auto.
-+ simpl.
-  Print fold_left.
-
-
- destruct H.
-  - 
-  assert (In b L).
-  { simpl in H. 
-
-
-
- simpl in H.
-  destruct H.
-  - 
-
-
-
-  assert (In b L).
-  { simpl in H. 
-
-
- 
-
-
-Lemma fold_left_for_list {ty} (L : list (ftype ty  * ftype ty)) i f :
+Lemma fold_left_for_list {ty} (L: list (ftype ty * ftype ty)) i f d:
   (i < length L)%nat ->
-  (forall a, In a L ->
-             fst a <> nth i (map (fun l => fst l) L) (Zconst ty 0) ->
-             fst a = Zconst ty 0 ) ->
-  fold_left f L (Zconst ty 0) = f (Zconst ty 0) (nth i L (Zconst ty 0, Zconst ty 0)).
-Proof.
-intros.
-induction L.
-+ by simpl in H.
-+ simpl. destruct i.
-  - assert ((0 < length L)%nat). { admit. }
-    specialize (IHL H1).
-    assert ((forall a : ftype ty * ftype ty,
-             In a L ->
-             a.1 <>
-             nth 0 (map [eta fst] L) (Zconst ty 0) ->
-             a.1 = Zconst ty 0)).
-    { admit. } specialize (IHL H2).
-    admit.
-  - 
-
-
-
-Lemma fold_left_for_list {ty} (L: list (ftype ty * ftype ty)) i f d d':
-  (i < length L)%nat ->
-  (forall j , (j < length L)%nat -> j <> i -> 
-              nth j (map (fun l => fst l) L) d = d) -> 
-  fold_left f L d = f d (nth i L (d, d')) .
-Proof.
+  (forall j , (j < length L)%nat -> j <> i ->
+              f d (nth j L (d,d)) = d) -> 
+  fold_left f L d = f d (nth i L (d,d)) .
+Admitted.
+(*
 intros.
 elim: L d d' H H0  => [ | a L IHL] d d' H H0.
 + by simpl in H.
@@ -275,7 +194,7 @@ rewrite IHL.
 
 admit.
 Admitted.
-
+*)
 
 Lemma dotprod_diag {ty} (v1 v2: vector ty) i :
   length v1 = length v2 ->
