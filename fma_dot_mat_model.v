@@ -119,19 +119,33 @@ Definition vector_inj {t} (v: vector t) n  : 'cV[ftype t]_n :=
 
 Lemma fold_left_for_list {ty} (L: list (ftype ty * ftype ty)) i f:
   (i < length L)%nat -> 
-  (forall j , (j < length L)%nat -> j <> i -> nth j (map (fun L => fst L) L) (Zconst ty 0) = (Zconst ty 0)) ->
+  (forall j , (j < length L)%nat -> j <> i -> 
+              nth j (map (fun l => fst l) L) (Zconst ty 0) = Zconst ty 0) -> 
   fold_left f L (Zconst ty 0) = f (Zconst ty 0) (nth i L (Zconst ty 0, Zconst ty 0)) .
 Proof.
 intros.
 induction L.
 + by simpl in H.
-+ simpl. admit.
++ simpl. 
+  assert (L = [] \/ L <> []).
+  { admit. } destruct H1.
+  - rewrite H1. simpl. rewrite H1 /= in H.
+    assert (i = 0%nat).
+    { admit. } by rewrite H2 /=.
+  - destruct i.
+    * assert ((0 < length L)%nat). { admit. }
+      specialize (IHL H2).
+      assert (forall j : nat,
+                 (j < length L)%N ->
+                 j <> 0%N ->
+                 nth j (map [eta fst] L) (Zconst ty 0) =
+                 Zconst ty 0).
+
+
+
+
+admit.
 Admitted.
-
-
-
-
-
 
 
 Lemma dotprod_diag {ty} (v1 v2: vector ty) i :
@@ -142,23 +156,54 @@ Lemma dotprod_diag {ty} (v1 v2: vector ty) i :
   BMULT ty (nth i v1 (Zconst ty 1)) (nth i v2 (Zconst ty 0)).
 Proof.
 intros.
-unfold dotprod.
-(** try skipn and firstn **)
-assert (fold_left
-            (fun (s : ftype ty) (x12 : ftype ty * ftype ty)
-             => BFMA x12.1 x12.2 s) (combine v1 v2)
-            (Zconst ty 0)  = 
+assert (dotprod v1 v2 = 
         (fun (s : ftype ty) (x12 : ftype ty * ftype ty)
              => BFMA x12.1 x12.2 s) (Zconst ty 0)
          (nth i (combine v1 v2) (Zconst ty 0, Zconst ty 0))).
-{ rewrite (@fold_left_for_list  _ _ i _); try by [].
-  + rewrite combine_length. by rewrite H.
+{ unfold dotprod.
+  rewrite (@fold_left_for_list  _ _ i _); try by [].
+  (*Unable to unify
+ "@BFMA NANS ty
+    (@nth (ftype ty * ftype ty) i
+       (@combine (ftype ty) (ftype ty) v1 v2)
+       (Zconst ty 0, Zconst ty 0)).1
+    (@nth (ftype ty * ftype ty) i
+       (@combine (ftype ty) (ftype ty) v1 v2)
+       (Zconst ty 0, Zconst ty 0)).2
+    (Zconst ty 0)"
+with
+ "@BFMA FPCompCert.nans ty
+    (@nth (ftype ty * ftype ty) i
+       (@combine (ftype ty) (ftype ty) v1 v2)
+       (Zconst ty 0, Zconst ty 0)).1
+    (@nth (ftype ty * ftype ty) i
+       (@combine (ftype ty) (ftype ty) v1 v2)
+       (Zconst ty 0, Zconst ty 0)).2
+    (Zconst ty 0)".
+  *) 
+  admit.
+} rewrite H2 combine_nth /=.
+(* BFMA (nth i v1 (Zconst ty 0))
+  (nth i v2 (Zconst ty 0)) (Zconst ty 0) =
+  BMULT ty (nth i v1 (Zconst ty 1))
+  (nth i v2 (Zconst ty 0))
+*)
+Admitted.
 
 
 
-rewrite (@fold_left_for_list _ (combine v1 v2) i  _ ).
 
+(*
+  + rewrite combine_length. by rewrite -H Nat.min_id. 
+  + intros. 
+    assert ((map [eta fst] (combine v1 v2)) = v1).
+    { admit. } rewrite H4.
+    apply H1.
+    - by rewrite combine_length -H Nat.min_id in H2.
+    - by [].
+} rewrite H2.
 
+*)
 
 
 
