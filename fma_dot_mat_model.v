@@ -126,20 +126,80 @@ induction L.
 + by simpl.
 + simpl. 
   assert (forall a : A, In a L -> f d a = d).
-  { admit. } specialize (IHL H0).
+  { move=>b IHa. specialize (H b).
+    assert (In b (a :: L)). { simpl;auto. }
+    by specialize (H H0).
+  }  specialize (IHL H0).
   specialize (H a).
-  assert (In a (a :: L)). { admit. }
+  assert (In a (a :: L)). { simpl;auto. }
   specialize (H H1).
   by rewrite H.
+Qed.
+
+
+Lemma remove_concat {A} (L:list A) (d: A) (b:A) 
+  (eqdec : forall (x y : A), {x = y}+{x <> y}):
+  In b L ->
+  L = (@remove A eqdec b L) ++ [b].
 Admitted.
 
+Lemma fold_left_except_zero {A} (L : list A) (d: A) (f: A -> A -> A) (b:A) 
+  (eqdec : forall (x y : A), {x = y}+{x <> y}):
+  In b L ->
+  (forall a l, In a l -> f d a = d) ->
+  fold_left f L d = f d b.
+Proof.
+intros.
+assert (L =  (@remove A eqdec b L) ++ [b]).
+{ by apply remove_concat. } rewrite H1.
+rewrite fold_left_app .
+assert (fold_left f (remove eqdec b L) d = d).
+{ rewrite fold_left_zero.
+  + by [].
+  + intros. by specialize (H0 a (remove eqdec b L) H2).
+} rewrite H2. by simpl.
+Qed.
 
 
 
+Lemma fold_left_except_zero {A} (L : list A) (d: A) (f: A -> A -> A) (b:A) :
+  In b L ->
+  f d b <> d ->
+  (forall a, In a L -> a <> b -> f d a = d) ->
+  fold_left f L d = f d b.
+Proof.
+intros.
+elim: L d H H0 H1 => [ |a L IHL] d H H0 H1.
++ contradict H;auto.
++ simpl. destruct H.
+  - rewrite -H.
+    apply fold_left_zero.
 
-elim: L d H => [ |a L IHL] d H.
-+ by simpl.
-+ simpl. 
+
+induction L.
++ contradict H1;auto.
++ simpl.
+  Print fold_left.
+
+
+ destruct H.
+  - 
+  assert (In b L).
+  { simpl in H. 
+
+
+
+ simpl in H.
+  destruct H.
+  - 
+
+
+
+  assert (In b L).
+  { simpl in H. 
+
+
+ 
 
 
 Lemma fold_left_for_list {ty} (L : list (ftype ty  * ftype ty)) i f :
