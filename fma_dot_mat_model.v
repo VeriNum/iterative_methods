@@ -116,16 +116,50 @@ Definition matrix_inj {t} (A: matrix t) m n  : 'M[ftype t]_(m,n):=
 Definition vector_inj {t} (v: vector t) n  : 'cV[ftype t]_n :=
    \col_(i < n) nth i v (Zconst t 0).
 
+
+Lemma fold_left_for_list {ty} (L: list (ftype ty * ftype ty)) i f:
+  (i < length L)%nat -> 
+  (forall j , (j < length L)%nat -> j <> i -> nth j (map (fun L => fst L) L) (Zconst ty 0) = (Zconst ty 0)) ->
+  fold_left f L (Zconst ty 0) = f (Zconst ty 0) (nth i L (Zconst ty 0, Zconst ty 0)) .
+Proof.
+intros.
+induction L.
++ by simpl in H.
++ simpl. admit.
+Admitted.
+
+
+
+
+
+
+
 Lemma dotprod_diag {ty} (v1 v2: vector ty) i :
   length v1 = length v2 ->
   (i < length v1)%nat -> 
-  nth i v1 (Zconst ty 0) <> (Zconst ty 0) ->
   (forall j , (j < length v1)%nat -> j <> i -> nth j v1 (Zconst ty 0) = Zconst ty 0) ->
   dotprod v1 v2 = 
   BMULT ty (nth i v1 (Zconst ty 1)) (nth i v2 (Zconst ty 0)).
 Proof.
 intros.
 unfold dotprod.
+(** try skipn and firstn **)
+assert (fold_left
+            (fun (s : ftype ty) (x12 : ftype ty * ftype ty)
+             => BFMA x12.1 x12.2 s) (combine v1 v2)
+            (Zconst ty 0)  = 
+        (fun (s : ftype ty) (x12 : ftype ty * ftype ty)
+             => BFMA x12.1 x12.2 s) (Zconst ty 0)
+         (nth i (combine v1 v2) (Zconst ty 0, Zconst ty 0))).
+{ rewrite (@fold_left_for_list  _ _ i _); try by [].
+  + rewrite combine_length. by rewrite H.
+
+
+
+rewrite (@fold_left_for_list _ (combine v1 v2) i  _ ).
+
+
+
 
 
 
@@ -337,6 +371,7 @@ Admitted.
 
 Lemma plus_minus_eqiv {ty} (x y : ftype ty):
   BPLUS ty x (BOPP ty y) = BMINUS ty x y.
+Proof.
 Admitted.
 
 Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat) :
