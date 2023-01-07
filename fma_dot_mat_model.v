@@ -117,16 +117,76 @@ Definition vector_inj {t} (v: vector t) n  : 'cV[ftype t]_n :=
    \col_(i < n) nth i v (Zconst t 0).
 
 
-Lemma fold_left_for_list {ty} (L: list (ftype ty * ftype ty)) i f:
-  (i < length L)%nat -> 
-  (forall j , (j < length L)%nat -> j <> i -> 
-              nth j (map (fun l => fst l) L) (Zconst ty 0) = Zconst ty 0) -> 
-  fold_left f L (Zconst ty 0) = f (Zconst ty 0) (nth i L (Zconst ty 0, Zconst ty 0)) .
+Lemma fold_left_zero {A} (L : list A) (d: A) (f: A -> A -> A) :
+  (forall a, In a L -> f d a = d) ->
+  fold_left f L d = d.
+Proof.
+intros.
+induction L.
++ by simpl.
++ simpl. 
+  assert (forall a : A, In a L -> f d a = d).
+  { admit. } specialize (IHL H0).
+  specialize (H a).
+  assert (In a (a :: L)). { admit. }
+  specialize (H H1).
+  by rewrite H.
+Admitted.
+
+
+
+
+
+elim: L d H => [ |a L IHL] d H.
++ by simpl.
++ simpl. 
+
+
+Lemma fold_left_for_list {ty} (L : list (ftype ty  * ftype ty)) i f :
+  (i < length L)%nat ->
+  (forall a, In a L ->
+             fst a <> nth i (map (fun l => fst l) L) (Zconst ty 0) ->
+             fst a = Zconst ty 0 ) ->
+  fold_left f L (Zconst ty 0) = f (Zconst ty 0) (nth i L (Zconst ty 0, Zconst ty 0)).
 Proof.
 intros.
 induction L.
 + by simpl in H.
-+ simpl. 
++ simpl. destruct i.
+  - assert ((0 < length L)%nat). { admit. }
+    specialize (IHL H1).
+    assert ((forall a : ftype ty * ftype ty,
+             In a L ->
+             a.1 <>
+             nth 0 (map [eta fst] L) (Zconst ty 0) ->
+             a.1 = Zconst ty 0)).
+    { admit. } specialize (IHL H2).
+    admit.
+  - 
+
+
+
+Lemma fold_left_for_list {ty} (L: list (ftype ty * ftype ty)) i f d d':
+  (i < length L)%nat ->
+  (forall j , (j < length L)%nat -> j <> i -> 
+              nth j (map (fun l => fst l) L) d = d) -> 
+  fold_left f L d = f d (nth i L (d, d')) .
+Proof.
+intros.
+elim: L d d' H H0  => [ | a L IHL] d d' H H0.
++ by simpl in H.
++ intros. simpl.
+  assert (L = [] \/ L <> []).
+  { admit. } destruct H1.
+  - rewrite H1. simpl. rewrite H1 /= in H.
+    assert (i = 0%nat).
+    { admit. } by rewrite H2 /=.
+  - destruct i.
+    * 
+
+induction L.
++ by simpl in H.
++ simpl.  
   assert (L = [] \/ L <> []).
   { admit. } destruct H1.
   - rewrite H1. simpl. rewrite H1 /= in H.
@@ -136,11 +196,20 @@ induction L.
     * assert ((0 < length L)%nat). { admit. }
       specialize (IHL H2).
       assert (forall j : nat,
-                 (j < length L)%N ->
+                 (j < length L)%nat ->
                  j <> 0%N ->
                  nth j (map [eta fst] L) (Zconst ty 0) =
                  Zconst ty 0).
+      { intros. specialize (H0 j).
+        assert ((j < length (a :: L))%nat).
+        { simpl. by apply ltn_trans with (length L). }
+        specialize (H0 H5 H4). admit.
+      } 
+      specialize (IHL H3). unfold fold_left.
 
+
+
+rewrite IHL.
 
 
 
