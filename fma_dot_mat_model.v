@@ -144,17 +144,58 @@ Lemma fold_left_except_zero {A} (L : list A) (d: A) (f: A -> A -> A) (b:A) :
 Admitted.
 
 
-Lemma fold_left_for_list {ty} (L: list (ftype ty * ftype ty)) i f d:
+Lemma nth_list {A} i (a d: A) (L : list A): 
+  i <> 0%nat ->
+  nth i.+1 (a :: L) d = nth i L d.
+Proof.
+intros.
+destruct i.
++ by contradict H.
++ by simpl.
+Qed.
+
+
+Print fold_left.
+
+Lemma fold_left_for_list {ty} (L: list (ftype ty * ftype ty)) i f d (d': ftype ty):
   (i < length L)%nat ->
-  (forall j , (j < length L)%nat -> j <> i ->
-              f d (nth j L (d,d)) = d) -> 
-  fold_left f L d = f d (nth i L (d,d)) .
-Admitted.
-(*
+  (forall j d'' , (j < length L)%nat -> j <> i ->
+              f d'' (nth j L d) = d'') -> 
+  fold_left f L d' = f d' (nth i L d) .
+Proof.
 intros.
 elim: L d d' H H0  => [ | a L IHL] d d' H H0.
 + by simpl in H.
-+ intros. simpl.
++ intros.
+  simpl.
+  assert (L = [] \/ L <> []).
+  { admit. } destruct H1.
+  - rewrite H1 /=.
+    assert (i = 0%nat).
+    { admit. } by rewrite H2 /=.
+  - destruct i.
+    * specialize (IHL d (f d' a)).
+      assert ((0 < length L)%nat).
+      { admit. } specialize (IHL H2).
+      assert (forall (j : nat) (d'' : ftype ty),
+               (j < length L)%nat ->
+               j <> 0%N -> f d'' (nth j L d) = d'').
+      { intros. specialize (H0 j.+1 d'').
+        assert ((j.+1 < length (a :: L))%nat).
+        { simpl. by []. } specialize (H0 H5).
+        assert (j.+1 <> 0%nat). { by [].  } 
+        specialize (H0 H6). by rewrite nth_list in H0.
+      } specialize (IHL H3). rewrite IHL.
+      specialize (H0 1%nat). apply H0.
+      ++ simpl. by [].
+      ++ by [].
+    * 
+
+
+
+
+
+
   assert (L = [] \/ L <> []).
   { admit. } destruct H1.
   - rewrite H1. simpl. rewrite H1 /= in H.
