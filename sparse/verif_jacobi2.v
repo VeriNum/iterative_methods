@@ -28,6 +28,7 @@ Definition surely_malloc_spec :=
 
 Definition Gprog: funspecs := surely_malloc_spec :: JacobiASI ++ SparseASI ++ MathASI ++ MallocASI.
 
+(*
 Definition first_loop : statement.
 let c := constr:(f_jacobi2) in
 let c := eval red in c in 
@@ -35,8 +36,9 @@ match c with context [Ssequence (Sset _i ?e) ?s] =>
  exact (Ssequence (Sset _i e ) s)
 end.
 Defined.
+*)
 
-Definition second_loop : statement.
+Definition the_loop : statement.
 let c := constr:(f_jacobi2) in
 let c := eval red in c in 
 match c with context [Sloop ?a ?b] => match a with context [Sset _maxiter] => idtac end;
@@ -44,6 +46,7 @@ match c with context [Sloop ?a ?b] => match a with context [Sset _maxiter] => id
 end.
 Defined.
 
+(*
 Lemma jacobi2_first_loop: forall {Espec : OracleKind}
   (sh1 : share) gv acc maxiter
   (A : matrix Tdouble)
@@ -115,6 +118,7 @@ rewrite sublist_same by auto.
 fold (invert_diagmatrix (diag_of_matrix A)).
 entailer!.
 Qed.
+*)
 
 Definition choose {A} n (a b: A) := if Nat.odd n then a else b.
 
@@ -124,7 +128,7 @@ intros. unfold choose. rewrite Nat.odd_succ, <-Nat.negb_odd;
         destruct (Nat.odd n); auto.
 Qed.
 
-Lemma jacobi2_second_loop: forall {Espec : OracleKind}
+Lemma jacobi2_the_loop: forall {Espec : OracleKind}
  (shA1 shA2 shb shx shy : share)
   (A : matrix Tdouble)
   (A1p A2p bp xp : val)
@@ -146,25 +150,25 @@ Lemma jacobi2_second_loop: forall {Espec : OracleKind}
   (FINacc : finite acc)
   (Hmaxiter : 0 < maxiter <= Int.max_unsigned)
   (HN : 0 < N < Int.max_unsigned)
-  (yp  A1ip : val)
+  (yp : val)
   (FR1 : list mpred),
 semax (func_tycontext f_jacobi2 Vprog Gprog [])
   (PROP ( )
-   LOCAL (temp _A1inv A1ip; temp _y yp; temp _z xp;
-   temp _N (Vint (Int.repr (matrix_rows A))); gvars gv; temp _A1 A1p; 
-   temp _A2 A2p; temp _b bp; temp _x xp; temp _acc (Vfloat acc);
+   LOCAL (temp _y yp; temp _z xp; temp _N (Vint (Int.repr N));
+   gvars gv; temp _A1 A1p; temp _A2 A2p; temp _b bp; 
+   temp _x xp; temp _acc (Vfloat acc);
    temp _maxiter (Vint (Int.repr maxiter)))
-   SEP (FRZL FR1; 
-      data_at_ shy (tarray tdouble N) yp; 
-      crs_rep shA2 (remove_diag A) A2p;
-      data_at shb (tarray tdouble N) (map Vfloat b) bp;
-      data_at shx (tarray tdouble N) (map Vfloat x) xp;
-      data_at shA1 (tarray tdouble (matrix_rows A))
-          (map Vfloat (invert_diagmatrix (diag_of_matrix A))) A1ip)) second_loop
+   SEP (FRZL FR1; data_at_ shy (tarray tdouble N) yp;
+   crs_rep shA2 (remove_diag A) A2p;
+   data_at shA1 (tarray tdouble N)
+     (map Vfloat (diag_of_matrix A)) A1p;
+   data_at shb (tarray tdouble N) (map Vfloat b) bp;
+   data_at shx (tarray tdouble N) (map Vfloat x) xp))
+  the_loop
   (normal_ret_assert
      (EX (n: nat) (z : vector Tdouble) (s : ftype Tdouble),
       PROP (RelProd feq (Forall2 feq) (s,z) (jacobi A b x acc (Z.to_nat maxiter)))
-      LOCAL (temp _A1inv A1ip; temp _y (choose n xp yp); temp _z (choose n yp xp);
+      LOCAL (temp _y (choose n xp yp); temp _z (choose n yp xp);
       temp _N (Vint (Int.repr (matrix_rows A))); gvars gv; 
       temp _A1 A1p; temp _A2 A2p; temp _b bp; temp _x xp; 
       temp _acc (Vfloat acc); temp _s (Vfloat s))
@@ -174,10 +178,10 @@ semax (func_tycontext f_jacobi2 Vprog Gprog [])
          data_at shb (tarray tdouble N) (map Vfloat b) bp;
          data_at (choose n shy shx) (tarray tdouble N) (map Vfloat z) (choose n yp xp);
          data_at shA1 (tarray tdouble (matrix_rows A))
-           (map Vfloat (invert_diagmatrix (diag_of_matrix A))) A1ip))%argsassert).
+           (map Vfloat (diag_of_matrix A)) A1p))%argsassert).
 Proof.
 intros.
-unfold second_loop.
+unfold the_loop.
 assert (FINA2 := finite_remove_diag A COLS FINA).
 subst N.
 rewrite <- matrix_rows_remove_diag in *.
@@ -185,19 +189,19 @@ set (A2 := remove_diag A) in *.
 set (N := matrix_rows A2) in *.
 abbreviate_semax.
 assert_PROP (Zlength b = N /\ Zlength x = N) as LENbx. {
-  entailer!. clear - H4 H1; unfold matrix_rows in *; split;  list_solve.
+  entailer!. clear - H4 H7; unfold matrix_rows in *; split;  list_solve.
 }
 destruct LENbx as [LENb LENx].
-set (A1inv := invert_diagmatrix (diag_of_matrix A)) in *.
-assert (LENA1inv: Zlength A1inv = N). {
-  unfold A1inv, N, A2, invert_diagmatrix.
-   rewrite Zlength_map, Zlength_diag_of_matrix, matrix_rows_remove_diag; auto.
+set (A1(*inv*) := (*invert_diagmatrix*) (diag_of_matrix A)) in *.
+assert (LENA1(*inv*): Zlength A1(*inv*) = N). {
+  unfold A1(*inv*), N, A2 (*, invert_diagmatrix*).
+   rewrite ?Zlength_map, Zlength_diag_of_matrix, matrix_rows_remove_diag; auto.
 }
 assert (COLS2: matrix_cols A2 N). {
   subst A2 N. 
   rewrite matrix_rows_remove_diag in COLS|-*; apply matrix_cols_remove_diag; auto.
 }
-pose (f := jacobi_iter A1inv A2 b).
+pose (f := jacobi_iter A1 A2 b).
 assert (CONGR_f: forall x x', Zlength x = N -> Forall2 strict_feq x x' -> Forall2 feq (f x) (f x')). {
   intros. apply jacobi_iter_congr; auto. rewrite H; auto.
 }
@@ -207,14 +211,14 @@ apply semax_loop_unroll1
           feq s (dist2 x y))
   LOCAL (temp _maxiter (Vint (Int.sub (Int.repr maxiter) (Int.repr 1)));
     temp _y xp; temp _z yp; temp _t xp; temp _s (Vfloat s);
-    temp _A1inv A1ip; temp _N (Vint (Int.repr N)); 
-    gvars gv; temp _A1 A1p; temp _A2 A2p; temp _b bp; 
+    temp _A1 A1p; temp _N (Vint (Int.repr N)); 
+    gvars gv; temp _A2 A2p; temp _b bp; 
     temp _x xp; temp _acc (Vfloat acc))
-  SEP (data_at shA1 (tarray tdouble (matrix_rows A2)) 
-            (map Vfloat A1inv) A1ip; crs_rep shA2 A2 A2p;
-        data_at shb (tarray tdouble (matrix_rows A2)) (map Vfloat b) bp;
-        data_at shx (tarray tdouble (matrix_rows A2)) (map Vfloat x) xp;
-        data_at shy (tarray tdouble (matrix_rows A2)) (map Vfloat y) yp;
+  SEP (data_at shA1 (tarray tdouble N) (map Vfloat A1) A1p;
+        crs_rep shA2 A2 A2p;
+        data_at shb (tarray tdouble N) (map Vfloat b) bp;
+        data_at shx (tarray tdouble N) (map Vfloat x) xp;
+        data_at shy (tarray tdouble N) (map Vfloat y) yp;
      FRZL FR1))%assert)
  (Q := (EX y:vector Tdouble, EX s:ftype Tdouble, 
   PROP (Forall2 feq y (f x); 
@@ -222,23 +226,23 @@ apply semax_loop_unroll1
           stop s acc = true; maxiter>1)
   LOCAL (temp _maxiter (Vint (Int.repr (maxiter -1)));
     temp _y xp; temp _z yp; temp _t xp; temp _s (Vfloat s);
-    temp _A1inv A1ip; temp _N (Vint (Int.repr N)); 
-    gvars gv; temp _A1 A1p; temp _A2 A2p; temp _b bp; 
+    temp _A1 A1p; temp _N (Vint (Int.repr N)); 
+    gvars gv; temp _A2 A2p; temp _b bp; 
     temp _x xp; temp _acc (Vfloat acc))
-  SEP (data_at shA1 (tarray tdouble (matrix_rows A2)) 
-            (map Vfloat A1inv) A1ip; crs_rep shA2 A2 A2p;
-        data_at shb (tarray tdouble (matrix_rows A2)) (map Vfloat b) bp;
-        data_at shx (tarray tdouble (matrix_rows A2)) (map Vfloat x) xp;
-        data_at shy (tarray tdouble (matrix_rows A2)) (map Vfloat y) yp;
+  SEP (data_at shA1 (tarray tdouble N) (map Vfloat A1) A1p;
+        crs_rep shA2 A2 A2p;
+        data_at shb (tarray tdouble N) (map Vfloat b) bp;
+        data_at shx (tarray tdouble N) (map Vfloat x) xp;
+        data_at shy (tarray tdouble N) (map Vfloat y) yp;
      FRZL FR1))%assert).
 -
-forward_call (shA1,shA2,shb,  shx, shy, A1ip, A1inv, A2p, A2, bp, b, xp, x, yp).
+forward_call (shA1,shA2,shb,  shx, shy, A1p, A1, A2p, A2, bp, b, xp, x, yp).
 Intros a; destruct a as [y s]. unfold fst,snd in H,H0|-*.
 forward. forward. forward. forward.
 Exists y s; entailer!!.
 -
 Intros y s.
-forward_if (temp _t'4 (Val.of_bool (stop s acc))).
+forward_if (temp _t'3 (Val.of_bool (stop s acc))).
   { forward.
     entailer!!.
    change (Float.cmp Cgt s acc) with ((s>acc)%F64).
@@ -253,9 +257,9 @@ forward_if (temp _t'4 (Val.of_bool (stop s acc))).
    destruct s; try discriminate; try reflexivity.
   }
  rewrite sub_repr.
- forward_if (temp _t'5 (Val.of_bool (stop s acc &&  Z.gtb maxiter 1))).
+ forward_if (temp _t'4 (Val.of_bool (stop s acc &&  Z.gtb maxiter 1))).
   { forward. change 1024 with (femax Tdouble) in H1.  rewrite H1. 
-    entailer!!. simpl andb.     
+    entailer!!. simpl andb.
     destruct (Z.gtb_spec maxiter 1).
     rewrite Int.eq_false. reflexivity.
    intro Hx. apply repr_inj_unsigned in Hx; try rep_lia.
@@ -270,7 +274,7 @@ forward_if (temp _t'4 (Val.of_bool (stop s acc))).
    rewrite andb_true_iff in H1; destruct H1; auto.
  + forward. Exists 1%nat y s.
    entailer!!.
-   unfold jacobi. fold A1inv. fold A2. fold f.
+   unfold jacobi. fold A1. fold A2. fold f.
    destruct (Z.to_nat maxiter) eqn:?H; [ lia | ].
    simpl. 
    destruct n. simpl iter_stop. unfold fst, snd. split; auto.
@@ -291,8 +295,8 @@ forward_loop
    PROP (0 <= Z.of_nat n <= maxiter-1;
              option_rel (Forall2 feq) (iter_stop_n dist2 f n acc x) (Some y);
              Forall finite y)
-   LOCAL (temp _A1inv A1ip; temp _y (choose n xp yp); temp _z (choose n yp xp);
-   temp _N (Vint (Int.repr N)); gvars gv; temp _A1 A1p; 
+   LOCAL (temp _A1 A1p; temp _y (choose n xp yp); temp _z (choose n yp xp);
+   temp _N (Vint (Int.repr N)); gvars gv;
    temp _A2 A2p; temp _b bp; temp _x xp; temp _acc (Vfloat acc);
    temp _maxiter (Vint (Int.repr (maxiter- (Z.of_nat n))));
    temp _s (Vfloat s))
@@ -301,7 +305,7 @@ forward_loop
    crs_rep shA2 A2 A2p;
    data_at shb (tarray tdouble N) (map Vfloat b) bp;
    data_at (choose n shy shx) (tarray tdouble N) (map Vfloat y) (choose n yp xp);
-   data_at shA1 (tarray tdouble N)  (map Vfloat A1inv) A1ip))%assert.
+   data_at shA1 (tarray tdouble N)  (map Vfloat A1) A1p))%assert.
 +
 Exists (S O) fx s; entailer!!.
 split.
@@ -323,8 +327,7 @@ progress change float with (ftype Tdouble) in *.
 rename H2 into FINy.
 destruct (iter_stop_n dist2 f n acc x) eqn:?K; inv H1.
 forward_call (shA1,shA2,shb, choose n shy shx, choose n shx shy,
-                       A1ip, A1inv, A2p, A2,
-                         bp, b, choose n yp xp,
+                       A1p, A1, A2p, A2, bp, b, choose n yp xp,
                          y,   choose n xp yp).
 unfold choose; destruct (Nat.odd n); auto.
 clear s.
@@ -334,7 +337,7 @@ forward.
 forward.
 forward.
 forward.
-forward_if (temp _t'4 (Val.of_bool (stop s acc))).
+forward_if (temp _t'3 (Val.of_bool (stop s acc))).
   { forward. 
     entailer!!.
    change (Float.cmp Cgt ?s acc) with ((s>acc)%F64).
@@ -349,7 +352,7 @@ forward_if (temp _t'4 (Val.of_bool (stop s acc))).
     destruct s; try discriminate; try reflexivity.
   }
  rewrite sub_repr. rewrite <- Z.sub_add_distr.
- forward_if (temp _t'5 (Val.of_bool (stop s acc &&  Z.gtb maxiter (Z.of_nat n+1)))).
+ forward_if (temp _t'4 (Val.of_bool (stop s acc &&  Z.gtb maxiter (Z.of_nat n+1)))).
   { forward. rewrite H4. 
     entailer!!. 
     destruct (Z.gtb_spec maxiter (Z.of_nat n+1)).
@@ -401,7 +404,7 @@ forward.
 Exists (S n) fy s.
 rewrite !choose_S.
 entailer!!.
-unfold jacobi. fold A1inv. fold A2. fold f.
+unfold jacobi. fold A1. fold A2. fold f.
 destruct (stop s acc) eqn:?H.
 --
 apply iter_stop_n_lem2 in K; auto.
@@ -441,19 +444,9 @@ forward_call (tarray tdouble N, gv).
   entailer!. simpl. do 3 f_equal.  rep_lia.
   simpl. rep_lia.
 Intros yp.
-forward_call (tarray tdouble N, gv).
-  entailer!. simpl. do 3 f_equal.  rep_lia.
-  simpl. rep_lia.
-Intros A1ip.
-freeze FR1 := - (data_at_ _ _ A1ip) (data_at _ _ _ A1p).
-change (Sfor _ _ _ _ ) with first_loop.
+freeze FR1 := (mem_mgr gv) (malloc_token _ _ _).
 eapply semax_seq'.
-apply jacobi2_first_loop; auto.
-abbreviate_semax.
-thaw FR1.
-freeze FR1 := (mem_mgr gv) (malloc_token _ _ _)(malloc_token _ _ _) (data_at _ _ _ A1p).
-eapply semax_seq'.
-eapply jacobi2_second_loop; try eassumption; auto.
+eapply jacobi2_the_loop; try eassumption; auto.
 Intros n z s.
 abbreviate_semax.
 thaw FR1.
@@ -463,9 +456,9 @@ freeze FR2 := - ( data_at_ _ _ (choose n xp yp))
                          (data_at _ _ _ (choose n yp xp)).
 apply semax_seq' with
  (PROP ( )
-   LOCAL (temp _A1inv A1ip; temp _y yp;
+   LOCAL (temp _A1 A1p; temp _y yp;
    temp _N (Vint (Int.repr N)); 
-   gvars gv; temp _A1 A1p; temp _A2 A2p; temp _b bp; 
+   gvars gv; temp _A2 A2p; temp _b bp; 
    temp _x xp; temp _acc (Vfloat acc); temp _s (Vfloat s))
    SEP (FRZL FR2; 
        data_at_ Ews (tarray tdouble N) yp;
@@ -475,9 +468,9 @@ apply semax_seq' with
  forward_if; try contradiction.
  + forward_for_simple_bound N
         (EX i:Z, (PROP ( )
-             LOCAL (temp _A1inv A1ip; temp _y xp; temp _z yp;
+             LOCAL (temp _A1 A1p; temp _y xp; temp _z yp;
                 temp _N (Vint (Int.repr N)); gvars gv; 
-                temp _A1 A1p; temp _A2 A2p; temp _b bp; 
+                temp _A2 A2p; temp _b bp; 
                 temp _x xp; temp _acc (Vfloat acc); temp _s (Vfloat s))
             SEP (FRZL FR2; 
                      data_at Ews (tarray tdouble N) 
@@ -496,8 +489,6 @@ apply semax_seq' with
  abbreviate_semax.
  forward_call free_spec_sub (yp, gv).
  saturate_local. destruct yp; try contradiction; simpl. cancel.
- forward_call free_spec_sub (A1ip, gv).
- saturate_local. destruct A1ip; try contradiction; simpl. cancel.
  forward.
  Exists z s.
  entailer!!.

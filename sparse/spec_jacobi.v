@@ -25,7 +25,7 @@ Definition jacobi2_oneiter_spec :=
              readable_share shx; writable_share shy;
              matrix_cols A2 (matrix_rows A2);
              matrix_rows A2 < Int.max_unsigned;
-             Forall finite A1;  Forall (Forall finite) A2; 
+             Forall (Forall finite) A2; 
              Forall finite b; Forall finite x)
     PARAMS(A1p; A2p; bp; xp; yp)
     SEP (data_at shA1 (tarray tdouble (matrix_rows A2)) (map Vfloat A1) A1p;

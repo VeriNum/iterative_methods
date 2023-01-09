@@ -14,6 +14,7 @@ Definition Gprog: funspecs := JacobiASI ++ SparseASI ++ MathASI.
 Lemma body_jacobi2_oneiter: semax_body Vprog Gprog f_jacobi2_oneiter jacobi2_oneiter_spec.
 Proof.
 start_function.
+rename H3 into H4; rename H2 into H3; rename H1 into H2; pose proof I.
 forward_call.
 forward.
 pose (r := jacobi_iter A1 A2 b x).
@@ -28,7 +29,7 @@ forward_for_simple_bound N
              feq s (norm2 (sublist 0 i (vector_sub x r))))
    LOCAL (temp _s (Vfloat s);
        temp _N (Vint (Int.repr (matrix_rows A2))); 
-       temp _A1inv A1p; temp _A2 A2p; temp _b bp; 
+       temp _A1 A1p; temp _A2 A2p; temp _b bp; 
        temp _x xp; temp _y yp)
    SEP (crs_rep shA2 A2 A2p;
    data_at shA1 (tarray tdouble N) (map Vfloat A1) A1p;
@@ -58,8 +59,8 @@ forward_for_simple_bound N
    autorewrite with float_elim in *.
    pose proof (Zlength_jacobi_iter A1 A2 b x ltac:(lia) ltac:(lia) ltac:(lia)).
    fold r in H9.
-  change (Binary.Bfma _ _ _ _ _ _ ?x ?y ?z) with (BFMA x y z).
-   Exists (y ++ [Znth i A1 * (Znth i b - y')]%F64).
+   change (Binary.Bfma _ _ _ _ _ _ ?x ?y ?z) with (BFMA x y z).
+   Exists (y ++ [BDIV _ (Zconst _ 1) (Znth i A1) * (Znth i b - y')]%F64).
    EExists.
    entailer!.
  + 

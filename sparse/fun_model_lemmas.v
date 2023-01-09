@@ -18,10 +18,10 @@ Lemma Zlength_jacobi_iter:
 Proof.
    intros. 
    unfold jacobi_iter, diagmatrix_vector_mult,
-        vector_sub, map2.
+        vector_sub, map2, invert_diagmatrix.
       rewrite Zlength_map.
       rewrite Zlength_combine.
-      rewrite Zlength_map.
+      rewrite !Zlength_map.
       rewrite Zlength_combine.
       unfold matrix_vector_mult.
       rewrite Zlength_map. unfold matrix_rows in *. lia.
@@ -35,21 +35,21 @@ Lemma Znth_jacobi_iter {t}:
   0 <= i < matrix_rows A2 ->
   feq y (dotprod (Znth i A2) x) ->
   feq (Znth i (jacobi_iter A1 A2 b x))
-     (BMULT t (Znth i A1)
+     (BMULT t (BDIV t (Zconst t 1) (Znth i A1))
          (BMINUS t (Znth i b) y)).
 Proof.
 intros. unfold matrix_rows in *.
  unfold jacobi_iter, diagmatrix_vector_mult, vector_sub, map2,
-   matrix_vector_mult.
+   matrix_vector_mult, invert_diagmatrix.
   rewrite Znth_map.
-2:rewrite Zlength_combine, Zlength_map,
+2:rewrite Zlength_combine, !Zlength_map,
      Zlength_combine, Zlength_map; lia.
 rewrite Znth_combine.
-2:rewrite Zlength_map, Zlength_combine, Zlength_map; lia.
-rewrite Znth_map.
-2:rewrite Zlength_combine, Zlength_map; lia.
-rewrite Znth_combine.
-2:rewrite Zlength_map; lia.
+2:rewrite !Zlength_map, Zlength_combine, Zlength_map; lia.
+rewrite Znth_map by lia.
+rewrite Znth_map
+ by (rewrite Zlength_combine, Zlength_map; lia).
+rewrite Znth_combine by (rewrite Zlength_map; lia).
 rewrite Znth_map by lia.
 unfold uncurry.
 apply BMULT_congr; auto.
@@ -57,7 +57,6 @@ apply BMINUS_congr; auto.
 symmetry.
 auto.
 Qed.
-
 
 Lemma matrix_by_index_prop:
  forall {t} (f: nat -> nat -> ftype t) (P: ftype t -> Prop) rows cols,
@@ -171,7 +170,6 @@ Qed.
 Lemma jacobi_iter_congr: 
  forall {t} A1 A2 (b: vector t) x x',
   Forall2 strict_feq x x' ->
-  Forall finite A1 ->
   Forall (Forall finite) A2 ->
   Forall finite b ->  
    Zlength b = matrix_rows A2 ->
@@ -179,7 +177,7 @@ Lemma jacobi_iter_congr:
    matrix_cols A2 (Zlength x) ->
    Forall2 feq (jacobi_iter A1 A2 b x) (jacobi_iter A1 A2 b x') .
 Proof.
-intros.
+intros until 1. pose proof I. intros.
 unfold jacobi_iter.
 unfold diagmatrix_vector_mult.
 unfold map2.

@@ -4,6 +4,10 @@ Require Import Iterative.floatlib.
 Require Import Coq.Lists.List. Import ListNotations.
 Set Bullet Behavior "Strict Subproofs".
 
+Section WITH_NANS.
+
+Context {NANS: Nans}.
+
 Definition diagmatrix t := list (ftype t).
 
 Definition invert_diagmatrix {t} (v: diagmatrix t) : diagmatrix t :=
@@ -26,8 +30,8 @@ Definition matrix_of_diag {t} (d: diagmatrix t) : matrix t :=
  matrix_by_index (length d) (length d)
   (fun i j => if Nat.eq_dec i j then nth i d (Zconst t 0) else Zconst t 0).
 
-Definition jacobi_iter {t: type} (A1inv: diagmatrix t) (A2: matrix t) (b: vector t) (x: vector t) : vector t :=
-   diagmatrix_vector_mult A1inv (vector_sub b (matrix_vector_mult A2 x)).
+Definition jacobi_iter {t: type} (A1: diagmatrix t) (A2: matrix t) (b: vector t) (x: vector t) : vector t :=
+   diagmatrix_vector_mult (invert_diagmatrix A1) (vector_sub b (matrix_vector_mult A2 x)).
 
 Fixpoint iter_stop {t} {A} (dist2: A -> A -> ftype t) (f : A -> A) (n:nat) (acc: ftype t) (x:A) :=
  let y := f x in 
@@ -41,23 +45,23 @@ Fixpoint iter_stop {t} {A} (dist2: A -> A -> ftype t) (f : A -> A) (n:nat) (acc:
 
 Definition jacobi_n {t: type} (A: matrix t) (b: vector t) (x: vector t) (n: nat) : vector t :=
    let A1 := diag_of_matrix  A in 
-   let A1inv := invert_diagmatrix A1 in
    let A2 := remove_diag A in 
-   Nat.iter n (jacobi_iter A1inv A2 b) x.
+   Nat.iter n (jacobi_iter A1 A2 b) x.
 
 Definition dist2 {t: type} (x y: vector t) := norm2 (vector_sub x y).
 
 Definition jacobi {t: type} (A: matrix t) (b: vector t) (x: vector t) (acc: ftype t) (n: nat) :
          ftype t * vector t :=
    let A1 := diag_of_matrix  A in 
-   let A1inv := invert_diagmatrix A1 in
    let A2 := remove_diag A in 
-   iter_stop dist2 (jacobi_iter A1inv A2 b) (pred n) acc x.
+   iter_stop dist2 (jacobi_iter A1 A2 b) (pred n) acc x.
 
 Definition old_jacobi_iter {t: type} x0 b (A1: diagmatrix t) (A2: matrix t) : vector t :=
   let S_J :=  opp_matrix (diagmatrix_matrix_mult A1 A2) in
   let f_J := diagmatrix_vector_mult A1 b in
   vector_add (matrix_vector_mult S_J x0) f_J.
+
+End WITH_NANS.
 
 Module Experiment.
 (***************** Some sanity checks about diag_of_matrix and matrix_of_diag ***)
@@ -68,6 +72,9 @@ Module Experiment.
   is that all of these lemmas should be done at the MathComp level
   and not at the list-of-lists level.  None of these lemmas are needed
   by the VST proofs, for example. *)
+
+Section WITH_NANS.
+Context {NANS: Nans}.
 
 Local Ltac inv H := inversion H; clear H; subst.
 
@@ -353,6 +360,6 @@ unfold matrix_of_diag.
 rewrite matrix_by_index_rows; auto.
 rewrite length_diag_of_matrix; auto.
 Qed.
-
+End WITH_NANS.
 End Experiment.
 
