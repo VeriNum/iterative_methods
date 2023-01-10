@@ -359,75 +359,13 @@ apply H1.
 Qed. 
 
 
-Lemma fold_right_for_list {A B}: 
-  forall  (i: nat) (b :  B) (L: list B) (f: B -> A -> A) (a : A),
-  (i < length L)%nat ->
-  (forall (j: nat), 
-              (j < length L)%nat -> j <> i ->
-              f (nth j L b) a = a) -> 
-  fold_right f a L = f (nth i L b) a.
-Proof.
-intros.
-revert i H H0. induction L; destruct i; simpl; intros.
-+ by contradict H.
-+ by contradict H.
-+ admit.
-+ 
-
-
-
-
- inv H; auto.
-
-
-
-destruct i.
-+ elim: L b a H H0  => [ | s L IHL]  b a H H0.
-  - by simpl in H.
-  - simpl. 
-    assert (L = [] \/ L <> []).
-    { admit. } destruct H1.
-    * by rewrite H1 /=.
-    * specialize (IHL b a).
-      assert ((0 < length L)%nat). { admit. }
-      specialize (IHL H2).
-      assert (forall j : nat,
-               (j < length L)%nat ->
-               j <> 0%N -> f (nth j L b) a = a).
-      { intros. specialize (H0 j.+1).
-        assert ((j.+1 < length (s :: L))%nat).
-        { by []. } specialize (H0 H5). 
-        assert (j.+1 <> 0%nat). { by []. } specialize (H0 H6).
-        by rewrite nth_list /= in H0.
-      } specialize (IHL H3).  rewrite IHL.
-      rewrite H3.
-
-
-
- admit.
-+ 
-
-
-
-
-elim: L i b a H H0  => [ | s L IHL]  i b a H H0.
-+ by simpl in H.
-+ assert (s = b \/ s <> b).
-  { admit. } destruct H1.
-  - rewrite H1 /=. rewrite H1 in H0. 
-
-
-simpl.  
-
-Admitted.
-
-
 
 Lemma dotprod_diag {ty} (v1 v2: vector ty) i :
   length v1 = length v2 ->
   (i < length v1)%nat -> 
-  (forall j , (j < length v1)%nat -> j <> i -> 
-      nth j v1 (Zconst ty 1) = Zconst ty 0) ->
+  (forall j , (j < length v1)%nat -> 
+              nth j v1 (Zconst ty 1) <> nth i v1 (Zconst ty 1) ->
+               nth j v1 (Zconst ty 1) = Zconst ty 0) ->
   dotprod_r v1 v2 = 
   BMULT ty (nth i v1 (Zconst ty 1)) (nth i v2 (Zconst ty 0)).
 Proof.
@@ -444,7 +382,8 @@ assert (dotprod_r v1 v2 =
   + intros. rewrite combine_nth /=. rewrite H1.
     - admit.
     - by rewrite combine_length -H Nat.min_id in H2. 
-    - by [].
+    - rewrite !combine_nth in H3; try by [].
+      admit.
     - by [].
 } rewrite H2. rewrite combine_nth /=.
 admit.
