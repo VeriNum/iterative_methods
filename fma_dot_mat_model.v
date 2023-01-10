@@ -357,7 +357,7 @@ induction L.
     * intros. apply H1. simpl;auto. apply H3.
 Qed.
 
-
+(*
 Lemma fold_right_except_zero {A B} 
   (b :  B) (L: list B) (f: B -> A -> A) (a : A):
   In b L ->
@@ -383,10 +383,13 @@ induction L.
       ++ simpl;auto.
       ++ by [].
 Admitted.
+*)
  
 Lemma fold_right_for_list {A B}: 
   forall  (i: nat) (b :  B) (L: list B) (f: B -> A -> A) (a : A),
-  (i < length L)%nat ->
+  (i < length L)%nat -> 
+  (forall (j:nat),
+      (j < length L)%nat -> nth j L b <> nth i L b) -> 
   (forall (j: nat) d, 
               (j < length L)%nat -> 
               nth j L b <> nth i L b ->
@@ -396,17 +399,23 @@ Proof.
 intros.
 assert (forall (b :  B) (L: list B) (f: B -> A -> A) (a : A),
           In b L ->
+          (forall s, In s L -> s <> b)->
           (forall s d, In s L -> s <> b -> f s d = d) ->
           fold_right f a L = f b a).
 { apply fold_right_except_zero. }
-apply H1.
+apply H2.
 + apply nth_In. by apply /ssrnat.ltP.
++ intros.
+  pose proof In_nth .
+  specialize (H4 B L s b H3).
+  destruct H4 as [j [H41 H42]]. rewrite -H42. apply H0.
+  by apply /ssrnat.ltP. 
 + intros. 
   pose proof In_nth .
-  specialize (H4 B L s b H2).
-  destruct H4 as [j [H41 H42]]. rewrite -H42. apply H0.
+  specialize (H5 B L s b H3).
+  destruct H5 as [j [H51 H52]]. rewrite -H52. apply H1.
   - by apply /ssrnat.ltP.
-  - by rewrite -H42 in H3.
+  - by rewrite -H52 in H4.
 Qed. 
 
 
