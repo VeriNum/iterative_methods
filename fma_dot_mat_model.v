@@ -533,30 +533,66 @@ induction n.
   unfold jacob_list_fun_model.jacobi_iter.
   unfold diagmatrix_vector_mult, map2, uncurry.
   rewrite (nth_map_inrange (Zconst ty 1, Zconst ty 0)).
-  rewrite combine_nth.
-  assert (dotprod_r (vec_to_list_float size.+1
-                      (\row_j0 A1_inv_J A_v i j0)^T) 
-          (vec_to_list_float size.+1
-               (\col_j0 (b_v +f
-                         -f (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) = 
-          BMULT ty (nth (size.+1.-1 - (nat_of_ord i)) (vec_to_list_float size.+1
-                      (\row_j0 A1_inv_J A_v i j0)^T) (Zconst ty 1))
-          (nth (size.+1.-1 - (nat_of_ord i)) (vec_to_list_float size.+1
-               (\col_j0 (b_v +f
-                         -f (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) (Zconst ty 0))).
-  { rewrite (@dotprod_diag _ _ _ (size.+1.-1 - (nat_of_ord i))); try by [].
-    + by rewrite !length_veclist.
-    + rewrite length_veclist. rewrite ltn_subLR. simpl. admit.
-      simpl. apply ltnSE, ltn_ord.
-    + admit.
-(*
-    + rewrite nth_vec_to_list_float. rewrite !mxE /=.
-      assert (i == @inord size i :> nat ). { by rewrite inord_val. }
-      rewrite H1. admit. apply ltn_ord.
-    + intros. 
-      admit.
-*)
-  }  rewrite H0.
+  - rewrite combine_nth.
+    * assert (dotprod_r (vec_to_list_float size.+1
+                        (\row_j0 A1_inv_J A_v i j0)^T) 
+            (vec_to_list_float size.+1
+                 (\col_j0 (b_v +f
+                           -f (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) = 
+            BMULT ty (nth (size.+1.-1 - (nat_of_ord i)) (vec_to_list_float size.+1
+                        (\row_j0 A1_inv_J A_v i j0)^T) (Zconst ty 1))
+            (nth (size.+1.-1 - (nat_of_ord i)) (vec_to_list_float size.+1
+                 (\col_j0 (b_v +f
+                           -f (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) (Zconst ty 0))).
+      { rewrite (@dotprod_diag _ _ _ (size.+1.-1 - (nat_of_ord i))); try by [].
+        + by rewrite !length_veclist.
+        + rewrite length_veclist. rewrite ltn_subLR. simpl. admit.
+          simpl. apply ltnSE, ltn_ord.
+        + admit.
+    (*
+        + rewrite nth_vec_to_list_float. rewrite !mxE /=.
+          assert (i == @inord size i :> nat ). { by rewrite inord_val. }
+          rewrite H1. admit. apply ltn_ord.
+        + intros. 
+          admit.
+    *)
+      }  rewrite H0.
+     rewrite nth_vec_to_list_float.
+     ++ rewrite nth_vec_to_list_float.
+        -- rewrite !mxE.
+           assert (i == @inord size i :> nat ). { by rewrite inord_val. }
+           rewrite H1. rewrite A1_invert_equiv.
+           assert (nth i
+                   (vector_sub b
+                      (matrix_vector_mult (remove_diag A) x_n))
+                   (Zconst ty 0) = 
+               BMINUS ty (nth i b (Zconst ty 0))
+                    (nth i  (matrix_vector_mult (remove_diag A)
+                            x_n) (Zconst ty 0))).
+           { unfold vector_sub, map2, uncurry. 
+             rewrite (nth_map_inrange (Zconst ty 0, Zconst ty 0)).
+             + rewrite combine_nth. 
+               - admit.
+             (*Unable to unify
+                 "@BMINUS NANS ty
+                    (@nth (ftype ty) i b (Zconst ty 0))
+                    (@nth (ftype ty) i
+                       (@matrix_vector_mult ty
+                          (@remove_diag ty A) x_n) 
+                       (Zconst ty 0))"
+                with
+                 "@BMINUS FPCompCert.nans ty
+                    (@nth (ftype ty) i b (Zconst ty 0))
+                    (@nth (ftype ty) i
+                       (@matrix_vector_mult ty
+                          (@remove_diag ty A) x_n) 
+                       (Zconst ty 0))". *)
+               - unfold matrix_vector_mult. rewrite map_length. 
+                 unfold remove_diag. rewrite map_length seq_length.
+                 by unfold matrix_rows_nat.
+             + rewrite combine_length. 
+           admit. } rewrite H1. 
+  
 
 
 
