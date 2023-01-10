@@ -287,6 +287,78 @@ Admitted.
 *)
 Admitted.
 
+
+Lemma fold_right_zero {A B} (L : list B) (d: A) (f: B -> A -> A) :
+  (forall a, In a L -> f a d = d) ->
+  fold_right f d L = d.
+Proof.
+intros.
+induction L.
++ by simpl.
++ simpl. 
+  assert (forall a : B, In a L -> f a d = d).
+  { move=>b IHa. specialize (H b).
+    assert (In b (a :: L)). { simpl;auto. }
+    by specialize (H H0).
+  }  specialize (IHL H0).
+  specialize (H a).
+  assert (In a (a :: L)). { simpl;auto. }
+  specialize (H H1).
+  by rewrite IHL H.
+Qed.
+
+Lemma fold_right_except_zero {A B} 
+  (b :  B) (L: list B) (f: B -> A -> A) (a : A):
+  In b L ->
+  (forall s, In s L -> s <> b -> f s a = a) ->
+  fold_right f a L = f b a.
+Proof.
+intros.
+induction L.
++ by simpl in H.
++ destruct H.
+  - rewrite H /=.
+    assert (fold_right f a L = a).
+    { rewrite fold_right_zero. auto.
+      intros. specialize (H0 a1). rewrite H in H0.
+      assert (In a1 (b :: L)). { simpl;auto. }
+      assert (a1 <> b).
+      { admit. } by apply H0.
+    } by rewrite H1.
+  - simpl. rewrite IHL.
+    * admit.
+    * by [].
+    * intros. apply H0. 
+      ++ simpl;auto.
+      ++ by [].
+Admitted.
+ 
+Lemma fold_right_for_list {A B}: 
+  forall  (i: nat) (b :  B) (L: list B) (f: B -> A -> A) (a : A),
+  (i < length L)%nat ->
+  (forall (j: nat), 
+              (j < length L)%nat -> 
+              nth j L b <> nth i L b ->
+              f (nth j L b) a = a) -> 
+  fold_right f a L = f (nth i L b) a.
+Proof.
+intros.
+assert (forall (b :  B) (L: list B) (f: B -> A -> A) (a : A),
+          In b L ->
+          (forall s, In s L -> s <> b -> f s a = a) ->
+          fold_right f a L = f b a).
+{ apply fold_right_except_zero. }
+apply H1.
++ apply nth_In. by apply /ssrnat.ltP.
++ intros. 
+  pose proof In_nth .
+  specialize (H4 B L s b H2).
+  destruct H4 as [j [H41 H42]]. rewrite -H42. apply H0.
+  - by apply /ssrnat.ltP.
+  - by rewrite -H42 in H3.
+Qed. 
+
+
 Lemma fold_right_for_list {A B}: 
   forall  (i: nat) (b :  B) (L: list B) (f: B -> A -> A) (a : A),
   (i < length L)%nat ->
@@ -296,6 +368,19 @@ Lemma fold_right_for_list {A B}:
   fold_right f a L = f (nth i L b) a.
 Proof.
 intros.
+revert i H H0. induction L; destruct i; simpl; intros.
++ by contradict H.
++ by contradict H.
++ admit.
++ 
+
+
+
+
+ inv H; auto.
+
+
+
 destruct i.
 + elim: L b a H H0  => [ | s L IHL]  b a H H0.
   - by simpl in H.
