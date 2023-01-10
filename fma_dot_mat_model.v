@@ -261,21 +261,46 @@ Admitted.
 *)
 Admitted.
 
+Lemma fold_right_for_list {A B}: 
+  forall  (i: nat) (b :  B) (L: list B) (f: B -> A -> A) (a : A),
+  (i < length L)%nat ->
+  (forall (j: nat), 
+              (j < length L)%nat -> j <> i ->
+              f (nth j L b) a = a) -> 
+  fold_right f a L = f (nth i L b) a.
+Admitted.
+
+
 
 Lemma dotprod_diag {ty} (v1 v2: vector ty) i :
   length v1 = length v2 ->
   (i < length v1)%nat -> 
   (forall j , (j < length v1)%nat -> j <> i -> 
-      nth j v1 (Zconst ty 0) = Zconst ty 0) ->
-  dotprod v1 v2 = 
+      nth j v1 (Zconst ty 1) = Zconst ty 0) ->
+  dotprod_r v1 v2 = 
   BMULT ty (nth i v1 (Zconst ty 1)) (nth i v2 (Zconst ty 0)).
 Proof.
 intros.
-assert (dotprod v1 v2 = 
-        (fun (s : ftype ty) (x12 : ftype ty * ftype ty)
-             => BFMA x12.1 x12.2 s) (Zconst ty 0)
-         (nth i (combine v1 v2) (Zconst ty 0, Zconst ty 0))).
-{ unfold dotprod.
+assert (dotprod_r v1 v2 = 
+        (fun (x12 : ftype ty * ftype ty) (s : ftype ty) 
+             => BFMA x12.1 x12.2 s) 
+         (nth i (combine v1 v2) (Zconst ty 1, Zconst ty 0)) (Zconst ty 0)).
+{ unfold dotprod_r.
+  apply (@fold_right_for_list _ _ i (Zconst ty 1, Zconst ty 0) (combine v1 v2)
+          (fun (x12 : ftype ty * ftype ty) (s : ftype ty) 
+             => BFMA x12.1 x12.2 s) (Zconst ty 0)). 
+  + admit.
+  + intros. rewrite combine_nth /=. rewrite H1.
+    - admit.
+    - admit.
+    - by [].
+    - by [].
+} rewrite H2. rewrite combine_nth /=.
+admit.
+by [].
+
+
+
   (*rewrite (@fold_left_for_list  _ _ i _); try by [].*)
   (*Unable to unify
  "@BFMA NANS ty
@@ -296,8 +321,7 @@ with
        (Zconst ty 0, Zconst ty 0)).2
     (Zconst ty 0)".
   *) 
-  admit.
-} rewrite H2 combine_nth /=.
+
 (* BFMA (nth i v1 (Zconst ty 0))
   (nth i v2 (Zconst ty 0)) (Zconst ty 0) =
   BMULT ty (nth i v1 (Zconst ty 1))
@@ -524,12 +548,16 @@ induction n.
     + by rewrite !length_veclist.
     + rewrite length_veclist. rewrite ltn_subLR. simpl. admit.
       simpl. apply ltnSE, ltn_ord.
+    + admit.
+(*
     + rewrite nth_vec_to_list_float. rewrite !mxE /=.
       assert (i == @inord size i :> nat ). { by rewrite inord_val. }
       rewrite H1. admit. apply ltn_ord.
     + intros. 
       admit.
-  } 
+*)
+  }  rewrite H0.
+
 
 
 assert (nth i
