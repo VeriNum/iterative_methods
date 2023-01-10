@@ -84,7 +84,7 @@ Lemma dotprod_rev_equiv {ty} (v1 v2: vector ty):
 Proof.         
 unfold dotprod, dotprod_r.
 assert (combine (rev v1) (rev v2) = rev (combine v1 v2)).
-{ admit. } rewrite H.
+{ by rewrite combine_rev. } rewrite H.
 (** with the vec_to_float_list, I am actually implementing a
     fold right model
 **)
@@ -288,6 +288,9 @@ Lemma fold_right_for_list {A B}:
               (j < length L)%nat -> j <> i ->
               f (nth j L b) a = a) -> 
   fold_right f a L = f (nth i L b) a.
+Proof.
+
+
 Admitted.
 
 
