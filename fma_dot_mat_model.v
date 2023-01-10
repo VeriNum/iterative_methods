@@ -308,29 +308,6 @@ induction L.
 Qed.
 
 
-(***
-H1 : In a1 L
-H0 : forall d : A,
-     In a1 (b :: L) -> a1 <> b -> f a1 d = d
-H2 : In a1 (b :: L)
-**)
-
-
-Hypothesis eq_dec: forall (A: Type) (a b :A) , a = b \/ a <> b.
-
-Lemma nth_neq {A} (l : list A) (a b : A):
-  In a l -> ~ In b l -> a <> b.
-Proof.
-intros.
-specialize (@eq_dec A a b).
-assert (a = b \/ a <> b).
-{ apply eq_dec. }
-destruct H1.
-+ by rewrite -H1 in H0.
-+ by [].
-Qed.
-
-
 Lemma fold_right_except_zero {A B} 
   (b :  B) (L: list B) (f: B -> A -> A) (a : A):
   In b L ->
@@ -357,33 +334,6 @@ induction L.
     * intros. apply H1. simpl;auto. apply H3.
 Qed.
 
-(*
-Lemma fold_right_except_zero {A B} 
-  (b :  B) (L: list B) (f: B -> A -> A) (a : A):
-  In b L ->
-  (forall s d, In s L -> s <> b -> f s d = d) ->
-  fold_right f a L = f b a.
-Proof.
-intros.
-induction L.
-+ by simpl in H.
-+ destruct H.
-  - rewrite H /=.
-    assert (fold_right f a L = a).
-    { rewrite fold_right_zero. auto.
-      intros. specialize (H0 a1). rewrite H in H0.
-      assert (In a1 (b :: L)). { simpl;auto. }
-      assert (a1 <> b).
-      { admit. } by apply H0.
-    } by rewrite H1.
-  - simpl. rewrite IHL.
-    * apply H0. simpl;auto. admit.
-    * by [].
-    * intros. apply H0. 
-      ++ simpl;auto.
-      ++ by [].
-Admitted.
-*)
  
 Lemma fold_right_for_list {A B}: 
   forall  (i: nat) (b :  B) (L: list B) (f: B -> A -> A) (a : A),
@@ -423,6 +373,7 @@ Qed.
 Lemma dotprod_diag {ty} (v1 v2: vector ty) i :
   length v1 = length v2 ->
   (i < length v1)%nat -> 
+  (forall j, (j < length v1)%nat -> nth j v1 (Zconst ty 1) <> nth i v1 (Zconst ty 1)) ->
   (forall j , (j < length v1)%nat -> 
               nth j v1 (Zconst ty 1) <> nth i v1 (Zconst ty 1) ->
                nth j v1 (Zconst ty 1) = Zconst ty 0) ->
@@ -439,6 +390,7 @@ assert (dotprod_r v1 v2 =
           (fun (x12 : ftype ty * ftype ty) (s : ftype ty) 
              => BFMA x12.1 x12.2 s) (Zconst ty 0)). 
   + by rewrite combine_length -H Nat.min_id. 
+  + intros. rewrite !combine_nth. admit.
   + intros. rewrite combine_nth /=. rewrite H1.
     - admit.
     - by rewrite combine_length -H Nat.min_id in H2. 
