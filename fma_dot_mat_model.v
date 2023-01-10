@@ -2,6 +2,8 @@ From Coq Require Import ZArith Reals Psatz.
 From Flocq Require Import Binary.
 From mathcomp Require Import all_ssreflect ssralg ssrnat all_algebra seq matrix.
 Import List ListNotations.
+
+
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
                             Float_notations Automate.
 Require Import dot_prod_defn float_model_generic.
@@ -391,6 +393,8 @@ apply nth_ext with (Zconst ty 0) (Zconst ty 0).
   - rewrite -H. by apply /ssrnat.ltP.
   - by rewrite -H. 
 Qed.
+
+
 Lemma A2_equiv {ty} (A: matrix ty) size i :
   length A = size.+1 ->
   (i < size.+1)%coq_nat ->
@@ -455,7 +459,7 @@ Lemma residual_equiv {ty} (v: vector ty) (A: matrix ty) i:
   length A = length v ->
   (i < length A)%nat ->
   nth i (matrix_vector_mult (remove_diag A) v) (Zconst ty 0) = 
-  dotprod (vec_to_list_float size.+1
+  dotprod_r (vec_to_list_float size.+1
               (\row_j0 A2_J A_v (inord i) j0)^T)
            (vec_to_list_float size.+1
               (\col_j0 vector_inj v size.+1 j0 ord0)).
@@ -492,17 +496,12 @@ assert (v = rev (vec_to_list_float size.+1
 }
 rewrite [in LHS]H2.
 rewrite (@A2_equiv _ _ size _).
-unfold matrix_vector_mult. 
-unfold remove_diag.
-Check ((matrix_by_index (matrix_rows_nat A)
-        (matrix_rows_nat A)
-        (fun i0 j : nat =>
-         if Nat.eq_dec i0 j
-         then Zconst ty 0
-         else matrix_index A i0 j))).
-Check (nth i A []).
-unfold A2_J.
-Admitted.
+by rewrite dotprod_rev_equiv.
+by rewrite /size prednK /=.
+rewrite /size prednK /=.
+by apply /ssrnat.ltP.
+apply H.
+Qed.
 
 
 
