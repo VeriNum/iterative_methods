@@ -73,9 +73,15 @@ Definition dotprod_r {t: type} (v1 v2: list (ftype t)) : ftype t :=
 
 
 
-Lemma combine_rev {ty} (v1 v2: vector ty):
+Lemma combine_rev {ty}:
+forall (v1 v2: vector ty),
   (combine (rev v1) (rev v2)) = rev (combine v1 v2).
 Proof.
+induction v1,v2.
++ simpl;auto.
++ simpl;auto.
++ simpl. apply  combine_nil.
++ simpl. admit.
 Admitted.
 
 
@@ -289,7 +295,44 @@ Lemma fold_right_for_list {A B}:
               f (nth j L b) a = a) -> 
   fold_right f a L = f (nth i L b) a.
 Proof.
+intros.
+destruct i.
++ elim: L b a H H0  => [ | s L IHL]  b a H H0.
+  - by simpl in H.
+  - simpl. 
+    assert (L = [] \/ L <> []).
+    { admit. } destruct H1.
+    * by rewrite H1 /=.
+    * specialize (IHL b a).
+      assert ((0 < length L)%nat). { admit. }
+      specialize (IHL H2).
+      assert (forall j : nat,
+               (j < length L)%nat ->
+               j <> 0%N -> f (nth j L b) a = a).
+      { intros. specialize (H0 j.+1).
+        assert ((j.+1 < length (s :: L))%nat).
+        { by []. } specialize (H0 H5). 
+        assert (j.+1 <> 0%nat). { by []. } specialize (H0 H6).
+        by rewrite nth_list /= in H0.
+      } specialize (IHL H3).  rewrite IHL.
+      rewrite H3.
 
+
+
+ admit.
++ 
+
+
+
+
+elim: L i b a H H0  => [ | s L IHL]  i b a H H0.
++ by simpl in H.
++ assert (s = b \/ s <> b).
+  { admit. } destruct H1.
+  - rewrite H1 /=. rewrite H1 in H0. 
+
+
+simpl.  
 
 Admitted.
 
@@ -312,10 +355,10 @@ assert (dotprod_r v1 v2 =
   apply (@fold_right_for_list _ _ i (Zconst ty 1, Zconst ty 0) (combine v1 v2)
           (fun (x12 : ftype ty * ftype ty) (s : ftype ty) 
              => BFMA x12.1 x12.2 s) (Zconst ty 0)). 
-  + admit.
+  + by rewrite combine_length -H Nat.min_id. 
   + intros. rewrite combine_nth /=. rewrite H1.
     - admit.
-    - admit.
+    - by rewrite combine_length -H Nat.min_id in H2. 
     - by [].
     - by [].
 } rewrite H2. rewrite combine_nth /=.
