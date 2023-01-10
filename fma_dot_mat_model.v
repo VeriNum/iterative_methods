@@ -310,7 +310,7 @@ Qed.
 Lemma fold_right_except_zero {A B} 
   (b :  B) (L: list B) (f: B -> A -> A) (a : A):
   In b L ->
-  (forall s, In s L -> s <> b -> f s a = a) ->
+  (forall s d, In s L -> s <> b -> f s d = d) ->
   fold_right f a L = f b a.
 Proof.
 intros.
@@ -326,7 +326,7 @@ induction L.
       { admit. } by apply H0.
     } by rewrite H1.
   - simpl. rewrite IHL.
-    * admit.
+    * apply H0. simpl;auto. admit.
     * by [].
     * intros. apply H0. 
       ++ simpl;auto.
@@ -336,16 +336,16 @@ Admitted.
 Lemma fold_right_for_list {A B}: 
   forall  (i: nat) (b :  B) (L: list B) (f: B -> A -> A) (a : A),
   (i < length L)%nat ->
-  (forall (j: nat), 
+  (forall (j: nat) d, 
               (j < length L)%nat -> 
               nth j L b <> nth i L b ->
-              f (nth j L b) a = a) -> 
+              f (nth j L b) d = d) -> 
   fold_right f a L = f (nth i L b) a.
 Proof.
 intros.
 assert (forall (b :  B) (L: list B) (f: B -> A -> A) (a : A),
           In b L ->
-          (forall s, In s L -> s <> b -> f s a = a) ->
+          (forall s d, In s L -> s <> b -> f s d = d) ->
           fold_right f a L = f b a).
 { apply fold_right_except_zero. }
 apply H1.
