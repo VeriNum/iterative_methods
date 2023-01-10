@@ -517,6 +517,7 @@ Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat
   let x_v := vector_inj x size.+1 in 
   let b_v := vector_inj b size.+1 in 
   let A_v := matrix_inj A size.+1 size.+1 in
+  (0 < length A)%nat ->
   length b = length A -> 
   vector_inj (jacobi_n A b x n) size.+1 = @X_m_jacobi ty size n x_v b_v A_v.
 Proof.
@@ -555,12 +556,12 @@ induction n.
         + intros. 
           admit.
     *)
-      }  rewrite H0.
+      }  rewrite H1.
      rewrite nth_vec_to_list_float.
      ++ rewrite nth_vec_to_list_float.
         -- rewrite !mxE.
            assert (i == @inord size i :> nat ). { by rewrite inord_val. }
-           rewrite H1. rewrite A1_invert_equiv.
+           rewrite H2. rewrite A1_invert_equiv.
            assert (nth i
                    (vector_sub b
                       (matrix_vector_mult (remove_diag A) x_n))
@@ -589,13 +590,29 @@ induction n.
                - unfold matrix_vector_mult. rewrite map_length. 
                  unfold remove_diag. rewrite map_length seq_length.
                  by unfold matrix_rows_nat.
-             + rewrite combine_length. rewrite !map_length seq_length /matrix_rows_nat H Nat.min_id /=.
+             + rewrite combine_length. rewrite !map_length seq_length /matrix_rows_nat H0 Nat.min_id /=.
                admit.
-           } rewrite H2.
+           } rewrite H3.
            unfold sum. rewrite residual_equiv. rewrite inordK.
            rewrite -/size . rewrite /A_v. rewrite plus_minus_eqiv.
-           assert (j = ord0). { by apply ord1. } by rewrite H3.
-           apply ltn_ord.
+           assert (j = ord0). { by apply ord1. } by rewrite H4.
+           apply ltn_ord. by [].
+           rewrite Heqx_n. admit.
+           assert (length A = size.+1).
+           { rewrite /size. by rewrite prednK. } rewrite H4. apply ltn_ord.
+           assert (length A = size.+1).
+           { rewrite /size. by rewrite prednK. } rewrite H3. 
+           apply /ssrnat.ltP. apply ltn_ord.
+        -- apply ltn_ord.
+     ++ apply ltn_ord.
+   * rewrite  !map_length !seq_length combine_length !map_length !seq_length.
+     by rewrite /matrix_rows_nat H0 Nat.min_id.
+ - rewrite  combine_length !map_length !seq_length combine_length !map_length !seq_length.
+   rewrite /matrix_rows_nat H0 !Nat.min_id.
+   assert (length A = size.+1).
+   { rewrite /size. by rewrite prednK. } rewrite H1. 
+   apply /ssrnat.ltP. apply ltn_ord.   
+Admitted.
   
 
 
