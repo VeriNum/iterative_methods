@@ -307,6 +307,57 @@ induction L.
   by rewrite IHL H.
 Qed.
 
+
+(***
+H1 : In a1 L
+H0 : forall d : A,
+     In a1 (b :: L) -> a1 <> b -> f a1 d = d
+H2 : In a1 (b :: L)
+**)
+
+
+Hypothesis eq_dec: forall (A: Type) (a b :A) , a = b \/ a <> b.
+
+Lemma nth_neq {A} (l : list A) (a b : A):
+  In a l -> ~ In b l -> a <> b.
+Proof.
+intros.
+specialize (@eq_dec A a b).
+assert (a = b \/ a <> b).
+{ apply eq_dec. }
+destruct H1.
++ by rewrite -H1 in H0.
++ by [].
+Qed.
+
+
+Lemma fold_right_except_zero {A B} 
+  (b :  B) (L: list B) (f: B -> A -> A) (a : A):
+  In b L ->
+  (forall s, In s L -> s <> b)->
+  (forall s d, In s L -> s <> b -> f s d = d) ->
+  fold_right f a L = f b a.
+Proof.
+intros.
+induction L.
++ by simpl in H.
++ destruct H.
+  - rewrite H /=.
+    assert (fold_right f a L = a).
+    { rewrite fold_right_zero. auto.
+      intros. specialize (H0 a1). rewrite H in H0.
+      apply H1.
+      - simpl;auto.
+      - apply H0. simpl;auto.
+    } by rewrite H2.
+  - simpl. rewrite IHL.
+    * apply H1. simpl;auto. apply H0. simpl;auto.
+    * by [].
+    * intros. apply H0. simpl;auto.
+    * intros. apply H1. simpl;auto. apply H3.
+Qed.
+
+
 Lemma fold_right_except_zero {A B} 
   (b :  B) (L: list B) (f: B -> A -> A) (a : A):
   In b L ->
@@ -706,6 +757,5 @@ Admitted.
   
 
 End WITHNANS.
-
 
 
