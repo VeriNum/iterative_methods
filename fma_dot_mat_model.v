@@ -590,8 +590,10 @@ induction n.
                - unfold matrix_vector_mult. rewrite map_length. 
                  unfold remove_diag. rewrite map_length seq_length.
                  by unfold matrix_rows_nat.
-             + rewrite combine_length. 
-           admit. } rewrite H1. 
+             + rewrite combine_length. rewrite !map_length seq_length /matrix_rows_nat H Nat.min_id /=.
+               admit.
+           } rewrite H2.
+           unfold sum. rewrite residual_equiv. 
   
 
 
