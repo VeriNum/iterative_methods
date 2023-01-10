@@ -592,7 +592,10 @@ induction n.
              + rewrite combine_length. rewrite !map_length seq_length /matrix_rows_nat H Nat.min_id /=.
                admit.
            } rewrite H2.
-           unfold sum. rewrite residual_equiv. 
+           unfold sum. rewrite residual_equiv. rewrite inordK.
+           rewrite -/size . rewrite /A_v. rewrite plus_minus_eqiv.
+           assert (j = ord0). { by apply ord1. } by rewrite H3.
+           apply ltn_ord.
   
 
 
