@@ -58,48 +58,6 @@ symmetry.
 auto.
 Qed.
 
-Lemma matrix_by_index_prop:
- forall {t} (f: nat -> nat -> ftype t) (P: ftype t -> Prop) rows cols,
-  P (Zconst t 0) ->
-  (forall i j, (i < rows)%nat -> (j < cols)%nat -> P (f i j)) ->
-  Forall (Forall P) (matrix_by_index rows cols f).
-Proof.
-intros.
-unfold matrix_by_index.
-apply Forall_nth; intros.
-rewrite map_length, seq_length in H1.
-rewrite nth_map_seq by auto.
-apply Forall_nth; intros.
-rewrite map_length, seq_length in H2.
-rewrite nth_map_seq by auto.
-apply H0; auto.
-Qed.
-
-Lemma Zmatrix_cols_nat: 
- forall {t} (m: matrix t) cols,
-  matrix_cols_nat m cols  <-> matrix_cols m (Z.of_nat cols).
-Proof.
-induction m; simpl; intros; split; intro; inv H; constructor; auto.
-apply Zlength_correct.
-clear - H3.
-induction H3; constructor; auto. rewrite <- H; apply Zlength_correct.
-rewrite Zlength_correct in H2. lia.
-clear - H3.
-induction H3; constructor; auto. rewrite Zlength_correct in H; lia.
-Qed.
-
-Lemma Zlength_seq: forall lo n, Zlength (seq lo n) = Z.of_nat n.
-Proof.
-intros. rewrite Zlength_correct. f_equal. apply seq_length.
-Qed.
-#[export] Hint Rewrite Zlength_seq : sublist rep_lia.
-
-Lemma Zmatrix_rows_nat: forall {t} (m: matrix t), Z.of_nat (matrix_rows_nat m) = matrix_rows m.
-Proof.
-unfold matrix_rows.
-induction m; simpl; auto. list_solve.
-Qed.
-
 Lemma matrix_cols_remove_diag:
   forall {t} (m: matrix t), matrix_cols m (matrix_rows m) ->
     matrix_cols (remove_diag m) (matrix_rows m).
@@ -138,136 +96,46 @@ Qed.
 
 #[export] Hint Rewrite @Zmatrix_rows_nat : sublist rep_lia.
 
-Add Parametric Morphism {t: type}: (@norm2 t)
-  with signature Forall2 feq ==> feq
- as norm2_mor.
+Add Parametric Morphism {t}: (@diagmatrix_vector_mult _ t)
+  with signature Forall2 feq ==> Forall2 feq ==> Forall2 feq 
+ as diagmatrix_vector_mult_mor.
 Proof.
-exact norm2_congr.
-Qed.
-
-Add Parametric Morphism {t: type}: (@vector_sub t)
-  with signature Forall2 feq ==> Forall2 feq ==> Forall2 feq
-  as vector_sub_mor.
-Proof.
-intros; eapply vector_sub_congr; eauto.
-Qed.
-
-Add Parametric Morphism {T: Type} (rel: relation T): (@Zlength T)
-  with signature Forall2 rel ==> eq
-  as Zlength_mor.
-Proof.
-induction 1; auto.
-rewrite !Zlength_cons; f_equal; auto.
-Qed.
-
-Add Parametric Morphism {t: type}: (@finite t)
-  with signature feq ==> iff
-  as finite_rel.
-Proof.
-destruct x,y; split; intros; inv H0; inv H; constructor; auto.
-Qed.
-
-Lemma jacobi_iter_congr: 
- forall {t} A1 A2 (b: vector t) x x',
-  Forall2 strict_feq x x' ->
-  Forall (Forall finite) A2 ->
-  Forall finite b ->  
-   Zlength b = matrix_rows A2 ->
-   Zlength A1 = matrix_rows A2 ->
-   matrix_cols A2 (Zlength x) ->
-   Forall2 feq (jacobi_iter A1 A2 b x) (jacobi_iter A1 A2 b x') .
-Proof.
-intros until 1. pose proof I. intros.
-unfold jacobi_iter.
+intros.
 unfold diagmatrix_vector_mult.
-unfold map2.
 apply Forall2_map.
-rewrite <- Zmatrix_rows_nat in *.
-rewrite Zlength_correct in *.
-apply Zmatrix_cols_nat in H5.
-apply Nat2Z.inj in H3,H4.
-unfold matrix_rows_nat in *.
-revert A1 A2 H0 H1 H3 H4 H5; induction H2; 
-   destruct A1 as [|A1r A1]; destruct A2 as [|A2r A2]; intros;
-  try inv H0; try inv H1; try inv H3; try inv H4; constructor; auto;
-   inv H5; inv H6.
--
-unfold uncurry.
- apply BMULT_congr; auto.
- apply BMINUS_congr; auto.
- apply dotprod_congr; auto.
--
- apply IHForall; auto.
-Qed.
-
-Lemma strict_floatlist_eqv_i1: 
-   forall {t} (a b: list (ftype t)),
-    Forall finite a -> Forall2 feq a b -> Forall2 strict_feq a b.
-Proof.
-induction 2; inv H;constructor.
-apply strict_feq_i1; auto.
-apply IHForall2; auto.
-Qed.
-
-Lemma finite_is_finite: forall {t} (x: ftype t),
-   finite x <-> Binary.is_finite _ _ x = true.
-Proof.
-split; intros;
-destruct x; inv H; try reflexivity.
+revert x0 y0 H0; induction H; simpl; intros; auto.
+destruct x0,y0; inv H1; simpl; intros; auto.
 constructor; auto.
+unfold uncurry.
+apply BMULT_congr; auto.
 Qed.
 
-Lemma feq_strict_feq:
- forall {t} (x y: ftype t),
-   finite x -> feq x y -> strict_feq x y.
+Add Parametric Morphism {t}:  (@jacobi_iter _ t)
+ with signature Forall2 strict_feq ==> Forall2 (Forall2 feq) 
+       ==> Forall2 feq ==> Forall2 feq ==> Forall2 feq
+  as jacobi_iter_mor.
 Proof.
- intros.
- destruct x; inv H; destruct y; inv H0; constructor; auto.
+unfold jacobi_iter; intros.
+apply diagmatrix_vector_mult_mor.
+unfold invert_diagmatrix.
+apply Forall2_map.
+clear - H.
+eapply Forall2_impl; try apply H; intros.
+apply BDIV_mor; auto.
+apply vector_sub_mor; auto.
+apply matrix_vector_mult_mor; auto.
 Qed.
 
-Lemma strict_feq_finite1:
-  forall {t} (x y: ftype t),
-    strict_feq x y -> finite x.
+Add Parametric Morphism {t}:  (@jacobi_residual _ t)
+ with signature Forall2 strict_feq ==> Forall2 (Forall2 feq) 
+       ==> Forall2 feq ==> Forall2 feq ==> Forall2 feq
+  as jacobi_residual_mor.
 Proof.
-intros.
-destruct x,y; inv H; constructor; auto.
-Qed.
-
-Lemma finite_dotprod_e: forall {t} (x y: vector t),
-  Zlength x = Zlength y ->
-  finite (dotprod x y) -> Forall finite x /\ Forall finite y.
-Proof.
-intros.
-rewrite !Zlength_correct in H. apply Nat2Z.inj in H.
-unfold dotprod in H0.
-rewrite <- fold_left_rev_right in H0.
-rewrite rev_combine in H0 by auto.
-rewrite <- (rev_length x), <- (rev_length y) in H.
-assert (Forall finite (rev x) /\ Forall finite (rev y)).
-2:rewrite <- (rev_involutive x), <- (rev_involutive y);
-   destruct H1; split; apply Forall_rev; auto.
-forget (rev x) as a; forget (rev y) as b.
-revert b H H0; induction a; destruct b; intros; inv H.
-split; constructor.
-specialize (IHa _ H2).
-simpl in H0.
-set (u := fold_right _ _ _) in *. clearbody u.
-assert (finite a /\ finite f /\ finite u); [ | split; constructor; tauto].
-clear - H0.
-apply finite_is_finite in H0.
-destruct a,f,u; inv H0; try solve [split3; constructor; auto].
-destruct s,s0,s1; inv H1.
-destruct s,s0,s1; inv H1.
-destruct s,s0,s1; inv H1.
-Qed.
-
-
-Lemma finite_norm2_e: forall {t} (x: vector t),
-  finite (norm2 x) -> Forall finite x.
-Proof.
-intros.
-apply finite_dotprod_e in H; auto.
-destruct H; auto.
+unfold jacobi_residual; intros.
+apply diagmatrix_vector_mult_mor; auto.
+eapply Forall2_impl. apply subrelation_strict_feq. auto.
+apply vector_sub_mor; auto.
+apply jacobi_iter_mor; auto.
 Qed.
 
 Lemma finite_dist2_e2: 
@@ -302,14 +170,6 @@ Qed.
 Definition stop {t} (s acc: ftype t) := 
    andb (Binary.is_finite (fprec t) (femax t) s) (BCMP _ Gt true s acc).
 
-Add Parametric Morphism {t: type} : (Binary.is_finite (fprec t) (femax t))
-  with signature feq ==> eq
-  as is_finite_mor.
-Proof.
-intros.
-destruct x, y; inv H; reflexivity.
-Qed.
-
 Add Parametric Morphism {t: type} : (@dist2 t)
   with signature Forall2 feq ==> Forall2 feq ==> feq
   as dist2_mor.
@@ -333,74 +193,45 @@ destruct H1; subst; auto.
 Qed.
 
 Ltac iter_stop_S :=
-   change (@iter_stop ?t _  ?dist2 ?f (S ?n) ?acc ?x) with
-        (if stop (dist2 x (f x)) acc
-           then iter_stop dist2 f n acc (f x) else (dist2 x (f x), (f x))).
-
-Lemma strict_floatlist_eqv_unstrict:
-   forall {t} (x y: vector t), Forall2 strict_feq x y -> Forall2 feq x y.
-Proof.
-induction 1; constructor; auto.
-apply subrelation_strict_feq; auto.
-Qed.
-
-Add Parametric Morphism {t}: (BCMP t) 
- with signature eq ==> eq ==> strict_feq ==> strict_feq ==> eq
- as BCMP_mor.
-Proof.
-intros.
-destruct x,y1; inv H; destruct x0,y2; inv H0; simpl.
-destruct y,s,s0,s1,s2;simpl; auto.
-destruct H1; subst.
-proof_irr.
-destruct y0,s,s0,s2; simpl; auto.
-destruct H2; subst.
-proof_irr.
-destruct y0,s,s0,s1; simpl; auto.
-destruct H1,H2; subst.
-repeat proof_irr.
-destruct y0,s0,s1; simpl; auto.
-Qed.
+   change (@iter_stop ?t _  ?norm2 ?res ?f (S ?n) ?acc ?x) with
+        (if stop (norm2 (res x)) acc
+           then iter_stop norm2 res f n acc (f x) else (norm2 (res x), (f x))).
 
 Lemma iter_stop_congr {t}:
- forall f acc (FINacc: finite acc) n (z z': vector t),
- (forall x, Zlength x = Zlength z -> Zlength (f x) = Zlength x) ->
- (forall x x': vector t, Zlength x = Zlength z -> Forall2 strict_feq x x' -> Forall2 feq (f x) (f x')) ->
- Forall2 strict_feq z z' ->
- Forall2 feq (snd (iter_stop dist2 f n acc z))
-    (snd (iter_stop dist2 f n acc z')).
+ forall (norm2: vector t -> ftype t) residual f acc (FINacc: finite acc) n (z z': vector t),
+   Proper (Forall2 feq ==> feq) norm2 ->
+   Proper (Forall2 feq ==> Forall2 feq) residual ->
+   Proper (Forall2 feq ==> Forall2 feq) f ->
+ Forall2 feq z z' ->
+ Forall2 feq (snd (iter_stop norm2 residual f n acc z))
+    (snd (iter_stop norm2 residual f n acc z')).
 Proof.
 induction n; simpl; intros.
-apply H0;auto.
-assert (feq (dist2 z (f z))  (dist2 z' (f z'))).
-apply dist2_mor; auto.
-apply strict_floatlist_eqv_unstrict; auto.
-replace  (Binary.is_finite (fprec t) (femax t) (dist2 z' (f z')))
-  with (Binary.is_finite (fprec t) (femax t) (dist2 z (f z)))
-  by (rewrite H2; auto).
+apply H1;auto.
+assert (feq (norm2 (residual z)) (norm2 (residual z'))).
+apply H; apply H0; auto.
+replace  (Binary.is_finite (fprec t) (femax t) (norm2 (residual z')))
+  with (Binary.is_finite (fprec t) (femax t) (norm2 (residual z)))
+  by (rewrite H3; auto).
 destruct (Binary.is_finite _ _ _) eqn:?H.
 simpl.
-apply finite_is_finite in H3.
-replace (BCMP t Gt true (dist2 z' (f z')) acc) with (BCMP t Gt true (dist2 z (f z)) acc)
+apply finite_is_finite in H4.
+replace (BCMP t Gt true (norm2 (residual z')) acc) 
+     with (BCMP t Gt true (norm2 (residual z)) acc)
   by (apply BCMP_mor; auto; apply strict_feq_i1; auto).
 destruct (BCMP _ _ _ _ _).
-apply IHn.
-intros; auto. rewrite H in H4; auto. 
-intros; apply H0; auto. rewrite H in H4; auto.
-apply strict_floatlist_eqv_i1; auto.
-apply finite_dist2_e2 in H3; auto.
-symmetry; apply H; auto.
-simpl snd. apply H0; auto.
+apply IHn; auto.
+simpl; auto.
 simpl.
-apply H0; auto.
+apply H1; auto.
 Qed.
 
-Fixpoint iter_stop_n {t} {A} (dist2: A -> A -> ftype t) (f : A -> A) (n: nat) (acc: ftype t) (x: A) :=
+Fixpoint iter_stop_n {t} {A} (norm2: A -> ftype t) (residual: A -> A) (f : A -> A) (n: nat) (acc: ftype t) (x: A) :=
    match n with
  | O => Some x
- | S n' => match iter_stop_n dist2 f n' acc x
+ | S n' => match iter_stop_n norm2 residual f n' acc x
                   with Some y => 
-                         let s := dist2 y (f y) in
+                         let s := norm2 (residual y) in
                           if (Binary.is_finite _ _ s && BCMP t Gt true s acc )%bool
                           then Some (f y)
                           else None
@@ -408,19 +239,19 @@ Fixpoint iter_stop_n {t} {A} (dist2: A -> A -> ftype t) (f : A -> A) (n: nat) (a
                end
   end.
 
-Fixpoint iter_stop_n_alt {t} {A} (dist2: A -> A -> ftype t) (f : A -> A) (n: nat) (acc: ftype t) (x: A) :=
+Fixpoint iter_stop_n_alt {t} {A} (norm2: A -> ftype t) (residual: A -> A) (f : A -> A) (n: nat) (acc: ftype t) (x: A) :=
    match n with
  | O => Some x
- | S n' => let s := dist2 x (f x) in
+ | S n' => let s := norm2 (residual x) in
                 if (Binary.is_finite _ _ s && BCMP t Gt true s acc )%bool
-                then iter_stop_n_alt dist2 f n' acc (f x)
+                then iter_stop_n_alt norm2 residual f n' acc (f x)
                 else None
   end.
 
 Lemma iter_stop_n_eq_alt: @iter_stop_n = @iter_stop_n_alt.
 Proof.
 extensionality t A.
-extensionality dist2 f.
+extensionality norm2 residual f.
 extensionality n acc x.
 revert x; induction n; intros; simpl; auto.
 rewrite IHn; clear IHn.
@@ -430,10 +261,10 @@ destruct (andb _ _) eqn:?H; auto.
 Qed.
 
 Lemma iter_stop_n_lem1:
-  forall t A dist2 (f: A->A) (acc: ftype t) k n x y, 
-   iter_stop_n dist2 f n acc x = Some y ->
-   (Binary.is_finite _ _ (dist2 y (f y)) && BCMP t Gt true (dist2 y (f y)) acc)%bool = false ->
-   iter_stop dist2 f (n+k) acc x = (dist2 y (f y), f y).
+  forall t A norm2 (residual: A -> A) (f: A->A) (acc: ftype t) k n x y, 
+   iter_stop_n norm2 residual f n acc x = Some y ->
+   (Binary.is_finite _ _ (norm2 (residual y)) && BCMP t Gt true (norm2 (residual y)) acc)%bool = false ->
+   iter_stop norm2 residual f (n+k) acc x = (norm2 (residual y), f y).
 Proof.
 rewrite iter_stop_n_eq_alt.
 induction n; simpl; intros; auto.
@@ -445,10 +276,10 @@ apply IHn; auto.
 Qed.  
 
 Lemma iter_stop_n_lem2: 
-  forall t A dist2 (f: A->A) (acc: ftype t) n x y, 
-   iter_stop_n dist2 f n acc x = Some y ->
-   (Binary.is_finite _ _ (dist2 y (f y)) && BCMP t Gt true (dist2 y (f y)) acc)%bool = true ->
-   iter_stop dist2 f n acc x = (dist2 y (f y), f y).
+  forall t A norm2 residual (f: A->A) (acc: ftype t) n x y, 
+   iter_stop_n norm2 residual f n acc x = Some y ->
+   (Binary.is_finite _ _ (norm2 (residual y)) && BCMP t Gt true (norm2 (residual y)) acc)%bool = true ->
+   iter_stop norm2 residual f n acc x = (norm2 (residual y), f y).
 Proof.
 rewrite iter_stop_n_eq_alt.
 induction n; simpl; intros; auto.
@@ -459,13 +290,14 @@ apply IHn; auto.
 Qed.  
 
 Lemma iter_stop_n_Zlength:
- forall {t} f N n acc x v
+ forall {t} residual f N n acc x v
     (LENf: forall x, Zlength x = N -> Zlength (f x) = Zlength x)
     (CONGR_f: forall x x' : list (ftype t),
           Zlength x = N ->
-          Forall2 strict_feq x x' -> Forall2 feq (f x) (f x')),
+          Forall2 strict_feq x x' -> Forall2 feq (f x) (f x'))
+    (FINRES: forall x, Zlength x = N -> Forall finite (residual x) -> Forall finite (f x)),
     Zlength x = N -> Forall finite x ->
-    iter_stop_n dist2 f n acc x = Some v ->
+    iter_stop_n norm2 residual f n acc x = Some v ->
     Zlength v = N.
 Proof.
 intros.
@@ -475,9 +307,68 @@ inv H1; auto.
 destruct (andb _ _) eqn:?H in H1; try discriminate.
 rewrite andb_true_iff in H2. destruct H2.
 apply finite_is_finite in H2.
-apply finite_dist2_e2 in H2.
+apply finite_norm2_e in H2.
 apply IHn in H1; auto.
 rewrite LENf; auto.
-rewrite LENf; auto.
 Qed.
+
+Lemma finres_jacobi {t}: forall A1 A2 b (x: vector t),
+   Zlength A1 = Zlength x ->
+   Zlength (jacobi_iter A1 A2 b x) = Zlength x ->
+   Forall finite (jacobi_residual A1 A2 b x) ->
+   Forall finite (jacobi_iter A1 A2 b x).
+Proof.
+intros.
+unfold jacobi_residual in *.
+set (y := jacobi_iter _ _ _ _) in *. clearbody y.
+unfold diagmatrix_vector_mult, vector_sub in H1.
+rewrite !Zlength_correct in *.
+apply Nat2Z.inj in H, H0.
+revert A1 y H H0 H1; induction x; destruct A1,y; intros; inv H; inv H0; inv H1; 
+  constructor; auto.
+-
+clear - H4.
+assert (finite (BMINUS t f0 a))
+  by (destruct f, (BMINUS t f0 a); try contradiction H4; simpl; auto).
+clear H4.
+destruct f0,a; try destruct s; try destruct s0; try contradiction H; simpl; auto.
+-
+apply (IHx _ _ H3 H2 H5).
+Qed.
+
+Lemma Zlength_jacobi_residual: 
+  forall {t} A1 (A2: matrix t) b x, 
+   Zlength A1 = matrix_rows A2 ->
+   Zlength b = matrix_rows A2 ->
+   Zlength x = matrix_rows A2 ->
+   Zlength (jacobi_residual A1 A2 b x) = matrix_rows A2.
+Proof.
+   intros. 
+   unfold jacobi_residual, diagmatrix_vector_mult,
+        vector_sub, map2.
+      rewrite Zlength_map.
+      rewrite Zlength_combine.
+      rewrite !Zlength_map.
+      rewrite Zlength_combine.
+      rewrite Zlength_jacobi_iter by auto. lia.
+Qed.
+
+Lemma diag_of_matrix_prop:
+  forall {t} (P: ftype t -> Prop) (A: matrix t), 
+      matrix_cols A (matrix_rows A) ->
+      Forall (Forall P) A -> Forall P (diag_of_matrix A).
+Proof.
+intros.
+unfold diag_of_matrix.
+apply Forall_map, Forall_seq.
+intros. red.
+assert (0 <= matrix_rows A).
+unfold matrix_rows in *. rep_lia.
+rewrite <- Z2Nat.id in H by lia.
+apply Zmatrix_cols_nat in H.
+eapply matrix_index_prop. eauto. auto. lia.
+rewrite <- Zmatrix_rows_nat. lia.
+Qed.
+
+
 

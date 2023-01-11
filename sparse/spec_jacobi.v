@@ -36,7 +36,7 @@ Definition jacobi2_oneiter_spec :=
  POST [ tdouble ]
    EX y: vector Tdouble, EX s: ftype Tdouble,
     PROP( Forall2 feq y  (jacobi_iter A1 A2 b x); 
-              feq s (dist2 x y))
+              feq s (norm2 (jacobi_residual A1 A2 b x)))
     RETURN(Vfloat s)
     SEP (data_at shA1 (tarray tdouble (matrix_rows A2)) (map Vfloat A1) A1p;
            crs_rep shA2 A2 A2p;

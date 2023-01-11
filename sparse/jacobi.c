@@ -48,10 +48,12 @@ double jacobi2_oneiter(double *A1, struct crs_matrix *A2, double *b, double *x, 
   unsigned i, N=crs_matrix_rows(A2);
   double s = 0.0;
   for (i=0; i<N; i++) {
-    double r = (1/A1[i])*(b[i] - crs_row_vector_multiply(A2,x,i));
-      double d = x[i]-r;
-      s = fma(d,d,s);
-      y[i] = r;
+    double u = b[i] - crs_row_vector_multiply(A2,x,i);
+    double a1 = A1[i];
+    double new = (1/a1)*u;
+    double r = a1*(new - x[i]);
+    s = fma(r,r,s);
+    y[i] = new;
     }
   return s;
 }
