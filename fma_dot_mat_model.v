@@ -354,6 +354,40 @@ by apply /ssrnat.ltP.
 apply H.
 Qed.
 
+
+(**
+length
+  (Nat.iter n
+     (fun x0 : vector ty =>
+      diagmatrix_vector_mult
+        (invert_diagmatrix (diag_of_matrix A))
+        (vector_sub b
+           (matrix_vector_mult (remove_diag A) x0)))
+     x)
+**)
+Print Nat.iter.
+
+Lemma iter_length {ty} n (A: matrix ty) (b: vector ty) (x: vector ty):
+  length b = length A ->
+  length x = length A ->
+  length
+  (Nat.iter n
+     (fun x0 : vector ty =>
+      diagmatrix_vector_mult
+        (invert_diagmatrix (diag_of_matrix A))
+        (vector_sub b
+           (matrix_vector_mult (remove_diag A) x0)))
+     x) = length A.
+Proof.
+induction n.
++ by simpl.
++ simpl. repeat rewrite !map_length combine_length.
+  unfold matrix_vector_mult. rewrite map_length.
+  rewrite !map_length !seq_length /matrix_rows_nat /=.
+  intros. rewrite H. by rewrite !Nat.min_id.
+Qed.
+  
+
 Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat) :
   let size := (length A).-1 in  
   let x_v := vector_inj x size.+1 in 
@@ -361,6 +395,7 @@ Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat
   let A_v := matrix_inj A size.+1 size.+1 in
   (0 < length A)%nat ->
   length b = length A -> 
+  length x = length A ->
   vector_inj (jacobi_n A b x n) size.+1 = @X_m_jacobi ty size n x_v b_v A_v.
 Proof.
 intros.
@@ -409,31 +444,27 @@ induction n.
                  by unfold matrix_rows_nat.
              + rewrite combine_length. rewrite !map_length seq_length /matrix_rows_nat H0 Nat.min_id /=.
                 assert (length A = size.+1).
-                { rewrite /size. by rewrite prednK. } rewrite H1. 
+                { rewrite /size. by rewrite prednK. } rewrite H2. 
                 apply /ssrnat.ltP. apply ltn_ord. 
-           } rewrite H1. rewrite nth_vec_to_list_float; last by apply ltn_ord.
+           } rewrite H2. rewrite nth_vec_to_list_float; last by apply ltn_ord.
            rewrite !mxE. rewrite residual_equiv. rewrite inordK.
            rewrite -/size . by rewrite /A_v. 
            apply ltn_ord. by [].
            rewrite Heqx_n. unfold jacobi_n.
            Print Nat.iter.
            unfold jacob_list_fun_model.jacobi_iter.
-           rewrite !map_length.
-
-
-
- admit.
+           by rewrite iter_length.
            assert (length A = size.+1).
-           { rewrite /size. by rewrite prednK. } rewrite H2. apply ltn_ord.
+           { rewrite /size. by rewrite prednK. } rewrite H3. apply ltn_ord.
      * assert (length A = size.+1).
-       { rewrite /size. by rewrite prednK. } rewrite H1. 
+       { rewrite /size. by rewrite prednK. } rewrite H2. 
        apply /ssrnat.ltP. apply ltn_ord.
      * rewrite  !map_length !seq_length combine_length !map_length !seq_length.
        by rewrite /matrix_rows_nat H0 Nat.min_id.
   - rewrite  combine_length !map_length !seq_length combine_length !map_length !seq_length.
      rewrite /matrix_rows_nat H0 !Nat.min_id.
      assert (length A = size.+1).
-     { rewrite /size. by rewrite prednK. } rewrite H1. 
+     { rewrite /size. by rewrite prednK. } rewrite H2. 
      apply /ssrnat.ltP. apply ltn_ord. 
 Admitted.
 
