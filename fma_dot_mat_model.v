@@ -414,7 +414,15 @@ induction n.
            } rewrite H1. rewrite nth_vec_to_list_float; last by apply ltn_ord.
            rewrite !mxE. rewrite residual_equiv. rewrite inordK.
            rewrite -/size . by rewrite /A_v. 
-           apply ltn_ord. by []. admit.
+           apply ltn_ord. by [].
+           rewrite Heqx_n. unfold jacobi_n.
+           Print Nat.iter.
+           unfold jacob_list_fun_model.jacobi_iter.
+           rewrite !map_length.
+
+
+
+ admit.
            assert (length A = size.+1).
            { rewrite /size. by rewrite prednK. } rewrite H2. apply ltn_ord.
      * assert (length A = size.+1).
