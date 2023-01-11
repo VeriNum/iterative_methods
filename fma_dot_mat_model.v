@@ -355,18 +355,6 @@ apply H.
 Qed.
 
 
-(**
-length
-  (Nat.iter n
-     (fun x0 : vector ty =>
-      diagmatrix_vector_mult
-        (invert_diagmatrix (diag_of_matrix A))
-        (vector_sub b
-           (matrix_vector_mult (remove_diag A) x0)))
-     x)
-**)
-Print Nat.iter.
-
 Lemma iter_length {ty} n (A: matrix ty) (b: vector ty) (x: vector ty):
   length b = length A ->
   length x = length A ->
