@@ -71,31 +71,47 @@ Definition dotprod_r {t: type} (v1 v2: list (ftype t)) : ftype t :=
   fold_right (fun x12 s => BFMA (fst x12) (snd x12) s) 
                  (Zconst t 0) (List.combine v1 v2)  .
 
-
-
 Lemma combine_rev {ty}:
 forall (v1 v2: vector ty),
+  length v1 = length v2 ->
   (combine (rev v1) (rev v2)) = rev (combine v1 v2).
 Proof.
-induction v1,v2.
+intros.
+elim: v1 v2 H => [ |s v1 IHv1] v2 H.
 + simpl;auto.
-+ simpl;auto.
-+ simpl. apply  combine_nil.
-+ simpl. admit.
-Admitted.
++ destruct v2.
+  - by simpl in H.
+  - specialize (IHv1 v2).
+    assert (length v1 = length v2).
+    { simpl in H. lia. } specialize (IHv1 H0).
+    simpl. rewrite -IHv1.
+    assert (length (rev v1) = length (rev v2)).
+    { by rewrite !rev_length. }
+    clear IHv1 H H0.
+    elim: (rev v1) (rev v2) H1  => [ |a1 v3 IHv3] v4 H.
+    * destruct v4.
+      ++ simpl;auto.
+      ++ by simpl in H.
+    * destruct v4.
+      ++ by simpl in H.
+      ++ simpl. rewrite IHv3; try by [].
+         simpl in H. lia.
+Qed.
 
 
 Lemma dotprod_rev_equiv {ty} (v1 v2: vector ty):
+  length v1 = length v2 ->
   dotprod (rev v1) (rev v2) = dotprod_r v1 v2.
-Proof.         
+Proof.
+intros.         
 unfold dotprod, dotprod_r.
 assert (combine (rev v1) (rev v2) = rev (combine v1 v2)).
-{ by rewrite combine_rev. } rewrite H.
+{ by rewrite combine_rev. } rewrite H0.
 (** with the vec_to_float_list, I am actually implementing a
     fold right model
 **)
 rewrite <-fold_left_rev_right.
-rewrite rev_involutive.
+rewrite rev_involutive. 
 (*
 Unable to unify
  "@fold_right (ftype ty) (ftype ty * ftype ty)
@@ -114,6 +130,17 @@ admit.
 
 Admitted.
 
+(** The issue is that b could appear more than once in the list. 
+    So the current version of lemma is not correct 
+***)
+(*
+Lemma fold_right_except_zero {A B} 
+  (f: B -> A -> A) (a : A) (L: list B) (b :  B) :
+  In b L ->
+  (forall s d, In s L -> s <> b -> f s d = d) ->
+  fold_right f a L = f b a.
+Admitted.
+*)
 
 Definition mulmx_float {ty} {m n p : nat} 
   (A: 'M[ftype ty]_(m.+1,n.+1)) (B: 'M[ftype ty]_(n.+1,p.+1)) : 
