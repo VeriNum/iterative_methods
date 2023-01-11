@@ -168,8 +168,8 @@ Definition jacobi_iter {ty} {n:nat} x0 b (A: 'M[ftype ty]_n.+1) :
 
 Definition diag_vector_mult {ty} {n:nat} (v1 v2: 'cV[ftype ty]_n.+1)
   : 'cV[ftype ty]_n.+1 :=
-  \col_i (BMULT ty (nth i (vec_to_list_float n.+1 v1) (Zconst ty 0))
-            (nth i (vec_to_list_float n.+1 v2) (Zconst ty 0))).
+  \col_i (BMULT ty (nth (n.+1.-1 -i) (vec_to_list_float n.+1 v1) (Zconst ty 0))
+            (nth (n.+1.-1 - i) (vec_to_list_float n.+1 v2) (Zconst ty 0))).
 
 Definition jacobi_iter {ty} {n:nat} x0 b (A: 'M[ftype ty]_n.+1) : 
   'cV[ftype ty]_n.+1 :=
@@ -640,6 +640,71 @@ rewrite /size prednK /=.
 by apply /ssrnat.ltP.
 apply H.
 Qed.
+
+Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat) :
+  let size := (length A).-1 in  
+  let x_v := vector_inj x size.+1 in 
+  let b_v := vector_inj b size.+1 in 
+  let A_v := matrix_inj A size.+1 size.+1 in
+  (0 < length A)%nat ->
+  length b = length A -> 
+  vector_inj (jacobi_n A b x n) size.+1 = @X_m_jacobi ty size n x_v b_v A_v.
+Proof.
+intros.
+induction n.
++ apply /matrixP. unfold eqrel.
+  intros. by rewrite !mxE /=.  
++ simpl. rewrite -IHn.
+  apply /matrixP. unfold eqrel.
+  move=> i j.
+  rewrite !mxE. 
+  remember (jacobi_n A b x n) as x_n.
+  unfold jacob_list_fun_model.jacobi_iter.
+  unfold diagmatrix_vector_mult, map2, uncurry.
+  rewrite (nth_map_inrange (Zconst ty 1, Zconst ty 0)).
+  - rewrite combine_nth.
+    rewrite A1_invert_equiv.
+    * rewrite nth_vec_to_list_float; last by apply ltn_ord.
+      rewrite !mxE. rewrite inordK; last by apply ltn_ord.
+      assert (nth i
+                   (vector_sub b
+                      (matrix_vector_mult (remove_diag A) x_n))
+                   (Zconst ty 0) = 
+               BMINUS ty (nth i b (Zconst ty 0))
+                    (nth i  (matrix_vector_mult (remove_diag A)
+                            x_n) (Zconst ty 0))).
+           { unfold vector_sub, map2, uncurry. 
+             rewrite (nth_map_inrange (Zconst ty 0, Zconst ty 0)).
+             + rewrite combine_nth. 
+               - admit.
+             (*Unable to unify
+                 "@BMINUS NANS ty
+                    (@nth (ftype ty) i b (Zconst ty 0))
+                    (@nth (ftype ty) i
+                       (@matrix_vector_mult ty
+                          (@remove_diag ty A) x_n) 
+                       (Zconst ty 0))"
+                with
+                 "@BMINUS FPCompCert.nans ty
+                    (@nth (ftype ty) i b (Zconst ty 0))
+                    (@nth (ftype ty) i
+                       (@matrix_vector_mult ty
+                          (@remove_diag ty A) x_n) 
+                       (Zconst ty 0))". *)
+               - unfold matrix_vector_mult. rewrite map_length. 
+                 unfold remove_diag. rewrite map_length seq_length.
+                 by unfold matrix_rows_nat.
+             + rewrite combine_length. rewrite !map_length seq_length /matrix_rows_nat H0 Nat.min_id /=.
+                assert (length A = size.+1).
+                { rewrite /size. by rewrite prednK. } rewrite H3. 
+                apply /ssrnat.ltP. apply ltn_ord. 
+           } rewrite H3.
+
+
+
+
+
+
 
 Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat) :
   let size := (length A).-1 in  
