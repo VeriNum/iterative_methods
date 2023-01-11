@@ -142,19 +142,40 @@ Notation "A -f B" := (sub_mat A B) (at level 80).
 Print BDIV.
 
 (** Functional model for Jacobi iteration **)
+(*
 Definition A1_inv_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'M[ftype ty]_n.+1:=
   \matrix_(i,j) 
     (if (i==j :> nat) then (BDIV ty (Zconst ty 1) (A i i)) else (Zconst ty 0)).
+*)
+
+Definition A1_inv_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
+  \col_i (BDIV ty (Zconst ty 1) (A i i)).
+
+
 Definition A2_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1): 
   'M[ftype ty]_n.+1 :=
   \matrix_(i,j) 
     if (i==j :> nat) then (Zconst ty 0) else A i j.
 
 
+(** Update this model to just multiply by diagonal of A1_inv_J **)
+(*
 Definition jacobi_iter {ty} {n:nat} x0 b (A: 'M[ftype ty]_n.+1) : 
   'cV[ftype ty]_n.+1 :=
    let r := b -f ((A2_J A) *f x0) in
    (A1_inv_J A) *f r.
+*)
+
+Definition diag_vector_mult {ty} {n:nat} (v1 v2: 'cV[ftype ty]_n.+1)
+  : 'cV[ftype ty]_n.+1 :=
+  \col_i (BMULT ty (nth i (vec_to_list_float n.+1 v1) (Zconst ty 0))
+            (nth i (vec_to_list_float n.+1 v2) (Zconst ty 0))).
+
+Definition jacobi_iter {ty} {n:nat} x0 b (A: 'M[ftype ty]_n.+1) : 
+  'cV[ftype ty]_n.+1 :=
+   let r := b -f ((A2_J A) *f x0) in
+   diag_vector_mult (A1_inv_J A) r.
+
 
 Definition X_m_jacobi {ty} {n:nat} m x0 b (A: 'M[ftype ty]_n.+1) :
   'cV[ftype ty]_n.+1 :=
@@ -314,6 +335,15 @@ induction L.
   specialize (H H1).
   by rewrite IHL H.
 Qed.
+
+(*
+
+Lemma not_in {A} (a:A) (L: list A) :
+  In a (a :: L) -> ~In a L.
+Proof.
+intros.
+*)
+
 
 
 Lemma fold_right_except_zero {A B} 
