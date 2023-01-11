@@ -71,18 +71,40 @@ Definition dotprod_r {t: type} (v1 v2: list (ftype t)) : ftype t :=
   fold_right (fun x12 s => BFMA (fst x12) (snd x12) s) 
                  (Zconst t 0) (List.combine v1 v2)  .
 
+(*
+Definition v1 := [1].
+Definition v2 := [2;3].
 
+Compute (combine (rev v1) (rev v2)).
+Compute (rev (combine v1 v2)).
+*)
 
 Lemma combine_rev {ty}:
 forall (v1 v2: vector ty),
+  length v1 = length v2 ->
   (combine (rev v1) (rev v2)) = rev (combine v1 v2).
 Proof.
-induction v1,v2.
+intros.
+elim: v1 v2 H => [ |s v1 IHv1] v2 H.
 + simpl;auto.
-+ simpl;auto.
-+ simpl. apply  combine_nil.
-+ simpl. admit.
-Admitted.
++ destruct v2.
+  - by simpl in H.
+  - specialize (IHv1 v2).
+    assert (length v1 = length v2).
+    { simpl in H. lia. } specialize (IHv1 H0).
+    simpl. rewrite -IHv1.
+    assert (length (rev v1) = length (rev v2)).
+    { by rewrite !rev_length. }
+    clear IHv1 H H0.
+    elim: (rev v1) (rev v2) H1  => [ |a1 v3 IHv3] v4 H.
+    * destruct v4.
+      ++ simpl;auto.
+      ++ by simpl in H.
+    * destruct v4.
+      ++ by simpl in H.
+      ++ simpl. rewrite IHv3; try by [].
+         simpl in H. lia.
+Qed.
 
 
 Lemma dotprod_rev_equiv {ty} (v1 v2: vector ty):
@@ -95,7 +117,7 @@ assert (combine (rev v1) (rev v2) = rev (combine v1 v2)).
     fold right model
 **)
 rewrite <-fold_left_rev_right.
-rewrite rev_involutive.
+rewrite rev_involutive. 
 (*
 Unable to unify
  "@fold_right (ftype ty) (ftype ty * ftype ty)
