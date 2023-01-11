@@ -33,13 +33,16 @@ Definition matrix_of_diag {t} (d: diagmatrix t) : matrix t :=
 Definition jacobi_iter {t: type} (A1: diagmatrix t) (A2: matrix t) (b: vector t) (x: vector t) : vector t :=
    diagmatrix_vector_mult (invert_diagmatrix A1) (vector_sub b (matrix_vector_mult A2 x)).
 
-Fixpoint iter_stop {t} {A} (dist2: A -> A -> ftype t) (f : A -> A) (n:nat) (acc: ftype t) (x:A) :=
+Definition jacobi_residual {t: type} (A1: diagmatrix t) (A2: matrix t) (b: vector t) (x: vector t) : vector t :=
+   diagmatrix_vector_mult A1 (vector_sub (jacobi_iter A1 A2 b x) x).
+
+Fixpoint iter_stop {t} {A} (norm2: A -> ftype t) (residual: A -> A) (f : A -> A) (n:nat) (acc: ftype t) (x:A) :=
  let y := f x in 
- let s := dist2 x y in
+ let s := norm2 (residual x) in 
  match n with
  | O => (s, y)
  | S n' => if Binary.is_finite _ _ s && BCMP t Gt true s acc 
-                then iter_stop dist2 f n' acc y
+                then iter_stop norm2 residual f n' acc y
                 else (s,y)
   end.
 
@@ -54,7 +57,7 @@ Definition jacobi {t: type} (A: matrix t) (b: vector t) (x: vector t) (acc: ftyp
          ftype t * vector t :=
    let A1 := diag_of_matrix  A in 
    let A2 := remove_diag A in 
-   iter_stop dist2 (jacobi_iter A1 A2 b) (pred n) acc x.
+   iter_stop norm2 (jacobi_residual A1 A2 b) (jacobi_iter A1 A2 b) (pred n) acc x.
 
 Definition old_jacobi_iter {t: type} x0 b (A1: diagmatrix t) (A2: matrix t) : vector t :=
   let S_J :=  opp_matrix (diagmatrix_matrix_mult A1 A2) in

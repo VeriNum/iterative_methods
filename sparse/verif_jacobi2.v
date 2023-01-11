@@ -28,16 +28,6 @@ Definition surely_malloc_spec :=
 
 Definition Gprog: funspecs := surely_malloc_spec :: JacobiASI ++ SparseASI ++ MathASI ++ MallocASI.
 
-(*
-Definition first_loop : statement.
-let c := constr:(f_jacobi2) in
-let c := eval red in c in 
-match c with context [Ssequence (Sset _i ?e) ?s] =>
- exact (Ssequence (Sset _i e ) s)
-end.
-Defined.
-*)
-
 Definition the_loop : statement.
 let c := constr:(f_jacobi2) in
 let c := eval red in c in 
@@ -45,80 +35,6 @@ match c with context [Sloop ?a ?b] => match a with context [Sset _maxiter] => id
  exact (Sloop a b)
 end.
 Defined.
-
-(*
-Lemma jacobi2_first_loop: forall {Espec : OracleKind}
-  (sh1 : share) gv acc maxiter
-  (A : matrix Tdouble)
-  (yp xp A2p bp A1p : val)
-  (SH : readable_share sh1),
-  let N := matrix_rows A in
-  forall  (H : matrix_cols A N)
-  (H0 : 0 < N < Int.max_unsigned)
-  (H1 : Forall (Forall finite) A)
-  (A1ip : val)
-  (FR1 : mpred),
-semax (func_tycontext f_jacobi2 Vprog Gprog nil)
-  (PROP ( )
-   LOCAL (temp _A1inv A1ip; temp _y yp; temp _z xp; 
-   temp _N (Vint (Int.repr N));
-   gvars gv; temp _A1 A1p; temp _A2 A2p; temp _b bp; temp _x xp;
-   temp _acc (Vfloat acc); temp _maxiter (Vint (Int.repr maxiter)))
-   SEP (FR1; data_at_ Ews (tarray tdouble N) A1ip;
-   data_at sh1 (tarray tdouble N) (map Vfloat (diag_of_matrix A)) A1p))
-   first_loop
- (normal_ret_assert
-  (PROP ( )
-   LOCAL (temp _A1inv A1ip; temp _y yp; temp _z xp; 
-   temp _N (Vint (Int.repr N));
-   gvars gv; temp _A1 A1p; temp _A2 A2p; temp _b bp; temp _x xp;
-   temp _acc (Vfloat acc); temp _maxiter (Vint (Int.repr maxiter)))
-   SEP (FR1; data_at Ews (tarray tdouble N) (map Vfloat (invert_diagmatrix (diag_of_matrix A))) A1ip;
-   data_at sh1 (tarray tdouble N) (map Vfloat (diag_of_matrix A)) A1p))).
-Proof.
-intros.
-unfold first_loop.
-abbreviate_semax.
-assert (Zlength (diag_of_matrix A) = N)
-  by (unfold diag_of_matrix; autorewrite with sublist; auto).
-forward_for_simple_bound N
-  (EX i:Z, PROP ( )
-   LOCAL (temp _A1inv A1ip; temp _y yp; temp _z xp;
-   temp _N (Vint (Int.repr N)); 
-   gvars gv; temp _A1 A1p; temp _A2 A2p; temp _b bp; temp _x xp;
-   temp _acc (Vfloat acc); temp _maxiter (Vint (Int.repr maxiter)))
-   SEP (FR1; 
-   data_at sh1 (tarray tdouble N) (map Vfloat (diag_of_matrix A)) A1p;
-   data_at Ews (tarray tdouble N)
-        (map Vfloat (sublist 0 i (map (BDIV _ (Zconst _ 1)) (diag_of_matrix A)))
-          ++ Zrepeat Vundef (N-i)) A1ip))%assert.
--
-  entailer!. simpl; apply derives_refl.
-- 
-   forward.
-   forward.
-   change float with (ftype Tdouble) in *.
-   rewrite Znth_map by list_solve.
-   simpl force_val.
-   entailer!.
-   apply derives_refl'; f_equal.
-   clear - H3 H2 H0 H H1.
-   rewrite (sublist_split 0 i (i+1)) by list_solve.
-   rewrite sublist_len_1 by list_solve.
-   replace (matrix_rows A - i) with (matrix_rows A - (i+1) + 1) by lia.
-   rewrite <- Zrepeat_app by lia.
-   change (Zrepeat Vundef 1) with [Vundef].
-   list_simplify.
-   rewrite Znth_app1 by list_solve. f_equal.
-   list_simplify.
--
-list_simplify.
-rewrite sublist_map.
-rewrite sublist_same by auto.
-fold (invert_diagmatrix (diag_of_matrix A)).
-entailer!.
-Qed.
-*)
 
 Definition choose {A} n (a b: A) := if Nat.odd n then a else b.
 
@@ -182,6 +98,9 @@ semax (func_tycontext f_jacobi2 Vprog Gprog [])
 Proof.
 intros.
 unfold the_loop.
+assert (COLS2 :=  matrix_cols_remove_diag _ COLS).
+assert (FINA1: Forall finite (diag_of_matrix A))
+  by (apply diag_of_matrix_prop; auto).
 assert (FINA2 := finite_remove_diag A COLS FINA).
 subst N.
 rewrite <- matrix_rows_remove_diag in *.
@@ -192,23 +111,21 @@ assert_PROP (Zlength b = N /\ Zlength x = N) as LENbx. {
   entailer!. clear - H4 H7; unfold matrix_rows in *; split;  list_solve.
 }
 destruct LENbx as [LENb LENx].
-set (A1(*inv*) := (*invert_diagmatrix*) (diag_of_matrix A)) in *.
-assert (LENA1(*inv*): Zlength A1(*inv*) = N). {
-  unfold A1(*inv*), N, A2 (*, invert_diagmatrix*).
+set (A1 := diag_of_matrix A) in *.
+assert (LENA1: Zlength A1 = N). {
+  unfold A1, N, A2.
    rewrite ?Zlength_map, Zlength_diag_of_matrix, matrix_rows_remove_diag; auto.
 }
-assert (COLS2: matrix_cols A2 N). {
-  subst A2 N. 
-  rewrite matrix_rows_remove_diag in COLS|-*; apply matrix_cols_remove_diag; auto.
-}
 pose (f := jacobi_iter A1 A2 b).
-assert (CONGR_f: forall x x', Zlength x = N -> Forall2 strict_feq x x' -> Forall2 feq (f x) (f x')). {
-  intros. apply jacobi_iter_congr; auto. rewrite H; auto.
-}
+pose (resid := jacobi_residual A1 A2 b).
+assert (f_Proper: Proper (Forall2 feq ==> Forall2 feq) f)
+  by (apply jacobi_iter_mor_Proper; auto).
+assert (resid_mor_Proper: Proper (Forall2 feq ==> Forall2 feq) resid)
+  by (apply jacobi_residual_mor_Proper; auto).
 apply semax_loop_unroll1
  with (P' := (EX y:vector Tdouble, EX s:ftype Tdouble, 
   PROP (Forall2 feq y (f x);
-          feq s (dist2 x y))
+          feq s (norm2 (resid x)))
   LOCAL (temp _maxiter (Vint (Int.sub (Int.repr maxiter) (Int.repr 1)));
     temp _y xp; temp _z yp; temp _t xp; temp _s (Vfloat s);
     temp _A1 A1p; temp _N (Vint (Int.repr N)); 
@@ -222,7 +139,7 @@ apply semax_loop_unroll1
      FRZL FR1))%assert)
  (Q := (EX y:vector Tdouble, EX s:ftype Tdouble, 
   PROP (Forall2 feq y (f x); 
-          feq s (dist2 x y);
+          feq s (norm2 (resid x));
           stop s acc = true; maxiter>1)
   LOCAL (temp _maxiter (Vint (Int.repr (maxiter -1)));
     temp _y xp; temp _z yp; temp _t xp; temp _s (Vfloat s);
@@ -274,26 +191,25 @@ forward_if (temp _t'3 (Val.of_bool (stop s acc))).
    rewrite andb_true_iff in H1; destruct H1; auto.
  + forward. Exists 1%nat y s.
    entailer!!.
-   unfold jacobi. fold A1. fold A2. fold f.
+   rewrite H0. rewrite H.
+   unfold jacobi. fold A1. fold A2. fold f. fold resid.
    destruct (Z.to_nat maxiter) eqn:?H; [ lia | ].
    simpl. 
-   destruct n. simpl iter_stop. unfold fst, snd. split; auto.
-   rewrite <- H; auto.
+   destruct n. simpl iter_stop. reflexivity.
+   iter_stop_S.
    rewrite andb_false_iff in H1.
    destruct H1; [ | lia].
-   change 1024 with (femax Tdouble) in H1.
-   iter_stop_S.
-   rewrite H in H0.
-  rewrite (stop_mor _ _ _ H0 _ _ FINacc) in H1. rewrite H1.
-   split; auto.
+   red in FINacc.
+   rewrite (stop_mor _ _ _ H0 _ _ FINacc) in H1. (* BUG?  Why doesn't it 
+                       work to simply write [rewrite H0 in H1] ? *)
+   rewrite H1.
+   reflexivity.
 -
-
-Intros fx s.
-
-forward_loop 
+ Intros fx s.
+ forward_loop 
   (EX n:nat, EX y: vector Tdouble, EX s: ftype Tdouble,
    PROP (0 <= Z.of_nat n <= maxiter-1;
-             option_rel (Forall2 feq) (iter_stop_n dist2 f n acc x) (Some y);
+             option_rel (Forall2 feq) (iter_stop_n norm2 resid f n acc x) (Some y);
              Forall finite y)
    LOCAL (temp _A1 A1p; temp _y (choose n xp yp); temp _z (choose n yp xp);
    temp _N (Vint (Int.repr N)); gvars gv;
@@ -309,23 +225,26 @@ forward_loop
 +
 Exists (S O) fx s; entailer!!.
 split.
-simpl.
-change (andb _ _) with (stop (dist2 x (f x)) acc).
- rewrite H in H0.
-  rewrite (stop_mor _ _ _ H0 _ _ FINacc) in H1. rewrite H1.
- constructor.  symmetry; auto.
- unfold stop in H1. rewrite andb_true_iff in H1. destruct H1 as [? _].
+ * simpl.
+   change (andb _ _) with (stop (norm2 (resid x)) acc).
+   rewrite (stop_mor _ _ _ H0 _ _ FINacc) in H1. rewrite H1.
+   constructor.  symmetry; auto.
+ * unfold stop in H1. rewrite andb_true_iff in H1. destruct H1 as [? _].
  apply finite_is_finite in H1.
  rewrite H0 in H1.
- apply finite_dist2_e2 in H1; auto.
- symmetry. rewrite H. rewrite LENx. apply Zlength_jacobi_iter; auto.
+ apply finite_norm2_e in H1.
+ apply finres_jacobi in H1; try (rewrite ?Zlength_jacobi_iter; lia).
+ fold f in H1.
+ symmetry in H.
+ eapply Forall_Forall2; try apply H1. apply H.
+ intros. rewrite H4 in H3; auto. 
 +
 clear dependent s.
 Intros n y s.
 inv H1. rename H4 into H1.
 progress change float with (ftype Tdouble) in *.
 rename H2 into FINy.
-destruct (iter_stop_n dist2 f n acc x) eqn:?K; inv H1.
+destruct (iter_stop_n norm2 resid f n acc x) eqn:?K; inv H1.
 forward_call (shA1,shA2,shb, choose n shy shx, choose n shx shy,
                        A1p, A1, A2p, A2, bp, b, choose n yp xp,
                          y,   choose n xp yp).
@@ -365,9 +284,12 @@ forward_if (temp _t'3 (Val.of_bool (stop s acc))).
     forward.
     rewrite H4. entailer!!.
   }
-assert (LENv :=  K).
-  apply iter_stop_n_Zlength with (N := matrix_rows A2) in LENv; auto.
-  2: intros; unfold f; rewrite Zlength_jacobi_iter; auto.
+assert (LENv: Zlength v = N). {
+  eapply iter_stop_n_Zlength in K; try eassumption.
+   intros; unfold f; rewrite Zlength_jacobi_iter; auto.
+   intros; apply f_Proper; eauto with typeclass_instances.
+   intros; eapply finres_jacobi; eauto; rewrite ?Zlength_jacobi_iter; lia.
+}
 assert (LENy : Zlength y = matrix_rows A2) by (rewrite <- H6; auto).
 fold N in LENv, LENy |-*.
 assert (EQyv: Forall2 strict_feq y v) by (apply strict_floatlist_eqv_i1; auto; symmetry; auto).
@@ -389,47 +311,38 @@ assert (FINs: finite s). {
 }
 split3; [ | | f_equal; f_equal; lia].
 -- simpl. rewrite K.
-  change (andb _ _) with (stop (dist2 v (f v)) acc).
-  rewrite <- H6 in H2.
-  rewrite (CONGR_f  y v) in H1 by auto.
-  rewrite H1 in H2.
+  change (andb _ _) with (stop (norm2 (resid v)) acc).
+  fold resid in H2. rewrite <- H6 in H2. rewrite <- H6 in H1.
   rewrite (stop_mor _ _ _ H2 _ _ FINacc) in H4 by auto. rewrite H4.
  constructor; symmetry; auto.
 --
-rewrite H2 in FINs.
-apply finite_dist2_e2 in FINs; auto.
-  rewrite H1. unfold f. rewrite Zlength_jacobi_iter; auto.
+ rewrite H2 in FINs.
+ apply finite_norm2_e in FINs.
+ apply finres_jacobi in FINs; try (rewrite ?Zlength_jacobi_iter; lia).
+ fold f in FINs.
+ symmetry in H1.
+ eapply Forall_Forall2; try apply H1; auto.
+ intros. rewrite H8 in H5; auto. 
 *
 forward.
 Exists (S n) fy s.
 rewrite !choose_S.
 entailer!!.
 unfold jacobi. fold A1. fold A2. fold f.
-destruct (stop s acc) eqn:?H.
+fold resid in H2|-*.
+rewrite <- H6 in H1, H2.
+rewrite (stop_mor _ _ _ H2 _ _ FINacc) in H4 by auto.
+rewrite H1, H2.
+destruct (stop (norm2 (resid v)) acc) eqn:?H.
 --
 apply iter_stop_n_lem2 in K; auto.
 replace (pred _) with n by lia.
-rewrite K.
-split.
-rewrite H1 in H2.
-rewrite H2. apply dist2_mor; auto. symmetry; auto. rewrite H1; apply CONGR_f; auto.
-   rewrite H1 in H2.
-  rewrite (CONGR_f  y v) in H2 by auto. 
-  rewrite <- H6 in H2.
-  rewrite (stop_mor _ _ _ H2 _ _ FINacc) in H5. apply H5.
+rewrite K. reflexivity.
 --
 pose (k := (pred (Z.to_nat maxiter) - n)%nat).
 apply iter_stop_n_lem1 with (k:=k) in K; auto.
 replace (pred _) with (n+k)%nat by lia.
-rewrite K.
-rewrite H1. rewrite H2.
-split.
-apply dist2_mor; auto. symmetry; auto. rewrite H1.
-apply CONGR_f; auto.
-apply CONGR_f; auto.
-  rewrite <- H6 in H2. rewrite H1 in H2.
-  rewrite (CONGR_f y v) in H2; auto.
-  rewrite (stop_mor _ _ _ H2 _ _ FINacc) in H5. apply H5.
+rewrite K. reflexivity.
 Qed.
 
 Lemma body_jacobi2: semax_body Vprog Gprog f_jacobi2 jacobi2_spec.
