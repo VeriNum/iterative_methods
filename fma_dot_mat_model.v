@@ -190,7 +190,7 @@ Definition matrix_inj {t} (A: matrix t) m n  : 'M[ftype t]_(m,n):=
 Definition vector_inj {t} (v: vector t) n  : 'cV[ftype t]_n :=
    \col_(i < n) nth i v (Zconst t 0).
 
-
+(*
 Lemma fold_left_zero {A} (L : list A) (d: A) (f: A -> A -> A) :
   (forall a, In a L -> f d a = d) ->
   fold_left f L d = d.
@@ -405,8 +405,9 @@ apply H2.
   - by apply /ssrnat.ltP.
   - by rewrite -H52 in H4.
 Qed. 
+*)
 
-
+(*
 
 Lemma dotprod_diag {ty} (v1 v2: vector ty) i :
   length v1 = length v2 ->
@@ -479,6 +480,7 @@ with
 } rewrite H2.
 *)
 Admitted.
+*)
 
 Lemma length_veclist {ty} {n m:nat} (v: 'cV[ftype ty]_n.+1):
   length (@vec_to_list_float _ n m v) = m.
@@ -487,6 +489,7 @@ induction m.
 + simpl. auto.
 + simpl. by rewrite IHm.
 Qed.
+
 
 
 Import jacob_list_fun_model.Experiment.
