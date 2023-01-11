@@ -71,14 +71,6 @@ Definition dotprod_r {t: type} (v1 v2: list (ftype t)) : ftype t :=
   fold_right (fun x12 s => BFMA (fst x12) (snd x12) s) 
                  (Zconst t 0) (List.combine v1 v2)  .
 
-(*
-Definition v1 := [1].
-Definition v2 := [2;3].
-
-Compute (combine (rev v1) (rev v2)).
-Compute (rev (combine v1 v2)).
-*)
-
 Lemma combine_rev {ty}:
 forall (v1 v2: vector ty),
   length v1 = length v2 ->
@@ -108,11 +100,13 @@ Qed.
 
 
 Lemma dotprod_rev_equiv {ty} (v1 v2: vector ty):
+  length v1 = length v2 ->
   dotprod (rev v1) (rev v2) = dotprod_r v1 v2.
-Proof.         
+Proof.
+intros.         
 unfold dotprod, dotprod_r.
 assert (combine (rev v1) (rev v2) = rev (combine v1 v2)).
-{ by rewrite combine_rev. } rewrite H.
+{ by rewrite combine_rev. } rewrite H0.
 (** with the vec_to_float_list, I am actually implementing a
     fold right model
 **)
@@ -136,6 +130,17 @@ admit.
 
 Admitted.
 
+(** The issue is that b could appear more than once in the list. 
+    So the current version of lemma is not correct 
+***)
+(*
+Lemma fold_right_except_zero {A B} 
+  (f: B -> A -> A) (a : A) (L: list B) (b :  B) :
+  In b L ->
+  (forall s d, In s L -> s <> b -> f s d = d) ->
+  fold_right f a L = f b a.
+Admitted.
+*)
 
 Definition mulmx_float {ty} {m n p : nat} 
   (A: 'M[ftype ty]_(m.+1,n.+1)) (B: 'M[ftype ty]_(n.+1,p.+1)) : 
