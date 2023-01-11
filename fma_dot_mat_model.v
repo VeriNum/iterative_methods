@@ -128,9 +128,15 @@ Definition opp_mat {ty} {m n: nat} (A : 'M[ftype ty]_(m.+1, n.+1))
   \matrix_(i,j) (BOPP ty (A i j)). 
 
 
+Definition sub_mat {ty} {m n: nat} (A B : 'M[ftype ty]_(m.+1, n.+1)) 
+  : 'M[ftype ty]_(m.+1, n.+1) :=
+  \matrix_(i,j) (BMINUS ty (A i j) (B i j)). 
+
+
 Notation "A +f B" := (addmx_float A B) (at level 80).
 Notation "-f A" := (opp_mat A) (at level 50).
 Notation "A *f B" := (mulmx_float A B) (at level 70).
+Notation "A -f B" := (sub_mat A B) (at level 80).
 
 
 Print BDIV.
@@ -143,9 +149,11 @@ Definition A2_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
   'M[ftype ty]_n.+1 :=
   \matrix_(i,j) 
     if (i==j :> nat) then (Zconst ty 0) else A i j.
+
+
 Definition jacobi_iter {ty} {n:nat} x0 b (A: 'M[ftype ty]_n.+1) : 
   'cV[ftype ty]_n.+1 :=
-   let r := b +f (-f ((A2_J A) *f x0)) in
+   let r := b -f ((A2_J A) *f x0) in
    (A1_inv_J A) *f r.
 
 Definition X_m_jacobi {ty} {n:nat} m x0 b (A: 'M[ftype ty]_n.+1) :
@@ -390,14 +398,14 @@ assert (dotprod_r v1 v2 =
           (fun (x12 : ftype ty * ftype ty) (s : ftype ty) 
              => BFMA x12.1 x12.2 s) (Zconst ty 0)). 
   + by rewrite combine_length -H Nat.min_id. 
-  + intros. rewrite !combine_nth. admit.
-  + intros. rewrite combine_nth /=. rewrite H1.
+  + intros. rewrite !combine_nth; try by []. admit.
+  + intros. rewrite combine_nth /=. rewrite H2.
     - admit.
-    - by rewrite combine_length -H Nat.min_id in H2. 
-    - rewrite !combine_nth in H3; try by [].
+    - by rewrite combine_length -H Nat.min_id in H3. 
+    - rewrite !combine_nth in H4; try by [].
       admit.
     - by [].
-} rewrite H2. rewrite combine_nth /=.
+} rewrite H3. rewrite combine_nth /=.
 admit.
 by [].
 
@@ -603,15 +611,6 @@ by apply /ssrnat.ltP.
 apply H.
 Qed.
 
-
-
-Lemma plus_minus_eqiv {ty} (x y : ftype ty):
-  BPLUS ty x (BOPP ty y) = BMINUS ty x y.
-Proof.
-Admitted.
-
-
-
 Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat) :
   let size := (length A).-1 in  
   let x_v := vector_inj x size.+1 in 
@@ -637,17 +636,18 @@ induction n.
     * assert (dotprod_r (vec_to_list_float size.+1
                         (\row_j0 A1_inv_J A_v i j0)^T) 
             (vec_to_list_float size.+1
-                 (\col_j0 (b_v +f
-                           -f (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) = 
+                 (\col_j0 (b_v -f
+                            (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) = 
             BMULT ty (nth (size.+1.-1 - (nat_of_ord i)) (vec_to_list_float size.+1
                         (\row_j0 A1_inv_J A_v i j0)^T) (Zconst ty 1))
             (nth (size.+1.-1 - (nat_of_ord i)) (vec_to_list_float size.+1
-                 (\col_j0 (b_v +f
-                           -f (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) (Zconst ty 0))).
+                 (\col_j0 (b_v -f
+                            (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) (Zconst ty 0))).
       { rewrite (@dotprod_diag _ _ _ (size.+1.-1 - (nat_of_ord i))); try by [].
         + by rewrite !length_veclist.
         + rewrite length_veclist. rewrite ltn_subLR. simpl. admit.
           simpl. apply ltnSE, ltn_ord.
+        + admit.
         + admit.
     (*
         + rewrite nth_vec_to_list_float. rewrite !mxE /=.
@@ -696,7 +696,7 @@ induction n.
                 apply /ssrnat.ltP. apply ltn_ord. 
            } rewrite H3.
            unfold sum. rewrite residual_equiv. rewrite inordK.
-           rewrite -/size . rewrite /A_v. rewrite plus_minus_eqiv.
+           rewrite -/size . rewrite /A_v. 
            assert (j = ord0). { by apply ord1. } by rewrite H4.
            apply ltn_ord. by [].
            rewrite Heqx_n. admit.
@@ -718,5 +718,4 @@ Admitted.
   
 
 End WITHNANS.
-
 
