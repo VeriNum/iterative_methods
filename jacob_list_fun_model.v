@@ -1,5 +1,4 @@
 Require Import vcfloat.VCFloat.
-Require Import vcfloat.FPCompCert.
 Require Import Iterative.floatlib.
 Require Import Coq.Lists.List. Import ListNotations.
 Set Bullet Behavior "Strict Subproofs".
