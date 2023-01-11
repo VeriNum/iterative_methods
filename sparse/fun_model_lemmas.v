@@ -2,15 +2,16 @@ Require Import VST.floyd.proofauto.
 From Iterative Require Import floatlib jacob_list_fun_model.
 From Iterative.sparse Require Import jacobi sparse_model.
 Require Import vcfloat.VCFloat.
-Require Import vcfloat.FPCompCert.
-Require Import VSTlib.spec_math.
+(*Require Import vcfloat.FPCompCert.*)
+(*Require Import VSTlib.spec_math.*)
 
 Set Bullet Behavior "Strict Subproofs".
 
+Close Scope R.
 Open Scope logic.
 
 Lemma Zlength_jacobi_iter: 
-  forall {t} A1 (A2: matrix t) b x, 
+  forall {NAN: Nans} {t} A1 (A2: matrix t) b x, 
    Zlength A1 = matrix_rows A2 ->
    Zlength b = matrix_rows A2 ->
    Zlength x = matrix_rows A2 ->
@@ -27,7 +28,7 @@ Proof.
       rewrite Zlength_map. unfold matrix_rows in *. lia.
 Qed.
 
-Lemma Znth_jacobi_iter {t}:
+Lemma Znth_jacobi_iter {NAN: Nans}{t}:
   forall i A1 A2 (b x: vector t) (y: ftype t),
   Zlength A1 = matrix_rows A2 -> 
   Zlength b = matrix_rows A2 -> 
@@ -96,7 +97,7 @@ Qed.
 
 #[export] Hint Rewrite @Zmatrix_rows_nat : sublist rep_lia.
 
-Add Parametric Morphism {t}: (@diagmatrix_vector_mult _ t)
+Add Parametric Morphism  {NAN: Nans}{t}: (@diagmatrix_vector_mult _ t)
   with signature Forall2 feq ==> Forall2 feq ==> Forall2 feq 
  as diagmatrix_vector_mult_mor.
 Proof.
@@ -110,7 +111,7 @@ unfold uncurry.
 apply BMULT_congr; auto.
 Qed.
 
-Add Parametric Morphism {t}:  (@jacobi_iter _ t)
+Add Parametric Morphism  {NAN: Nans}{t}:  (@jacobi_iter _ t)
  with signature Forall2 strict_feq ==> Forall2 (Forall2 feq) 
        ==> Forall2 feq ==> Forall2 feq ==> Forall2 feq
   as jacobi_iter_mor.
@@ -126,7 +127,7 @@ apply vector_sub_mor; auto.
 apply matrix_vector_mult_mor; auto.
 Qed.
 
-Add Parametric Morphism {t}:  (@jacobi_residual _ t)
+Add Parametric Morphism  {NAN: Nans}{t}:  (@jacobi_residual _ t)
  with signature Forall2 strict_feq ==> Forall2 (Forall2 feq) 
        ==> Forall2 feq ==> Forall2 feq ==> Forall2 feq
   as jacobi_residual_mor.
@@ -139,7 +140,7 @@ apply jacobi_iter_mor; auto.
 Qed.
 
 Lemma finite_dist2_e2: 
-  forall {t} (x y: vector t), 
+  forall  {NAN: Nans}{t} (x y: vector t), 
   Zlength x = Zlength y ->
   finite (dist2 x y) -> 
   Forall finite y.
@@ -170,7 +171,7 @@ Qed.
 Definition stop {t} (s acc: ftype t) := 
    andb (Binary.is_finite (fprec t) (femax t) s) (BCMP _ Gt true s acc).
 
-Add Parametric Morphism {t: type} : (@dist2 t)
+Add Parametric Morphism  {NAN: Nans}{t: type} : (@dist2 _ t)
   with signature Forall2 feq ==> Forall2 feq ==> feq
   as dist2_mor.
 Proof.
@@ -290,7 +291,7 @@ apply IHn; auto.
 Qed.  
 
 Lemma iter_stop_n_Zlength:
- forall {t} residual f N n acc x v
+ forall  {NAN: Nans}{t} residual f N n acc x v
     (LENf: forall x, Zlength x = N -> Zlength (f x) = Zlength x)
     (CONGR_f: forall x x' : list (ftype t),
           Zlength x = N ->
@@ -312,7 +313,7 @@ apply IHn in H1; auto.
 rewrite LENf; auto.
 Qed.
 
-Lemma finres_jacobi {t}: forall A1 A2 b (x: vector t),
+Lemma finres_jacobi  {NAN: Nans}{t}: forall A1 A2 b (x: vector t),
    Zlength A1 = Zlength x ->
    Zlength (jacobi_iter A1 A2 b x) = Zlength x ->
    Forall finite (jacobi_residual A1 A2 b x) ->
@@ -337,7 +338,7 @@ apply (IHx _ _ H3 H2 H5).
 Qed.
 
 Lemma Zlength_jacobi_residual: 
-  forall {t} A1 (A2: matrix t) b x, 
+  forall {NAN: Nans} {t} A1 (A2: matrix t) b x, 
    Zlength A1 = matrix_rows A2 ->
    Zlength b = matrix_rows A2 ->
    Zlength x = matrix_rows A2 ->
