@@ -696,121 +696,26 @@ induction n.
                  by unfold matrix_rows_nat.
              + rewrite combine_length. rewrite !map_length seq_length /matrix_rows_nat H0 Nat.min_id /=.
                 assert (length A = size.+1).
-                { rewrite /size. by rewrite prednK. } rewrite H3. 
+                { rewrite /size. by rewrite prednK. } rewrite H1. 
                 apply /ssrnat.ltP. apply ltn_ord. 
-           } rewrite H3.
-
-
-
-
-
-
-
-Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat) :
-  let size := (length A).-1 in  
-  let x_v := vector_inj x size.+1 in 
-  let b_v := vector_inj b size.+1 in 
-  let A_v := matrix_inj A size.+1 size.+1 in
-  (0 < length A)%nat ->
-  length b = length A -> 
-  vector_inj (jacobi_n A b x n) size.+1 = @X_m_jacobi ty size n x_v b_v A_v.
-Proof.
-intros.
-induction n.
-+ apply /matrixP. unfold eqrel.
-  intros. by rewrite !mxE /=.  
-+ simpl. rewrite -IHn.
-  apply /matrixP. unfold eqrel.
-  move=> i j.
-  rewrite !mxE. 
-  remember (jacobi_n A b x n) as x_n.
-  unfold jacob_list_fun_model.jacobi_iter.
-  unfold diagmatrix_vector_mult, map2, uncurry.
-  rewrite (nth_map_inrange (Zconst ty 1, Zconst ty 0)).
-  - rewrite combine_nth.
-    * assert (dotprod_r (vec_to_list_float size.+1
-                        (\row_j0 A1_inv_J A_v i j0)^T) 
-            (vec_to_list_float size.+1
-                 (\col_j0 (b_v -f
-                            (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) = 
-            BMULT ty (nth (size.+1.-1 - (nat_of_ord i)) (vec_to_list_float size.+1
-                        (\row_j0 A1_inv_J A_v i j0)^T) (Zconst ty 1))
-            (nth (size.+1.-1 - (nat_of_ord i)) (vec_to_list_float size.+1
-                 (\col_j0 (b_v -f
-                            (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) (Zconst ty 0))).
-      { rewrite (@dotprod_diag _ _ _ (size.+1.-1 - (nat_of_ord i))); try by [].
-        + by rewrite !length_veclist.
-        + rewrite length_veclist. rewrite ltn_subLR. simpl. admit.
-          simpl. apply ltnSE, ltn_ord.
-        + admit.
-        + admit.
-    (*
-        + rewrite nth_vec_to_list_float. rewrite !mxE /=.
-          assert (i == @inord size i :> nat ). { by rewrite inord_val. }
-          rewrite H1. admit. apply ltn_ord.
-        + intros. 
-          admit.
-    *)
-      }  rewrite H1.
-     rewrite nth_vec_to_list_float.
-     ++ rewrite nth_vec_to_list_float.
-        -- rewrite !mxE.
-           assert (i == @inord size i :> nat ). { by rewrite inord_val. }
-           rewrite H2. rewrite A1_invert_equiv.
-           assert (nth i
-                   (vector_sub b
-                      (matrix_vector_mult (remove_diag A) x_n))
-                   (Zconst ty 0) = 
-               BMINUS ty (nth i b (Zconst ty 0))
-                    (nth i  (matrix_vector_mult (remove_diag A)
-                            x_n) (Zconst ty 0))).
-           { unfold vector_sub, map2, uncurry. 
-             rewrite (nth_map_inrange (Zconst ty 0, Zconst ty 0)).
-             + rewrite combine_nth. 
-               - admit.
-             (*Unable to unify
-                 "@BMINUS NANS ty
-                    (@nth (ftype ty) i b (Zconst ty 0))
-                    (@nth (ftype ty) i
-                       (@matrix_vector_mult ty
-                          (@remove_diag ty A) x_n) 
-                       (Zconst ty 0))"
-                with
-                 "@BMINUS FPCompCert.nans ty
-                    (@nth (ftype ty) i b (Zconst ty 0))
-                    (@nth (ftype ty) i
-                       (@matrix_vector_mult ty
-                          (@remove_diag ty A) x_n) 
-                       (Zconst ty 0))". *)
-               - unfold matrix_vector_mult. rewrite map_length. 
-                 unfold remove_diag. rewrite map_length seq_length.
-                 by unfold matrix_rows_nat.
-             + rewrite combine_length. rewrite !map_length seq_length /matrix_rows_nat H0 Nat.min_id /=.
-                assert (length A = size.+1).
-                { rewrite /size. by rewrite prednK. } rewrite H3. 
-                apply /ssrnat.ltP. apply ltn_ord. 
-           } rewrite H3.
-           unfold sum. rewrite residual_equiv. rewrite inordK.
-           rewrite -/size . rewrite /A_v. 
-           assert (j = ord0). { by apply ord1. } by rewrite H4.
-           apply ltn_ord. by [].
-           rewrite Heqx_n. admit.
+           } rewrite H1. rewrite nth_vec_to_list_float; last by apply ltn_ord.
+           rewrite !mxE. rewrite residual_equiv. rewrite inordK.
+           rewrite -/size . by rewrite /A_v. 
+           apply ltn_ord. by []. admit.
            assert (length A = size.+1).
-           { rewrite /size. by rewrite prednK. } rewrite H4. apply ltn_ord.
-           assert (length A = size.+1).
-           { rewrite /size. by rewrite prednK. } rewrite H3. 
-           apply /ssrnat.ltP. apply ltn_ord.
-        -- apply ltn_ord.
-     ++ apply ltn_ord.
-   * rewrite  !map_length !seq_length combine_length !map_length !seq_length.
-     by rewrite /matrix_rows_nat H0 Nat.min_id.
- - rewrite  combine_length !map_length !seq_length combine_length !map_length !seq_length.
-   rewrite /matrix_rows_nat H0 !Nat.min_id.
-   assert (length A = size.+1).
-   { rewrite /size. by rewrite prednK. } rewrite H1. 
-   apply /ssrnat.ltP. apply ltn_ord.   
+           { rewrite /size. by rewrite prednK. } rewrite H2. apply ltn_ord.
+     * assert (length A = size.+1).
+       { rewrite /size. by rewrite prednK. } rewrite H1. 
+       apply /ssrnat.ltP. apply ltn_ord.
+     * rewrite  !map_length !seq_length combine_length !map_length !seq_length.
+       by rewrite /matrix_rows_nat H0 Nat.min_id.
+  - rewrite  combine_length !map_length !seq_length combine_length !map_length !seq_length.
+     rewrite /matrix_rows_nat H0 !Nat.min_id.
+     assert (length A = size.+1).
+     { rewrite /size. by rewrite prednK. } rewrite H1. 
+     apply /ssrnat.ltP. apply ltn_ord. 
 Admitted.
-  
+
 
 End WITHNANS.
 
