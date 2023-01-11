@@ -1,22 +1,22 @@
 From Coq Require Import ZArith Reals Psatz.
 From Flocq Require Import Binary.
 From mathcomp Require Import all_ssreflect ssralg ssrnat all_algebra seq matrix.
-
-
 Import List ListNotations.
+
 
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
                             Float_notations Automate.
 Require Import dot_prod_defn float_model_generic.
 Require Import floatlib jacob_list_fun_model.
 Set Bullet Behavior "Strict Subproofs". 
-
 Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
+
 Section WITHNANS.
 Context {NANS: Nans}. 
+
 
 Definition list_to_vec_float {ty} {n:nat} 
 (l : list (ftype ty)): 'cV[ftype ty]_n := 
@@ -27,6 +27,7 @@ Definition list_to_vec_float {ty} {n:nat}
 Definition addmx_float {ty} {m n:nat} (A B: 'M[ftype ty]_(m,n))
   : 'M[ftype ty]_(m,n) :=
   \matrix_(i, j) (sum ty (A i j) (B i j)).
+
 
 Fixpoint vec_to_list_float {ty} {n:nat} (m:nat) (v :'cV[ftype ty]_n.+1)
    : list (ftype ty) := 
@@ -65,15 +66,62 @@ Qed.
 
 
 
-(** Matrix multiplication as dot product  **)
+
+Definition dotprod_r {t: type} (v1 v2: list (ftype t)) : ftype t :=
+  fold_right (fun x12 s => BFMA (fst x12) (snd x12) s) 
+                 (Zconst t 0) (List.combine v1 v2)  .
+
+
+
+Lemma combine_rev {ty}:
+forall (v1 v2: vector ty),
+  (combine (rev v1) (rev v2)) = rev (combine v1 v2).
+Proof.
+induction v1,v2.
++ simpl;auto.
++ simpl;auto.
++ simpl. apply  combine_nil.
++ simpl. admit.
+Admitted.
+
+
+Lemma dotprod_rev_equiv {ty} (v1 v2: vector ty):
+  dotprod (rev v1) (rev v2) = dotprod_r v1 v2.
+Proof.         
+unfold dotprod, dotprod_r.
+assert (combine (rev v1) (rev v2) = rev (combine v1 v2)).
+{ by rewrite combine_rev. } rewrite H.
+(** with the vec_to_float_list, I am actually implementing a
+    fold right model
+**)
+rewrite <-fold_left_rev_right.
+rewrite rev_involutive.
+(*
+Unable to unify
+ "@fold_right (ftype ty) (ftype ty * ftype ty)
+    (fun x12 : ftype ty * ftype ty =>
+     [eta @BFMA NANS ty x12.1 x12.2])
+    (Zconst ty 0)
+    (@combine (ftype ty) (ftype ty) v1 v2)"
+with
+ "@fold_right (ftype ty) (ftype ty * ftype ty)
+    (fun y : ftype ty * ftype ty =>
+     [eta @BFMA FPCompCert.nans ty y.1 y.2])
+    (Zconst ty 0)
+    (@combine (ftype ty) (ftype ty) v1 v2)".
+*)
+admit.
+
+Admitted.
+
+
 Definition mulmx_float {ty} {m n p : nat} 
   (A: 'M[ftype ty]_(m.+1,n.+1)) (B: 'M[ftype ty]_(n.+1,p.+1)) : 
   'M[ftype ty]_(m.+1,p.+1):=
   \matrix_(i, k)
-    let l1 := vec_to_list_float_1 n.+1 (\row_(j < n.+1) A i j)^T in
-    let l2 := vec_to_list_float_1 n.+1 (\col_(j < n.+1) B j k) in
-    @dotprod ty l1 l2.
-
+    let l1 := vec_to_list_float n.+1 (\row_(j < n.+1) A i j)^T in
+    let l2 := vec_to_list_float n.+1 (\col_(j < n.+1) B j k) in
+    @dotprod_r ty l1 l2.
 
 Definition opp_mat {ty} {m n: nat} (A : 'M[ftype ty]_(m.+1, n.+1)) 
   : 'M[ftype ty]_(m.+1, n.+1) :=
@@ -84,28 +132,25 @@ Notation "A +f B" := (addmx_float A B) (at level 80).
 Notation "-f A" := (opp_mat A) (at level 50).
 Notation "A *f B" := (mulmx_float A B) (at level 70).
 
+
 Print BDIV.
 
 (** Functional model for Jacobi iteration **)
 Definition A1_inv_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'M[ftype ty]_n.+1:=
   \matrix_(i,j) 
     (if (i==j :> nat) then (BDIV ty (Zconst ty 1) (A i i)) else (Zconst ty 0)).
-
 Definition A2_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1): 
   'M[ftype ty]_n.+1 :=
   \matrix_(i,j) 
     if (i==j :> nat) then (Zconst ty 0) else A i j.
-
 Definition jacobi_iter {ty} {n:nat} x0 b (A: 'M[ftype ty]_n.+1) : 
   'cV[ftype ty]_n.+1 :=
    let r := b +f (-f ((A2_J A) *f x0)) in
    (A1_inv_J A) *f r.
 
-
 Definition X_m_jacobi {ty} {n:nat} m x0 b (A: 'M[ftype ty]_n.+1) :
   'cV[ftype ty]_n.+1 :=
    Nat.iter m  (fun x0 => jacobi_iter x0 b A) x0.
-
 
 
 Definition matrix_inj {t} (A: matrix t) m n  : 'M[ftype t]_(m,n):=
@@ -136,7 +181,6 @@ induction L.
   by rewrite H.
 Qed.
 
-
 Lemma fold_left_except_zero {A} (L : list A) (d: A) (f: A -> A -> A) (b:A) :
   In b L ->
   (forall a, In a L -> a <> b -> f d a = d) ->
@@ -154,17 +198,21 @@ destruct i.
 + by simpl.
 Qed.
 
-
 Print fold_left.
 
-Lemma fold_left_for_list {ty} (L: list (ftype ty * ftype ty)) i f d (d': ftype ty):
+
+Lemma fold_left_for_list {A B}: 
+  forall (L: list B) 
+  (i: nat)  (f: A -> B -> A) (b :  B) (a : A),
   (i < length L)%nat ->
-  (forall j d'' , (j < length L)%nat -> j <> i ->
-              f d'' (nth j L d) = d'') -> 
-  fold_left f L d' = f d' (nth i L d) .
+  (forall (j: nat) (a' : A) , 
+              (j < length L)%nat -> j <> i ->
+              f a' (nth j L b) = a') -> 
+  fold_left f L a = f a (nth i L b) .
 Proof.
-intros.
-elim: L d d' H H0  => [ | a L IHL] d d' H H0.
+(*
+intros
+elim: L i b a H H0  => [ | s L IHL]  i b a H H0.
 + by simpl in H.
 + intros.
   simpl.
@@ -174,14 +222,14 @@ elim: L d d' H H0  => [ | a L IHL] d d' H H0.
     assert (i = 0%nat).
     { admit. } by rewrite H2 /=.
   - destruct i.
-    * specialize (IHL d (f d' a)).
+    * specialize (IHL 0%nat b (f a s)).
       assert ((0 < length L)%nat).
       { admit. } specialize (IHL H2).
-      assert (forall (j : nat) (d'' : ftype ty),
+      assert (forall (j : nat) (a' : A),
                (j < length L)%nat ->
-               j <> 0%N -> f d'' (nth j L d) = d'').
-      { intros. specialize (H0 j.+1 d'').
-        assert ((j.+1 < length (a :: L))%nat).
+               j <> 0%N -> f a' (nth j L b) = a').
+      { intros. specialize (H0 j.+1 a').
+        assert ((j.+1 < length (s :: L))%nat).
         { simpl. by []. } specialize (H0 H5).
         assert (j.+1 <> 0%nat). { by [].  } 
         specialize (H0 H6). by rewrite nth_list in H0.
@@ -189,10 +237,15 @@ elim: L d d' H H0  => [ | a L IHL] d d' H H0.
       specialize (H0 1%nat). apply H0.
       ++ simpl. by [].
       ++ by [].
-    * 
+      * specialize (IHL i b (f a s)).
+      assert ((i < length L)%nat).
+      { by simpl in H. } specialize (IHL H2).
 
 
 
+specialize (IHL d (f d' a)).
+      assert ((i.+1 < length L)%nat).
+      { 
 
 
 
@@ -203,7 +256,6 @@ elim: L d d' H H0  => [ | a L IHL] d d' H H0.
     { admit. } by rewrite H2 /=.
   - destruct i.
     * 
-
 induction L.
 + by simpl in H.
 + simpl.  
@@ -226,31 +278,132 @@ induction L.
         specialize (H0 H5 H4). admit.
       } 
       specialize (IHL H3). unfold fold_left.
-
-
-
 rewrite IHL.
-
-
 
 admit.
 Admitted.
+
+
 *)
+Admitted.
+
+
+Lemma fold_right_zero {A B} (L : list B) (d: A) (f: B -> A -> A) :
+  (forall a, In a L -> f a d = d) ->
+  fold_right f d L = d.
+Proof.
+intros.
+induction L.
++ by simpl.
++ simpl. 
+  assert (forall a : B, In a L -> f a d = d).
+  { move=>b IHa. specialize (H b).
+    assert (In b (a :: L)). { simpl;auto. }
+    by specialize (H H0).
+  }  specialize (IHL H0).
+  specialize (H a).
+  assert (In a (a :: L)). { simpl;auto. }
+  specialize (H H1).
+  by rewrite IHL H.
+Qed.
+
+
+Lemma fold_right_except_zero {A B} 
+  (b :  B) (L: list B) (f: B -> A -> A) (a : A):
+  In b L ->
+  (forall s, In s L -> s <> b)->
+  (forall s d, In s L -> s <> b -> f s d = d) ->
+  fold_right f a L = f b a.
+Proof.
+intros.
+induction L.
++ by simpl in H.
++ destruct H.
+  - rewrite H /=.
+    assert (fold_right f a L = a).
+    { rewrite fold_right_zero. auto.
+      intros. specialize (H0 a1). rewrite H in H0.
+      apply H1.
+      - simpl;auto.
+      - apply H0. simpl;auto.
+    } by rewrite H2.
+  - simpl. rewrite IHL.
+    * apply H1. simpl;auto. apply H0. simpl;auto.
+    * by [].
+    * intros. apply H0. simpl;auto.
+    * intros. apply H1. simpl;auto. apply H3.
+Qed.
+
+ 
+Lemma fold_right_for_list {A B}: 
+  forall  (i: nat) (b :  B) (L: list B) (f: B -> A -> A) (a : A),
+  (i < length L)%nat -> 
+  (forall (j:nat),
+      (j < length L)%nat -> nth j L b <> nth i L b) -> 
+  (forall (j: nat) d, 
+              (j < length L)%nat -> 
+              nth j L b <> nth i L b ->
+              f (nth j L b) d = d) -> 
+  fold_right f a L = f (nth i L b) a.
+Proof.
+intros.
+assert (forall (b :  B) (L: list B) (f: B -> A -> A) (a : A),
+          In b L ->
+          (forall s, In s L -> s <> b)->
+          (forall s d, In s L -> s <> b -> f s d = d) ->
+          fold_right f a L = f b a).
+{ apply fold_right_except_zero. }
+apply H2.
++ apply nth_In. by apply /ssrnat.ltP.
++ intros.
+  pose proof In_nth .
+  specialize (H4 B L s b H3).
+  destruct H4 as [j [H41 H42]]. rewrite -H42. apply H0.
+  by apply /ssrnat.ltP. 
++ intros. 
+  pose proof In_nth .
+  specialize (H5 B L s b H3).
+  destruct H5 as [j [H51 H52]]. rewrite -H52. apply H1.
+  - by apply /ssrnat.ltP.
+  - by rewrite -H52 in H4.
+Qed. 
+
+
 
 Lemma dotprod_diag {ty} (v1 v2: vector ty) i :
   length v1 = length v2 ->
   (i < length v1)%nat -> 
-  (forall j , (j < length v1)%nat -> j <> i -> nth j v1 (Zconst ty 0) = Zconst ty 0) ->
-  dotprod v1 v2 = 
+  (forall j, (j < length v1)%nat -> nth j v1 (Zconst ty 1) <> nth i v1 (Zconst ty 1)) ->
+  (forall j , (j < length v1)%nat -> 
+              nth j v1 (Zconst ty 1) <> nth i v1 (Zconst ty 1) ->
+               nth j v1 (Zconst ty 1) = Zconst ty 0) ->
+  dotprod_r v1 v2 = 
   BMULT ty (nth i v1 (Zconst ty 1)) (nth i v2 (Zconst ty 0)).
 Proof.
 intros.
-assert (dotprod v1 v2 = 
-        (fun (s : ftype ty) (x12 : ftype ty * ftype ty)
-             => BFMA x12.1 x12.2 s) (Zconst ty 0)
-         (nth i (combine v1 v2) (Zconst ty 0, Zconst ty 0))).
-{ unfold dotprod.
-  rewrite (@fold_left_for_list  _ _ i _); try by [].
+assert (dotprod_r v1 v2 = 
+        (fun (x12 : ftype ty * ftype ty) (s : ftype ty) 
+             => BFMA x12.1 x12.2 s) 
+         (nth i (combine v1 v2) (Zconst ty 1, Zconst ty 0)) (Zconst ty 0)).
+{ unfold dotprod_r.
+  apply (@fold_right_for_list _ _ i (Zconst ty 1, Zconst ty 0) (combine v1 v2)
+          (fun (x12 : ftype ty * ftype ty) (s : ftype ty) 
+             => BFMA x12.1 x12.2 s) (Zconst ty 0)). 
+  + by rewrite combine_length -H Nat.min_id. 
+  + intros. rewrite !combine_nth. admit.
+  + intros. rewrite combine_nth /=. rewrite H1.
+    - admit.
+    - by rewrite combine_length -H Nat.min_id in H2. 
+    - rewrite !combine_nth in H3; try by [].
+      admit.
+    - by [].
+} rewrite H2. rewrite combine_nth /=.
+admit.
+by [].
+
+
+
+  (*rewrite (@fold_left_for_list  _ _ i _); try by [].*)
   (*Unable to unify
  "@BFMA NANS ty
     (@nth (ftype ty * ftype ty) i
@@ -270,17 +423,12 @@ with
        (Zconst ty 0, Zconst ty 0)).2
     (Zconst ty 0)".
   *) 
-  admit.
-} rewrite H2 combine_nth /=.
+
 (* BFMA (nth i v1 (Zconst ty 0))
   (nth i v2 (Zconst ty 0)) (Zconst ty 0) =
   BMULT ty (nth i v1 (Zconst ty 1))
   (nth i v2 (Zconst ty 0))
 *)
-Admitted.
-
-
-
 
 (*
   + rewrite combine_length. by rewrite -H Nat.min_id. 
@@ -291,14 +439,8 @@ Admitted.
     - by rewrite combine_length -H Nat.min_id in H2.
     - by [].
 } rewrite H2.
-
 *)
-
-
-
-
 Admitted.
-
 
 Lemma length_veclist {ty} {n m:nat} (v: 'cV[ftype ty]_n.+1):
   length (@vec_to_list_float _ n m v) = m.
@@ -310,6 +452,7 @@ Qed.
 
 
 Import jacob_list_fun_model.Experiment.
+
 
 Lemma A1_invert_equiv {ty} (A : matrix ty) i: 
   (i < length A)%coq_nat ->
@@ -323,29 +466,13 @@ intros.
 assert (nth i (invert_diagmatrix (diag_of_matrix A))
             (Zconst ty 1) = 
         BDIV ty (Zconst ty 1) (nth i (diag_of_matrix A) (Zconst ty 1))).
-{ rewrite -[in RHS]map_nth. unfold invert_diagmatrix.
-  assert ((BDIV ty (Zconst ty 1) (Zconst ty 1)) = (Zconst ty 1)).
-  { admit. } rewrite H0. 
-  (*Unable to unify
- "@nth (ftype ty) i
-    (@map (ftype ty) (ftype ty)
-       (@BDIV NANS ty (Zconst ty 1))
-       (@diag_of_matrix ty A)) 
-    (Zconst ty 1)"
-with
- "@nth (ftype ty) i
-    (@map (ftype ty) (ftype ty)
-       (@BDIV FPCompCert.nans ty
-          (Zconst ty 1))
-       (@diag_of_matrix ty A)) 
-    (Zconst ty 1)".
-*)
-admit.
- } rewrite H0.
+{ rewrite (nth_map_inrange (Zconst ty 1)); try by [].
+  by rewrite /diag_of_matrix map_length seq_length /matrix_rows_nat .
+} rewrite H0.
 unfold diag_of_matrix.  rewrite nth_map_seq.
 by unfold matrix_index.
 by unfold matrix_rows_nat.
-Admitted.
+Qed.
 
 
 Lemma v_equiv {ty} (v: vector ty) size:
@@ -425,26 +552,6 @@ apply nth_ext with (Zconst ty 0) (Zconst ty 0).
     -- unfold matrix_rows_nat. by rewrite H.
 Qed.
 
-Lemma combine_rev {ty} (v1 v2: vector ty):
-  (combine (rev v1) (rev v2)) = rev (combine v1 v2).
-Proof.
-Admitted.
-
-
-
-Lemma dotprod_rev_equiv {ty} (v1 v2: vector ty):
-  dotprod (rev v1) (rev v2) = dotprod v1 v2.
-Proof.
-unfold dotprod.
-assert ((combine (rev v1) (rev v2)) = rev (combine v1 v2)).
-{ admit. } rewrite H. 
-(** with the vec_to_float_list, I am actually implementing a
-    fold right model
-**)
-Admitted.
-
-
-
 Lemma residual_equiv {ty} (v: vector ty) (A: matrix ty) i:
   (0 < length A)%nat ->
   let size := (length A).-1 in   
@@ -452,7 +559,7 @@ Lemma residual_equiv {ty} (v: vector ty) (A: matrix ty) i:
   length A = length v ->
   (i < length A)%nat ->
   nth i (matrix_vector_mult (remove_diag A) v) (Zconst ty 0) = 
-  dotprod (vec_to_list_float size.+1
+  dotprod_r (vec_to_list_float size.+1
               (\row_j0 A2_J A_v (inord i) j0)^T)
            (vec_to_list_float size.+1
               (\col_j0 vector_inj v size.+1 j0 ord0)).
@@ -489,30 +596,28 @@ assert (v = rev (vec_to_list_float size.+1
 }
 rewrite [in LHS]H2.
 rewrite (@A2_equiv _ _ size _).
+by rewrite dotprod_rev_equiv.
+by rewrite /size prednK /=.
+rewrite /size prednK /=.
+by apply /ssrnat.ltP.
+apply H.
+Qed.
 
 
-unfold matrix_vector_mult. 
-unfold remove_diag.
-Check ((matrix_by_index (matrix_rows_nat A)
-        (matrix_rows_nat A)
-        (fun i0 j : nat =>
-         if Nat.eq_dec i0 j
-         then Zconst ty 0
-         else matrix_index A i0 j))).
-Check (nth i A []).
-unfold A2_J.
-Admitted.
 
 Lemma plus_minus_eqiv {ty} (x y : ftype ty):
   BPLUS ty x (BOPP ty y) = BMINUS ty x y.
 Proof.
 Admitted.
 
+
+
 Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat) :
   let size := (length A).-1 in  
   let x_v := vector_inj x size.+1 in 
   let b_v := vector_inj b size.+1 in 
   let A_v := matrix_inj A size.+1 size.+1 in
+  (0 < length A)%nat ->
   length b = length A -> 
   vector_inj (jacobi_n A b x n) size.+1 = @X_m_jacobi ty size n x_v b_v A_v.
 Proof.
@@ -525,124 +630,93 @@ induction n.
   move=> i j.
   rewrite !mxE. 
   remember (jacobi_n A b x n) as x_n.
-  assert (nth i
-            (jacob_list_fun_model.jacobi_iter
-               (invert_diagmatrix (diag_of_matrix A))
-               (remove_diag A) b x_n)
-            (Zconst ty 0) = BMULT ty
-              (nth i
-                 (invert_diagmatrix (diag_of_matrix A))
-                 (Zconst ty 1))
-              (nth i
-                 (vector_sub b
-                    (matrix_vector_mult (remove_diag A)
-                       x_n)) (Zconst ty 0))).
-  { assert (nth i
-            (jacob_list_fun_model.jacobi_iter
-               (invert_diagmatrix (diag_of_matrix A))
-               (remove_diag A) b x_n)
-            (Zconst ty 0) = 
-            nth i
-            (jacob_list_fun_model.jacobi_iter
-               (invert_diagmatrix (diag_of_matrix A))
-               (remove_diag A) b x_n)
-            (BMULT ty (Zconst ty 1) (Zconst ty 0))).
-    { assert (Zconst ty 0 = BMULT ty (Zconst ty 1) (Zconst ty 0)).
-      { admit. } rewrite [in LHS]H0. reflexivity.
-    } rewrite H0.
-    unfold jacob_list_fun_model.jacobi_iter.
-    unfold diagmatrix_vector_mult, map2, uncurry.
-    Check ((fun p : ftype ty * ftype ty =>
-      let (x0, y) := p in BMULT ty x0 y)).
-    Search BMULT.
-
-    admit.
-  } rewrite H0. 
-  assert (dotprod (vec_to_list_float size.+1
-                      (\row_j0 A1_inv_J A_v i j0)^T) 
-          (vec_to_list_float size.+1
-               (\col_j0 (b_v +f
-                         -f (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) = 
-          BMULT ty (nth (size.+1.-1 - (nat_of_ord i)) (vec_to_list_float size.+1
-                      (\row_j0 A1_inv_J A_v i j0)^T) (Zconst ty 1))
-          (nth (size.+1.-1 - (nat_of_ord i)) (vec_to_list_float size.+1
-               (\col_j0 (b_v +f
-                         -f (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) (Zconst ty 0))).
-  { rewrite (@dotprod_diag _ _ _ (size.+1.-1 - (nat_of_ord i))); try by [].
-    + by rewrite !length_veclist.
-    + rewrite length_veclist. rewrite ltn_subLR. simpl. admit.
-      simpl. apply ltnSE, ltn_ord.
-    + rewrite nth_vec_to_list_float. rewrite !mxE /=.
-      assert (i == @inord size i :> nat ). { by rewrite inord_val. }
-      rewrite H1. admit. apply ltn_ord.
-    + intros. 
-      admit.
-  } 
-  assert ((let l1 :=
-             vec_to_list_float size.+1
-               (\row_j0 A1_inv_J A_v i j0)^T in
-           let l2 :=
-             vec_to_list_float size.+1
-               (\col_j0 (b_v +f
-                         -f
-                         (A2_J A_v *f
-                          vector_inj x_n size.+1)) j0
-                          j) in
-           dotprod l1 l2) = 
-           dotprod (vec_to_list_float size.+1
-                      (\row_j0 A1_inv_J A_v i j0)^T) 
-          (vec_to_list_float size.+1
-               (\col_j0 (b_v +f
-                         -f (A2_J A_v *f vector_inj x_n size.+1)) j0 j))).
-   { by []. } rewrite H2 H1. clear H2 H1.
-   rewrite A1_invert_equiv.
-   - rewrite nth_vec_to_list_float.
-     * assert (nth i
+  unfold jacob_list_fun_model.jacobi_iter.
+  unfold diagmatrix_vector_mult, map2, uncurry.
+  rewrite (nth_map_inrange (Zconst ty 1, Zconst ty 0)).
+  - rewrite combine_nth.
+    * assert (dotprod_r (vec_to_list_float size.+1
+                        (\row_j0 A1_inv_J A_v i j0)^T) 
+            (vec_to_list_float size.+1
+                 (\col_j0 (b_v +f
+                           -f (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) = 
+            BMULT ty (nth (size.+1.-1 - (nat_of_ord i)) (vec_to_list_float size.+1
+                        (\row_j0 A1_inv_J A_v i j0)^T) (Zconst ty 1))
+            (nth (size.+1.-1 - (nat_of_ord i)) (vec_to_list_float size.+1
+                 (\col_j0 (b_v +f
+                           -f (A2_J A_v *f vector_inj x_n size.+1)) j0 j)) (Zconst ty 0))).
+      { rewrite (@dotprod_diag _ _ _ (size.+1.-1 - (nat_of_ord i))); try by [].
+        + by rewrite !length_veclist.
+        + rewrite length_veclist. rewrite ltn_subLR. simpl. admit.
+          simpl. apply ltnSE, ltn_ord.
+        + admit.
+    (*
+        + rewrite nth_vec_to_list_float. rewrite !mxE /=.
+          assert (i == @inord size i :> nat ). { by rewrite inord_val. }
+          rewrite H1. admit. apply ltn_ord.
+        + intros. 
+          admit.
+    *)
+      }  rewrite H1.
+     rewrite nth_vec_to_list_float.
+     ++ rewrite nth_vec_to_list_float.
+        -- rewrite !mxE.
+           assert (i == @inord size i :> nat ). { by rewrite inord_val. }
+           rewrite H2. rewrite A1_invert_equiv.
+           assert (nth i
                    (vector_sub b
                       (matrix_vector_mult (remove_diag A) x_n))
                    (Zconst ty 0) = 
                BMINUS ty (nth i b (Zconst ty 0))
                     (nth i  (matrix_vector_mult (remove_diag A)
                             x_n) (Zconst ty 0))).
-       { unfold vector_sub, map2, uncurry. 
-         rewrite (@map_nth _ _ _ _ (Zconst ty 0, Zconst ty 0) _ ).
-         rewrite combine_nth. 
-         (*Unable to unify
-             "@BMINUS NANS ty
-                (@nth (ftype ty) i b (Zconst ty 0))
-                (@nth (ftype ty) i
-                   (@matrix_vector_mult ty
-                      (@remove_diag ty A) x_n) 
-                   (Zconst ty 0))"
-            with
-             "@BMINUS FPCompCert.nans ty
-                (@nth (ftype ty) i b (Zconst ty 0))
-                (@nth (ftype ty) i
-                   (@matrix_vector_mult ty
-                      (@remove_diag ty A) x_n) 
-                   (Zconst ty 0))". *)
-       admit. } rewrite H1. 
-       rewrite !mxE.
-       assert (i == @inord size i :> nat ). { by rewrite inord_val. }
-       rewrite H2. 
-       rewrite nth_vec_to_list_float.
-       ++ rewrite !mxE. unfold sum. rewrite residual_equiv.
-          rewrite inordK.
-          -- rewrite -/size. rewrite -/A_v.
-             rewrite plus_minus_eqiv. 
-             assert (j = ord0). { apply ord1. } rewrite H3.
-             reflexivity. 
-          -- admit.
-          -- admit.
-       ++ admit.
-     * admit.
-  - admit.
-(*
-  - unfold invert_diagmatrix, vector_sub, map2.
-    rewrite !map_length combine_length.
-    unfold matrix_vector_mult. rewrite !map_length !seq_length.
-    unfold matrix_rows_nat. by rewrite H;lia.
-*)
+           { unfold vector_sub, map2, uncurry. 
+             rewrite (nth_map_inrange (Zconst ty 0, Zconst ty 0)).
+             + rewrite combine_nth. 
+               - admit.
+             (*Unable to unify
+                 "@BMINUS NANS ty
+                    (@nth (ftype ty) i b (Zconst ty 0))
+                    (@nth (ftype ty) i
+                       (@matrix_vector_mult ty
+                          (@remove_diag ty A) x_n) 
+                       (Zconst ty 0))"
+                with
+                 "@BMINUS FPCompCert.nans ty
+                    (@nth (ftype ty) i b (Zconst ty 0))
+                    (@nth (ftype ty) i
+                       (@matrix_vector_mult ty
+                          (@remove_diag ty A) x_n) 
+                       (Zconst ty 0))". *)
+               - unfold matrix_vector_mult. rewrite map_length. 
+                 unfold remove_diag. rewrite map_length seq_length.
+                 by unfold matrix_rows_nat.
+             + rewrite combine_length. rewrite !map_length seq_length /matrix_rows_nat H0 Nat.min_id /=.
+                assert (length A = size.+1).
+                { rewrite /size. by rewrite prednK. } rewrite H3. 
+                apply /ssrnat.ltP. apply ltn_ord. 
+           } rewrite H3.
+           unfold sum. rewrite residual_equiv. rewrite inordK.
+           rewrite -/size . rewrite /A_v. rewrite plus_minus_eqiv.
+           assert (j = ord0). { by apply ord1. } by rewrite H4.
+           apply ltn_ord. by [].
+           rewrite Heqx_n. admit.
+           assert (length A = size.+1).
+           { rewrite /size. by rewrite prednK. } rewrite H4. apply ltn_ord.
+           assert (length A = size.+1).
+           { rewrite /size. by rewrite prednK. } rewrite H3. 
+           apply /ssrnat.ltP. apply ltn_ord.
+        -- apply ltn_ord.
+     ++ apply ltn_ord.
+   * rewrite  !map_length !seq_length combine_length !map_length !seq_length.
+     by rewrite /matrix_rows_nat H0 Nat.min_id.
+ - rewrite  combine_length !map_length !seq_length combine_length !map_length !seq_length.
+   rewrite /matrix_rows_nat H0 !Nat.min_id.
+   assert (length A = size.+1).
+   { rewrite /size. by rewrite prednK. } rewrite H1. 
+   apply /ssrnat.ltP. apply ltn_ord.   
 Admitted.
+  
 
 End WITHNANS.
+
+
