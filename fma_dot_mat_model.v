@@ -111,24 +111,8 @@ assert (combine (rev v1) (rev v2) = rev (combine v1 v2)).
     fold right model
 **)
 rewrite <-fold_left_rev_right.
-rewrite rev_involutive. 
-(*
-Unable to unify
- "@fold_right (ftype ty) (ftype ty * ftype ty)
-    (fun x12 : ftype ty * ftype ty =>
-     [eta @BFMA NANS ty x12.1 x12.2])
-    (Zconst ty 0)
-    (@combine (ftype ty) (ftype ty) v1 v2)"
-with
- "@fold_right (ftype ty) (ftype ty * ftype ty)
-    (fun y : ftype ty * ftype ty =>
-     [eta @BFMA FPCompCert.nans ty y.1 y.2])
-    (Zconst ty 0)
-    (@combine (ftype ty) (ftype ty) v1 v2)".
-*)
-admit.
-
-Admitted.
+rewrite rev_involutive. reflexivity.
+Qed.
 
 (** The issue is that b could appear more than once in the list. 
     So the current version of lemma is not correct 
@@ -374,7 +358,8 @@ assert (v = rev (vec_to_list_float size.+1
 }
 rewrite [in LHS]H2.
 rewrite (@A2_equiv _ _ size _).
-by rewrite dotprod_rev_equiv.
+rewrite dotprod_rev_equiv; try by [].
+by rewrite !length_veclist.
 by rewrite /size prednK /=.
 rewrite /size prednK /=.
 by apply /ssrnat.ltP.
@@ -439,21 +424,7 @@ induction n.
            { unfold vector_sub, map2, uncurry. 
              rewrite (nth_map_inrange (Zconst ty 0, Zconst ty 0)).
              + rewrite combine_nth. 
-               - admit.
-             (*Unable to unify
-                 "@BMINUS NANS ty
-                    (@nth (ftype ty) i b (Zconst ty 0))
-                    (@nth (ftype ty) i
-                       (@matrix_vector_mult ty
-                          (@remove_diag ty A) x_n) 
-                       (Zconst ty 0))"
-                with
-                 "@BMINUS FPCompCert.nans ty
-                    (@nth (ftype ty) i b (Zconst ty 0))
-                    (@nth (ftype ty) i
-                       (@matrix_vector_mult ty
-                          (@remove_diag ty A) x_n) 
-                       (Zconst ty 0))". *)
+               - reflexivity.
                - unfold matrix_vector_mult. rewrite map_length. 
                  unfold remove_diag. rewrite map_length seq_length.
                  by unfold matrix_rows_nat.
@@ -481,8 +452,7 @@ induction n.
      assert (length A = size.+1).
      { rewrite /size. by rewrite prednK. } rewrite H2. 
      apply /ssrnat.ltP. apply ltn_ord. 
-Admitted.
+Qed.
 
 
 End WITHNANS.
-
