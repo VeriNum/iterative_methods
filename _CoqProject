@@ -9,6 +9,7 @@ local_float_error.v
 global_float_error.v
 floatlib.v
 jacob_list_fun_model.v
+fma_dot_mat_model.v
 
 sparse/sparse.v
 sparse/spec_sparse.v
