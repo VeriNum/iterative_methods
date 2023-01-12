@@ -6,8 +6,8 @@ Import List ListNotations.
 
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
                             Float_notations Automate.
-Require Import dot_prod_defn float_model_generic.
-Require Import floatlib jacob_list_fun_model.
+From Iterative Require Import dot_prod_defn float_model_generic.
+From Iterative Require Import floatlib jacob_list_fun_model.
 Set Bullet Behavior "Strict Subproofs". 
 Set Implicit Arguments.
 Unset Strict Implicit.
