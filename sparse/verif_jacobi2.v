@@ -199,9 +199,7 @@ forward_if (temp _t'3 (Val.of_bool (stop s acc))).
    iter_stop_S.
    rewrite andb_false_iff in H1.
    destruct H1; [ | lia].
-   red in FINacc.
-   rewrite (stop_mor _ _ _ H0 _ _ FINacc) in H1. (* BUG?  Why doesn't it 
-                       work to simply write [rewrite H0 in H1] ? *)
+   rewrite H0 in H1.
    rewrite H1.
    reflexivity.
 -
@@ -227,7 +225,7 @@ Exists (S O) fx s; entailer!!.
 split.
  * simpl.
    change (andb _ _) with (stop (norm2 (resid x)) acc).
-   rewrite (stop_mor _ _ _ H0 _ _ FINacc) in H1. rewrite H1.
+   rewrite H0 in H1. rewrite H1.
    constructor.  symmetry; auto.
  * unfold stop in H1. rewrite andb_true_iff in H1. destruct H1 as [? _].
  apply finite_is_finite in H1.
@@ -313,7 +311,7 @@ split3; [ | | f_equal; f_equal; lia].
 -- simpl. rewrite K.
   change (andb _ _) with (stop (norm2 (resid v)) acc).
   fold resid in H2. rewrite <- H6 in H2. rewrite <- H6 in H1.
-  rewrite (stop_mor _ _ _ H2 _ _ FINacc) in H4 by auto. rewrite H4.
+  rewrite H2 in H4. rewrite H4.
  constructor; symmetry; auto.
 --
  rewrite H2 in FINs.
@@ -331,7 +329,7 @@ entailer!!.
 unfold jacobi. fold A1. fold A2. fold f.
 fold resid in H2|-*.
 rewrite <- H6 in H1, H2.
-rewrite (stop_mor _ _ _ H2 _ _ FINacc) in H4 by auto.
+rewrite H2 in H4.
 rewrite H1, H2.
 destruct (stop (norm2 (resid v)) acc) eqn:?H.
 --
