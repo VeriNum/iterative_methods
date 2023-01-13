@@ -1,0 +1,10 @@
+-R . Stationary
+common.v
+op_defs.v
+float_acc_lems.v
+list_lemmas.v
+dotprod_model.v
+sum_model.v
+sum_acc.v
+dot_acc.v
+fma_dot_acc.v
