@@ -157,6 +157,13 @@ apply Rle_trans with (e_i (@inord n i) A v).
     rewrite inord_val in H. specialize (H H4).
     destruct H as [Hf1 [Hf2 [Ha1 Ha2]]].
     repeat split; try by []; try by apply /RleP.
-+ 
++ assert (e_i (inord i) A v = 
+         [seq e_i i0 A v | i0 <- enum 'I_n.+1]`_i).
+  { rewrite seq_equiv nth_mkseq. nra. by rewrite size_map size_enum_ord in H0. } 
+  rewrite H4. apply /RleP.
+  apply (@bigmaxr_ler _  _ [seq e_i i0 A v | i0 <- enum 'I_n.+1] i).
+  rewrite size_map size_enum_ord.
+  by rewrite size_map size_enum_ord in H0.
+Admitted.
 
 End WITHNANS.
