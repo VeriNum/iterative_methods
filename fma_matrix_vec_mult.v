@@ -103,6 +103,29 @@ Lemma R_dot_prod_rel_holds {n:nat} {ty} m i
       FT2R_mat A (inord i) j * FT2R_mat v j 0).
 Admitted.
 
+Lemma R_dot_prod_rel_abs_holds {n:nat} {ty} m i
+  (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1):
+  R_dot_prod_rel
+  (combine
+     (map Rabs
+        (map FT2R
+           (@vec_to_list_float _ n m
+              (\row_j A (inord i) j)^T)))
+     (map Rabs
+        (map FT2R (@vec_to_list_float _ n m v))))
+  (sum_fold
+     (map (uncurry Rmult)
+        (map Rabsp
+           (map FR2
+              (combine
+                 (@vec_to_list_float _ n m
+                    (\row_j A (inord i) j)^T)
+                 (@vec_to_list_float _ n m v)))))).
+Proof.
+induction m.
++ simpl. apply R_dot_prod_rel_nil.
++ simpl. rewrite !mxE. by apply R_dot_prod_rel_cons.
+Qed.
 
 (** Write a lemma for matrix-vector multiplication **)
 Lemma matrix_vec_mult_bound {n:nat} {ty}:
@@ -141,7 +164,7 @@ apply Rle_trans with (e_i (@inord n i) A v).
   } rewrite -H4.
   - apply fma_dot_prod_rel_holds .
   - apply R_dot_prod_rel_holds.
-  - admit.
+  - apply R_dot_prod_rel_abs_holds.
   - intros. specialize (H xy (@inord n i)).
     rewrite inord_val in H. specialize (H H4).
     split; apply H.
@@ -164,6 +187,6 @@ apply Rle_trans with (e_i (@inord n i) A v).
   apply (@bigmaxr_ler _  _ [seq e_i i0 A v | i0 <- enum 'I_n.+1] i).
   rewrite size_map size_enum_ord.
   by rewrite size_map size_enum_ord in H0.
-Admitted.
+Qed.
 
 End WITHNANS.
