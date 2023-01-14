@@ -195,7 +195,20 @@ apply Rle_trans with (e_i (@inord n i) A v).
       assert ( y = ord0). { apply ord1. } by rewrite H4.
   } rewrite -H4.
   - apply fma_dot_prod_rel_holds .
-  - apply R_dot_prod_rel_holds.
+  - pose proof (@R_dot_prod_rel_holds n ty n.+1 i (leqnn n.+1)).
+    specialize (H4 A v).
+    assert (\sum_(j < n.+1)
+               FT2R_mat A (inord i)
+                 (widen_ord (leqnn n.+1) j) *
+               FT2R_mat v
+                 (widen_ord (leqnn n.+1) j) 0 = 
+            \sum_j
+               FT2R_mat A (inord i) j * FT2R_mat v j 0).
+    { apply eq_big. by []. intros.
+      assert (widen_ord (leqnn n.+1) i0 = i0).
+      { unfold widen_ord. apply val_inj. by simpl. }
+      by rewrite H6.
+    } by rewrite -H5. 
   - apply R_dot_prod_rel_abs_holds.
   - intros. specialize (H xy (@inord n i)).
     rewrite inord_val in H. specialize (H H4).
