@@ -7,7 +7,7 @@ Import List ListNotations.
 
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
                             Float_notations Automate.
-(*Require Import float_model_generic. *)
+
 Require Import floatlib jacob_list_fun_model fma_dot_mat_model inf_norm_properties.
 
 Require Import common fma_dot_acc float_acc_lems dotprod_model.
@@ -64,20 +64,13 @@ Lemma zero_eq {ty}:
   neg_zero = Zconst ty 0.
 Admitted.
 
-
-(**
-Definition dotprod_r {t: type} (v1 v2: list (ftype t)) : ftype t :=
-  fold_right (fun x12 s => BFMA (fst x12) (snd x12) s) 
-                 (Zconst t 0) (List.combine v1 v2)  .
-**)
 Lemma dotprod_cons {t: type} (v1 v2: list (ftype t)) (x y : ftype t): 
   length v1 = length v2 ->
   dotprod_r (x :: v1) (y :: v2) = 
   BFMA x y (dotprod_r v1 v2).
 Proof.
-intros. unfold dotprod_r.
-
-Admitted.
+intros. by unfold dotprod_r. 
+Qed.
 
 Lemma fma_dot_prod_rel_holds {n:nat} {ty} m i
   (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1):
