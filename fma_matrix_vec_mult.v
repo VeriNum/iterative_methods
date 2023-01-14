@@ -56,12 +56,26 @@ Definition FT2R_mat {m n: nat} {ty} (A : 'M[ftype ty]_(m.+1, n.+1)) :
    'M[R]_(m.+1, n.+1):=
   \matrix_(i, j) FT2R (A i j).
 
+Require Import lemmas.
 
 (** Write a lemma for matrix-vector multiplication **)
 Lemma matrix_vec_mult_bound {n:nat} {ty}:
   forall (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1),
   vec_inf_norm (FT2R_mat (A *f v) - (FT2R_mat A) *m (FT2R_mat v)) <=
   mat_vec_mult_err_bnd A v.
+Proof.
+intros. unfold vec_inf_norm, mat_vec_mult_err_bnd.
+apply /RleP. apply bigmax_le; first by rewrite size_map size_enum_ord.
+intros. rewrite seq_equiv. 
+rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
+pose proof (fma_dotprod_forward_error _ ty 
+             (vec_to_list_float n.+1 (\row_j A (inord i) j)^T)
+             (vec_to_list_float n.+1 v)).
+rewrite !length_veclist in H0.
+assert ((1 <= n.+1)%coq_nat). { lia. } 
+assert (n.+1 = n.+1). { lia. } 
+specialize (H0 H1 H2).
+
 
 
 
