@@ -44,7 +44,7 @@ Definition e_i {n:nat} {ty} (i : 'I_n.+1)
   let L := combine l1 l2 in
   let prods := map (uncurry Rmult) (map Rabsp (map FR2 L)) in
   let rs:= sum_fold prods in
-  (g ty (length l1) * rs  + g1 ty (length l1) (length l1 - 1))%Re.
+  (g ty (length l1) * Rabs rs  + g1 ty (length l1) (length l1 - 1))%Re.
 
 
 Definition mat_vec_mult_err_bnd {n:nat} {ty}
@@ -57,6 +57,44 @@ Definition FT2R_mat {m n: nat} {ty} (A : 'M[ftype ty]_(m.+1, n.+1)) :
   \matrix_(i, j) FT2R (A i j).
 
 Require Import lemmas.
+
+Print vec_to_list_float.
+
+Lemma zero_eq {ty}:
+  neg_zero = Zconst ty 0.
+Admitted.
+
+Lemma fma_dot_prod_rel_holds {n:nat} {ty} m i
+  (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1):
+  fma_dot_prod_rel
+  (combine
+     (@vec_to_list_float _ n m (\row_j A (inord i) j)^T)
+     (@vec_to_list_float _  n m v))
+  (let l1 :=
+     @vec_to_list_float _ n m (\row_j A (inord i) j)^T
+     in
+   let l2 := @vec_to_list_float _ n m (\col_j v j 0) in
+   dotprod_r l1 l2).
+Proof.
+induction m.
++ simpl. unfold dotprod_r. simpl. rewrite -zero_eq. apply fma_dot_prod_rel_nil.
++ simpl. rewrite !mxE. 
+  assert (v = \col_j v j 0).
+  {  apply matrixP.  unfold eqrel. intros. rewrite !mxE /=.
+    assert ( y = ord0). { apply ord1. } by rewrite H.
+  } rewrite -H. 
+  assert ( (dotprod_r
+             (A (inord i) (inord m)
+              :: vec_to_list_float m (\row_j A (inord i) j)^T)
+             (v (inord m) 0 :: vec_to_list_float m v)) = 
+            BFMA (A (inord i) (inord m)) (v (inord m) 0) 
+            (dotprod_r (vec_to_list_float m (\row_j A (inord i) j)^T)
+                      (vec_to_list_float m v))).
+  { admit. } 
+  rewrite H0. apply fma_dot_prod_rel_cons.
+  by rewrite -H in IHm.
+Admitted.
+
 
 (** Write a lemma for matrix-vector multiplication **)
 Lemma matrix_vec_mult_bound {n:nat} {ty}:
@@ -75,6 +113,11 @@ rewrite !length_veclist in H0.
 assert ((1 <= n.+1)%coq_nat). { lia. } 
 assert (n.+1 = n.+1). { lia. } 
 specialize (H0 H1 H2).
+apply Rle_trans with (e_i (@inord n i) A v).
++ unfold e_i. rewrite !mxE -RminusE.
+  rewrite !length_veclist.
+  apply H0.
+  - unfold fma_dot_prod_rel.
 
 
 
