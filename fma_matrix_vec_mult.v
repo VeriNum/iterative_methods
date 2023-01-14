@@ -96,6 +96,19 @@ induction m.
 Admitted.
 
 
+Lemma R_dot_prod_rel_holds {n:nat} {ty} m i
+  (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1):
+  R_dot_prod_rel
+  (combine
+     (map FT2R
+        (@vec_to_list_float _ n m 
+           (\row_j A (inord i) j)^T))
+     (map FT2R (@vec_to_list_float _ n m v)))
+  (\sum_j
+      FT2R_mat A (inord i) j * FT2R_mat v j 0).
+Admitted.
+
+
 (** Write a lemma for matrix-vector multiplication **)
 Lemma matrix_vec_mult_bound {n:nat} {ty}:
   forall (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1),
@@ -117,7 +130,9 @@ apply Rle_trans with (e_i (@inord n i) A v).
 + unfold e_i. rewrite !mxE -RminusE.
   rewrite !length_veclist.
   apply H0.
-  - unfold fma_dot_prod_rel.
+  - apply fma_dot_prod_rel_holds .
+  - apply R_dot_prod_rel_holds.
+  - 
 
 
 
