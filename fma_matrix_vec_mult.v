@@ -91,7 +91,7 @@ induction m.
 Admitted.
 
 
-Lemma R_dot_prod_rel_holds {n:nat} {ty} m i
+Lemma R_dot_prod_rel_holds {n:nat} {ty} m i (le_n_m : (m <= n.+1)%nat)
   (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1):
   R_dot_prod_rel
   (combine
@@ -99,9 +99,41 @@ Lemma R_dot_prod_rel_holds {n:nat} {ty} m i
         (@vec_to_list_float _ n m 
            (\row_j A (inord i) j)^T))
      (map FT2R (@vec_to_list_float _ n m v)))
-  (\sum_j
-      FT2R_mat A (inord i) j * FT2R_mat v j 0).
-Admitted.
+  (\sum_(j < m)
+      FT2R_mat A (inord i) (@widen_ord m n.+1 le_n_m j) * 
+      FT2R_mat v (@widen_ord m n.+1 le_n_m j) 0).
+Proof.
+induction m.
++ simpl. rewrite big_ord0 //=. apply R_dot_prod_rel_nil.
++ simpl. rewrite !mxE. rewrite big_ord_recr //=.
+  rewrite -RplusE -RmultE.
+  assert ((widen_ord le_n_m ord_max) = (inord m)).
+  { unfold widen_ord. 
+    apply val_inj. simpl. by rewrite inordK.
+  } rewrite H. rewrite Rplus_comm. rewrite !mxE.
+  apply R_dot_prod_rel_cons.
+  assert ((m <= n.+1)%nat). { by apply ltnW. }
+  specialize (IHm H0). 
+  assert (\sum_(j < m)
+            FT2R_mat A (inord i)
+              (widen_ord H0 j) *
+            FT2R_mat v (widen_ord H0 j) 0 = 
+          \sum_(i0 < m)
+                FT2R_mat A (inord i)
+                  (widen_ord le_n_m
+                     (widen_ord (leqnSn m) i0)) *
+                FT2R_mat v
+                  (widen_ord le_n_m
+                     (widen_ord (leqnSn m) i0)) 0).
+  { apply eq_big. by []. intros.
+    assert ((widen_ord le_n_m
+                  (widen_ord (leqnSn m) i0))= 
+             (widen_ord  H0 i0)).
+    { unfold widen_ord. 
+      apply val_inj. by simpl.
+    } by rewrite H2.
+  } rewrite -H1. apply IHm.
+Qed.
 
 Lemma R_dot_prod_rel_abs_holds {n:nat} {ty} m i
   (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1):
