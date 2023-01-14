@@ -64,6 +64,21 @@ Lemma zero_eq {ty}:
   neg_zero = Zconst ty 0.
 Admitted.
 
+
+(**
+Definition dotprod_r {t: type} (v1 v2: list (ftype t)) : ftype t :=
+  fold_right (fun x12 s => BFMA (fst x12) (snd x12) s) 
+                 (Zconst t 0) (List.combine v1 v2)  .
+**)
+Lemma dotprod_cons {t: type} (v1 v2: list (ftype t)) (x y : ftype t): 
+  length v1 = length v2 ->
+  dotprod_r (x :: v1) (y :: v2) = 
+  BFMA x y (dotprod_r v1 v2).
+Proof.
+intros. unfold dotprod_r.
+
+Admitted.
+
 Lemma fma_dot_prod_rel_holds {n:nat} {ty} m i
   (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1):
   fma_dot_prod_rel
@@ -86,9 +101,9 @@ induction m.
             BFMA (A (inord i) (inord m)) (v (inord m) ord0) 
             (dotprod_r (vec_to_list_float m (\row_j A (inord i) j)^T)
                       (vec_to_list_float m v))).
-  { admit. } 
+  { apply dotprod_cons. by rewrite !length_veclist. } 
   rewrite H. by apply fma_dot_prod_rel_cons.
-Admitted.
+Qed.
 
 
 Lemma R_dot_prod_rel_holds {n:nat} {ty} m i (le_n_m : (m <= n.+1)%nat)
