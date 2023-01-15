@@ -242,24 +242,6 @@ apply Rle_trans with (e_i (@inord n i) A v).
   by rewrite size_map size_enum_ord in H0.
 Qed.
 
-(*
-g ty n.+1 *
-Rabs
-  (\sum_j FT2R_mat A (inord x) j * FT2R_mat v j 0) +
-g1 ty n.+1 (n.+1 - 1) =
-(g ty n.+1 *
- Rabs
-   (sum_fold
-      (map (uncurry Rmult)
-         (map Rabsp
-            (map FR2
-               (combine
-                  (vec_to_list_float n.+1
-                     (\row_j A (inord x) j)^T)
-                  (vec_to_list_float n.+1 v)))))) +
- g1 ty n.+1 (n.+1 - 1))%Re
-*)
-
 
 Definition FT2R_abs {m n: nat} (A : 'M[R]_(m.+1, n.+1)) :=
   \matrix_(i,j) Rabs (A i j).
@@ -333,7 +315,23 @@ rewrite -bigmaxr_mulr.
       unfold eqfun. intros.
       rewrite !mxE. unfold e_i.
       rewrite !length_veclist.
-      
+      pose proof (@sum_fold_mathcomp_equiv n ty n.+1 x (leqnn n.+1) A v).
+      rewrite -H.
+      assert (\sum_j
+                  FT2R_abs (FT2R_mat A) (inord x) j *
+                  FT2R_abs (FT2R_mat v) j 0 = 
+              \sum_(j < n.+1)
+                 FT2R_abs (FT2R_mat A) (inord x)
+                   (widen_ord (leqnn n.+1) j) *
+                 FT2R_abs (FT2R_mat v)
+                   (widen_ord (leqnn n.+1) j) 0).
+      { apply eq_big. by []. intros.
+        assert (widen_ord (leqnn n.+1) i = i).
+        { unfold widen_ord. apply val_inj. by simpl. }
+        by rewrite H1.
+      } by rewrite -H0.
+    } rewrite H. apply bigmaxr_mem.
+    by rewrite size_map size_enum_ord.
 
 
 
