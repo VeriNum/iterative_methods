@@ -249,7 +249,28 @@ Lemma matrix_err_bound_equiv {n:nat} {ty}
  vec_inf_norm (FT2R_mat A *m FT2R_mat v) * g ty n.+1 + g1 ty n.+1 (n.+1 - 1).
 Proof.
 unfold mat_vec_mult_err_bnd.
-unfold vec_inf_norm. 
+unfold vec_inf_norm. rewrite mulrC.
+rewrite -bigmaxr_mulr.
++ apply bigmaxrP . split.
+  - rewrite -bigmaxr_addr.
+    assert ([seq y + g1 ty n.+1 (n.+1 - 1)
+               | y <- [seq g ty n.+1 *
+                           Rabs
+                             ((FT2R_mat A *m FT2R_mat v) i
+                                0)
+                         | i <- enum 'I_n.+1]] = 
+            [seq e_i i A v | i <- enum 'I_n.+1]).
+    { rewrite seq_equiv. rewrite -map_comp.
+      rewrite seq_equiv. apply eq_mkseq.
+      unfold eqfun. intros.
+      rewrite !mxE. unfold e_i.
+      rewrite 
+
+
+
+ admit.
++ apply /RleP. apply g_pos.
+Admitted.
 
 
 
