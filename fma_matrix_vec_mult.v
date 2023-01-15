@@ -332,12 +332,45 @@ rewrite -bigmaxr_mulr.
       } by rewrite -H0.
     } rewrite H. apply bigmaxr_mem.
     by rewrite size_map size_enum_ord.
-
-
-
- admit.
+  - intros. rewrite seq_equiv. rewrite nth_mkseq;
+    last by rewrite size_map size_enum_ord in H.
+    unfold e_i. rewrite !length_veclist.
+    apply /RleP. rewrite -RplusE.
+    apply Rplus_le_compat_r.
+    apply Rle_trans with 
+    ([seq (g ty n.+1 *
+         Rabs
+           ((FT2R_abs (FT2R_mat A) *m 
+             FT2R_abs (FT2R_mat v)) i0 0))%Ri
+      | i0 <- enum 'I_n.+1]`_i).
+    * rewrite seq_equiv. rewrite nth_mkseq;
+      last by rewrite size_map size_enum_ord in H.
+      rewrite -RmultE. rewrite !mxE.
+      pose proof (@sum_fold_mathcomp_equiv n ty n.+1 i (leqnn n.+1) A v).
+      rewrite -H0.
+      assert (\sum_j
+                  FT2R_abs (FT2R_mat A) (inord i) j *
+                  FT2R_abs (FT2R_mat v) j 0 = 
+              \sum_(j < n.+1)
+                 FT2R_abs (FT2R_mat A) (inord i)
+                   (widen_ord (leqnn n.+1) j) *
+                 FT2R_abs (FT2R_mat v)
+                   (widen_ord (leqnn n.+1) j) 0).
+      { apply eq_big. by []. intros.
+        assert (widen_ord (leqnn n.+1) i0 = i0).
+        { unfold widen_ord. apply val_inj. by simpl. }
+        by rewrite H2.
+      } rewrite -H1. apply Rle_refl.
+   * apply /RleP.
+     apply (@bigmaxr_ler _ 0%Re [seq (g ty n.+1 *
+                 Rabs
+                   ((FT2R_abs (FT2R_mat A) *m 
+                     FT2R_abs (FT2R_mat v)) i0 0))%Ri
+              | i0 <- enum 'I_n.+1] i).
+     rewrite size_map size_enum_ord.
+     by rewrite size_map size_enum_ord in H.
 + apply /RleP. apply g_pos.
-Admitted.
+Qed.
 
 
 
