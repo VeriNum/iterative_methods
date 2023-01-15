@@ -242,11 +242,79 @@ apply Rle_trans with (e_i (@inord n i) A v).
   by rewrite size_map size_enum_ord in H0.
 Qed.
 
+(*
+g ty n.+1 *
+Rabs
+  (\sum_j FT2R_mat A (inord x) j * FT2R_mat v j 0) +
+g1 ty n.+1 (n.+1 - 1) =
+(g ty n.+1 *
+ Rabs
+   (sum_fold
+      (map (uncurry Rmult)
+         (map Rabsp
+            (map FR2
+               (combine
+                  (vec_to_list_float n.+1
+                     (\row_j A (inord x) j)^T)
+                  (vec_to_list_float n.+1 v)))))) +
+ g1 ty n.+1 (n.+1 - 1))%Re
+*)
+
+
+Definition FT2R_abs {m n: nat} (A : 'M[R]_(m.+1, n.+1)) :=
+  \matrix_(i,j) Rabs (A i j).
+
+
+
+Lemma sum_fold_mathcomp_equiv {n:nat} {ty} m i (le_n_m : (m <= n.+1)%nat)
+  (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1) :
+  \sum_(j < m) FT2R_abs (FT2R_mat A) (inord i) (@widen_ord m n.+1 le_n_m j)
+               * FT2R_abs (FT2R_mat v) (@widen_ord m n.+1 le_n_m j) 0 = 
+   sum_fold
+      (map (uncurry Rmult)
+         (map Rabsp
+            (map FR2
+               (combine
+                  (@vec_to_list_float _ n m
+                     (\row_j A (inord i) j)^T)
+                  (@vec_to_list_float _ n m v))))).
+Proof.
+induction m.
++ simpl. by rewrite big_ord0 /=. 
++ rewrite big_ord_recr /= !mxE.
+   assert ((widen_ord le_n_m ord_max) = (inord m)).
+  { unfold widen_ord. 
+    apply val_inj. simpl. by rewrite inordK.
+  } rewrite H. rewrite Rplus_comm. 
+  assert ((m <= n.+1)%nat). { by apply ltnW. }
+  specialize (IHm H0). 
+  assert (\sum_(j < m)
+               FT2R_abs (FT2R_mat A) (inord i)
+                 (widen_ord H0 j) *
+               FT2R_abs (FT2R_mat v) (widen_ord H0 j) 0 = 
+           \sum_(i0 < m)
+               FT2R_abs (FT2R_mat A) (inord i)
+                 (widen_ord le_n_m (widen_ord (leqnSn m) i0)) *
+               FT2R_abs (FT2R_mat v)
+                 (widen_ord le_n_m (widen_ord (leqnSn m) i0)) 0).
+  { apply eq_big. by []. intros.
+    assert ((widen_ord le_n_m
+                  (widen_ord (leqnSn m) i0))= 
+             (widen_ord  H0 i0)).
+    { unfold widen_ord. 
+      apply val_inj. by simpl.
+    } by rewrite H2.
+  } rewrite -H1. by rewrite IHm.
+Qed.
+
+
+
 
 Lemma matrix_err_bound_equiv {n:nat} {ty}
  (A: 'M[ftype ty]_n.+1) (v: 'cV[ftype ty]_n.+1):
  mat_vec_mult_err_bnd A v = 
- vec_inf_norm (FT2R_mat A *m FT2R_mat v) * g ty n.+1 + g1 ty n.+1 (n.+1 - 1).
+ vec_inf_norm (FT2R_abs (FT2R_mat A) *m FT2R_abs (FT2R_mat v)) * g ty n.+1 +
+   g1 ty n.+1 (n.+1 - 1).
 Proof.
 unfold mat_vec_mult_err_bnd.
 unfold vec_inf_norm. rewrite mulrC.
@@ -256,15 +324,16 @@ rewrite -bigmaxr_mulr.
     assert ([seq y + g1 ty n.+1 (n.+1 - 1)
                | y <- [seq g ty n.+1 *
                            Rabs
-                             ((FT2R_mat A *m FT2R_mat v) i
-                                0)
+                             ((FT2R_abs (FT2R_mat A) *m 
+                               FT2R_abs (FT2R_mat v)) i 0)
                          | i <- enum 'I_n.+1]] = 
             [seq e_i i A v | i <- enum 'I_n.+1]).
     { rewrite seq_equiv. rewrite -map_comp.
       rewrite seq_equiv. apply eq_mkseq.
       unfold eqfun. intros.
       rewrite !mxE. unfold e_i.
-      rewrite 
+      rewrite !length_veclist.
+      
 
 
 
