@@ -242,4 +242,16 @@ apply Rle_trans with (e_i (@inord n i) A v).
   by rewrite size_map size_enum_ord in H0.
 Qed.
 
+
+Lemma matrix_err_bound_equiv {n:nat} {ty}
+ (A: 'M[ftype ty]_n.+1) (v: 'cV[ftype ty]_n.+1):
+ mat_vec_mult_err_bnd A v = 
+ vec_inf_norm (FT2R_mat A *m FT2R_mat v) * g ty n.+1 + g1 ty n.+1 (n.+1 - 1).
+Proof.
+unfold mat_vec_mult_err_bnd.
+unfold vec_inf_norm. 
+
+
+
 End WITHNANS.
+
