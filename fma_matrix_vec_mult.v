@@ -374,62 +374,50 @@ Qed.
 
 Print is_finite.
 Lemma Bminus_bplus_opp_equiv {ty} (x y : ftype ty):
-  is_finite _ _ x = false ->
-  is_finite _ _ y = false ->
+  is_finite _ _ x = true ->
+  is_finite _ _ (BOPP ty y) = true ->
+  is_finite _ _ (BPLUS ty x (BOPP ty y)) ->
   BMINUS ty x y = BPLUS ty x (BOPP ty y).
 Proof.
-admit.
-(*
 intros.
-destruct x, y; try destruct s; try destruct s0; simpl; auto;
-unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus; simpl; auto.
+destruct x, y.
 + unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus. simpl; auto.
   destruct (eqb s (~~ s0)); simpl;auto.
 + unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus. simpl; auto.
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus. simpl; auto.
-  assert (B754_nan (fprec ty) (femax ty) s0 pl e =
-          build_nan (fprec ty) (femax ty)
-           (opp_nan ty (B754_nan (fprec ty) (femax ty) s0 pl e)) ).
-  { admit. } rewrite -H1. reflexivity.
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus. simpl; auto.
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus. simpl; auto.
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus. simpl; auto.
-  destruct s,s0; simpl;auto.
-  - unfold is_nan in H, H0. admit.
-  - unfold is_nan in H, H0.
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
+  by [].
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
+  by [].
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
+  by [].
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
+  by [].
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
+  by [].
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
+  by [].
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
+  by [].
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
+  by [].
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
+  unfold BSN2B; simpl;auto.
+  unfold is_finite in H1; simpl in *; auto.
+  destruct (BinarySingleNaN.binary_normalize 
+    (fprec ty) (femax ty) (fprec_gt_0 ty)
+    (fprec_lt_femax ty) BinarySingleNaN.mode_NE
+    (BinarySingleNaN.Fplus_naive s m e 
+       (~~ s0) m0 e1 (Z.min e e1)) 
+    (Z.min e e1) false); simpl;auto.
+  by destruct s,s0;simpl in *; auto.
+Qed.
 
 
- unfold plus_nan; simpl;auto.
-  Print B754_infinity.
-
-
-Print eqb.c
-
-destruct (eqb s (~~ s0)); simpl;auto.
-  destruct s,s0; simpl;auto.
-
-
-Search (_ = ~~ _).
-
-
-
-Print B754_nan.
-
-
- unfold B754_nan; simpl;auto. rewrite e.
-
-destruct (eqb s (~~ s0)); simpl;auto.
-*)
-Admitted.
-
-(*
-Lemma BPLUS_accurate' {NAN: Nans} (t : type) :
-  forall x y 
-  (FIN: Binary.is_finite _ _ (BPLUS t x y) = true), 
-  exists delta, 
-   Rabs delta <= default_rel t /\
-   (FT2R (BPLUS t x y ) = (FT2R x + FT2R y) * (1+delta))%R.
-*)
 
 Lemma BPLUS_le_rel
   {NAN: Nans} (t : type) :
@@ -442,7 +430,15 @@ pose proof (BPLUS_accurate' t x y FIN).
 destruct H as [delta H].
 destruct H as [Hd Heq].
 rewrite Heq.
-apply Rabs_mult.
+rewrite Rabs_mult.
+apply /RleP. rewrite -RmultE -!RplusE.
+apply Rmult_le_compat; try apply Rabs_pos; try apply Rabs_triang.
+apply Rle_trans with (Rabs 1 + Rabs delta)%Re.
++ apply Rabs_triang.
++ rewrite Rabs_R1. apply Rplus_le_compat_l.
+  apply Hd.
+Qed.
+
   
 
 
@@ -457,6 +453,7 @@ intros. rewrite seq_equiv.
 rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
 rewrite !mxE. rewrite -!RminusE -RmultE -!RplusE.
 rewrite Bminus_bplus_opp_equiv.
+
 rewrite BPLUS_accurate'.
 
 
