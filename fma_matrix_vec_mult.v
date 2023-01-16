@@ -372,6 +372,14 @@ rewrite -bigmaxr_mulr.
 + apply /RleP. apply g_pos.
 Qed.
 
+Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
+  vec_inf_norm (FT2R_mat (v1 -f v2) - (FT2R_mat v1 - FT2R_mat v2)) <= 
+  (vec_inf_norm (FT2R_mat v1) + vec_inf_norm (FT2R_mat v2)) * (default_rel ty) +
+  (default_abs ty).
+Proof.
+Admitted.
+  
+
 
 
 End WITHNANS.
