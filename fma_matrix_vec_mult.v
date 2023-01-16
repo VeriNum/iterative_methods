@@ -611,7 +611,24 @@ rewrite Bminus_bplus_opp_equiv.
                           (2 * bpow Zaux.radix2 (femax ty) * default_rel ty - default_abs ty))%Re).
                { nra. } rewrite H1.
                assert (forall x y:R, (0 < y)%Re -> (x - y < x)%Re).
-               { intros. nra. } apply H2. admit.
+               { intros. nra. } apply H2.
+               apply Rgt_lt. apply Rgt_minus. apply Rlt_gt.
+               unfold default_abs, default_rel.
+               assert ((2 * bpow Zaux.radix2 (femax ty) *
+                          (/ 2 * bpow Zaux.radix2 (- fprec ty + 1)))%Re = 
+                       (1 * (bpow Zaux.radix2 (femax ty) * bpow Zaux.radix2 (- fprec ty + 1)))%Re).
+               { nra. } rewrite H3. clear H3.
+               apply Rmult_lt_compat. nra. apply bpow_ge_0. nra.
+               rewrite -bpow_plus. apply bpow_lt. 
+               
+
+
+
+
+
+
+
+ admit.
              } apply Rle_lt_trans with (F' ty + default_abs ty)%Re.
              ** apply Rplus_le_compat_r.
                 assert ((2 *
