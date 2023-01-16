@@ -472,8 +472,8 @@ Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
          (vec_to_list_float n.+1 v2)) ->
     is_finite (fprec ty) (femax ty) xy.1 = true /\
     is_finite (fprec ty) (femax ty) xy.2 = true /\ 
-    (Rabs (FT2R (fst (xy))) <= F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re /\
-     (Rabs (FT2R (snd (xy))) <= F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re) ->
+    (Rabs (FT2R (fst (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re /\
+     (Rabs (FT2R (snd (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re) ->
   vec_inf_norm (FT2R_mat (v1 -f v2) - (FT2R_mat v1 - FT2R_mat v2)) <= 
   (vec_inf_norm (FT2R_mat v1) + vec_inf_norm (FT2R_mat v2)) * (default_rel ty) +
   (default_abs ty).
@@ -567,7 +567,7 @@ rewrite Bminus_bplus_opp_equiv.
       ++ apply Rplus_le_compat_r. apply Rmult_le_compat_r.
           apply Rabs_pos. apply Rabs_triang.
       ++ apply Rle_lt_trans with 
-         ((2 * (F' ty / (INR n.+1 * (1 + default_rel ty) ^ n.+1))) *
+         ((2 * ((F' ty/2) / (INR n.+1 * (1 + default_rel ty) ^ n.+1))) *
           (1 + default_rel ty) + default_abs ty)%Re.
          -- apply Rplus_le_compat.
             ** apply Rmult_le_compat.
@@ -580,32 +580,42 @@ rewrite Bminus_bplus_opp_equiv.
                +++ apply Rle_trans with (Rabs 1 + Rabs d)%Re.
                    apply Rabs_triang. rewrite Rabs_R1. by apply Rplus_le_compat_l.
             ** apply Hde.
-         --  
-
-
-    unfold Generic_fmt.round . simpl; auto.
-    simpl.
-    unfold rounded.
-
-
-
-    pose proof (
-     Raux.Rlt_bool_spec
-          (Rabs
-             (Generic_fmt.round Zaux.radix2
-                (SpecFloat.fexp (fprec ty) (femax ty))
-                (BinarySingleNaN.round_mode
-                   BinarySingleNaN.mode_NE) (FT2R (v1 (inord i) 0) + FT2R (BOPP ty (v2 (inord i) 0)))))
-          (Raux.bpow Zaux.radix2 (femax ty))).
-    destruct H0.
-    * apply H0.
-    * red in Hfin.
-
-
-
-
-admit.
-
+         --  assert ((F' ty + default_abs ty < bpow Zaux.radix2 (femax ty))%Re)%Re.
+             { unfold F'. unfold fmax.
+               assert ((bpow Zaux.radix2 (femax ty) *
+                          (1 - 2 * default_rel ty) + default_abs ty)%Re = 
+                        (bpow Zaux.radix2 (femax ty) - 
+                          (2 * bpow Zaux.radix2 (femax ty) * default_rel ty - default_abs ty))%Re).
+               { nra. } rewrite H1.
+               assert (forall x y:R, (0 < y)%Re -> (x - y < x)%Re).
+               { intros. nra. } apply H2. admit.
+             } apply Rle_lt_trans with (F' ty + default_abs ty)%Re.
+             ** apply Rplus_le_compat_r.
+                assert ((2 *
+                           (F' ty / 2 /
+                            (INR n.+1 * (1 + default_rel ty) ^ n.+1)) *
+                           (1 + default_rel ty))%Re = 
+                        ((F' ty * / (INR n.+1 * (1 + default_rel ty) ^ n.+1)) * (1 + default_rel ty))%Re).
+                { nra. } rewrite H2. clear H2.
+                rewrite Rinv_mult_distr.
+                +++ replace (F' ty) with (F' ty * 1)%Re by nra.
+                    assert (((F' ty * 1) *
+                               (/ INR n.+1 * / (1 + default_rel ty) ^ n.+1) *
+                               (1 + default_rel ty))%Re = 
+                             ((F' ty * / INR n.+1) * (/ (1 + default_rel ty) ^ n.+1 * (1 + default_rel ty)))%Re).
+                    { nra. } rewrite H2. clear H2.
+                    apply Rmult_le_compat.
+                    --- apply Rmult_le_pos.  admit.
+                        apply Rlt_le. apply Rinv_0_lt_compat. apply lt_0_INR.
+                        lia.
+                    --- apply Rmult_le_pos. apply Rlt_le. apply Rinv_0_lt_compat.
+                        apply pow_lt. admit.
+                        admit.
+                    --- admit.  
+                    --- admit.
+                +++ apply not_0_INR. lia.
+                +++ apply pow_nonzero . admit.
+             ** apply H1.
 Admitted.
   
 
