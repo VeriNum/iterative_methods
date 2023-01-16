@@ -372,11 +372,73 @@ rewrite -bigmaxr_mulr.
 + apply /RleP. apply g_pos.
 Qed.
 
+Print is_finite.
+Lemma Bminus_bplus_opp_equiv {ty} (x y : ftype ty):
+  is_finite _ _ x = false ->
+  is_finite _ _ y = false ->
+  BMINUS ty x y = BPLUS ty x (BOPP ty y).
+Proof.
+admit.
+(*
+intros.
+destruct x, y; try destruct s; try destruct s0; simpl; auto;
+unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus; simpl; auto.
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus. simpl; auto.
+  destruct (eqb s (~~ s0)); simpl;auto.
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus. simpl; auto.
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus. simpl; auto.
+  assert (B754_nan (fprec ty) (femax ty) s0 pl e =
+          build_nan (fprec ty) (femax ty)
+           (opp_nan ty (B754_nan (fprec ty) (femax ty) s0 pl e)) ).
+  { admit. } rewrite -H1. reflexivity.
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus. simpl; auto.
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus. simpl; auto.
++ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus. simpl; auto.
+  destruct s,s0; simpl;auto.
+  - unfold is_nan in H, H0. admit.
+  - unfold is_nan in H, H0.
+
+
+ unfold plus_nan; simpl;auto.
+  Print B754_infinity.
+
+
+Print eqb.c
+
+destruct (eqb s (~~ s0)); simpl;auto.
+  destruct s,s0; simpl;auto.
+
+
+Search (_ = ~~ _).
+
+
+
+Print B754_nan.
+
+
+ unfold B754_nan; simpl;auto. rewrite e.
+
+destruct (eqb s (~~ s0)); simpl;auto.
+*)
+Admitted.
+
+
 Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   vec_inf_norm (FT2R_mat (v1 -f v2) - (FT2R_mat v1 - FT2R_mat v2)) <= 
   (vec_inf_norm (FT2R_mat v1) + vec_inf_norm (FT2R_mat v2)) * (default_rel ty) +
   (default_abs ty).
 Proof.
+unfold vec_inf_norm.
+apply /RleP. apply bigmax_le; first by rewrite size_map size_enum_ord.
+intros. rewrite seq_equiv. 
+rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
+rewrite !mxE. rewrite -!RminusE -RmultE -!RplusE.
+rewrite Bminus_bplus_opp_equiv.
+rewrite BPLUS_accurate'.
+
+
+
+
 Admitted.
   
 
