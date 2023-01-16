@@ -627,24 +627,13 @@ rewrite Bminus_bplus_opp_equiv.
                Search (_ + _  < _ + _)%Z.
                apply Z.lt_sub_lt_add. simpl.
                unfold Z.sub. rewrite Z.opp_involutive. 
-
-
-
-Search (_ + _ + _ = _)%Z.
-
-               rewrite -bpow_plus. apply bpow_lt. 
-               
-
-               assert ((femax ty + (- fprec ty + 1))%Z = (1 + femax ty - fprec ty)%Z).
-               { Search (_ - _ + _ = _)%Z.
-
-
-
-
-
-
-
- admit.
+               Search (_ + _ = _)%Z.
+               assert (2%Z = (1+1)%Z). { by simpl. }
+               rewrite H3.  
+               Search (_ + _  < _ + _)%Z.
+               apply Z.add_lt_mono;
+               apply Z.lt_trans with (fprec ty); try apply fprec_gt_one;
+               try apply fprec_lt_femax.
              } apply Rle_lt_trans with (F' ty + default_abs ty)%Re.
              ** apply Rplus_le_compat_r.
                 assert ((2 *
