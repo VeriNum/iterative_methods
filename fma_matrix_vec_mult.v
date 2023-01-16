@@ -464,6 +464,39 @@ Lra.lra.
 Qed.
 
 
+Lemma F_p_ge_0 {ty}:
+  (0 <= F' ty)%Re.
+Proof.
+unfold F'.
+apply Rmult_le_pos.
++ unfold fmax. apply bpow_ge_0.
++  apply Rge_le. apply Rge_minus. apply Rle_ge.
+   unfold default_rel.
+   assert ((2 * (/ 2 * bpow Zaux.radix2 (- fprec ty + 1)))%Re = 
+            bpow Zaux.radix2 (- fprec ty + 1)).
+   { nra. } rewrite H.
+   assert ((- fprec ty + 1)%Z = (- (fprec ty - 1))%Z).
+   {  rewrite Z.opp_add_distr Z.opp_involutive. reflexivity. }
+   rewrite H0 bpow_opp.
+   replace 1%Re with (/1)%Re by nra.
+   apply Rlt_le. apply Rinv_lt_contravar.
+   - apply Rmult_lt_0_compat. nra. 
+     apply bpow_gt_0.
+   - 
+   Search "bpow". 
+      Search (- - _ = _)%Z.
+
+
+auto.
+     Search (- (_ + _) = _)%Z.
+   Search "bpow".
+  
+   apply bpow_le.
+
+
+   Search (bpow _ <= 1)%Re.
+   apply bpow_le_1.
+
 Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty),
     In xy
