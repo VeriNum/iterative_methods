@@ -609,12 +609,29 @@ rewrite Bminus_bplus_opp_equiv.
                         apply Rlt_le. apply Rinv_0_lt_compat. apply lt_0_INR.
                         lia.
                     --- apply Rmult_le_pos. apply Rlt_le. apply Rinv_0_lt_compat.
-                        apply pow_lt. admit.
-                        admit.
-                    --- admit.  
+                        apply pow_lt. apply Rplus_lt_0_compat. nra. apply default_rel_gt_0. 
+                        apply Rlt_le. apply Rplus_lt_0_compat. nra. apply default_rel_gt_0. 
+                    --- replace (F' ty) with (F' ty * 1)%Re by nra.
+                        replace (F' ty * 1 * / INR n.+1)%Re with (F' ty * / INR n.+1)%Re by nra.
+                        apply Rmult_le_compat_l. 
+                        *** admit.
+                        *** replace 1%Re with (/1)%Re by nra.
+                            assert ((0 <= n)%nat ). { by []. }
+                            rewrite leq_eqVlt in H2.
+                            assert ((0%nat == n) \/ (0 < n)%nat).
+                            { by apply /orP. } destruct H3.
+                            ++++ rewrite eq_sym in H3. 
+                                 assert (n = 0%nat). { by apply /eqP. }
+                                 rewrite H4. simpl;nra. 
+                            ++++ apply /Rlt_le. apply  Rinv_lt_contravar.
+                                 apply Rmult_lt_0_compat. nra. apply lt_0_INR. lia.
+                                 apply lt_1_INR. apply /ssrnat.ltP. by []. 
                     --- admit.
                 +++ apply not_0_INR. lia.
-                +++ apply pow_nonzero . admit.
+                +++ apply pow_nonzero . 
+                    assert ((0 < 1 + default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+                    { nra. } apply H2. 
+                    apply Rplus_lt_0_compat. nra. apply default_rel_gt_0. 
              ** apply H1.
 Admitted.
   
