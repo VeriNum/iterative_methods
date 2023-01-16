@@ -464,7 +464,6 @@ Lra.lra.
 Qed.
 
 
-
 Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty),
     In xy
@@ -550,7 +549,40 @@ rewrite Bminus_bplus_opp_equiv.
       apply default_abs_ge_0.
 + apply Hfin.
 + rewrite is_finite_Bopp. apply Hfin.
-+ admit.
++ apply Bplus_no_ov_is_finite .
+  - apply Hfin.
+  - rewrite is_finite_Bopp. apply Hfin.
+  - unfold Bplus_no_overflow. 
+    pose proof (generic_round_property ty (FT2R (v1 (inord i) 0) +  FT2R (BOPP ty (v2 (inord i) 0)))).
+    destruct H0 as [d [e [Hpr [Hdf [Hde H0]]]]].
+    rewrite H0.
+    
+
+
+
+
+    unfold Generic_fmt.round . simpl; auto.
+    simpl.
+    unfold rounded.
+
+
+
+    pose proof (
+     Raux.Rlt_bool_spec
+          (Rabs
+             (Generic_fmt.round Zaux.radix2
+                (SpecFloat.fexp (fprec ty) (femax ty))
+                (BinarySingleNaN.round_mode
+                   BinarySingleNaN.mode_NE) (FT2R (v1 (inord i) 0) + FT2R (BOPP ty (v2 (inord i) 0)))))
+          (Raux.bpow Zaux.radix2 (femax ty))).
+    destruct H0.
+    * apply H0.
+    * red in Hfin.
+
+
+
+
+admit.
 
 Admitted.
   
