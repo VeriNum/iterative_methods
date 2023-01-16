@@ -557,6 +557,16 @@ rewrite Bminus_bplus_opp_equiv.
     destruct H0 as [d [e [Hpr [Hdf [Hde H0]]]]].
     rewrite H0.
     destruct Hfin as [Hf1 [Hf2 [Ha1 Ha2]]].
+    apply Rle_lt_trans with 
+    (Rabs ((FT2R (v1 (inord i) ord0) +
+              FT2R (BOPP ty (v2 (inord i) ord0))) *  (1 + d)) + 
+    (Rabs e))%Re.
+    * apply Rabs_triang.
+    * rewrite Rabs_mult.
+      eapply Rle_lt_trans.
+      ++ apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+          apply Rabs_pos. apply Rabs_triang.
+      ++ 
 
 
 
