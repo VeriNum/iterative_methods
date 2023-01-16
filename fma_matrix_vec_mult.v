@@ -372,7 +372,7 @@ rewrite -bigmaxr_mulr.
 + apply /RleP. apply g_pos.
 Qed.
 
-Print is_finite.
+
 Lemma Bminus_bplus_opp_equiv {ty} (x y : ftype ty):
   is_finite _ _ x = true ->
   is_finite _ _ (BOPP ty y) = true ->
@@ -380,41 +380,16 @@ Lemma Bminus_bplus_opp_equiv {ty} (x y : ftype ty):
   BMINUS ty x y = BPLUS ty x (BOPP ty y).
 Proof.
 intros.
-destruct x, y.
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus. simpl; auto.
-  destruct (eqb s (~~ s0)); simpl;auto.
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus. simpl; auto.
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
-  by [].
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
-  by [].
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
-  by [].
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
-  by [].
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
-  by [].
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
-  by [].
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
-  by [].
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
-  by [].
-+ unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *. simpl in *; auto.
-  unfold BSN2B; simpl;auto.
-  unfold is_finite in H1; simpl in *; auto.
-  destruct (BinarySingleNaN.binary_normalize 
+destruct x, y; (unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *; simpl in *; auto;
+  try destruct (eqb s (~~ s0)); simpl in * ;auto; try by []; 
+  try unfold is_finite in H1; simpl in *; auto);
+  (destruct (BinarySingleNaN.binary_normalize 
     (fprec ty) (femax ty) (fprec_gt_0 ty)
     (fprec_lt_femax ty) BinarySingleNaN.mode_NE
     (BinarySingleNaN.Fplus_naive s m e 
        (~~ s0) m0 e1 (Z.min e e1)) 
-    (Z.min e e1) false); simpl;auto.
-  by destruct s,s0;simpl in *; auto.
+    (Z.min e e1) false); simpl;auto;
+  by destruct s,s0;simpl in *; auto).
 Qed.
 
 
