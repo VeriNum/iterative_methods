@@ -664,12 +664,19 @@ rewrite Bminus_bplus_opp_equiv.
                         } rewrite H2. rewrite Rinv_r.
                         assert (( / (1 + default_rel ty) ^ n <= / 1)%Re ->
                                 (1 * / (1 + default_rel ty) ^ n <= 1)%Re).
-                        { nra. } apply H3. apply Rlt_le.  
-                        apply Rinv_lt_contravar. apply Rmult_lt_0_compat.
-                        nra. apply pow_lt. apply Rplus_lt_0_compat. nra.
-                        apply default_rel_gt_0. apply Rlt_pow_R1.
-                        
-admit.
+                        { nra. } apply H3. destruct n.
+                        *** simpl. nra.
+                        *** apply Rlt_le.  
+                            apply Rinv_lt_contravar. apply Rmult_lt_0_compat.
+                            nra. apply pow_lt. apply Rplus_lt_0_compat. nra.
+                            apply default_rel_gt_0. 
+                            apply Rlt_pow_R1.
+                            assert (forall x, (0 < x)%Re -> (1 < 1 + x)%Re).
+                            { intros. nra. } apply H4. apply default_rel_gt_0.
+                            lia.
+                        *** assert ((0 < 1 + default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+                            { nra. } apply H3. 
+                            apply Rplus_lt_0_compat. nra. apply default_rel_gt_0. 
                 +++ apply not_0_INR. lia.
                 +++ apply pow_nonzero . 
                     assert ((0 < 1 + default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
