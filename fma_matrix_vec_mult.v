@@ -438,15 +438,30 @@ Qed.
 
 
 Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
+  (forall (xy : ftype ty * ftype ty),
+    In xy
+      (combine 
+         (vec_to_list_float n.+1 v1)
+         (vec_to_list_float n.+1 v2)) ->
+    is_finite (fprec ty) (femax ty) xy.1 = true /\
+    is_finite (fprec ty) (femax ty) xy.2 = true /\ 
+      Rabs (FT2R (fst (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty) /\
+      Rabs (FT2R (snd (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty)) ->
   vec_inf_norm (FT2R_mat (v1 -f v2) - (FT2R_mat v1 - FT2R_mat v2)) <= 
   (vec_inf_norm (FT2R_mat v1) + vec_inf_norm (FT2R_mat v2)) * (default_rel ty) +
   (default_abs ty).
 Proof.
+intros Hfin.
 unfold vec_inf_norm.
 apply /RleP. apply bigmax_le; first by rewrite size_map size_enum_ord.
 intros. rewrite seq_equiv. 
 rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
 rewrite !mxE. rewrite -!RminusE -RmultE -!RplusE.
+specialize (Hfin ((v1 (inord i) ord0), (v2 (inord i) ord0))).
+assert (Hin: In (v1 (inord i) ord0, v2 (inord i) ord0)
+           (combine (vec_to_list_float n.+1 v1)
+              (vec_to_list_float n.+1 v2))).
+{ admit. } specialize (Hfin Hin).
 rewrite Bminus_bplus_opp_equiv.
 + assert ((FT2R (v1 (inord i) ord0) -  FT2R (v2 (inord i) ord0))%Re = 
           (FT2R (v1 (inord i) ord0) +  FT2R (BOPP ty (v2 (inord i) ord0)))%Re ).
@@ -487,24 +502,12 @@ rewrite Bminus_bplus_opp_equiv.
                                               | i0 <- enum 'I_n.+1] i).
                rewrite size_map size_enum_ord.
                by rewrite size_map size_enum_ord in H.
-    * 
-
-
-rewrite Rmult_plus_distr_r.
-    apply Rle_trans with 
-    
-
-    apply Rplus_le_compat.
-
-
-Search ((_ + _ ) * _ )%Re.
-  
-
-
-rewrite BPLUS_accurate'.
-
-
-
+    * assert (forall x y, (0 <= y)%Re -> (x <= x + y)%Re).
+      { intros. nra. } apply H1.
+      apply default_abs_ge_0.
++ apply Hfin.
++ rewrite is_finite_Bopp. apply Hfin.
++ admit.
 
 Admitted.
   
