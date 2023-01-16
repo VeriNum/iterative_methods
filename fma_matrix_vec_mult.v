@@ -436,6 +436,34 @@ apply Rmult_le_compat; try by apply Rabs_pos.
 Qed.
 
 
+Lemma Bplus_no_ov_is_finite : 
+   forall (t: type) 
+             x (FINx: Binary.is_finite (fprec t) (femax t) x = true) 
+             y (FINy: Binary.is_finite (fprec t) (femax t) y = true) 
+          (FIN: Bplus_no_overflow t (FT2R x) (FT2R y)), 
+          Binary.is_finite (fprec t) (femax t) (BPLUS t x y) = true.
+Proof.
+intros.
+pose proof (Binary.Bplus_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan t) 
+                      BinarySingleNaN.mode_NE x y FINx FINy ).
+change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
+cbv zeta in H.
+pose proof (
+   Raux.Rlt_bool_spec
+        (Rabs
+           (Generic_fmt.round Zaux.radix2
+              (SpecFloat.fexp (fprec t) (femax t))
+              (BinarySingleNaN.round_mode
+                 BinarySingleNaN.mode_NE) (FT2R x + FT2R y)))
+        (Raux.bpow Zaux.radix2 (femax t))).
+destruct H0.
+{ destruct H as ( _ & Hyp & _).
+fold (@BPLUS _ t) in Hyp; auto. }
+red in FIN. unfold rounded in FIN.
+Lra.lra.
+Qed.
+
+
 
 Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty),
@@ -473,10 +501,10 @@ assert (Hin: In (v1 (inord i) ord0, v2 (inord i) ord0)
     apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H.
     apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H.
     by rewrite !rev_length !length_veclist.
- }
-
-
- specialize (Hfin Hin).
+ } rewrite H0. apply nth_In. rewrite combine_length.
+ rewrite !rev_length !length_veclist Nat.min_id.
+ rewrite size_map size_enum_ord in H. by apply /ssrnat.ltP.
+} specialize (Hfin Hin).
 rewrite Bminus_bplus_opp_equiv.
 + assert ((FT2R (v1 (inord i) ord0) -  FT2R (v2 (inord i) ord0))%Re = 
           (FT2R (v1 (inord i) ord0) +  FT2R (BOPP ty (v2 (inord i) ord0)))%Re ).
