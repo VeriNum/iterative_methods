@@ -461,7 +461,22 @@ specialize (Hfin ((v1 (inord i) ord0), (v2 (inord i) ord0))).
 assert (Hin: In (v1 (inord i) ord0, v2 (inord i) ord0)
            (combine (vec_to_list_float n.+1 v1)
               (vec_to_list_float n.+1 v2))).
-{ admit. } specialize (Hfin Hin).
+{ apply in_rev. rewrite -combine_rev; last by rewrite !length_veclist.
+  assert ((v1 (inord i) ord0, v2 (inord i) ord0) = 
+           nth i (combine (rev (vec_to_list_float n.+1 v1))
+                    (rev (vec_to_list_float n.+1 v2))) (Zconst ty 0, Zconst ty 0)).
+  { rewrite combine_nth. rewrite !rev_nth !length_veclist.
+    assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat).
+    { lia. } rewrite H0. rewrite !nth_vec_to_list_float; try by [].
+    by rewrite size_map size_enum_ord in H.
+    by rewrite size_map size_enum_ord in H.
+    apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H.
+    apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H.
+    by rewrite !rev_length !length_veclist.
+ }
+
+
+ specialize (Hfin Hin).
 rewrite Bminus_bplus_opp_equiv.
 + assert ((FT2R (v1 (inord i) ord0) -  FT2R (v2 (inord i) ord0))%Re = 
           (FT2R (v1 (inord i) ord0) +  FT2R (BOPP ty (v2 (inord i) ord0)))%Re ).
