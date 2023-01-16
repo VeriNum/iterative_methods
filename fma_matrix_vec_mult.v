@@ -472,8 +472,8 @@ Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
          (vec_to_list_float n.+1 v2)) ->
     is_finite (fprec ty) (femax ty) xy.1 = true /\
     is_finite (fprec ty) (femax ty) xy.2 = true /\ 
-      Rabs (FT2R (fst (xy))) <= F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) /\
-      Rabs (FT2R (snd (xy))) <= F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1)) ->
+    (Rabs (FT2R (fst (xy))) <= F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re /\
+     (Rabs (FT2R (snd (xy))) <= F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re) ->
   vec_inf_norm (FT2R_mat (v1 -f v2) - (FT2R_mat v1 - FT2R_mat v2)) <= 
   (vec_inf_norm (FT2R_mat v1) + vec_inf_norm (FT2R_mat v2)) * (default_rel ty) +
   (default_abs ty).
@@ -566,9 +566,21 @@ rewrite Bminus_bplus_opp_equiv.
       eapply Rle_lt_trans.
       ++ apply Rplus_le_compat_r. apply Rmult_le_compat_r.
           apply Rabs_pos. apply Rabs_triang.
-      ++ 
-
-
+      ++ apply Rle_lt_trans with 
+         ((2 * (F' ty / (INR n.+1 * (1 + default_rel ty) ^ n.+1))) *
+          (1 + default_rel ty) + default_abs ty)%Re.
+         -- apply Rplus_le_compat.
+            ** apply Rmult_le_compat.
+               +++ apply Rplus_le_le_0_compat; apply Rabs_pos.
+               +++ apply Rabs_pos.
+               +++ rewrite double. apply Rplus_le_compat. 
+                   --- apply Ha1.
+                   --- unfold FT2R in *. rewrite B2R_Bopp. rewrite Rabs_Ropp.
+                       apply Ha2.
+               +++ apply Rle_trans with (Rabs 1 + Rabs d)%Re.
+                   apply Rabs_triang. rewrite Rabs_R1. by apply Rplus_le_compat_l.
+            ** apply Hde.
+         --  
 
 
     unfold Generic_fmt.round . simpl; auto.
