@@ -422,6 +422,29 @@ destruct (eqb s (~~ s0)); simpl;auto.
 *)
 Admitted.
 
+(*
+Lemma BPLUS_accurate' {NAN: Nans} (t : type) :
+  forall x y 
+  (FIN: Binary.is_finite _ _ (BPLUS t x y) = true), 
+  exists delta, 
+   Rabs delta <= default_rel t /\
+   (FT2R (BPLUS t x y ) = (FT2R x + FT2R y) * (1+delta))%R.
+*)
+
+Lemma BPLUS_le_rel
+  {NAN: Nans} (t : type) :
+  forall x y 
+  (FIN: Binary.is_finite _ _ (BPLUS t x y) = true),
+  Rabs (FT2R (BPLUS t x y )) <= (Rabs (FT2R x) + Rabs (FT2R y)) * (1+ default_rel t).
+Proof.
+intros.
+pose proof (BPLUS_accurate' t x y FIN).
+destruct H as [delta H].
+destruct H as [Hd Heq].
+rewrite Heq.
+apply Rabs_mult.
+  
+
 
 Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   vec_inf_norm (FT2R_mat (v1 -f v2) - (FT2R_mat v1 - FT2R_mat v2)) <= 
