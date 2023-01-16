@@ -623,7 +623,10 @@ rewrite Bminus_bplus_opp_equiv.
                apply Rmult_lt_compat. nra. apply bpow_ge_0. nra.
                rewrite Z.add_comm. rewrite Rmult_comm.
                rewrite -bpow_plus. apply bpow_lt. rewrite Z.add_shuffle0.
-               
+               apply Z.add_lt_mono_r.
+               Search (_ + _  < _ + _)%Z.
+               apply Z.lt_sub_lt_add. simpl.
+               unfold Z.sub. rewrite Z.opp_involutive. 
 
 
 
@@ -719,4 +722,3 @@ Admitted.
 
 
 End WITHNANS.
-
