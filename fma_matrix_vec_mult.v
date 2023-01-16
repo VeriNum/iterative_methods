@@ -472,8 +472,8 @@ Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
          (vec_to_list_float n.+1 v2)) ->
     is_finite (fprec ty) (femax ty) xy.1 = true /\
     is_finite (fprec ty) (femax ty) xy.2 = true /\ 
-      Rabs (FT2R (fst (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty) /\
-      Rabs (FT2R (snd (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty)) ->
+      Rabs (FT2R (fst (xy))) <= F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) /\
+      Rabs (FT2R (snd (xy))) <= F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1)) ->
   vec_inf_norm (FT2R_mat (v1 -f v2) - (FT2R_mat v1 - FT2R_mat v2)) <= 
   (vec_inf_norm (FT2R_mat v1) + vec_inf_norm (FT2R_mat v2)) * (default_rel ty) +
   (default_abs ty).
@@ -556,7 +556,7 @@ rewrite Bminus_bplus_opp_equiv.
     pose proof (generic_round_property ty (FT2R (v1 (inord i) 0) +  FT2R (BOPP ty (v2 (inord i) 0)))).
     destruct H0 as [d [e [Hpr [Hdf [Hde H0]]]]].
     rewrite H0.
-    
+    destruct Hfin as [Hf1 [Hf2 [Ha1 Ha2]]].
 
 
 
