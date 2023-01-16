@@ -462,11 +462,31 @@ rewrite Bminus_bplus_opp_equiv.
         bigmaxr 0%Re
           [seq Rabs (FT2R_mat v2 i0 ord0)
              | i0 <- enum 'I_n.+1]) * default_rel ty)%Re.
-    *
-
-
-
- admit.
+    * apply Rmult_le_compat_r.
+      ++ apply default_rel_ge_0.
+      ++ apply Rplus_le_compat.
+         -- apply Rle_trans with 
+            [seq Rabs (FT2R_mat v1 i0 ord0)
+                 | i0 <- enum 'I_n.+1]`_i.
+            ** rewrite seq_equiv. rewrite nth_mkseq;
+               last by rewrite size_map size_enum_ord in H.
+               rewrite !mxE. nra.
+            ** apply /RleP. 
+               apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v1 i0 ord0)
+                                              | i0 <- enum 'I_n.+1] i).
+               rewrite size_map size_enum_ord.
+               by rewrite size_map size_enum_ord in H.
+         -- apply Rle_trans with 
+            [seq Rabs (FT2R_mat v2 i0 ord0)
+                 | i0 <- enum 'I_n.+1]`_i.
+            ** rewrite seq_equiv. rewrite nth_mkseq;
+               last by rewrite size_map size_enum_ord in H.
+               rewrite !mxE. unfold FT2R. rewrite B2R_Bopp Rabs_Ropp. nra.
+            ** apply /RleP. 
+               apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v2 i0 ord0)
+                                              | i0 <- enum 'I_n.+1] i).
+               rewrite size_map size_enum_ord.
+               by rewrite size_map size_enum_ord in H.
     * 
 
 
