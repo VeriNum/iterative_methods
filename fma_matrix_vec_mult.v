@@ -482,20 +482,10 @@ apply Rmult_le_pos.
    apply Rlt_le. apply Rinv_lt_contravar.
    - apply Rmult_lt_0_compat. nra. 
      apply bpow_gt_0.
-   - 
-   Search "bpow". 
-      Search (- - _ = _)%Z.
-
-
-auto.
-     Search (- (_ + _) = _)%Z.
-   Search "bpow".
-  
-   apply bpow_le.
-
-
-   Search (bpow _ <= 1)%Re.
-   apply bpow_le_1.
+   - assert (1%Re = bpow Zaux.radix2 0).
+     { by unfold bpow. } rewrite H1.
+     apply bpow_lt. apply Z.lt_0_sub, fprec_gt_one.
+Qed.
 
 Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty),
@@ -638,7 +628,7 @@ rewrite Bminus_bplus_opp_equiv.
                              ((F' ty * / INR n.+1) * (/ (1 + default_rel ty) ^ n.+1 * (1 + default_rel ty)))%Re).
                     { nra. } rewrite H2. clear H2.
                     apply Rmult_le_compat.
-                    --- apply Rmult_le_pos.  admit.
+                    --- apply Rmult_le_pos.  apply F_p_ge_0.
                         apply Rlt_le. apply Rinv_0_lt_compat. apply lt_0_INR.
                         lia.
                     --- apply Rmult_le_pos. apply Rlt_le. apply Rinv_0_lt_compat.
@@ -647,7 +637,7 @@ rewrite Bminus_bplus_opp_equiv.
                     --- replace (F' ty) with (F' ty * 1)%Re by nra.
                         replace (F' ty * 1 * / INR n.+1)%Re with (F' ty * / INR n.+1)%Re by nra.
                         apply Rmult_le_compat_l. 
-                        *** admit.
+                        *** apply F_p_ge_0.
                         *** replace 1%Re with (/1)%Re by nra.
                             assert ((0 <= n)%nat ). { by []. }
                             rewrite leq_eqVlt in H2.
@@ -659,7 +649,27 @@ rewrite Bminus_bplus_opp_equiv.
                             ++++ apply /Rlt_le. apply  Rinv_lt_contravar.
                                  apply Rmult_lt_0_compat. nra. apply lt_0_INR. lia.
                                  apply lt_1_INR. apply /ssrnat.ltP. by []. 
-                    --- admit.
+                    --- simpl.
+                        assert ((/ ((1 + default_rel ty) * (1 + default_rel ty) ^ n) *
+                                    (1 + default_rel ty))%Re = 
+                                (((1 + default_rel ty) * / (1 + default_rel ty)) * /(1 + default_rel ty) ^ n)%Re).
+                        { rewrite Rinv_mult_distr. nra.
+                          assert ((0 < 1 + default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+                          { nra. } apply H2. 
+                          apply Rplus_lt_0_compat. nra. apply default_rel_gt_0. 
+                          apply pow_nonzero.
+                          assert ((0 < 1 + default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+                          { nra. } apply H2. 
+                          apply Rplus_lt_0_compat. nra. apply default_rel_gt_0. 
+                        } rewrite H2. rewrite Rinv_r.
+                        assert (( / (1 + default_rel ty) ^ n <= / 1)%Re ->
+                                (1 * / (1 + default_rel ty) ^ n <= 1)%Re).
+                        { nra. } apply H3. apply Rlt_le.  
+                        apply Rinv_lt_contravar. apply Rmult_lt_0_compat.
+                        nra. apply pow_lt. apply Rplus_lt_0_compat. nra.
+                        apply default_rel_gt_0. apply Rlt_pow_R1.
+                        
+admit.
                 +++ apply not_0_INR. lia.
                 +++ apply pow_nonzero . 
                     assert ((0 < 1 + default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
