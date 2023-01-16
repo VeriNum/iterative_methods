@@ -489,6 +489,159 @@ Qed.
 
 Require Import Coq.ZArith.BinInt.
 
+
+Lemma finite_bminus {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1) i:
+  (forall (xy : ftype ty * ftype ty),
+    In xy
+      (combine 
+         (vec_to_list_float n.+1 v1)
+         (vec_to_list_float n.+1 v2)) ->
+    is_finite (fprec ty) (femax ty) xy.1 = true /\
+    is_finite (fprec ty) (femax ty) xy.2 = true /\ 
+    (Rabs (FT2R (fst (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re /\
+     (Rabs (FT2R (snd (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re) ->
+  In (v1 (inord i) ord0, v2 (inord i) ord0)
+        (combine (vec_to_list_float n.+1 v1)
+           (vec_to_list_float n.+1 v2)) ->
+  is_finite (fprec ty) (femax ty)
+  (BPLUS ty (v1 (inord i) 0) (BOPP ty (v2 (inord i) 0))) = true.
+Proof.
+intros Hfin Hin.
+specialize (Hfin (v1 (inord i) ord0, (v2 (inord i) 0)) Hin).
+apply Bplus_no_ov_is_finite .
+  - apply Hfin.
+  - rewrite is_finite_Bopp. apply Hfin.
+  - unfold Bplus_no_overflow. 
+    pose proof (generic_round_property ty (FT2R (v1 (inord i) 0) +  FT2R (BOPP ty (v2 (inord i) 0)))).
+    destruct H as [d [e [Hpr [Hdf [Hde H]]]]].
+    rewrite H.
+    destruct Hfin as [Hf1 [Hf2 [Ha1 Ha2]]].
+    apply Rle_lt_trans with 
+    (Rabs ((FT2R (v1 (inord i) ord0) +
+              FT2R (BOPP ty (v2 (inord i) ord0))) *  (1 + d)) + 
+    (Rabs e))%Re.
+    * apply Rabs_triang.
+    * rewrite Rabs_mult.
+      eapply Rle_lt_trans.
+      ++ apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+          apply Rabs_pos. apply Rabs_triang.
+      ++ apply Rle_lt_trans with 
+         ((2 * ((F' ty/2) / (INR n.+1 * (1 + default_rel ty) ^ n.+1))) *
+          (1 + default_rel ty) + default_abs ty)%Re.
+         -- apply Rplus_le_compat.
+            ** apply Rmult_le_compat.
+               +++ apply Rplus_le_le_0_compat; apply Rabs_pos.
+               +++ apply Rabs_pos.
+               +++ rewrite double. apply Rplus_le_compat. 
+                   --- apply Ha1.
+                   --- unfold FT2R in *. rewrite B2R_Bopp. rewrite Rabs_Ropp.
+                       apply Ha2.
+               +++ apply Rle_trans with (Rabs 1 + Rabs d)%Re.
+                   apply Rabs_triang. rewrite Rabs_R1. by apply Rplus_le_compat_l.
+            ** apply Hde.
+         --  assert ((F' ty + default_abs ty < bpow Zaux.radix2 (femax ty))%Re)%Re.
+             { unfold F'. unfold fmax.
+               assert ((bpow Zaux.radix2 (femax ty) *
+                          (1 - 2 * default_rel ty) + default_abs ty)%Re = 
+                        (bpow Zaux.radix2 (femax ty) - 
+                          (2 * bpow Zaux.radix2 (femax ty) * default_rel ty - default_abs ty))%Re).
+               { nra. } rewrite H0.
+               assert (forall x y:R, (0 < y)%Re -> (x - y < x)%Re).
+               { intros. nra. } apply H1.
+               apply Rgt_lt. apply Rgt_minus. apply Rlt_gt.
+               unfold default_abs, default_rel.
+               assert ((2 * bpow Zaux.radix2 (femax ty) *
+                          (/ 2 * bpow Zaux.radix2 (- fprec ty + 1)))%Re = 
+                       (1 * (bpow Zaux.radix2 (femax ty) * bpow Zaux.radix2 (- fprec ty + 1)))%Re).
+               { nra. } rewrite H2. clear H2.
+               apply Rmult_lt_compat. nra. apply bpow_ge_0. nra.
+               rewrite Z.add_comm. rewrite Rmult_comm.
+               rewrite -bpow_plus. apply bpow_lt. rewrite Z.add_shuffle0.
+               apply Z.add_lt_mono_r.
+               Search (_ + _  < _ + _)%Z.
+               apply Z.lt_sub_lt_add. simpl.
+               unfold Z.sub. rewrite Z.opp_involutive. 
+               Search (_ + _ = _)%Z.
+               assert (2%Z = (1+1)%Z). { by simpl. }
+               rewrite H2.  
+               Search (_ + _  < _ + _)%Z.
+               apply Z.add_lt_mono;
+               apply Z.lt_trans with (fprec ty); try apply fprec_gt_one;
+               try apply fprec_lt_femax.
+             } apply Rle_lt_trans with (F' ty + default_abs ty)%Re.
+             ** apply Rplus_le_compat_r.
+                assert ((2 *
+                           (F' ty / 2 /
+                            (INR n.+1 * (1 + default_rel ty) ^ n.+1)) *
+                           (1 + default_rel ty))%Re = 
+                        ((F' ty * / (INR n.+1 * (1 + default_rel ty) ^ n.+1)) * (1 + default_rel ty))%Re).
+                { nra. } rewrite H1. clear H1.
+                rewrite Rinv_mult_distr.
+                +++ replace (F' ty) with (F' ty * 1)%Re by nra.
+                    assert (((F' ty * 1) *
+                               (/ INR n.+1 * / (1 + default_rel ty) ^ n.+1) *
+                               (1 + default_rel ty))%Re = 
+                             ((F' ty * / INR n.+1) * (/ (1 + default_rel ty) ^ n.+1 * (1 + default_rel ty)))%Re).
+                    { nra. } rewrite H1. clear H1.
+                    apply Rmult_le_compat.
+                    --- apply Rmult_le_pos.  apply F_p_ge_0.
+                        apply Rlt_le. apply Rinv_0_lt_compat. apply lt_0_INR.
+                        lia.
+                    --- apply Rmult_le_pos. apply Rlt_le. apply Rinv_0_lt_compat.
+                        apply pow_lt. apply Rplus_lt_0_compat. nra. apply default_rel_gt_0. 
+                        apply Rlt_le. apply Rplus_lt_0_compat. nra. apply default_rel_gt_0. 
+                    --- replace (F' ty) with (F' ty * 1)%Re by nra.
+                        replace (F' ty * 1 * / INR n.+1)%Re with (F' ty * / INR n.+1)%Re by nra.
+                        apply Rmult_le_compat_l. 
+                        *** apply F_p_ge_0.
+                        *** replace 1%Re with (/1)%Re by nra.
+                            assert ((0 <= n)%nat ). { by []. }
+                            rewrite leq_eqVlt in H1.
+                            assert ((0%nat == n) \/ (0 < n)%nat).
+                            { by apply /orP. } destruct H2.
+                            ++++ rewrite eq_sym in H2. 
+                                 assert (n = 0%nat). { by apply /eqP. }
+                                 rewrite H3. simpl;nra. 
+                            ++++ apply /Rlt_le. apply  Rinv_lt_contravar.
+                                 apply Rmult_lt_0_compat. nra. apply lt_0_INR. lia.
+                                 apply lt_1_INR. apply /ssrnat.ltP. by []. 
+                    --- simpl.
+                        assert ((/ ((1 + default_rel ty) * (1 + default_rel ty) ^ n) *
+                                    (1 + default_rel ty))%Re = 
+                                (((1 + default_rel ty) * / (1 + default_rel ty)) * /(1 + default_rel ty) ^ n)%Re).
+                        { rewrite Rinv_mult_distr. nra.
+                          assert ((0 < 1 + default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+                          { nra. } apply H1. 
+                          apply Rplus_lt_0_compat. nra. apply default_rel_gt_0. 
+                          apply pow_nonzero.
+                          assert ((0 < 1 + default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+                          { nra. } apply H1. 
+                          apply Rplus_lt_0_compat. nra. apply default_rel_gt_0. 
+                        } rewrite H1. rewrite Rinv_r.
+                        assert (( / (1 + default_rel ty) ^ n <= / 1)%Re ->
+                                (1 * / (1 + default_rel ty) ^ n <= 1)%Re).
+                        { nra. } apply H2. destruct n.
+                        *** simpl. nra.
+                        *** apply Rlt_le.  
+                            apply Rinv_lt_contravar. apply Rmult_lt_0_compat.
+                            nra. apply pow_lt. apply Rplus_lt_0_compat. nra.
+                            apply default_rel_gt_0. 
+                            apply Rlt_pow_R1.
+                            assert (forall x, (0 < x)%Re -> (1 < 1 + x)%Re).
+                            { intros. nra. } apply H3. apply default_rel_gt_0.
+                            lia.
+                        *** assert ((0 < 1 + default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+                            { nra. } apply H2. 
+                            apply Rplus_lt_0_compat. nra. apply default_rel_gt_0. 
+                +++ apply not_0_INR. lia.
+                +++ apply pow_nonzero . 
+                    assert ((0 < 1 + default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+                    { nra. } apply H1. 
+                    apply Rplus_lt_0_compat. nra. apply default_rel_gt_0. 
+             ** apply H0.
+Qed.
+
+
 Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty),
     In xy
