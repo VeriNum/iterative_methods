@@ -487,6 +487,8 @@ apply Rmult_le_pos.
      apply bpow_lt. apply Z.lt_0_sub, fprec_gt_one.
 Qed.
 
+Require Import Coq.ZArith.BinInt.
+
 Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty),
     In xy
@@ -619,8 +621,19 @@ rewrite Bminus_bplus_opp_equiv.
                        (1 * (bpow Zaux.radix2 (femax ty) * bpow Zaux.radix2 (- fprec ty + 1)))%Re).
                { nra. } rewrite H3. clear H3.
                apply Rmult_lt_compat. nra. apply bpow_ge_0. nra.
+               rewrite Z.add_comm. rewrite Rmult_comm.
+               rewrite -bpow_plus. apply bpow_lt. rewrite Z.add_shuffle0.
+               
+
+
+
+Search (_ + _ + _ = _)%Z.
+
                rewrite -bpow_plus. apply bpow_lt. 
                
+
+               assert ((femax ty + (- fprec ty + 1))%Z = (1 + femax ty - fprec ty)%Z).
+               { Search (_ - _ + _ = _)%Z.
 
 
 
