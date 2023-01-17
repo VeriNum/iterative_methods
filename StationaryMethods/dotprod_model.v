@@ -1,5 +1,6 @@
 Require Import vcfloat.VCFloat.
 Require Import List.
+Import ListNotations.
 
 Require Import common op_defs list_lemmas.
 
@@ -112,7 +113,6 @@ induction (map Rabsp (map FR2 (rev (combine v1 v2)))).
 destruct a; simpl. apply R_dot_prod_rel_cons; auto.
 Qed.
 
-Import ListNotations.
 
 Lemma R_dot_prod_rel_single rs a:
 R_dot_prod_rel [a] rs -> rs = (fst a * snd a).
