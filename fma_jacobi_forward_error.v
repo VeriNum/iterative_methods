@@ -57,20 +57,30 @@ Definition diag_matrix_vec_mult_R {n:nat} (v1 v2 : 'cV[R]_n.+1)
   \col_i ((nth (n.+1.-1 -i) (vec_to_list_real n.+1 v1) 0%Re) * 
           (nth (n.+1.-1 -i) (vec_to_list_real n.+1 v2) 0%Re)).
 
-
+Lemma nth_vec_to_list_real_sub {n:nat} i m (v1 v2 :'cV[R]_n.+1) d:
+  (i < m)%nat ->
+  nth (m.-1 -i) (@vec_to_list_real n m (v1 - v2)) d = 
+  nth (m.-1 -i) (@vec_to_list_real n m v1) d - 
+  nth (m.-1 -i) (@vec_to_list_real n m v2) d.
+Proof.
+intros.
+induction m.
++ by rewrite ltn0 in H.
++ simpl. rewrite -subn_gt0 in IHm. rewrite -predn_sub in IHm.
+  destruct (m-i)%nat.
+  - by rewrite !mxE /=.
+  - simpl in IHm. by apply IHm.
+Qed.
 
 Lemma diag_matrix_vec_mult_diff {n:nat} (v1 v2 v3 : 'cV[R]_n.+1):
   diag_matrix_vec_mult_R v1 v2 - diag_matrix_vec_mult_R v1 v3 = 
   diag_matrix_vec_mult_R v1 (v2 - v3).
 Proof.
 apply /matrixP. unfold eqrel. intros. rewrite !mxE.
-case: (n - x)%nat .
-+ rewrite !mxE. rewrite -!RmultE -!RminusE. field_simplify. auto.
-+ intros. rewrite !mxE.
-
-
-
-
+rewrite nth_vec_to_list_real_sub.
++ rewrite -!RmultE -!RminusE. field_simplify. auto.
++ apply ltn_ord.
+Qed.
 
 
 
