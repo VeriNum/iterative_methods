@@ -94,7 +94,18 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
       Rabs (FT2R (fst (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty) /\
       Rabs (FT2R (snd (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty)) ->
   
-  exists rho d_mag,
+   let R := vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real) in
+   let delta := default_rel ty in
+   let rho := ((g ty n.+1 * (1+ delta) * (1+ g ty n.+1) + delta + delta * g ty n.+1 + g ty n.+1) * R)%Re in
+   let d_mag := ( g ty n.+1 * (1 + delta) * (1 + g ty n.+1) * R * vec_inf_norm x +
+                  (delta + delta * g ty n.+1 + g ty n.+1) * R * vec_inf_norm x +
+                  g ty n.+1 * (1 + delta) * vec_inf_norm (A1_diag A_real) * vec_inf_norm b_real  +
+                  g ty n.+1 * g1 ty n.+1 (n.+1 - 1)%nat * (1 + delta) * vec_inf_norm (A1_diag A_real) +
+                  g1 ty n.+1 (n.+1 - 1)%nat * (1+ delta) * vec_inf_norm (A1_diag A_real) +
+                  delta * vec_inf_norm (A1_diag A_real) * vec_inf_norm b_real)%Re in
+
+  (rho < 1)%Re ->
+  (A = A1_inv_J A +f A2_J A) ->
   forall x0: 'cV[ftype ty]_n.+1, 
   forall k:nat,
   (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re.
