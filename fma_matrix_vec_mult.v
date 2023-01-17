@@ -58,11 +58,6 @@ Definition FT2R_mat {m n: nat} {ty} (A : 'M[ftype ty]_(m.+1, n.+1)) :
 
 
 
-Print vec_to_list_float.
-
-Lemma zero_eq {ty}:
-  neg_zero = Zconst ty 0.
-Admitted.
 
 Lemma dotprod_cons {t: type} (v1 v2: list (ftype t)) (x y : ftype t): 
   length v1 = length v2 ->
@@ -85,7 +80,7 @@ Lemma fma_dot_prod_rel_holds {n:nat} {ty} m i
    dotprod_r l1 l2).
 Proof.
 induction m.
-+ simpl. unfold dotprod_r. simpl. rewrite -zero_eq. apply fma_dot_prod_rel_nil.
++ simpl. unfold dotprod_r. simpl. apply fma_dot_prod_rel_nil.
 + simpl. rewrite !mxE. 
   assert ( (dotprod_r
              (A (inord i) (inord m)
