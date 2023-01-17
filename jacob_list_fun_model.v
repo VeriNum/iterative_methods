@@ -35,14 +35,19 @@ Definition jacobi_iter {t: type} (A1: diagmatrix t) (A2: matrix t) (b: vector t)
 Definition jacobi_residual {t: type} (A1: diagmatrix t) (A2: matrix t) (b: vector t) (x: vector t) : vector t :=
    diagmatrix_vector_mult A1 (vector_sub (jacobi_iter A1 A2 b x) x).
 
+
+Definition going {t} (s acc: ftype t) := 
+   andb (Binary.is_finite (fprec t) (femax t) s) (BCMP _ Gt true s acc).
+
+
 Fixpoint iter_stop {t} {A} (norm2: A -> ftype t) (residual: A -> A) (f : A -> A) (n:nat) (acc: ftype t) (x:A) :=
  let y := f x in 
  let s := norm2 (residual x) in 
  match n with
- | O => (s, y)
- | S n' => if Binary.is_finite _ _ s && BCMP t Gt true s acc 
+ | O => (s, x)
+ | S n' => if going s acc
                 then iter_stop norm2 residual f n' acc y
-                else (s,y)
+                else (s,x)
   end.
 
 Definition jacobi_n {t: type} (A: matrix t) (b: vector t) (x: vector t) (n: nat) : vector t :=
@@ -62,6 +67,32 @@ Definition old_jacobi_iter {t: type} x0 b (A1: diagmatrix t) (A2: matrix t) : ve
   let S_J :=  opp_matrix (diagmatrix_matrix_mult A1 A2) in
   let f_J := diagmatrix_vector_mult A1 b in
   vector_add (matrix_vector_mult S_J x0) f_J.
+
+Definition jacobi_iteration_bound {t: type}
+  (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
+  (* some property of A,b,accuracy holds such that 
+    jacobi_n will indeed converge within k iterations to this accuracy, 
+   without ever overflowing *)
+  False.  (* need to fill this in! *)
+
+Lemma jacobi_iteration_bound_correct {t: type} :
+ forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
+   jacobi_iteration_bound A b acc k ->
+   let acc2 := BMULT t acc acc in
+   let x0 := (repeat  (Zconst t 0) (length b)) in
+   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+   finite acc2 /\ 
+   exists j,
+    (j <= k)%nat /\
+    let y :=  jacobi_n A b x0 j in
+    let r2 := norm2 (resid y) in
+    finite acc2 /\ 
+    (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
+    BCMP t Gt true (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
+Proof.
+intros.
+contradiction H.
+Qed.
 
 End WITH_NANS.
 

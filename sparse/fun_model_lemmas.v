@@ -168,9 +168,6 @@ rewrite !Zlength_correct, seq_length.
 auto.
 Qed.
 
-Definition stop {t} (s acc: ftype t) := 
-   andb (Binary.is_finite (fprec t) (femax t) s) (BCMP _ Gt true s acc).
-
 Add Parametric Morphism  {NAN: Nans}{t: type} : (@dist2 _ t)
   with signature Forall2 feq ==> Forall2 feq ==> feq
   as dist2_mor.
@@ -180,9 +177,9 @@ unfold dist2.
 rewrite H, H0. auto.
 Qed.
 
-Add Parametric Morphism {t} : (@stop t)
+Add Parametric Morphism {t} : (@going t)
   with signature feq ==> strict_feq ==> eq
-  as stop_mor.
+  as going_mor.
 Proof.
  intros.
 destruct x,y; inv H; simpl; auto.
@@ -195,8 +192,8 @@ Qed.
 
 Ltac iter_stop_S :=
    change (@iter_stop ?t _  ?norm2 ?res ?f (S ?n) ?acc ?x) with
-        (if stop (norm2 (res x)) acc
-           then iter_stop norm2 res f n acc (f x) else (norm2 (res x), (f x))).
+        (if going (norm2 (res x)) acc
+           then iter_stop norm2 res f n acc (f x) else (norm2 (res x), x)).
 
 Lemma iter_stop_congr {t}:
  forall (norm2: vector t -> ftype t) residual f acc (FINacc: finite acc) n (z z': vector t),
@@ -208,9 +205,10 @@ Lemma iter_stop_congr {t}:
     (snd (iter_stop norm2 residual f n acc z')).
 Proof.
 induction n; simpl; intros.
-apply H1;auto.
+auto.
 assert (feq (norm2 (residual z)) (norm2 (residual z'))).
 apply H; apply H0; auto.
+unfold going.
 replace  (Binary.is_finite (fprec t) (femax t) (norm2 (residual z')))
   with (Binary.is_finite (fprec t) (femax t) (norm2 (residual z)))
   by (rewrite H3; auto).
@@ -224,69 +222,57 @@ destruct (BCMP _ _ _ _ _).
 apply IHn; auto.
 simpl; auto.
 simpl.
-apply H1; auto.
+auto.
 Qed.
 
 Fixpoint iter_stop_n {t} {A} (norm2: A -> ftype t) (residual: A -> A) (f : A -> A) (n: nat) (acc: ftype t) (x: A) :=
    match n with
  | O => Some x
- | S n' => match iter_stop_n norm2 residual f n' acc x
-                  with Some y => 
-                         let s := norm2 (residual y) in
-                          if (Binary.is_finite _ _ s && BCMP t Gt true s acc )%bool
-                          then Some (f y)
-                          else None
-                 | None => None
-               end
-  end.
-
-Fixpoint iter_stop_n_alt {t} {A} (norm2: A -> ftype t) (residual: A -> A) (f : A -> A) (n: nat) (acc: ftype t) (x: A) :=
-   match n with
- | O => Some x
- | S n' => let s := norm2 (residual x) in
-                if (Binary.is_finite _ _ s && BCMP t Gt true s acc )%bool
-                then iter_stop_n_alt norm2 residual f n' acc (f x)
+ | S n' => if going (norm2 (residual x)) acc
+                then iter_stop_n norm2 residual f n' acc (f x)
                 else None
   end.
 
-Lemma iter_stop_n_eq_alt: @iter_stop_n = @iter_stop_n_alt.
+Lemma iter_stop_n_S:
+  forall {t}{A} (norm2: A -> ftype t) (resid f: A -> A) (n: nat) 
+            (acc: ftype t) x v,
+  iter_stop_n norm2 resid f n acc x = Some v ->
+  going (norm2 (resid v)) acc = true ->
+  iter_stop_n norm2 resid f (S n) acc x = Some (f v).
 Proof.
-extensionality t A.
-extensionality norm2 residual f.
-extensionality n acc x.
-revert x; induction n; intros; simpl; auto.
-rewrite IHn; clear IHn.
-revert x; induction n; intros;simpl.
-auto.
-destruct (andb _ _) eqn:?H; auto.
+intros.
+revert x v H H0; induction n; simpl; intros.
+inv H. rewrite H0. auto.
+destruct (going (norm2 (resid x)) acc) eqn:J.
+apply IHn in H; auto.
+inv H.
 Qed.
+
 
 Lemma iter_stop_n_lem1:
   forall t A norm2 (residual: A -> A) (f: A->A) (acc: ftype t) k n x y, 
    iter_stop_n norm2 residual f n acc x = Some y ->
-   (Binary.is_finite _ _ (norm2 (residual y)) && BCMP t Gt true (norm2 (residual y)) acc)%bool = false ->
-   iter_stop norm2 residual f (n+k) acc x = (norm2 (residual y), f y).
+   going (norm2 (residual y)) acc = false ->
+   iter_stop norm2 residual f (n+k) acc x = (norm2 (residual y), y).
 Proof.
-rewrite iter_stop_n_eq_alt.
 induction n; simpl; intros; auto.
 inv H; auto.
-destruct k; auto. simpl. rewrite H0. auto.
-destruct (andb _ _) eqn:J in H; try discriminate.
-rewrite J.
+destruct k; auto. simpl. fold (going (norm2 (residual y)) acc).  rewrite H0. auto.
+ fold (going (norm2 (residual x)) acc). 
+destruct (going (norm2 (residual x)) acc) eqn:J; try discriminate.
 apply IHn; auto.
 Qed.  
 
 Lemma iter_stop_n_lem2: 
   forall t A norm2 residual (f: A->A) (acc: ftype t) n x y, 
    iter_stop_n norm2 residual f n acc x = Some y ->
-   (Binary.is_finite _ _ (norm2 (residual y)) && BCMP t Gt true (norm2 (residual y)) acc)%bool = true ->
-   iter_stop norm2 residual f n acc x = (norm2 (residual y), f y).
+   going (norm2 (residual y)) acc = true ->
+   iter_stop norm2 residual f n acc x = (norm2 (residual y), y).
 Proof.
-rewrite iter_stop_n_eq_alt.
 induction n; simpl; intros; auto.
 inv H; auto.
-destruct (andb _ _) eqn:J in H; try discriminate.
-rewrite J.
+fold (going (norm2 (residual x)) acc). 
+destruct (going (norm2 (residual x)) acc) eqn:J; try discriminate.
 apply IHn; auto.
 Qed.  
 
@@ -302,10 +288,10 @@ Lemma iter_stop_n_Zlength:
     Zlength v = N.
 Proof.
 intros.
-rewrite iter_stop_n_eq_alt in H1.
 revert x H H0 H1; induction n; simpl; intros.
 inv H1; auto.
-destruct (andb _ _) eqn:?H in H1; try discriminate.
+destruct (going _ _) eqn:?H in H1; try discriminate.
+unfold going in H2.
 rewrite andb_true_iff in H2. destruct H2.
 apply finite_is_finite in H2.
 apply finite_norm2_e in H2.
@@ -372,4 +358,131 @@ rewrite <- Zmatrix_rows_nat. lia.
 Qed.
 
 
+Local Open Scope nat.
+
+Lemma exists_nat_dec:
+  forall (P: nat -> Prop),
+  (forall n, Decidable.decidable (P n)) ->
+   forall n, Decidable.decidable (exists k, k<n /\ P k).
+Proof.
+  induction n.
+  right. intros [? [? ?]]; lia.
+  destruct (H n). left; exists n; split; auto.
+  destruct IHn.
+  destruct H1 as [k [? ?]].
+  left; exists k; repeat split; auto.
+  right. intros [k [? ?]]. destruct (lt_dec k n).
+  apply H1; exists k; split; auto.
+  assert (k=n) by lia. subst; contradiction.
+Qed.
+
+Lemma first_occurrence: forall (P: nat -> Prop),
+  (forall n, Decidable.decidable (P n)) ->
+  forall n, 
+   P n -> exists k, k <= n /\ P k /\ forall j, j<k -> ~P j.
+Proof.  (* this proof seems a bit more clumsy than necessary *)
+intros.
+set (b := n).
+assert (exists n, n<=b /\ P n) by eauto.
+clearbody b. clear H0 n. 
+revert H1; induction b; intros [n [? ?]].
+-
+exists n; repeat split; auto. intros; lia.
+-
+destruct (Nat.eq_dec n (S b)).
++ subst n.
+destruct (exists_nat_dec _ H (S b)) as [[k [? ?]]|].
+destruct (IHb ltac:(exists k; split; [lia | auto])) as [k' [? [? ?]]].
+exists k'; repeat split; auto.
+exists (S b); repeat split; auto. 
+intros.
+contradict H2. exists j; split; auto.
++
+assert (n <= b) by lia. clear n0 H0.
+destruct (IHb ltac:(exists n; split; [lia | auto])) as [k [? [? ?]]].
+exists k; repeat split; auto.
+Qed.
+
+Lemma min_iter: 
+  forall {A} (f: A -> A) (P: A -> Prop) (DECP: forall x, Decidable.decidable (P x)) (x: A) (k: nat),
+  P (Nat.iter k f x) ->
+  exists j, j <= k /\ P (Nat.iter j f x) /\ forall i, i<j -> ~P (Nat.iter i f x).
+Proof.
+intros.
+apply (first_occurrence (fun k => P (Nat.iter k f x)) ltac:(intros; apply DECP) k H).
+Qed.
+
+Lemma iter_swap: forall {A} (f: A-> A) i x,
+  Nat.iter i f (f x) = f (Nat.iter i f x).
+Proof.
+induction i; simpl; intros; f_equal; auto.
+Qed.
+
+Lemma jacobi_n_jacobi {NAN: Nans} {t: type}:
+  forall A b acc k maxiter, 
+   jacobi_iteration_bound A b acc k ->
+   (k <= maxiter)%nat ->
+  let acc2 := BMULT t acc acc in
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  exists j,
+   (j<=k)%nat /\
+   let '(r2,xj) := jacobi A b x0 acc2 (S maxiter) in
+   r2 = norm2 (jacobi_residual (diag_of_matrix A) (remove_diag A) b xj) /\
+   xj = jacobi_n A b x0 j.
+Proof.
+intros.
+apply jacobi_iteration_bound_correct in H.
+destruct H as [FINacc2 [j [? [? [? ?]]]]].
+unfold jacobi.
+fold x0 in H2, H3.
+set (resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b) in *.
+unfold jacobi_n in *.
+set (f := jacobi_iter _ _ _) in *.
+simpl pred.
+fold acc2 in FINacc2,H1,H3.
+clearbody acc2. clear acc.
+clearbody f. clearbody resid.
+clearbody x0.
+set (P x := BCMP t Gt true (norm2 (resid x)) acc2 = false).
+assert (forall x, Decidable.decidable (P x)).
+clear.
+intros. subst P. simpl. destruct (BCMP _ _ _ _ _); [right|left]; auto.
+destruct (min_iter f P H4 x0 j) as [i [? [? ?]]].
+apply H3.
+exists i; split; auto. lia.
+assert (i <= maxiter) by lia.
+clear k H H0.
+assert (forall i', i' <= i -> finite (norm2 (resid (Nat.iter i' f x0)))).
+intros; apply H2; lia.
+clear j H5 H2 H3.
+clear H4. subst P. simpl in *.
+replace maxiter with (i + (maxiter-i)) by lia.
+forget (maxiter-i) as k.
+clear H8 maxiter.
+rewrite (iter_stop_n_lem1 _ _ norm2 resid f acc2 k i x0
+  (Nat.iter i f x0)).
+split; auto.
+2: unfold going; rewrite H6, andb_false_iff; auto.
+revert x0 H6 H H7; induction i; simpl; intros; auto.
+specialize (IHi (f x0)).
+rewrite IHi.
+specialize (H7 0 ltac:(lia)).
+apply not_false_is_true in H7.
+simpl in H7.
+unfold going.
+rewrite H7.
+specialize (H 0 ltac:(lia)). 
+apply finite_is_finite in H. simpl in H.
+rewrite H.
+simpl.
+f_equal.
+apply iter_swap.
+rewrite iter_swap; auto.
+intros.
+rewrite iter_swap.
+ apply (H (S i')). lia.
+intros.
+rewrite iter_swap.
+apply (H7 (S i0)). lia.
+Qed.
 
