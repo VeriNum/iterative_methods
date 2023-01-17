@@ -259,7 +259,17 @@ intros. apply matrixP. unfold eqrel.
 intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
 Qed.
 
+Lemma sub_vec_comm_1 {n:nat}:
+  forall a b: 'cV[R]_n,
+  (a - b) = - (b-a).
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+Qed.
 
+Lemma x_fixpoint {n:nat} x b (A: 'M[R]_n.+1):
+  x = x_fix x b A.
+Admitted.
 
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
@@ -359,20 +369,17 @@ induction k.
             ** apply Rmult_le_compat_l.
                +++ apply /RleP. apply vec_norm_pd.
                +++ apply /RleP. apply submult_prop.
-            ** assert (
-
-
-
-         (vec_inf_norm_diag_matrix_vec_mult_R
-
-
-
-
-
-
-
-
-admit.
+            ** assert ((vec_inf_norm (A1_diag (FT2R_mat A)) *
+                         (matrix_inf_norm (A2_J_real (FT2R_mat A)) *
+                          vec_inf_norm (x - FT2R_mat (X_m_jacobi k x0 b A))))%Re = 
+                        ((vec_inf_norm (A1_diag (FT2R_mat A)) * matrix_inf_norm (A2_J_real (FT2R_mat A))) *
+                        (vec_inf_norm (x - FT2R_mat (X_m_jacobi k x0 b A))))%Re).
+               { nra. } rewrite H5. unfold R2.
+               rewrite -RmultE. rewrite sub_vec_comm_1.
+               rewrite -vec_inf_norm_opp. unfold f_error. rewrite -x_fixpoint.
+               apply Rle_refl.
+         -- auto.
+      ++ admit.
   - apply Rplus_le_compat_r. apply Rmult_le_compat_l.
     * by apply rho_ge_0.
     * nra.
