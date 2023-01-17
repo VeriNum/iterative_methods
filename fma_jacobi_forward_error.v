@@ -116,6 +116,35 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
   forall x0: 'cV[ftype ty]_n.+1, 
   forall k:nat,
   (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re.
+Proof.
+induction k.
++ simpl. nra.
++ simpl.
+  assert (((1 - rho * rho ^ k) / (1 - rho))%Re = 
+           (rho * ((1 - rho ^ k) / (1 - rho)) + 1)%Re).
+  { assert ((rho * ((1 - rho ^ k) / (1 - rho)) + 1)%Re = 
+            (rho * ((1 - rho ^ k) / (1 - rho)) + (1 - rho) * / (1 - rho))%Re).
+    { rewrite Rinv_r; nra. } rewrite H3. clear H3.
+    Search ((_ + _ ) * _ )%Re.
+    assert ((rho * ((1 - rho ^ k) / (1 - rho)) +
+                  (1 - rho) * / (1 - rho))%Re = 
+             (( (rho * (1 - rho ^ k)) * / (1 - rho))%Re + 
+              (1 - rho) * / (1 - rho))%Re).
+    { nra. } rewrite H3. clear H3.
+    rewrite -Rmult_plus_distr_r. nra.
+  } rewrite H3. 
+  Search ( (_ + _ ) * _)%Re.
+  rewrite Rmult_plus_distr_r.
+  assert ((rho * rho ^ k * f_error 0 b x0 x A +
+            (rho * ((1 - rho ^ k) / (1 - rho)) * d_mag + 1 * d_mag))%Re = 
+           (rho * (rho ^ k * f_error 0 b x0 x A +
+                        (1 - rho ^ k) / (1 - rho) * d_mag) + d_mag)%Re).
+  { nra. } rewrite H4.
+  apply Rle_trans with (rho * f_error k b x0 x A + d_mag)%Re.
+  - admit.
+  - apply Rplus_le_compat_r. apply Rmult_le_compat_l.
+    * admit.
+    * nra.
 Admitted. 
   
 
