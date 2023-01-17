@@ -111,6 +111,44 @@ repeat apply Rmult_le_pos.
 + apply /RleP. apply matrix_norm_pd.
 Qed.
 
+Lemma add_vec_distr {n:nat}:
+  forall a b c: 'cV[R]_n,
+  a - b + b - c = (a-b) + (b-c).
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE. by rewrite -addrA.
+Qed.
+
+
+Lemma add_vec_distr_1 {n:nat}:
+  forall a b c: 'cV[R]_n,
+  (a+b) - (b+c) = a - c.
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+Qed.
+
+
+Lemma add_vec_distr_2 {n:nat}:
+  forall a b c: 'cV[R]_n,
+  (a-b) + (b-c) = a - c.
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+Qed.
+
+
+Lemma add_vec_distr_3 {n:nat}:
+  forall a b c d: 'cV[R]_n,
+  (a+b) - (c+d) = (a-c) + (b-d).
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+Qed.
+
+
+
+
 
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
@@ -171,7 +209,24 @@ induction k.
                         (1 - rho ^ k) / (1 - rho) * d_mag) + d_mag)%Re).
   { nra. } rewrite H4.
   apply Rle_trans with (rho * f_error k b x0 x A + d_mag)%Re.
-  - admit.
+  - unfold f_error. 
+    assert (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
+                 x_fix x (FT2R_mat b) (FT2R_mat A) = 
+             (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
+               x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A)) +
+             (x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A) -
+              x_fix x (FT2R_mat b) (FT2R_mat A))).
+    { by rewrite add_vec_distr_2. } rewrite H5. clear H5.
+    
+
+
+
+
+
+
+
+
+admit.
   - apply Rplus_le_compat_r. apply Rmult_le_compat_l.
     * by apply rho_ge_0.
     * nra.
