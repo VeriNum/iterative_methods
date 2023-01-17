@@ -1,4 +1,4 @@
--Q . Iterative
+-R . Iterative
 lemmas.v
 float_model.v
 real_model.v
@@ -12,6 +12,18 @@ jacob_list_fun_model.v
 fma_dot_mat_model.v
 dot_prod_defn.v
 float_model_generic.v
+
+StationaryMethods/common.v
+StationaryMethods/op_defs.v
+StationaryMethods/float_acc_lems.v
+StationaryMethods/list_lemmas.v
+StationaryMethods/dotprod_model.v
+StationaryMethods/sum_model.v
+StationaryMethods/fma_dot_acc.v
+StationaryMethods/fma_is_finite.v
+
+fma_matrix_vec_mult.v
+vec_sum_inf_norm_rel.v
 
 sparse/sparse.v
 sparse/spec_sparse.v
