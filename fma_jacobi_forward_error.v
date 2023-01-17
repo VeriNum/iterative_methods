@@ -153,14 +153,18 @@ rewrite -bigmaxr_mulr.
                  | i0 <- enum 'I_n.+1] i).
        rewrite size_map size_enum_ord.
        by rewrite size_map size_enum_ord in H.
-+ 
-
++ apply bigmax_le_0.
+  - apply /RleP. apply Rle_refl.
+  - intros. rewrite seq_equiv. rewrite nth_mkseq;
+    last by rewrite size_map size_enum_ord in H.
+    apply /RleP. apply Rabs_pos.
+Qed.
 
 
 Definition A2_J_real {n:nat} (A: 'M[R]_n.+1): 
   'M[R]_n.+1 :=
   \matrix_(i,j) 
-    if (i==j :> nat) then 0%Re else A i j.
+    if (i==j :> nat) then 0%Re else A i j. 
 
 (** Define real real functional model **)
 Definition x_fix {n:nat} x b (A: 'M[R]_n.+1) :
@@ -341,6 +345,25 @@ induction k.
          rewrite add_vec_distr_4. 
          Search (_ *m (_ - _) = _).
          rewrite -mulmxBr.
+         apply Rle_trans with
+         ( vec_inf_norm (A1_diag (FT2R_mat A)) * 
+           vec_inf_norm (A2_J_real (FT2R_mat A) *m (x -
+                                  FT2R_mat
+                                   (X_m_jacobi k x0 b A))))%Re.
+         -- apply /RleP.
+            apply vec_inf_norm_diag_matrix_vec_mult_R.
+         -- apply Rle_trans with 
+            (vec_inf_norm (A1_diag (FT2R_mat A)) * 
+              (matrix_inf_norm (A2_J_real (FT2R_mat A)) *
+               vec_inf_norm (x - FT2R_mat (X_m_jacobi k x0 b A))))%Re.
+            ** apply Rmult_le_compat_l.
+               +++ apply /RleP. apply vec_norm_pd.
+               +++ apply /RleP. apply submult_prop.
+            ** assert (
+
+
+
+         (vec_inf_norm_diag_matrix_vec_mult_R
 
 
 
