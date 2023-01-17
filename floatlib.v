@@ -833,7 +833,7 @@ Add Parametric Morphism {NAN: Nans}{t}: (@dotprod _ t)
 Proof.
 intros.
 unfold dotprod.
-set (a := Zconst t 0) at 1.
+set (a := Zconst t 0) at 1. 
 set (a' := Zconst t 0).
 assert (feq a a') by reflexivity.
 clearbody a. clearbody a'.
