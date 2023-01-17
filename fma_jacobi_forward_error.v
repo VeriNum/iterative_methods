@@ -97,7 +97,11 @@ repeat apply Rmult_le_pos.
 + apply Rplus_le_le_0_compat.
   - apply Rplus_le_le_0_compat.
     * apply Rplus_le_le_0_compat.
-      ++ admit.
+      ++ repeat apply Rmult_le_pos.
+         -- apply g_pos.
+         -- unfold delta. apply Rplus_le_le_0_compat. nra.
+            apply default_rel_ge_0.
+         -- apply Rplus_le_le_0_compat. nra. apply g_pos.
       ++ unfold delta. apply default_rel_ge_0.
     * apply Rmult_le_pos.
       ++ unfold delta. apply default_rel_ge_0.
@@ -105,8 +109,7 @@ repeat apply Rmult_le_pos.
   - apply g_pos.
 + apply /RleP. apply vec_norm_pd.
 + apply /RleP. apply matrix_norm_pd.
-Admitted.
-
+Qed.
 
 
 (** State the forward error theorem **)
@@ -170,7 +173,7 @@ induction k.
   apply Rle_trans with (rho * f_error k b x0 x A + d_mag)%Re.
   - admit.
   - apply Rplus_le_compat_r. apply Rmult_le_compat_l.
-    * admit.
+    * by apply rho_ge_0.
     * nra.
 Admitted. 
   
