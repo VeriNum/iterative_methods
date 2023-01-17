@@ -35,12 +35,17 @@ Definition jacobi_iter {t: type} (A1: diagmatrix t) (A2: matrix t) (b: vector t)
 Definition jacobi_residual {t: type} (A1: diagmatrix t) (A2: matrix t) (b: vector t) (x: vector t) : vector t :=
    diagmatrix_vector_mult A1 (vector_sub (jacobi_iter A1 A2 b x) x).
 
+
+Definition going {t} (s acc: ftype t) := 
+   andb (Binary.is_finite (fprec t) (femax t) s) (BCMP _ Gt true s acc).
+
+
 Fixpoint iter_stop {t} {A} (norm2: A -> ftype t) (residual: A -> A) (f : A -> A) (n:nat) (acc: ftype t) (x:A) :=
  let y := f x in 
  let s := norm2 (residual x) in 
  match n with
  | O => (s, x)
- | S n' => if Binary.is_finite _ _ s && BCMP t Gt true s acc 
+ | S n' => if going s acc
                 then iter_stop norm2 residual f n' acc y
                 else (s,x)
   end.

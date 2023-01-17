@@ -141,7 +141,7 @@ apply semax_loop_unroll1
  (Q := (EX y:vector Tdouble, EX s:ftype Tdouble, 
   PROP (Forall2 feq y (f x); 
           feq s (norm2 (resid x));
-          stop s acc = true; maxiter>1)
+          going s acc = true; maxiter>1)
   LOCAL (temp _maxiter (Vint (Int.repr (maxiter -1)));
     temp _y xp; temp _z yp; temp _t xp; temp _s (Vfloat s);
     temp _A1 A1p; temp _N (Vint (Int.repr N)); 
@@ -160,22 +160,22 @@ forward. forward. forward. forward.
 Exists y s; entailer!!.
 -
 Intros y s.
-forward_if (temp _t'3 (Val.of_bool (stop s acc))).
+forward_if (temp _t'3 (Val.of_bool (going s acc))).
   { forward.
     entailer!!.
    change (Float.cmp Cgt s acc) with ((s>acc)%F64).
-   unfold stop.
+   unfold going.
    replace (Binary.is_finite _ _ _) with true; auto.
    destruct s; try discriminate; reflexivity.
   } 
   { forward.
-    entailer!!. unfold stop.
+    entailer!!. unfold going.
    replace (Binary.is_finite _ _ _) with false; auto.
    clear - H1.
    destruct s; try discriminate; try reflexivity.
   }
  rewrite sub_repr.
- forward_if (temp _t'4 (Val.of_bool (stop s acc &&  Z.gtb maxiter 1))).
+ forward_if (temp _t'4 (Val.of_bool (going s acc &&  Z.gtb maxiter 1))).
   { forward. change 1024 with (femax Tdouble) in H1.  rewrite H1. 
     entailer!!. simpl andb.
     destruct (Z.gtb_spec maxiter 1).
@@ -225,10 +225,9 @@ forward_if (temp _t'3 (Val.of_bool (stop s acc))).
 Exists (S O) fx s; entailer!!.
 split.
  * simpl.
-   change (andb _ _) with (stop (norm2 (resid x)) acc).
    rewrite H0 in H1. rewrite H1.
    constructor.  symmetry; auto.
- * unfold stop in H1. rewrite andb_true_iff in H1. destruct H1 as [? _].
+ * unfold going in H1. rewrite andb_true_iff in H1. destruct H1 as [? _].
  apply finite_is_finite in H1.
  rewrite H0 in H1.
  apply finite_norm2_e in H1.
@@ -255,22 +254,22 @@ forward.
 forward.
 forward.
 forward.
-forward_if (temp _t'3 (Val.of_bool (stop s acc))).
+forward_if (temp _t'3 (Val.of_bool (going s acc))).
   { forward. 
     entailer!!.
    change (Float.cmp Cgt ?s acc) with ((s>acc)%F64).
-   unfold stop.
+   unfold going.
    replace (Binary.is_finite _ _ _) with true; auto.
    destruct s; try discriminate; reflexivity.
   } 
   { forward.
     entailer!!.
-    unfold stop.
+    unfold going.
    replace (Binary.is_finite _ _ _) with false; auto.
     destruct s; try discriminate; try reflexivity.
   }
  rewrite sub_repr. rewrite <- Z.sub_add_distr.
- forward_if (temp _t'4 (Val.of_bool (stop s acc &&  Z.gtb maxiter (Z.of_nat n+1)))).
+ forward_if (temp _t'4 (Val.of_bool (going s acc &&  Z.gtb maxiter (Z.of_nat n+1)))).
   { forward. rewrite H4. 
     entailer!!. 
     destruct (Z.gtb_spec maxiter (Z.of_nat n+1)).
@@ -309,7 +308,7 @@ destruct (Z.gtb_spec maxiter (Z.of_nat n + 1)); try discriminate. clear H5.
 simpl.   
 
 assert (FINs: finite s). {
-  unfold stop in H4. rewrite andb_true_iff in H4. destruct H4.
+  unfold going in H4. rewrite andb_true_iff in H4. destruct H4.
    apply finite_is_finite; auto.
 }
 fold resid in H2.
@@ -319,16 +318,15 @@ rewrite <- H6 in H2. rewrite H2 in H4.
 
 apply iter_stop_n_S in K; auto.
 simpl in K.
-destruct (stop (norm2 (resid x)) acc); inv K.
+destruct (going (norm2 (resid x)) acc); inv K.
 rewrite H8. constructor.
 rewrite <- H6 in H1. rewrite H1; auto.
---
-Set Nested Proofs Allowed.
+-- 
+ rewrite H1.
  rewrite H2 in FINs. 
  apply finite_norm2_e in FINs.
  apply finres_jacobi in FINs.
- fold f in FINs.
- eapply Forall_finite_congr. apply H1. auto.
+ auto.
  congruence. 
  rewrite Zlength_jacobi_iter; try lia.
 *
@@ -340,7 +338,7 @@ unfold jacobi. fold A1. fold A2. fold f.
 fold resid in H2|-*.
 rewrite <- H6 in H1, H2|-*.
 rewrite H2 in H4|-*.
-destruct (stop (norm2 (resid v)) acc) eqn:?H.
+destruct (going (norm2 (resid v)) acc) eqn:?H.
 --
 apply iter_stop_n_lem2 in K; auto.
 replace (pred _) with n by lia.

@@ -150,8 +150,6 @@ Notation "A *f B" := (mulmx_float A B) (at level 70).
 Notation "A -f B" := (sub_mat A B) (at level 80).
 
 
-Print BDIV.
-
 (** Functional model for Jacobi iteration **)
 (*
 Definition A1_inv_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'M[ftype ty]_n.+1:=
@@ -437,7 +435,6 @@ induction n.
            rewrite -/size . by rewrite /A_v. 
            apply ltn_ord. by [].
            rewrite Heqx_n. unfold jacobi_n.
-           Print Nat.iter.
            unfold jacob_list_fun_model.jacobi_iter.
            by rewrite iter_length.
            assert (length A = size.+1).

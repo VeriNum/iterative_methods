@@ -168,9 +168,6 @@ rewrite !Zlength_correct, seq_length.
 auto.
 Qed.
 
-Definition stop {t} (s acc: ftype t) := 
-   andb (Binary.is_finite (fprec t) (femax t) s) (BCMP _ Gt true s acc).
-
 Add Parametric Morphism  {NAN: Nans}{t: type} : (@dist2 _ t)
   with signature Forall2 feq ==> Forall2 feq ==> feq
   as dist2_mor.
@@ -180,9 +177,9 @@ unfold dist2.
 rewrite H, H0. auto.
 Qed.
 
-Add Parametric Morphism {t} : (@stop t)
+Add Parametric Morphism {t} : (@going t)
   with signature feq ==> strict_feq ==> eq
-  as stop_mor.
+  as going_mor.
 Proof.
  intros.
 destruct x,y; inv H; simpl; auto.
@@ -195,7 +192,7 @@ Qed.
 
 Ltac iter_stop_S :=
    change (@iter_stop ?t _  ?norm2 ?res ?f (S ?n) ?acc ?x) with
-        (if stop (norm2 (res x)) acc
+        (if going (norm2 (res x)) acc
            then iter_stop norm2 res f n acc (f x) else (norm2 (res x), x)).
 
 Lemma iter_stop_congr {t}:
@@ -211,6 +208,7 @@ induction n; simpl; intros.
 auto.
 assert (feq (norm2 (residual z)) (norm2 (residual z'))).
 apply H; apply H0; auto.
+unfold going.
 replace  (Binary.is_finite (fprec t) (femax t) (norm2 (residual z')))
   with (Binary.is_finite (fprec t) (femax t) (norm2 (residual z)))
   by (rewrite H3; auto).
@@ -230,7 +228,7 @@ Qed.
 Fixpoint iter_stop_n {t} {A} (norm2: A -> ftype t) (residual: A -> A) (f : A -> A) (n: nat) (acc: ftype t) (x: A) :=
    match n with
  | O => Some x
- | S n' => if stop (norm2 (residual x)) acc
+ | S n' => if going (norm2 (residual x)) acc
                 then iter_stop_n norm2 residual f n' acc (f x)
                 else None
   end.
@@ -239,13 +237,13 @@ Lemma iter_stop_n_S:
   forall {t}{A} (norm2: A -> ftype t) (resid f: A -> A) (n: nat) 
             (acc: ftype t) x v,
   iter_stop_n norm2 resid f n acc x = Some v ->
-  stop (norm2 (resid v)) acc = true ->
+  going (norm2 (resid v)) acc = true ->
   iter_stop_n norm2 resid f (S n) acc x = Some (f v).
 Proof.
 intros.
 revert x v H H0; induction n; simpl; intros.
 inv H. rewrite H0. auto.
-destruct (stop (norm2 (resid x)) acc) eqn:J.
+destruct (going (norm2 (resid x)) acc) eqn:J.
 apply IHn in H; auto.
 inv H.
 Qed.
@@ -254,28 +252,27 @@ Qed.
 Lemma iter_stop_n_lem1:
   forall t A norm2 (residual: A -> A) (f: A->A) (acc: ftype t) k n x y, 
    iter_stop_n norm2 residual f n acc x = Some y ->
-   stop (norm2 (residual y)) acc = false ->
+   going (norm2 (residual y)) acc = false ->
    iter_stop norm2 residual f (n+k) acc x = (norm2 (residual y), y).
 Proof.
-(*rewrite iter_stop_n_eq_alt.*)
 induction n; simpl; intros; auto.
 inv H; auto.
-destruct k; auto. simpl. fold (stop (norm2 (residual y)) acc).  rewrite H0. auto.
- fold (stop (norm2 (residual x)) acc). 
-destruct (stop (norm2 (residual x)) acc) eqn:J; try discriminate.
+destruct k; auto. simpl. fold (going (norm2 (residual y)) acc).  rewrite H0. auto.
+ fold (going (norm2 (residual x)) acc). 
+destruct (going (norm2 (residual x)) acc) eqn:J; try discriminate.
 apply IHn; auto.
 Qed.  
 
 Lemma iter_stop_n_lem2: 
   forall t A norm2 residual (f: A->A) (acc: ftype t) n x y, 
    iter_stop_n norm2 residual f n acc x = Some y ->
-   stop (norm2 (residual y)) acc = true ->
+   going (norm2 (residual y)) acc = true ->
    iter_stop norm2 residual f n acc x = (norm2 (residual y), y).
 Proof.
 induction n; simpl; intros; auto.
 inv H; auto.
-fold (stop (norm2 (residual x)) acc). 
-destruct (stop (norm2 (residual x)) acc) eqn:J; try discriminate.
+fold (going (norm2 (residual x)) acc). 
+destruct (going (norm2 (residual x)) acc) eqn:J; try discriminate.
 apply IHn; auto.
 Qed.  
 
@@ -293,8 +290,8 @@ Proof.
 intros.
 revert x H H0 H1; induction n; simpl; intros.
 inv H1; auto.
-destruct (stop _ _) eqn:?H in H1; try discriminate.
-unfold stop in H2.
+destruct (going _ _) eqn:?H in H1; try discriminate.
+unfold going in H2.
 rewrite andb_true_iff in H2. destruct H2.
 apply finite_is_finite in H2.
 apply finite_norm2_e in H2.
@@ -465,14 +462,14 @@ clear H8 maxiter.
 rewrite (iter_stop_n_lem1 _ _ norm2 resid f acc2 k i x0
   (Nat.iter i f x0)).
 split; auto.
-2: unfold stop; rewrite H6, andb_false_iff; auto.
+2: unfold going; rewrite H6, andb_false_iff; auto.
 revert x0 H6 H H7; induction i; simpl; intros; auto.
 specialize (IHi (f x0)).
 rewrite IHi.
 specialize (H7 0 ltac:(lia)).
 apply not_false_is_true in H7.
 simpl in H7.
-unfold stop.
+unfold going.
 rewrite H7.
 specialize (H 0 ltac:(lia)). 
 apply finite_is_finite in H. simpl in H.
@@ -489,11 +486,3 @@ rewrite iter_swap.
 apply (H7 (S i0)). lia.
 Qed.
 
-Lemma Forall_finite_congr {t}: forall  al bl: vector t,
-  Forall2 feq al bl -> (Forall finite al <-> Forall finite bl).
-Proof.
-induction 1. split; auto.
-split; intros; inv H1; constructor.
-rewrite <- H; auto. rewrite <- IHForall2; auto.
-rewrite H; auto. rewrite IHForall2; auto.
-Qed.
