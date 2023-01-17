@@ -67,9 +67,10 @@ double jacobi2(double *A1, struct crs_matrix *A2, double *b, double *x, double a
     t=z; z=y; y=t;
     maxiter--;
   } while (s*0==0.0 && s>acc && maxiter);
-  if (z!=x) {
-    for (i=0; i<N; i++) x[i]=z[i];
+  if (y==x)
     y=z;
+  else {
+    for (i=0; i<N; i++) x[i]=y[i];
   }
   free(y);
   return s;

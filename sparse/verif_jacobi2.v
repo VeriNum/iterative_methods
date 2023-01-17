@@ -82,17 +82,18 @@ semax (func_tycontext f_jacobi2 Vprog Gprog [])
    data_at shx (tarray tdouble N) (map Vfloat x) xp))
   the_loop
   (normal_ret_assert
-     (EX (n: nat) (z : vector Tdouble) (s : ftype Tdouble),
-      PROP (RelProd feq (Forall2 feq) (s,z) (jacobi A b x acc (Z.to_nat maxiter)))
+     (EX (n: nat) (z : vector Tdouble) (fz: vector Tdouble) (s : ftype Tdouble),
+      PROP (RelProd feq (Forall2 feq) (s,z) (jacobi A b x acc (Z.to_nat maxiter));
+                Forall2 feq fz (jacobi_iter (diag_of_matrix A) (remove_diag A) b z))
       LOCAL (temp _y (choose n xp yp); temp _z (choose n yp xp);
       temp _N (Vint (Int.repr (matrix_rows A))); gvars gv; 
       temp _A1 A1p; temp _A2 A2p; temp _b bp; temp _x xp; 
       temp _acc (Vfloat acc); temp _s (Vfloat s))
       SEP (FRZL FR1; 
-         data_at_ (choose n shx shy) (tarray tdouble N) (choose n xp yp);
+         data_at (choose n shx shy) (tarray tdouble N) (map Vfloat z) (choose n xp yp);
          crs_rep shA2 (remove_diag A) A2p;
          data_at shb (tarray tdouble N) (map Vfloat b) bp;
-         data_at (choose n shy shx) (tarray tdouble N) (map Vfloat z) (choose n yp xp);
+         data_at (choose n shy shx) (tarray tdouble N) (map Vfloat fz) (choose n yp xp);
          data_at shA1 (tarray tdouble (matrix_rows A))
            (map Vfloat (diag_of_matrix A)) A1p))%argsassert).
 Proof.
@@ -189,9 +190,9 @@ forward_if (temp _t'3 (Val.of_bool (stop s acc))).
  forward_if.
  + forward. Exists y s. entailer!!.
    rewrite andb_true_iff in H1; destruct H1; auto.
- + forward. Exists 1%nat y s.
+ + forward. Exists 1%nat x y s.
    entailer!!.
-   rewrite H0. rewrite H.
+   rewrite H0.
    unfold jacobi. fold A1. fold A2. fold f. fold resid.
    destruct (Z.to_nat maxiter) eqn:?H; [ lia | ].
    simpl. 
@@ -282,14 +283,18 @@ forward_if (temp _t'3 (Val.of_bool (stop s acc))).
     forward.
     rewrite H4. entailer!!.
   }
+
 assert (LENv: Zlength v = N). {
   eapply iter_stop_n_Zlength in K; try eassumption.
    intros; unfold f; rewrite Zlength_jacobi_iter; auto.
    intros; apply f_Proper; eauto with typeclass_instances.
    intros; eapply finres_jacobi; eauto; rewrite ?Zlength_jacobi_iter; lia.
 }
-assert (LENy : Zlength y = matrix_rows A2) by (rewrite <- H6; auto).
+
+assert (LENy : Zlength y = matrix_rows A2)
+ by (rewrite <- H6; auto).
 fold N in LENv, LENy |-*.
+
 assert (EQyv: Forall2 strict_feq y v) by (apply strict_floatlist_eqv_i1; auto; symmetry; auto).
 
 forward_if.
@@ -307,30 +312,34 @@ assert (FINs: finite s). {
   unfold stop in H4. rewrite andb_true_iff in H4. destruct H4.
    apply finite_is_finite; auto.
 }
+fold resid in H2.
 split3; [ | | f_equal; f_equal; lia].
--- simpl. rewrite K.
-  change (andb _ _) with (stop (norm2 (resid v)) acc).
-  fold resid in H2. rewrite <- H6 in H2. rewrite <- H6 in H1.
-  rewrite H2 in H4. rewrite H4.
- constructor; symmetry; auto.
+-- 
+rewrite <- H6 in H2. rewrite H2 in H4.
+
+apply iter_stop_n_S in K; auto.
+simpl in K.
+destruct (stop (norm2 (resid x)) acc); inv K.
+rewrite H8. constructor.
+rewrite <- H6 in H1. rewrite H1; auto.
 --
- rewrite H2 in FINs.
+Set Nested Proofs Allowed.
+ rewrite H2 in FINs. 
  apply finite_norm2_e in FINs.
- apply finres_jacobi in FINs; try (rewrite ?Zlength_jacobi_iter; lia).
+ apply finres_jacobi in FINs.
  fold f in FINs.
- symmetry in H1.
- eapply Forall_Forall2; try apply H1; auto.
- intros. rewrite H8 in H5; auto. 
+ eapply Forall_finite_congr. apply H1. auto.
+ congruence. 
+ rewrite Zlength_jacobi_iter; try lia.
 *
 forward.
-Exists (S n) fy s.
+Exists (S n) y fy s.
 rewrite !choose_S.
 entailer!!.
 unfold jacobi. fold A1. fold A2. fold f.
 fold resid in H2|-*.
-rewrite <- H6 in H1, H2.
-rewrite H2 in H4.
-rewrite H1, H2.
+rewrite <- H6 in H1, H2|-*.
+rewrite H2 in H4|-*.
 destruct (stop (norm2 (resid v)) acc) eqn:?H.
 --
 apply iter_stop_n_lem2 in K; auto.
@@ -358,12 +367,12 @@ Intros yp.
 freeze FR1 := (mem_mgr gv) (malloc_token _ _ _).
 eapply semax_seq'.
 eapply jacobi2_the_loop; try eassumption; auto.
-Intros n z s.
+Intros n z fz s.
 abbreviate_semax.
 thaw FR1.
 fold N.
 progress change float with (ftype Tdouble).
-freeze FR2 := - ( data_at_ _ _ (choose n xp yp))
+freeze FR2 := - ( data_at _ _ _ (choose n xp yp))
                          (data_at _ _ _ (choose n yp xp)).
 apply semax_seq' with
  (PROP ( )
@@ -372,29 +381,37 @@ apply semax_seq' with
    gvars gv; temp _A2 A2p; temp _b bp; 
    temp _x xp; temp _acc (Vfloat acc); temp _s (Vfloat s))
    SEP (FRZL FR2; 
-       data_at_ Ews (tarray tdouble N) yp;
-       data_at Ews (tarray tdouble N)  (map Vfloat z) xp)).
+       data_at Ews (tarray tdouble N)  (map Vfloat z) xp;
+       data_at_ Ews (tarray tdouble N) yp)).
 -
+ assert_PROP (Zlength z = N /\ Zlength fz = N) as LEN
+  by (entailer!; rewrite Zlength_map in*; auto).
+ destruct LEN as [LENz LENfz].
  unfold choose. destruct (Nat.odd n) eqn:ODD;
  forward_if; try contradiction.
+ + forward. entailer!!.
+ + forward. entailer!!.
  + forward_for_simple_bound N
         (EX i:Z, (PROP ( )
-             LOCAL (temp _A1 A1p; temp _y xp; temp _z yp;
+             LOCAL (temp _A1 A1p; temp _y yp; temp _z xp;
                 temp _N (Vint (Int.repr N)); gvars gv; 
                 temp _A2 A2p; temp _b bp; 
                 temp _x xp; temp _acc (Vfloat acc); temp _s (Vfloat s))
             SEP (FRZL FR2; 
                      data_at Ews (tarray tdouble N) 
-                          (sublist 0 i (map Vfloat z) ++ Zrepeat Vundef (N-i)) xp;
+                          (sublist 0 i (map Vfloat z) ++ sublist i N (map Vfloat fz)) xp;
                      data_at Ews (tarray tdouble N) (map Vfloat z) yp)))%assert.
-  * rewrite sublist_nil, app_nil_l. entailer!. apply derives_refl.
-  * forward. forward. entailer!. apply derives_refl'; f_equal.
+  * rewrite sublist_nil, app_nil_l. entailer!. rewrite sublist_same by list_solve. apply derives_refl.
+  * forward. forward. entailer!!. apply derives_refl'; f_equal.
      progress change float with (ftype Tdouble) in *.
-     clear - H9 H0 H15. rewrite Zlength_map in H15. simpl.
-     forget (matrix_rows A) as N. list_solve.
-  * forward. entailer!. list_solve.
- + forward. entailer!!. 
- + forward. entailer!!.
+     set (N := matrix_rows A).
+     rewrite (sublist_split 0 i (i+1)) by list_solve.
+     rewrite (sublist_split i (i+1) N) by list_solve.
+     list_solve. list_simplify.
+     replace (i0 - i + i) with i by lia. reflexivity.
+  * entailer!!. apply derives_refl'. f_equal.
+     rewrite sublist_nil. rewrite sublist_same by list_solve.
+     list_solve. 
 -
  thaw FR2.
  abbreviate_semax.
