@@ -5,7 +5,7 @@
 Require Import vcfloat.VCFloat.
 Require Import List.
 Import ListNotations.
-Require Import common op_defs dotprod_model sum_model float_acc_lems list_lemmas real_lemmas.
+Require Import common op_defs dotprod_model sum_model float_acc_lems list_lemmas.
 
 Require Import Reals.
 Open Scope R.
@@ -62,7 +62,7 @@ destruct Hl.
 subst; simpl.
 rewrite (R_dot_prod_rel_single rp (FR2 a)).
 inversion Hfp. inversion H2. subst.
-pose proof fma_accurate' t (fst a) (snd a) neg_zero Hfin as Hacc.
+pose proof fma_accurate' t (fst a) (snd a) (Zconst t 0) Hfin as Hacc.
 destruct Hacc as (e & d & Hz & He & Hd & A). rewrite A; clear A.
 inversion Hra; inversion H3; subst.
 unfold g1, g; simpl.
@@ -226,7 +226,7 @@ Lemma fma_dotprod_mixed_error:
     length u = length v2 /\
     R_dot_prod_rel (List.combine u (map FT2R v2)) (FT2R fp - eta) /\
     (forall n, (n <= length v2)%nat -> exists delta,
-      nth n u 0 = FT2R (nth n v1 neg_zero) * (1 + delta) /\ Rabs delta <= g t (length v2))  /\
+      nth n u 0 = FT2R (nth n v1 (Zconst t 0)) * (1 + delta) /\ Rabs delta <= g t (length v2))  /\
     Rabs eta <= g1 t (length v2) (length v2 - 1).
 Proof.
 intros t v1 v2 Hlen.
@@ -250,10 +250,10 @@ intros.
 inversion Hfp; subst. inversion Hrp; subst.
 inversion H2; inversion H3; subst; clear H2 H3.
  simpl in Hrp, Hfp, Hfin.
-pose proof fma_accurate' t f a neg_zero Hfin as Hacc.
+pose proof fma_accurate' t f a (Zconst t 0) Hfin as Hacc.
 destruct Hacc as (d & e & Hde & Hd & He& Hacc).
 exists [FT2R f * (1  +d)], e; repeat split.
-{ simpl. rewrite Hacc. replace ((FT2R f * FT2R a + FT2R neg_zero) * (1 + d) + e - e) with
+{ simpl. rewrite Hacc. replace ((FT2R f * FT2R a + FT2R (Zconst t 0)) * (1 + d) + e - e) with
   (FT2R f * (1 + d) * FT2R a + 0) by (simpl; nra).
 apply R_dot_prod_rel_cons; apply R_dot_prod_rel_nil. }
 { intros; exists d; split; auto. simpl in H. 

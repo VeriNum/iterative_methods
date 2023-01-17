@@ -1,7 +1,7 @@
 Require Import vcfloat.VCFloat.
 Require Import List.
 
-Require Import common op_defs real_lemmas list_lemmas.
+Require Import common op_defs list_lemmas.
 
 Section NAN.
 
@@ -32,11 +32,11 @@ Qed.
 (* FMA dot-product *)
 Definition fma_dotprod {NAN: Nans} (t: type) (v1 v2: list (ftype t)) : ftype t :=
   fold_left (fun s x12 => BFMA (fst x12) (snd x12) s) 
-                (List.combine v1 v2) neg_zero.
+                (List.combine v1 v2) (Zconst t 0).
 
 Inductive fma_dot_prod_rel {NAN: Nans} {t : type} : 
             list (ftype t * ftype t) -> ftype t -> Prop :=
-| fma_dot_prod_rel_nil  : fma_dot_prod_rel nil (neg_zero )
+| fma_dot_prod_rel_nil  : fma_dot_prod_rel nil (Zconst t 0)
 | fma_dot_prod_rel_cons : forall l (xy : ftype t * ftype t) s,
     fma_dot_prod_rel  l s ->
     fma_dot_prod_rel  (xy::l) (BFMA (fst xy) (snd xy) s).
