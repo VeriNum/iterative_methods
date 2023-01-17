@@ -75,6 +75,13 @@ Definition f_error {ty} {n:nat} m b x0 x (A: 'M[ftype ty]_n.+1):=
   let x := x_fix x b_real A_real in
   vec_inf_norm (FT2R_mat x_k - x).
 
+
+Definition matrix_of_diag_A1 {ty} {n:nat} (A: 'M[ftype ty]_n.+1) :
+ 'M[ftype ty]_n.+1 :=
+ \matrix_(i, j) 
+    (if (i == j :> nat) then (A1_inv_J A i ord0) else (Zconst ty 0)).
+
+
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
@@ -105,7 +112,7 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
                   delta * vec_inf_norm (A1_diag A_real) * vec_inf_norm b_real)%Re in
 
   (rho < 1)%Re ->
-  (A = A1_inv_J A +f A2_J A) ->
+  (A =  ((matrix_of_diag_A1 A) +f (A2_J A))) ->
   forall x0: 'cV[ftype ty]_n.+1, 
   forall k:nat,
   (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re.
