@@ -82,6 +82,26 @@ rewrite nth_vec_to_list_real_sub.
 + apply ltn_ord.
 Qed.
 
+Lemma vec_inf_norm_diag_matrix_vec_mult_R {n:nat} (v1 v2 : 'cV[R]_n.+1):
+  vec_inf_norm (diag_matrix_vec_mult_R v1 v2) <= 
+  vec_inf_norm v1 * vec_inf_norm v2.
+Proof.
+unfold vec_inf_norm, diag_matrix_vec_mult_R.
+rewrite -bigmaxr_mulr.
++ apply /RleP. apply bigmax_le.
+  - by rewrite size_map size_enum_ord.
+  - intros. rewrite seq_equiv. rewrite nth_mkseq; 
+    last by rewrite size_map size_enum_ord in H.
+    apply Rle_trans with 
+    [seq (bigmaxr 0%Re
+           [seq Rabs (v1 i1 0) | i1 <- enum 'I_n.+1] *
+         Rabs (v2 i0 0))%Ri
+      | i0 <- enum 'I_n.+1]`_i.
+    * rewrite !seq_equiv. rewrite nth_mkseq; 
+      last by rewrite size_map size_enum_ord in H.
+      rewrite !mxE. rewrite -!RmultE. rewrite Rabs_mult.
+      
+
 
 
 Definition A2_J_real {n:nat} (A: 'M[R]_n.+1): 
@@ -174,6 +194,13 @@ intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
 Qed.
 
 
+Lemma add_vec_distr_4 {n:nat}:
+  forall a b c d: 'cV[R]_n,
+  (a - b) - (a - d) = d - b.
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+Qed.
 
 
 
@@ -257,7 +284,10 @@ induction k.
             (FT2R_mat b) (FT2R_mat A)) +
         R2 * f_error k b x0 x A)%Re.
       ++ apply Rplus_le_compat_l.
-         unfold x_fix.
+         unfold x_fix. rewrite diag_matrix_vec_mult_diff.
+         rewrite add_vec_distr_4. 
+         Search (_ *m (_ - _) = _).
+         rewrite -mulmxBr.
 
 
 
