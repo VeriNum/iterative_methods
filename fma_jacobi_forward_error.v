@@ -57,6 +57,23 @@ Definition diag_matrix_vec_mult_R {n:nat} (v1 v2 : 'cV[R]_n.+1)
   \col_i ((nth (n.+1.-1 -i) (vec_to_list_real n.+1 v1) 0%Re) * 
           (nth (n.+1.-1 -i) (vec_to_list_real n.+1 v2) 0%Re)).
 
+
+
+Lemma diag_matrix_vec_mult_diff {n:nat} (v1 v2 v3 : 'cV[R]_n.+1):
+  diag_matrix_vec_mult_R v1 v2 - diag_matrix_vec_mult_R v1 v3 = 
+  diag_matrix_vec_mult_R v1 (v2 - v3).
+Proof.
+apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+case: (n - x)%nat .
++ rewrite !mxE. rewrite -!RmultE -!RminusE. field_simplify. auto.
++ intros. rewrite !mxE.
+
+
+
+
+
+
+
 Definition A2_J_real {n:nat} (A: 'M[R]_n.+1): 
   'M[R]_n.+1 :=
   \matrix_(i,j) 
