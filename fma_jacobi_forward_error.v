@@ -217,7 +217,20 @@ induction k.
              (x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A) -
               x_fix x (FT2R_mat b) (FT2R_mat A))).
     { by rewrite add_vec_distr_2. } rewrite H5. clear H5.
-    
+    apply Rle_trans with 
+    (vec_inf_norm (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
+                       x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A) ) +
+     vec_inf_norm ((x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A) -
+                      x_fix x (FT2R_mat b) (FT2R_mat A))))%Re.
+    * apply /RleP. apply triang_ineq.
+    * apply Rle_trans with 
+      (vec_inf_norm
+         (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
+          x_fix (FT2R_mat (X_m_jacobi k x0 b A)) 
+            (FT2R_mat b) (FT2R_mat A)) +
+        R2 * f_error k b x0 x A)%Re.
+      ++ apply Rplus_le_compat_l.
+         unfold x_fix.
 
 
 
