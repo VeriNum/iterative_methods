@@ -526,9 +526,22 @@ induction k.
                                                ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
                                                 * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
                                       { apply matrix_vec_mult_bound_corollary.  admit. }
-                                      
-          
-
+                                      apply Rle_trans with 
+                                      ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
+                                                * (1 + g ty n.+1) + g1 ty n.+1 (n.+1 - 1))%Re.
+                                      **** rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
+                                           apply Rle_trans with
+                                           (vec_inf_norm (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A)) +
+                                            (matrix_inf_norm (FT2R_mat (A2_J A)) *
+                                             vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
+                                             g ty n.+1 + g1 ty n.+1 (n.+1 - 1)))%Re.
+                                           +++++ apply reverse_triang_ineq in H8.
+                                                 assert (forall x y z:R, (x - y <= z)%Re -> (x <= y + z)%Re).
+                                                 { intros. nra. } apply H9. apply /RleP. apply H8.
+                                           +++++ match goal with |-context[(_ <= ?p + ?a * ?b * ?c + ?d)%Re]=>
+                                                  replace (p + a * b * c + d)%Re with (p + (a * b * c + d))%Re by nra
+                                                 end. apply Rplus_le_compat_r. apply /RleP. apply submult_prop.
+                                      **** apply Rle_refl.
                     --- unfold x_fix. rewrite diag_matrix_vec_mult_diff .
                         apply Rle_trans with
                         (vec_inf_norm (A1_diag (FT2R_mat A)) *
@@ -560,21 +573,17 @@ induction k.
              rewrite -vec_inf_norm_opp. rewrite -RplusE.
              rewrite Rmult_plus_distr_l. eapply Rle_trans.
              ** apply Rplus_le_compat_r. apply Rplus_le_compat_l.
+                apply Rmult_le_compat_l. apply /RleP. apply vec_norm_pd.
                 apply Rplus_le_compat.
-                +++ apply Rmult_le_compat_l.
-                    --- apply /RleP. apply vec_norm_pd.
-                    --- apply /RleP. apply vec_float_sub.
-                        intros. 
-                        specialize (H0 b (A2_J A *f X_m_jacobi k x0 b A) xy H6).
-                        apply H0.
-                +++ apply Rmult_le_compat_l.
-                    --- apply /RleP. apply vec_norm_pd.
-                    --- apply /RleP. 
-                        assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
-                        { apply matrixP. unfold eqrel. intros. rewrite !mxE.
-                          by case: (x1 == y :> nat).
-                        } rewrite H6. apply matrix_vec_mult_bound_corollary.
-                        intros. admit.
+                +++ apply /RleP. apply vec_float_sub.
+                    intros. 
+                    specialize (H0 b (A2_J A *f X_m_jacobi k x0 b A) xy H6).
+                    apply H0.
+                +++ assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
+                    { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                       by case: (x1 == y :> nat).
+                    } rewrite H6. apply /RleP. apply matrix_vec_mult_bound_corollary.
+                    intros. admit.
              **  rewrite !ft2r_mat_equiv .
                  
 
