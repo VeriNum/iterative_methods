@@ -444,7 +444,25 @@ apply bigmax_le.
               { nra. } apply H4. apply Rle_pow .
               apply default_rel_plus_1_ge_1. lia.
        -- unfold g1. eapply Rle_trans. apply He.
-          
+          rewrite Rmult_assoc. 
+          assert (forall x y z:R, (1 * x <= y * z)%Re -> (x <= y * z)%Re).
+          { intros. nra. }  apply H4.
+          apply Rmult_le_compat.
+          ** nra.
+          ** apply default_abs_ge_0. 
+          ** replace 1%Re with (INR 1) by (simpl;auto).
+             apply le_INR. lia.
+          ** assert (forall x z:R, (x * 1 <= x * z)%Re -> (x <= x * z)%Re).
+             { intros. nra. }  apply H5.
+             apply Rmult_le_compat_l.
+             +++ apply default_abs_ge_0.
+             +++ assert (forall x:R, (0 <= x)%Re -> (1 <= 1 + x)%Re).
+                 { intros. nra. } apply H6. apply g_pos.
+  * rewrite inordK; by rewrite size_map size_enum_ord in H0.
+  * rewrite inordK; by rewrite size_map size_enum_ord in H0.
+ - rewrite inordK; by rewrite size_map size_enum_ord in H0.
+ - rewrite inordK; by rewrite size_map size_enum_ord in H0.
+Admitted.
   
   
   
