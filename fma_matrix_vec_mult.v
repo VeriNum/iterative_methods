@@ -391,7 +391,7 @@ Lemma matrix_err_bound_le_rel {n:nat} {ty}
 Proof.
 unfold mat_vec_mult_err_bnd.
 unfold vec_inf_norm, matrix_inf_norm.
-rewrite mulrC.
+rewrite mulrC. rewrite [in X in (_ * X + _)]mulrC.
 rewrite -bigmaxr_mulr.
 + apply /RleP. rewrite -RplusE -RmultE.
   apply bigmax_le.
@@ -401,7 +401,32 @@ rewrite -bigmaxr_mulr.
     unfold e_i. rewrite !length_veclist.
     apply Rplus_le_compat_r. apply Rmult_le_compat_l.
     * apply g_pos.
-    * apply Rle_trans with 
+    * apply Rle_trans with
+      [seq (bigmaxr 0%Re
+           [seq Rabs (FT2R_mat v i1 0)
+              | i1 <- enum 'I_n.+1] *
+         row_sum (FT2R_mat A) i0)%Ri
+      | i0 <- enum 'I_n.+1]`_i.
+      ++ assert ([seq bigmaxr 0%Re
+                    [seq Rabs (FT2R_mat v i1 0)
+                       | i1 <- enum 'I_n.+1] *
+                    row_sum (FT2R_mat A) i0
+                  | i0 <- enum 'I_n.+1] = 
+                 mkseq (fun i: nat => (bigmaxr 0%Re
+                                        [seq Rabs (FT2R_mat v i1 ord0)
+                                           | i1 <- enum 'I_n.+1] *
+                                      row_sum (FT2R_mat A) (@inord n i))%Re) n.+1).
+          { rewrite !seq_equiv. by []. } rewrite H0. clear H0.
+         rewrite nth_mkseq;
+         last by rewrite size_map size_enum_ord in H.
+         rewrite RmultE.
+         rewrite mulrC. rewrite -bigmaxr_mulr. 
+         -- 
+
+
+
+
+apply Rle_trans with 
       [seq (bigmaxr 0%Re
            [seq row_sum (FT2R_mat A) i1
               | i1 <- enum 'I_n.+1] *
@@ -417,8 +442,14 @@ rewrite -bigmaxr_mulr.
             ** rewrite seq_equiv. rewrite nth_mkseq;
                last by rewrite size_map size_enum_ord in H.
                rewrite -RmultE. unfold row_sum. rewrite big_distrr. 
-               
-               
+               rewrite -sum_fold_mathcomp_equiv.
+               rewrite sum_abs_eq /=.
+               +++ apply /RleP. apply big_sum_ge_ex_abstract.
+                   intros. rewrite -RmultE.
+                   assert ((widen_ord (leqnn n.+1) i0) = i0).
+                   { unfold widen_ord. apply val_inj. by simpl. }
+                   rewrite H1. rewrite !mxE. rewrite Rmult_comm. 
+
 
 
 
