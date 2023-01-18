@@ -440,8 +440,21 @@ induction k.
                x_fix (FT2R_mat (X_m_jacobi k x0 b A))
                     (FT2R_mat b) (FT2R_mat A))) + 
               R2 * f_error k b x0 x A)%Re.
-             ** apply Rplus_le_compat_r.
-                
+             ** apply Rplus_le_compat_r. 
+                assert ( (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
+                            x_fix (FT2R_mat (X_m_jacobi k x0 b A))
+                              (FT2R_mat b) (FT2R_mat A)) = 
+                         (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
+                            FT2R_mat (matrix_of_diag_A1 A) *m 
+                            FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A)) +
+                         (FT2R_mat (matrix_of_diag_A1 A) *m 
+                            FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A) -
+                            x_fix (FT2R_mat (X_m_jacobi k x0 b A))
+                              (FT2R_mat b) (FT2R_mat A))).
+                { by rewrite add_vec_distr_2. } rewrite H6.
+                apply /RleP.
+                apply triang_ineq.
+             ** 
 
 
 
