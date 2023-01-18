@@ -699,7 +699,32 @@ induction k.
                                  ---- apply /RleP. apply vec_norm_pd.
                                  ---- apply /RleP. apply matrix_norm_pd.
                         *** apply H7.
-                    ---
+                    --- assert ((((1 + g ty n.+1) * (1 + default_rel ty) * g ty n.+1 +
+                                  default_rel ty * (1 + g ty n.+1) + 
+                                  g ty n.+1) * R2 *
+                                 (f_error k b x0 x A +
+                                  vec_inf_norm (x_fix x b_real A_real)) +
+                                 ((g ty n.+1 * (1 + default_rel ty) + default_rel ty) *
+                                  (vec_inf_norm (A1_diag A_real) *
+                                   vec_inf_norm b_real) +
+                                  (1 + g ty n.+1) * g1 ty n.+1 (n.+1 - 1) *
+                                  (1 + default_rel ty) *
+                                  vec_inf_norm (A1_diag A_real)) +
+                                 g1 ty n.+1 (n.+1 - 1) + R2 * f_error k b x0 x A)%Re = 
+                                ((((1 + g ty n.+1) * (1 + default_rel ty) * g ty n.+1 +
+                                  default_rel ty * (1 + g ty n.+1) +   g ty n.+1 + 1) * R2) *
+                                f_error k b x0 x A + 
+                                (((1 + g ty n.+1) * (1 + default_rel ty) * g ty n.+1 +
+                                  default_rel ty * (1 + g ty n.+1) + g ty n.+1) *
+                                  (R2  * vec_inf_norm (x_fix x b_real A_real)) +
+                                  ((g ty n.+1 * (1 + default_rel ty) + default_rel ty) *
+                                  (vec_inf_norm (A1_diag A_real) *
+                                   vec_inf_norm b_real) +
+                                  (1 + g ty n.+1) * g1 ty n.+1 (n.+1 - 1) *
+                                  (1 + default_rel ty) *
+                                  vec_inf_norm (A1_diag A_real)) +
+                                 g1 ty n.+1 (n.+1 - 1)))%Re).
+                        { nra. } rewrite H8. clear H8. fold delta.
 
 
 
