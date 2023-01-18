@@ -319,6 +319,15 @@ rewrite !mxE. rewrite !nth_vec_to_list_real.
 + apply ltn_ord.
 Qed.
 
+
+(** remember to remove this later **)
+Lemma ft2r_mat_equiv {ty} {m n : nat} (A : 'M[ftype ty]_(m.+1,n.+1)):
+  fma_matrix_vec_mult.FT2R_mat A = FT2R_mat A.
+Proof.
+by unfold fma_matrix_vec_mult.FT2R_mat, FT2R_mat.
+Qed.
+
+
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
@@ -504,7 +513,8 @@ induction k.
                           by case: (x1 == y :> nat).
                         } rewrite H6. apply matrix_vec_mult_bound_corollary.
                         intros. admit.
-             **  
+             **  rewrite !ft2r_mat_equiv .
+                 
 
 
 
