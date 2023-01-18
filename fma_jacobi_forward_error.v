@@ -459,17 +459,27 @@ induction k.
              ** apply Rplus_le_compat_r.
                 +++ apply Rplus_le_compat.
                     --- admit.
-                    --- unfold x_fix.
-
-
-
-
-
-
-
-
-
-admit.
+                    --- unfold x_fix. rewrite diag_matrix_vec_mult_diff .
+                        apply Rle_trans with
+                        (vec_inf_norm (A1_diag (FT2R_mat A)) *
+                         vec_inf_norm (FT2R_mat
+                                         (b -f A2_J A *f X_m_jacobi k x0 b A) -
+                                       (FT2R_mat b -
+                                        A2_J_real (FT2R_mat A) *m 
+                                        FT2R_mat (X_m_jacobi k x0 b A))))%Re.
+                        *** apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R .
+                        *** apply Rmult_le_compat_l.
+                            ++++ apply /RleP. apply vec_norm_pd.
+                            ++++ assert ((FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A) -
+                                          (FT2R_mat b -
+                                           A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A))) =
+                                         (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A) - 
+                                          (FT2R_mat b - FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) +
+                                         (FT2R_mat b - FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) - 
+                                           (FT2R_mat b -
+                                           A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A)))).
+                                 { by rewrite add_vec_distr_2. } rewrite H6. clear H6.
+                                 apply /RleP. apply triang_ineq.
          -- 
 
 
