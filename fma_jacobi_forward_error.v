@@ -688,19 +688,19 @@ induction k.
                             ++++ apply Rplus_le_le_0_compat.
                                  ---- apply Rplus_le_le_0_compat.
                                       **** repeat apply Rmult_le_pos.
-                                           +++++
-              
-
-
-
-
- admit.
+                                           +++++ apply Rplus_le_le_0_compat. nra. apply g_pos.
+                                           +++++ apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+                                           +++++ apply g_pos.
+                                      **** apply Rmult_le_pos.
+                                           +++++ apply default_rel_ge_0.
+                                           +++++ apply Rplus_le_le_0_compat. nra. apply g_pos.
+                                 ---- apply g_pos.
+                            ++++ unfold R2. apply Rmult_le_pos.
+                                 ---- apply /RleP. apply vec_norm_pd.
+                                 ---- apply /RleP. apply matrix_norm_pd.
                         *** apply H7.
+                    ---
 
-
-
-                      assert (forall x y z: R, (x - z <= y)%Re -> (x <= y + z)%Re).
-                      { intros. nra. } apply H7. apply 
 
 
  nra.
