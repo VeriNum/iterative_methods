@@ -190,10 +190,11 @@ Lemma rho_ge_0 {ty} {n:nat}
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
-  let R := vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real) in
+  let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
   let delta := default_rel ty in
-  let rho := ((g ty n.+1 * (1+ delta) * (1+ g ty n.+1) + delta + delta * g ty n.+1 + g ty n.+1) * R)%Re in
-  (0 <= rho)%Re.
+  let rho := (((1 + g ty n.+1) * (1 + delta) * g ty n.+1 +
+                delta * (1 + g ty n.+1) + g ty n.+1 + 1) * R)%Re in
+ (0 <= rho)%Re.
 Proof.
 intros.
 unfold rho.
@@ -202,15 +203,15 @@ repeat apply Rmult_le_pos.
   - apply Rplus_le_le_0_compat.
     * apply Rplus_le_le_0_compat.
       ++ repeat apply Rmult_le_pos.
-         -- apply g_pos.
+         -- apply Rplus_le_le_0_compat. nra. apply g_pos.
          -- unfold delta. apply Rplus_le_le_0_compat. nra.
             apply default_rel_ge_0.
+         -- apply g_pos.
+      ++ unfold delta. apply Rmult_le_pos.
+         -- unfold delta. apply default_rel_ge_0.
          -- apply Rplus_le_le_0_compat. nra. apply g_pos.
-      ++ unfold delta. apply default_rel_ge_0.
-    * apply Rmult_le_pos.
-      ++ unfold delta. apply default_rel_ge_0.
-      ++ apply g_pos.
-  - apply g_pos.
+    * apply g_pos.
+  - nra.
 + apply /RleP. apply vec_norm_pd.
 + apply /RleP. apply matrix_norm_pd.
 Qed.
