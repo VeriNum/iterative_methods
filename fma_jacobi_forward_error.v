@@ -355,8 +355,8 @@ Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
          (vec_to_list_float n.+1 v2)) ->
     is_finite (fprec ty) (femax ty) xy.1 = true /\
     is_finite (fprec ty) (femax ty) xy.2 = true /\ 
-      Rabs (FT2R (fst (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty) /\
-      Rabs (FT2R (snd (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty)) ->
+     (Rabs (FT2R (fst (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1)))%Re /\
+     (Rabs (FT2R (snd (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1)))%Re) ->
 
   (vec_inf_norm (FT2R_mat (diag_vector_mult v1 v2) - 
                 diag_matrix_vec_mult_R (FT2R_mat v1) (FT2R_mat v2)) <=
@@ -395,7 +395,47 @@ apply bigmax_le.
             (Zconst ty 0)))).
     destruct H2 as [d [e [Heq [Hd [He H2]]]]].
     rewrite H2. rewrite !nth_vec_to_list_float.
-    + rewrite !inord_val. admit.
+    + rewrite !inord_val.
+      apply Rle_lt_trans with
+      (Rabs
+         (FT2R (v1 (inord i) ord0) *
+          FT2R (v2 (inord i) ord0) * (1 + d)) + Rabs e)%Re.
+      - apply Rabs_triang.
+      - rewrite !Rabs_mult.
+        apply Rle_lt_trans with
+        (Rabs (FT2R (v1 (inord i) ord0)) *
+           Rabs (FT2R (v2 (inord i) ord0)) * 
+           (1 + default_rel ty) + default_abs ty)%Re.
+        * apply Rplus_le_compat.
+          ++ apply Rmult_le_compat_l.
+             -- apply Rmult_le_pos; apply Rabs_pos.
+             -- apply Rle_trans with (Rabs 1 + Rabs d)%Re.
+                ** apply Rabs_triang.
+                ** rewrite Rabs_R1. apply Rplus_le_compat_l.
+                   apply Hd.
+          ++ apply He.
+        * apply Rle_lt_trans with 
+            ((sqrt
+              (F' ty /
+               (INR n.+1 * (1 + default_rel ty) ^ n.+1) -
+               default_abs ty)) ^ 2 * (1 + default_rel ty) +
+             default_abs ty)%Re.
+          ++ apply Rplus_le_compat_r.
+             apply Rmult_le_compat_r.
+             -- apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+             -- assert (forall x:R, (x^2)%Re = (x * x)%Re).
+                { intros. simpl;nra. } rewrite H3.
+                admit.
+          ++  
+  
+
+
+
+
+
+
+
+ admit.
     + rewrite inordK; by rewrite size_map size_enum_ord in H0.
     + rewrite inordK; by rewrite size_map size_enum_ord in H0.
   } specialize (H1 H2).
