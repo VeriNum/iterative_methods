@@ -350,6 +350,20 @@ Lemma rel_le_1 {ty} {n:nat}:
   (/ INR n.+1 *
      ((1 + default_rel ty) *
       / (1 + default_rel ty) ^ n.+1) <= 1)%Re.
+Proof.
+assert (forall x y:R , (x * y <= 1 * 1)%Re -> (x * y <= 1)%Re).
+{ intros. nra. } apply H.
+apply Rmult_le_compat.
++ apply Rlt_le. apply Rinv_0_lt_compat. apply lt_0_INR. lia.
++ apply Rmult_le_pos.
+  - apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+  - apply Rlt_le. apply Rinv_0_lt_compat.
+    apply pow_lt. apply Rplus_lt_0_compat. nra.
+    apply default_rel_gt_0.
++ 
+
+
+
 Admitted.
 
 
@@ -475,7 +489,7 @@ apply bigmax_le.
                         {  nra. } rewrite H3. clear H3.
                         assert (forall x y:R, (x * y <= x * 1)%Re -> (x * y <= x)%Re).
                         { intros. nra. } apply H3. apply Rmult_le_compat_l.
-                        --- admit.
+                        --- apply  F_p_ge_0 .
                         --- apply rel_le_1.
                    +++ apply not_0_INR. lia.
                    +++ apply pow_nonzero.
@@ -490,7 +504,7 @@ apply bigmax_le.
                    assert (forall x y:R, (0 < y)%Re -> (x - y < x)%Re).
                    { intros. nra. } apply H4. apply delta_eps_lt_fmax.
           -- apply Rmult_le_pos.
-             ** admit.
+             ** apply  F_p_ge_0 .
              ** rewrite Rinv_mult_distr.
                 +++ apply Rmult_le_pos.
                     --- apply Rlt_le. apply Rinv_0_lt_compat.
