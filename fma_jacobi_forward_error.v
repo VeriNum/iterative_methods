@@ -361,11 +361,48 @@ Qed.
 ***)
 
 Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
+  (forall (xy : ftype ty * ftype ty) (i : 'I_n.+1),
+    In xy
+      (combine
+         (vec_to_list_float n.+1  v1)
+         (vec_to_list_float n.+1 v2)) ->
+    is_finite (fprec ty) (femax ty) xy.1 = true /\
+    is_finite (fprec ty) (femax ty) xy.2 = true /\ 
+      Rabs (FT2R (fst (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty) /\
+      Rabs (FT2R (snd (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty)) ->
+
   (vec_inf_norm (FT2R_mat (diag_vector_mult v1 v2) - 
                 diag_matrix_vec_mult_R (FT2R_mat v1) (FT2R_mat v2)) <=
   (vec_inf_norm (FT2R_mat v1) * vec_inf_norm (FT2R_mat v2)) * 
   g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re.
 Proof.
+intros.
+unfold diag_vector_mult, diag_matrix_vec_mult_R.
+unfold vec_inf_norm.
+apply bigmax_le.
++ by rewrite size_map size_enum_ord.
++ intros. rewrite seq_equiv. rewrite nth_mkseq;
+  last by rewrite size_map size_enum_ord in H0.
+  rewrite !mxE.
+  pose proof (BMULT_accurate ty 
+              (nth (n.+1.-1 - @inord n i) (vec_to_list_float n.+1 v1) (Zconst ty 0))
+              (nth (n.+1.-1 - @inord n i) (vec_to_list_float n.+1 v2) (Zconst ty 0))).
+  assert (Bmult_no_overflow ty
+       (FT2R
+          (nth (n.+1.-1 - @inord n i)
+             (vec_to_list_float n.+1 v1)
+             (Zconst ty 0)))
+       (FT2R
+          (nth (n.+1.-1 - @inord n i)
+             (vec_to_list_float n.+1 v2)
+             (Zconst ty 0)))). 
+  { admit. } specialize (H1 H2).
+  destruct H1 as [d [e [Heq [Hd [He H1]]]]].
+  rewrite H1. rewrite !nth_vec_to_list_float.
+  - 
+  
+  
+
 
 
 
