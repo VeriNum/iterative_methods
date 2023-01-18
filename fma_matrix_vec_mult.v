@@ -368,4 +368,20 @@ rewrite -bigmaxr_mulr.
 Qed.
 
 
+Lemma matrix_err_bound_le_rel {n:nat} {ty}
+ (A: 'M[ftype ty]_n.+1) (v: 'cV[ftype ty]_n.+1):
+ mat_vec_mult_err_bnd A v <=
+ (matrix_inf_norm (FT2R_mat A) * vec_inf_norm (FT2R_mat v)) * g ty n.+1 +
+   g1 ty n.+1 (n.+1 - 1).
+Proof.
+unfold mat_vec_mult_err_bnd.
+unfold vec_inf_norm, matrix_inf_norm.
+rewrite mulrC.
+rewrite -bigmaxr_mulr.
++ apply /RleP. rewrite -RplusE -RmultE.
+  apply bigmax_le.
+  - by rewrite size_map size_enum_ord.
+  - intros. 
+
+
 End WITHNANS.
