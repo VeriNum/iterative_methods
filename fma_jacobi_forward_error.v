@@ -488,16 +488,20 @@ apply bigmax_le.
                             (fmax ty - (2 * fmax ty * default_rel ty - default_abs ty))%Re).
                    { nra. } rewrite H3.
                    assert (forall x y:R, (0 < y)%Re -> (x - y < x)%Re).
-                   { intros. nra. } apply H4. 
-  
-
-
-
-
-
-
-
- admit.
+                   { intros. nra. } apply H4. apply delta_eps_lt_fmax.
+          -- apply Rmult_le_pos.
+             ** admit.
+             ** rewrite Rinv_mult_distr.
+                +++ apply Rmult_le_pos.
+                    --- apply Rlt_le. apply Rinv_0_lt_compat.
+                        apply lt_0_INR. lia.
+                    --- apply Rlt_le. apply Rinv_0_lt_compat.
+                        apply pow_lt. apply Rplus_lt_0_compat. nra.
+                        apply default_rel_gt_0.
+                +++ apply not_0_INR. lia.
+                +++ apply pow_nonzero.
+                    assert ((0 <=  default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+                    { nra. } apply H3. apply default_rel_ge_0.
     + rewrite inordK; by rewrite size_map size_enum_ord in H0.
     + rewrite inordK; by rewrite size_map size_enum_ord in H0.
   } specialize (H1 H2).
