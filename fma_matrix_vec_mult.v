@@ -241,7 +241,10 @@ Qed.
 Definition FT2R_abs {m n: nat} (A : 'M[R]_(m.+1, n.+1)) :=
   \matrix_(i,j) Rabs (A i j).
 
-
+Lemma sum_abs_eq {n:nat} (f: 'I_n.+1 -> R):
+  (forall i, (0 <= f i)%Re) ->
+  Rabs (\sum_j (f j)) = \sum_j (f j).
+Proof.
 
 Lemma sum_fold_mathcomp_equiv {n:nat} {ty} m i (le_n_m : (m <= n.+1)%nat)
   (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1) :
@@ -392,7 +395,23 @@ rewrite -bigmaxr_mulr.
               | i1 <- enum 'I_n.+1] *
          Rabs (FT2R_mat v i0 0))%Ri
       | i0 <- enum 'I_n.+1]`_i.
-      ++ admit.
+      ++ rewrite seq_equiv. rewrite nth_mkseq;
+         last by rewrite size_map size_enum_ord in H.
+         rewrite mulrC. rewrite -bigmaxr_mulr. 
+         -- apply Rle_trans with 
+            [seq (Rabs (FT2R_mat v (inord i) 0) *
+                   row_sum (FT2R_mat A) i0)%Ri
+                | i0 <- enum 'I_n.+1]`_i.
+            ** rewrite seq_equiv. rewrite nth_mkseq;
+               last by rewrite size_map size_enum_ord in H.
+               rewrite -RmultE. unfold row_sum. rewrite big_distrr. 
+               
+               
+
+
+
+
+admit.
       ++ apply /RleP.
          apply (@bigmaxr_ler _ 0%Re [seq bigmaxr 0%Re
                                       [seq row_sum (FT2R_mat A) i1
