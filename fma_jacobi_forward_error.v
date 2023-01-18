@@ -414,7 +414,32 @@ apply bigmax_le.
          -- rewrite !Rabs_mult. apply Rmult_le_compat.
             ** apply Rmult_le_pos; apply Rabs_pos.
             ** apply Rabs_pos.
-            **
+            ** apply Rmult_le_compat; try apply Rabs_pos.
+                +++ apply Rle_trans with  
+                    [seq Rabs (FT2R_mat v1 i0 0)
+                          | i0 <- enum 'I_n.+1]`_i.
+                    --- rewrite seq_equiv. rewrite nth_mkseq;
+                        last by rewrite size_map size_enum_ord in H0.
+                        rewrite !mxE. apply Rle_refl.
+                    --- apply /RleP.
+                        apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v1 i0 0)
+                                                    | i0 <- enum 'I_n.+1] i).
+                        rewrite size_map size_enum_ord .
+                        by rewrite size_map size_enum_ord in H0.
+                +++ apply Rle_trans with  
+                    [seq Rabs (FT2R_mat v2 i0 0)
+                          | i0 <- enum 'I_n.+1]`_i.
+                    --- rewrite seq_equiv. rewrite nth_mkseq;
+                        last by rewrite size_map size_enum_ord in H0.
+                        rewrite !mxE. apply Rle_refl.
+                    --- apply /RleP.
+                        apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v2 i0 0)
+                                                    | i0 <- enum 'I_n.+1] i).
+                        rewrite size_map size_enum_ord .
+                        by rewrite size_map size_enum_ord in H0.
+           ** unfold g. 
+              eapply Rle_trans. apply Hd.
+              
   
   
 
