@@ -399,7 +399,22 @@ apply bigmax_le.
   { admit. } specialize (H1 H2).
   destruct H1 as [d [e [Heq [Hd [He H1]]]]].
   rewrite H1. rewrite !nth_vec_to_list_float.
-  - 
+  - rewrite !nth_vec_to_list_real.
+    * rewrite !inord_val. rewrite !mxE.
+      rewrite -!RmultE -!RminusE. 
+      assert ((FT2R (v1 (inord i) ord0) *
+                FT2R (v2 (inord i) ord0) * (1 + d) + e -
+                FT2R (v1 (inord i) ord0) *
+                FT2R (v2 (inord i) ord0))%Re =
+              ((FT2R (v1 (inord i) ord0) * FT2R (v2 (inord i) ord0)) * d + e)%Re).
+      { nra. } rewrite H3.
+      eapply Rle_trans.
+      ++ apply Rabs_triang.
+      ++ apply Rplus_le_compat.
+         -- rewrite !Rabs_mult. apply Rmult_le_compat.
+            ** apply Rmult_le_pos; apply Rabs_pos.
+            ** apply Rabs_pos.
+            **
   
   
 
