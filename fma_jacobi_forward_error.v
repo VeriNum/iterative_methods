@@ -360,11 +360,34 @@ apply Rmult_le_compat.
   - apply Rlt_le. apply Rinv_0_lt_compat.
     apply pow_lt. apply Rplus_lt_0_compat. nra.
     apply default_rel_gt_0.
-+ 
-
-
-
-Admitted.
++ assert (1%Re = (/1)%Re). { nra. } rewrite H0.
+  destruct n. simpl;nra.
+  apply Rlt_le. apply Rinv_1_lt_contravar. nra.
+  replace 1%Re with (INR 1) by (simpl;nra).
+  apply lt_INR. lia.
++ simpl. rewrite Rinv_mult_distr.
+  - assert (((1 + default_rel ty) *
+               (/ (1 + default_rel ty) *
+                / (1 + default_rel ty) ^ n))%Re = 
+             ( ((1 + default_rel ty) * /(1 + default_rel ty)) *
+              (/ (1 + default_rel ty) ^ n))%Re).
+    { nra. } rewrite H0. rewrite Rinv_r.
+    * destruct n. simpl;nra.
+      assert ((/ (1 + default_rel ty) ^ n.+1 < /1)%Re -> 
+              (1 * / (1 + default_rel ty) ^ n.+1 <= 1)%Re).
+      { nra. } apply H1.
+      apply Rinv_1_lt_contravar. nra. 
+      apply Rlt_pow_R1.
+      assert ((0 < default_rel ty)%Re ->  (1 < 1 + default_rel ty)%Re).
+      { nra. } apply H2. apply default_rel_gt_0. lia.
+    * assert ((0 < default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+      { nra. } apply H1. apply default_rel_gt_0.
+  - assert ((0 < default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+    { nra. } apply H0. apply default_rel_gt_0.
+  - apply pow_nonzero. 
+    assert ((0 < default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+    { nra. } apply H0. apply default_rel_gt_0.
+Qed.
 
 
 Lemma delta_eps_lt_fmax {ty}:
