@@ -349,7 +349,8 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
                   delta * vec_inf_norm (A1_diag A_real) * vec_inf_norm b_real)%Re in
 
   (rho < 1)%Re ->
-  (A =  ((matrix_of_diag_A1 A) +f (A2_J A))) ->
+   A_real \in unitmx ->
+  (forall i : 'I_n.+1, FT2R_mat A i i <> 0%Re) ->
   forall x0: 'cV[ftype ty]_n.+1, 
   forall k:nat,
   (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re.
@@ -361,22 +362,20 @@ induction k.
            (rho * ((1 - rho ^ k) / (1 - rho)) + 1)%Re).
   { assert ((rho * ((1 - rho ^ k) / (1 - rho)) + 1)%Re = 
             (rho * ((1 - rho ^ k) / (1 - rho)) + (1 - rho) * / (1 - rho))%Re).
-    { rewrite Rinv_r; nra. } rewrite H3. clear H3.
-    Search ((_ + _ ) * _ )%Re.
+    { rewrite Rinv_r; nra. } rewrite H4. clear H4.
     assert ((rho * ((1 - rho ^ k) / (1 - rho)) +
                   (1 - rho) * / (1 - rho))%Re = 
              (( (rho * (1 - rho ^ k)) * / (1 - rho))%Re + 
               (1 - rho) * / (1 - rho))%Re).
-    { nra. } rewrite H3. clear H3.
+    { nra. } rewrite H4. clear H4.
     rewrite -Rmult_plus_distr_r. nra.
-  } rewrite H3. 
-  Search ( (_ + _ ) * _)%Re.
+  } rewrite H4. 
   rewrite Rmult_plus_distr_r.
   assert ((rho * rho ^ k * f_error 0 b x0 x A +
             (rho * ((1 - rho ^ k) / (1 - rho)) * d_mag + 1 * d_mag))%Re = 
            (rho * (rho ^ k * f_error 0 b x0 x A +
                         (1 - rho ^ k) / (1 - rho) * d_mag) + d_mag)%Re).
-  { nra. } rewrite H4.
+  { nra. } rewrite H5.
   apply Rle_trans with (rho * f_error k b x0 x A + d_mag)%Re.
   - unfold f_error. 
     assert (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
@@ -385,7 +384,7 @@ induction k.
                x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A)) +
              (x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A) -
               x_fix x (FT2R_mat b) (FT2R_mat A))).
-    { by rewrite add_vec_distr_2. } rewrite H5. clear H5.
+    { by rewrite add_vec_distr_2. } rewrite H6. clear H6.
     apply Rle_trans with 
     (vec_inf_norm (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
                        x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A) ) +
@@ -401,7 +400,6 @@ induction k.
       ++ apply Rplus_le_compat_l.
          unfold x_fix. rewrite diag_matrix_vec_mult_diff.
          rewrite add_vec_distr_4. 
-         Search (_ *m (_ - _) = _).
          rewrite -mulmxBr.
          apply Rle_trans with
          ( vec_inf_norm (A1_diag (FT2R_mat A)) * 
@@ -422,14 +420,15 @@ induction k.
                           vec_inf_norm (x - FT2R_mat (X_m_jacobi k x0 b A))))%Re = 
                         ((vec_inf_norm (A1_diag (FT2R_mat A)) * matrix_inf_norm (A2_J_real (FT2R_mat A))) *
                         (vec_inf_norm (x - FT2R_mat (X_m_jacobi k x0 b A))))%Re).
-               { nra. } rewrite H5. unfold R2.
+               { nra. } rewrite H6. unfold R2.
                rewrite -RmultE. rewrite sub_vec_comm_1.
                rewrite -vec_inf_norm_opp. unfold f_error. rewrite -x_fixpoint.
                +++ apply Rle_refl.
                +++ unfold x. rewrite mulmxA.
                   assert (FT2R_mat A *m A_real^-1 = 1).
-                  { admit. } rewrite H6. by rewrite mul1mx /b_real.
-               +++ 
+                  { fold A_real. by rewrite mulmxV . }
+                  rewrite H7. by rewrite mul1mx /b_real.
+               +++ apply H3.
          -- auto.
       ++ admit.
   - apply Rplus_le_compat_r. apply Rmult_le_compat_l.
