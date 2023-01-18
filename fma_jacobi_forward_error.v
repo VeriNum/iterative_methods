@@ -496,7 +496,15 @@ induction k.
                         intros. 
                         specialize (H0 b (A2_J A *f X_m_jacobi k x0 b A) xy H6).
                         apply H0.
-                +++
+                +++ apply Rmult_le_compat_l.
+                    --- apply /RleP. apply vec_norm_pd.
+                    --- apply /RleP. 
+                        assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
+                        { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                          by case: (x1 == y :> nat).
+                        } rewrite H6. apply matrix_vec_mult_bound_corollary.
+                        intros. admit.
+             **  
 
 
 
