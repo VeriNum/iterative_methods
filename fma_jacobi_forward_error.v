@@ -366,13 +366,17 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
   
    let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
    let delta := default_rel ty in
-   let rho := ((g ty n.+1 * (1+ delta) * (1+ g ty n.+1) + delta + delta * g ty n.+1 + g ty n.+1) * R)%Re in
-   let d_mag := ( g ty n.+1 * (1 + delta) * (1 + g ty n.+1) * R * vec_inf_norm x +
-                  (delta + delta * g ty n.+1 + g ty n.+1) * R * vec_inf_norm x +
-                  g ty n.+1 * (1 + delta) * vec_inf_norm (A1_diag A_real) * vec_inf_norm b_real  +
-                  g ty n.+1 * g1 ty n.+1 (n.+1 - 1)%nat * (1 + delta) * vec_inf_norm (A1_diag A_real) +
-                  g1 ty n.+1 (n.+1 - 1)%nat * (1+ delta) * vec_inf_norm (A1_diag A_real) +
-                  delta * vec_inf_norm (A1_diag A_real) * vec_inf_norm b_real)%Re in
+   let rho := (((1 + g ty n.+1) * (1 + delta) * g ty n.+1 +
+                delta * (1 + g ty n.+1) + g ty n.+1 + 1) * R)%Re in
+   let d_mag := (((1 + g ty n.+1) * (1 + delta) * g ty n.+1 +
+                   delta * (1 + g ty n.+1) + g ty n.+1) *
+                  (R * vec_inf_norm (x_fix x b_real A_real)) +
+                  ((g ty n.+1 * (1 + delta) + delta) *
+                   (vec_inf_norm (A1_diag A_real) *
+                    vec_inf_norm b_real) +
+                   (1 + g ty n.+1) * g1 ty n.+1 (n.+1 - 1) *
+                   (1 + delta) * vec_inf_norm (A1_diag A_real)) +
+                  g1 ty n.+1 (n.+1 - 1))%Re in 
 
   (rho < 1)%Re ->
    A_real \in unitmx ->
@@ -724,30 +728,8 @@ induction k.
                                   (1 + default_rel ty) *
                                   vec_inf_norm (A1_diag A_real)) +
                                  g1 ty n.+1 (n.+1 - 1)))%Re).
-                        { nra. } rewrite H8. clear H8. fold delta.
-
-
-
- nra.
-
-((vec_inf_norm (A1_diag A_real) * matrix_inf_norm (FT2R_mat (A2_J A))) *
-                              (1 + g ty n.+1) * (1 + default_rel ty)) * g ty n.+1 + 
-                              
-
-
-
- admit.
-
-
-
- split;apply H0.
-
-
-
-
-
-
- admit.
+                        { nra. } rewrite H8. clear H8. fold delta. fold rho. fold d_mag.
+                        unfold f_error. fold b_real. fold A_real. apply Rle_refl.
   - apply Rplus_le_compat_r. apply Rmult_le_compat_l.
     * by apply rho_ge_0.
     * nra.
