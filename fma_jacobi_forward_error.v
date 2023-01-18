@@ -352,6 +352,11 @@ Lemma rel_le_1 {ty} {n:nat}:
       / (1 + default_rel ty) ^ n.+1) <= 1)%Re.
 Admitted.
 
+
+Lemma delta_eps_lt_fmax {ty}:
+  (0 < 2 * fmax ty * default_rel ty - default_abs ty)%Re.
+Proof.
+
 Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty) (i : 'I_n.+1),
     In xy
@@ -453,7 +458,14 @@ apply bigmax_le.
                    +++ apply pow_nonzero.
                        assert ((0 <= default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
                        { intros. nra. } apply H3. apply default_rel_ge_0.
-                ** 
+                ** unfold F'. 
+                   rewrite Rmult_minus_distr_l. rewrite Rmult_1_r.
+                   assert ((fmax ty - fmax ty * (2 * default_rel ty) +
+                              default_abs ty)%Re = 
+                            (fmax ty - (2 * fmax ty * default_rel ty - default_abs ty))%Re).
+                   { nra. } rewrite H3.
+                   assert (forall x y:R, (0 < y)%Re -> (x - y < x)%Re).
+                   { intros. nra. } apply H4. 
   
 
 
