@@ -267,6 +267,14 @@ intros. apply matrixP. unfold eqrel.
 intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
 Qed.
 
+Lemma sub_vec_2 {n:nat}:
+  forall a b: 'cV[R]_n,
+  (a - b) = (a + (-b)).
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+Qed.
+
 Lemma x_fixpoint {n:nat} x b (A: 'M[R]_n.+1):
   A *m x = b ->
   (forall i, A i i <> 0%Re) ->
@@ -480,12 +488,38 @@ induction k.
                             apply g_pos.
                             apply Rmult_le_compat_l.
                             apply /RleP. apply vec_norm_pd.
-                            
+                            assert ((vec_inf_norm (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A) -
+                                                  (FT2R_mat b - FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) <=
+                                    (vec_inf_norm (FT2R_mat b) + vec_inf_norm (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) *
+                                    (default_rel ty))).
+                            { apply vec_float_sub. intros.
+                              specialize (H0 b (A2_J A *f X_m_jacobi k x0 b A) xy H7).
+                              apply H0.
+                            } apply reverse_triang_ineq in H7.
+                            apply Rle_trans with 
+                            ((vec_inf_norm (FT2R_mat b) +
+                                    vec_inf_norm
+                                      (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) *
+                                   (1 + default_rel ty))%Re.
+                            ++++ rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
+                                 apply Rle_trans with 
+                                 (vec_inf_norm
+                                   (FT2R_mat b -
+                                    FT2R_mat (A2_J A *f X_m_jacobi k x0 b A)) + 
+                                   (vec_inf_norm (FT2R_mat b) +
+                                      vec_inf_norm
+                                        (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) *
+                                     default_rel ty)%Re.
+                                 ---- assert (forall x y z:R, (x - y <= z)%Re -> (x <= y + z)%Re).
+                                      { intros. nra. } apply H8. by apply /RleP.
+                                 ---- apply Rplus_le_compat_r.
+                                      assert (vec_inf_norm
+                                                  (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A)) = 
+                                              vec_inf_norm (- (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A)))).
+                                      { by rewrite vec_inf_norm_opp. } rewrite H8.
+                                      apply /RleP. apply triang_ineq.
 
 
-
-
-admit.
                     --- unfold x_fix. rewrite diag_matrix_vec_mult_diff .
                         apply Rle_trans with
                         (vec_inf_norm (A1_diag (FT2R_mat A)) *
