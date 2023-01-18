@@ -326,17 +326,16 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
   let b_real := FT2R_mat b in
   let x:= A_real^-1 *m b_real in
   x != 0 ->
-  (forall (A: 'M[ftype ty]_n.+1) (v: 'cV[ftype ty]_n.+1)
+  (forall (v1 v2: 'cV[ftype ty]_n.+1)
           (xy : ftype ty * ftype ty) (i : 'I_n.+1),
     In xy
       (combine
-         (vec_to_list_float n.+1
-            (\row_j A (inord i) j)^T)
-         (vec_to_list_float n.+1 v)) ->
+         (vec_to_list_float n.+1 v1)
+         (vec_to_list_float n.+1 v2)) ->
     is_finite (fprec ty) (femax ty) xy.1 = true /\
     is_finite (fprec ty) (femax ty) xy.2 = true /\ 
-      Rabs (FT2R (fst (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty) /\
-      Rabs (FT2R (snd (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty)) ->
+      Rabs (FT2R (fst (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1) /\
+      Rabs (FT2R (snd (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1)) ->
   
    let R := vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real) in
    let delta := default_rel ty in
@@ -486,8 +485,23 @@ induction k.
                           A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A))  =
                      - (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) -
                         A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A)) ).
-             { rewrite add_vec_distr_4. by rewrite sub_vec_comm_1. } rewrite H6. clear H6.
-             rewrite -vec_inf_norm_opp.
+             { rewrite add_vec_distr_4. by rewrite sub_vec_comm_1. auto. } rewrite H6. clear H6.
+             rewrite -vec_inf_norm_opp. rewrite -RplusE.
+             rewrite Rmult_plus_distr_l. eapply Rle_trans.
+             ** apply Rplus_le_compat_r. apply Rplus_le_compat_l.
+                apply Rplus_le_compat.
+                +++ apply Rmult_le_compat_l.
+                    --- apply /RleP. apply vec_norm_pd.
+                    --- apply /RleP. apply vec_float_sub.
+                        intros.
+                        specialize (H0 
+
+
+
+ split;apply H0.
+
+
+
 
 
 
