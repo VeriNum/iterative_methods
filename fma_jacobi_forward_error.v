@@ -466,7 +466,26 @@ induction k.
                apply triang_ineq.
              ** apply Rplus_le_compat_r.
                 +++ apply Rplus_le_compat.
-                    --- admit.
+                    --- simpl. unfold jacobi_iter. 
+                        apply Rle_trans with 
+                          ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+                            vec_inf_norm (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A))) * g ty n.+1 +
+                               g1 ty n.+1 (n.+1 - 1))%Re.
+                        *** admit.
+                        *** assert (FT2R_mat (A1_inv_J A) = A1_diag A_real).
+                            { apply matrixP. unfold eqrel. intros. rewrite !mxE /=.
+                              admit.
+                            } rewrite H6. apply Rplus_le_compat_r.
+                            apply Rmult_le_compat_r.
+                            apply g_pos.
+                            apply Rmult_le_compat_l.
+                            apply /RleP. apply vec_norm_pd.
+                            
+
+
+
+
+admit.
                     --- unfold x_fix. rewrite diag_matrix_vec_mult_diff .
                         apply Rle_trans with
                         (vec_inf_norm (A1_diag (FT2R_mat A)) *
