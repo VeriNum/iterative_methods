@@ -613,7 +613,41 @@ induction k.
                                     replace (p + a * b * c + d)%Re with (p + (a * b * c + d))%Re by nra
                                  end. apply Rplus_le_compat_r. apply /RleP. apply submult_prop.
                         *** apply Rle_refl.
+               +++ assert ((vec_inf_norm (A1_diag A_real) *
+                             ((vec_inf_norm (FT2R_mat b) +
+                               (matrix_inf_norm (FT2R_mat (A2_J A)) *
+                                vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
+                                (1 + g ty n.+1) + g1 ty n.+1 (n.+1 - 1))) * 1 +
+                              (vec_inf_norm (FT2R_mat b) +
+                               (matrix_inf_norm (FT2R_mat (A2_J A)) *
+                                vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
+                                (1 + g ty n.+1) + g1 ty n.+1 (n.+1 - 1))) *
+                              default_rel ty) * g ty n.+1 +
+                             g1 ty n.+1 (n.+1 - 1) +
+                             vec_inf_norm (A1_diag (FT2R_mat A)) *
+                             ((vec_inf_norm (FT2R_mat b) +
+                               (matrix_inf_norm (FT2R_mat (A2_J A)) *
+                                vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
+                                (1 + g ty n.+1) + g1 ty n.+1 (n.+1 - 1))) *
+                              default_rel ty +
+                              (matrix_inf_norm (FT2R_mat (A2_J A)) *
+                               vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
+                               g ty n.+1 + g1 ty n.+1 (n.+1 - 1))) +
+                             R2 * f_error k b x0 x A)%Re = 
+                          ((((((1 + g ty n.+1) * (1 + default_rel ty) * g ty n.+1 +
+                            default_rel ty * (1 + g ty n.+1) + g ty n.+1) *
+                            (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (FT2R_mat (A2_J A)))) *
+                           vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A))) +
+                           ((g ty n.+1 * (1 + default_rel ty) + default_rel ty) *
+                            (vec_inf_norm (A1_diag A_real) * vec_inf_norm (FT2R_mat b)) +
+                           ( (1+ g ty n.+1) * g1 ty n.+1 (n.+1 - 1) * (1 + default_rel ty)) *
+                            (vec_inf_norm (A1_diag A_real))) + g1 ty n.+1 (n.+1 - 1)) + 
+                           R2 * f_error k b x0 x A)%Re).
+                   { field_simplify. auto.
 
+((vec_inf_norm (A1_diag A_real) * matrix_inf_norm (FT2R_mat (A2_J A))) *
+                              (1 + g ty n.+1) * (1 + default_rel ty)) * g ty n.+1 + 
+                              
 
 
 
