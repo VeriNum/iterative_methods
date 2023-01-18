@@ -245,6 +245,18 @@ Lemma sum_abs_eq {n:nat} (f: 'I_n.+1 -> R):
   (forall i, (0 <= f i)%Re) ->
   Rabs (\sum_j (f j)) = \sum_j (f j).
 Proof.
+intros.
+induction n.
++ simpl. rewrite big_ord_recr /= big_ord0 /=.
+  rewrite add0r. rewrite Rabs_right. by []. apply Rle_ge. by apply H.
++ simpl. rewrite big_ord_recr /=. rewrite Rabs_right.
+  by []. rewrite -RplusE. apply Rle_ge.
+  apply Rplus_le_le_0_compat.
+  - rewrite -IHn. apply Rabs_pos. 
+    intros. apply H.
+  - apply H.
+Qed.
+  
 
 Lemma sum_fold_mathcomp_equiv {n:nat} {ty} m i (le_n_m : (m <= n.+1)%nat)
   (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1) :
