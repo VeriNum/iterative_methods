@@ -354,7 +354,7 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
       (Rabs (FT2R (fst (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re /\
       (Rabs (FT2R (snd (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re) ->
   
-   let R := vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real) in
+   let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
    let delta := default_rel ty in
    let rho := ((g ty n.+1 * (1+ delta) * (1+ g ty n.+1) + delta + delta * g ty n.+1 + g ty n.+1) * R)%Re in
    let d_mag := ( g ty n.+1 * (1 + delta) * (1 + g ty n.+1) * R * vec_inf_norm x +
@@ -437,7 +437,7 @@ induction k.
                         ((vec_inf_norm (A1_diag (FT2R_mat A)) * matrix_inf_norm (A2_J_real (FT2R_mat A))) *
                         (vec_inf_norm (x - FT2R_mat (X_m_jacobi k x0 b A))))%Re).
                { nra. } rewrite H6. unfold R2.
-               rewrite -RmultE. rewrite sub_vec_comm_1.
+               rewrite sub_vec_comm_1.
                rewrite -vec_inf_norm_opp. unfold f_error. rewrite -x_fixpoint.
                +++ apply Rle_refl.
                +++ unfold x. rewrite mulmxA.
@@ -643,8 +643,11 @@ induction k.
                            ( (1+ g ty n.+1) * g1 ty n.+1 (n.+1 - 1) * (1 + default_rel ty)) *
                             (vec_inf_norm (A1_diag A_real)) ) + g1 ty n.+1 (n.+1 - 1)) + 
                            R2 * f_error k b x0 x A)%Re).
-                   { fold A_real. nra. }
-
+                   { fold A_real. nra. } rewrite H6. clear H6. fold R2.
+                   assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
+                    { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                       by case: (x1 == y :> nat).
+                    } rewrite -H6. fold A_real. fold R2. fold b_real.
 
 
  nra.
