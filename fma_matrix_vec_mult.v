@@ -381,7 +381,27 @@ rewrite -bigmaxr_mulr.
 + apply /RleP. rewrite -RplusE -RmultE.
   apply bigmax_le.
   - by rewrite size_map size_enum_ord.
-  - intros. 
+  - intros. rewrite seq_equiv. rewrite nth_mkseq;
+    last by rewrite size_map size_enum_ord in H.
+    unfold e_i. rewrite !length_veclist.
+    apply Rplus_le_compat_r. apply Rmult_le_compat_l.
+    * apply g_pos.
+    * apply Rle_trans with 
+      [seq (bigmaxr 0%Re
+           [seq row_sum (FT2R_mat A) i1
+              | i1 <- enum 'I_n.+1] *
+         Rabs (FT2R_mat v i0 0))%Ri
+      | i0 <- enum 'I_n.+1]`_i.
+      ++ admit.
+      ++ apply /RleP.
+         apply (@bigmaxr_ler _ 0%Re [seq bigmaxr 0%Re
+                                      [seq row_sum (FT2R_mat A) i1
+                                         | i1 <- enum 'I_n.+1] *
+                                    Rabs (FT2R_mat v i0 0)
+                                  | i0 <- enum 'I_n.+1] i).
+         rewrite size_map size_enum_ord.
+         by rewrite size_map size_enum_ord in H.
++ admit.
 
 
 End WITHNANS.
