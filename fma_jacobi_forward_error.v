@@ -596,18 +596,23 @@ induction k.
                                       ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
                                                 * (1 + g ty n.+1) + g1 ty n.+1 (n.+1 - 1))%Re.
                         *** rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
-                                           apply Rle_trans with
+                            assert (vec_inf_norm (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) -
+                                                 (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A))) <=
+                                               ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
+                                                * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
+                           { apply matrix_vec_mult_bound_corollary.  admit. }
+                            apply Rle_trans with
                                            (vec_inf_norm (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A)) +
                                             (matrix_inf_norm (FT2R_mat (A2_J A)) *
                                              vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
                                              g ty n.+1 + g1 ty n.+1 (n.+1 - 1)))%Re.
-                                           +++++ apply reverse_triang_ineq in H8.
-                                                 assert (forall x y z:R, (x - y <= z)%Re -> (x <= y + z)%Re).
-                                                 { intros. nra. } apply H9. apply /RleP. apply H8.
-                                           +++++ match goal with |-context[(_ <= ?p + ?a * ?b * ?c + ?d)%Re]=>
-                                                  replace (p + a * b * c + d)%Re with (p + (a * b * c + d))%Re by nra
-                                                 end. apply Rplus_le_compat_r. apply /RleP. apply submult_prop.
-                                      **** apply Rle_refl.
+                            ++++ apply reverse_triang_ineq in H6.
+                                 assert (forall x y z:R, (x - y <= z)%Re -> (x <= y + z)%Re).
+                                 { intros. nra. } apply H7. apply /RleP. apply H6.
+                            ++++ match goal with |-context[(_ <= ?p + ?a * ?b * ?c + ?d)%Re]=>
+                                    replace (p + a * b * c + d)%Re with (p + (a * b * c + d))%Re by nra
+                                 end. apply Rplus_le_compat_r. apply /RleP. apply submult_prop.
+                        *** apply Rle_refl.
 
 
 
