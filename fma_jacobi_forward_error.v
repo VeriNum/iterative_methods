@@ -439,7 +439,13 @@ apply bigmax_le.
                         by rewrite size_map size_enum_ord in H0.
            ** unfold g. 
               eapply Rle_trans. apply Hd.
-              
+              assert (((1 + default_rel ty) ^ 1 <= (1 + default_rel ty) ^ n.+1)%Re ->
+                       (default_rel ty <= (1 + default_rel ty) ^ n.+1 - 1)%Re).
+              { nra. } apply H4. apply Rle_pow .
+              apply default_rel_plus_1_ge_1. lia.
+       -- unfold g1. eapply Rle_trans. apply He.
+          
+  
   
   
 
