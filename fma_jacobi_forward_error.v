@@ -518,7 +518,16 @@ induction k.
                                               vec_inf_norm (- (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A)))).
                                       { by rewrite vec_inf_norm_opp. } rewrite H8.
                                       apply /RleP. apply triang_ineq.
-
+                            ++++ apply Rmult_le_compat_r.
+                                 ---- apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+                                 ---- apply Rplus_le_compat_l.
+                                      assert (vec_inf_norm (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) -
+                                                 (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A))) <=
+                                               ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
+                                                * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
+                                      { apply matrix_vec_mult_bound_corollary.  admit. }
+                                      
+          
 
                     --- unfold x_fix. rewrite diag_matrix_vec_mult_diff .
                         apply Rle_trans with
