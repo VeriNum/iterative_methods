@@ -346,6 +346,11 @@ Proof.
 by unfold fma_matrix_vec_mult.FT2R_mat, FT2R_mat.
 Qed.
 
+Lemma rel_le_1 {ty} {n:nat}:
+  (/ INR n.+1 *
+     ((1 + default_rel ty) *
+      / (1 + default_rel ty) ^ n.+1) <= 1)%Re.
+Admitted.
 
 Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty) (i : 'I_n.+1),
@@ -417,8 +422,7 @@ apply bigmax_le.
         * apply Rle_lt_trans with 
             ((sqrt
               (F' ty /
-               (INR n.+1 * (1 + default_rel ty) ^ n.+1) -
-               default_abs ty)) ^ 2 * (1 + default_rel ty) +
+               (INR n.+1 * (1 + default_rel ty) ^ n.+1))) ^ 2 * (1 + default_rel ty) +
              default_abs ty)%Re.
           ++ apply Rplus_le_compat_r.
              apply Rmult_le_compat_r.
@@ -426,7 +430,30 @@ apply bigmax_le.
              -- assert (forall x:R, (x^2)%Re = (x * x)%Re).
                 { intros. simpl;nra. } rewrite H3.
                 admit.
-          ++  
+          ++ rewrite pow2_sqrt.
+             -- apply Rle_lt_trans with 
+                (F' ty + default_abs ty)%Re.
+                ** apply Rplus_le_compat_r.
+                   assert ((F' ty / (INR n.+1 * (1 + default_rel ty) ^ n.+1) *
+                                (1 + default_rel ty))%Re = 
+                            ((F' ty * / (INR n.+1 * (1 + default_rel ty) ^ n.+1)) *
+                               (1 + default_rel ty))%Re).
+                   { nra. } rewrite H3. clear H3.
+                   rewrite Rinv_mult_distr.
+                   +++  assert ((F' ty *
+                                   (/ INR n.+1 * / (1 + default_rel ty) ^ n.+1) *
+                                   (1 + default_rel ty))%Re = 
+                                 (F' ty * (/ INR n.+1 * ((1 + default_rel ty) */ (1 + default_rel ty) ^ n.+1)))%Re).
+                        {  nra. } rewrite H3. clear H3.
+                        assert (forall x y:R, (x * y <= x * 1)%Re -> (x * y <= x)%Re).
+                        { intros. nra. } apply H3. apply Rmult_le_compat_l.
+                        --- admit.
+                        --- apply rel_le_1.
+                   +++ apply not_0_INR. lia.
+                   +++ apply pow_nonzero.
+                       assert ((0 <= default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+                       { intros. nra. } apply H3. apply default_rel_ge_0.
+                ** 
   
 
 
