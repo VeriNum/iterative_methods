@@ -418,7 +418,7 @@ apply Rlt_le_trans with
 Qed.
   
 Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
-  (forall (xy : ftype ty * ftype ty) (i : 'I_n.+1),
+  (forall (xy : ftype ty * ftype ty),
     In xy
       (combine
          (vec_to_list_float n.+1  v1)
@@ -494,7 +494,27 @@ apply bigmax_le.
              -- apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
              -- assert (forall x:R, (x^2)%Re = (x * x)%Re).
                 { intros. simpl;nra. } rewrite H3.
-                admit.
+                assert (Hin: In (v1 (inord i) ord0, v2 (inord i) ord0)
+                           (combine (vec_to_list_float n.+1 v1)
+                              (vec_to_list_float n.+1 v2))).
+                { apply in_rev. rewrite -combine_rev; last by rewrite !length_veclist.
+                  assert ((v1 (inord i) ord0, v2 (inord i) ord0) = 
+                           nth i (combine (rev (vec_to_list_float n.+1 v1))
+                                    (rev (vec_to_list_float n.+1 v2))) (Zconst ty 0, Zconst ty 0)).
+                  { rewrite combine_nth. rewrite !rev_nth !length_veclist.
+                    assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat).
+                    { lia. } rewrite H4. rewrite !nth_vec_to_list_float; try by [].
+                    by rewrite size_map size_enum_ord in H0.
+                    by rewrite size_map size_enum_ord in H0.
+                    apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H0.
+                    apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H0.
+                    by rewrite !rev_length !length_veclist.
+                 } rewrite H4. apply nth_In. rewrite combine_length.
+                 rewrite !rev_length !length_veclist Nat.min_id.
+                 rewrite size_map size_enum_ord in H0. by apply /ssrnat.ltP.
+                } specialize (H (v1 (inord i) ord0, v2 (inord i) ord0) Hin).
+                destruct H as [Hf1 [Hf2 [Ha1 Ha2]]].
+                apply Rmult_le_compat; try apply Rabs_pos; try apply Ha1; try apply Ha2.
           ++ rewrite pow2_sqrt.
              -- apply Rle_lt_trans with 
                 (F' ty + default_abs ty)%Re.
@@ -607,14 +627,7 @@ apply bigmax_le.
   * rewrite inordK; by rewrite size_map size_enum_ord in H0.
  - rewrite inordK; by rewrite size_map size_enum_ord in H0.
  - rewrite inordK; by rewrite size_map size_enum_ord in H0.
-Admitted.
-  
-  
-  
-
-
-
-
+Qed.
 
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
