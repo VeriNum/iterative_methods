@@ -275,6 +275,16 @@ intros. apply matrixP. unfold eqrel.
 intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
 Qed.
 
+
+Lemma sub_vec_3 {n:nat}:
+  forall a b: 'cV[R]_n,
+  (a - b) + b = a.
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+Qed.
+
+
 Lemma x_fixpoint {n:nat} x b (A: 'M[R]_n.+1):
   A *m x = b ->
   (forall i, A i i <> 0%Re) ->
@@ -648,6 +658,21 @@ induction k.
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                        by case: (x1 == y :> nat).
                     } rewrite -H6. fold A_real. fold R2. fold b_real.
+                    assert ((vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) <= 
+                             f_error k b x0 x A + 
+                             vec_inf_norm (x_fix x b_real A_real))%Re).
+                    { unfold f_error.
+                      apply Rle_trans with 
+                      (vec_inf_norm ((FT2R_mat (X_m_jacobi k x0 b A) -
+                                        x_fix x (FT2R_mat b) (FT2R_mat A)) + 
+                                      x_fix x b_real A_real)).
+                      + rewrite sub_vec_3. apply Rle_refl.
+                      + apply /RleP. apply triang_ineq.
+
+
+
+                      assert (forall x y z: R, (x - z <= y)%Re -> (x <= y + z)%Re).
+                      { intros. nra. } apply H7. apply 
 
 
  nra.
