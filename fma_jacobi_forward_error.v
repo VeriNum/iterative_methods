@@ -480,7 +480,14 @@ induction k.
                                            A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A)))).
                                  { by rewrite add_vec_distr_2. } rewrite H6. clear H6.
                                  apply /RleP. apply triang_ineq.
-         -- 
+         -- assert (FT2R_mat b -
+                         FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) -
+                         (FT2R_mat b -
+                          A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A))  =
+                     - (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) -
+                        A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A)) ).
+             { rewrite add_vec_distr_4. by rewrite sub_vec_comm_1. } rewrite H6. clear H6.
+             rewrite -vec_inf_norm_opp.
 
 
 
