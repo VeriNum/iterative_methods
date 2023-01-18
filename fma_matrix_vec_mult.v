@@ -457,5 +457,28 @@ rewrite -bigmaxr_mulr.
     apply /RleP. apply Rabs_pos.
 Qed.
 
+Lemma matrix_vec_mult_bound_corollary {n:nat} {ty}:
+  forall (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1),
+  (forall (xy : ftype ty * ftype ty) (i : 'I_n.+1),
+    In xy
+      (combine
+         (vec_to_list_float n.+1
+            (\row_j A (inord i) j)^T)
+         (vec_to_list_float n.+1 v)) ->
+    is_finite (fprec ty) (femax ty) xy.1 = true /\
+    is_finite (fprec ty) (femax ty) xy.2 = true /\ 
+      Rabs (FT2R (fst (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty) /\
+      Rabs (FT2R (snd (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty)) ->
+  vec_inf_norm (FT2R_mat (A *f v) - (FT2R_mat A) *m (FT2R_mat v)) <=
+  (matrix_inf_norm (FT2R_mat A) * vec_inf_norm (FT2R_mat v)) * g ty n.+1 +
+   g1 ty n.+1 (n.+1 - 1).
+Proof.
+intros.
+apply /RleP.
+apply Rle_trans with (mat_vec_mult_err_bnd A v).
++ apply /RleP. by apply matrix_vec_mult_bound.
++ apply /RleP. apply matrix_err_bound_le_rel.
+Qed.
+
 
 End WITHNANS.
