@@ -327,15 +327,15 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
   let x:= A_real^-1 *m b_real in
   x != 0 ->
   (forall (v1 v2: 'cV[ftype ty]_n.+1)
-          (xy : ftype ty * ftype ty) (i : 'I_n.+1),
+          (xy : ftype ty * ftype ty),
     In xy
       (combine
          (vec_to_list_float n.+1 v1)
          (vec_to_list_float n.+1 v2)) ->
     is_finite (fprec ty) (femax ty) xy.1 = true /\
     is_finite (fprec ty) (femax ty) xy.2 = true /\ 
-      Rabs (FT2R (fst (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1) /\
-      Rabs (FT2R (snd (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1)) ->
+      (Rabs (FT2R (fst (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re /\
+      (Rabs (FT2R (snd (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re) ->
   
    let R := vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real) in
    let delta := default_rel ty in
@@ -493,8 +493,14 @@ induction k.
                 +++ apply Rmult_le_compat_l.
                     --- apply /RleP. apply vec_norm_pd.
                     --- apply /RleP. apply vec_float_sub.
-                        intros.
-                        specialize (H0 
+                        intros. 
+                        specialize (H0 b (A2_J A *f X_m_jacobi k x0 b A) xy H6).
+                        apply H0.
+                +++
+
+
+
+ admit.
 
 
 
