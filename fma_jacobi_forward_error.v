@@ -434,12 +434,14 @@ induction k.
          -- apply Rle_trans with 
             ((vec_inf_norm 
               (FT2R_mat (X_m_jacobi k.+1 x0 b A) - 
-                 (A1_diag A_real)^T *m FT2R_mat (b -f (A2_J A *f (X_m_jacobi k x0 b A)))) +
+                FT2R_mat (matrix_of_diag_A1 A) *m FT2R_mat (b -f (A2_J A *f (X_m_jacobi k x0 b A)))) +
              vec_inf_norm 
-              ((A1_diag A_real)^T *m FT2R_mat (b -f (A2_J A *f (X_m_jacobi k x0 b A))) -
+              (FT2R_mat (matrix_of_diag_A1 A) *m FT2R_mat (b -f (A2_J A *f (X_m_jacobi k x0 b A))) -
                x_fix (FT2R_mat (X_m_jacobi k x0 b A))
                     (FT2R_mat b) (FT2R_mat A))) + 
               R2 * f_error k b x0 x A)%Re.
+             ** apply Rplus_le_compat_r.
+                
 
 
 
