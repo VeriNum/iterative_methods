@@ -346,19 +346,6 @@ Proof.
 by unfold fma_matrix_vec_mult.FT2R_mat, FT2R_mat.
 Qed.
 
-(***
-(vec_inf_norm
-   (FT2R_mat
-      (diag_vector_mult (A1_inv_J A)
-         (b -f A2_J A *f X_m_jacobi k x0 b A)) -
-    diag_matrix_vec_mult_R (A1_diag (FT2R_mat A))
-      (FT2R_mat
-         (b -f A2_J A *f X_m_jacobi k x0 b A))) <=
- vec_inf_norm (FT2R_mat (A1_inv_J A)) *
- vec_inf_norm
-   (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A)) *
- g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re
-***)
 
 Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty) (i : 'I_n.+1),
@@ -618,7 +605,11 @@ induction k.
                           ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
                             vec_inf_norm (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A))) * g ty n.+1 +
                                g1 ty n.+1 (n.+1 - 1))%Re.
-                        *** admit.
+                        *** pose proof (@vec_norm_diag ty n). 
+                            assert (A1_diag (FT2R_mat A) = FT2R_mat (A1_inv_J A)).
+                            { apply matrixP. unfold eqrel. intros. rewrite !mxE. admit. }
+                            rewrite H7. apply H6. 
+                            admit.
                         *** assert (FT2R_mat (A1_inv_J A) = A1_diag A_real).
                             { apply matrixP. unfold eqrel. intros. rewrite !mxE /=.
                               admit.
