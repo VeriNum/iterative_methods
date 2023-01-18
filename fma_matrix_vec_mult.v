@@ -401,29 +401,7 @@ rewrite -bigmaxr_mulr.
     unfold e_i. rewrite !length_veclist.
     apply Rplus_le_compat_r. apply Rmult_le_compat_l.
     * apply g_pos.
-    * (*apply Rle_trans with 
-      (bigmaxr 0
-         [seq (Rabs (FT2R_mat v (@inord n i) 0) *
-               row_sum (FT2R_mat A) i0)%Ri
-            | i0 <- enum 'I_n.+1]).
-      ++ apply Rle_trans with 
-         [seq (Rabs (FT2R_mat v (inord i) 0) *
-               row_sum (FT2R_mat A) i0)%Ri
-            | i0 <- enum 'I_n.+1]`_i.
-         -- rewrite seq_equiv. rewrite nth_mkseq;
-            last by rewrite size_map size_enum_ord in H.
-            unfold row_sum. rewrite big_distrr.
-            rewrite -sum_fold_mathcomp_equiv.
-            rewrite sum_abs_eq /=.
-            ** apply /RleP. apply big_sum_ge_ex_abstract.
-                   intros. rewrite -RmultE.
-                   assert ((widen_ord (leqnn n.+1) i0) = i0).
-                   { unfold widen_ord. apply val_inj. by simpl. }
-                   rewrite H1. rewrite !mxE. rewrite Rmult_comm.
-*)
-
-
-apply Rle_trans with
+    * apply Rle_trans with
       [seq (bigmaxr 0%Re
            [seq Rabs (FT2R_mat v i1 0)
               | i1 <- enum 'I_n.+1] *
@@ -443,68 +421,41 @@ apply Rle_trans with
          last by rewrite size_map size_enum_ord in H.
          rewrite RmultE.
          unfold row_sum. rewrite big_distrr.
-
-
-
-
-         rewrite RmultE.
-         rewrite mulrC. rewrite -bigmaxr_mulr. 
-         -- apply Rle_trans with 
-            [seq (row_sum (FT2R_mat A) (inord i) *
-                 Rabs (FT2R_mat v i0 ord0))%Ri
-              | i0 <- enum 'I_n.+1]`_i.
-            ** rewrite seq_equiv. rewrite nth_mkseq;
-               last by rewrite size_map size_enum_ord in H.
-               unfold row_sum. rewrite big_distrl.
-               rewrite -sum_fold_mathcomp_equiv.
-               rewrite sum_abs_eq /=.
-               +++ apply /RleP. apply big_sum_ge_ex_abstract.
-                   intros. rewrite -RmultE.
-                   assert ((widen_ord (leqnn n.+1) i0) = i0).
-                   { unfold widen_ord. apply val_inj. by simpl. }
-                   rewrite H1. rewrite !mxE. rewrite Rmult_comm.
-
-
-
-
-apply Rle_trans with 
-      [seq (bigmaxr 0%Re
-           [seq row_sum (FT2R_mat A) i1
-              | i1 <- enum 'I_n.+1] *
-         Rabs (FT2R_mat v i0 0))%Ri
-      | i0 <- enum 'I_n.+1]`_i.
-      ++ rewrite seq_equiv. rewrite nth_mkseq;
-         last by rewrite size_map size_enum_ord in H.
-         rewrite mulrC. rewrite -bigmaxr_mulr. 
-         -- apply Rle_trans with 
-            [seq (Rabs (FT2R_mat v (inord i) 0) *
-                   row_sum (FT2R_mat A) i0)%Ri
-                | i0 <- enum 'I_n.+1]`_i.
-            ** rewrite seq_equiv. rewrite nth_mkseq;
-               last by rewrite size_map size_enum_ord in H.
-               rewrite -RmultE. unfold row_sum. rewrite big_distrr. 
-               rewrite -sum_fold_mathcomp_equiv.
-               rewrite sum_abs_eq /=.
-               +++ apply /RleP. apply big_sum_ge_ex_abstract.
-                   intros. rewrite -RmultE.
-                   assert ((widen_ord (leqnn n.+1) i0) = i0).
-                   { unfold widen_ord. apply val_inj. by simpl. }
-                   rewrite H1. rewrite !mxE. rewrite Rmult_comm. 
-
-
-
-
-
-admit.
-      ++ apply /RleP.
-         apply (@bigmaxr_ler _ 0%Re [seq bigmaxr 0%Re
-                                      [seq row_sum (FT2R_mat A) i1
-                                         | i1 <- enum 'I_n.+1] *
-                                    Rabs (FT2R_mat v i0 0)
-                                  | i0 <- enum 'I_n.+1] i).
-         rewrite size_map size_enum_ord.
-         by rewrite size_map size_enum_ord in H.
-+ admit.
+         rewrite -sum_fold_mathcomp_equiv.
+         rewrite sum_abs_eq /=.
+         -- apply /RleP. apply big_sum_ge_ex_abstract.
+            intros. rewrite -RmultE.
+            assert ((widen_ord (leqnn n.+1) i0) = i0).
+            { unfold widen_ord. apply val_inj. by simpl. }
+            rewrite H1. rewrite !mxE. rewrite mulrC.
+            rewrite -RmultE. apply Rmult_le_compat_l.
+            ** apply Rabs_pos.
+            ** apply Rle_trans with
+               [seq Rabs (FT2R_mat v i1 ord0)
+                   | i1 <- enum 'I_n.+1]`_i0.
+               +++ rewrite seq_equiv. rewrite nth_mkseq; 
+                   last by apply ltn_ord.
+                   rewrite !mxE /=. rewrite inord_val. apply Rle_refl.
+               +++ apply /RleP. 
+                   apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v i1 ord0)
+                                                | i1 <- enum 'I_n.+1] i0).
+                   rewrite size_map size_enum_ord. apply ltn_ord.
+         -- intros. rewrite !mxE. rewrite -RmultE. 
+            apply Rmult_le_pos; apply Rabs_pos.
+     ++ apply /RleP.
+        apply (@bigmaxr_ler _ 0%Re [seq bigmaxr 0%Re
+                                           [seq Rabs (FT2R_mat v i1 0)
+                                              | i1 <- enum 'I_n.+1] *
+                                         row_sum (FT2R_mat A) i0
+                                       | i0 <- enum 'I_n.+1] i).
+        rewrite size_map size_enum_ord.
+        by rewrite size_map size_enum_ord in H.
++ apply bigmax_le_0.
+  - apply /RleP. apply Rle_refl.
+  - intros. rewrite seq_equiv. rewrite nth_mkseq;
+    last by rewrite size_map size_enum_ord in H.
+    apply /RleP. apply Rabs_pos.
+Qed.
 
 
 End WITHNANS.
