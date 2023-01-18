@@ -668,6 +668,34 @@ induction k.
                                       x_fix x b_real A_real)).
                       + rewrite sub_vec_3. apply Rle_refl.
                       + apply /RleP. apply triang_ineq.
+                    } 
+                    apply Rle_trans with
+                    (((1 + g ty n.+1) * (1 + default_rel ty) * g ty n.+1 +
+                        default_rel ty * (1 + g ty n.+1) + 
+                        g ty n.+1) * R2 *
+                       (f_error k b x0 x A +
+                            vec_inf_norm (x_fix x b_real A_real)) +
+                       ((g ty n.+1 * (1 + default_rel ty) + default_rel ty) *
+                        (vec_inf_norm (A1_diag A_real) *
+                         vec_inf_norm b_real) +
+                        (1 + g ty n.+1) * g1 ty n.+1 (n.+1 - 1) *
+                        (1 + default_rel ty) *
+                        vec_inf_norm (A1_diag A_real)) +
+                       g1 ty n.+1 (n.+1 - 1) + R2 * f_error k b x0 x A )%Re.
+                    --- repeat apply Rplus_le_compat_r.
+                        repeat apply Rmult_le_compat_l.
+                        *** apply Rmult_le_pos.
+                            ++++ apply Rplus_le_le_0_compat.
+                                 ---- apply Rplus_le_le_0_compat.
+                                      **** repeat apply Rmult_le_pos.
+                                           +++++
+              
+
+
+
+
+ admit.
+                        *** apply H7.
 
 
 
