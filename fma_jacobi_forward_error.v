@@ -425,7 +425,11 @@ induction k.
                { nra. } rewrite H5. unfold R2.
                rewrite -RmultE. rewrite sub_vec_comm_1.
                rewrite -vec_inf_norm_opp. unfold f_error. rewrite -x_fixpoint.
-               apply Rle_refl.
+               +++ apply Rle_refl.
+               +++ unfold x. rewrite mulmxA.
+                  assert (FT2R_mat A *m A_real^-1 = 1).
+                  { admit. } rewrite H6. by rewrite mul1mx /b_real.
+               +++ 
          -- auto.
       ++ admit.
   - apply Rplus_le_compat_r. apply Rmult_le_compat_l.
