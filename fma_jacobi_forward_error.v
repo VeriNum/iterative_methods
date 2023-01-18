@@ -356,6 +356,23 @@ Admitted.
 Lemma delta_eps_lt_fmax {ty}:
   (0 < 2 * fmax ty * default_rel ty - default_abs ty)%Re.
 Proof.
+apply Rgt_lt. apply Rgt_minus. apply Rlt_gt.
+unfold fmax, default_abs, default_rel.
+apply Rlt_le_trans with
+(1 * bpow Zaux.radix2 (3 - femax ty - fprec ty))%Re.
++ apply Rmult_lt_compat_r. apply bpow_gt_0. nra.
++ assert ((2 * bpow Zaux.radix2 (femax ty) *
+            (/ 2 * bpow Zaux.radix2 (- fprec ty + 1)))%Re = 
+           (bpow Zaux.radix2 (femax ty) * bpow Zaux.radix2 (- fprec ty + 1))%Re).
+  { nra. } rewrite H.
+  assert ((1 * bpow Zaux.radix2 (3 - femax ty - fprec ty))%Re = 
+          bpow Zaux.radix2 (3 - femax ty - fprec ty)).
+  { nra. } rewrite H0.
+  rewrite -bpow_plus. apply bpow_le.
+  
+
+
+
 
 Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty) (i : 'I_n.+1),
