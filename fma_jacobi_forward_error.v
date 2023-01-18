@@ -383,7 +383,22 @@ apply bigmax_le.
           (nth (n.+1.-1 - @inord n i)
              (vec_to_list_float n.+1 v2)
              (Zconst ty 0)))). 
-  { admit. } specialize (H1 H2).
+  { unfold Bmult_no_overflow. unfold rounded.
+    pose proof (generic_round_property ty 
+                  (FT2R
+         (nth (n.+1.-1 - @inord n i)
+            (vec_to_list_float n.+1 v1)
+            (Zconst ty 0)) *
+       FT2R
+         (nth (n.+1.-1 - @inord n i)
+            (vec_to_list_float n.+1 v2)
+            (Zconst ty 0)))).
+    destruct H2 as [d [e [Heq [Hd [He H2]]]]].
+    rewrite H2. rewrite !nth_vec_to_list_float.
+    + rewrite !inord_val. admit.
+    + rewrite inordK; by rewrite size_map size_enum_ord in H0.
+    + rewrite inordK; by rewrite size_map size_enum_ord in H0.
+  } specialize (H1 H2).
   destruct H1 as [d [e [Heq [Hd [He H1]]]]].
   rewrite H1. rewrite !nth_vec_to_list_float.
   - rewrite !nth_vec_to_list_real.
