@@ -367,13 +367,19 @@ apply Rlt_le_trans with
   { nra. } rewrite H.
   assert ((1 * bpow Zaux.radix2 (3 - femax ty - fprec ty))%Re = 
           bpow Zaux.radix2 (3 - femax ty - fprec ty)).
-  { nra. } rewrite H0.
-  rewrite -bpow_plus. apply bpow_le.
+  { nra. } rewrite H0. apply Rlt_le.
+  rewrite Z.add_comm. rewrite Rmult_comm.
+  rewrite -bpow_plus. apply bpow_lt. rewrite Z.add_shuffle0.
+  apply Z.add_lt_mono_r.
+  apply Z.lt_sub_lt_add. simpl.
+  unfold Z.sub. rewrite Z.opp_involutive. 
+  assert (2%Z = (1+1)%Z). { by simpl. }
+  rewrite H1. 
+  apply Z.add_lt_mono;
+  apply Z.lt_trans with (fprec ty); try apply fprec_gt_one;
+  try apply fprec_lt_femax.
+Qed.
   
-
-
-
-
 Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty) (i : 'I_n.+1),
     In xy
