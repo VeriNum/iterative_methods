@@ -907,6 +907,7 @@ Qed.
 Print default_rel.
 Print Z.pow_pos.
 
+(*
 Lemma C_ge_0 (m n:nat):
   (0 <= C m n)%Re.
 Proof.
@@ -919,6 +920,64 @@ unfold C. apply Rmult_le_pos.
   - apply not_0_INR. apply fact_neq_0.
 Qed.
 
+
+Lemma fact_bound:
+  forall m n:nat,
+  (n <= m)%coq_nat -> 
+  (INR (fact m) / INR (fact (m - n)%coq_nat) <= INR (m ^ n))%Re.
+Proof.
+intros.
+induction n.
++ simpl. 
+  assert ((m - 0)%coq_nat = m). { lia. } rewrite H0.
+  assert ((INR (fact m) / INR (fact m) )%Re= 1%Re).
+  { apply Rinv_r. apply not_0_INR. apply fact_neq_0. }
+  rewrite H1. nra.
++ simpl.
+  assert ((n <= m)%coq_nat).
+  { lia. } specialize (IHn H0).
+  rewrite mult_INR. 
+  assert (INR (fact (m - S n)%coq_nat) =  (INR (fact (m - n)%coq_nat) * / INR (m - n)%coq_nat )%Re).
+  { assert ((m-n)%coq_nat = S (m - S n)%coq_nat).
+    { lia.  } 
+    assert (fact (m - n)%coq_nat = fact (S (m - S n)%coq_nat)).
+    { by rewrite H1. } rewrite H2. simpl.
+    assert ((fact (m - S n)%coq_nat + (m - S n)%coq_nat * fact (m - S n)%coq_nat)%coq_nat = 
+            ((m - n)%coq_nat * fact (m - S n)%coq_nat)%coq_nat).
+    { assert ((fact (m - n.+1)%coq_nat +
+                (m - n.+1)%coq_nat * fact (m - n.+1)%coq_nat)%coq_nat = 
+              (fact (m - n.+1)%coq_nat * 1%nat +
+                (m - n.+1)%coq_nat * fact (m - n.+1)%coq_nat)%coq_nat).
+      { lia.
+
+lia. } rewrite H3. rewrite mult_INR.
+    assert (INR (m - n) * INR (fact (m - S n)) * / INR (m - n) = 
+            INR (fact (m - S n)) * (INR (m - n) */ INR (m - n))).
+    { nra. } rewrite H4. rewrite Rinv_r. nra.
+    apply not_0_INR;lia.
+  } rewrite H1. 
+  assert (INR (fact m) / (INR (fact (m - n)) * / INR (m - n)) = 
+          INR (fact m) * / (INR (fact (m - n)) * / INR (m - n))).
+  { nra. } rewrite H2. rewrite Rinv_mult_distr.
+  - rewrite Rinv_involutive.
+    * assert (INR (fact m) * (/ INR (fact (m - n)) * INR (m - n)) = 
+              (INR (fact m) / INR (fact (m - n))) * INR (m - n)).
+      { nra. } rewrite H3.
+      apply Rle_trans with 
+      (INR (m ^ n) * INR (m - n)).
+      ++ apply Rmult_le_compat_r.
+         -- apply pos_INR. 
+         -- apply IHn.
+      ++ rewrite Rmult_comm. apply Rmult_le_compat_r.
+         -- apply pos_INR.
+         -- apply le_INR; lia.
+    * apply not_0_INR;lia.
+  - apply not_0_INR, fact_neq_0.
+  - apply Rinv_neq_0_compat. apply not_0_INR;lia.
+Qed.
+*)
+
+Require Import generalize.
 
 Lemma delta_bound {ty} :
   forall m:nat, 
@@ -940,13 +999,13 @@ apply Rle_lt_trans with
   end. apply Rmult_le_compat.
   - apply C_ge_0 .
   - apply Rmult_le_pos. try apply Rlt_le,x_pow_gt_0;try nra.
-    unfold u0. apply pow_le. apply default_rel_ge_0. simpl.
-    apply Rlt_le,x_pow_gt_0. nra.
+    unfold u0. apply default_rel_gt_0. simpl.
+    apply Rlt_le. apply pow_lt. nra.
   - unfold C. 
-    assert (INR (fact m) / (INR (fact n) * INR (fact (m - n))) = 
-              (INR (fact m) / INR (fact (m-n))) * / INR (fact n)).
-    { assert (INR (fact m) / (INR (fact n) * INR (fact (m - n))) = 
-              INR (fact m) * / (INR (fact n) * INR (fact (m - n)))).
+    assert ((INR (fact m) / (INR (fact n) * INR (fact (m - n))))%Re = 
+              ((INR (fact m) / INR (fact (m-n))) * / INR (fact n))%Re).
+    { assert ((INR (fact m) / (INR (fact n) * INR (fact (m - n))))%Re = 
+              (INR (fact m) * / (INR (fact n) * INR (fact (m - n))))%Re).
       { nra. } rewrite H2. 
       rewrite Rinv_mult_distr; try nra; try apply not_0_INR, fact_neq_0.
     } rewrite H2. apply Rmult_le_compat_r.
