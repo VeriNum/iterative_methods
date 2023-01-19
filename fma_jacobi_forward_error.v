@@ -1440,10 +1440,12 @@ induction k.
                             { apply vec_float_sub. intros.
                               (** This is where I need to make most of the changes **)
                               specialize (Hbound (fst xy)). 
-                              assert (xy = (fst xy, snd xy)).
-                              { destruct xy; simpl;auto. } rewrite H8 in H7.
-                              apply in_combine_l in H7. specialize (Hbound H7).
-                              repeat split; try apply Hbound.
+                              assert (In xy.1 (vec_to_list_float n.+1 b)).
+                              { assert (xy = (fst xy, snd xy)).
+                                { destruct xy; simpl;auto. } rewrite H8 in H7.
+                                by apply in_combine_l in H7. 
+                              } specialize (Hbound H8).
+                              repeat split; try apply Hbound. 
 
 
 
