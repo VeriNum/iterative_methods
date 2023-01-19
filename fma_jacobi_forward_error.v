@@ -1128,50 +1128,57 @@ apply Rle_lt_trans with
            ** apply Rmult_le_pos; try apply pos_INR; try (unfold u0; simpl;nra). 
               unfold u0. apply default_rel_ge_0.
            ** apply Rlt_le, Rinv_0_lt_compat. replace (1* 1)%Re with 1%Re by nra.  by apply ratio_gt_0. 
-        -- assert (((INR m * u0 / INR 2) ^ m <= 1(%Re -> 
-                    0 <= 1 - (INR m * u0 / INR 2) ^ m).
+        -- assert (((INR m * u0 / INR 2) ^ m <= 1)%Re -> 
+                    (0 <= 1 - (INR m * u0 / INR 2) ^ m)%Re).
            { nra. }  apply H6.
-           assert (1 = 1^m). { by rewrite pow1. } rewrite H7.
+           assert (1%Re = (1^m)%Re). { by rewrite pow1. } rewrite H7.
            apply pow_incr. split.
            ** apply Rmult_le_pos.
               +++ apply Rmult_le_pos; try apply pos_INR; try (unfold u0;simpl;nra).
+                  unfold u0. apply default_rel_ge_0.
               +++ simpl;nra.
-           ** assert (0 < (1 - INR m * u0 / INR 2) -> 
-                        INR m * u0 / INR 2 <= 1).
-              { nra. } apply H8. apply ratio_gt_0. lia.
-        --  assert (2 = (2 * (1 - INR m * u0 / INR 2)) * / (1 - INR m * u0 / INR 2)).
-            { match goal with |-context[_ = (?a * ?b) * ?c]=>
-                replace ((a*b)*c) with (a * (b * c)) by nra
+           ** assert ((0 < (1 - INR m * u0 / INR 2))%Re -> 
+                        (INR m * u0 / INR 2 <= 1)%Re).
+              { nra. } apply H8. by apply ratio_gt_0. 
+        --  assert (2%Re = ((2 * (1 - INR m * u0 / INR 2)) * / (1 - INR m * u0 / INR 2))%Re ).
+            { match goal with |-context[(_ = (?a * ?b) * ?c)%Re]=>
+                replace ((a*b)*c)%Re with (a * (b * c))%Re by nra
               end. rewrite Rinv_r.
               nra.
-              pose proof (ratio_gt_0 m H). simpl in H6. unfold u0; simpl; nra.
+              pose proof (ratio_gt_0 H).
+              assert ((0< (1 - INR m * u0 / INR 2))%Re -> 
+                    (1 - INR m * u0 / INR 2)%Re <> 0%Re).
+              { nra. } apply H7. unfold u0. apply H6. 
             } rewrite H6.
             apply Rmult_lt_compat_r.
-            ** apply Rinv_0_lt_compat,ratio_gt_0; lia.
-            ** replace (INR 2) with 2 by (simpl;nra).
-               assert (2 * (1 - INR m * u0 / 2) = 2 - INR m * u0).
+            ** by apply Rinv_0_lt_compat,ratio_gt_0. 
+            ** replace (INR 2) with 2%Re by (simpl;nra).
+               assert ((2 * (1 - INR m * u0 / 2))%Re = (2 - INR m * u0)%Re).
                { nra. } rewrite H7.
-               assert (INR m * u0 < 1 -> INR m * u0 < 2 - INR m * u0).
-               { nra. } apply H8. 
-               apply Rlt_le_trans with
+               assert ((INR m * u0 < 1)%Re -> (INR m * u0 < 2 - INR m * u0)%Re).
+               { nra. } apply H8. admit.
+               (*apply Rlt_le_trans with
                (INR (Z.to_nat (Z.pow_pos 2 23)) * u0).
                +++ apply Rmult_lt_compat_r. unfold u0;simpl;nra.
                    apply lt_INR;lia.
                +++  rewrite INR_IZR_INZ. 
                     assert ((Z.of_nat (Z.to_nat (Z.pow_pos 2 23))) = Z.pow_pos 2 23).
-                    { lia. } rewrite H9. unfold u0;simpl;nra.
-         -- assert ( 0 < (INR m * u0 / INR 2) ^ m ->
-                     1 - (INR m * u0 / INR 2) ^ m < 1).
+                    { lia. } rewrite H9. unfold u0;simpl;nra. *)
+         -- assert ( (0 < (INR m * u0 / INR 2) ^ m)%Re ->
+                     (1 - (INR m * u0 / INR 2) ^ m < 1)%Re).
             { nra. } apply H6. apply x_pow_gt_0. 
             apply Rmult_lt_0_compat.
             ** apply Rmult_lt_0_compat.
                +++ apply lt_0_INR. lia.
-               +++ unfold u0;simpl;nra.
+               +++ unfold u0;simpl. apply default_rel_gt_0.
             ** simpl;nra.
-     ++ pose proof (ratio_gt_0 m H). simpl in H4. unfold u0; simpl; nra.
-Qed.
+     ++ pose proof (ratio_gt_0 H).
+        assert ((0< (1 - INR m * u0 / INR 2))%Re -> 
+                    0%Re <> (INR m * u0 / INR 2 - 1)%Re).
+        { nra. } apply H5. unfold u0. apply H4.
+Admitted.
 
-*)
+
 
 
 Lemma delta_bound {ty} :
