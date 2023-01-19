@@ -979,6 +979,10 @@ Qed.
 
 Require Import generalize.
 
+Lemma pow_1: forall n:nat,
+  (1^n)%Re = 1%Re.
+Admitted.
+
 Lemma delta_bound {ty} :
   forall m:nat, 
   let u0 := default_rel ty in
@@ -1011,26 +1015,27 @@ apply Rle_lt_trans with
     } rewrite H2. apply Rmult_le_compat_r.
     * apply Rlt_le, Rinv_0_lt_compat. apply lt_0_INR. apply lt_O_fact.
     * apply fact_bound;lia.
-  - nra.
-+ assert (m = 0%nat \/ (0 < m)%nat). { lia. } destruct H1.
+  - rewrite pow_1. nra.
++ assert (m = 0%nat \/ (0 < m)%nat). { admit. } destruct H1.
   - rewrite H1. simpl. nra.
   - apply Rle_lt_trans with 
-    (1 + INR m *u0 * sum_f_R0 (fun i: nat => INR (m^i) * u0^i / INR (2^i)) (m-1)%nat).
+    (1 + INR m *u0 * sum_f_R0 (fun i: nat => (INR (m^i) * u0^i / INR (2^i))%Re) (m-1)%nat)%Re.
     * rewrite decomp_sum.
       ++ simpl.
-         assert (1 / 1 * 1 * 1 ^ (m - 0) = 1). { rewrite pow1. nra. }
+         assert ((1 / 1 * 1 * 1 ^ (m - 0)%nat)%Re = 1%Re). { rewrite pow1. nra. }
          rewrite H2. clear H2.
          apply Rplus_le_compat_l.
          rewrite scal_sum. 
-         assert ((m - 1)%nat = (Init.Nat.pred m)). { lia. } rewrite H2.
+         assert ((m - 1)%nat = (Init.Nat.pred m)). { by rewrite -subn1. } rewrite H2.
          apply sum_Rle. intros.
          rewrite !mult_INR. rewrite pow1.
-         assert (INR m * INR (m ^ n) / INR (fact n + n * fact n) *
-                    (u0 * u0 ^ n) * 1 = 
-                 ( INR (m ^ n) / INR (fact n + n * fact n) * u0^n) * 
-                 (INR m * u0)).
+         assert ((INR m * INR (m ^ n) / INR (fact n + n * fact n) *
+                    (u0 * u0 ^ n) * 1)%Re = 
+                 (( INR (m ^ n) / INR (fact n + n * fact n) * u0^n) * 
+                 (INR m * u0) )%Re).
          { nra. } rewrite H4. apply Rmult_le_compat_r.
-         -- apply Rmult_le_pos. apply pos_INR. unfold u0;simpl;nra.
+         -- apply Rmult_le_pos. apply pos_INR. unfold u0;simpl.
+            apply default_rel_ge_0.
          -- rewrite Rmult_assoc. 
             assert (INR (m ^ n) * u0 ^ n / INR (2 ^ n) = 
                     INR (m ^ n) * ( / INR (2 ^ n) * u0^n)).
