@@ -49,8 +49,8 @@ Fixpoint vec_to_list_real {n:nat} (m:nat) (v :'cV[R]_n.+1)
    end.
 
 
-Definition A1_diag {n: nat} (A: 'M[R]_n.+1) : 'cV[R]_n.+1:=
-  \col_i (1 / (A i i))%Re.
+Definition A1_diag {n: nat} {ty} (A: 'M[ftype ty]_n.+1) : 'cV[R]_n.+1:=
+  \col_i (FT2R (BDIV ty (Zconst ty 1) (A i i))).
 
 Definition diag_matrix_vec_mult_R {n:nat} (v1 v2 : 'cV[R]_n.+1)
   : 'cV[R]_n.+1 :=
@@ -1262,7 +1262,7 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
                 delta * (1 + g ty n.+1) + g ty n.+1 + 1) * R)%Re in
    let d_mag := (((1 + g ty n.+1) * (1 + delta) * g ty n.+1 +
                    delta * (1 + g ty n.+1) + g ty n.+1) *
-                  (R * vec_inf_norm (x_fix x b_real A_real)) +
+                  (R * vec_inf_norm (x_fix x b_real A)) +
                   ((g ty n.+1 * (1 + delta) + delta) *
                    (vec_inf_norm (A1_diag A_real) *
                     vec_inf_norm b_real) +
@@ -1302,23 +1302,23 @@ induction k.
   apply Rle_trans with (rho * f_error k b x0 x A + d_mag)%Re.
   - unfold f_error. 
     assert (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
-                 x_fix x (FT2R_mat b) (FT2R_mat A) = 
+                 x_fix x (FT2R_mat b) A = 
              (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
-               x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A)) +
-             (x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A) -
-              x_fix x (FT2R_mat b) (FT2R_mat A))).
+               x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) A) +
+             (x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) A -
+              x_fix x (FT2R_mat b) A)).
     { by rewrite add_vec_distr_2. } rewrite H6. clear H6.
     apply Rle_trans with 
     (vec_inf_norm (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
-                       x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A) ) +
-     vec_inf_norm ((x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A) -
-                      x_fix x (FT2R_mat b) (FT2R_mat A))))%Re.
+                       x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) A ) +
+     vec_inf_norm ((x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) A -
+                      x_fix x (FT2R_mat b) A)))%Re.
     * apply /RleP. apply triang_ineq.
     * apply Rle_trans with 
       (vec_inf_norm
          (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
           x_fix (FT2R_mat (X_m_jacobi k x0 b A)) 
-            (FT2R_mat b) (FT2R_mat A)) +
+            (FT2R_mat b) A) +
         R2 * f_error k b x0 x A)%Re.
       ++ apply Rplus_le_compat_l.
          unfold x_fix. rewrite diag_matrix_vec_mult_diff.
@@ -1363,19 +1363,19 @@ induction k.
               (diag_matrix_vec_mult_R (A1_diag (FT2R_mat A))
                              (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A)) -
                x_fix (FT2R_mat (X_m_jacobi k x0 b A))
-                    (FT2R_mat b) (FT2R_mat A))) + 
+                    (FT2R_mat b) A)) + 
               R2 * f_error k b x0 x A)%Re.
              ** apply Rplus_le_compat_r.
                 assert ((FT2R_mat (X_m_jacobi k.+1 x0 b A) -
                             x_fix (FT2R_mat (X_m_jacobi k x0 b A))
-                              (FT2R_mat b) (FT2R_mat A)) = 
+                              (FT2R_mat b) A) = 
                         (FT2R_mat (X_m_jacobi k.+1 x0 b A) - 
                             diag_matrix_vec_mult_R (A1_diag (FT2R_mat A))
                              (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A))) +
                         (diag_matrix_vec_mult_R (A1_diag (FT2R_mat A))
                              (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A)) -
                           x_fix (FT2R_mat (X_m_jacobi k x0 b A))
-                              (FT2R_mat b) (FT2R_mat A))).
+                              (FT2R_mat b) A)).
                { by rewrite add_vec_distr_2. } rewrite H6.
                apply /RleP.
                apply triang_ineq.
@@ -1388,7 +1388,10 @@ induction k.
                                g1 ty n.+1 (n.+1 - 1))%Re.
                         *** pose proof (@vec_norm_diag ty n). 
                             assert (A1_diag (FT2R_mat A) = FT2R_mat (A1_inv_J A)).
-                            { apply matrixP. unfold eqrel. intros. rewrite !mxE. admit. }
+                            { apply matrixP. unfold eqrel. intros. rewrite !mxE. 
+
+
+ admit. }
                             rewrite H7. apply H6. intros.
                             specialize (H0 (A1_inv_J A) (b -f A2_J A *f X_m_jacobi k x0 b A)).
                             by apply H0.
