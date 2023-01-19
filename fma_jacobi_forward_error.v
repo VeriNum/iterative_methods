@@ -518,17 +518,42 @@ apply bigmax_le.
                 apply Rmult_le_compat; try apply Rabs_pos. 
                ** apply Rle_trans with 
                     (sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))); try apply Ha1.
+                  apply sqrt_le_1_alt.
+                  apply Rmult_le_compat_r.
+                  +++ rewrite Rinv_mult_distr.
+                      --- apply Rmult_le_pos.
+                          *** apply Rlt_le. apply Rinv_0_lt_compat.
+                              apply lt_0_INR. lia.
+                          *** apply Rlt_le. apply Rinv_0_lt_compat.
+                              apply pow_lt. apply Rplus_lt_0_compat. nra.
+                              apply default_rel_gt_0.
+                      --- apply not_0_INR. lia.
+                      --- apply pow_nonzero.
+                          assert ((0 <=  default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+                          { nra. } apply H. apply default_rel_ge_0.
 
+                 +++ assert (forall x y:R, (x * y <= x * 1)%Re -> (x * y <= x)%Re).
+                     { intros. nra. } apply H. apply Rmult_le_compat_l;try nra.
+                     apply F_p_ge_0.
+              ** apply Rle_trans with 
+                    (sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))); try apply Ha2.
+                  apply sqrt_le_1_alt.
+                  apply Rmult_le_compat_r.
+                  +++ rewrite Rinv_mult_distr.
+                      --- apply Rmult_le_pos.
+                          *** apply Rlt_le. apply Rinv_0_lt_compat.
+                              apply lt_0_INR. lia.
+                          *** apply Rlt_le. apply Rinv_0_lt_compat.
+                              apply pow_lt. apply Rplus_lt_0_compat. nra.
+                              apply default_rel_gt_0.
+                      --- apply not_0_INR. lia.
+                      --- apply pow_nonzero.
+                          assert ((0 <=  default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+                          { nra. } apply H. apply default_rel_ge_0.
 
-
-
-
-
-
-
-
-
-
+                 +++ assert (forall x y:R, (x * y <= x * 1)%Re -> (x * y <= x)%Re).
+                     { intros. nra. } apply H. apply Rmult_le_compat_l;try nra.
+                     apply F_p_ge_0.
           ++ rewrite pow2_sqrt.
              -- apply Rle_lt_trans with 
                 (F' ty + default_abs ty)%Re.
@@ -644,14 +669,7 @@ apply bigmax_le.
 Qed.
 
 
-
-
-
-
-
-
-
-  
+(* 
 Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty),
     In xy
@@ -863,6 +881,8 @@ apply bigmax_le.
  - rewrite inordK; by rewrite size_map size_enum_ord in H0.
  - rewrite inordK; by rewrite size_map size_enum_ord in H0.
 Qed.
+
+*)
 
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
