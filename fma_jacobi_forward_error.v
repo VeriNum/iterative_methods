@@ -416,6 +416,241 @@ apply Rlt_le_trans with
   apply Z.lt_trans with (fprec ty); try apply fprec_gt_one;
   try apply fprec_lt_femax.
 Qed.
+
+
+Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
+  (forall (xy : ftype ty * ftype ty),
+    In xy
+      (combine
+         (vec_to_list_float n.+1  v1)
+         (vec_to_list_float n.+1 v2)) ->
+    is_finite (fprec ty) (femax ty) xy.1 = true /\
+    is_finite (fprec ty) (femax ty) xy.2 = true /\ 
+     (Rabs (FT2R (fst (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1)))%Re /\
+     (Rabs (FT2R (snd (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1)))%Re) ->
+
+  (vec_inf_norm (FT2R_mat (diag_vector_mult v1 v2) - 
+                diag_matrix_vec_mult_R (FT2R_mat v1) (FT2R_mat v2)) <=
+  (vec_inf_norm (FT2R_mat v1) * vec_inf_norm (FT2R_mat v2)) * 
+  g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re.
+Proof.
+intros.
+unfold diag_vector_mult, diag_matrix_vec_mult_R.
+unfold vec_inf_norm.
+apply bigmax_le.
++ by rewrite size_map size_enum_ord.
++ intros. rewrite seq_equiv. rewrite nth_mkseq;
+  last by rewrite size_map size_enum_ord in H0.
+  rewrite !mxE.
+  pose proof (BMULT_accurate ty 
+              (nth (n.+1.-1 - @inord n i) (vec_to_list_float n.+1 v1) (Zconst ty 0))
+              (nth (n.+1.-1 - @inord n i) (vec_to_list_float n.+1 v2) (Zconst ty 0))).
+  assert (Bmult_no_overflow ty
+       (FT2R
+          (nth (n.+1.-1 - @inord n i)
+             (vec_to_list_float n.+1 v1)
+             (Zconst ty 0)))
+       (FT2R
+          (nth (n.+1.-1 - @inord n i)
+             (vec_to_list_float n.+1 v2)
+             (Zconst ty 0)))). 
+  { unfold Bmult_no_overflow. unfold rounded.
+    pose proof (generic_round_property ty 
+                  (FT2R
+         (nth (n.+1.-1 - @inord n i)
+            (vec_to_list_float n.+1 v1)
+            (Zconst ty 0)) *
+       FT2R
+         (nth (n.+1.-1 - @inord n i)
+            (vec_to_list_float n.+1 v2)
+            (Zconst ty 0)))).
+    destruct H2 as [d [e [Heq [Hd [He H2]]]]].
+    rewrite H2. rewrite !nth_vec_to_list_float.
+    + rewrite !inord_val.
+      apply Rle_lt_trans with
+      (Rabs
+         (FT2R (v1 (inord i) ord0) *
+          FT2R (v2 (inord i) ord0) * (1 + d)) + Rabs e)%Re.
+      - apply Rabs_triang.
+      - rewrite !Rabs_mult.
+        apply Rle_lt_trans with
+        (Rabs (FT2R (v1 (inord i) ord0)) *
+           Rabs (FT2R (v2 (inord i) ord0)) * 
+           (1 + default_rel ty) + default_abs ty)%Re.
+        * apply Rplus_le_compat.
+          ++ apply Rmult_le_compat_l.
+             -- apply Rmult_le_pos; apply Rabs_pos.
+             -- apply Rle_trans with (Rabs 1 + Rabs d)%Re.
+                ** apply Rabs_triang.
+                ** rewrite Rabs_R1. apply Rplus_le_compat_l.
+                   apply Hd.
+          ++ apply He.
+        * apply Rle_lt_trans with 
+            ((sqrt
+              (F' ty /
+               (INR n.+1 * (1 + default_rel ty) ^ n.+1))) ^ 2 * (1 + default_rel ty) +
+             default_abs ty)%Re.
+          ++ apply Rplus_le_compat_r.
+             apply Rmult_le_compat_r.
+             -- apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+             -- assert (forall x:R, (x^2)%Re = (x * x)%Re).
+                { intros. simpl;nra. } rewrite H3.
+                assert (Hin: In (v1 (inord i) ord0, v2 (inord i) ord0)
+                           (combine (vec_to_list_float n.+1 v1)
+                              (vec_to_list_float n.+1 v2))).
+                { apply in_rev. rewrite -combine_rev; last by rewrite !length_veclist.
+                  assert ((v1 (inord i) ord0, v2 (inord i) ord0) = 
+                           nth i (combine (rev (vec_to_list_float n.+1 v1))
+                                    (rev (vec_to_list_float n.+1 v2))) (Zconst ty 0, Zconst ty 0)).
+                  { rewrite combine_nth. rewrite !rev_nth !length_veclist.
+                    assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat).
+                    { lia. } rewrite H4. rewrite !nth_vec_to_list_float; try by [].
+                    by rewrite size_map size_enum_ord in H0.
+                    by rewrite size_map size_enum_ord in H0.
+                    apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H0.
+                    apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H0.
+                    by rewrite !rev_length !length_veclist.
+                 } rewrite H4. apply nth_In. rewrite combine_length.
+                 rewrite !rev_length !length_veclist Nat.min_id.
+                 rewrite size_map size_enum_ord in H0. by apply /ssrnat.ltP.
+                } specialize (H (v1 (inord i) ord0, v2 (inord i) ord0) Hin).
+                destruct H as [Hf1 [Hf2 [Ha1 Ha2]]].
+                apply Rmult_le_compat; try apply Rabs_pos. 
+               ** apply Rle_trans with 
+                    (sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))); try apply Ha1.
+
+
+
+
+
+
+
+
+
+
+
+          ++ rewrite pow2_sqrt.
+             -- apply Rle_lt_trans with 
+                (F' ty + default_abs ty)%Re.
+                ** apply Rplus_le_compat_r.
+                   assert ((F' ty / (INR n.+1 * (1 + default_rel ty) ^ n.+1) *
+                                (1 + default_rel ty))%Re = 
+                            ((F' ty * / (INR n.+1 * (1 + default_rel ty) ^ n.+1)) *
+                               (1 + default_rel ty))%Re).
+                   { nra. } rewrite H3. clear H3.
+                   rewrite Rinv_mult_distr.
+                   +++  assert ((F' ty *
+                                   (/ INR n.+1 * / (1 + default_rel ty) ^ n.+1) *
+                                   (1 + default_rel ty))%Re = 
+                                 (F' ty * (/ INR n.+1 * ((1 + default_rel ty) */ (1 + default_rel ty) ^ n.+1)))%Re).
+                        {  nra. } rewrite H3. clear H3.
+                        assert (forall x y:R, (x * y <= x * 1)%Re -> (x * y <= x)%Re).
+                        { intros. nra. } apply H3. apply Rmult_le_compat_l.
+                        --- apply  F_p_ge_0 .
+                        --- apply rel_le_1.
+                   +++ apply not_0_INR. lia.
+                   +++ apply pow_nonzero.
+                       assert ((0 <= default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+                       { intros. nra. } apply H3. apply default_rel_ge_0.
+                ** unfold F'. 
+                   rewrite Rmult_minus_distr_l. rewrite Rmult_1_r.
+                   assert ((fmax ty - fmax ty * (2 * default_rel ty) +
+                              default_abs ty)%Re = 
+                            (fmax ty - (2 * fmax ty * default_rel ty - default_abs ty))%Re).
+                   { nra. } rewrite H3.
+                   assert (forall x y:R, (0 < y)%Re -> (x - y < x)%Re).
+                   { intros. nra. } apply H4. apply delta_eps_lt_fmax.
+          -- apply Rmult_le_pos.
+             ** apply  F_p_ge_0 .
+             ** rewrite Rinv_mult_distr.
+                +++ apply Rmult_le_pos.
+                    --- apply Rlt_le. apply Rinv_0_lt_compat.
+                        apply lt_0_INR. lia.
+                    --- apply Rlt_le. apply Rinv_0_lt_compat.
+                        apply pow_lt. apply Rplus_lt_0_compat. nra.
+                        apply default_rel_gt_0.
+                +++ apply not_0_INR. lia.
+                +++ apply pow_nonzero.
+                    assert ((0 <=  default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+                    { nra. } apply H3. apply default_rel_ge_0.
+    + rewrite inordK; by rewrite size_map size_enum_ord in H0.
+    + rewrite inordK; by rewrite size_map size_enum_ord in H0.
+  } specialize (H1 H2).
+  destruct H1 as [d [e [Heq [Hd [He H1]]]]].
+  rewrite H1. rewrite !nth_vec_to_list_float.
+  - rewrite !nth_vec_to_list_real.
+    * rewrite !inord_val. rewrite !mxE.
+      rewrite -!RmultE -!RminusE. 
+      assert ((FT2R (v1 (inord i) ord0) *
+                FT2R (v2 (inord i) ord0) * (1 + d) + e -
+                FT2R (v1 (inord i) ord0) *
+                FT2R (v2 (inord i) ord0))%Re =
+              ((FT2R (v1 (inord i) ord0) * FT2R (v2 (inord i) ord0)) * d + e)%Re).
+      { nra. } rewrite H3.
+      eapply Rle_trans.
+      ++ apply Rabs_triang.
+      ++ apply Rplus_le_compat.
+         -- rewrite !Rabs_mult. apply Rmult_le_compat.
+            ** apply Rmult_le_pos; apply Rabs_pos.
+            ** apply Rabs_pos.
+            ** apply Rmult_le_compat; try apply Rabs_pos.
+                +++ apply Rle_trans with  
+                    [seq Rabs (FT2R_mat v1 i0 0)
+                          | i0 <- enum 'I_n.+1]`_i.
+                    --- rewrite seq_equiv. rewrite nth_mkseq;
+                        last by rewrite size_map size_enum_ord in H0.
+                        rewrite !mxE. apply Rle_refl.
+                    --- apply /RleP.
+                        apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v1 i0 0)
+                                                    | i0 <- enum 'I_n.+1] i).
+                        rewrite size_map size_enum_ord .
+                        by rewrite size_map size_enum_ord in H0.
+                +++ apply Rle_trans with  
+                    [seq Rabs (FT2R_mat v2 i0 0)
+                          | i0 <- enum 'I_n.+1]`_i.
+                    --- rewrite seq_equiv. rewrite nth_mkseq;
+                        last by rewrite size_map size_enum_ord in H0.
+                        rewrite !mxE. apply Rle_refl.
+                    --- apply /RleP.
+                        apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v2 i0 0)
+                                                    | i0 <- enum 'I_n.+1] i).
+                        rewrite size_map size_enum_ord .
+                        by rewrite size_map size_enum_ord in H0.
+           ** unfold g. 
+              eapply Rle_trans. apply Hd.
+              assert (((1 + default_rel ty) ^ 1 <= (1 + default_rel ty) ^ n.+1)%Re ->
+                       (default_rel ty <= (1 + default_rel ty) ^ n.+1 - 1)%Re).
+              { nra. } apply H4. apply Rle_pow .
+              apply default_rel_plus_1_ge_1. lia.
+       -- unfold g1. eapply Rle_trans. apply He.
+          rewrite Rmult_assoc. 
+          assert (forall x y z:R, (1 * x <= y * z)%Re -> (x <= y * z)%Re).
+          { intros. nra. }  apply H4.
+          apply Rmult_le_compat.
+          ** nra.
+          ** apply default_abs_ge_0. 
+          ** replace 1%Re with (INR 1) by (simpl;auto).
+             apply le_INR. lia.
+          ** assert (forall x z:R, (x * 1 <= x * z)%Re -> (x <= x * z)%Re).
+             { intros. nra. }  apply H5.
+             apply Rmult_le_compat_l.
+             +++ apply default_abs_ge_0.
+             +++ assert (forall x:R, (0 <= x)%Re -> (1 <= 1 + x)%Re).
+                 { intros. nra. } apply H6. apply g_pos.
+  * rewrite inordK; by rewrite size_map size_enum_ord in H0.
+  * rewrite inordK; by rewrite size_map size_enum_ord in H0.
+ - rewrite inordK; by rewrite size_map size_enum_ord in H0.
+ - rewrite inordK; by rewrite size_map size_enum_ord in H0.
+Qed.
+
+
+
+
+
+
+
+
+
   
 Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty),
@@ -1034,4 +1269,3 @@ Admitted.
 
 
 End WITHNANS.
-
