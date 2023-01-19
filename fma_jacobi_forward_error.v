@@ -1264,6 +1264,35 @@ destruct H2.
 + (** using no overflow **)
 Admitted.
 
+
+(***
+is_finite (fprec ty) (femax ty) xy.2 = true
+______________________________________(2/2)
+(Rabs (FT2R xy.2) <=
+ F' ty / 2 /
+ (INR n.+1 * (1 + default_rel ty) ^ n.+1))%Re
+***)
+
+Lemma matrix_mult_fin_and_respects_bound {ty} {n:nat} (i: 'I_n.+1) 
+(A: 'M[ftype ty]_n.+1) (v: 'cV[ftype ty]_n.+1) xy :
+  (forall (v1 v2: 'cV[ftype ty]_n.+1)
+          (xy : ftype ty * ftype ty),
+    In xy
+      (combine
+         (vec_to_list_float n.+1 v1)
+         (vec_to_list_float n.+1 v2)) ->
+    is_finite (fprec ty) (femax ty) xy.1 = true /\
+    is_finite (fprec ty) (femax ty) xy.2 = true /\ 
+      (Rabs (FT2R (fst (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1)))%Re /\
+      (Rabs (FT2R (snd (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1)))%Re) ->
+  In xy (vec_to_list_float n.+1 (A *f v)) /\
+  (Rabs (FT2R xy) <=
+     F' ty / 2 /
+     (INR n.+1 * (1 + default_rel ty) ^ n.+1))%Re.
+Admitted.
+  
+
+
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
