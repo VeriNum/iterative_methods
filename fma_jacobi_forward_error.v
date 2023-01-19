@@ -1215,7 +1215,16 @@ apply pow_invert.
       assert ((((1 + default_rel ty) ^ n.+1 - 1) < 2)%Re -> 
               ((1 + default_rel ty) ^ n.+1 < 3)%Re).
       { nra. } apply H2. by apply delta_bound .
-  -
+  - assert ((2 * INR n.+1 * 3)%Re = (6 * INR n.+1)%Re).
+    { nra. } rewrite H1. 
+    apply Rle_trans with 
+    (6 * INR (2 ^ Z.to_nat (fprec ty)))%Re.
+    * apply Rmult_le_compat_l. nra. apply Rlt_le.
+      apply lt_INR. by apply /ssrnat.ltP. 
+    * unfold F'. unfold fmax, default_rel.
+      assert ((1 - 2 * (/ 2 * bpow Zaux.radix2 (- fprec ty + 1)))%Re = 
+              (1 - bpow Zaux.radix2 (- fprec ty + 1))%Re).
+      { nra. } rewrite H2.
 
 
 
