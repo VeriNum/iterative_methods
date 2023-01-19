@@ -1198,6 +1198,22 @@ assert ((F' ty / 2 /
     assert ((0 <  default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
     { nra. } apply H, default_rel_gt_0.
 } rewrite H.
+apply pow_invert.
++ apply Rmult_lt_0_compat. nra.
+  apply Rmult_lt_0_compat. apply lt_0_INR. lia.
+  apply pow_lt. apply Rplus_lt_0_compat. nra. apply default_rel_gt_0.
++ apply Rle_trans with 
+  ((2 * INR n.+1) * 3)%Re.
+  - assert ((1 * (2 *(INR n.+1 * (1 + default_rel ty) ^ n.+1)))%Re = 
+            ((2 * INR n.+1) * (1 + default_rel ty) ^ n.+1)%Re).
+    { nra. } rewrite H0.
+    apply Rmult_le_compat_l.
+    * apply Rmult_le_pos; try nra. apply Rlt_le, lt_0_INR. lia.
+    * apply Rlt_le.
+      assert ((((1 + default_rel ty) ^ n.+1 - 1) < 2)%Re -> 
+              ((1 + default_rel ty) ^ n.+1 < 3)%Re).
+      { nra. } apply H1. apply delta_bound .
+
 
 
 
