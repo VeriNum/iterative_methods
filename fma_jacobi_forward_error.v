@@ -884,12 +884,45 @@ Qed.
 
 *)
 
+Lemma sqrt_full_le: 
+  forall x:R,
+  (1 <= x)%Re ->
+  (sqrt x <= x)%Re.
+Proof.
+intros. 
+assert ((sqrt x <= sqrt x * sqrt x)%Re -> 
+        (sqrt x <= x)%Re).
+{ rewrite sqrt_def. nra. nra. }
+apply H0. 
+assert ((sqrt x * 1<= sqrt x * sqrt x)%Re ->
+        (sqrt x <= sqrt x * sqrt x)%Re).
+{ nra. } apply H1.
+apply Rmult_le_compat_l.
+apply sqrt_pos.
+
+
+
+
+match goal with |-context[(?b <= ?a)%Re] =>
+  replace a with (sqrt a * sqrt a)%Re
+end.
+
+rewrite -Rsqr_sqrt.
+
+
 Lemma n_bound {ty} {n:nat}:
   (sqrt
    (F' ty / 2 /
     (INR n.+1 * (1 + default_rel ty) ^ n.+1)) <=
  F' ty / 2 /
  (INR n.+1 * (1 + default_rel ty) ^ n.+1))%Re.
+Proof.
+
+
+
+
+
+
 Admitted.
 
 (** State the forward error theorem **)
