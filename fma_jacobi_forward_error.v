@@ -899,16 +899,9 @@ assert ((sqrt x * 1<= sqrt x * sqrt x)%Re ->
 { nra. } apply H1.
 apply Rmult_le_compat_l.
 apply sqrt_pos.
-
-
-
-
-match goal with |-context[(?b <= ?a)%Re] =>
-  replace a with (sqrt a * sqrt a)%Re
-end.
-
-rewrite -Rsqr_sqrt.
-
+replace 1%Re with (sqrt 1%Re); try by rewrite sqrt_1.
+apply  sqrt_le_1_alt. nra.
+Qed.
 
 Lemma n_bound {ty} {n:nat}:
   (sqrt
@@ -917,6 +910,7 @@ Lemma n_bound {ty} {n:nat}:
  F' ty / 2 /
  (INR n.+1 * (1 + default_rel ty) ^ n.+1))%Re.
 Proof.
+apply sqrt_full_le.
 
 
 
