@@ -983,11 +983,37 @@ Lemma pow_1: forall n:nat,
   (1^n)%Re = 1%Re.
 Admitted.
 
-
+Require Import Coq.ZArith.Znat.
 Lemma fact_distr {n: nat}:
   (fact n + n * fact n)%nat =
   (fact n * (n + 1))%nat.
 Admitted.
+
+Lemma ratio_gt_0 {ty}:
+  forall m:nat, 
+  let u0 := default_rel ty in
+  (m < 2 ^ (Z.to_nat (fprec ty)))%nat ->
+  (0 < (1 - INR m * u0 / INR 2))%Re.
+Admitted.
+(*
+Proof.
+intros.
+replace (INR 2) with 2 by (simpl;nra).
+assert (INR m * u0 < 2 -> 0 < 1 - INR m * u0 / 2).
+{ nra. } apply H0.
+unfold u0. simpl.
+assert (INR m < 2 * 2 * IZR (Z.pow_pos 2 23) ->
+        INR m * (/ 2 * / IZR (Z.pow_pos 2 23)) < 2).
+{ simpl; nra. } apply H1.
+apply Rlt_trans with 
+(INR (Z.to_nat (Z.pow_pos 2 23))).
++ apply lt_INR;lia.
++ rewrite INR_IZR_INZ. 
+  assert ((Z.of_nat (Z.to_nat (Z.pow_pos 2 23))) = Z.pow_pos 2 23).
+  { lia. } rewrite H2. nra.
+Qed.
+  
+*)
 
 Lemma delta_bound {ty} :
   forall m:nat, 
@@ -1091,17 +1117,18 @@ apply Rle_lt_trans with
           { nra. } rewrite H6. 
           rewrite -Ropp_inv_permute. 
           + nra.
-          + Print ratio_gt_0.
-
-
-pose proof (ratio_gt_0 m H). simpl in H7. unfold u0; simpl; nra.
+          + pose proof (ratio_gt_0 H).
+            assert ((0< (1 - INR m * u0 / INR 2))%Re -> 
+                    (1 - INR m * u0 / INR 2)%Re <> 0%Re).
+            { nra. } apply H8. unfold u0. apply H7.
         } rewrite H5.
-        replace 2 with (2 * 1) by nra.
+        replace 2%Re with (2 * 1)%Re by nra.
         apply Rmult_lt_compat.
         -- apply Rmult_le_pos.
-           ** apply Rmult_le_pos; try apply pos_INR; try (unfold u0; simpl;nra).
-           ** apply Rlt_le, Rinv_0_lt_compat. replace (1* 1) with 1 by nra.  apply ratio_gt_0. lia.
-        -- assert ((INR m * u0 / INR 2) ^ m <= 1 -> 
+           ** apply Rmult_le_pos; try apply pos_INR; try (unfold u0; simpl;nra). 
+              unfold u0. apply default_rel_ge_0.
+           ** apply Rlt_le, Rinv_0_lt_compat. replace (1* 1)%Re with 1%Re by nra.  by apply ratio_gt_0. 
+        -- assert (((INR m * u0 / INR 2) ^ m <= 1(%Re -> 
                     0 <= 1 - (INR m * u0 / INR 2) ^ m).
            { nra. }  apply H6.
            assert (1 = 1^m). { by rewrite pow1. } rewrite H7.
