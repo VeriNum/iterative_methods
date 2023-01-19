@@ -983,6 +983,12 @@ Lemma pow_1: forall n:nat,
   (1^n)%Re = 1%Re.
 Admitted.
 
+
+Lemma fact_distr {n: nat}:
+  (fact n + n * fact n)%nat =
+  (fact n * (n + 1))%nat.
+Admitted.
+
 Lemma delta_bound {ty} :
   forall m:nat, 
   let u0 := default_rel ty in
@@ -1037,56 +1043,58 @@ apply Rle_lt_trans with
          -- apply Rmult_le_pos. apply pos_INR. unfold u0;simpl.
             apply default_rel_ge_0.
          -- rewrite Rmult_assoc. 
-            assert (INR (m ^ n) * u0 ^ n / INR (2 ^ n) = 
-                    INR (m ^ n) * ( / INR (2 ^ n) * u0^n)).
+            assert ((INR (m ^ n) * u0 ^ n / INR (2 ^ n))%Re = 
+                    (INR (m ^ n) * ( / INR (2 ^ n) * u0^n))%Re).
             { nra. } rewrite H5. apply Rmult_le_compat_l.
             ** apply pos_INR.
-            ** apply Rmult_le_compat_r; 
-                  first by apply Rlt_le,x_pow_gt_0; unfold u0; simpl; nra.
+            ** apply Rmult_le_compat_r. 
+               apply pow_le. unfold u0. apply default_rel_ge_0.
                assert (n = 0%nat \/ (0 < n)%nat).
-               { lia. } destruct H6. 
+               { admit. } destruct H6. 
                +++ rewrite H6. simpl. nra.
-               +++ assert (n = 1%nat \/ (1 < n)%nat). { lia. } destruct H7.
+               +++ assert (n = 1%nat \/ (1 < n)%nat). { admit. } destruct H7.
                    --- rewrite H7. simpl. nra.
                    --- apply Rlt_le, Rinv_lt_contravar.
                        *** apply Rmult_lt_0_compat. apply lt_0_INR. 
-                           apply pow_2_gt_0. apply lt_0_INR.
-                           assert ((fact n + n * fact n)%nat = (fact n * (n+1))%nat).
-                           { lia. } rewrite H8.
-                           apply Nat.mul_pos_pos. apply lt_O_fact. lia. 
+                           apply pow_2_gt_0. apply lt_0_INR. apply /ssrnat.ltP.
+                           rewrite addn_gt0. apply /orP. left. apply /ssrnat.ltP. apply lt_O_fact. 
                        *** assert ((fact n + n * fact n)%nat = (fact n * (n+1))%nat).
-                           { lia. } rewrite H8. apply fact_low_bound; lia.
-      ++ lia.
+                           { by rewrite fact_distr. }
+                           rewrite H8. apply fact_low_bound. by apply /ssrnat.ltP.
+      ++ by apply /ssrnat.ltP.
    * assert (sum_f_R0 (fun i : nat =>
-                          INR (m ^ i) * u0 ^ i / INR (2 ^ i))  (m - 1) = 
-             sum_f_R0 (fun i : nat => (INR m * u0 / INR 2)^i) (m-1)).
+                          (INR (m ^ i) * u0 ^ i / INR (2 ^ i))%Re)  (m - 1) = 
+             sum_f_R0 (fun i : nat => ((INR m * u0 / INR 2)^i)%Re) (m-1)).
      { apply sum_eq. intros.
        rewrite !pow_INR. rewrite [in RHS]Rpow_mult_distr.
        rewrite Rpow_mult_distr. rewrite -Rinv_pow. nra.
        simpl; nra.
      } rewrite H2. clear H2.
-     assert ((m - 1)%nat = (Init.Nat.pred m)). { lia. } rewrite H2.
+     assert ((m - 1)%nat = (Init.Nat.pred m)). { by rewrite -subn1. } rewrite H2.
      pose proof (GP_finite (INR m * u0 / INR 2) (Init.Nat.pred m) ).
      apply pow_invert_eq in H3.
      ++ rewrite H3.
-        assert ((Init.Nat.pred m + 1)%nat = m). { lia. } rewrite H4.
-        assert ((INR m * u0 * / ( INR m * u0 / INR 2 - 1)) *  
-                  ((INR m * u0 / INR 2) ^ m - 1) < 2 -> 1 +
+        assert ((Init.Nat.pred m + 1)%coq_nat = m). { rewrite -subn1. admit. } rewrite H4.
+        assert (((INR m * u0 * / ( INR m * u0 / INR 2 - 1)) *  
+                  ((INR m * u0 / INR 2) ^ m - 1) < 2)%Re -> (1 +
                   INR m * u0 *
                   (((INR m * u0 / INR 2) ^ m - 1) /
-                   (INR m * u0 / INR 2 - 1)) < 3).
+                   (INR m * u0 / INR 2 - 1)) < 3)%Re).
         { intros. nra. } apply H5. clear H5.
-        assert (INR m * u0 * / (INR m * u0 / INR 2 - 1) *
-                    ((INR m * u0 / INR 2) ^ m - 1) = 
-                 INR m * u0 * / (1 - INR m * u0 / INR 2) *
-                    (1 - (INR m * u0 / INR 2) ^ m )).
-        { assert ((INR m * u0 / INR 2 - 1) = - ((1 - INR m * u0 / INR 2))).
+        assert ((INR m * u0 * / (INR m * u0 / INR 2 - 1) *
+                    ((INR m * u0 / INR 2) ^ m - 1))%Re = 
+                 (INR m * u0 * / (1 - INR m * u0 / INR 2) *
+                    (1 - (INR m * u0 / INR 2) ^ m ))%Re).
+        { assert ((INR m * u0 / INR 2 - 1)%Re = (- ((1 - INR m * u0 / INR 2)))%Re).
           { nra. } rewrite H5.
-          assert (((INR m * u0 / INR 2)^m - 1) = - ((1 - (INR m * u0 / INR 2)^m))).
+          assert (((INR m * u0 / INR 2)^m - 1)%Re = (- ((1 - (INR m * u0 / INR 2)^m)))%Re).
           { nra. } rewrite H6. 
           rewrite -Ropp_inv_permute. 
           + nra.
-          + pose proof (ratio_gt_0 m H). simpl in H7. unfold u0; simpl; nra.
+          + Print ratio_gt_0.
+
+
+pose proof (ratio_gt_0 m H). simpl in H7. unfold u0; simpl; nra.
         } rewrite H5.
         replace 2 with (2 * 1) by nra.
         apply Rmult_lt_compat.
