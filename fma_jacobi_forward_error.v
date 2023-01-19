@@ -884,6 +884,419 @@ Qed.
 
 *)
 
+
+
+(** State the forward error theorem **)
+Theorem jacobi_forward_error_bound {ty} {n:nat} 
+  (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+  x != 0 ->
+  (forall (v1 v2: 'cV[ftype ty]_n.+1)
+          (xy : ftype ty * ftype ty),
+    In xy
+      (combine
+         (vec_to_list_float n.+1 v1)
+         (vec_to_list_float n.+1 v2)) ->
+    is_finite (fprec ty) (femax ty) xy.1 = true /\
+    is_finite (fprec ty) (femax ty) xy.2 = true /\ 
+      (Rabs (FT2R (fst (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1)))%Re /\
+      (Rabs (FT2R (snd (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1)))%Re) ->
+  
+   let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
+   let delta := default_rel ty in
+   let rho := (((1 + g ty n.+1) * (1 + delta) * g ty n.+1 +
+                delta * (1 + g ty n.+1) + g ty n.+1 + 1) * R)%Re in
+   let d_mag := (((1 + g ty n.+1) * (1 + delta) * g ty n.+1 +
+                   delta * (1 + g ty n.+1) + g ty n.+1) *
+                  (R * vec_inf_norm (x_fix x b_real A_real)) +
+                  ((g ty n.+1 * (1 + delta) + delta) *
+                   (vec_inf_norm (A1_diag A_real) *
+                    vec_inf_norm b_real) +
+                   (1 + g ty n.+1) * g1 ty n.+1 (n.+1 - 1) *
+                   (1 + delta) * vec_inf_norm (A1_diag A_real)) +
+                  g1 ty n.+1 (n.+1 - 1))%Re in 
+
+  (rho < 1)%Re ->
+   A_real \in unitmx ->
+  (forall i : 'I_n.+1, FT2R_mat A i i <> 0%Re) ->
+  forall x0: 'cV[ftype ty]_n.+1, 
+  forall k:nat,
+  (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re.
+Proof.
+induction k.
++ simpl. nra.
++ simpl.
+  assert (((1 - rho * rho ^ k) / (1 - rho))%Re = 
+           (rho * ((1 - rho ^ k) / (1 - rho)) + 1)%Re).
+  { assert ((rho * ((1 - rho ^ k) / (1 - rho)) + 1)%Re = 
+            (rho * ((1 - rho ^ k) / (1 - rho)) + (1 - rho) * / (1 - rho))%Re).
+    { rewrite Rinv_r; nra. } rewrite H4. clear H4.
+    assert ((rho * ((1 - rho ^ k) / (1 - rho)) +
+                  (1 - rho) * / (1 - rho))%Re = 
+             (( (rho * (1 - rho ^ k)) * / (1 - rho))%Re + 
+              (1 - rho) * / (1 - rho))%Re).
+    { nra. } rewrite H4. clear H4.
+    rewrite -Rmult_plus_distr_r. nra.
+  } rewrite H4. 
+  rewrite Rmult_plus_distr_r.
+  assert ((rho * rho ^ k * f_error 0 b x0 x A +
+            (rho * ((1 - rho ^ k) / (1 - rho)) * d_mag + 1 * d_mag))%Re = 
+           (rho * (rho ^ k * f_error 0 b x0 x A +
+                        (1 - rho ^ k) / (1 - rho) * d_mag) + d_mag)%Re).
+  { nra. } rewrite H5.
+  apply Rle_trans with (rho * f_error k b x0 x A + d_mag)%Re.
+  - unfold f_error. 
+    assert (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
+                 x_fix x (FT2R_mat b) (FT2R_mat A) = 
+             (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
+               x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A)) +
+             (x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A) -
+              x_fix x (FT2R_mat b) (FT2R_mat A))).
+    { by rewrite add_vec_distr_2. } rewrite H6. clear H6.
+    apply Rle_trans with 
+    (vec_inf_norm (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
+                       x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A) ) +
+     vec_inf_norm ((x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A) -
+                      x_fix x (FT2R_mat b) (FT2R_mat A))))%Re.
+    * apply /RleP. apply triang_ineq.
+    * apply Rle_trans with 
+      (vec_inf_norm
+         (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
+          x_fix (FT2R_mat (X_m_jacobi k x0 b A)) 
+            (FT2R_mat b) (FT2R_mat A)) +
+        R2 * f_error k b x0 x A)%Re.
+      ++ apply Rplus_le_compat_l.
+         unfold x_fix. rewrite diag_matrix_vec_mult_diff.
+         rewrite add_vec_distr_4. 
+         rewrite -mulmxBr.
+         apply Rle_trans with
+         ( vec_inf_norm (A1_diag (FT2R_mat A)) * 
+           vec_inf_norm (A2_J_real (FT2R_mat A) *m (x -
+                                  FT2R_mat
+                                   (X_m_jacobi k x0 b A))))%Re.
+         -- apply /RleP.
+            apply vec_inf_norm_diag_matrix_vec_mult_R.
+         -- apply Rle_trans with 
+            (vec_inf_norm (A1_diag (FT2R_mat A)) * 
+              (matrix_inf_norm (A2_J_real (FT2R_mat A)) *
+               vec_inf_norm (x - FT2R_mat (X_m_jacobi k x0 b A))))%Re.
+            ** apply Rmult_le_compat_l.
+               +++ apply /RleP. apply vec_norm_pd.
+               +++ apply /RleP. apply submult_prop.
+            ** assert ((vec_inf_norm (A1_diag (FT2R_mat A)) *
+                         (matrix_inf_norm (A2_J_real (FT2R_mat A)) *
+                          vec_inf_norm (x - FT2R_mat (X_m_jacobi k x0 b A))))%Re = 
+                        ((vec_inf_norm (A1_diag (FT2R_mat A)) * matrix_inf_norm (A2_J_real (FT2R_mat A))) *
+                        (vec_inf_norm (x - FT2R_mat (X_m_jacobi k x0 b A))))%Re).
+               { nra. } rewrite H6. unfold R2.
+               rewrite sub_vec_comm_1.
+               rewrite -vec_inf_norm_opp. unfold f_error. rewrite -x_fixpoint.
+               +++ apply Rle_refl.
+               +++ unfold x. rewrite mulmxA.
+                  assert (FT2R_mat A *m A_real^-1 = 1).
+                  { fold A_real. by rewrite mulmxV . }
+                  rewrite H7. by rewrite mul1mx /b_real.
+               +++ apply H3.
+         -- auto.
+      ++ eapply Rle_trans.
+         -- apply Rle_trans with 
+            ((vec_inf_norm 
+              (FT2R_mat (X_m_jacobi k.+1 x0 b A) - 
+                diag_matrix_vec_mult_R (A1_diag (FT2R_mat A))
+                             (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A))) +
+             vec_inf_norm 
+              (diag_matrix_vec_mult_R (A1_diag (FT2R_mat A))
+                             (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A)) -
+               x_fix (FT2R_mat (X_m_jacobi k x0 b A))
+                    (FT2R_mat b) (FT2R_mat A))) + 
+              R2 * f_error k b x0 x A)%Re.
+             ** apply Rplus_le_compat_r.
+                assert ((FT2R_mat (X_m_jacobi k.+1 x0 b A) -
+                            x_fix (FT2R_mat (X_m_jacobi k x0 b A))
+                              (FT2R_mat b) (FT2R_mat A)) = 
+                        (FT2R_mat (X_m_jacobi k.+1 x0 b A) - 
+                            diag_matrix_vec_mult_R (A1_diag (FT2R_mat A))
+                             (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A))) +
+                        (diag_matrix_vec_mult_R (A1_diag (FT2R_mat A))
+                             (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A)) -
+                          x_fix (FT2R_mat (X_m_jacobi k x0 b A))
+                              (FT2R_mat b) (FT2R_mat A))).
+               { by rewrite add_vec_distr_2. } rewrite H6.
+               apply /RleP.
+               apply triang_ineq.
+             ** apply Rplus_le_compat_r.
+                +++ apply Rplus_le_compat.
+                    --- simpl. unfold jacobi_iter. 
+                        apply Rle_trans with 
+                          ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+                            vec_inf_norm (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A))) * g ty n.+1 +
+                               g1 ty n.+1 (n.+1 - 1))%Re.
+                        *** pose proof (@vec_norm_diag ty n). 
+                            assert (A1_diag (FT2R_mat A) = FT2R_mat (A1_inv_J A)).
+                            { apply matrixP. unfold eqrel. intros. rewrite !mxE. admit. }
+                            rewrite H7. apply H6. intros.
+                            specialize (H0 (A1_inv_J A) (b -f A2_J A *f X_m_jacobi k x0 b A)).
+                            by apply H0.
+                        *** assert (FT2R_mat (A1_inv_J A) = A1_diag A_real).
+                            { apply matrixP. unfold eqrel. intros. rewrite !mxE /=.
+                              admit.
+                            } rewrite H6. apply Rplus_le_compat_r.
+                            apply Rmult_le_compat_r.
+                            apply g_pos.
+                            apply Rmult_le_compat_l.
+                            apply /RleP. apply vec_norm_pd.
+                            assert ((vec_inf_norm (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A) -
+                                                  (FT2R_mat b - FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) <=
+                                    (vec_inf_norm (FT2R_mat b) + vec_inf_norm (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) *
+                                    (default_rel ty))).
+                            { apply vec_float_sub. intros.
+                              specialize (H0 b (A2_J A *f X_m_jacobi k x0 b A) xy H7).
+                              apply H0.
+                            } apply reverse_triang_ineq in H7.
+                            apply Rle_trans with 
+                            ((vec_inf_norm (FT2R_mat b) +
+                                    vec_inf_norm
+                                      (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) *
+                                   (1 + default_rel ty))%Re.
+                            ++++ rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
+                                 apply Rle_trans with 
+                                 (vec_inf_norm
+                                   (FT2R_mat b -
+                                    FT2R_mat (A2_J A *f X_m_jacobi k x0 b A)) + 
+                                   (vec_inf_norm (FT2R_mat b) +
+                                      vec_inf_norm
+                                        (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) *
+                                     default_rel ty)%Re.
+                                 ---- assert (forall x y z:R, (x - y <= z)%Re -> (x <= y + z)%Re).
+                                      { intros. nra. } apply H8. by apply /RleP.
+                                 ---- apply Rplus_le_compat_r.
+                                      assert (vec_inf_norm
+                                                  (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A)) = 
+                                              vec_inf_norm (- (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A)))).
+                                      { by rewrite vec_inf_norm_opp. } rewrite H8.
+                                      apply /RleP. apply triang_ineq.
+                            ++++ apply Rmult_le_compat_r.
+                                 ---- apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+                                 ---- apply Rplus_le_compat_l.
+                                      assert (vec_inf_norm (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) -
+                                                 (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A))) <=
+                                               ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
+                                                * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
+                                      { apply matrix_vec_mult_bound_corollary.  admit. }
+                                      apply Rle_trans with 
+                                      ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
+                                                * (1 + g ty n.+1) + g1 ty n.+1 (n.+1 - 1))%Re.
+                                      **** rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
+                                           apply Rle_trans with
+                                           (vec_inf_norm (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A)) +
+                                            (matrix_inf_norm (FT2R_mat (A2_J A)) *
+                                             vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
+                                             g ty n.+1 + g1 ty n.+1 (n.+1 - 1)))%Re.
+                                           +++++ apply reverse_triang_ineq in H8.
+                                                 assert (forall x y z:R, (x - y <= z)%Re -> (x <= y + z)%Re).
+                                                 { intros. nra. } apply H9. apply /RleP. apply H8.
+                                           +++++ match goal with |-context[(_ <= ?p + ?a * ?b * ?c + ?d)%Re]=>
+                                                  replace (p + a * b * c + d)%Re with (p + (a * b * c + d))%Re by nra
+                                                 end. apply Rplus_le_compat_r. apply /RleP. apply submult_prop.
+                                      **** apply Rle_refl.
+                    --- unfold x_fix. rewrite diag_matrix_vec_mult_diff .
+                        apply Rle_trans with
+                        (vec_inf_norm (A1_diag (FT2R_mat A)) *
+                         vec_inf_norm (FT2R_mat
+                                         (b -f A2_J A *f X_m_jacobi k x0 b A) -
+                                       (FT2R_mat b -
+                                        A2_J_real (FT2R_mat A) *m 
+                                        FT2R_mat (X_m_jacobi k x0 b A))))%Re.
+                        *** apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R .
+                        *** apply Rmult_le_compat_l.
+                            ++++ apply /RleP. apply vec_norm_pd.
+                            ++++ assert ((FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A) -
+                                          (FT2R_mat b -
+                                           A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A))) =
+                                         (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A) - 
+                                          (FT2R_mat b - FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) +
+                                         (FT2R_mat b - FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) - 
+                                           (FT2R_mat b -
+                                           A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A)))).
+                                 { by rewrite add_vec_distr_2. } rewrite H6. clear H6.
+                                 apply /RleP. apply triang_ineq.
+         -- assert (FT2R_mat b -
+                         FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) -
+                         (FT2R_mat b -
+                          A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A))  =
+                     - (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) -
+                        A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A)) ).
+             { rewrite add_vec_distr_4. by rewrite sub_vec_comm_1. auto. } rewrite H6. clear H6.
+             rewrite -vec_inf_norm_opp. rewrite -RplusE.
+             rewrite Rmult_plus_distr_l. eapply Rle_trans.
+             ** apply Rplus_le_compat_r. apply Rplus_le_compat_l.
+                apply Rmult_le_compat_l. apply /RleP. apply vec_norm_pd.
+                apply Rplus_le_compat.
+                +++ apply /RleP. apply vec_float_sub.
+                    intros. 
+                    specialize (H0 b (A2_J A *f X_m_jacobi k x0 b A) xy H6).
+                    apply H0.
+                +++ assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
+                    { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                       by case: (x1 == y :> nat).
+                    } rewrite H6. apply /RleP. apply matrix_vec_mult_bound_corollary.
+                    intros. admit.
+             ** rewrite !ft2r_mat_equiv .
+                eapply Rle_trans.
+                +++ apply Rplus_le_compat_r. apply Rplus_le_compat_l.
+                    rewrite -!RmultE -!RplusE. apply Rmult_le_compat_l.
+                    --- apply /RleP. apply vec_norm_pd.
+                    --- apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+                        apply default_rel_ge_0. 
+                        apply Rplus_le_compat_l.
+                        apply Rle_trans with 
+                                      ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
+                                                * (1 + g ty n.+1) + g1 ty n.+1 (n.+1 - 1))%Re.
+                        *** rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
+                            assert (vec_inf_norm (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) -
+                                                 (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A))) <=
+                                               ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
+                                                * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
+                           { apply matrix_vec_mult_bound_corollary.  admit. }
+                            apply Rle_trans with
+                                           (vec_inf_norm (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A)) +
+                                            (matrix_inf_norm (FT2R_mat (A2_J A)) *
+                                             vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
+                                             g ty n.+1 + g1 ty n.+1 (n.+1 - 1)))%Re.
+                            ++++ apply reverse_triang_ineq in H6.
+                                 assert (forall x y z:R, (x - y <= z)%Re -> (x <= y + z)%Re).
+                                 { intros. nra. } apply H7. apply /RleP. apply H6.
+                            ++++ match goal with |-context[(_ <= ?p + ?a * ?b * ?c + ?d)%Re]=>
+                                    replace (p + a * b * c + d)%Re with (p + (a * b * c + d))%Re by nra
+                                 end. apply Rplus_le_compat_r. apply /RleP. apply submult_prop.
+                        *** apply Rle_refl.
+               +++ assert ((vec_inf_norm (A1_diag A_real) *
+                             ((vec_inf_norm (FT2R_mat b) +
+                               (matrix_inf_norm (FT2R_mat (A2_J A)) *
+                                vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
+                                (1 + g ty n.+1) + g1 ty n.+1 (n.+1 - 1))) * 1 +
+                              (vec_inf_norm (FT2R_mat b) +
+                               (matrix_inf_norm (FT2R_mat (A2_J A)) *
+                                vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
+                                (1 + g ty n.+1) + g1 ty n.+1 (n.+1 - 1))) *
+                              default_rel ty) * g ty n.+1 +
+                             g1 ty n.+1 (n.+1 - 1) +
+                             vec_inf_norm (A1_diag (FT2R_mat A)) *
+                             ((vec_inf_norm (FT2R_mat b) +
+                               (matrix_inf_norm (FT2R_mat (A2_J A)) *
+                                vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
+                                (1 + g ty n.+1) + g1 ty n.+1 (n.+1 - 1))) *
+                              default_rel ty +
+                              (matrix_inf_norm (FT2R_mat (A2_J A)) *
+                               vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
+                               g ty n.+1 + g1 ty n.+1 (n.+1 - 1))) +
+                             R2 * f_error k b x0 x A)%Re = 
+                          ((( (((1 + g ty n.+1) * (1 + default_rel ty) * g ty n.+1 +
+                              default_rel ty * (1 + g ty n.+1) + g ty n.+1) *
+                              (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (FT2R_mat (A2_J A)))) *
+                              vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A))) +
+                           ((g ty n.+1 * (1 + default_rel ty) + default_rel ty) *
+                            (vec_inf_norm (A1_diag A_real) * vec_inf_norm (FT2R_mat b)) +
+                           ( (1+ g ty n.+1) * g1 ty n.+1 (n.+1 - 1) * (1 + default_rel ty)) *
+                            (vec_inf_norm (A1_diag A_real)) ) + g1 ty n.+1 (n.+1 - 1)) + 
+                           R2 * f_error k b x0 x A)%Re).
+                   { fold A_real. nra. } rewrite H6. clear H6. fold R2.
+                   assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
+                    { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                       by case: (x1 == y :> nat).
+                    } rewrite -H6. fold A_real. fold R2. fold b_real.
+                    assert ((vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) <= 
+                             f_error k b x0 x A + 
+                             vec_inf_norm (x_fix x b_real A_real))%Re).
+                    { unfold f_error.
+                      apply Rle_trans with 
+                      (vec_inf_norm ((FT2R_mat (X_m_jacobi k x0 b A) -
+                                        x_fix x (FT2R_mat b) (FT2R_mat A)) + 
+                                      x_fix x b_real A_real)).
+                      + rewrite sub_vec_3. apply Rle_refl.
+                      + apply /RleP. apply triang_ineq.
+                    } 
+                    apply Rle_trans with
+                    (((1 + g ty n.+1) * (1 + default_rel ty) * g ty n.+1 +
+                        default_rel ty * (1 + g ty n.+1) + 
+                        g ty n.+1) * R2 *
+                       (f_error k b x0 x A +
+                            vec_inf_norm (x_fix x b_real A_real)) +
+                       ((g ty n.+1 * (1 + default_rel ty) + default_rel ty) *
+                        (vec_inf_norm (A1_diag A_real) *
+                         vec_inf_norm b_real) +
+                        (1 + g ty n.+1) * g1 ty n.+1 (n.+1 - 1) *
+                        (1 + default_rel ty) *
+                        vec_inf_norm (A1_diag A_real)) +
+                       g1 ty n.+1 (n.+1 - 1) + R2 * f_error k b x0 x A )%Re.
+                    --- repeat apply Rplus_le_compat_r.
+                        repeat apply Rmult_le_compat_l.
+                        *** apply Rmult_le_pos.
+                            ++++ apply Rplus_le_le_0_compat.
+                                 ---- apply Rplus_le_le_0_compat.
+                                      **** repeat apply Rmult_le_pos.
+                                           +++++ apply Rplus_le_le_0_compat. nra. apply g_pos.
+                                           +++++ apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+                                           +++++ apply g_pos.
+                                      **** apply Rmult_le_pos.
+                                           +++++ apply default_rel_ge_0.
+                                           +++++ apply Rplus_le_le_0_compat. nra. apply g_pos.
+                                 ---- apply g_pos.
+                            ++++ unfold R2. apply Rmult_le_pos.
+                                 ---- apply /RleP. apply vec_norm_pd.
+                                 ---- apply /RleP. apply matrix_norm_pd.
+                        *** apply H7.
+                    --- assert ((((1 + g ty n.+1) * (1 + default_rel ty) * g ty n.+1 +
+                                  default_rel ty * (1 + g ty n.+1) + 
+                                  g ty n.+1) * R2 *
+                                 (f_error k b x0 x A +
+                                  vec_inf_norm (x_fix x b_real A_real)) +
+                                 ((g ty n.+1 * (1 + default_rel ty) + default_rel ty) *
+                                  (vec_inf_norm (A1_diag A_real) *
+                                   vec_inf_norm b_real) +
+                                  (1 + g ty n.+1) * g1 ty n.+1 (n.+1 - 1) *
+                                  (1 + default_rel ty) *
+                                  vec_inf_norm (A1_diag A_real)) +
+                                 g1 ty n.+1 (n.+1 - 1) + R2 * f_error k b x0 x A)%Re = 
+                                ((((1 + g ty n.+1) * (1 + default_rel ty) * g ty n.+1 +
+                                  default_rel ty * (1 + g ty n.+1) +   g ty n.+1 + 1) * R2) *
+                                f_error k b x0 x A + 
+                                (((1 + g ty n.+1) * (1 + default_rel ty) * g ty n.+1 +
+                                  default_rel ty * (1 + g ty n.+1) + g ty n.+1) *
+                                  (R2  * vec_inf_norm (x_fix x b_real A_real)) +
+                                  ((g ty n.+1 * (1 + default_rel ty) + default_rel ty) *
+                                  (vec_inf_norm (A1_diag A_real) *
+                                   vec_inf_norm b_real) +
+                                  (1 + g ty n.+1) * g1 ty n.+1 (n.+1 - 1) *
+                                  (1 + default_rel ty) *
+                                  vec_inf_norm (A1_diag A_real)) +
+                                 g1 ty n.+1 (n.+1 - 1)))%Re).
+                        { nra. } rewrite H8. clear H8. fold delta. fold rho. fold d_mag.
+                        unfold f_error. fold b_real. fold A_real. apply Rle_refl.
+  - apply Rplus_le_compat_r. apply Rmult_le_compat_l.
+    * by apply rho_ge_0.
+    * nra.
+Admitted. 
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
