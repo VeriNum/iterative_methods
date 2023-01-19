@@ -1224,20 +1224,21 @@ apply pow_invert.
     * unfold F'. unfold fmax, default_rel.
       assert ((1 - 2 * (/ 2 * bpow Zaux.radix2 (- fprec ty + 1)))%Re = 
               (1 - bpow Zaux.radix2 (- fprec ty + 1))%Re).
-      { nra. } rewrite H2.
-
-
-
-
-
-
-
-
+      { nra. } rewrite H2. 
+      rewrite Rmult_minus_distr_l. rewrite Rmult_1_r.
+      assert ( ((6 * INR (2 ^ Z.to_nat (fprec ty)) + bpow Zaux.radix2 (femax ty) *
+                     bpow Zaux.radix2 (- fprec ty + 1))%Re <= 
+                bpow Zaux.radix2 (femax ty))%Re -> 
+              (6 * INR (2 ^ Z.to_nat (fprec ty)) <=
+               bpow Zaux.radix2 (femax ty) -
+               bpow Zaux.radix2 (femax ty) * bpow Zaux.radix2 (- fprec ty + 1))%Re).
+      { nra. } apply H3. admit.
 Admitted.
 
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
+  (n.+1 < 2 ^ Z.to_nat (fprec ty))%nat ->
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x:= A_real^-1 *m b_real in
@@ -1274,6 +1275,7 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
   forall k:nat,
   (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re.
 Proof.
+intro Hbound. intros.
 induction k.
 + simpl. nra.
 + simpl.
@@ -1408,7 +1410,7 @@ induction k.
                                 (sqrt
                                    (F' ty / 2 /
                                     (INR n.+1 * (1 + default_rel ty) ^ n.+1)))%Re; try apply Ha1; try apply Ha2;
-                                try apply n_bound).
+                                try apply n_bound). by []. by [].
                             } apply reverse_triang_ineq in H7.
                             apply Rle_trans with 
                             ((vec_inf_norm (FT2R_mat b) +
@@ -1498,7 +1500,7 @@ induction k.
                                 (sqrt
                                    (F' ty / 2 /
                                     (INR n.+1 * (1 + default_rel ty) ^ n.+1)))%Re; try apply Ha1; try apply Ha2;
-                    try apply n_bound).
+                    try by apply n_bound).
                 +++ assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                        by case: (x1 == y :> nat).
@@ -1646,18 +1648,7 @@ Admitted.
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+(*
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
@@ -2052,7 +2043,7 @@ induction k.
 Admitted. 
   
 
-
+*)
 
 
 
