@@ -172,10 +172,10 @@ Lemma matrix_vec_mult_bound {n:nat} {ty}:
             (\row_j A (inord i) j)^T)
          (vec_to_list_float n.+1 v)) ->
     is_finite (fprec ty) (femax ty) xy.1 = true /\
-    is_finite (fprec ty) (femax ty) xy.2 = true /\ 
-      Rabs (FT2R (fst (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty) /\
-      Rabs (FT2R (snd (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty)) ->
-  vec_inf_norm (FT2R_mat (A *f v) - (FT2R_mat A) *m (FT2R_mat v)) <=
+    is_finite (fprec ty) (femax ty) xy.2 = true /\
+    Rabs (FT2R (fst (xy))) <= sqrt ((F' ty /2) / (INR n.+1  * (1 + default_rel ty)^ n.+1)) /\
+    Rabs (FT2R (snd (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1 ))) -> 
+   vec_inf_norm (FT2R_mat (A *f v) - (FT2R_mat A) *m (FT2R_mat v)) <=
   mat_vec_mult_err_bnd A v.
 Proof.
 intros. unfold vec_inf_norm, mat_vec_mult_err_bnd.
@@ -467,8 +467,8 @@ Lemma matrix_vec_mult_bound_corollary {n:nat} {ty}:
          (vec_to_list_float n.+1 v)) ->
     is_finite (fprec ty) (femax ty) xy.1 = true /\
     is_finite (fprec ty) (femax ty) xy.2 = true /\ 
-      Rabs (FT2R (fst (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty) /\
-      Rabs (FT2R (snd (xy))) <= sqrt (F' ty / (INR n.+1 * (1 + default_rel ty)^n.+1) - default_abs ty)) ->
+    Rabs (FT2R (fst (xy))) <= sqrt ((F' ty /2) / (INR n.+1  * (1 + default_rel ty)^ n.+1)) /\
+    Rabs (FT2R (snd (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1 ))) -> 
   vec_inf_norm (FT2R_mat (A *f v) - (FT2R_mat A) *m (FT2R_mat v)) <=
   (matrix_inf_norm (FT2R_mat A) * vec_inf_norm (FT2R_mat v)) * g ty n.+1 +
    g1 ty n.+1 (n.+1 - 1).
