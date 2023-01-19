@@ -906,28 +906,42 @@ Qed.
 
 Print default_rel.
 Print Z.pow_pos.
-(*
+
+Lemma C_ge_0 (m n:nat):
+  (0 <= C m n)%Re.
+Proof.
+unfold C. apply Rmult_le_pos.
++ apply pos_INR.
++ rewrite Rinv_mult_distr.
+  - apply Rmult_le_pos; 
+    (apply Rlt_le, Rinv_0_lt_compat; apply lt_0_INR, lt_O_fact).
+  - apply not_0_INR. apply fact_neq_0.
+  - apply not_0_INR. apply fact_neq_0.
+Qed.
+
+
 Lemma delta_bound {ty} :
   forall m:nat, 
   let u0 := default_rel ty in
-  (m < Z.to_nat (Z.pow_pos 2 _ (fprec ty)))%nat ->
-  ((1 + u0) ^ m - 1) < 2.
+  (m < 2 ^ (Z.to_nat (fprec ty)))%nat ->
+  (((1 + u0) ^ m - 1) < 2)%Re.
 Proof.
 intros.
-assert ((1 + u0) ^ m  < 3 -> (1 + u0) ^ m - 1 < 2).
+assert (((1 + u0) ^ m  < 3)%Re -> ((1 + u0) ^ m - 1 < 2)%Re).
 { nra. } apply H0.
-assert (1+u0 = u0 + 1). { nra. } rewrite H1. clear H1.
+assert ((1+u0)%Re = (u0 + 1)%Re). { nra. } rewrite H1. clear H1.
 rewrite binomial.
 apply Rle_lt_trans with
-(sum_f_R0 (fun i : nat => (INR (m ^ i) / INR (fact i)) * u0 ^ i * 1 ^ (m - i)) m).
+(sum_f_R0 (fun i : nat => ((INR (m ^ i) / INR (fact i)) * u0 ^ i * 1 ^ (m - i))%Re) m).
 + apply sum_Rle. intros.
   rewrite Rmult_assoc. 
-  match goal with |-context[_ <= ?a * ?b * ?c]=>
-    replace (a * b * c) with (a * (b * c)) by nra
+  match goal with |-context[(_ <= ?a * ?b * ?c)%Re]=>
+    replace (a * b * c)%Re with (a * (b * c))%Re by nra
   end. apply Rmult_le_compat.
   - apply C_ge_0 .
   - apply Rmult_le_pos. try apply Rlt_le,x_pow_gt_0;try nra.
-    unfold u0; simpl;nra. apply Rlt_le,x_pow_gt_0. nra.
+    unfold u0. apply pow_le. apply default_rel_ge_0. simpl.
+    apply Rlt_le,x_pow_gt_0. nra.
   - unfold C. 
     assert (INR (fact m) / (INR (fact n) * INR (fact (m - n))) = 
               (INR (fact m) / INR (fact (m-n))) * / INR (fact n)).
