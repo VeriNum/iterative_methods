@@ -307,23 +307,23 @@ rewrite !mxE. rewrite !nth_vec_to_list_real.
     { nra. } rewrite H1. rewrite Rinv_r.
     nra. specialize (H0 (@inord n x0)). rewrite !mxE in H0. apply H0.
   } rewrite H1.
-  assert (((A (inord x0) (inord x0) * x x0 y))%Re  = 
+  assert (((FT2R (A (inord x0) (inord x0)) * x x0 y))%Re  = 
            (b (inord x0) ord0 -
-              \sum_j A2_J_real A (inord x0) j * x j ord0)%Re).   
+              \sum_j A2_J_real (FT2R_mat A) (inord x0) j * x j ord0)%Re).   
   { assert (forall x y z:R, (x + y = z)%Re -> (x = z - y)%Re).
     { intros. nra. } apply H2.
-    assert ((A (inord x0) (inord x0) * x x0 y +
-              \sum_j A2_J_real A (inord x0) j * x j ord0)%Re = 
-              \sum_j (A x0 j * x j ord0)%Re).
+    assert ((FT2R (A (inord x0) (inord x0)) * x x0 y +
+              \sum_j A2_J_real (FT2R_mat A) (inord x0) j * x j ord0)%Re = 
+              \sum_j ((FT2R_mat A) x0 j * x j ord0)%Re).
     { unfold A2_J_real. rewrite [in RHS](bigD1 x0) /=.
       rewrite inord_val. 
-      assert (y = ord0). { by apply ord1. } rewrite H3.
+      assert (y = ord0). { by apply ord1. } rewrite H3. rewrite mxE.
       apply Rplus_eq_compat_l. 
       assert (\sum_(i < n.+1 | i != x0)
-                    (A x0 i * x i ord0)%Re = 
+                    ((FT2R_mat A) x0 i * x i ord0)%Re = 
                \sum_(i < n.+1)
                    (if (~~ (i == x0 :> nat)) then 
-                      (A x0 i * x i ord0)%Re else 0%Re)).
+                      ((FT2R_mat A) x0 i * x i ord0)%Re else 0%Re)).
       { by rewrite big_mkcond /=. } rewrite H4.
       apply eq_big.
       by []. intros. rewrite !mxE. rewrite eq_sym.
