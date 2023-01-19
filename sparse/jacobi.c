@@ -66,7 +66,7 @@ double jacobi2(double *A1, struct crs_matrix *A2, double *b, double *x, double a
     s = jacobi2_oneiter(A1,A2,b,z,y);
     t=z; z=y; y=t;
     maxiter--;
-  } while (s*0==0.0 && s>acc && maxiter);
+  } while (s*0==0.0 && s>=acc && maxiter);
   if (y==x)
     y=z;
   else {

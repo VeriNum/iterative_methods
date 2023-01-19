@@ -215,8 +215,8 @@ replace  (Binary.is_finite (fprec t) (femax t) (norm2 (residual z')))
 destruct (Binary.is_finite _ _ _) eqn:?H.
 simpl.
 apply finite_is_finite in H4.
-replace (BCMP t Gt true (norm2 (residual z')) acc) 
-     with (BCMP t Gt true (norm2 (residual z)) acc)
+replace (BCMP t Lt false (norm2 (residual z')) acc) 
+     with (BCMP t Lt false (norm2 (residual z)) acc)
   by (apply BCMP_mor; auto; apply strict_feq_i1; auto).
 destruct (BCMP _ _ _ _ _).
 apply IHn; auto.
@@ -444,7 +444,7 @@ fold acc2 in FINacc2,H3.
 clearbody acc2. clear acc.
 clearbody f. clearbody resid.
 clearbody x0.
-set (P x := BCMP t Gt true (norm2 (resid x)) acc2 = false).
+set (P x := BCMP t Lt false (norm2 (resid x)) acc2 = false).
 assert (forall x, Decidable.decidable (P x)).
 clear.
 intros. subst P. simpl. destruct (BCMP _ _ _ _ _); [right|left]; auto.

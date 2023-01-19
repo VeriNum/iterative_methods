@@ -37,7 +37,7 @@ Definition jacobi_residual {t: type} (A1: diagmatrix t) (A2: matrix t) (b: vecto
 
 
 Definition going {t} (s acc: ftype t) := 
-   andb (Binary.is_finite (fprec t) (femax t) s) (BCMP _ Gt true s acc).
+   andb (Binary.is_finite (fprec t) (femax t) s) (BCMP _ Lt false s acc).
 
 
 Fixpoint iter_stop {t} {A} (norm2: A -> ftype t) (residual: A -> A) (f : A -> A) (n:nat) (acc: ftype t) (x:A) :=
@@ -87,7 +87,7 @@ Lemma jacobi_iteration_bound_correct {t: type} :
     let y :=  jacobi_n A b x0 j in
     let r2 := norm2 (resid y) in
     (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
-    BCMP t Gt true (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
+    BCMP t Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
 Proof.
 intros.
 contradiction H.
