@@ -12,6 +12,63 @@ Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
 
+
+Lemma subsume_jacobi2: funspec_sub (snd jacobi2_spec) (snd jacobi2_highspec).
+Proof.
+apply NDsubsume_subsume.
+split; auto.
+unfold snd.
+hnf; intros.
+split; auto. intros s [? ?].
+destruct s as [[[[[[[[[[[shA1 shA2] shb] A] A1p] A2p] bp] b] xp] acc] maxiter] gv].
+Exists (shA1,shA2,shb,A,A1p,A2p,bp,b,xp,
+           (Zrepeat (Zconst Tdouble 0) (matrix_rows A)),acc,maxiter,gv).
+Exists emp.
+Intros. clear H.
+unfold_for_go_lower; normalize.
+simpl.
+apply derives_extract_prop; intro.
+apply derives_extract_prop; intro.
+assert_PROP (Zlength b = matrix_rows A) as LENb. {
+  saturate_local. apply prop_right. rewrite Zlength_map in H5;  auto.
+}
+decompose [and] H; clear H.
+decompose [and] (jacobi_iteration_bound_corollaries _ _ _ _ H4).
+rewrite !prop_true_andp; auto.
+repeat split; auto.
+rewrite <- repeat_Zrepeat; apply Forall_repeat; auto.
+intros.
+apply derives_extract_prop; intro.
+Intros y s.
+Exists y s.
+rewrite !prop_true_andp; auto.
+cancel.
+destruct H15.
+split; auto.
+red in H15. simpl in H15.
+rewrite H15.
+destruct (jacobi_n_jacobi _ _ _ _ H4) as [j [? ?]].
+set (x0 := Zrepeat _ _) in *.
+set (x0nat := repeat _ _) in *.
+assert (x0nat = x0). {
+  unfold x0, x0nat. rewrite <- repeat_Zrepeat.
+  f_equal. rewrite Zlength_correct in LENb.
+  rewrite <- LENb.
+  rewrite Nat2Z.id. auto.
+}
+clearbody x0nat; subst x0nat.
+pose proof (jacobi_returns_residual A b x0 acc (Z.to_nat maxiter-1)).
+replace (S _) with (Z.to_nat maxiter) in H21 by lia.
+destruct (jacobi A b x0 acc (Z.to_nat maxiter)) as [r2 xj].
+subst r2; simpl fst.
+red in H18. simpl snd in H18.
+assert (Forall finite (diag_of_matrix A))
+    by (apply diag_of_matrix_prop; auto).
+apply norm2_mor.
+apply jacobi_residual_mor; auto.
+symmetry; auto.
+Qed.
+
 Definition surely_malloc_spec :=
   DECLARE _surely_malloc
    WITH t:Ctypes.type, gv: globals

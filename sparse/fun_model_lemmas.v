@@ -418,17 +418,24 @@ Proof.
 induction i; simpl; intros; f_equal; auto.
 Qed.
 
+Lemma jacobi_returns_residual  {NAN: Nans} {t: type}:
+  forall A (b: vector t) x0 acc2 k,
+  let '(r2,xj) := jacobi A b x0 acc2 (S k) in
+  r2 = norm2 (jacobi_residual (diag_of_matrix A) (remove_diag A) b xj).
+Proof.
+intros.
+unfold jacobi.
+revert x0; induction k; simpl; intros; auto.
+destruct (going _ _); auto.
+apply (IHk (jacobi_iter (diag_of_matrix A) (remove_diag A) b x0)).
+Qed.
+
 Lemma jacobi_n_jacobi {NAN: Nans} {t: type}:
-  forall A b acc k maxiter, 
+  forall A b acc k, 
    jacobi_iteration_bound A b acc k ->
-   (k <= maxiter)%nat ->
   let acc2 := BMULT t acc acc in
   let x0 := (repeat  (Zconst t 0) (length b)) in
-  exists j,
-   (j<=k)%nat /\
-   let '(r2,xj) := jacobi A b x0 acc2 (S maxiter) in
-   r2 = norm2 (jacobi_residual (diag_of_matrix A) (remove_diag A) b xj) /\
-   xj = jacobi_n A b x0 j.
+  exists j, (j<=k)%nat /\ snd (jacobi A b x0 acc2 (S k)) = jacobi_n A b x0 j.
 Proof.
 intros.
 apply jacobi_iteration_bound_correct in H.
@@ -448,43 +455,42 @@ set (P x := BCMP t Lt false (norm2 (resid x)) acc2 = false).
 assert (forall x, Decidable.decidable (P x)).
 clear.
 intros. subst P. simpl. destruct (BCMP _ _ _ _ _); [right|left]; auto.
-destruct (min_iter f P H4 x0 j) as [i [? [? ?]]].
+destruct (min_iter f P H1 x0 j) as [i [? [? ?]]].
 red.
 apply H3.
 exists i; split; auto. lia.
-assert (i <= maxiter) by lia.
-clear k H H0.
+assert (i <= k) by lia.
 assert (forall i', i' <= i -> finite (norm2 (resid (Nat.iter i' f x0)))).
 intros; apply H2; lia.
-clear j H5 H2 H3.
-clear H4. subst P. simpl in *.
-replace maxiter with (i + (maxiter-i)) by lia.
-forget (maxiter-i) as k.
-clear H8 maxiter.
-rewrite (iter_stop_n_lem1 _ _ norm2 resid f acc2 k i x0
+clear j H H2 H3 H4.
+subst P. simpl in *.
+replace k with (i + (k-i)) by lia.
+forget (k-i) as d.
+clear H7 k.
+rewrite (iter_stop_n_lem1 _ _ norm2 resid f acc2 d i x0
   (Nat.iter i f x0)).
 split; auto.
-2: unfold going; rewrite H6, andb_false_iff; auto.
-revert x0 H6 H H7; induction i; simpl; intros; auto.
+2: unfold going; rewrite H5, andb_false_iff; auto.
+revert x0 H5 H6 H8; induction i; simpl; intros; auto.
 specialize (IHi (f x0)).
 rewrite IHi.
-specialize (H7 0 ltac:(lia)).
-apply not_false_is_true in H7.
-simpl in H7.
+specialize (H6 0 ltac:(lia)).
+apply not_false_is_true in H6.
+simpl in H6.
 unfold going.
-rewrite H7.
-specialize (H 0 ltac:(lia)). 
-apply finite_is_finite in H. simpl in H.
-rewrite H.
+rewrite H6.
+specialize (H8 0 ltac:(lia)). 
+apply finite_is_finite in H8. simpl in H8.
+rewrite H8.
 simpl.
 f_equal.
 apply iter_swap.
 rewrite iter_swap; auto.
 intros.
 rewrite iter_swap.
- apply (H (S i')). lia.
+ apply (H6 (S i0)). lia.
 intros.
 rewrite iter_swap.
-apply (H7 (S i0)). lia.
+apply (H8 (S i')). lia.
 Qed.
 

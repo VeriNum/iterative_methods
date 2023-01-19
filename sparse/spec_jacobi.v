@@ -47,7 +47,7 @@ Definition jacobi2_oneiter_spec :=
 Definition jacobi2_spec :=
  DECLARE _jacobi2
  WITH shA1: share, shA2: share, shb: share,
-      A: matrix Tdouble, A1p: val, A1: vector Tdouble, A2p: val, A2: matrix Tdouble, 
+      A: matrix Tdouble, A1p: val, A2p: val,
       bp: val, b: vector Tdouble, xp: val, x: vector Tdouble, 
       acc: ftype Tdouble, maxiter: Z, gv: globals
  PRE [ tptr tdouble, tptr t_crs, tptr tdouble, tptr tdouble, tdouble, tuint ]
@@ -67,6 +67,34 @@ Definition jacobi2_spec :=
  POST [ tdouble ]
    EX y: vector Tdouble, EX s: ftype Tdouble,
     PROP(RelProd feq (Forall2 feq) (s,y) (jacobi A b x acc (Z.to_nat maxiter)))
+    RETURN(Vfloat s)
+    SEP (mem_mgr gv;
+           data_at shA1 (tarray tdouble (matrix_rows A)) (map Vfloat (diag_of_matrix A)) A1p;
+           crs_rep shA2 (remove_diag A) A2p;
+           data_at shb (tarray tdouble (matrix_rows A)) (map Vfloat b) bp;
+           data_at Ews (tarray tdouble (matrix_rows A)) (map Vfloat y) xp).
+
+Definition jacobi2_highspec :=
+ DECLARE _jacobi2
+ WITH shA1: share, shA2: share, shb: share,
+      A: matrix Tdouble, A1p: val, A2p: val,
+      bp: val, b: vector Tdouble, xp: val,
+      acc: ftype Tdouble, maxiter: Z, gv: globals
+ PRE [ tptr tdouble, tptr t_crs, tptr tdouble, tptr tdouble, tdouble, tuint ]
+    PROP(readable_share shA1; readable_share shA2; readable_share shb;
+             jacobi_iteration_bound A b acc (Z.to_nat (maxiter-1));
+             0 < matrix_rows A < Int.max_unsigned;
+             0 < maxiter <= Int.max_unsigned)
+    PARAMS(A1p; A2p; bp; xp; Vfloat acc; Vint (Int.repr maxiter)) GLOBALS(gv)
+    SEP (mem_mgr gv;
+           data_at shA1 (tarray tdouble (matrix_rows A)) (map Vfloat (diag_of_matrix A)) A1p;
+           crs_rep shA2 (remove_diag A) A2p;
+           data_at shb (tarray tdouble (matrix_rows A)) (map Vfloat b) bp;
+           data_at Ews (tarray tdouble (matrix_rows A)) (map Vfloat (Zrepeat (Zconst Tdouble 0) (matrix_rows A))) xp)
+ POST [ tdouble ]
+   EX y: vector Tdouble, EX s: ftype Tdouble,
+    PROP(feq s (norm2 (jacobi_residual (diag_of_matrix A) (remove_diag A) b y));
+             BCMP _ Lt true s acc = true)
     RETURN(Vfloat s)
     SEP (mem_mgr gv;
            data_at shA1 (tarray tdouble (matrix_rows A)) (map Vfloat (diag_of_matrix A)) A1p;

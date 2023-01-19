@@ -75,6 +75,22 @@ Definition jacobi_iteration_bound {t: type}
    without ever overflowing *)
   False.  (* need to fill this in! *)
 
+Lemma jacobi_iteration_bound_monotone:
+  forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k k': nat),
+   (k <= k')%nat ->
+   jacobi_iteration_bound A b acc k ->
+   jacobi_iteration_bound A b acc k'.
+Proof. auto. Qed.
+
+Lemma jacobi_iteration_bound_corollaries:
+  forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
+   jacobi_iteration_bound A b acc k ->
+   matrix_cols A (matrix_rows A) /\
+   Forall (Forall finite) A /\
+   Forall finite (invert_diagmatrix (diag_of_matrix A)) /\
+   Forall finite b /\ finite acc.
+Proof. intros. contradiction H. Qed.
+
 Lemma jacobi_iteration_bound_correct {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_iteration_bound A b acc k ->
