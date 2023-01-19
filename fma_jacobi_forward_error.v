@@ -1493,9 +1493,19 @@ induction k.
                               pose proof (@In_nth (ftype ty)).
                               specialize (H10 (rev (vec_to_list_float n.+1
                                                        (A2_J A *f X_m_jacobi k x0 b A))) xy.2 (Zconst ty 0)).
+                              apply In_rev in H7.
                               specialize (H10 H7). 
-                              destruct H10 as [j [H10 Hnth]].
-                              rewrite -Hnth.
+                              destruct H10 as [j [H10 Hnth]]. rewrite rev_nth in Hnth.
+                              rewrite length_veclist in Hnth.
+                              assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
+                              { lia. } rewrite H11 in Hnth.
+                              rewrite nth_vec_to_list_float in Hnth.
+                              + rewrite !mxE in Hnth. 
+                                (** dot product is finite ***)
+                                admit.
+                              + rewrite rev_length length_veclist in H10. by apply /ssrnat.ltP.
+                              + by rewrite rev_length in H10.
+                              + 
 
 
 
