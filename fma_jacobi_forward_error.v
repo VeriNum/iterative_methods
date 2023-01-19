@@ -1260,43 +1260,8 @@ destruct H2.
   pose proof (generic_round_property ty (B2R (fprec ty) (femax ty) (Zconst ty 1) /
                 B2R (fprec ty) (femax ty) x)%Re ).
   destruct H1 as [d [e [Heq [Hd [He H1]]]]].
-  rewrite H1. simpl.
-
-change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
-cbv zeta in H.
-pose proof (
-   Raux.Rlt_bool_spec
-        (Rabs
-           (Generic_fmt.round Zaux.radix2
-              (SpecFloat.fexp (fprec t) (femax t))
-              (BinarySingleNaN.round_mode
-                 BinarySingleNaN.mode_NE) (FT2R x * FT2R y + FT2R z)))
-        (Raux.bpow Zaux.radix2 (femax t))).
-destruct H0.
-
-
-
-
-destruct x; (unfold BDIV, BINOP, Bdiv in *; simpl in *; auto;
-  try destruct (eqb s (~~ s0)); simpl in * ;auto; try by []; 
-  try unfold is_finite in H1; simpl in *; auto).
-  unfold BSN2B.
-  destruct
-  ( BinarySingleNaN.Bdiv BinarySingleNaN.mode_NE
-      (B2BSN (fprec ty) (femax ty) (Zconst ty 1))
-      (BinarySingleNaN.B754_finite s m e e0)).
-  simpl;auto.
-
-
-  (destruct (BinarySingleNaN.binary_normalize 
-    (fprec ty) (femax ty) (fprec_gt_0 ty)
-    (fprec_lt_femax ty) BinarySingleNaN.mode_NE
-    (BinarySingleNaN.Fplus_naive s m e 
-       (~~ s0) m0 e1 (Z.min e e1)) 
-    (Z.min e e1) false); simpl;auto;
-  by destruct s,s0;simpl in *; auto).
-
-
+  rewrite H1. simpl. admit.
++ (** using no overflow **)
 Admitted.
 
 (** State the forward error theorem **)
@@ -1474,8 +1439,11 @@ induction k.
                                     (default_rel ty))).
                             { apply vec_float_sub. intros.
                               (** This is where I need to make most of the changes **)
-                              admit.
-  
+                              specialize (Hbound (fst xy)). 
+                              assert (xy = (fst xy, snd xy)).
+                              { destruct xy; simpl;auto. } rewrite H8 in H7.
+                              apply in_combine_l in H7. specialize (Hbound H7).
+                              repeat split; try apply Hbound.
 
 
 
