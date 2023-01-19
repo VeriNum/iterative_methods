@@ -1235,12 +1235,20 @@ apply pow_invert.
       { nra. } apply H3. admit.
 Admitted.
 
+
+Lemma BDIV_FT2R {ty} (x: ftype ty):
+  FT2R x <> 0 ->
+  is_finite _ _ x = true ->
+  (1 / FT2R x)%Re = FT2R  (BDIV ty (Zconst ty 1) x).
+Admitted.
+
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
   (forall a, In a (vec_to_list_float n.+1 b) ->
              is_finite (fprec ty) (femax ty) a = true /\
              (Rabs (FT2R a) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re) -> 
+  (forall i j, is_finite _ _ (A i j) = true) ->
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x:= A_real^-1 *m b_real in
@@ -1276,7 +1284,7 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
   forall k:nat,
   (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re.
 Proof.
-intro Hbound. intros.
+intro Hbound. intro HAf. intros.
 induction k.
 + simpl. nra.
 + simpl.
@@ -1388,15 +1396,16 @@ induction k.
                         *** pose proof (@vec_norm_diag ty n). 
                             assert (A1_diag (FT2R_mat A) = FT2R_mat (A1_inv_J A)).
                             { apply matrixP. unfold eqrel. intros. rewrite !mxE. 
-
-
- admit. }
+                              apply BDIV_FT2R. specialize (H3 x1). rewrite mxE in H3. apply H3.
+                              apply HAf.
+                            }
                             rewrite H7. apply H6. intros.
                             specialize (H0 (A1_inv_J A) (b -f A2_J A *f X_m_jacobi k x0 b A)).
                             by apply H0.
                         *** assert (FT2R_mat (A1_inv_J A) = A1_diag A_real).
                             { apply matrixP. unfold eqrel. intros. rewrite !mxE /=.
-                              admit.
+                              symmetry. apply BDIV_FT2R. specialize (H3 x1). rewrite mxE in H3. apply H3.
+                              apply HAf.
                             } rewrite H6. apply Rplus_le_compat_r.
                             apply Rmult_le_compat_r.
                             apply g_pos.
