@@ -1238,7 +1238,9 @@ Admitted.
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
-  (n.+1 < 2 ^ Z.to_nat (fprec ty))%nat ->
+  (forall a, In a (vec_to_list_float n.+1 b) ->
+             is_finite (fprec ty) (femax ty) a = true /\
+             (Rabs (FT2R a) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re) -> 
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x:= A_real^-1 *m b_real in
@@ -1252,8 +1254,7 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
     is_finite (fprec ty) (femax ty) xy.1 = true /\
     is_finite (fprec ty) (femax ty) xy.2 = true /\ 
       (Rabs (FT2R (fst (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1)))%Re /\
-      (Rabs (FT2R (snd (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1)))%Re) ->
-  
+      (Rabs (FT2R (snd (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1)))%Re) -> 
    let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
    let delta := default_rel ty in
    let rho := (((1 + g ty n.+1) * (1 + delta) * g ty n.+1 +
@@ -1444,7 +1445,7 @@ induction k.
                                                  (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A))) <=
                                                ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
                                                 * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
-                                      { apply matrix_vec_mult_bound_corollary.  admit. }
+                                      { apply matrix_vec_mult_bound_corollary. intros. apply H0.  admit. }
                                       apply Rle_trans with 
                                       ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
                                                 * (1 + g ty n.+1) + g1 ty n.+1 (n.+1 - 1))%Re.
