@@ -1180,12 +1180,14 @@ Admitted.
 
 
 Lemma n_bound {ty} {n:nat}:
+  (n.+1 < 2 ^ Z.to_nat (fprec ty))%nat ->
   (sqrt
    (F' ty / 2 /
     (INR n.+1 * (1 + default_rel ty) ^ n.+1)) <=
  F' ty / 2 /
  (INR n.+1 * (1 + default_rel ty) ^ n.+1))%Re.
 Proof.
+intros.
 apply sqrt_full_le.
 assert ((F' ty / 2 /
            (INR n.+1 *
@@ -1196,8 +1198,8 @@ assert ((F' ty / 2 /
   + apply not_0_INR. lia.
   + apply pow_nonzero. 
     assert ((0 <  default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
-    { nra. } apply H, default_rel_gt_0.
-} rewrite H.
+    { nra. } apply H0, default_rel_gt_0.
+} rewrite H0.
 apply pow_invert.
 + apply Rmult_lt_0_compat. nra.
   apply Rmult_lt_0_compat. apply lt_0_INR. lia.
@@ -1206,13 +1208,14 @@ apply pow_invert.
   ((2 * INR n.+1) * 3)%Re.
   - assert ((1 * (2 *(INR n.+1 * (1 + default_rel ty) ^ n.+1)))%Re = 
             ((2 * INR n.+1) * (1 + default_rel ty) ^ n.+1)%Re).
-    { nra. } rewrite H0.
+    { nra. } rewrite H1.
     apply Rmult_le_compat_l.
     * apply Rmult_le_pos; try nra. apply Rlt_le, lt_0_INR. lia.
     * apply Rlt_le.
       assert ((((1 + default_rel ty) ^ n.+1 - 1) < 2)%Re -> 
               ((1 + default_rel ty) ^ n.+1 < 3)%Re).
-      { nra. } apply H1. apply delta_bound .
+      { nra. } apply H2. by apply delta_bound .
+  -
 
 
 
