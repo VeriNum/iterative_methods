@@ -167,16 +167,17 @@ Definition A2_J_real {n:nat} (A: 'M[R]_n.+1):
     if (i==j :> nat) then 0%Re else A i j. 
 
 (** Define real real functional model **)
-Definition x_fix {n:nat} x b (A: 'M[R]_n.+1) :
+Definition x_fix {n:nat} {ty} x b (A: 'M[ftype ty]_n.+1) :
   'cV[R]_n.+1 :=
-  let r := b - ((A2_J_real A) *m x) in
-  diag_matrix_vec_mult_R (A1_diag A) r.
+  let A_real := FT2R_mat A in
+  let r := b - ((A2_J_real A_real) *m x) in
+  diag_matrix_vec_mult_R (A1_diag A_real) r.
 
 Definition f_error {ty} {n:nat} m b x0 x (A: 'M[ftype ty]_n.+1):=
   let x_k := X_m_jacobi m x0 b A in 
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
-  let x := x_fix x b_real A_real in
+  let x := x_fix x b_real A in
   vec_inf_norm (FT2R_mat x_k - x).
 
 
@@ -286,9 +287,10 @@ intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
 Qed.
 
 
-Lemma x_fixpoint {n:nat} x b (A: 'M[R]_n.+1):
-  A *m x = b ->
-  (forall i, A i i <> 0%Re) ->
+Lemma x_fixpoint {n:nat} {ty} x b (A: 'M[ftype ty]_n.+1):
+  let A_real := FT2R_mat A in 
+  A_real *m x = b ->
+  (forall i, (FT2R_mat A) i i <> 0%Re) ->
   x = x_fix x b A.
 Proof.
 intros.
@@ -296,14 +298,14 @@ unfold x_fix. unfold diag_matrix_vec_mult_R.
 apply /matrixP. unfold eqrel. intros.
 rewrite !mxE. rewrite !nth_vec_to_list_real.
 + rewrite !mxE. 
-  assert (x x0 y = ((1 / A (inord x0) (inord x0)) *
-                    (A (inord x0) (inord x0) * x x0 y))%Re).
-  { assert (((1 / A (inord x0) (inord x0)) *
-                    (A (inord x0) (inord x0) * x x0 y))%Re = 
-             ((A (inord x0) (inord x0) * / A (inord x0) (inord x0)) *
+  assert (x x0 y = ((1 / FT2R (A (inord x0) (inord x0))) *
+                    (FT2R (A (inord x0) (inord x0)) * x x0 y))%Re).
+  { assert (((1 / FT2R (A (inord x0) (inord x0))) *
+                    (FT2R (A (inord x0) (inord x0)) * x x0 y))%Re = 
+             ((FT2R (A (inord x0) (inord x0)) * / FT2R (A (inord x0) (inord x0)) )*
               x x0 y)%Re).
     { nra. } rewrite H1. rewrite Rinv_r.
-    nra. apply H0.
+    nra. specialize (H0 (@inord n x0)). rewrite !mxE in H0. apply H0.
   } rewrite H1.
   assert (((A (inord x0) (inord x0) * x x0 y))%Re  = 
            (b (inord x0) ord0 -
