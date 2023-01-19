@@ -1179,19 +1179,6 @@ apply Rle_lt_trans with
 Admitted.
 
 
-
-
-Lemma delta_bound {ty} :
-  forall m:nat, 
-  let u0 := default_rel ty in
-  ((1 + u0) ^ m < 3)%Re.
-Admitted.
-
-
-
-
-
-
 Lemma n_bound {ty} {n:nat}:
   (sqrt
    (F' ty / 2 /
@@ -1200,6 +1187,18 @@ Lemma n_bound {ty} {n:nat}:
  (INR n.+1 * (1 + default_rel ty) ^ n.+1))%Re.
 Proof.
 apply sqrt_full_le.
+assert ((F' ty / 2 /
+           (INR n.+1 *
+            (1 + default_rel ty) ^ n.+1))%Re = 
+         ((F' ty) * / (2 * (INR n.+1 * (1 + default_rel ty) ^ n.+1)))%Re).
+{ rewrite Rinv_mult_distr. nra. nra.
+  apply Rmult_integral_contrapositive. split.
+  + apply not_0_INR. lia.
+  + apply pow_nonzero. 
+    assert ((0 <  default_rel ty)%Re -> (1 + default_rel ty)%Re <> 0%Re).
+    { nra. } apply H, default_rel_gt_0.
+} rewrite H.
+
 
 
 
