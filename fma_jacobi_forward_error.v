@@ -884,7 +884,13 @@ Qed.
 
 *)
 
-
+Lemma n_bound {ty} {n:nat}:
+  (sqrt
+   (F' ty / 2 /
+    (INR n.+1 * (1 + default_rel ty) ^ n.+1)) <=
+ F' ty / 2 /
+ (INR n.+1 * (1 + default_rel ty) ^ n.+1))%Re.
+Admitted.
 
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
@@ -1053,7 +1059,20 @@ induction k.
                                     (default_rel ty))).
                             { apply vec_float_sub. intros.
                               specialize (H0 b (A2_J A *f X_m_jacobi k x0 b A) xy H7).
-                              apply H0.
+                              destruct H0 as [Hf1 [Hf2 [Ha1 Ha2]]].   
+                              repeat split; try apply Hf1; try apply Hf2.
+                              + apply Rle_trans with
+                                (sqrt
+                                   (F' ty / 2 /
+                                    (INR n.+1 * (1 + default_rel ty) ^ n.+1)))%Re; try apply Ha1.
+                                
+            
+
+
+
+
+
+admit.
                             } apply reverse_triang_ineq in H7.
                             apply Rle_trans with 
                             ((vec_inf_norm (FT2R_mat b) +
@@ -1137,7 +1156,7 @@ induction k.
                 +++ apply /RleP. apply vec_float_sub.
                     intros. 
                     specialize (H0 b (A2_J A *f X_m_jacobi k x0 b A) xy H6).
-                    apply H0.
+                    admit.
                 +++ assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                        by case: (x1 == y :> nat).
