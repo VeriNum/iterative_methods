@@ -1274,7 +1274,9 @@ ______________________________________(2/2)
 ***)
 
 Lemma matrix_mult_fin_and_respects_bound {ty} {n:nat} (i: 'I_n.+1) 
-(A: 'M[ftype ty]_n.+1) (v: 'cV[ftype ty]_n.+1) xy :
+(A: 'M[ftype ty]_n.+1) (v: 'cV[ftype ty]_n.+1)  :
+  let xy := BFMA (nth i (vec_to_list_float n.+1 ((\row_j A i j)^T)) (Zconst ty 0))
+                    (nth i (vec_to_list_float n.+1 v) (Zconst ty 0)) (Zconst ty 0) in
   (forall (v1 v2: 'cV[ftype ty]_n.+1)
           (xy : ftype ty * ftype ty),
     In xy
@@ -1285,10 +1287,19 @@ Lemma matrix_mult_fin_and_respects_bound {ty} {n:nat} (i: 'I_n.+1)
     is_finite (fprec ty) (femax ty) xy.2 = true /\ 
       (Rabs (FT2R (fst (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1)))%Re /\
       (Rabs (FT2R (snd (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1)))%Re) ->
-  In xy (vec_to_list_float n.+1 (A *f v)) /\
+  In xy (vec_to_list_float n.+1 (A *f v)) ->
+  is_finite (fprec ty) (femax ty) xy = true /\
   (Rabs (FT2R xy) <=
      F' ty / 2 /
      (INR n.+1 * (1 + default_rel ty) ^ n.+1))%Re.
+Proof.
+intros.
+unfold mulmx_float in H0.
+
+
+
+
+
 Admitted.
   
 
@@ -1474,9 +1485,60 @@ induction k.
                                 { destruct xy; simpl;auto. } rewrite H8 in H7.
                                 by apply in_combine_l in H7. 
                               } specialize (Hbound H8).
-                              repeat split; try apply Hbound. 
+                              repeat split; try apply Hbound; try 
+                              apply matrix_mult_fin_and_respects_bound.
+                              assert (xy = (fst xy, snd xy)).
+                              { destruct xy; simpl;auto. } rewrite H9 in H7.
+                              apply in_combine_r in H7. 
+                              pose proof (@In_nth (ftype ty)).
+                              specialize (H10 (rev (vec_to_list_float n.+1
+                                                       (A2_J A *f X_m_jacobi k x0 b A))) xy.2 (Zconst ty 0)).
+                              specialize (H10 H7). 
+                              destruct H10 as [j [H10 Hnth]].
+                              rewrite -Hnth.
 
 
+
+
+
+                              assert (exists k, (k < length (vec_to_list_float n.+1
+                                                         (A2_J A *f X_m_jacobi k x0 b A)))%coq_nat /\
+                                                nth k  (vec_to_list_float n.+1
+                                                       (A2_J A *f X_m_jacobi k x0 b A)) (Zconst ty 0) = xy.2).
+                              { apply (In_nth (vec_to_list_float n.+1
+                                                       (A2_J A *f X_m_jacobi k x0 b A)) xy.2 (Zconst ty 0)).
+
+
+ apply (@In_nth _ (vec_to_list_float n.+1
+                                                       (A2_J A *f X_m_jacobi k x0 b A)) xy.2 (Zconst ty 0)).
+
+
+
+
+
+                              assert (
+
+                              assert (Hin: In (v1 (inord i) ord0, v2 (inord i) ord0)
+                           (combine (vec_to_list_float n.+1 v1)
+                              (vec_to_list_float n.+1 v2))).
+                { apply in_rev. rewrite -combine_rev; last by rewrite !length_veclist.
+                  assert ((v1 (inord i) ord0, v2 (inord i) ord0) = 
+                           nth i (combine (rev (vec_to_list_float n.+1 v1))
+                                    (rev (vec_to_list_float n.+1 v2))) (Zconst ty 0, Zconst ty 0)).
+                  { rewrite combine_nth. rewrite !rev_nth !length_veclist.
+                    assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat).
+                    { lia. } rewrite H4. rewrite !nth_vec_to_list_float; try by [].
+                    by rewrite size_map size_enum_ord in H0.
+                    by rewrite size_map size_enum_ord in H0.
+                    apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H0.
+                    apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H0.
+                    by rewrite !rev_length !length_veclist.
+                 } rewrite H4. apply nth_In. rewrite combine_length.
+                 rewrite !rev_length !length_veclist Nat.min_id.
+                 rewrite size_map size_enum_ord in H0. by apply /ssrnat.ltP.
+                } 
+
+ 
 
 
 
