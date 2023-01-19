@@ -432,14 +432,15 @@ Lemma jacobi_n_jacobi {NAN: Nans} {t: type}:
 Proof.
 intros.
 apply jacobi_iteration_bound_correct in H.
-destruct H as [FINacc2 [j [? [? [? ?]]]]].
+destruct H as [FINacc2 [j [? [H2 H3]]]].
+pose proof I.
 unfold jacobi.
-fold x0 in H2, H3.
+fold x0 in H2,H3.
 set (resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b) in *.
 unfold jacobi_n in *.
 set (f := jacobi_iter _ _ _) in *.
 simpl pred.
-fold acc2 in FINacc2,H1,H3.
+fold acc2 in FINacc2,H3.
 clearbody acc2. clear acc.
 clearbody f. clearbody resid.
 clearbody x0.
@@ -448,6 +449,7 @@ assert (forall x, Decidable.decidable (P x)).
 clear.
 intros. subst P. simpl. destruct (BCMP _ _ _ _ _); [right|left]; auto.
 destruct (min_iter f P H4 x0 j) as [i [? [? ?]]].
+red.
 apply H3.
 exists i; split; auto. lia.
 assert (i <= maxiter) by lia.

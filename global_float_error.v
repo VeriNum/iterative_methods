@@ -12,6 +12,10 @@ Set Bullet Behavior "Strict Subproofs".
 From Iterative Require Import inf_norm_properties local_float_error real_model float_model.
 From Iterative Require Import model_mat_lemmas lemmas vcfloat_lemmas.
 
+From mathcomp Require Import matrix bigop all_algebra all_ssreflect.
+From mathcomp.analysis Require Import Rstruct.
+From Coquelicot Require Import Lub Rbar.
+
 Local Open Scope float32_scope.
 
 Section WITHNANS.
@@ -22,10 +26,6 @@ Import Interval.Tactic.
 Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
-
-From mathcomp Require Import matrix bigop all_algebra all_ssreflect.
-From mathcomp.analysis Require Import Rstruct.
-From Coquelicot Require Import Lub Rbar.
 
 (** We will open the real scope and the Ring scope 
   separately **)
@@ -80,7 +80,7 @@ assert A;
 try split; auto
 end.
 simpl in IHk; destruct IHk as (IHk & BMDk); try apply ltnW; auto.
-Search (?a < ?b -> ?a <= ?b). try interval.
+try interval.
 set (xkr := (X_m_real k x0 (listR_to_vecR b_real) h)) in *.
 assert (X_m_real k.+1 x0 b h = X_m_real 1 xkr b h) by (apply X_m_real_iter).
 set (xkf :=  @listR_to_vecR len (FT2R_list (X_m k x_l b_float h_f))) in *.

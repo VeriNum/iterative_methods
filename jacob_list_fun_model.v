@@ -86,7 +86,6 @@ Lemma jacobi_iteration_bound_correct {t: type} :
     (j <= k)%nat /\
     let y :=  jacobi_n A b x0 j in
     let r2 := norm2 (resid y) in
-    finite acc2 /\ 
     (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
     BCMP t Gt true (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
 Proof.
