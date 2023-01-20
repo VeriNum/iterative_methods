@@ -1397,28 +1397,31 @@ induction k.
                 apply Rplus_le_compat.
                 +++ apply /RleP. apply vec_float_sub.
                     intros.
-                    specialize (H0 b ( A2_J A *f X_m_jacobi k x0 b A)).
-                              pose proof (@In_nth (ftype ty * ftype ty)
-                                             (rev (combine
-                                                (vec_to_list_float n.+1 b)
-                                                (vec_to_list_float n.+1 (A2_J A *f X_m_jacobi k x0 b A)))) xy 
-                                              (Zconst ty 1, Zconst ty 0) ).
-                              rewrite -in_rev in H8. specialize (H8 H7).
-                              destruct H8 as [j [Hlength Hnth]].
+                     pose proof (@In_nth (ftype ty * ftype ty)
+                                           (rev (combine
+                                              (vec_to_list_float n.+1 b)
+                                              (vec_to_list_float n.+1 (A2_J A *f X_m_jacobi k x0 b A)))) xy 
+                                            (Zconst ty 0, Zconst ty 0) ).
+                              rewrite -in_rev in H6. specialize (H6 H5).
+                              destruct H6 as [j [Hlength Hnth]].
                               rewrite rev_nth in Hnth.
                               ++++ rewrite combine_length !length_veclist Nat.min_id in Hnth.
                                    assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
-                                   { lia. } rewrite H8 in Hnth. rewrite combine_nth in Hnth.
+                                   { lia. } rewrite H6 in Hnth. rewrite combine_nth in Hnth.
                                    rewrite !nth_vec_to_list_float in Hnth.
-                                   specialize (H0 xy H7). repeat split; try apply H0.
                                    rewrite -Hnth /=.
                                    specialize (Hfin k.+1 (@inord n j)).
                                    rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
-                                   rewrite inord_val in Hfin.
-                                   apply bmult_overflow_implies  in Hfin.
-                                   destruct Hfin as [Hfin1 Hfin2].
-                                   rewrite !mxE in Hfin2. apply Bminus_bplus_opp_implies.
-                                   rewrite !mxE.  apply Hfin2.
+                                   rewrite inord_val in Hfin. repeat split; try apply Hfin.
+                                   apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                   rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                   apply bplus_overflow_implies in Hfin2; try apply Hfin2.
+                                   apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                   rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                   apply bplus_overflow_implies in Hfin2. rewrite is_finite_Bopp in Hfin2.  try apply Hfin2.
+                                   apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                   rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                   try apply Hfin2.
                                    by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
                                    by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
                                    rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
@@ -1429,13 +1432,46 @@ induction k.
                 +++ assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                        by case: (x1 == y :> nat).
-                    } rewrite H7. apply /RleP. apply matrix_vec_mult_bound_corollary.
-                    intros. 
-                    specialize (H0 (\row_j A2_J A (inord i) j)^T (X_m_jacobi k x0 b A) xy H8).
-                    repeat split; try apply /RleP; try apply H0.
-                    intros. 
-                    by specialize (H1 (\row_j A2_J A (inord i) j)^T
-                                  (\col_j X_m_jacobi k x0 b A j 0) ).
+                    } rewrite H5. apply /RleP. apply matrix_vec_mult_bound_corollary.
+                    intros.
+                      pose proof (@In_nth (ftype ty * ftype ty)
+                                           (rev (combine
+                                              (vec_to_list_float n.+1 (\row_j A2_J A (inord i) j)^T)
+                                              (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))) xy 
+                                            (Zconst ty 0, Zconst ty 0) ).
+                                          rewrite -in_rev in H7. specialize (H7 H6).
+                                          destruct H7 as [j [Hlength Hnth]].
+                                          rewrite rev_nth in Hnth.
+                                          ++++ rewrite combine_length !length_veclist Nat.min_id in Hnth.
+                                               assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
+                                               { lia. } rewrite H7 in Hnth. rewrite combine_nth in Hnth.
+                                               rewrite !nth_vec_to_list_float in Hnth.
+                                               rewrite -Hnth /=.
+                                               specialize (Hfin k.+1 (@inord n j)).
+                                               rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
+                                               rewrite inord_val in Hfin. repeat split; try apply Hfin.
+                                               apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                               rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                               apply bplus_overflow_implies in Hfin2; try apply Hfin2.
+                                               destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
+                                               rewrite mxE in Hfin22. admit. admit.
+
+
+                                               (*
+                                               apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                               rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                               apply bplus_overflow_implies in Hfin2. rewrite is_finite_Bopp in Hfin2.  try apply Hfin2.
+                                               apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                               rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                               try apply Hfin2. *)
+                                               by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                               by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                               rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                               by apply /ssrnat.ltP.
+                                               rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                               by apply /ssrnat.ltP. by rewrite !length_veclist.
+                                         ++++ by rewrite rev_length in Hlength. 
+                                         ++++ admit.
              ** rewrite !ft2r_mat_equiv .
                 eapply Rle_trans.
                 +++ apply Rplus_le_compat_r. apply Rplus_le_compat_l.
@@ -1453,19 +1489,53 @@ induction k.
                                                ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
                                                 * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
                            { apply matrix_vec_mult_bound_corollary. intros.
-                             specialize (H0 (\row_j A2_J A (inord i) j)^T (X_m_jacobi k x0 b A) xy H7).
-                             repeat split; try apply /RleP; try apply H0.
-                             intros.
-                             by specialize (H1 (\row_j A2_J A (inord i) j)^T (\col_j X_m_jacobi k x0 b A j 0)).
+                              pose proof (@In_nth (ftype ty * ftype ty)
+                                           (rev (combine
+                                              (vec_to_list_float n.+1 (\row_j A2_J A (inord i) j)^T)
+                                              (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))) xy 
+                                            (Zconst ty 0, Zconst ty 0) ).
+                                          rewrite -in_rev in H6. specialize (H6 H5).
+                                          destruct H6 as [j [Hlength Hnth]].
+                                          rewrite rev_nth in Hnth.
+                                          ++++ rewrite combine_length !length_veclist Nat.min_id in Hnth.
+                                               assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
+                                               { lia. } rewrite H6 in Hnth. rewrite combine_nth in Hnth.
+                                               rewrite !nth_vec_to_list_float in Hnth.
+                                               rewrite -Hnth /=.
+                                               specialize (Hfin k.+1 (@inord n j)).
+                                               rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
+                                               rewrite inord_val in Hfin. repeat split; try apply Hfin.
+                                               apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                               rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                               apply bplus_overflow_implies in Hfin2; try apply Hfin2.
+                                               destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
+                                               rewrite mxE in Hfin22. admit. admit.
+
+
+                                               (*
+                                               apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                               rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                               apply bplus_overflow_implies in Hfin2. rewrite is_finite_Bopp in Hfin2.  try apply Hfin2.
+                                               apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                               rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                               try apply Hfin2. *)
+                                               by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                               by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                               rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                               by apply /ssrnat.ltP.
+                                               rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                               by apply /ssrnat.ltP. by rewrite !length_veclist.
+                                         ++++ by rewrite rev_length in Hlength. 
+                                         ++++ admit.
                            }
                             apply Rle_trans with
                                            (vec_inf_norm (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A)) +
                                             (matrix_inf_norm (FT2R_mat (A2_J A)) *
                                              vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
                                              g ty n.+1 + g1 ty n.+1 (n.+1 - 1)))%Re.
-                            ++++ apply reverse_triang_ineq in H7.
+                            ++++ apply reverse_triang_ineq in H5.
                                  assert (forall x y z:R, (x - y <= z)%Re -> (x <= y + z)%Re).
-                                 { intros. nra. } apply H8. apply /RleP. apply H7.
+                                 { intros. nra. } apply H6. apply /RleP. apply H5.
                             ++++ match goal with |-context[(_ <= ?p + ?a * ?b * ?c + ?d)%Re]=>
                                     replace (p + a * b * c + d)%Re with (p + (a * b * c + d))%Re by nra
                                  end. apply Rplus_le_compat_r. apply /RleP. apply submult_prop.
@@ -1500,11 +1570,11 @@ induction k.
                            ( (1+ g ty n.+1) * g1 ty n.+1 (n.+1 - 1) * (1 + default_rel ty)) *
                             (vec_inf_norm (A1_diag A_real)) ) + g1 ty n.+1 (n.+1 - 1)) + 
                            R2 * f_error k b x0 x A)%Re).
-                   { fold A_real. nra. } rewrite H7. clear H7. fold R2.
+                   { fold A_real. nra. } rewrite H5. clear H5. fold R2.
                    assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                        by case: (x1 == y :> nat).
-                    } rewrite -H7. fold A_real. fold R2. fold b_real.
+                    } rewrite -H5. fold A_real. fold R2. fold b_real.
                     assert ((vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) <= 
                              f_error k b x0 x A + 
                              vec_inf_norm (x_fix x b_real A_real))%Re).
@@ -1545,7 +1615,7 @@ induction k.
                             ++++ unfold R2. apply Rmult_le_pos.
                                  ---- apply /RleP. apply vec_norm_pd.
                                  ---- apply /RleP. apply matrix_norm_pd.
-                        *** apply H8.
+                        *** apply H6.
                     --- assert ((((1 + g ty n.+1) * (1 + default_rel ty) * g ty n.+1 +
                                   default_rel ty * (1 + g ty n.+1) + 
                                   g ty n.+1) * R2 *
@@ -1571,7 +1641,7 @@ induction k.
                                   (1 + default_rel ty) *
                                   vec_inf_norm (A1_diag A_real)) +
                                  g1 ty n.+1 (n.+1 - 1)))%Re).
-                        { nra. } rewrite H9. clear H9. fold delta. fold rho. fold d_mag.
+                        { nra. } rewrite H7. clear H7. fold delta. fold rho. fold d_mag.
                         unfold f_error. fold b_real. fold A_real. apply Rle_refl.
   - apply Rplus_le_compat_r. apply Rmult_le_compat_l.
     * by apply rho_ge_0.
