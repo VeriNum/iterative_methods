@@ -873,10 +873,47 @@ try unfold is_finite in H1; simpl in *; auto);
 Qed.
 
 
+Definition Bdiv_no_overflow (t: type) (x y: R) : Prop :=
+  (Rabs (rounded t  (x / y)) < Raux.bpow Zaux.radix2 (femax t))%R.
+
+Lemma BDIV_accurate {NAN: Nans}: 
+   forall (t: type) x y (FIN: Bdiv_no_overflow t (FT2R x) (FT2R y)), 
+  FT2R y <> 0%Re ->
+  exists delta, exists epsilon,
+   (delta * epsilon)%Re = 0%Re /\
+   (Rabs delta <= default_rel t)%Re /\
+   (Rabs epsilon <= default_abs t)%Re /\ 
+   (FT2R (BDIV t x y) = (FT2R x / FT2R y) * (1+delta) + epsilon)%Re.
+Proof.
+intros.
+pose proof (Binary.Bdiv_correct (fprec t) (femax t) (fprec_gt_0 t) (fprec_lt_femax t) 
+                (div_nan t) BinarySingleNaN.mode_NE x y).
+change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
+cbv zeta in H0.
+specialize (H0 H).
+pose proof (
+   Raux.Rlt_bool_spec
+        (Rabs
+           (Generic_fmt.round Zaux.radix2
+              (SpecFloat.fexp (fprec t) (femax t))
+              (BinarySingleNaN.round_mode
+                 BinarySingleNaN.mode_NE) (FT2R x / FT2R y)))
+        (Raux.bpow Zaux.radix2 (femax t))).
+destruct H1.
+destruct H0 as [? _].
+rewrite H0.
+apply generic_round_property.
+red in FIN. unfold rounded in FIN.
+Lra.lra.
+Qed.
+
+
+
 
 (*** Lemma for error bound on the inverse ***)
 Lemma inverse_mat_norm_bound {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
   (forall i, FT2R (A i i) <> 0%Re) ->
+  (forall i, is_finite _ _ (BDIV ty (Zconst ty 1) (A (inord i) (inord i))) = true) ->
   let A_real := FT2R_mat A in
   (vec_inf_norm (FT2R_mat (A1_inv_J A) - A1_diag A_real) <=
     vec_inf_norm (A1_diag A_real) * (default_rel ty))%Re.
@@ -886,19 +923,67 @@ unfold vec_inf_norm. rewrite RmultE. rewrite mulrC.
 rewrite -bigmaxr_mulr.
 + apply bigmax_le; first by rewrite size_map size_enum_ord.
   intros. rewrite seq_equiv. 
-  rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H0.
+  rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H1.
   rewrite !mxE. 
   apply Rle_trans with 
   [seq (default_rel ty *
          Rabs (A1_diag A_real i0 0))%Ri
       | i0 <- enum 'I_n.+1]`_i.
   - rewrite seq_equiv. rewrite nth_mkseq;
-    last by rewrite size_map size_enum_ord in H0.
+    last by rewrite size_map size_enum_ord in H1.
     rewrite -RmultE -RminusE. rewrite !mxE.
+    specialize (H0 (@inord n i)).
+    pose proof (generic_round_property ty (1 / FT2R (A (inord i) (inord i)))%Re).
+    destruct H2 as [d [e [Hpr [Hdf [Hde H2]]]]].
+    unfold Generic_fmt.round in H2.
+
+
+
+
+
+
+
+    unfold is_finite in H0.
+
+
+    Print Bdiv_correct.
+    Print generic_round_property.
+    destruct 
+
+
+
+
     pose proof (Binary.Bdiv_correct  (fprec ty) (femax ty)  (fprec_gt_0 ty) (fprec_lt_femax ty) (plus_nan ty) 
                       BinarySingleNaN.mode_NE (Zconst ty 1) (A (inord i) (inord i))).
-    specialize (H (@inord n i)). 
-    specialize (H1 H).
+    specialize (H0 (@inord n i)). 
+    specialize (H2 H0).
+    pose proof (
+      Raux.Rlt_bool_spec
+        (Rabs
+           (Generic_fmt.round Zaux.radix2
+              (SpecFloat.fexp 
+                 (fprec ty) (femax ty))
+              (BinarySingleNaN.round_mode
+                 BinarySingleNaN.mode_NE)
+              (B2R (fprec ty) 
+                 (femax ty) (Zconst ty 1) /
+               B2R (fprec ty) 
+                 (femax ty)
+                 (A (inord i) (inord i)))))
+        (bpow Zaux.radix2 (femax ty))). 
+    destruct H2.
+    * admit.
+    * unfold B2FF in H1. simpl in H1. 
+      destruct 
+      ( Bdiv (fprec ty) (femax ty)
+         (fprec_gt_0 ty) (fprec_lt_femax ty)
+         (plus_nan ty)
+         BinarySingleNaN.mode_NE
+         (Zconst ty 1)
+         (A (inord i) (inord i))) in H1; simpl in *.
+
+red in FIN. unfold rounded in FIN.
+    Lra.lra.
 
 
 
