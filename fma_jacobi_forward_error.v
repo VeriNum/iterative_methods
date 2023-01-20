@@ -872,6 +872,18 @@ unfold mulmx_float in H0.
 Admitted.
   
 
+Lemma bmult_overflow_implies {t : type}: 
+  forall x y , 
+  Binary.is_finite _ _ (BMULT t x y) = true ->
+  is_finite _ _ x = true /\
+  is_finite _ _ y = true.
+Proof.
+intros.
+destruct x, y; (unfold BMULT, BINOP, Bmult in *; simpl in *; auto;
+  try destruct (eqb s (~~ s0)); simpl in * ;auto; try by []; 
+  try unfold is_finite in H1; simpl in *; auto).
+Qed.
+
 
 
 (** State the forward error theorem **)
@@ -1072,16 +1084,31 @@ induction k.
                                     (vec_inf_norm (FT2R_mat b) + vec_inf_norm (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) *
                                     (default_rel ty))).
                             { apply vec_float_sub. intros. 
-                              (** finiteness of the solution vector? **)
-                              specialize (Hfin k.+1). simpl in Hfin.
-                              unfold jacobi_iter in Hfin. 
-                              unfold diag_vector_mult in Hfin. admit.
-
-
-
-
-
-
+                              specialize (H0 b ( A2_J A *f X_m_jacobi k x0 b A)).
+                              pose proof (@In_nth (ftype ty * ftype ty)
+                                             (rev (combine
+                                                (vec_to_list_float n.+1 b)
+                                                (vec_to_list_float n.+1 (A2_J A *f X_m_jacobi k x0 b A)))) xy 
+                                              (Zconst ty 1, Zconst ty 0) ).
+                              rewrite -in_rev in H9. specialize (H9 H8).
+                              destruct H9 as [j [Hlength Hnth]].
+                              rewrite rev_nth in Hnth.
+                              ++++ rewrite combine_length !length_veclist Nat.min_id in Hnth.
+                                   assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
+                                   { lia. } rewrite H9 in Hnth. rewrite combine_nth in Hnth.
+                                   rewrite !nth_vec_to_list_float in Hnth.
+                                   specialize (H0 xy H8). repeat split; try apply H0.
+                                   rewrite -Hnth /=.
+                                   specialize (Hfin k.+1 (@inord n j)).
+                                   rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
+                                   rewrite inord_val in Hfin. apply Hfin.
+                                   by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                   by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                   rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                   by apply /ssrnat.ltP.
+                                   rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                   by apply /ssrnat.ltP. by rewrite !length_veclist.
+                             ++++ by rewrite rev_length in Hlength.
 
                             } apply reverse_triang_ineq in H8.
                             apply Rle_trans with 
