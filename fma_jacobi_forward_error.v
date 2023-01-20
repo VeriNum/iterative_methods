@@ -872,7 +872,7 @@ try unfold is_finite in H1; simpl in *; auto);
   by destruct s,s0;simpl in *; auto).
 Qed.
 
-
+(*
 Definition Bdiv_no_overflow (t: type) (x y: R) : Prop :=
   (Rabs (rounded t  (x / y)) < Raux.bpow Zaux.radix2 (femax t))%R.
 
@@ -932,9 +932,9 @@ red in FIN. unfold rounded in FIN.
 Lra.lra.
 Qed.
 
+*)
 
-
-
+(*
 (*** Lemma for error bound on the inverse ***)
 Lemma inverse_mat_norm_bound {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
   (forall i, FT2R (A i i) <> 0%Re) ->
@@ -1021,7 +1021,7 @@ red in FIN. unfold rounded in FIN.
 
 
 
-
+*)
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
@@ -1030,7 +1030,9 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
   let b_real := FT2R_mat b in
   let x:= A_real^-1 *m b_real in
   x != 0 ->
-  (forall (v1 v2 : 'cV[ftype ty]_n.+1)
+ (* 
+
+(forall (v1 v2 : 'cV[ftype ty]_n.+1)
               (xy : ftype ty * ftype ty) ,
     In xy
       (combine
@@ -1038,11 +1040,18 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
          (vec_to_list_float n.+1 v2)) ->
     is_finite (fprec ty) (femax ty) xy.1 = true /\
     is_finite (fprec ty) (femax ty) xy.2 = true) ->
-  (forall (v1 v2 : 'cV[ftype ty]_n.+1),
+  
+
+
+
+(forall (v1 v2 : 'cV[ftype ty]_n.+1),
     is_finite (fprec ty) (femax ty)
         (let l1 := vec_to_list_float n.+1 v1 in
          let l2 := vec_to_list_float n.+1 v2 in
-         dotprod_r l1 l2) = true ) ->
+         dotprod_r l1 l2) = true 
+  ) ->
+
+*)
    let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
    let delta := default_rel ty in
    let rho := (((1 + g ty n.+1) * (1 + delta) * g ty n.+1 +
@@ -1066,7 +1075,7 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
   (forall k:nat,
    (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag))%Re.
 Proof.
-intro HAf. intros ? ? ? ? ? ? ? ? ? ? ? ? ? ? Hfin ?.
+intro HAf. intros ? ? ? ? ? ? ? ? ? ? ? ? Hfin ?.
 induction k.
 + simpl. nra.
 + simpl.
@@ -1074,20 +1083,20 @@ induction k.
            (rho * ((1 - rho ^ k) / (1 - rho)) + 1)%Re).
   { assert ((rho * ((1 - rho ^ k) / (1 - rho)) + 1)%Re = 
             (rho * ((1 - rho ^ k) / (1 - rho)) + (1 - rho) * / (1 - rho))%Re).
-    { rewrite Rinv_r; nra. } rewrite H5. clear H5.
+    { rewrite Rinv_r; nra. } rewrite H3. clear H3.
     assert ((rho * ((1 - rho ^ k) / (1 - rho)) +
                   (1 - rho) * / (1 - rho))%Re = 
              (( (rho * (1 - rho ^ k)) * / (1 - rho))%Re + 
               (1 - rho) * / (1 - rho))%Re).
-    { nra. } rewrite H5. clear H5.
+    { nra. } rewrite H3. clear H3.
     rewrite -Rmult_plus_distr_r. nra.
-  } rewrite H5. 
+  } rewrite H3. 
   rewrite Rmult_plus_distr_r.
   assert ((rho * rho ^ k * f_error 0 b x0 x A +
             (rho * ((1 - rho ^ k) / (1 - rho)) * d_mag + 1 * d_mag))%Re = 
            (rho * (rho ^ k * f_error 0 b x0 x A +
                         (1 - rho ^ k) / (1 - rho) * d_mag) + d_mag)%Re).
-  { nra. } rewrite H6.
+  { nra. } rewrite H4.
   apply Rle_trans with (rho * f_error k b x0 x A + d_mag)%Re.
   - unfold f_error. 
     assert (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
@@ -1096,7 +1105,7 @@ induction k.
                x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A)) +
              (x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A) -
               x_fix x (FT2R_mat b) (FT2R_mat A))).
-    { by rewrite add_vec_distr_2. } rewrite H7. clear H7.
+    { by rewrite add_vec_distr_2. } rewrite H5. clear H5.
     apply Rle_trans with 
     (vec_inf_norm (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
                        x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A) ) +
@@ -1132,15 +1141,15 @@ induction k.
                           vec_inf_norm (x - FT2R_mat (X_m_jacobi k x0 b A))))%Re = 
                         ((vec_inf_norm (A1_diag (FT2R_mat A)) * matrix_inf_norm (A2_J_real (FT2R_mat A))) *
                         (vec_inf_norm (x - FT2R_mat (X_m_jacobi k x0 b A))))%Re).
-               { nra. } rewrite H7. unfold R2.
+               { nra. } rewrite H5. unfold R2.
                rewrite sub_vec_comm_1.
                rewrite -vec_inf_norm_opp. unfold f_error. rewrite -x_fixpoint.
                +++ apply Rle_refl.
                +++ unfold x. rewrite mulmxA.
                   assert (FT2R_mat A *m A_real^-1 = 1).
                   { fold A_real. by rewrite mulmxV . }
-                  rewrite H8. by rewrite mul1mx /b_real.
-               +++ apply H4.
+                  rewrite H6. by rewrite mul1mx /b_real.
+               +++ apply H2.
          -- auto.
       ++ eapply Rle_trans.
          -- apply Rle_trans with 
@@ -1165,7 +1174,7 @@ induction k.
                              (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A)) -
                           x_fix (FT2R_mat (X_m_jacobi k x0 b A))
                               (FT2R_mat b) (FT2R_mat A))).
-               { by rewrite add_vec_distr_2. } rewrite H7.
+               { by rewrite add_vec_distr_2. } rewrite H5.
                apply /RleP.
                apply triang_ineq.
              ** apply Rplus_le_compat_r.
@@ -1180,7 +1189,16 @@ induction k.
                             { apply matrixP. unfold eqrel. intros. rewrite !mxE. 
                               admit.
                             }
-                            rewrite H8. apply H7. intros.
+                            rewrite H6. apply H5. intros.
+                            
+
+
+
+
+
+
+
+
                             specialize (H0 (A1_inv_J A) (b -f A2_J A *f X_m_jacobi k x0 b A)).
                             pose proof (@In_nth (ftype ty * ftype ty)
                                            (rev (combine
