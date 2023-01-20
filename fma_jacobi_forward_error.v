@@ -876,6 +876,31 @@ Qed.
 Definition Bdiv_no_overflow (t: type) (x y: R) : Prop :=
   (Rabs (rounded t  (x / y)) < Raux.bpow Zaux.radix2 (femax t))%R.
 
+
+
+Lemma is_finite_BDIV_no_overflow {NAN: Nans} (t : type) :
+  forall (x y : ftype t)
+  (HFINb : Binary.is_finite (fprec t) (femax t) (BDIV t x y) = true),
+  FT2R y <> 0%Re ->
+  Bdiv_no_overflow t (FT2R x) (FT2R y).
+Proof.
+intros.
+pose proof Rle_or_lt (bpow Zaux.radix2 (femax t)) 
+  (Rabs (rounded t (FT2R x / FT2R y)))  as Hor;
+  destruct Hor; auto.
+apply Rlt_bool_false in H0; red.
+unfold rounded, FT2R  in H0.
+pose proof (Binary.Bdiv_correct  (fprec t) (femax t)  
+    (fprec_gt_0 t) (fprec_lt_femax t) (div_nan t) BinarySingleNaN.mode_NE x y) as
+  H1.
+specialize (H1 H).
+simpl in H1; simpl in H0;
+rewrite H0 in H1.  unfold BDIV, BINOP in HFINb.
+destruct ((Binary.Bdiv (fprec t) (femax t) (fprec_gt_0 t) 
+             (fprec_lt_femax t) (div_nan t) BinarySingleNaN.mode_NE x y));
+simpl;  try discriminate.
+Qed.
+
 Lemma BDIV_accurate {NAN: Nans}: 
    forall (t: type) x y (FIN: Bdiv_no_overflow t (FT2R x) (FT2R y)), 
   FT2R y <> 0%Re ->
