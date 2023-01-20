@@ -1226,8 +1226,7 @@ induction k.
                               admit.
                             }
                             rewrite H6. apply H5. intros.
-                        (*    specialize (H0 (A1_inv_J A) (b -f A2_J A *f X_m_jacobi k x0 b A)).
-                         *)  pose proof (@In_nth (ftype ty * ftype ty)
+                            pose proof (@In_nth (ftype ty * ftype ty)
                                            (rev (combine
                                               (vec_to_list_float n.+1 (A1_inv_J A))
                                               (vec_to_list_float n.+1 (b -f A2_J A *f X_m_jacobi k x0 b A)))) xy 
@@ -1348,7 +1347,11 @@ induction k.
                                                rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
                                                apply bplus_overflow_implies in Hfin2; try apply Hfin2.
                                                destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
-                                               rewrite mxE in Hfin22. admit. admit.
+                                               rewrite mxE in Hfin22. 
+
+
+
+admit. admit.
 
 
                                                (*
