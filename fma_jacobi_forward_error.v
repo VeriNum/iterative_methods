@@ -941,7 +941,6 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
   (rho < 1)%Re ->
   A_real \in unitmx ->
   (forall i : 'I_n.+1, FT2R_mat A i i <> 0%Re) ->
-  (** might have to add finiteness of the solution vector forall k **)
   forall x0: 'cV[ftype ty]_n.+1, 
   (forall k:nat, 
      forall i, is_finite _ _ ((X_m_jacobi k x0 b A) i ord0) = true) -> 
@@ -1214,16 +1213,36 @@ induction k.
                 apply Rmult_le_compat_l. apply /RleP. apply vec_norm_pd.
                 apply Rplus_le_compat.
                 +++ apply /RleP. apply vec_float_sub.
-                    intros. admit. (** From the finiteness of solution vector? **)
-                   (*
-                    specialize (H0 b (A2_J A *f X_m_jacobi k x0 b A) xy H6).
-                    destruct H0 as [Hf1 [Hf2 [Ha1 Ha2]]].   
-                    repeat split; try apply Hf1; try apply Hf2;
-                    (apply Rle_trans with
-                                (sqrt
-                                   (F' ty / 2 /
-                                    (INR n.+1 * (1 + default_rel ty) ^ n.+1)))%Re; try apply Ha1; try apply Ha2;
-                    try by apply n_bound). *)
+                    intros.
+                    specialize (H0 b ( A2_J A *f X_m_jacobi k x0 b A)).
+                              pose proof (@In_nth (ftype ty * ftype ty)
+                                             (rev (combine
+                                                (vec_to_list_float n.+1 b)
+                                                (vec_to_list_float n.+1 (A2_J A *f X_m_jacobi k x0 b A)))) xy 
+                                              (Zconst ty 1, Zconst ty 0) ).
+                              rewrite -in_rev in H8. specialize (H8 H7).
+                              destruct H8 as [j [Hlength Hnth]].
+                              rewrite rev_nth in Hnth.
+                              ++++ rewrite combine_length !length_veclist Nat.min_id in Hnth.
+                                   assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
+                                   { lia. } rewrite H8 in Hnth. rewrite combine_nth in Hnth.
+                                   rewrite !nth_vec_to_list_float in Hnth.
+                                   specialize (H0 xy H7). repeat split; try apply H0.
+                                   rewrite -Hnth /=.
+                                   specialize (Hfin k.+1 (@inord n j)).
+                                   rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
+                                   rewrite inord_val in Hfin.
+                                   apply bmult_overflow_implies  in Hfin.
+                                   destruct Hfin as [Hfin1 Hfin2].
+                                   rewrite !mxE in Hfin2. apply Bminus_bplus_opp_implies.
+                                   rewrite !mxE.  apply Hfin2.
+                                   by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                   by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                   rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                   by apply /ssrnat.ltP.
+                                   rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                   by apply /ssrnat.ltP. by rewrite !length_veclist.
+                             ++++ by rewrite rev_length in Hlength.
                 +++ assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                        by case: (x1 == y :> nat).
