@@ -1101,7 +1101,22 @@ induction k.
                                    rewrite -Hnth /=.
                                    specialize (Hfin k.+1 (@inord n j)).
                                    rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
-                                   rewrite inord_val in Hfin. apply Hfin.
+                                   rewrite inord_val in Hfin.
+                                   apply bmult_overflow_implies  in Hfin.
+                                   destruct Hfin as [Hfin1 Hfin2].
+                                   rewrite !mxE in Hfin2.
+                                   rewrite -Bminus_bplus_opp_equiv.
+                                   ---- rewrite !mxE. apply Hfin2.
+                                   ---- rewrite -Hnth /= in H0. by apply H0.
+                                   ---- rewrite -Hnth /= in H0.  by rewrite is_finite_Bopp; apply H0.
+  
+
+
+
+
+
+
+ apply Hfin.
                                    by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
                                    by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
                                    rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
