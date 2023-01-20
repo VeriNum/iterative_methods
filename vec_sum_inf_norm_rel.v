@@ -317,8 +317,8 @@ Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
          (vec_to_list_float n.+1 v2)) ->
     is_finite (fprec ty) (femax ty) xy.1 = true /\
     is_finite (fprec ty) (femax ty) xy.2 = true /\ 
-    (Rabs (FT2R (fst (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re /\
-     (Rabs (FT2R (snd (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re) ->
+    is_finite (fprec ty) (femax ty)
+        (BPLUS ty xy.1 (BOPP ty xy.2)) = true) ->
   vec_inf_norm (FT2R_mat (v1 -f v2) - (FT2R_mat v1 - FT2R_mat v2)) <= 
   (vec_inf_norm (FT2R_mat v1) + vec_inf_norm (FT2R_mat v2)) * (default_rel ty) .
 Proof.
@@ -356,7 +356,7 @@ rewrite Bminus_bplus_opp_equiv.
   apply Rle_trans with 
   ((Rabs (FT2R (v1 (inord i) ord0)) + Rabs (FT2R (BOPP ty (v2 (inord i) ord0)))) * (default_rel ty))%Re.
   - apply /RleP. apply BPLUS_error_le_rel.
-    by apply finite_bminus. 
+    apply Hfin. 
   - apply Rle_trans with
     ((bigmaxr 0%Re
           [seq Rabs (FT2R_mat v1 i0 ord0)
@@ -392,8 +392,9 @@ rewrite Bminus_bplus_opp_equiv.
     * apply Rle_refl.
 + apply Hfin.
 + rewrite is_finite_Bopp. apply Hfin.
-+ by apply finite_bminus. 
++ by apply Hfin. 
 Qed.
+
 
 
 
