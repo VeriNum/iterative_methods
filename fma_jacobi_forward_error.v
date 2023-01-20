@@ -1042,7 +1042,11 @@ induction k.
                                             (Zconst ty 1, Zconst ty 0) ).
                             rewrite -in_rev in H10. specialize (H10 H9).
                             destruct H10 as [j [Hlength Hnth]].
-                            
+                            rewrite rev_nth in Hnth.
+                            ++++ rewrite combine_length !length_veclist Nat.min_id in Hnth.
+                                 assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
+                                 { lia. } rewrite H10 in Hnth. rewrite combine_nth in Hnth.
+                                 rewrite !nth_vec_to_list_float in Hnth.
 
 
 
