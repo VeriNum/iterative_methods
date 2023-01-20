@@ -284,7 +284,6 @@ destruct ((Binary.Bplus (fprec t) (femax t) (fprec_gt_0 t) (fprec_lt_femax t)
 simpl; try discriminate.
 Qed.
 
-
 Lemma BPLUS_accurate' {NAN: Nans} (t : type) :
   forall x y 
   (FIN: Binary.is_finite _ _ (BPLUS t x y) = true), 
@@ -300,6 +299,17 @@ assert (A: Binary.is_finite (fprec t) (femax t) x = true /\
 destruct A as (A & B).
 pose proof BPLUS_accurate t x A y B (is_finite_sum_no_overflow t x y FIN); 
   auto.
+Qed.
+
+Lemma BDIV_sep_zero {NAN: Nans} (t : type) :
+  forall (f1 f2 : ftype t)
+  (Hfin: Binary.is_finite _ _ (BDIV t f1 f2) = true)
+  (Hfin1: Binary.is_finite_strict _ _ f1 = true)
+  (Hfin2: Binary.is_finite _ _ f2 = true),
+  Binary.is_finite_strict _ _ f2 = true.
+Proof.
+intros ? ?;
+destruct f2; destruct f1; simpl; try discriminate; auto.
 Qed.
 
 
