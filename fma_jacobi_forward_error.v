@@ -872,7 +872,7 @@ try unfold is_finite in H1; simpl in *; auto);
   by destruct s,s0;simpl in *; auto).
 Qed.
 
-Lemma bplsu_overflow_implies {t : type}: 
+Lemma bplus_overflow_implies {t : type}: 
   forall x y , 
   Binary.is_finite _ _ (BPLUS t x y) = true ->
   is_finite _ _ x = true /\
@@ -1261,8 +1261,15 @@ induction k.
                                    specialize (Hfin k.+1 (@inord n j)).
                                    rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
                                    rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                                   apply bmult_overflow_implies in Hfin; try apply Hfin.
-                                   apply bmult_overflow_implies in Hfin; try apply Hfin.
+                                   apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                   rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                   apply bplus_overflow_implies in Hfin2; try apply Hfin2.
+                                   apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                   rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                   apply bplus_overflow_implies in Hfin2. rewrite is_finite_Bopp in Hfin2.  try apply Hfin2.
+                                   apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                   rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                   try apply Hfin2.
                                    by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
                                    by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
                                    rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
