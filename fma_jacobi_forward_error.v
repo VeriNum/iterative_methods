@@ -842,35 +842,6 @@ ______________________________________(2/2)
  (INR n.+1 * (1 + default_rel ty) ^ n.+1))%Re
 ***)
 
-Lemma matrix_mult_fin_and_respects_bound {ty} {n:nat} (i: 'I_n.+1) 
-(A: 'M[ftype ty]_n.+1) (v: 'cV[ftype ty]_n.+1)  :
-  let xy := BFMA (nth i (vec_to_list_float n.+1 ((\row_j A i j)^T)) (Zconst ty 0))
-                    (nth i (vec_to_list_float n.+1 v) (Zconst ty 0)) (Zconst ty 0) in
-  (forall (v1 v2: 'cV[ftype ty]_n.+1)
-          (xy : ftype ty * ftype ty),
-    In xy
-      (combine
-         (vec_to_list_float n.+1 v1)
-         (vec_to_list_float n.+1 v2)) ->
-    is_finite (fprec ty) (femax ty) xy.1 = true /\
-    is_finite (fprec ty) (femax ty) xy.2 = true /\ 
-      (Rabs (FT2R (fst (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1)))%Re /\
-      (Rabs (FT2R (snd (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1)))%Re) ->
-  In xy (vec_to_list_float n.+1 (A *f v)) ->
-  is_finite (fprec ty) (femax ty) xy = true /\
-  (Rabs (FT2R xy) <=
-     F' ty / 2 /
-     (INR n.+1 * (1 + default_rel ty) ^ n.+1))%Re.
-Proof.
-intros.
-unfold mulmx_float in H0.
-
-
-
-
-
-Admitted.
-  
 
 Lemma bmult_overflow_implies {t : type}: 
   forall x y , 
@@ -900,6 +871,17 @@ try unfold is_finite in H1; simpl in *; auto);
     (Z.min e e1) false); simpl;auto;
   by destruct s,s0;simpl in *; auto).
 Qed.
+
+
+
+(*** Lemma for error bound on the inverse ***)
+Lemma inverse_mat_norm_bound {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
+  let A_real := FT2R_mat A in
+  (vec_inf_norm (FT2R_mat (A1_inv_J A) - A1_diag A_real) <=
+    vec_inf_norm (A1_diag A_real) * (default_rel ty))%Re.
+Proof.
+intros.
+
 
 
 
