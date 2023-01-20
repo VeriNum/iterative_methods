@@ -1328,14 +1328,16 @@ induction k.
                                                rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
                                                apply bplus_overflow_implies in Hfin2; try apply Hfin2.
                                                destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
-                                               rewrite mxE in Hfin22. 
-                                               
+                                               rewrite mxE in Hfin22. admit. admit.
+
+
+                                               (*
                                                apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
                                                rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
                                                apply bplus_overflow_implies in Hfin2. rewrite is_finite_Bopp in Hfin2.  try apply Hfin2.
                                                apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
                                                rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                               try apply Hfin2.
+                                               try apply Hfin2. *)
                                                by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
                                                by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
                                                rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
@@ -1343,16 +1345,6 @@ induction k.
                                                rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
                                                by apply /ssrnat.ltP. by rewrite !length_veclist.
                                          ++++ by rewrite rev_length in Hlength.
-
-
-
-
-
-
-
-
-                                        specialize (H0  (\row_j A2_J A (inord i) j)^T (X_m_jacobi k x0 b A)xy  H9).
-                                        apply H0. intros. apply H1.
                                       }
                                       apply Rle_trans with 
                                       ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
@@ -1363,9 +1355,9 @@ induction k.
                                             (matrix_inf_norm (FT2R_mat (A2_J A)) *
                                              vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
                                              g ty n.+1 + g1 ty n.+1 (n.+1 - 1)))%Re.
-                                           +++++ apply reverse_triang_ineq in H9.
+                                           +++++ apply reverse_triang_ineq in H7.
                                                  assert (forall x y z:R, (x - y <= z)%Re -> (x <= y + z)%Re).
-                                                 { intros. nra. } apply H10. apply /RleP. apply H9.
+                                                 { intros. nra. } apply H8. apply /RleP. apply H7.
                                            +++++ match goal with |-context[(_ <= ?p + ?a * ?b * ?c + ?d)%Re]=>
                                                   replace (p + a * b * c + d)%Re with (p + (a * b * c + d))%Re by nra
                                                  end. apply Rplus_le_compat_r. apply /RleP. apply submult_prop.
@@ -1389,7 +1381,7 @@ induction k.
                                          (FT2R_mat b - FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) - 
                                            (FT2R_mat b -
                                            A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A)))).
-                                 { by rewrite add_vec_distr_2. } rewrite H7. clear H7.
+                                 { by rewrite add_vec_distr_2. } rewrite H5. clear H5.
                                  apply /RleP. apply triang_ineq.
          -- assert (FT2R_mat b -
                          FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) -
@@ -1397,7 +1389,7 @@ induction k.
                           A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A))  =
                      - (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) -
                         A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A)) ).
-             { rewrite add_vec_distr_4. by rewrite sub_vec_comm_1. auto. } rewrite H7. clear H7.
+             { rewrite add_vec_distr_4. by rewrite sub_vec_comm_1. auto. } rewrite H5. clear H5.
              rewrite -vec_inf_norm_opp. rewrite -RplusE.
              rewrite Rmult_plus_distr_l. eapply Rle_trans.
              ** apply Rplus_le_compat_r. apply Rplus_le_compat_l.
