@@ -877,9 +877,6 @@ Admitted.
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
-  (forall a, In a (vec_to_list_float n.+1 b) ->
-             is_finite (fprec ty) (femax ty) a = true /\
-             (Rabs (FT2R a) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re) -> 
   (forall i j, is_finite _ _ (A i j) = true) ->
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -895,10 +892,8 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
     is_finite (fprec ty) (femax ty) xy.2 = true) ->
   (forall (v1 v2 : 'cV[ftype ty]_n.+1),
     is_finite (fprec ty) (femax ty)
-        (let l1 :=
-           vec_to_list_float n.+1 v1 in
-         let l2 :=
-           vec_to_list_float n.+1 v2 in
+        (let l1 := vec_to_list_float n.+1 v1 in
+         let l2 := vec_to_list_float n.+1 v2 in
          dotprod_r l1 l2) = true ) ->
    let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
    let delta := default_rel ty in
@@ -915,13 +910,16 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
                   g1 ty n.+1 (n.+1 - 1))%Re in 
 
   (rho < 1)%Re ->
-   A_real \in unitmx ->
+  A_real \in unitmx ->
   (forall i : 'I_n.+1, FT2R_mat A i i <> 0%Re) ->
+  (** might have to add finiteness of the solution vector forall k **)
   forall x0: 'cV[ftype ty]_n.+1, 
-  forall k:nat,
-  (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re.
+  (forall k:nat, 
+     forall i, is_finite _ _ ((X_m_jacobi k x0 b A) i ord0) = true) -> 
+  (forall k:nat,
+   (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag))%Re.
 Proof.
-intro Hbound. intro HAf. intros.
+intro HAf. intros ? ? ? ? ? ? ? ? ? ? ? ? ? ? Hfin ?.
 induction k.
 + simpl. nra.
 + simpl.
@@ -1037,7 +1035,30 @@ induction k.
                             }
                             rewrite H8. apply H7. intros.
                             specialize (H0 (A1_inv_J A) (b -f A2_J A *f X_m_jacobi k x0 b A)).
-                            admit. (** To prove BMULT is finite ***)
+                            pose proof (@In_nth (ftype ty * ftype ty)
+                                           (rev (combine
+                                              (vec_to_list_float n.+1 (A1_inv_J A))
+                                              (vec_to_list_float n.+1 (b -f A2_J A *f X_m_jacobi k x0 b A)))) xy 
+                                            (Zconst ty 1, Zconst ty 0) ).
+                            rewrite -in_rev in H10. specialize (H10 H9).
+                            destruct H10 as [j [Hlength Hnth]].
+                            
+
+
+
+.
+                            
+
+ assert (exists n, n < length l /\ nth n l d = x.
+
+apply in_rev in H9.
+                            apply In_nth in H9.
+                            
+
+
+
+                            admit. (** From finiteness of the solution vector ? **)
+
                         *** assert (FT2R_mat (A1_inv_J A) = A1_diag A_real).
                             { apply matrixP. unfold eqrel. intros. rewrite !mxE /=.
                               symmetry. admit.
@@ -1050,7 +1071,18 @@ induction k.
                                                   (FT2R_mat b - FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) <=
                                     (vec_inf_norm (FT2R_mat b) + vec_inf_norm (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) *
                                     (default_rel ty))).
-                            { apply vec_float_sub. intros. admit.
+                            { apply vec_float_sub. intros. 
+                              (** finiteness of the solution vector? **)
+                              specialize (Hfin k.+1). simpl in Hfin.
+                              unfold jacobi_iter in Hfin. 
+                              unfold diag_vector_mult in Hfin. admit.
+
+
+
+
+
+
+
                             } apply reverse_triang_ineq in H8.
                             apply Rle_trans with 
                             ((vec_inf_norm (FT2R_mat b) +
@@ -1135,7 +1167,7 @@ induction k.
                 apply Rmult_le_compat_l. apply /RleP. apply vec_norm_pd.
                 apply Rplus_le_compat.
                 +++ apply /RleP. apply vec_float_sub.
-                    intros. admit.
+                    intros. admit. (** From the finiteness of solution vector? **)
                    (*
                     specialize (H0 b (A2_J A *f X_m_jacobi k x0 b A) xy H6).
                     destruct H0 as [Hf1 [Hf2 [Ha1 Ha2]]].   
