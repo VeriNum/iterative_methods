@@ -1069,11 +1069,12 @@ induction v.
   { admit. } rewrite H1 H2 in H.
   unfold dotprod_r in H.  simpl in H.
   apply bfma_overflow_implies in H.
-  dest
-  
-
-unfold split in H.
-
+  destruct H0.
+  - rewrite -H0. split; try apply H.
+  - unfold dotprod_r in IHv.
+    destruct H as [Hf1 [Hf2 Hf3]].
+    specialize (IHv Hf3 H0). apply IHv. 
+Admitted.
 
 
 
