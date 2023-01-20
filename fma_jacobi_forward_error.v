@@ -1039,6 +1039,19 @@ red in FIN. unfold rounded in FIN.
 
 *)
 
+Lemma bfma_overflow_implies {t : type}: 
+  forall x y z, 
+  Binary.is_finite _ _ (@BFMA _ t x y z) = true ->
+  is_finite _ _ x = true /\
+  is_finite _ _ y = true /\
+  is_finite _ _ z = true.
+Proof.
+intros.
+destruct x, y, z; (unfold BFMA, BINOP, Bfma, is_finite in *; simpl in *; auto;
+  try destruct (eqb s (~~ s0)); simpl in * ;auto; try by []; 
+  try unfold is_finite in H1; simpl in *; auto);
+  by destruct s,s0,s1;simpl in *; auto.
+Qed.
 
 
 Lemma dotprod_finite_implies {ty} (v: list (ftype ty * ftype ty)):
@@ -1055,6 +1068,8 @@ induction v.
   assert ((List.split (a0 :: v)).2 = (a0.2 :: (List.split v).2)).
   { admit. } rewrite H1 H2 in H.
   unfold dotprod_r in H.  simpl in H.
+  apply bfma_overflow_implies in H.
+  dest
   
 
 unfold split in H.
