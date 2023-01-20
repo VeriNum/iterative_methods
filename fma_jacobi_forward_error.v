@@ -1047,22 +1047,18 @@ induction k.
                                  assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
                                  { lia. } rewrite H10 in Hnth. rewrite combine_nth in Hnth.
                                  rewrite !nth_vec_to_list_float in Hnth.
-
-
-
-.
-                            
-
- assert (exists n, n < length l /\ nth n l d = x.
-
-apply in_rev in H9.
-                            apply In_nth in H9.
-                            
-
-
-
-                            admit. (** From finiteness of the solution vector ? **)
-
+                                 specialize (H0 xy H9). repeat split; try apply H0.
+                                 rewrite -Hnth /=.
+                                 specialize (Hfin k.+1 (@inord n j)).
+                                 rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
+                                 rewrite inord_val in Hfin. apply Hfin.
+                                 by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                 by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                 rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                 by apply /ssrnat.ltP.
+                                 rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                 by apply /ssrnat.ltP. by rewrite !length_veclist.
+                           ++++ by rewrite rev_length in Hlength.
                         *** assert (FT2R_mat (A1_inv_J A) = A1_diag A_real).
                             { apply matrixP. unfold eqrel. intros. rewrite !mxE /=.
                               symmetry. admit.
