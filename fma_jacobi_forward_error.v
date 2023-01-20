@@ -1766,7 +1766,9 @@ induction k.
                     intros. 
                     specialize (H0 (\row_j A2_J A (inord i) j)^T (X_m_jacobi k x0 b A) xy H8).
                     repeat split; try apply /RleP; try apply H0.
-                    intros. admit.
+                    intros. 
+                    by specialize (H1 (\row_j A2_J A (inord i) j)^T
+                                  (\col_j X_m_jacobi k x0 b A j 0) ).
              ** rewrite !ft2r_mat_equiv .
                 eapply Rle_trans.
                 +++ apply Rplus_le_compat_r. apply Rplus_le_compat_l.
@@ -1785,7 +1787,9 @@ induction k.
                                                 * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
                            { apply matrix_vec_mult_bound_corollary. intros.
                              specialize (H0 (\row_j A2_J A (inord i) j)^T (X_m_jacobi k x0 b A) xy H7).
-                             repeat split; try apply /RleP; try apply H0. admit.
+                             repeat split; try apply /RleP; try apply H0.
+                             intros.
+                             by specialize (H1 (\row_j A2_J A (inord i) j)^T (\col_j X_m_jacobi k x0 b A j 0)).
                            }
                             apply Rle_trans with
                                            (vec_inf_norm (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A)) +
