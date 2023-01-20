@@ -876,11 +876,38 @@ Qed.
 
 (*** Lemma for error bound on the inverse ***)
 Lemma inverse_mat_norm_bound {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
+  (forall i, FT2R (A i i) <> 0%Re) ->
   let A_real := FT2R_mat A in
   (vec_inf_norm (FT2R_mat (A1_inv_J A) - A1_diag A_real) <=
     vec_inf_norm (A1_diag A_real) * (default_rel ty))%Re.
 Proof.
 intros.
+unfold vec_inf_norm. rewrite RmultE. rewrite mulrC.
+rewrite -bigmaxr_mulr.
++ apply bigmax_le; first by rewrite size_map size_enum_ord.
+  intros. rewrite seq_equiv. 
+  rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H0.
+  rewrite !mxE. 
+  apply Rle_trans with 
+  [seq (default_rel ty *
+         Rabs (A1_diag A_real i0 0))%Ri
+      | i0 <- enum 'I_n.+1]`_i.
+  - rewrite seq_equiv. rewrite nth_mkseq;
+    last by rewrite size_map size_enum_ord in H0.
+    rewrite -RmultE -RminusE. rewrite !mxE.
+    pose proof (Binary.Bdiv_correct  (fprec ty) (femax ty)  (fprec_gt_0 ty) (fprec_lt_femax ty) (plus_nan ty) 
+                      BinarySingleNaN.mode_NE (Zconst ty 1) (A (inord i) (inord i))).
+    specialize (H (@inord n i)). 
+    specialize (H1 H).
+
+
+
+
+
+    pose proof (generic_round_property ty (1 / FT2R (A (inord i) (inord i)))%Re).
+    destruct H0 as [d [e [Hpr [Hdf [Hde H0]]]]].
+    rewrite H0.
+    
 
 
 
