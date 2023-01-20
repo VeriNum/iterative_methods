@@ -1038,6 +1038,32 @@ red in FIN. unfold rounded in FIN.
 
 
 *)
+
+
+
+Lemma dotprod_finite_implies {ty} (v: list (ftype ty * ftype ty)):
+  is_finite _ _ (dotprod_r (fst (List.split v)) (snd (List.split v))) = true ->
+  (forall a, In a v ->
+             is_finite _ _ (fst a) = true /\
+             is_finite _ _ (snd a) = true).
+Proof.
+intros.
+induction v.
++ by simpl in H0.
++ assert ((List.split (a0 :: v)).1 = (a0.1 :: (List.split v).1)).
+  { admit. }
+  assert ((List.split (a0 :: v)).2 = (a0.2 :: (List.split v).2)).
+  { admit. } rewrite H1 H2 in H.
+  unfold dotprod_r in H.  simpl in H.
+  
+
+unfold split in H.
+
+
+
+
+
+
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
@@ -1046,28 +1072,6 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
   let b_real := FT2R_mat b in
   let x:= A_real^-1 *m b_real in
   x != 0 ->
- (* 
-
-(forall (v1 v2 : 'cV[ftype ty]_n.+1)
-              (xy : ftype ty * ftype ty) ,
-    In xy
-      (combine
-         (vec_to_list_float n.+1 v1)
-         (vec_to_list_float n.+1 v2)) ->
-    is_finite (fprec ty) (femax ty) xy.1 = true /\
-    is_finite (fprec ty) (femax ty) xy.2 = true) ->
-  
-
-
-
-(forall (v1 v2 : 'cV[ftype ty]_n.+1),
-    is_finite (fprec ty) (femax ty)
-        (let l1 := vec_to_list_float n.+1 v1 in
-         let l2 := vec_to_list_float n.+1 v2 in
-         dotprod_r l1 l2) = true 
-  ) ->
-
-*)
    let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
    let delta := default_rel ty in
    let rho := (((1 + g ty n.+1) * (1 + delta) * g ty n.+1 +
