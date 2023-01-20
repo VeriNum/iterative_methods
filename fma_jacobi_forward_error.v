@@ -1427,7 +1427,7 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
         (let l1 :=
            vec_to_list_float n.+1 v1 in
          let l2 :=
-           vec_to_list_float n.+1 v1 in
+           vec_to_list_float n.+1 v2 in
          dotprod_r l1 l2) = true ) ->
    let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
    let delta := default_rel ty in
@@ -1766,6 +1766,7 @@ induction k.
                     intros. 
                     specialize (H0 (\row_j A2_J A (inord i) j)^T (X_m_jacobi k x0 b A) xy H8).
                     repeat split; try apply /RleP; try apply H0.
+                    intros. admit.
              ** rewrite !ft2r_mat_equiv .
                 eapply Rle_trans.
                 +++ apply Rplus_le_compat_r. apply Rplus_le_compat_l.
@@ -1783,17 +1784,17 @@ induction k.
                                                ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
                                                 * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
                            { apply matrix_vec_mult_bound_corollary. intros.
-                             specialize (H0 (\row_j A2_J A (inord i) j)^T (X_m_jacobi k x0 b A) xy H6).
-                             repeat split; try apply /RleP; try apply H0.
+                             specialize (H0 (\row_j A2_J A (inord i) j)^T (X_m_jacobi k x0 b A) xy H7).
+                             repeat split; try apply /RleP; try apply H0. admit.
                            }
                             apply Rle_trans with
                                            (vec_inf_norm (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A)) +
                                             (matrix_inf_norm (FT2R_mat (A2_J A)) *
                                              vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
                                              g ty n.+1 + g1 ty n.+1 (n.+1 - 1)))%Re.
-                            ++++ apply reverse_triang_ineq in H6.
+                            ++++ apply reverse_triang_ineq in H7.
                                  assert (forall x y z:R, (x - y <= z)%Re -> (x <= y + z)%Re).
-                                 { intros. nra. } apply H7. apply /RleP. apply H6.
+                                 { intros. nra. } apply H8. apply /RleP. apply H7.
                             ++++ match goal with |-context[(_ <= ?p + ?a * ?b * ?c + ?d)%Re]=>
                                     replace (p + a * b * c + d)%Re with (p + (a * b * c + d))%Re by nra
                                  end. apply Rplus_le_compat_r. apply /RleP. apply submult_prop.
@@ -1828,11 +1829,11 @@ induction k.
                            ( (1+ g ty n.+1) * g1 ty n.+1 (n.+1 - 1) * (1 + default_rel ty)) *
                             (vec_inf_norm (A1_diag A_real)) ) + g1 ty n.+1 (n.+1 - 1)) + 
                            R2 * f_error k b x0 x A)%Re).
-                   { fold A_real. nra. } rewrite H6. clear H6. fold R2.
+                   { fold A_real. nra. } rewrite H7. clear H7. fold R2.
                    assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                        by case: (x1 == y :> nat).
-                    } rewrite -H6. fold A_real. fold R2. fold b_real.
+                    } rewrite -H7. fold A_real. fold R2. fold b_real.
                     assert ((vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) <= 
                              f_error k b x0 x A + 
                              vec_inf_norm (x_fix x b_real A_real))%Re).
@@ -1873,7 +1874,7 @@ induction k.
                             ++++ unfold R2. apply Rmult_le_pos.
                                  ---- apply /RleP. apply vec_norm_pd.
                                  ---- apply /RleP. apply matrix_norm_pd.
-                        *** apply H7.
+                        *** apply H8.
                     --- assert ((((1 + g ty n.+1) * (1 + default_rel ty) * g ty n.+1 +
                                   default_rel ty * (1 + g ty n.+1) + 
                                   g ty n.+1) * R2 *
@@ -1899,7 +1900,7 @@ induction k.
                                   (1 + default_rel ty) *
                                   vec_inf_norm (A1_diag A_real)) +
                                  g1 ty n.+1 (n.+1 - 1)))%Re).
-                        { nra. } rewrite H8. clear H8. fold delta. fold rho. fold d_mag.
+                        { nra. } rewrite H9. clear H9. fold delta. fold rho. fold d_mag.
                         unfold f_error. fold b_real. fold A_real. apply Rle_refl.
   - apply Rplus_le_compat_r. apply Rmult_le_compat_l.
     * by apply rho_ge_0.
