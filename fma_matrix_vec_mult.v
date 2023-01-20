@@ -162,6 +162,148 @@ induction m.
 + simpl. rewrite !mxE. by apply R_dot_prod_rel_cons.
 Qed.
 
+
+(** Write a lemma for matrix-vector multiplication **)
+Lemma matrix_vec_mult_bound {n:nat} {ty}:
+  forall (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1),
+  (forall (xy : ftype ty * ftype ty) (i : 'I_n.+1),
+    In xy
+      (combine
+         (vec_to_list_float n.+1
+            (\row_j A (inord i) j)^T)
+         (vec_to_list_float n.+1 v)) ->
+    is_finite (fprec ty) (femax ty) xy.1 = true /\
+    is_finite (fprec ty) (femax ty) xy.2 = true /\
+    Rabs (FT2R (fst (xy))) <= sqrt ((F' ty /2) / (INR n.+1  * (1 + default_rel ty)^ n.+1)) /\
+    Rabs (FT2R (snd (xy))) <= sqrt ((F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1 ))) -> 
+   vec_inf_norm (FT2R_mat (A *f v) - (FT2R_mat A) *m (FT2R_mat v)) <=
+  mat_vec_mult_err_bnd A v.
+Proof.
+intros. unfold vec_inf_norm, mat_vec_mult_err_bnd.
+apply /RleP. apply bigmax_le; first by rewrite size_map size_enum_ord.
+intros. rewrite seq_equiv. 
+rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H0.
+pose proof (fma_dotprod_forward_error _ ty 
+            (vec_to_list_float n.+1 (\row_j A (inord i) j)^T)
+             (vec_to_list_float n.+1 v)).
+rewrite !length_veclist in H1.
+assert ((1 <= n.+1)%coq_nat). { lia. } 
+assert (n.+1 = n.+1). { lia. } 
+specialize (H1 H2 H3).
+apply Rle_trans with (e_i (@inord n i) A v).
++ unfold e_i. rewrite !mxE -RminusE.
+  rewrite !length_veclist.
+  apply H1.
+  assert (v = \col_j v j ord0).
+  {  apply matrixP.  unfold eqrel. intros. rewrite !mxE /=.
+      assert ( y = ord0). { apply ord1. } by rewrite H4.
+  } rewrite -H4.
+  - apply fma_dot_prod_rel_holds .
+  - pose proof (@R_dot_prod_rel_holds n ty n.+1 i (leqnn n.+1)).
+    specialize (H4 A v).
+    assert (\sum_(j < n.+1)
+               FT2R_mat A (inord i)
+                 (widen_ord (leqnn n.+1) j) *
+               FT2R_mat v
+                 (widen_ord (leqnn n.+1) j) 0 = 
+            \sum_j
+               FT2R_mat A (inord i) j * FT2R_mat v j 0).
+    { apply eq_big. by []. intros.
+      assert (widen_ord (leqnn n.+1) i0 = i0).
+      { unfold widen_ord. apply val_inj. by simpl. }
+      by rewrite H6.
+    } by rewrite -H5. 
+  - apply R_dot_prod_rel_abs_holds.
+  - intros. specialize (H xy (@inord n i)).
+    rewrite inord_val in H. specialize (H H4).
+    split; apply H.
+  -
+
+
+
+
+ admit.
++ assert (e_i (inord i) A v = 
+         [seq e_i i0 A v | i0 <- enum 'I_n.+1]`_i).
+  { rewrite seq_equiv nth_mkseq. nra. by rewrite size_map size_enum_ord in H0. } 
+  rewrite H4. apply /RleP.
+  apply (@bigmaxr_ler _  _ [seq e_i i0 A v | i0 <- enum 'I_n.+1] i).
+  rewrite size_map size_enum_ord.
+  by rewrite size_map size_enum_ord in H0.
+Admitted.
+  
+
+
+
+
+
+
+
+
+
+
+pose proof (fma_dotprod_forward_error _ ty 
+             (vec_to_list_float n.+1 (\row_j A (inord i) j)^T)
+             (vec_to_list_float n.+1 v)).
+rewrite !length_veclist in H1.
+assert ((1 <= n.+1)%coq_nat). { lia. } 
+assert (n.+1 = n.+1). { lia. } 
+specialize (H1 H2 H3).
+apply Rle_trans with (e_i (@inord n i) A v).
++ unfold e_i. rewrite !mxE -RminusE.
+  rewrite !length_veclist.
+  apply H1.
+  assert (v = \col_j v j ord0).
+  {  apply matrixP.  unfold eqrel. intros. rewrite !mxE /=.
+      assert ( y = ord0). { apply ord1. } by rewrite H4.
+  } rewrite -H4.
+  - apply fma_dot_prod_rel_holds .
+  - pose proof (@R_dot_prod_rel_holds n ty n.+1 i (leqnn n.+1)).
+    specialize (H4 A v).
+    assert (\sum_(j < n.+1)
+               FT2R_mat A (inord i)
+                 (widen_ord (leqnn n.+1) j) *
+               FT2R_mat v
+                 (widen_ord (leqnn n.+1) j) 0 = 
+            \sum_j
+               FT2R_mat A (inord i) j * FT2R_mat v j 0).
+    { apply eq_big. by []. intros.
+      assert (widen_ord (leqnn n.+1) i0 = i0).
+      { unfold widen_ord. apply val_inj. by simpl. }
+      by rewrite H6.
+    } by rewrite -H5. 
+  - apply R_dot_prod_rel_abs_holds.
+  - intros. specialize (H xy (@inord n i)).
+    rewrite inord_val in H. specialize (H H4).
+    split; apply H.
+  - apply (fma_is_finite _ ty (vec_to_list_float n.+1
+       (\row_j A (inord i) j)^T) (vec_to_list_float n.+1 v)).
+    * by rewrite !length_veclist.
+    * assert (v = \col_j v j ord0).
+      {  apply matrixP.  unfold eqrel. intros. rewrite !mxE /=.
+        assert ( y = ord0). { apply ord1. } by rewrite H4.
+      } rewrite -H4.
+      apply fma_dot_prod_rel_holds.
+    * intros.  rewrite length_veclist. specialize (H xy (@inord n i)).
+    rewrite inord_val in H. specialize (H H4).
+    destruct H as [Hf1 [Hf2 [Ha1 Ha2]]].
+    repeat split; try by []; try by apply /RleP.
++ assert (e_i (inord i) A v = 
+         [seq e_i i0 A v | i0 <- enum 'I_n.+1]`_i).
+  { rewrite seq_equiv nth_mkseq. nra. by rewrite size_map size_enum_ord in H0. } 
+  rewrite H4. apply /RleP.
+  apply (@bigmaxr_ler _  _ [seq e_i i0 A v | i0 <- enum 'I_n.+1] i).
+  rewrite size_map size_enum_ord.
+  by rewrite size_map size_enum_ord in H0.
+Qed.
+
+
+
+
+
+
+
+
 (** Write a lemma for matrix-vector multiplication **)
 Lemma matrix_vec_mult_bound {n:nat} {ty}:
   forall (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1),
