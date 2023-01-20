@@ -1569,9 +1569,8 @@ induction k.
                             admit.
                         *** assert (FT2R_mat (A1_inv_J A) = A1_diag A_real).
                             { apply matrixP. unfold eqrel. intros. rewrite !mxE /=.
-                              symmetry. apply BDIV_FT2R. specialize (H3 x1). rewrite mxE in H3. apply H3.
-                              apply HAf.
-                            } rewrite H6. apply Rplus_le_compat_r.
+                              symmetry. admit.
+                            } rewrite H7. apply Rplus_le_compat_r.
                             apply Rmult_le_compat_r.
                             apply g_pos.
                             apply Rmult_le_compat_l.
@@ -1580,9 +1579,9 @@ induction k.
                                                   (FT2R_mat b - FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) <=
                                     (vec_inf_norm (FT2R_mat b) + vec_inf_norm (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) *
                                     (default_rel ty))).
-                            { apply vec_float_sub. intros.
+                            { apply vec_float_sub. intros. admit.
                               (** This is where I need to make most of the changes **)
-                              specialize (Hbound (fst xy)). 
+                              (*specialize (Hbound (fst xy)). 
                               assert (In xy.1 (vec_to_list_float n.+1 b)).
                               { assert (xy = (fst xy, snd xy)).
                                 { destruct xy; simpl;auto. } rewrite H8 in H7.
@@ -1665,8 +1664,8 @@ induction k.
                                 (sqrt
                                    (F' ty / 2 /
                                     (INR n.+1 * (1 + default_rel ty) ^ n.+1)))%Re; try apply Ha1; try apply Ha2;
-                                try apply n_bound). by []. by []. *)
-                            } apply reverse_triang_ineq in H7.
+                                try apply n_bound). by []. by []. *) *)
+                            } apply reverse_triang_ineq in H8.
                             apply Rle_trans with 
                             ((vec_inf_norm (FT2R_mat b) +
                                     vec_inf_norm
@@ -1682,12 +1681,12 @@ induction k.
                                         (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) *
                                      default_rel ty)%Re.
                                  ---- assert (forall x y z:R, (x - y <= z)%Re -> (x <= y + z)%Re).
-                                      { intros. nra. } apply H8. by apply /RleP.
+                                      { intros. nra. } apply H9. by apply /RleP.
                                  ---- apply Rplus_le_compat_r.
                                       assert (vec_inf_norm
                                                   (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A)) = 
                                               vec_inf_norm (- (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A)))).
-                                      { by rewrite vec_inf_norm_opp. } rewrite H8.
+                                      { by rewrite vec_inf_norm_opp. } rewrite H9.
                                       apply /RleP. apply triang_ineq.
                             ++++ apply Rmult_le_compat_r.
                                  ---- apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
@@ -1696,9 +1695,9 @@ induction k.
                                                  (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A))) <=
                                                ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
                                                 * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
-                                      { apply matrix_vec_mult_bound_corollary. intros. 
-                                        specialize (H0 (\row_j A2_J A (inord i) j)^T (X_m_jacobi k x0 b A) xy H8).
-                                        repeat split; try apply /RleP; try apply H0.
+                                      { apply matrix_vec_mult_bound_corollary. intros. admit.
+                                       (* specialize (H0 (\row_j A2_J A (inord i) j)^T (X_m_jacobi k x0 b A) xy H8).
+                                        repeat split; try apply /RleP; try apply H0. *)
                                       }
                                       apply Rle_trans with 
                                       ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
@@ -1709,9 +1708,9 @@ induction k.
                                             (matrix_inf_norm (FT2R_mat (A2_J A)) *
                                              vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) *
                                              g ty n.+1 + g1 ty n.+1 (n.+1 - 1)))%Re.
-                                           +++++ apply reverse_triang_ineq in H8.
+                                           +++++ apply reverse_triang_ineq in H9.
                                                  assert (forall x y z:R, (x - y <= z)%Re -> (x <= y + z)%Re).
-                                                 { intros. nra. } apply H9. apply /RleP. apply H8.
+                                                 { intros. nra. } apply H10. apply /RleP. apply H9.
                                            +++++ match goal with |-context[(_ <= ?p + ?a * ?b * ?c + ?d)%Re]=>
                                                   replace (p + a * b * c + d)%Re with (p + (a * b * c + d))%Re by nra
                                                  end. apply Rplus_le_compat_r. apply /RleP. apply submult_prop.
@@ -1735,7 +1734,7 @@ induction k.
                                          (FT2R_mat b - FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) - 
                                            (FT2R_mat b -
                                            A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A)))).
-                                 { by rewrite add_vec_distr_2. } rewrite H6. clear H6.
+                                 { by rewrite add_vec_distr_2. } rewrite H7. clear H7.
                                  apply /RleP. apply triang_ineq.
          -- assert (FT2R_mat b -
                          FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) -
@@ -1743,7 +1742,7 @@ induction k.
                           A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A))  =
                      - (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A) -
                         A2_J_real (FT2R_mat A) *m FT2R_mat (X_m_jacobi k x0 b A)) ).
-             { rewrite add_vec_distr_4. by rewrite sub_vec_comm_1. auto. } rewrite H6. clear H6.
+             { rewrite add_vec_distr_4. by rewrite sub_vec_comm_1. auto. } rewrite H7. clear H7.
              rewrite -vec_inf_norm_opp. rewrite -RplusE.
              rewrite Rmult_plus_distr_l. eapply Rle_trans.
              ** apply Rplus_le_compat_r. apply Rplus_le_compat_l.
@@ -1763,9 +1762,9 @@ induction k.
                 +++ assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                        by case: (x1 == y :> nat).
-                    } rewrite H6. apply /RleP. apply matrix_vec_mult_bound_corollary.
+                    } rewrite H7. apply /RleP. apply matrix_vec_mult_bound_corollary.
                     intros. 
-                    specialize (H0 (\row_j A2_J A (inord i) j)^T (X_m_jacobi k x0 b A) xy H7).
+                    specialize (H0 (\row_j A2_J A (inord i) j)^T (X_m_jacobi k x0 b A) xy H8).
                     repeat split; try apply /RleP; try apply H0.
              ** rewrite !ft2r_mat_equiv .
                 eapply Rle_trans.
