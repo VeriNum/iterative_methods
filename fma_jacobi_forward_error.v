@@ -872,6 +872,22 @@ try unfold is_finite in H1; simpl in *; auto);
   by destruct s,s0;simpl in *; auto).
 Qed.
 
+Lemma bplsu_overflow_implies {t : type}: 
+  forall x y , 
+  Binary.is_finite _ _ (BPLUS t x y) = true ->
+  is_finite _ _ x = true /\
+  is_finite _ _ y = true.
+Proof.
+intros.
+destruct x, y; (unfold BPLUS, BINOP, Bplus, is_finite in *; simpl in *; auto;
+  try destruct (eqb s (~~ s0)); simpl in * ;auto; try by []; 
+  try unfold is_finite in H1; simpl in *; auto);
+  by destruct s,s0;simpl in *; auto.
+Qed.
+
+
+
+
 (*
 Definition Bdiv_no_overflow (t: type) (x y: R) : Prop :=
   (Rabs (rounded t  (x / y)) < Raux.bpow Zaux.radix2 (femax t))%R.
@@ -1190,33 +1206,25 @@ induction k.
                               admit.
                             }
                             rewrite H6. apply H5. intros.
-                            
-
-
-
-
-
-
-
-
-                            specialize (H0 (A1_inv_J A) (b -f A2_J A *f X_m_jacobi k x0 b A)).
-                            pose proof (@In_nth (ftype ty * ftype ty)
+                        (*    specialize (H0 (A1_inv_J A) (b -f A2_J A *f X_m_jacobi k x0 b A)).
+                         *)  pose proof (@In_nth (ftype ty * ftype ty)
                                            (rev (combine
                                               (vec_to_list_float n.+1 (A1_inv_J A))
                                               (vec_to_list_float n.+1 (b -f A2_J A *f X_m_jacobi k x0 b A)))) xy 
                                             (Zconst ty 1, Zconst ty 0) ).
-                            rewrite -in_rev in H10. specialize (H10 H9).
-                            destruct H10 as [j [Hlength Hnth]].
+                            rewrite -in_rev in H8. specialize (H8 H7).
+                            destruct H8 as [j [Hlength Hnth]].
                             rewrite rev_nth in Hnth.
                             ++++ rewrite combine_length !length_veclist Nat.min_id in Hnth.
                                  assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
-                                 { lia. } rewrite H10 in Hnth. rewrite combine_nth in Hnth.
+                                 { lia. } rewrite H8 in Hnth. rewrite combine_nth in Hnth.
                                  rewrite !nth_vec_to_list_float in Hnth.
-                                 specialize (H0 xy H9). repeat split; try apply H0.
                                  rewrite -Hnth /=.
                                  specialize (Hfin k.+1 (@inord n j)).
                                  rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
-                                 rewrite inord_val in Hfin. apply Hfin.
+                                 rewrite inord_val in Hfin. repeat split; try apply Hfin.
+                                 apply bmult_overflow_implies in Hfin; try apply Hfin.
+                                 apply bmult_overflow_implies in Hfin; try apply Hfin.
                                  by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
                                  by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
                                  rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
@@ -1227,7 +1235,7 @@ induction k.
                         *** assert (FT2R_mat (A1_inv_J A) = A1_diag A_real).
                             { apply matrixP. unfold eqrel. intros. rewrite !mxE /=.
                               symmetry. admit.
-                            } rewrite H7. apply Rplus_le_compat_r.
+                            } rewrite H5. apply Rplus_le_compat_r.
                             apply Rmult_le_compat_r.
                             apply g_pos.
                             apply Rmult_le_compat_l.
@@ -1236,7 +1244,52 @@ induction k.
                                                   (FT2R_mat b - FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) <=
                                     (vec_inf_norm (FT2R_mat b) + vec_inf_norm (FT2R_mat (A2_J A *f X_m_jacobi k x0 b A))) *
                                     (default_rel ty))).
-                            { apply vec_float_sub. intros. 
+                            { apply vec_float_sub. intros.
+                              pose proof (@In_nth (ftype ty * ftype ty)
+                                           (rev (combine
+                                              (vec_to_list_float n.+1 b)
+                                              (vec_to_list_float n.+1 (A2_J A *f X_m_jacobi k x0 b A)))) xy 
+                                            (Zconst ty 0, Zconst ty 0) ).
+                              rewrite -in_rev in H7. specialize (H7 H6).
+                              destruct H7 as [j [Hlength Hnth]].
+                              rewrite rev_nth in Hnth.
+                              ++++ rewrite combine_length !length_veclist Nat.min_id in Hnth.
+                                   assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
+                                   { lia. } rewrite H7 in Hnth. rewrite combine_nth in Hnth.
+                                   rewrite !nth_vec_to_list_float in Hnth.
+                                   rewrite -Hnth /=.
+                                   specialize (Hfin k.+1 (@inord n j)).
+                                   rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
+                                   rewrite inord_val in Hfin. repeat split; try apply Hfin.
+                                   apply bmult_overflow_implies in Hfin; try apply Hfin.
+                                   apply bmult_overflow_implies in Hfin; try apply Hfin.
+                                   by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                   by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                   rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                   by apply /ssrnat.ltP.
+                                   rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+                                   by apply /ssrnat.ltP. by rewrite !length_veclist.
+                             ++++ by rewrite rev_length in Hlength.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
                               specialize (H0 b ( A2_J A *f X_m_jacobi k x0 b A)).
                               pose proof (@In_nth (ftype ty * ftype ty)
                                              (rev (combine
