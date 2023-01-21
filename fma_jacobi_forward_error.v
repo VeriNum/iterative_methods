@@ -1505,24 +1505,22 @@ induction k.
                             ((vec_inf_norm (A1_diag (FT2R_mat A)) * (default_rel ty) + (default_abs ty)) *
                             (vec_inf_norm (FT2R_mat b) + matrix_inf_norm (A2_J_real (FT2R_mat A)) *
                              vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A))))%Re.
-                             ----
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- admit.
+                             ---- apply Rmult_le_compat.
+                                  +++++ apply /RleP. apply vec_norm_pd.
+                                  +++++ apply /RleP. apply vec_norm_pd.
+                                  +++++  pose proof (@inverse_mat_norm_bound ty n A ).
+                                         assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by admit.
+                                         assert (forall i : 'I_n.+1,
+                                                            is_finite (fprec ty) (femax ty)
+                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by admit.
+                                         assert (forall i : 'I_n.+1,
+                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by admit.
+                                         by specialize (H5 H6 H7 H8).
+                                  +++++  apply Rle_trans with
+                                        (vec_inf_norm (FT2R_mat b) + vec_inf_norm (-(A2_J_real (FT2R_mat A) *m 
+                                                                          FT2R_mat (X_m_jacobi k x0 b A))))%Re.
+                                         apply /RleP. apply triang_ineq. rewrite -vec_inf_norm_opp. 
+                                         apply Rplus_le_compat_l. apply /RleP. apply submult_prop.
                              ---- apply Rle_refl. 
                    --- assert ((vec_inf_norm (FT2R_mat (A1_inv_J A)) <= 
                                 vec_inf_norm (A1_diag (FT2R_mat A))* (1 + default_rel ty) +
