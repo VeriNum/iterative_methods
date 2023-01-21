@@ -1612,9 +1612,9 @@ induction k.
                                                    assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by apply H2.
                                                    assert (forall i : 'I_n.+1,
                                                             is_finite (fprec ty) (femax ty)
-                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by admit.
+                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
                                                    assert (forall i : 'I_n.+1,
-                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by admit.
+                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
                                                    specialize (H6 H7 H8 H9).
                                                    assert ((vec_inf_norm
                                                                 (FT2R_mat (A1_inv_J A) -
@@ -1822,11 +1822,7 @@ induction k.
  - apply Rplus_le_compat_r. apply Rmult_le_compat_l.
     * by apply rho_ge_0.
     * nra.
-Admitted. 
+Qed. 
   
-
-
-
-
 
 End WITHNANS.
