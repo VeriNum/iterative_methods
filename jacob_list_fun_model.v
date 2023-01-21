@@ -71,6 +71,8 @@ Definition old_jacobi_iter {t: type} x0 b (A1: diagmatrix t) (A2: matrix t) : ve
   let f_J := diagmatrix_vector_mult A1 b in
   vector_add (matrix_vector_mult S_J x0) f_J.
 
+(** Adding some definitions from other files just for now **)
+
 Definition matrix_inj {t} (A: matrix t) m n  : 'M[ftype t]_(m,n):=
     \matrix_(i < m, j < n) 
      nth j (nth i A [::]) (Zconst t 0).
@@ -103,9 +105,14 @@ Definition diag_matrix_vec_mult_R {n:nat} (v1 v2 : 'cV[R]_n.+1)
   \col_i ((nth (n.+1.-1 -i) (vec_to_list_real n.+1 v1) 0) * 
           (nth (n.+1.-1 -i) (vec_to_list_real n.+1 v2) 0)).
 
-Definition x_fix {n:nat} x b (A: 'M[R]_n.+1) : 
-  'cV[R]_n.+1 :=
-  let r := b - (@mulmx _ n.+1 n.+1 _ (A2_J_real A) x) in
+Import Order.TTheory GRing.Theory Num.Def Num.Theory.
+
+(** Dummy x_fix. there are some issues with using the real defintion 
+    in this file
+**)
+Definition x_fix {n:nat} (x: 'cV[R]_n.+1) b (A: 'M[R]_n.+1) : 
+  'cV[R]_n.+1 := 
+  let r :=  b  in
   diag_matrix_vec_mult_R (A1_diag A) r.
 
 Require Import inf_norm_properties common.
@@ -151,16 +158,16 @@ Definition jacobi_iteration_bound {t: type}
                      matrix_inf_norm (A2_J_real A_real)) *
                     vec_inf_norm (x_fix x b_real A_real)) in
   
-  (forall i, is_finite _ _ (A' i i) = true) /\
+  (forall i, Binary.is_finite _ _ (A' i i) = true) /\
   x != 0 /\
   (rho < 1)%Re /\
   A_real \in unitmx /\
   (forall i : 'I_n.+1,
-    is_finite (fprec ty) (femax ty)
-      (BDIV ty (Zconst ty 1) (A' i i)) = true) /\
-  (forall x0: 'cV[ftype ty]_n.+1, 
+    Binary.is_finite (fprec t) (femax t)
+      (BDIV t (Zconst t 1) (A' i i)) = true) /\
+  (forall x0: 'cV[ftype t]_n.+1, 
     (forall k:nat, 
-      forall i, is_finite _ _ ((X_m_jacobi k x0 b A') i ord0) = true) /\
+      forall i, Binary.is_finite _ _ ((X_m_jacobi k x0 b A') i ord0) = true) /\
     (forall k:nat,
       (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag))).
 
