@@ -1355,7 +1355,40 @@ induction k.
                                         { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
                                           assert (y = ord0). { by apply ord1. } by rewrite H9.
                                         } rewrite H9 in H8. 
-                                        specialize (H8 Hfin22 xy).
+                                        specialize (H8 Hfin22 xy). rewrite -H9 in H8.
+                                        specialize (H8 H7). apply H8.
+                                        by rewrite !length_veclist.
+
+
+                                        apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                        rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                        apply bplus_overflow_implies in Hfin2; try apply Hfin2.
+                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
+                                        rewrite mxE in Hfin22.  
+                                        pose proof (@dotprod_finite_implies ty).
+                                        specialize (H8 (combine  (vec_to_list_float n.+1
+                                                                      (\row_j0 A2_J A (inord i) j0)^T)
+                                                                  (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
+                                        rewrite !combine_split  in H8. 
+                                        assert ((vec_to_list_float n.+1
+                                                         (\row_j0 A2_J A  (inord i) j0)^T,
+                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
+                                                       vec_to_list_float n.+1
+                                                         (\row_j0 A2_J A  (inord i) j0)^T). 
+                                        { by simpl. } rewrite H9 in H8. clear H9.
+                                        assert ((vec_to_list_float n.+1
+                                                         (\row_j0 A2_J A  (inord i) j0)^T,
+                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
+                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
+                                        { by simpl. } rewrite H9 in H8. clear H9. 
+                                        assert (X_m_jacobi k x0 b A = \col_j (X_m_jacobi k x0 b A j ord0)).
+                                        { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+                                          assert (y = ord0). { by apply ord1. } by rewrite H9.
+                                        } rewrite H9 in H8. 
+                                        specialize (H8 Hfin22 xy). rewrite -H9 in H8.
+                                        specialize (H8 H7). apply H8.
+                                        by rewrite !length_veclist.
+                                        
 
 
 
