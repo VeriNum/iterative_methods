@@ -1328,7 +1328,8 @@ induction k.
                                                 * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
                                       { apply matrix_vec_mult_bound_corollary. intros.
                                         specialize (Hfin k.+1 (@inord n i)). 
-                                        rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
+                                        rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
+                                        rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite inord_val in Hfin. repeat split; try apply Hfin.
                                         apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
                                         rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
@@ -1389,93 +1390,17 @@ induction k.
                                         specialize (H8 H7). apply H8.
                                         by rewrite !length_veclist.
                                         
-
-
-
-
-                                          rewrite in_rev in H7.
-                                          rewrite rev_nth in H7.
-                                          ++++ rewrite combine_length !length_veclist Nat.min_id in Hnth.
-                                               assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
-                                               { lia. } rewrite H8 in Hnth. rewrite combine_nth in Hnth.
-                                               rewrite !nth_vec_to_list_float in Hnth.
-                                               rewrite -Hnth /=.
-                                               specialize (Hfin k.+1 (@inord n j)).
-                                               rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
-                                               rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                                               apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
-                                               rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                               apply bplus_overflow_implies in Hfin2; try apply Hfin2.
-                                               destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
-                                               rewrite mxE in Hfin22.  
-                                               pose proof (@dotprod_finite_implies ty).
-                                               specialize (H9 (combine  (vec_to_list_float n.+1
-                                                                      (\row_j0 A2_J A (inord j) j0)^T)
-                                                                  (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
-                                               rewrite !combine_split  in H9. 
-                                               assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord j) j0)^T,
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
-                                                       vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord j) j0)^T). 
-                                                { by simpl. } rewrite H10 in H9. clear H10.
-                                               assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord j) j0)^T,
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
-                                                { by simpl. } rewrite H10 in H9. clear H10. 
-                                                assert (X_m_jacobi k x0 b A = \col_j (X_m_jacobi k x0 b A j ord0)).
-                                                { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
-                                                  assert (y = ord0). { by apply ord1. } by rewrite H10.
-                                                } rewrite H10 in H9. 
-                                                specialize (H9 Hfin22).  rewrite -H10 in H9.
-                                                remember ((\row_j0 A2_J A  (inord j) j0)^T) as v1.
-                                                remember ((X_m_jacobi k x0 b A)) as v2.
-                                                assert (In
-                                                          (v1 (inord j) ord0, v2 (inord j) ord0)
-                                                          (combine (vec_to_list_float n.+1 v1)
-                                                             (vec_to_list_float n.+1 v2))).
-                                                { apply in_rev. rewrite -combine_rev; last by rewrite !length_veclist.
-                                                  assert ((v1 (inord j) ord0, v2 (inord j) ord0) = 
-                                                                     nth j (combine (rev (vec_to_list_float n.+1 v1))
-                                                                              (rev (vec_to_list_float n.+1 v2))) (Zconst ty 0, Zconst ty 0)).
-                                                  { rewrite combine_nth. rewrite !rev_nth !length_veclist.
-                                                    assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
-                                                    { lia. } rewrite H11. rewrite !nth_vec_to_list_float; try by [].
-                                                   rewrite rev_length !combine_length !length_veclist Nat.min_id in Hlength. by apply /ssrnat.ltP.
-                                                   rewrite rev_length !combine_length !length_veclist Nat.min_id in Hlength. by apply /ssrnat.ltP.
-                                                   by rewrite rev_length !combine_length !length_veclist Nat.min_id in Hlength. 
-                                                   by rewrite rev_length !combine_length !length_veclist Nat.min_id in Hlength.
-                                                   by rewrite !rev_length !length_veclist.
-                                                  } rewrite H11. apply nth_In. rewrite combine_length.
-                                                  rewrite !rev_length !length_veclist Nat.min_id.
-                                                  by rewrite rev_length !combine_length !length_veclist Nat.min_id in Hlength.
-                                               } specialize (H9  (v1 (inord j) ord0, v2 (inord j) ord0) H11).
-                                               simpl in H9. rewrite Heqv1 in H9. rewrite !mxE. rewrite !mxE in H9.
-
-
-
-
-
-
-
-admit. admit.
-
-
-                                               (*
-                                               apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
-                                               rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                               apply bplus_overflow_implies in Hfin2. rewrite is_finite_Bopp in Hfin2.  try apply Hfin2.
-                                               apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
-                                               rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                               try apply Hfin2. *)
-                                               by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
-                                               by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
-                                               rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
-                                               by apply /ssrnat.ltP.
-                                               rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
-                                               by apply /ssrnat.ltP. by rewrite !length_veclist.
-                                         ++++ by rewrite rev_length in Hlength.
+                                        intros.
+                                        specialize (Hfin k.+1 (@inord n i)). 
+                                        rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
+                                        rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
+                                        rewrite inord_val in Hfin. repeat split; try apply Hfin.
+                                        apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                        rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                        apply bplus_overflow_implies in Hfin2; try apply Hfin2.
+                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
+                                        by rewrite mxE in Hfin22.
+                                       
                                       }
                                       apply Rle_trans with 
                                       ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
