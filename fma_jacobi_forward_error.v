@@ -1347,8 +1347,18 @@ induction k.
                                                rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
                                                apply bplus_overflow_implies in Hfin2; try apply Hfin2.
                                                destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
-                                               rewrite mxE in Hfin22. 
-
+                                               rewrite mxE in Hfin22.  
+                                               pose proof (@dotprod_finite_implies ty).
+                                               specialize (H9 (combine  (vec_to_list_float n.+1
+                                                                      (\row_j0 A2_J A (inord j) j0)^T)
+                                                                  (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
+                                               rewrite !combine_split  in H9. 
+                                               assert ((vec_to_list_float n.+1
+                                                         (\row_j0 A2_J A  (inord j) j0)^T,
+                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
+                                                       vec_to_list_float n.+1
+                                                         (\row_j0 A2_J A  (inord j) j0)^T). 
+                                                { by simpl. } rewrite H10 in H9. clear H10.
 
 
 admit. admit.
