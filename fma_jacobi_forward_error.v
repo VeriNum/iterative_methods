@@ -1609,14 +1609,14 @@ induction k.
                                       vec_inf_norm
                                         (FT2R_mat (X_m_jacobi k x0 b A))) +
                                      R2 * f_error k b x0 x A)%Re = 
-                                     ( ((((((1 + g ty n.+1) * (1 + default_rel ty) *
+                                     ( ((( ( ((1 + g ty n.+1) * (1 + default_rel ty) *
                                           g ty n.+1 + default_rel ty * (1 + g ty n.+1) +
-                                          g ty n.+1) * (1 + default_rel ty) + default_rel ty  + default_abs ty) *
+                                          g ty n.+1) * (1 + default_rel ty) + default_rel ty ) *
                                         (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (FT2R_mat (A2_J A)))) +
-                                         ((1 + g ty n.+1) * (1 + default_rel ty) *
+                                         ((((1 + g ty n.+1) * (1 + default_rel ty) *
                                           g ty n.+1 + default_rel ty * (1 + g ty n.+1) +
-                                          g ty n.+1 ) * default_abs ty * matrix_inf_norm (FT2R_mat (A2_J A))) *
-                                        vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A))) +
+                                          g ty n.+1 ) * default_abs ty) + default_abs ty) * matrix_inf_norm (FT2R_mat (A2_J A))) *
+                                        vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) ) +
                                         (((g ty n.+1 * (1 + default_rel ty) +
                                              default_rel ty) *
                                             ((vec_inf_norm (A1_diag A_real) *
@@ -1630,7 +1630,12 @@ induction k.
                                             (vec_inf_norm (A1_diag (FT2R_mat A)) *
                                                     default_rel ty + default_abs ty) * vec_inf_norm (FT2R_mat b)) +
                                         R2 * f_error k b x0 x A )%Re).
-                                 { nra.
+                                 { assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
+                                    { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                                       by case: (x1 == y :> nat).
+                                    } rewrite -!H6. fold A_real. nra.
+                                 } rewrite H6. clear H6. 
+                                   
 
 
 
