@@ -216,34 +216,52 @@ Lemma rho_ge_0 {ty} {n:nat}
                   g ty n.+1) * default_abs ty +
                  default_abs ty) *
                 matrix_inf_norm (A2_J_real A_real) + R)%Re in
-(*
-
-(((1 + g ty n.+1) * (1 + delta) * g ty n.+1 +
-                delta * (1 + g ty n.+1) + g ty n.+1 + 1) * R)%Re in *)
  (0 <= rho)%Re.
 Proof.
-(*
 intros.
 unfold rho.
-repeat apply Rmult_le_pos.
-+ apply Rplus_le_le_0_compat.
+repeat apply Rplus_le_le_0_compat.
++ apply Rmult_le_pos.
   - apply Rplus_le_le_0_compat.
-    * apply Rplus_le_le_0_compat.
-      ++ repeat apply Rmult_le_pos.
-         -- apply Rplus_le_le_0_compat. nra. apply g_pos.
-         -- unfold delta. apply Rplus_le_le_0_compat. nra.
+    * apply Rmult_le_pos.
+      ++ apply Rplus_le_le_0_compat; last by apply g_pos.
+         repeat apply Rplus_le_le_0_compat; apply Rmult_le_pos. 
+         -- apply Rmult_le_pos; try apply Rplus_le_le_0_compat; 
+            try nra; try apply g_pos. unfold delta. 
             apply default_rel_ge_0.
          -- apply g_pos.
-      ++ unfold delta. apply Rmult_le_pos.
-         -- unfold delta. apply default_rel_ge_0.
-         -- apply Rplus_le_le_0_compat. nra. apply g_pos.
-    * apply g_pos.
-  - nra.
-+ apply /RleP. apply vec_norm_pd.
-+ apply /RleP. apply matrix_norm_pd.
+         -- unfold delta. 
+            apply default_rel_ge_0.
+         -- apply Rplus_le_le_0_compat; last by apply g_pos. nra. 
+      ++ apply Rplus_le_le_0_compat. nra.  
+         unfold delta. 
+         apply default_rel_ge_0.
+    * unfold delta. 
+      apply default_rel_ge_0.
+  - unfold R2. apply Rmult_le_pos.
+    * apply /RleP. apply vec_norm_pd.
+    * apply /RleP. apply matrix_norm_pd.
++ apply Rmult_le_pos.
+  - repeat apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
+    apply Rmult_le_pos; last by apply default_abs_ge_0.
+    apply Rplus_le_le_0_compat; last by apply g_pos.
+    apply Rplus_le_le_0_compat. 
+    * repeat apply Rmult_le_pos.
+      ++ apply Rplus_le_le_0_compat; last by apply g_pos. nra. 
+      ++ apply Rplus_le_le_0_compat. nra.  
+         unfold delta. 
+         apply default_rel_ge_0.
+      ++ apply g_pos.
+    * apply Rmult_le_pos.
+      ++ unfold delta. 
+         apply default_rel_ge_0.
+      ++ apply Rplus_le_le_0_compat; last by apply g_pos. nra.
+  - apply /RleP. apply matrix_norm_pd.
++ unfold R2. apply Rmult_le_pos.
+    * apply /RleP. apply vec_norm_pd.
+    * apply /RleP. apply matrix_norm_pd.
 Qed.
-*)
-Admitted.
+
 
 Lemma add_vec_distr {n:nat}:
   forall a b c: 'cV[R]_n,
