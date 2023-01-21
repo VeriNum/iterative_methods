@@ -208,10 +208,21 @@ Lemma rho_ge_0 {ty} {n:nat}
   let b_real := FT2R_mat b in
   let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
   let delta := default_rel ty in
-  let rho := (((1 + g ty n.+1) * (1 + delta) * g ty n.+1 +
-                delta * (1 + g ty n.+1) + g ty n.+1 + 1) * R)%Re in
+  let rho := ((((1 + g ty n.+1) * (1 + delta) *
+                  g ty n.+1 + delta * (1 + g ty n.+1) +
+                  g ty n.+1) * (1 + delta) + delta) * R +
+                (((1 + g ty n.+1) * (1 + delta) *
+                  g ty n.+1 + delta * (1 + g ty n.+1) +
+                  g ty n.+1) * default_abs ty +
+                 default_abs ty) *
+                matrix_inf_norm (A2_J_real A_real) + R)%Re in
+(*
+
+(((1 + g ty n.+1) * (1 + delta) * g ty n.+1 +
+                delta * (1 + g ty n.+1) + g ty n.+1 + 1) * R)%Re in *)
  (0 <= rho)%Re.
 Proof.
+(*
 intros.
 unfold rho.
 repeat apply Rmult_le_pos.
@@ -231,6 +242,8 @@ repeat apply Rmult_le_pos.
 + apply /RleP. apply vec_norm_pd.
 + apply /RleP. apply matrix_norm_pd.
 Qed.
+*)
+Admitted.
 
 Lemma add_vec_distr {n:nat}:
   forall a b c: 'cV[R]_n,
@@ -1492,7 +1505,24 @@ induction k.
                             ((vec_inf_norm (A1_diag (FT2R_mat A)) * (default_rel ty) + (default_abs ty)) *
                             (vec_inf_norm (FT2R_mat b) + matrix_inf_norm (A2_J_real (FT2R_mat A)) *
                              vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A))))%Re.
-                             ---- admit.
+                             ----
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ admit.
                              ---- apply Rle_refl. 
                    --- assert ((vec_inf_norm (FT2R_mat (A1_inv_J A)) <= 
                                 vec_inf_norm (A1_diag (FT2R_mat A))* (1 + default_rel ty) +
@@ -1791,7 +1821,7 @@ induction k.
                               { nra. }  rewrite H8. clear H8. fold delta. fold rho. fold d_mag.
                               unfold f_error. fold b_real. fold A_real. apply Rle_refl.
  - apply Rplus_le_compat_r. apply Rmult_le_compat_l.
-    * admit.
+    * by apply rho_ge_0.
     * nra.
 Admitted. 
   
