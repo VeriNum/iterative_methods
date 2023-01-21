@@ -1476,8 +1476,12 @@ induction k.
                             (vec_inf_norm (FT2R_mat b) + matrix_inf_norm (A2_J_real (FT2R_mat A)) *
                              vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A))))%Re.
                              ---- admit.
-                             ---- apply Rle_refl.
-                        
+                             ---- apply Rle_refl. 
+                   --- assert ((vec_inf_norm (FT2R_mat (A1_inv_J A)) <= 
+                                vec_inf_norm (A1_diag (FT2R_mat A))* (1 + default_rel ty) +
+                                default_abs ty)%Re).
+                       { rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
+                         
 
 
 
@@ -1489,9 +1493,6 @@ induction k.
 
 
 
-
-
-fold R2.
                    assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                        by case: (x1 == y :> nat).
