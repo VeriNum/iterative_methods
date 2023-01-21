@@ -1350,17 +1350,17 @@ induction k.
                                                rewrite mxE in Hfin22.  
                                                pose proof (@dotprod_finite_implies ty).
                                                specialize (H9 (combine  (vec_to_list_float n.+1
-                                                                      (\row_j0 A2_J A (inord j) j0)^T)
+                                                                      (\row_j0 A2_J A (inord i) j0)^T)
                                                                   (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
                                                rewrite !combine_split  in H9. 
                                                assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord j) j0)^T,
+                                                         (\row_j0 A2_J A  (inord i) j0)^T,
                                                        vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
                                                        vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord j) j0)^T). 
+                                                         (\row_j0 A2_J A  (inord i) j0)^T). 
                                                 { by simpl. } rewrite H10 in H9. clear H10.
                                                assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord j) j0)^T,
+                                                         (\row_j0 A2_J A  (inord i) j0)^T,
                                                        vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
                                                        vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
                                                 { by simpl. } rewrite H10 in H9. clear H10. 
@@ -1369,26 +1369,29 @@ induction k.
                                                   assert (y = ord0). { by apply ord1. } by rewrite H10.
                                                 } rewrite H10 in H9. 
                                                 specialize (H9 Hfin22).  rewrite -H10 in H9.
-                                                remember ((\row_j0 A2_J A  (inord j) j0)^T) as v1.
+                                                remember ((\row_j0 A2_J A  (inord i) j0)^T) as v1.
                                                 remember ((X_m_jacobi k x0 b A)) as v2.
                                                 assert (In
-                                                          (v1 (inord i) ord0, v2 (inord i) ord0)
+                                                          (v1 (inord j) ord0, v2 (inord j) ord0)
                                                           (combine (vec_to_list_float n.+1 v1)
                                                              (vec_to_list_float n.+1 v2))).
                                                 { apply in_rev. rewrite -combine_rev; last by rewrite !length_veclist.
-                                                  assert ((v1 (inord i) ord0, v2 (inord i) ord0) = 
-                                                                     nth i (combine (rev (vec_to_list_float n.+1 v1))
+                                                  assert ((v1 (inord j) ord0, v2 (inord j) ord0) = 
+                                                                     nth j (combine (rev (vec_to_list_float n.+1 v1))
                                                                               (rev (vec_to_list_float n.+1 v2))) (Zconst ty 0, Zconst ty 0)).
-                                                            { rewrite combine_nth. rewrite !rev_nth !length_veclist.
-                                                              assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat).
-                                                              { lia. } rewrite H11. rewrite !nth_vec_to_list_float; try by [].
-                                                              apply /ssrnat.ltP. apply ltn_ord.
-                                                              apply /ssrnat.ltP. apply ltn_ord.
-                                                              by rewrite !rev_length !length_veclist.
-                                                           } rewrite H11. apply nth_In. rewrite combine_length.
-                                                           rewrite !rev_length !length_veclist Nat.min_id.
-                                                           apply /ssrnat.ltP. apply ltn_ord.
-                                               }
+                                                  { rewrite combine_nth. rewrite !rev_nth !length_veclist.
+                                                    assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
+                                                    { lia. } rewrite H11. rewrite !nth_vec_to_list_float; try by [].
+                                                   rewrite rev_length !combine_length !length_veclist Nat.min_id in Hlength. by apply /ssrnat.ltP.
+                                                   rewrite rev_length !combine_length !length_veclist Nat.min_id in Hlength. by apply /ssrnat.ltP.
+                                                   by rewrite rev_length !combine_length !length_veclist Nat.min_id in Hlength. 
+                                                   by rewrite rev_length !combine_length !length_veclist Nat.min_id in Hlength.
+                                                   by rewrite !rev_length !length_veclist.
+                                                  } rewrite H11. apply nth_In. rewrite combine_length.
+                                                  rewrite !rev_length !length_veclist Nat.min_id.
+                                                  by rewrite rev_length !combine_length !length_veclist Nat.min_id in Hlength.
+                                               } specialize (H9  (v1 (inord j) ord0, v2 (inord j) ord0) H11).
+                                               simpl in H9. rewrite Heqv1 in H9. apply H9.
 
 
 
