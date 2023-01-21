@@ -83,6 +83,18 @@ rewrite nth_vec_to_list_real_sub.
 + apply ltn_ord.
 Qed.
 
+Lemma diag_matrix_vec_mult_diff_r {n:nat} (v1 v2 v3 : 'cV[R]_n.+1):
+  diag_matrix_vec_mult_R v1 v3 - diag_matrix_vec_mult_R v2 v3 = 
+  diag_matrix_vec_mult_R (v1 - v2) v3.
+Proof.
+apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+rewrite nth_vec_to_list_real_sub.
++ rewrite -!RmultE -!RminusE. field_simplify. auto.
++ apply ltn_ord.
+Qed.
+
+
+
 Lemma nth_vec_to_list_real {n:nat} i m (v :'cV[R]_n.+1) d:
   (i < m)%nat ->
   nth (m.-1 -i) (@vec_to_list_real n m v) d = v (@inord n i) ord0.
@@ -1453,6 +1465,19 @@ induction k.
                    eapply Rle_trans.
                    apply Rplus_le_compat_r. apply Rplus_le_compat_l.
                    --- rewrite Heqinv_bound .
+                       unfold x_fix_FT2R, x_fix. rewrite diag_matrix_vec_mult_diff_r.
+                       apply Rle_trans with 
+                       (vec_inf_norm (FT2R_mat (A1_inv_J A) - A1_diag (FT2R_mat A)) * 
+                        vec_inf_norm (FT2R_mat b -
+                             A2_J_real (FT2R_mat A) *m  FT2R_mat (X_m_jacobi k x0 b A)))%Re. 
+                       ****  apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R.
+                       **** apply Rle_trans with 
+                            ((vec_inf_norm (A1_diag (FT2R_mat A)) * (default_rel ty) + (default_abs ty)) *
+                            (vec_inf_norm (FT2R_mat b) + matrix_inf_norm (A2_J_real (FT2R_mat A)) *
+                             vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A))))%Re.
+                             ---- admit.
+                             ---- apply Rle_refl.
+                        
 
 
 
