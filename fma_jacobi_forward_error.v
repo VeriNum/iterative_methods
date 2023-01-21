@@ -1635,20 +1635,10 @@ induction k.
                                        by case: (x1 == y :> nat).
                                     } rewrite -!H6. fold A_real. nra.
                                  } rewrite H6. clear H6. 
-                                   
-
-
-
-
-
-
-
-
-
-                   assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
+                    assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                        by case: (x1 == y :> nat).
-                    } rewrite -H5. fold A_real. fold R2. fold b_real.
+                    } rewrite -H6. fold A_real. fold R2. fold b_real. 
                     assert ((vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) <= 
                              f_error k b x0 x A + 
                              vec_inf_norm (x_fix x b_real A_real))%Re).
