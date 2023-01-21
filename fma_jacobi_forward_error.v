@@ -598,20 +598,46 @@ Qed.
 
 
 
-
-(*
 Definition Bdiv_no_overflow (t: type) (x y: R) : Prop :=
   (Rabs (rounded t  (x / y)) < Raux.bpow Zaux.radix2 (femax t))%R.
+
+
 
 
 
 Lemma is_finite_BDIV_no_overflow {NAN: Nans} (t : type) :
   forall (x y : ftype t)
   (HFINb : Binary.is_finite (fprec t) (femax t) (BDIV t x y) = true),
-  FT2R y <> 0%Re ->
+  is_finite _ _ x = true ->
+  is_finite _ _ y = true ->
   Bdiv_no_overflow t (FT2R x) (FT2R y).
 Proof.
+(*
 intros.
+assert (FT2R y <> 0%Re).
+{ pose proof BDIV_sep_zero.
+  specialize (H1 t x y HFINb).
+  destruct x; destruct y; simpl; try discriminate; auto.
+  destruct s, s0; simpl in *; auto.
+  unfold SpecFloat.bounded in e0.
+
+
+  destruct x,y; simpl in *;auto.
+  destruct s, s0; simpl in * ;auto.
+  try discriminate.
+
+
+
+  contradict H. auto. repeat cbv. intros. 
+  Print is_finite_strict.
+
+
+
+  unfold is_finite_strict in H.
+  
+
+
+
 pose proof Rle_or_lt (bpow Zaux.radix2 (femax t)) 
   (Rabs (rounded t (FT2R x / FT2R y)))  as Hor;
   destruct Hor; auto.
@@ -627,9 +653,12 @@ destruct ((Binary.Bdiv (fprec t) (femax t) (fprec_gt_0 t)
              (fprec_lt_femax t) (div_nan t) BinarySingleNaN.mode_NE x y));
 simpl;  try discriminate.
 Qed.
+*)
+Admitted.
 
-Lemma BDIV_accurate {NAN: Nans}: 
-   forall (t: type) x y (FIN: Bdiv_no_overflow t (FT2R x) (FT2R y)), 
+Lemma BDIV_accurate' {NAN: Nans}: 
+   forall (t: type) x y 
+  (FIN: Bdiv_no_overflow t (FT2R x) (FT2R y)), 
   FT2R y <> 0%Re ->
   exists delta, exists epsilon,
    (delta * epsilon)%Re = 0%Re /\
@@ -659,39 +688,68 @@ red in FIN. unfold rounded in FIN.
 Lra.lra.
 Qed.
 
-*)
+Lemma is_finite_one {ty}:
+  is_finite (fprec ty) (femax ty)  (Zconst ty 1) = true.
+Admitted.
 
-(*
+Lemma BDIV_accurate {NAN: Nans}: 
+   forall (t: type) x y 
+  (FIN: Binary.is_finite (fprec t) (femax t) (BDIV t x y) = true )
+  (FINx : is_finite _ _ x = true)
+  (FINy : is_finite _ _ y = true) , 
+  FT2R y <> 0%Re ->
+  exists delta, exists epsilon,
+   (delta * epsilon)%Re = 0%Re /\
+   (Rabs delta <= default_rel t)%Re /\
+   (Rabs epsilon <= default_abs t)%Re /\ 
+   (FT2R (BDIV t x y) = (FT2R x / FT2R y) * (1+delta) + epsilon)%Re.
+Proof.
+intros.
+by apply BDIV_accurate'; try apply is_finite_BDIV_no_overflow .
+Qed.
+
+Lemma real_const_1 {ty}:
+  FT2R (Zconst ty 1) = 1%Re.
+Admitted.
+
 (*** Lemma for error bound on the inverse ***)
 Lemma inverse_mat_norm_bound {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
   (forall i, FT2R (A i i) <> 0%Re) ->
-  (forall i, is_finite _ _ (BDIV ty (Zconst ty 1) (A (inord i) (inord i))) = true) ->
+  (forall i, is_finite _ _ (BDIV ty (Zconst ty 1) (A i i )) = true) ->
+  (forall i, is_finite _ _ (A i i) = true) ->
   let A_real := FT2R_mat A in
   (vec_inf_norm (FT2R_mat (A1_inv_J A) - A1_diag A_real) <=
-    vec_inf_norm (A1_diag A_real) * (default_rel ty))%Re.
+    vec_inf_norm (A1_diag A_real) * (default_rel ty) + (default_abs ty))%Re.
 Proof.
 intros.
 unfold vec_inf_norm. rewrite RmultE. rewrite mulrC.
 rewrite -bigmaxr_mulr.
 + apply bigmax_le; first by rewrite size_map size_enum_ord.
   intros. rewrite seq_equiv. 
-  rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H1.
+  rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H2.
   rewrite !mxE. 
   apply Rle_trans with 
-  [seq (default_rel ty *
+  ([seq (default_rel ty *
          Rabs (A1_diag A_real i0 0))%Ri
-      | i0 <- enum 'I_n.+1]`_i.
+      | i0 <- enum 'I_n.+1]`_i + (default_abs ty))%Re.
   - rewrite seq_equiv. rewrite nth_mkseq;
-    last by rewrite size_map size_enum_ord in H1.
+    last by rewrite size_map size_enum_ord in H2.
     rewrite -RmultE -RminusE. rewrite !mxE.
-    specialize (H0 (@inord n i)).
-    pose proof (generic_round_property ty (1 / FT2R (A (inord i) (inord i)))%Re).
-    destruct H2 as [d [e [Hpr [Hdf [Hde H2]]]]].
-    unfold Generic_fmt.round in H2.
-
-
-
-
+    specialize (H1 (@inord n i)). specialize (H0 (@inord n i)).
+    pose proof (@BDIV_accurate _ ty (Zconst ty 1) (A (inord i) (inord i))) .
+    specialize (H3 H0 is_finite_one H1).
+    specialize (H (@inord n i)). specialize (H3 H).
+    destruct H3 as [d [e [Hpr [Hdf [Hde H3]]]]].
+    rewrite H3 /=. rewrite real_const_1.
+    assert ((1 / FT2R (A (inord i) (inord i)) *
+              (1 + d) + e -
+              1 / FT2R (A (inord i) (inord i)))%Re = 
+            ((1 / FT2R (A (inord i) (inord i))) * d + e)%Re).
+    { nra. } rewrite H4.
+    eapply Rle_trans.
+    apply Rabs_triang.
+    * 
+    
 
 
 
