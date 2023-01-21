@@ -802,7 +802,10 @@ induction v.
     specialize (IHv Hf3 H0). apply IHv. 
 Admitted.
 
-
+Definition x_fix_FT2R {ty} {n:nat} x b (A: 'M[ftype ty]_n.+1) : 
+  'cV[R]_n.+1 :=
+  let r := b - ((A2_J_real (FT2R_mat A)) *m x) in
+  diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) r.
 
 
 (** State the forward error theorem **)
@@ -914,6 +917,22 @@ induction k.
          -- auto.
       ++ (*** TODO This is where I will have to do another triangular inequality
               with the real D **)
+         eapply Rle_trans.
+         -- apply Rplus_le_compat_r.
+            apply Rle_trans with 
+            (vec_inf_norm (FT2R_mat (X_m_jacobi k.+1 x0 b A) -  
+                           x_fix_FT2R (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) A) +
+             vec_inf_norm (x_fix_FT2R (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) A - 
+                              x_fix (FT2R_mat (X_m_jacobi k x0 b A))
+                                  (FT2R_mat b) (FT2R_mat A)))%Re.
+            ** assert ((FT2R_mat (X_m_jacobi k.+1 x0 b A) -
+                         x_fix (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) (FT2R_mat A)) = 
+                       ((FT2R_mat (X_m_jacobi k.+1 x0 b A) -  
+                           x_fix_FT2R (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) A) +
+                        (x_fix_FT2R (FT2R_mat (X_m_jacobi k x0 b A)) (FT2R_mat b) A - 
+                              x_fix (FT2R_mat (X_m_jacobi k x0 b A))
+                                  (FT2R_mat b) (FT2R_mat A)))).
+               {
 
 
 
