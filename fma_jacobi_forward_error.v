@@ -1583,7 +1583,54 @@ induction k.
                                                    rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.  apply H11. by apply /RleP.
                                                    apply Rle_refl.
                              ---- apply Rle_refl.
-                       **** 
+                       **** assert ((((1 + g ty n.+1) * (1 + default_rel ty) *
+                                      g ty n.+1 +
+                                      default_rel ty * (1 + g ty n.+1) +
+                                      g ty n.+1) *
+                                     ((vec_inf_norm (A1_diag A_real) *
+                                       (1 + default_rel ty) + default_abs ty) *
+                                      matrix_inf_norm (FT2R_mat (A2_J A))) *
+                                     vec_inf_norm
+                                       (FT2R_mat (X_m_jacobi k x0 b A)) +
+                                     ((g ty n.+1 * (1 + default_rel ty) +
+                                       default_rel ty) *
+                                      ((vec_inf_norm (A1_diag A_real) *
+                                        (1 + default_rel ty) + default_abs ty) *
+                                       vec_inf_norm (FT2R_mat b)) +
+                                      (1 + g ty n.+1) * g1 ty n.+1 (n.+1 - 1) *
+                                      (1 + default_rel ty) *
+                                      (vec_inf_norm (A1_diag A_real) *
+                                       (1 + default_rel ty) + default_abs ty) +
+                                      g1 ty n.+1 (n.+1 - 1)) +
+                                     (vec_inf_norm (A1_diag (FT2R_mat A)) *
+                                      default_rel ty + default_abs ty) *
+                                     (vec_inf_norm (FT2R_mat b) +
+                                      matrix_inf_norm (A2_J_real (FT2R_mat A)) *
+                                      vec_inf_norm
+                                        (FT2R_mat (X_m_jacobi k x0 b A))) +
+                                     R2 * f_error k b x0 x A)%Re = 
+                                     ( ((((((1 + g ty n.+1) * (1 + default_rel ty) *
+                                          g ty n.+1 + default_rel ty * (1 + g ty n.+1) +
+                                          g ty n.+1) * (1 + default_rel ty) + default_rel ty  + default_abs ty) *
+                                        (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (FT2R_mat (A2_J A)))) +
+                                         ((1 + g ty n.+1) * (1 + default_rel ty) *
+                                          g ty n.+1 + default_rel ty * (1 + g ty n.+1) +
+                                          g ty n.+1 ) * default_abs ty * matrix_inf_norm (FT2R_mat (A2_J A))) *
+                                        vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A))) +
+                                        (((g ty n.+1 * (1 + default_rel ty) +
+                                             default_rel ty) *
+                                            ((vec_inf_norm (A1_diag A_real) *
+                                              (1 + default_rel ty) + default_abs ty) *
+                                             vec_inf_norm (FT2R_mat b)) +
+                                            (1 + g ty n.+1) * g1 ty n.+1 (n.+1 - 1) *
+                                            (1 + default_rel ty) *
+                                            (vec_inf_norm (A1_diag A_real) *
+                                             (1 + default_rel ty) + default_abs ty) +
+                                            g1 ty n.+1 (n.+1 - 1)) +
+                                            (vec_inf_norm (A1_diag (FT2R_mat A)) *
+                                                    default_rel ty + default_abs ty) * vec_inf_norm (FT2R_mat b)) +
+                                        R2 * f_error k b x0 x A )%Re).
+                                 { nra.
 
 
 
