@@ -836,7 +836,7 @@ Definition x_fix_FT2R {ty} {n:nat} x b (A: 'M[ftype ty]_n.+1) :
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
-  (forall i j, is_finite _ _ (A i j) = true) ->
+  (forall i, is_finite _ _ (A i i) = true) ->
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x:= A_real^-1 *m b_real in
@@ -874,14 +874,17 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
 
   (rho < 1)%Re ->
   A_real \in unitmx ->
-  (forall i : 'I_n.+1, FT2R_mat A i i <> 0%Re) ->
+  (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) ->
+  (forall i : 'I_n.+1,
+    is_finite (fprec ty) (femax ty)
+      (BDIV ty (Zconst ty 1) (A i i)) = true) ->
   forall x0: 'cV[ftype ty]_n.+1, 
   (forall k:nat, 
      forall i, is_finite _ _ ((X_m_jacobi k x0 b A) i ord0) = true) -> 
   (forall k:nat,
    (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag))%Re.
 Proof.
-intro HAf. intros ? ? ? ? ? ? ? ? ? ? ? ? Hfin ?.
+intro HAf. intros ? ? ? ? ? ? ? ? ? ? ? Hdivf ? Hfin ?.
 induction k.
 + simpl. nra.
 + simpl.
@@ -955,11 +958,9 @@ induction k.
                   assert (FT2R_mat A *m A_real^-1 = 1).
                   { fold A_real. by rewrite mulmxV . }
                   rewrite H6. by rewrite mul1mx /b_real.
-               +++ apply H2.
+               +++ intros. rewrite !mxE. apply H2.
          -- auto.
-      ++ (*** TODO This is where I will have to do another triangular inequality
-              with the real D **)
-         eapply Rle_trans.
+      ++ eapply Rle_trans.
          -- apply Rplus_le_compat_r.
             apply Rle_trans with 
             (vec_inf_norm (FT2R_mat (X_m_jacobi k.+1 x0 b A) -  
@@ -1509,12 +1510,12 @@ induction k.
                                   +++++ apply /RleP. apply vec_norm_pd.
                                   +++++ apply /RleP. apply vec_norm_pd.
                                   +++++  pose proof (@inverse_mat_norm_bound ty n A ).
-                                         assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by admit.
+                                         assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by apply H2.
                                          assert (forall i : 'I_n.+1,
                                                             is_finite (fprec ty) (femax ty)
-                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by admit.
+                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
                                          assert (forall i : 'I_n.+1,
-                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by admit.
+                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
                                          by specialize (H5 H6 H7 H8).
                                   +++++  apply Rle_trans with
                                         (vec_inf_norm (FT2R_mat b) + vec_inf_norm (-(A2_J_real (FT2R_mat A) *m 
@@ -1527,12 +1528,12 @@ induction k.
                                 default_abs ty)%Re).
                        { rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
                          pose proof (@inverse_mat_norm_bound ty n A ).
-                         assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by admit.
+                         assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by apply H2.
                          assert (forall i : 'I_n.+1,
                                   is_finite (fprec ty) (femax ty)
-                                    (BDIV ty (Zconst ty 1) (A i i)) = true) by admit.
+                                    (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
                          assert (forall i : 'I_n.+1,
-                                    is_finite (fprec ty) (femax ty) (A i i) = true) by admit.
+                                    is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
                          specialize (H5 H6 H7 H8).
                          assert ((vec_inf_norm
                                       (FT2R_mat (A1_inv_J A) -
@@ -1559,12 +1560,12 @@ induction k.
                                                    nra. apply g_pos.
                                              ***** apply Rmult_le_compat_r. apply /RleP. apply matrix_norm_pd.
                                                    pose proof (@inverse_mat_norm_bound ty n A ).
-                                                   assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by admit.
+                                                   assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by apply H2.
                                                    assert (forall i : 'I_n.+1,
                                                             is_finite (fprec ty) (femax ty)
-                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by admit.
+                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
                                                    assert (forall i : 'I_n.+1,
-                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by admit.
+                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
                                                    specialize (H6 H7 H8 H9).
                                                    assert ((vec_inf_norm
                                                                 (FT2R_mat (A1_inv_J A) -
@@ -1584,12 +1585,12 @@ induction k.
                                                apply default_rel_ge_0. apply default_rel_ge_0.
                                                apply Rmult_le_compat_r. apply /RleP. apply vec_norm_pd.
                                                pose proof (@inverse_mat_norm_bound ty n A ).
-                                                   assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by admit.
+                                                   assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by apply H2.
                                                    assert (forall i : 'I_n.+1,
                                                             is_finite (fprec ty) (femax ty)
-                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by admit.
+                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
                                                    assert (forall i : 'I_n.+1,
-                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by admit.
+                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
                                                    specialize (H6 H7 H8 H9).
                                                    assert ((vec_inf_norm
                                                                 (FT2R_mat (A1_inv_J A) -
@@ -1608,7 +1609,7 @@ induction k.
                                                apply Rplus_le_le_0_compat. nra. apply g_pos.
                                                apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
                                                pose proof (@inverse_mat_norm_bound ty n A ).
-                                                   assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by admit.
+                                                   assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by apply H2.
                                                    assert (forall i : 'I_n.+1,
                                                             is_finite (fprec ty) (femax ty)
                                                               (BDIV ty (Zconst ty 1) (A i i)) = true) by admit.
