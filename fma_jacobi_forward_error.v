@@ -741,72 +741,28 @@ rewrite -bigmaxr_mulr.
     specialize (H (@inord n i)). specialize (H3 H).
     destruct H3 as [d [e [Hpr [Hdf [Hde H3]]]]].
     rewrite H3 /=. rewrite real_const_1.
-    assert ((1 / FT2R (A (inord i) (inord i)) *
+    assert ((1 / FT2R (A (inord  i) (inord i)) *
               (1 + d) + e -
               1 / FT2R (A (inord i) (inord i)))%Re = 
             ((1 / FT2R (A (inord i) (inord i))) * d + e)%Re).
     { nra. } rewrite H4.
     eapply Rle_trans.
     apply Rabs_triang.
-    * 
-    
+    * apply Rplus_le_compat.
+      ++ rewrite Rmult_comm. rewrite Rabs_mult. apply Rmult_le_compat_r.
+         apply Rabs_pos. apply Hdf.
+      ++ apply Hde.
+  - apply Rplus_le_compat_r.
+    apply /RleP.
+    apply (@bigmaxr_ler _ 0%Re [seq default_rel ty *
+                                     Rabs (A1_diag A_real i0 0)
+                                   | i0 <- enum 'I_n.+1] i).
+    rewrite size_map size_enum_ord.
+    by rewrite size_map size_enum_ord in H2.
++ apply /RleP. apply default_rel_ge_0.
+Qed.
 
 
-
-    unfold is_finite in H0.
-
-
-    Print Bdiv_correct.
-    Print generic_round_property.
-    destruct 
-
-
-
-
-    pose proof (Binary.Bdiv_correct  (fprec ty) (femax ty)  (fprec_gt_0 ty) (fprec_lt_femax ty) (plus_nan ty) 
-                      BinarySingleNaN.mode_NE (Zconst ty 1) (A (inord i) (inord i))).
-    specialize (H0 (@inord n i)). 
-    specialize (H2 H0).
-    pose proof (
-      Raux.Rlt_bool_spec
-        (Rabs
-           (Generic_fmt.round Zaux.radix2
-              (SpecFloat.fexp 
-                 (fprec ty) (femax ty))
-              (BinarySingleNaN.round_mode
-                 BinarySingleNaN.mode_NE)
-              (B2R (fprec ty) 
-                 (femax ty) (Zconst ty 1) /
-               B2R (fprec ty) 
-                 (femax ty)
-                 (A (inord i) (inord i)))))
-        (bpow Zaux.radix2 (femax ty))). 
-    destruct H2.
-    * admit.
-    * unfold B2FF in H1. simpl in H1. 
-      destruct 
-      ( Bdiv (fprec ty) (femax ty)
-         (fprec_gt_0 ty) (fprec_lt_femax ty)
-         (plus_nan ty)
-         BinarySingleNaN.mode_NE
-         (Zconst ty 1)
-         (A (inord i) (inord i))) in H1; simpl in *.
-
-red in FIN. unfold rounded in FIN.
-    Lra.lra.
-
-
-
-
-
-    pose proof (generic_round_property ty (1 / FT2R (A (inord i) (inord i)))%Re).
-    destruct H0 as [d [e [Hpr [Hdf [Hde H0]]]]].
-    rewrite H0.
-    
-
-
-
-*)
 
 Lemma bfma_overflow_implies {t : type}: 
   forall x y z, 
