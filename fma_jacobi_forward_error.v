@@ -1327,14 +1327,41 @@ induction k.
                                                ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
                                                 * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
                                       { apply matrix_vec_mult_bound_corollary. intros.
-                                        pose proof (@In_nth (ftype ty * ftype ty)
-                                           (rev (combine
-                                              (vec_to_list_float n.+1 (\row_j A2_J A (inord i) j)^T)
-                                              (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))) xy 
-                                            (Zconst ty 0, Zconst ty 0) ).
-                                          rewrite -in_rev in H8. specialize (H8 H7).
-                                          destruct H8 as [j [Hlength Hnth]].
-                                          rewrite rev_nth in Hnth.
+                                        specialize (Hfin k.+1 (@inord n i)). 
+                                        rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
+                                        rewrite inord_val in Hfin. repeat split; try apply Hfin.
+                                        apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                        rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                        apply bplus_overflow_implies in Hfin2; try apply Hfin2.
+                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
+                                        rewrite mxE in Hfin22.  
+                                        pose proof (@dotprod_finite_implies ty).
+                                        specialize (H8 (combine  (vec_to_list_float n.+1
+                                                                      (\row_j0 A2_J A (inord i) j0)^T)
+                                                                  (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
+                                        rewrite !combine_split  in H8. 
+                                        assert ((vec_to_list_float n.+1
+                                                         (\row_j0 A2_J A  (inord i) j0)^T,
+                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
+                                                       vec_to_list_float n.+1
+                                                         (\row_j0 A2_J A  (inord i) j0)^T). 
+                                        { by simpl. } rewrite H9 in H8. clear H9.
+                                        assert ((vec_to_list_float n.+1
+                                                         (\row_j0 A2_J A  (inord i) j0)^T,
+                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
+                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
+                                        { by simpl. } rewrite H9 in H8. clear H9. 
+                                        assert (X_m_jacobi k x0 b A = \col_j (X_m_jacobi k x0 b A j ord0)).
+                                        { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+                                          assert (y = ord0). { by apply ord1. } by rewrite H9.
+                                        } rewrite H9 in H8. 
+                                        specialize (H8 Hfin22 xy).
+
+
+
+
+                                          rewrite in_rev in H7.
+                                          rewrite rev_nth in H7.
                                           ++++ rewrite combine_length !length_veclist Nat.min_id in Hnth.
                                                assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
                                                { lia. } rewrite H8 in Hnth. rewrite combine_nth in Hnth.
@@ -1350,17 +1377,17 @@ induction k.
                                                rewrite mxE in Hfin22.  
                                                pose proof (@dotprod_finite_implies ty).
                                                specialize (H9 (combine  (vec_to_list_float n.+1
-                                                                      (\row_j0 A2_J A (inord i) j0)^T)
+                                                                      (\row_j0 A2_J A (inord j) j0)^T)
                                                                   (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
                                                rewrite !combine_split  in H9. 
                                                assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T,
+                                                         (\row_j0 A2_J A  (inord j) j0)^T,
                                                        vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
                                                        vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T). 
+                                                         (\row_j0 A2_J A  (inord j) j0)^T). 
                                                 { by simpl. } rewrite H10 in H9. clear H10.
                                                assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T,
+                                                         (\row_j0 A2_J A  (inord j) j0)^T,
                                                        vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
                                                        vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
                                                 { by simpl. } rewrite H10 in H9. clear H10. 
@@ -1369,7 +1396,7 @@ induction k.
                                                   assert (y = ord0). { by apply ord1. } by rewrite H10.
                                                 } rewrite H10 in H9. 
                                                 specialize (H9 Hfin22).  rewrite -H10 in H9.
-                                                remember ((\row_j0 A2_J A  (inord i) j0)^T) as v1.
+                                                remember ((\row_j0 A2_J A  (inord j) j0)^T) as v1.
                                                 remember ((X_m_jacobi k x0 b A)) as v2.
                                                 assert (In
                                                           (v1 (inord j) ord0, v2 (inord j) ord0)
@@ -1391,7 +1418,7 @@ induction k.
                                                   rewrite !rev_length !length_veclist Nat.min_id.
                                                   by rewrite rev_length !combine_length !length_veclist Nat.min_id in Hlength.
                                                } specialize (H9  (v1 (inord j) ord0, v2 (inord j) ord0) H11).
-                                               simpl in H9. rewrite Heqv1 in H9. apply H9.
+                                               simpl in H9. rewrite Heqv1 in H9. rewrite !mxE. rewrite !mxE in H9.
 
 
 
