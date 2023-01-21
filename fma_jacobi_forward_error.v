@@ -1688,12 +1688,25 @@ induction k.
                                     apply Rplus_le_le_0_compat.
                                     repeat apply Rmult_le_pos.
                                     apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-
-
-
-
-                                           +++++ apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
-                                           +++++ apply g_pos.
+                                    apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+                                    apply g_pos. apply Rmult_le_pos. apply default_rel_ge_0.
+                                    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+                              +++++ apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+                              +++++ unfold R2. apply Rmult_le_pos.
+                                     ----- apply /RleP. apply vec_norm_pd.
+                                     ----- apply /RleP. apply matrix_norm_pd.
+                              +++++ apply Rmult_le_pos; last by (apply /RleP;apply matrix_norm_pd).
+                                    apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
+                                    apply Rmult_le_pos; last by apply default_abs_ge_0.
+                                    apply Rplus_le_le_0_compat; last by apply g_pos.
+                                    apply Rplus_le_le_0_compat.
+                                    repeat apply Rmult_le_pos.
+                                    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+                                    apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+                                    apply g_pos.
+                                    apply Rmult_le_pos. apply default_rel_ge_0.
+                                    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+                        ***** apply H7.
 
 
 
