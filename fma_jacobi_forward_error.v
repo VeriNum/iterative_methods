@@ -1512,8 +1512,78 @@ induction k.
                                                    apply g_pos. apply Rmult_le_pos.
                                                    apply default_rel_ge_0. apply Rplus_le_le_0_compat.
                                                    nra. apply g_pos.
-                                             *****
-                                             
+                                             ***** apply Rmult_le_compat_r. apply /RleP. apply matrix_norm_pd.
+                                                   pose proof (@inverse_mat_norm_bound ty n A ).
+                                                   assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by admit.
+                                                   assert (forall i : 'I_n.+1,
+                                                            is_finite (fprec ty) (femax ty)
+                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by admit.
+                                                   assert (forall i : 'I_n.+1,
+                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by admit.
+                                                   specialize (H6 H7 H8 H9).
+                                                   assert ((vec_inf_norm
+                                                                (FT2R_mat (A1_inv_J A) -
+                                                                 A1_diag A_real) <=
+                                                              vec_inf_norm (A1_diag A_real) *
+                                                              default_rel ty + default_abs ty)). { by apply /RleP. }
+                                                   apply reverse_triang_ineq in H10.
+                                                   assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
+                                                   { intros. nra. } 
+                                                   apply Rle_trans with 
+                                                   (vec_inf_norm (A1_diag A_real) * (1+ default_rel ty) + default_abs ty)%Re.
+                                                   rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.  apply H11. by apply /RleP.
+                                                   apply Rle_refl.
+                                  +++++ apply Rplus_le_compat_r. apply Rplus_le_compat.
+                                         ----- apply Rmult_le_compat_l. apply Rplus_le_le_0_compat.
+                                               apply Rmult_le_pos. apply g_pos. apply Rplus_le_le_0_compat; try nra.
+                                               apply default_rel_ge_0. apply default_rel_ge_0.
+                                               apply Rmult_le_compat_r. apply /RleP. apply vec_norm_pd.
+                                               pose proof (@inverse_mat_norm_bound ty n A ).
+                                                   assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by admit.
+                                                   assert (forall i : 'I_n.+1,
+                                                            is_finite (fprec ty) (femax ty)
+                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by admit.
+                                                   assert (forall i : 'I_n.+1,
+                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by admit.
+                                                   specialize (H6 H7 H8 H9).
+                                                   assert ((vec_inf_norm
+                                                                (FT2R_mat (A1_inv_J A) -
+                                                                 A1_diag A_real) <=
+                                                              vec_inf_norm (A1_diag A_real) *
+                                                              default_rel ty + default_abs ty)). { by apply /RleP. }
+                                                   apply reverse_triang_ineq in H10.
+                                                   assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
+                                                   { intros. nra. }
+                                                   apply Rle_trans with 
+                                                   (vec_inf_norm (A1_diag A_real) * (1+ default_rel ty) + default_abs ty)%Re.
+                                                   rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.  apply H11. by apply /RleP.
+                                                   apply Rle_refl.
+                                         ----- apply Rmult_le_compat_l.
+                                               apply Rmult_le_pos. apply Rmult_le_pos; try apply g1_pos.  
+                                               apply Rplus_le_le_0_compat. nra. apply g_pos.
+                                               apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+                                               pose proof (@inverse_mat_norm_bound ty n A ).
+                                                   assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by admit.
+                                                   assert (forall i : 'I_n.+1,
+                                                            is_finite (fprec ty) (femax ty)
+                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by admit.
+                                                   assert (forall i : 'I_n.+1,
+                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by admit.
+                                                   specialize (H6 H7 H8 H9).
+                                                   assert ((vec_inf_norm
+                                                                (FT2R_mat (A1_inv_J A) -
+                                                                 A1_diag A_real) <=
+                                                              vec_inf_norm (A1_diag A_real) *
+                                                              default_rel ty + default_abs ty)). { by apply /RleP. }
+                                                   apply reverse_triang_ineq in H10.
+                                                   assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
+                                                   { intros. nra. }
+                                                   apply Rle_trans with 
+                                                   (vec_inf_norm (A1_diag A_real) * (1+ default_rel ty) + default_abs ty)%Re.
+                                                   rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.  apply H11. by apply /RleP.
+                                                   apply Rle_refl.
+                             ---- apply Rle_refl.
+                       **** 
 
 
 
