@@ -188,6 +188,8 @@ induction m.
 + simpl. by rewrite IHm.
 Qed.
 
-
+Definition FT2R_mat {m n: nat} {ty} (A : 'M[ftype ty]_(m.+1, n.+1)) :
+   'M[R]_(m.+1, n.+1):=
+  \matrix_(i, j) FT2R (A i j).
 
 End WITHNANS.
