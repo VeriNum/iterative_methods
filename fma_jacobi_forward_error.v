@@ -724,6 +724,27 @@ destruct x, y, z; (unfold BFMA, BINOP, Bfma, is_finite in *; simpl in *; auto;
 Qed.
 
 
+Lemma list_split_l {T} (l : list (T * T)) (a:T * T):
+  (List.split (a :: l)).1 = (a.1 :: (List.split l).1).
+Proof.
+induction l; simpl; intros; auto.
++ destruct a; auto.
++ destruct (List.split l); auto.
+  destruct a0; simpl.
+  destruct a; simpl; auto.
+Qed.
+  
+
+Lemma list_split_r {T} (l : list (T * T)) (a:T * T):
+  (List.split (a :: l)).2 = (a.2 :: (List.split l).2).
+Proof.
+induction l; simpl; intros; auto.
++ destruct a; auto.
++ destruct (List.split l); auto.
+  destruct a0; simpl.
+  destruct a; simpl; auto.
+Qed.
+
 Lemma dotprod_finite_implies {ty} (v: list (ftype ty * ftype ty)):
   is_finite _ _ (dotprod_r (fst (List.split v)) (snd (List.split v))) = true ->
   (forall a, In a v ->
@@ -734,9 +755,9 @@ intros.
 induction v.
 + by simpl in H0.
 + assert ((List.split (a0 :: v)).1 = (a0.1 :: (List.split v).1)).
-  { admit. }
+  { apply list_split_l. }
   assert ((List.split (a0 :: v)).2 = (a0.2 :: (List.split v).2)).
-  { admit. } rewrite H1 H2 in H.
+  { apply list_split_r. } rewrite H1 H2 in H.
   unfold dotprod_r in H.  simpl in H.
   apply bfma_overflow_implies in H.
   destruct H0.
@@ -744,7 +765,7 @@ induction v.
   - unfold dotprod_r in IHv.
     destruct H as [Hf1 [Hf2 Hf3]].
     specialize (IHv Hf3 H0). apply IHv. 
-Admitted.
+Qed.
 
 Definition x_fix_FT2R {ty} {n:nat} x b (A: 'M[ftype ty]_n.+1) : 
   'cV[R]_n.+1 :=
