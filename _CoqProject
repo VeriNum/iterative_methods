@@ -12,6 +12,8 @@ jacob_list_fun_model.v
 fma_dot_mat_model.v
 dot_prod_defn.v
 float_model_generic.v
+fma_floating_point_model.v
+fma_real_func_model.v
 
 StationaryMethods/common.v
 StationaryMethods/op_defs.v
