@@ -13,6 +13,7 @@ Require Import floatlib jacob_list_fun_model fma_dot_mat_model
 
 Require Import common fma_dot_acc float_acc_lems dotprod_model.
 Require Import fma_matrix_vec_mult vec_sum_inf_norm_rel.
+Require Import fma_real_func_model fma_floating_point_model.
 
 
 Set Bullet Behavior "Strict Subproofs". 
@@ -37,87 +38,6 @@ Notation "A +f B" := (addmx_float A B) (at level 80).
 Notation "-f A" := (opp_mat A) (at level 50).
 Notation "A *f B" := (mulmx_float A B) (at level 70).
 Notation "A -f B" := (sub_mat A B) (at level 80).
-
-
-(** Define forward error **)
-
-Fixpoint vec_to_list_real {n:nat} (m:nat) (v :'cV[R]_n.+1)
-   : list R := 
-   match m with 
-   | O => []
-   | S p => [v (@inord n p) ord0] ++ vec_to_list_real p v
-   end.
-
-
-Definition A1_diag {n: nat} (A: 'M[R]_n.+1) : 'cV[R]_n.+1:=
-  \col_i (1 / (A i i))%Re.
-
-
-Definition diag_matrix_vec_mult_R {n:nat} (v1 v2 : 'cV[R]_n.+1)
-  : 'cV[R]_n.+1 :=
-  \col_i ((nth (n.+1.-1 -i) (vec_to_list_real n.+1 v1) 0%Re) * 
-          (nth (n.+1.-1 -i) (vec_to_list_real n.+1 v2) 0%Re)).
-
-Lemma nth_vec_to_list_real_sub {n:nat} i m (v1 v2 :'cV[R]_n.+1) d:
-  (i < m)%nat ->
-  nth (m.-1 -i) (@vec_to_list_real n m (v1 - v2)) d = 
-  nth (m.-1 -i) (@vec_to_list_real n m v1) d - 
-  nth (m.-1 -i) (@vec_to_list_real n m v2) d.
-Proof.
-intros.
-induction m.
-+ by rewrite ltn0 in H.
-+ simpl. rewrite -subn_gt0 in IHm. rewrite -predn_sub in IHm.
-  destruct (m-i)%nat.
-  - by rewrite !mxE /=.
-  - simpl in IHm. by apply IHm.
-Qed.
-
-Lemma diag_matrix_vec_mult_diff {n:nat} (v1 v2 v3 : 'cV[R]_n.+1):
-  diag_matrix_vec_mult_R v1 v2 - diag_matrix_vec_mult_R v1 v3 = 
-  diag_matrix_vec_mult_R v1 (v2 - v3).
-Proof.
-apply /matrixP. unfold eqrel. intros. rewrite !mxE.
-rewrite nth_vec_to_list_real_sub.
-+ rewrite -!RmultE -!RminusE. field_simplify. auto.
-+ apply ltn_ord.
-Qed.
-
-Lemma diag_matrix_vec_mult_diff_r {n:nat} (v1 v2 v3 : 'cV[R]_n.+1):
-  diag_matrix_vec_mult_R v1 v3 - diag_matrix_vec_mult_R v2 v3 = 
-  diag_matrix_vec_mult_R (v1 - v2) v3.
-Proof.
-apply /matrixP. unfold eqrel. intros. rewrite !mxE.
-rewrite nth_vec_to_list_real_sub.
-+ rewrite -!RmultE -!RminusE. field_simplify. auto.
-+ apply ltn_ord.
-Qed.
-
-
-
-Lemma nth_vec_to_list_real {n:nat} i m (v :'cV[R]_n.+1) d:
-  (i < m)%nat ->
-  nth (m.-1 -i) (@vec_to_list_real n m v) d = v (@inord n i) ord0.
-Proof.
-intros.
-elim: m i H => [ | m IHm] i H.
-+ by [].
-+ simpl.
-  rewrite leq_eqVlt in H.
-  assert ((i == m) \/ (i < m)%nat).
-  { by apply /orP. } destruct H0.
-  - assert (i = m). { by apply /eqP. }
-    rewrite H1. simpl.
-    assert ((m - m)%nat = 0%N). 
-    { apply /eqP. rewrite subn_eq0. by []. } by rewrite H2 /=.
-  - assert (nth (m.-1 - i) (vec_to_list_real m v)
-                d = v (inord i) ord0).
-    { by apply IHm. } 
-    rewrite -H1. rewrite -[in RHS]predn_sub.
-    rewrite -subn_gt0 in H0. rewrite -predn_sub in H1.
-    by destruct (m - i)%nat.
-Qed.
-
 
 Lemma vec_inf_norm_diag_matrix_vec_mult_R {n:nat} (v1 v2 : 'cV[R]_n.+1):
   vec_inf_norm (diag_matrix_vec_mult_R v1 v2) <= 
@@ -174,20 +94,6 @@ rewrite -bigmaxr_mulr.
 Qed.
 
 
-Definition A2_J_real {n:nat} (A: 'M[R]_n.+1): 
-  'M[R]_n.+1 :=
-  \matrix_(i,j) 
-    if (i==j :> nat) then 0%Re else A i j. 
-
-
-(** Define real real functional model **)
-
-Definition x_fix {n:nat} x b (A: 'M[R]_n.+1) : 
-  'cV[R]_n.+1 :=
-  let r := b - ((A2_J_real A) *m x) in
-  diag_matrix_vec_mult_R (A1_diag A) r.
-
-
 Definition f_error {ty} {n:nat} m b x0 x (A: 'M[ftype ty]_n.+1):=
   let x_k := X_m_jacobi m x0 b A in 
   let A_real := FT2R_mat A in
@@ -195,11 +101,6 @@ Definition f_error {ty} {n:nat} m b x0 x (A: 'M[ftype ty]_n.+1):=
   let x := x_fix x b_real A_real in
   vec_inf_norm (FT2R_mat x_k - x).
 
-
-Definition matrix_of_diag_A1 {ty} {n:nat} (A: 'M[ftype ty]_n.+1) :
- 'M[ftype ty]_n.+1 :=
- \matrix_(i, j) 
-    (if (i == j :> nat) then (A1_inv_J A i ord0) else (Zconst ty 0)).
 
 
 Lemma rho_ge_0 {ty} {n:nat} 
