@@ -8,7 +8,7 @@ Import List ListNotations.
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
                             Float_notations Automate.
 
-Require Import floatlib jacob_list_fun_model fma_dot_mat_model inf_norm_properties.
+Require Import (*floatlib jacob_list_fun_model*) fma_floating_point_model inf_norm_properties.
 
 Require Import common fma_dot_acc float_acc_lems dotprod_model.
 
@@ -303,10 +303,6 @@ apply Bplus_no_ov_is_finite .
                     apply Rplus_lt_0_compat. nra. apply default_rel_gt_0. 
              ** apply H0.
 Qed.
-
-Definition FT2R_mat {m n: nat} {ty} (A : 'M[ftype ty]_(m.+1, n.+1)) :
-   'M[R]_(m.+1, n.+1):=
-  \matrix_(i, j) FT2R (A i j).
 
 
 Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
