@@ -8,7 +8,7 @@ Import List ListNotations.
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
                             Float_notations Automate.
 
-Require Import floatlib jacob_list_fun_model fma_floating_point_model inf_norm_properties.
+Require Import floatlib fma_floating_point_model inf_norm_properties.
 
 Require Import common fma_dot_acc float_acc_lems dotprod_model.
 
