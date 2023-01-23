@@ -209,6 +209,26 @@ apply (R_dot_prod_rel_Rabs_eq (combine (map FT2R (rev v1)) (map FT2R (rev v2))) 
 rewrite <- (combine_map R R Rabs Rabsp); auto.
 Qed.
 
+Lemma fma_dotprod_forward_error_3:
+  forall (t: type) (v1 v2: list (ftype t))
+  (Hlen2: length v1 = length v2)
+  (Hfin: Binary.is_finite _ _ (fma_dotprod t v1 v2) = true),
+  let prods := map (uncurry Rmult) (List.combine (map FT2R v1) (map FT2R v2)) in
+  let abs_prods := map (uncurry Rmult) (List.combine (map Rabs (map FT2R v1)) (map Rabs (map FT2R v2))) in  
+  Rabs (FT2R (fma_dotprod t v1 v2) - sum_fold prods) <= g t (length v1) * sum_fold abs_prods + g1 t (length v1) (length v1 - 1).
+Proof.
+intros.
+assert (length v1 = O \/ 1 <= length v1)%nat by lia.
+destruct H as [Hlen1|Hlen1].
+destruct v1,v2; inversion Hlen1; inversion Hlen2; clear Hlen1 Hlen2; subst.
+simpl.
+unfold g1,g. simpl. 
+rewrite Rmult_0_r, Rmult_0_l.
+rewrite Rminus_diag, Rabs_R0.
+lra.
+apply fma_dotprod_forward_error_2; auto.
+admit.  (* Easily provable, see similar theorem in sparse/fun_model_lemmas.v *)
+Admitted.
 
 (* mixed error bounds *)
 Lemma fma_dotprod_mixed_error:
