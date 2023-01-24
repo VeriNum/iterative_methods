@@ -241,5 +241,15 @@ rewrite H7 in H1. rewrite sum_abs_eq in H1.
   apply Rle_0_sqr.
 Qed.
 
-
+(** Relate norm2 with inf-vec norm **)
+Lemma norm2_vec_inf_norm_rel {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
+   let v_l := vec_to_list_float n.+1 v in
+  (forall xy : ftype t * ftype t,
+     In xy (combine v_l v_l) ->
+     Binary.is_finite (fprec t) (femax t) xy.1 =  true /\
+     Binary.is_finite (fprec t) (femax t) xy.2 = true) ->
+  Binary.is_finite (fprec t) (femax t) (norm2 (rev v_l)) = true ->
+  (FT2R (norm2 (rev v_l)) <=
+    (INR n.+1 * Rsqr (vec_inf_norm (FT2R_mat v))) * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
+Admitted.
 
