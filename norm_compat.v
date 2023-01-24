@@ -143,6 +143,56 @@ induction m.
   } rewrite -H1. apply IHm.
 Qed.
 
+Lemma R_dot_prod_norm2_abs_holds {t} {n:nat} {NANS: Nans} m 
+  (v : 'cV[ftype t]_n.+1) (le_n_m : (m <= n.+1)%nat):
+  let v_l := @vec_to_list_float _ n m v in
+  R_dot_prod_rel
+      (combine
+         (map Rabs (map FT2R v_l))
+         (map Rabs (map FT2R v_l)))
+       (\sum_(j < m)
+      FT2R_mat v (@widen_ord m n.+1 le_n_m j) 0 * 
+      FT2R_mat v (@widen_ord m n.+1 le_n_m j) 0).
+Proof.
+intros. induction m.
++ simpl. rewrite big_ord0 //=. apply R_dot_prod_rel_nil.
++ simpl. rewrite big_ord_recr //=.
+  rewrite -RplusE -RmultE.
+  assert ((widen_ord le_n_m ord_max) = (inord m)).
+  { unfold widen_ord. 
+    apply val_inj. simpl. by rewrite inordK.
+  } rewrite H. rewrite Rplus_comm. rewrite !mxE.
+  Print  R_dot_prod_rel_cons.
+  assert ((FT2R (v (inord m) ord0) * FT2R (v (inord m) ord0))%Re = 
+          (Rabs (FT2R (v (inord m) ord0)) * Rabs (FT2R (v (inord m) ord0)))%Re).
+  { assert (forall x:R, Rsqr x = (x * x)%Re).
+    { intros. unfold Rsqr;nra. } rewrite -!H0.
+      by rewrite Rsqr_abs.
+  } rewrite H0. 
+   apply R_dot_prod_rel_cons.
+  assert ((m <= n.+1)%nat). { by apply ltnW. }
+  specialize (IHm H1). 
+  assert (\sum_(j < m)
+            FT2R_mat v (widen_ord H1 j) 0 *
+            FT2R_mat v (widen_ord H1 j) 0 = 
+          \sum_(i0 < m)
+                FT2R_mat v
+                  (widen_ord le_n_m
+                     (widen_ord (leqnSn m) i0)) 0 *
+                FT2R_mat v
+                  (widen_ord le_n_m
+                     (widen_ord (leqnSn m) i0)) 0).
+  { apply eq_big. by []. intros.
+    assert ((widen_ord le_n_m
+                  (widen_ord (leqnSn m) i))= 
+             (widen_ord  H1 i)).
+    { unfold widen_ord. 
+      apply val_inj. by simpl.
+    } by rewrite H3.
+  } rewrite -H2. apply IHm.
+Qed.
+
+
 
 (*** error between norm2 float and norm2 real **)
 Lemma norm2_error {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
@@ -176,6 +226,7 @@ assert ( \sum_j (FT2R_mat v  (widen_ord (leqnn n.+1) j) 0 *
   { unfold widen_ord. apply val_inj. by simpl. }
   rewrite H5. by rewrite inord_val.
 } rewrite -H4 in H. specialize (H H3).
+
 
 
 
