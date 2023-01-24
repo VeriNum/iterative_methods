@@ -67,20 +67,11 @@ end.
 Qed.
 
 Require Import floatlib fma_floating_point_model common 
-      op_defs sum_model fma_dot_acc float_acc_lems dotprod_model.
+      op_defs sum_model fma_dot_acc float_acc_lems dotprod_model fma_matrix_vec_mult.
 
 
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
                             Float_notations Automate.
-
-(** move this lemma to floating point model file **)
-Lemma dotprod_cons {t: type} {NANS: Nans} (v1 v2: list (ftype t)) (x y : ftype t): 
-  length v1 = length v2 ->
-  dotprod_r (x :: v1) (y :: v2) = 
-  BFMA x y (dotprod_r v1 v2).
-Proof.
-intros. by unfold dotprod_r. 
-Qed.
 
 Lemma fma_dot_prod_norm2_holds {t} {n:nat} {NANS: Nans} m (v : 'cV[ftype t]_n.+1):
   let v_l := @vec_to_list_float _ n m v in
@@ -204,7 +195,7 @@ Lemma norm2_error {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
   Binary.is_finite (fprec t) 
       (femax t) (norm2 (rev v_l)) = true ->
   Rabs (FT2R (norm2 (rev v_l)) - Rsqr (vec_norm2 (FT2R_mat v))) <=  
-  g t n.+1 * (Rsqr (vec_norm2 (FT2R_mat v))) + g1 t n.+1 (n.+1 - 1).
+  g t n.+1 * (Rsqr (vec_norm2 (FT2R_mat v))) + g1 t n.+1 (n.+1 - 1)%coq_nat.
 Proof.
 intros.
 pose proof (@fma_dotprod_forward_error _ t v_l v_l).
@@ -220,11 +211,13 @@ assert (Rsqr (vec_norm2 (FT2R_mat v)) =
          \sum_(j < n.+1)
             FT2R_mat v (@inord n j) 0 * 
             FT2R_mat v (@inord n j) 0).
-{
-
-
-
- admit. } rewrite H4 in H1.
+{ unfold vec_norm2. 
+  rewrite Rsqr_sqrt.
+  + apply eq_big. by []. intros. rewrite -RmultE. unfold Rsqr.
+    by rewrite inord_val.
+  + apply /RleP. apply big_ge_0_ex_abstract. intros.
+    apply /RleP. apply Rle_0_sqr.
+} rewrite H4 in H1.
 pose proof (R_dot_prod_norm2_holds v (leqnn n.+1)).
 assert ( \sum_j (FT2R_mat v  (widen_ord (leqnn n.+1) j) 0 *
                   FT2R_mat v  (widen_ord (leqnn n.+1) j) 0) = 
@@ -237,21 +230,16 @@ assert ( \sum_j (FT2R_mat v  (widen_ord (leqnn n.+1) j) 0 *
   rewrite H7. by rewrite inord_val.
 } rewrite -H6 in H1. specialize (H1 H5).
 specialize (H1 (R_dot_prod_norm2_abs_holds v (leqnn n.+1)) H H0).
-
-
-
-
-
-
-
-
-specialize (H (R_dot_prod_norm2_holds v (leqnn n.+1) 
-            (\sum_(j < n.+1)
-            FT2R_mat v (@inord n j) 0 * 
-            FT2R_mat v (@inord n j) 0))).
-
-
-Admitted.
+rewrite H4 -H6.
+assert (length v_l = n.+1).
+{ unfold v_l. by rewrite length_veclist. }
+rewrite H7 in H1. rewrite sum_abs_eq in H1.
++ apply H1.
++ intros. rewrite -RmultE. 
+  assert (forall x:R, Rsqr x = (x * x)%Re).
+  { intros. unfold Rsqr;nra. } rewrite -H1.
+  apply Rle_0_sqr.
+Qed.
 
 
 
