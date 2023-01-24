@@ -73,11 +73,18 @@ From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify
                             Float_notations Automate.
 
 (*** error between norm2 float and norm2 real **)
-Lemma norm2_error {t} {NANS: Nans} (v : vector t):
-  let n := (length v).-1 in
-  let v_inj := FT2R_mat (vector_inj v n.+1) in
-  Rabs (FT2R (norm2 v) - (vec_norm2 v_inj)) <=  g t (length v) * (vec_norm2 v_inj) + g1 t (length v) (length v - 1).
+Lemma norm2_error {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
+  let v_l := vec_to_list_float n.+1 v in
+  Rabs (FT2R (norm2 v_l) - (vec_norm2 (FT2R_mat v))) <=  
+  g t n.+1 * (vec_norm2 (FT2R_mat v)) + g1 t n.+1 (n.+1 - 1).
 Proof.
+intros.
+pose proof (@fma_dotprod_forward_error _ t v_l v_l).
+assert ((1 <= length v_l)%coq_nat).
+{ unfold v_l.  
+
+
+
 Admitted.
 
 
