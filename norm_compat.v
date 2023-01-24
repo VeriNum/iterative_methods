@@ -66,5 +66,19 @@ end.
     apply /RleP. apply Rabs_pos.
 Qed.
 
+Require Import floatlib fma_floating_point_model common fma_dot_acc float_acc_lems dotprod_model.
+
+
+From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
+                            Float_notations Automate.
+
+(*** error between norm2 float and norm2 real **)
+Lemma norm2_error {t} {NANS: Nans} (v : vector t):
+  let n := (length v).-1 in
+  let v_inj := FT2R_mat (vector_inj v n.+1) in
+  Rabs (FT2R (norm2 v) - (vec_norm2 v_inj)) <=  g t (length v) * (vec_norm2 v_inj) + g1 t (length v) (length v - 1).
+Proof.
+Admitted.
+
 
 
