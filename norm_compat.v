@@ -249,7 +249,33 @@ Lemma norm2_vec_inf_norm_rel {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
      Binary.is_finite (fprec t) (femax t) xy.1 =  true /\
      Binary.is_finite (fprec t) (femax t) xy.2 = true) ->
   Binary.is_finite (fprec t) (femax t) (norm2 (rev v_l)) = true ->
-  (FT2R (norm2 (rev v_l)) <=
+  (Rabs (FT2R (norm2 (rev v_l))) <=
     (INR n.+1 * Rsqr (vec_inf_norm (FT2R_mat v))) * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
+Proof.
+intros.
+pose proof (@norm2_error _ _ _ v H H0).
+
+
+
+apply Rle_trans with 
+(Rsqr (vec_inf_norm (FT2R_mat v)) * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
++ assert (Rsqr (vec_inf_norm (FT2R_mat v)) = Rabs (Rsqr (vec_inf_norm (FT2R_mat v)))).
+  { rewrite Rabs_right. nra. apply Rle_ge,  Rle_0_sqr . }
+  rewrite H2. 
+  Search (_ * (_ + _) = _)%Re.
+  rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
+  assert (forall a b c d:R, (a - b<= c + d)%Re -> (a <= b + c + d)%Re).
+  { intros. nra. } apply H3. 
+  apply Rle_trans with
+  (Rabs (FT2R (norm2 (rev v_l)) - (vec_inf_norm (FT2R_mat v))²))%Re.
+  - apply Rabs_triang_inv.
+  - fold v_l in H1. rewrite Rmult_comm .
+    rewrite -H2. apply H1.
+  
+
+
+
+
+
 Admitted.
 
