@@ -190,13 +190,19 @@ intros. induction m.
       apply val_inj. by simpl.
     } by rewrite H3.
   } rewrite -H2. apply IHm.
-Qed.
+Qed. 
 
 
 
 (*** error between norm2 float and norm2 real **)
 Lemma norm2_error {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
   let v_l := vec_to_list_float n.+1 v in
+  (forall xy : ftype t * ftype t,
+     In xy (combine v_l v_l) ->
+     Binary.is_finite (fprec t) (femax t) xy.1 =  true /\
+     Binary.is_finite (fprec t) (femax t) xy.2 = true) ->
+  Binary.is_finite (fprec t) 
+      (femax t) (norm2 (rev v_l)) = true ->
   Rabs (FT2R (norm2 (rev v_l)) - Rsqr (vec_norm2 (FT2R_mat v))) <=  
   g t n.+1 * (Rsqr (vec_norm2 (FT2R_mat v))) + g1 t n.+1 (n.+1 - 1).
 Proof.
@@ -206,15 +212,19 @@ assert ((1 <= length v_l)%coq_nat).
 { unfold v_l. rewrite length_veclist. lia. }
 assert (length v_l = length v_l).
 { by rewrite !length_veclist. }
-specialize (H H0 H1).
-specialize (H (norm2 (rev v_l)) (Rsqr (vec_norm2 (FT2R_mat v))) 
+specialize (H1 H2 H3).
+specialize (H1 (norm2 (rev v_l)) (Rsqr (vec_norm2 (FT2R_mat v))) 
               (Rsqr (vec_norm2 (FT2R_mat v)))).
-specialize (H (fma_dot_prod_norm2_holds n.+1 v)).
+specialize (H1 (fma_dot_prod_norm2_holds n.+1 v)).
 assert (Rsqr (vec_norm2 (FT2R_mat v)) = 
          \sum_(j < n.+1)
             FT2R_mat v (@inord n j) 0 * 
             FT2R_mat v (@inord n j) 0).
-{ admit. } rewrite H2 in H.
+{
+
+
+
+ admit. } rewrite H4 in H1.
 pose proof (R_dot_prod_norm2_holds v (leqnn n.+1)).
 assert ( \sum_j (FT2R_mat v  (widen_ord (leqnn n.+1) j) 0 *
                   FT2R_mat v  (widen_ord (leqnn n.+1) j) 0) = 
@@ -224,8 +234,11 @@ assert ( \sum_j (FT2R_mat v  (widen_ord (leqnn n.+1) j) 0 *
 { apply eq_big. by []. intros.
   assert (widen_ord (leqnn n.+1) i = i).
   { unfold widen_ord. apply val_inj. by simpl. }
-  rewrite H5. by rewrite inord_val.
-} rewrite -H4 in H. specialize (H H3).
+  rewrite H7. by rewrite inord_val.
+} rewrite -H6 in H1. specialize (H1 H5).
+specialize (H1 (R_dot_prod_norm2_abs_holds v (leqnn n.+1)) H H0).
+
+
 
 
 
