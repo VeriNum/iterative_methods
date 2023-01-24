@@ -209,6 +209,32 @@ apply (R_dot_prod_rel_Rabs_eq (combine (map FT2R (rev v1)) (map FT2R (rev v2))) 
 rewrite <- (combine_map R R Rabs Rabsp); auto.
 Qed.
 
+Lemma rev_combine :
+  forall {A B : Type} (l1 : list A) (l2 : list B),
+     length l1 = length l2 ->
+     rev (combine l1 l2) = combine (rev l1) (rev l2).
+Proof.
+induction l1; destruct l2; intros; inversion H; clear H; subst; auto.
+simpl.
+rewrite (IHl1 _ H1).
+clear - H1.
+rewrite <- (rev_length l1), <- (rev_length l2) in H1.
+set (r1 := rev l1) in *; set (r2 := rev l2) in *; clearbody r1; clearbody r2.
+revert r2 H1; induction r1; intros; destruct r2; simpl; intros; inversion H1; clear H1; subst; auto.
+f_equal; auto.
+Qed.
+
+Lemma BMFA_finite_e {t: type}:
+ forall a u f : ftype t,
+ Binary.is_finite _ _ (BFMA a f u) = true ->
+ Binary.is_finite _ _ a = true  /\ Binary.is_finite _ _ f = true /\ Binary.is_finite _ _ u = true.
+Proof.
+intros.
+destruct a,f,u; inversion H; clear H; subst; 
+ try solve [split; [ | split]; simpl; auto; constructor; auto].
+all: try solve [destruct s,s0,s1; discriminate].
+Qed.
+
 Lemma fma_dotprod_forward_error_3:
   forall (t: type) (v1 v2: list (ftype t))
   (Hlen2: length v1 = length v2)
@@ -227,8 +253,26 @@ rewrite Rmult_0_r, Rmult_0_l.
 rewrite Rminus_diag, Rabs_R0.
 lra.
 apply fma_dotprod_forward_error_2; auto.
-admit.  (* Easily provable, see similar theorem in sparse/fun_model_lemmas.v *)
-Admitted.
+(* the rest of this proof is really just finite_dotprod_e from iterative_methods.floatlib *)
+clear - Hfin Hlen2.
+unfold fma_dotprod in Hfin.
+rewrite <- fold_left_rev_right in Hfin.
+rewrite <- (rev_involutive v1), <- (rev_involutive v2).
+rewrite rev_combine in Hfin by auto.
+rewrite <- rev_combine by (rewrite !rev_length; auto).
+set (al := combine _ _) in *.
+clearbody al. clear - Hfin.
+induction al; simpl in *. tauto.
+intros.
+apply BMFA_finite_e in Hfin.
+destruct Hfin as [? [? ?]].
+rewrite in_app_iff in H.
+destruct H.
+apply IHal in H; auto.
+destruct H.
+subst; auto.
+destruct H.
+Qed.
 
 (* mixed error bounds *)
 Lemma fma_dotprod_mixed_error:
