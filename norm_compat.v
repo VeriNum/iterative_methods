@@ -66,11 +66,45 @@ end.
     apply /RleP. apply Rabs_pos.
 Qed.
 
-Require Import floatlib fma_floating_point_model common fma_dot_acc float_acc_lems dotprod_model.
+Require Import floatlib fma_floating_point_model common 
+      op_defs sum_model fma_dot_acc float_acc_lems dotprod_model.
 
 
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
                             Float_notations Automate.
+
+(** move this lemma to floating point model file **)
+Lemma dotprod_cons {t: type} {NANS: Nans} (v1 v2: list (ftype t)) (x y : ftype t): 
+  length v1 = length v2 ->
+  dotprod_r (x :: v1) (y :: v2) = 
+  BFMA x y (dotprod_r v1 v2).
+Proof.
+intros. by unfold dotprod_r. 
+Qed.
+
+Lemma fma_dot_prod_norm2_holds {t} {n:nat} {NANS: Nans} m (v : 'cV[ftype t]_n.+1):
+  let v_l := @vec_to_list_float _ n m v in
+  fma_dot_prod_rel (combine v_l v_l) (norm2 (rev v_l)).
+Proof.
+intros.
+unfold norm2. rewrite dotprod_rev_equiv;last by []. unfold v_l.
+induction m.
++ simpl. apply fma_dot_prod_rel_nil.
++ simpl.
+  assert ( dotprod_r
+             (v (inord m) ord0 :: vec_to_list_float m v)
+             (v (inord m) ord0 :: vec_to_list_float m v) = 
+            BFMA (v (inord m) ord0) (v (inord m) ord0) 
+            (dotprod_r (vec_to_list_float m v)
+                      (vec_to_list_float m v))).
+  { apply dotprod_cons . by rewrite !length_veclist. } 
+  rewrite H. by apply fma_dot_prod_rel_cons. 
+Qed.
+
+
+
+
+
 
 (*** error between norm2 float and norm2 real **)
 Lemma norm2_error {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
@@ -81,7 +115,13 @@ Proof.
 intros.
 pose proof (@fma_dotprod_forward_error _ t v_l v_l).
 assert ((1 <= length v_l)%coq_nat).
-{ unfold v_l.  
+{ unfold v_l. rewrite length_veclist. lia. }
+assert (length v_l = length v_l).
+{ by rewrite !length_veclist. }
+specialize (H H0 H1).
+specialize (H (norm2 v_l) (vec_norm2 (FT2R_mat v)) 
+              (vec_norm2 (FT2R_mat v))).
+
 
 
 
