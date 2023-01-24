@@ -254,28 +254,29 @@ Lemma norm2_vec_inf_norm_rel {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
 Proof.
 intros.
 pose proof (@norm2_error _ _ _ v H H0).
-
-
-
 apply Rle_trans with 
-(Rsqr (vec_inf_norm (FT2R_mat v)) * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
-+ assert (Rsqr (vec_inf_norm (FT2R_mat v)) = Rabs (Rsqr (vec_inf_norm (FT2R_mat v)))).
+((vec_norm2 (FT2R_mat v))² * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat).
++ assert (Rsqr (vec_norm2 (FT2R_mat v)) = Rabs (Rsqr (vec_norm2 (FT2R_mat v)))).
   { rewrite Rabs_right. nra. apply Rle_ge,  Rle_0_sqr . }
   rewrite H2. 
-  Search (_ * (_ + _) = _)%Re.
   rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
   assert (forall a b c d:R, (a - b<= c + d)%Re -> (a <= b + c + d)%Re).
   { intros. nra. } apply H3. 
   apply Rle_trans with
-  (Rabs (FT2R (norm2 (rev v_l)) - (vec_inf_norm (FT2R_mat v))²))%Re.
+  (Rabs (FT2R (norm2 (rev v_l)) - (vec_norm2 (FT2R_mat v))²))%Re.
   - apply Rabs_triang_inv.
   - fold v_l in H1. rewrite Rmult_comm .
     rewrite -H2. apply H1.
-  
-
-
-
-
-
-Admitted.
++ apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+  - apply Rplus_le_le_0_compat. nra. apply g_pos.
+  - assert (INR n.+1 = Rsqr (sqrt (INR n.+1))).
+    { rewrite Rsqr_sqrt. by []. apply pos_INR. }
+    rewrite H2. rewrite -Rsqr_mult.
+    apply Rsqr_incr_1.
+    * apply norm2_inf_norm_compat.
+    * unfold vec_norm2. apply sqrt_pos.
+    * apply Rmult_le_pos. apply sqrt_pos.
+      apply /RleP. apply vec_norm_pd.
+Qed.
+    
 
