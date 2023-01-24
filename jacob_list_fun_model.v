@@ -120,7 +120,7 @@ Definition jacobi_iteration_bound {t: type}
                      matrix_inf_norm (A2_J_real A_real)) *
                     vec_inf_norm (x_fix x b_real A_real)) in
   
-  (forall i, Binary.is_finite _ _ (A' i i) = true) /\
+  (forall i j, Binary.is_finite _ _ (A' i j) = true) /\
   x != 0 /\
   (rho < 1)%Re /\
   A_real \in unitmx /\
@@ -141,7 +141,8 @@ Lemma jacobi_iteration_bound_monotone:
    (k <= k')%nat ->
    jacobi_iteration_bound A b acc k ->
    jacobi_iteration_bound A b acc k'.
-Proof. auto. Qed.
+Proof. 
+Admitted.
 
 Lemma jacobi_iteration_bound_corollaries:
   forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
@@ -150,7 +151,40 @@ Lemma jacobi_iteration_bound_corollaries:
    Forall (Forall finite) A /\
    Forall finite (invert_diagmatrix (diag_of_matrix A)) /\
    Forall finite b /\ finite acc.
-Proof. intros. contradiction H. Qed.
+Proof. 
+intros. unfold jacobi_iteration_bound in H.
+destruct H as [HfA [Hxneq0 [Hrho [HAinv [Hinvf Hsolf]]]]].
+repeat split.
++ unfold matrix_cols, matrix_rows. simpl.
+  admit.
++ apply Forall_nth. intros.
+  apply Forall_nth. intros.
+  specialize (HfA (@inord (length A).-1 i) (@inord (length A).-1 i0)).
+  apply finite_is_finite. rewrite !mxE in HfA.
+  rewrite !inordK in HfA.
+  - admit.
+  - rewrite prednK. by apply /ssrnat.ltP. admit.
+  - rewrite prednK. 
+    admit. admit.
++ apply Forall_nth. intros.
+  unfold invert_diagmatrix. 
+  rewrite (nth_map_inrange (Zconst t 0)).
+  - specialize (Hinvf (@inord (length A).-1 i)).
+    rewrite !mxE in Hinvf. unfold diag_of_matrix.
+    rewrite nth_map_seq.
+    * unfold matrix_index. rewrite inordK in Hinvf.
+      ++ apply finite_is_finite. apply Hinvf.
+      ++ rewrite prednK. rewrite !map_length seq_length /matrix_rows_nat in H.
+         by apply /ssrnat.ltP. admit.
+    * unfold matrix_rows_nat. 
+      by rewrite !map_length seq_length /matrix_rows_nat in H.
+  - rewrite !map_length seq_length.
+    by rewrite !map_length seq_length in H.
++    
+
+
+
+contradiction H. Qed.
 
 Lemma jacobi_iteration_bound_correct {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
