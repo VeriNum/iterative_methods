@@ -170,13 +170,18 @@ Definition X_m_jacobi {ty} {n:nat} m x0 b (A: 'M[ftype ty]_n.+1) :
    Nat.iter m  (fun x0 => jacobi_iter x0 b A) x0.
 
 
-Definition matrix_inj {t} (A: matrix t) m n  : 'M[ftype t]_(m,n):=
+Definition matrix_inj' {t} (A: matrix t) m n  d d': 'M[ftype t]_(m,n):=
     \matrix_(i < m, j < n) 
-     nth j (nth i A [::]) (Zconst t 0).
+     nth j (nth i A d) d'.
 
+Definition matrix_inj {t} (A: matrix t) m n  : 'M[ftype t]_(m,n):=
+  matrix_inj' A m n [::] (Zconst t 0).
 
-Definition vector_inj {t} (v: vector t) n  : 'cV[ftype t]_n :=
-   \col_(i < n) nth i v (Zconst t 0).
+Definition vector_inj' {t} (v: vector t) n d : 'cV[ftype t]_n :=
+   \col_(i < n) nth i v d.
+
+Definition vector_inj {t} (v: vector t) n : 'cV[ftype t]_n :=
+   vector_inj' v n (Zconst t 0).
 
 
 
