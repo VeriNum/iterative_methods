@@ -243,6 +243,9 @@ intros. unfold jacobi_preconditions in H.
 destruct H as [Hla [Hlab [HfA [Hxneq0 [Hrho [HAinv [Hinvf [Hsolf [HcG1 [HcG2 Hk]]]]]]]]]].
 repeat split.
 + unfold matrix_cols, matrix_rows. simpl.
+  apply Forall_forall.
+  intros.
+
   admit.
 + apply Forall_nth. intros.
   apply Forall_nth. intros.
@@ -311,6 +314,15 @@ Lemma jacobi_iteration_bound {t: type} :
     BCMP t Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
 Proof.
 intros.
+unfold jacobi_preconditions in H.
+destruct H as [Hla [Hlab [HfA [Hxneq0 [Hrho [HAinv [Hinvf [Hsolf [HcG1 [HcG2 Hk]]]]]]]]]].
+repeat split.
++ admit. (** BMULT acc acc is finite **)
++ exists k.-1. repeat split.
+  -
+  
+
+
 contradiction H.
 Qed.
 
