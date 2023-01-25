@@ -88,7 +88,7 @@ Definition f_error {ty} {n:nat} m b x0 x (A: 'M[ftype ty]_n.+1):=
 
 
 
-Definition jacobi_iteration_bound {t: type}
+Definition jacobi_preconditions {t: type}
   (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
   (* some property of A,b,accuracy holds such that 
     jacobi_n will indeed converge within k iterations to this accuracy, 
@@ -152,6 +152,8 @@ Definition jacobi_iteration_bound {t: type}
       forall i, Binary.is_finite _ _ ((X_m_jacobi k x0' b' A') i ord0) = true) /\
   (** Constraint on Gamma **)
   (Rsqr (g1 t n.+1 (n.+1 - 1)) < FT2R (accuracy))%Re /\
+  (** Gamma is finite **)
+  Binary.is_finite _ _ accuracy = true /\
   (** constraint on k **)
   (k > Z.to_N (Zceil (ln (((1- rho) * sqrt (INR n.+1) * (1 + g t n.+1) * (f_error 0 b' x0' x A' - d_mag / (1-rho))) /
                           (sqrt (FT2R (accuracy)  - g1 t n.+1 (n.+1 - 1)))) /
@@ -162,21 +164,21 @@ Definition jacobi_iteration_bound {t: type}
 Lemma jacobi_iteration_bound_monotone:
   forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k k': nat),
    (k <= k')%nat ->
-   jacobi_iteration_bound A b acc k ->
-   jacobi_iteration_bound A b acc k'.
+   jacobi_preconditions A b acc k ->
+   jacobi_preconditions A b acc k'.
 Proof. 
 Admitted.
 
 Lemma jacobi_iteration_bound_corollaries:
   forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
-   jacobi_iteration_bound A b acc k ->
+   jacobi_preconditions A b acc k ->
    matrix_cols A (matrix_rows A) /\
    Forall (Forall finite) A /\
    Forall finite (invert_diagmatrix (diag_of_matrix A)) /\
    Forall finite b /\ finite acc.
 Proof. 
-intros. unfold jacobi_iteration_bound in H.
-destruct H as [Hla [HfA [Hxneq0 [Hrho [HAinv [Hinvf Hsolf]]]]]].
+intros. unfold jacobi_preconditions in H.
+destruct H as [Hla [HfA [Hxneq0 [Hrho [HAinv [Hinvf [Hsolf [HcG1 [HcG2 Hk]]]]]]]]].
 repeat split.
 + unfold matrix_cols, matrix_rows. simpl.
   admit.
@@ -189,12 +191,8 @@ repeat split.
   - rewrite prednK. by apply /ssrnat.ltP. by apply /ssrnat.ltP.
   - rewrite prednK.
     assert (length (nth i A d) = length A).
-    { 
-
-
-
- 
-    admit. by apply /ssrnat.ltP.
+    { admit . } admit.
+   by apply /ssrnat.ltP.
 + apply Forall_nth. intros.
   unfold invert_diagmatrix. 
   rewrite (nth_map_inrange (Zconst t 0)).
@@ -210,12 +208,12 @@ repeat split.
   - rewrite !map_length seq_length.
     by rewrite !map_length seq_length in H.
 +  admit.
-+ admit. 
++ by apply finite_is_finite.
 Admitted.
 
-Lemma jacobi_iteration_bound_correct {t: type} :
+Lemma jacobi_iteration_bound {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
-   jacobi_iteration_bound A b acc k ->
+   jacobi_preconditions A b acc k ->
    let acc2 := BMULT t acc acc in
    let x0 := (repeat  (Zconst t 0) (length b)) in
    let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
