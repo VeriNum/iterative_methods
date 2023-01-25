@@ -20,7 +20,7 @@ Set Bullet Behavior "Strict Subproofs".
 Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
-Require Import lemmas fma_is_finite.
+Require Import lemmas fma_is_finite finite_lemmas_additional.
 
 Open Scope ring_scope.
 
@@ -490,7 +490,7 @@ Qed.
 
 
 
-
+(*
 Lemma bmult_overflow_implies {t : type}: 
   forall x y , 
   Binary.is_finite _ _ (BMULT t x y) = true ->
@@ -532,7 +532,7 @@ destruct x, y; (unfold BPLUS, BINOP, Bplus, is_finite in *; simpl in *; auto;
   try unfold is_finite in H1; simpl in *; auto);
   by destruct s,s0;simpl in *; auto.
 Qed.
-
+*)
 
 
 Definition Bdiv_no_overflow (t: type) (x y: R) : Prop :=
@@ -698,22 +698,6 @@ rewrite -bigmaxr_mulr.
     rewrite size_map size_enum_ord.
     by rewrite size_map size_enum_ord in H2.
 + apply /RleP. apply default_rel_ge_0.
-Qed.
-
-
-
-Lemma bfma_overflow_implies {t : type}: 
-  forall x y z, 
-  Binary.is_finite _ _ (@BFMA _ t x y z) = true ->
-  is_finite _ _ x = true /\
-  is_finite _ _ y = true /\
-  is_finite _ _ z = true.
-Proof.
-intros.
-destruct x, y, z; (unfold BFMA, BINOP, Bfma, is_finite in *; simpl in *; auto;
-  try destruct (eqb s (~~ s0)); simpl in * ;auto; try by []; 
-  try unfold is_finite in H1; simpl in *; auto);
-  by destruct s,s0,s1;simpl in *; auto.
 Qed.
 
 
