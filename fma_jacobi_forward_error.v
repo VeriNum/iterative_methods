@@ -488,154 +488,14 @@ apply bigmax_le.
  - rewrite inordK; by rewrite size_map size_enum_ord in H0.
 Qed.
 
-
-
-
-Definition Bdiv_no_overflow (t: type) (x y: R) : Prop :=
-  (Rabs (rounded t  (x / y)) < Raux.bpow Zaux.radix2 (femax t))%R.
-
-Lemma is_finite_Binv_no_overflow {NAN: Nans} (t : type) :
-  forall (x y : ftype t)
-  (HFINb : Binary.is_finite (fprec t) (femax t) (BDIV t (Zconst t 1) y) = true),
-  is_finite _ _ y = true ->
-  Bdiv_no_overflow t (FT2R (Zconst t 1)) (FT2R y).
-Proof.
-intros.
-assert (FT2R y <> 0%Re).
-{ by apply BDIV_FT2R_sep_zero. }
-pose proof Rle_or_lt (bpow Zaux.radix2 (femax t)) 
-  (Rabs (rounded t (FT2R (Zconst t 1) / FT2R y)))  as Hor;
-  destruct Hor; auto.
-apply Rlt_bool_false in H1; red.
-unfold rounded, FT2R  in H1.
-pose proof (Binary.Bdiv_correct  (fprec t) (femax t)  
-    (fprec_gt_0 t) (fprec_lt_femax t) (div_nan t) BinarySingleNaN.mode_NE (Zconst t 1) y) as
-  H2.
-specialize (H2 H0).
-simpl in H2; simpl in H1;
-rewrite H1 in H2.  unfold BDIV, BINOP in HFINb.
-destruct ((Binary.Bdiv (fprec t) (femax t) (fprec_gt_0 t) 
-             (fprec_lt_femax t) (div_nan t) BinarySingleNaN.mode_NE (Zconst t 1) y));
-simpl;  try discriminate. 
-Qed.
-
-
-(*
-
-Lemma is_finite_BDIV_no_overflow {NAN: Nans} (t : type) :
-  forall (x y : ftype t)
-  (HFINb : Binary.is_finite (fprec t) (femax t) (BDIV t x y) = true),
-  is_finite _ _ x = true ->
-  is_finite _ _ y = true ->
-  Bdiv_no_overflow t (FT2R x) (FT2R y).
-Proof.
-intros.
-assert (FT2R y <> 0%Re).
-{ apply BDIV_FT2R_sep_zero. 
-
-
-
-
-pose proof BDIV_sep_zero.
-  specialize (H1 t x y HFINb).
-  destruct x; destruct y; simpl; try discriminate; auto.
-  destruct s, s0; simpl in *; auto.
-  unfold SpecFloat.bounded in e0.
-
-
-  destruct x,y; simpl in *;auto.
-  destruct s, s0; simpl in * ;auto.
-  try discriminate.
-
-
-
-  contradict H. auto. repeat cbv. intros. 
-  Print is_finite_strict.
-
-
-
-  unfold is_finite_strict in H.
-  
-
-
-
-pose proof Rle_or_lt (bpow Zaux.radix2 (femax t)) 
-  (Rabs (rounded t (FT2R x / FT2R y)))  as Hor;
-  destruct Hor; auto.
-apply Rlt_bool_false in H0; red.
-unfold rounded, FT2R  in H0.
-pose proof (Binary.Bdiv_correct  (fprec t) (femax t)  
-    (fprec_gt_0 t) (fprec_lt_femax t) (div_nan t) BinarySingleNaN.mode_NE x y) as
-  H1.
-specialize (H1 H).
-simpl in H1; simpl in H0;
-rewrite H0 in H1.  unfold BDIV, BINOP in HFINb.
-destruct ((Binary.Bdiv (fprec t) (femax t) (fprec_gt_0 t) 
-             (fprec_lt_femax t) (div_nan t) BinarySingleNaN.mode_NE x y));
-simpl;  try discriminate.
-Qed.
-*)
-
-
-Lemma Binv_accurate' {NAN: Nans}: 
-   forall (t: type) y 
-  (FIN: Bdiv_no_overflow t (FT2R (Zconst t 1)) (FT2R y)), 
-  FT2R y <> 0%Re ->
-  exists delta, exists epsilon,
-   (delta * epsilon)%Re = 0%Re /\
-   (Rabs delta <= default_rel t)%Re /\
-   (Rabs epsilon <= default_abs t)%Re /\ 
-   (FT2R (BDIV t (Zconst t 1) y) = (FT2R (Zconst t 1) / FT2R y) * (1+delta) + epsilon)%Re.
-Proof.
-intros.
-pose proof (Binary.Bdiv_correct (fprec t) (femax t) (fprec_gt_0 t) (fprec_lt_femax t) 
-                (div_nan t) BinarySingleNaN.mode_NE (Zconst t 1) y).
-change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
-cbv zeta in H0.
-specialize (H0 H).
-pose proof (
-   Raux.Rlt_bool_spec
-        (Rabs
-           (Generic_fmt.round Zaux.radix2
-              (SpecFloat.fexp (fprec t) (femax t))
-              (BinarySingleNaN.round_mode
-                 BinarySingleNaN.mode_NE) (FT2R (Zconst t 1) / FT2R y)))
-        (Raux.bpow Zaux.radix2 (femax t))).
-destruct H1.
-destruct H0 as [? _].
-rewrite H0.
-apply generic_round_property.
-red in FIN. unfold rounded in FIN.
-Lra.lra.
-Qed.
-
-Lemma is_finite_one {ty}:
-  is_finite (fprec ty) (femax ty)  (Zconst ty 1) = true.
-Admitted.
-
-Lemma Binv_accurate {NAN: Nans}: 
-   forall (t: type) y 
-  (FIN: Binary.is_finite (fprec t) (femax t) (BDIV t (Zconst t 1) y) = true )
-  (FINy : is_finite _ _ y = true) , 
-  exists delta, exists epsilon,
-   (delta * epsilon)%Re = 0%Re /\
-   (Rabs delta <= default_rel t)%Re /\
-   (Rabs epsilon <= default_abs t)%Re /\ 
-   (FT2R (BDIV t (Zconst t 1) y) = (FT2R (Zconst t 1) / FT2R y) * (1+delta) + epsilon)%Re.
-Proof.
-intros.
-pose proof (@BDIV_FT2R_sep_zero _ t y FIN FINy).
-by apply Binv_accurate'; try apply is_finite_Binv_no_overflow .
-Qed.
-
 Lemma real_const_1 {ty}:
   FT2R (Zconst ty 1) = 1%Re.
 Proof.
 Admitted.
 
+
 (*** Lemma for error bound on the inverse ***)
 Lemma inverse_mat_norm_bound {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
-  (* (forall i, FT2R (A i i) <> 0%Re) -> *)
   (forall i, is_finite _ _ (BDIV ty (Zconst ty 1) (A i i )) = true) ->
   (forall i, is_finite _ _ (A i i) = true) ->
   let A_real := FT2R_mat A in
@@ -661,7 +521,6 @@ rewrite -bigmaxr_mulr.
     specialize (H0 (@inord n i)). specialize (H (@inord n i)).
     pose proof (@Binv_accurate _ ty (A (inord i) (inord i))) .
     specialize (H2 H H0).
-    (*specialize (H (@inord n i)). specialize (H3 H). *)
     destruct H2 as [d [e [Hpr [Hdf [Hde H2]]]]].
     rewrite H2 /=. rewrite real_const_1.
     assert ((1 / FT2R (A (inord  i) (inord i)) *
@@ -1414,13 +1273,12 @@ induction k.
                                   +++++ apply /RleP. apply vec_norm_pd.
                                   +++++ apply /RleP. apply vec_norm_pd.
                                   +++++  pose proof (@inverse_mat_norm_bound ty n A ).
-                                         assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by apply H2.
                                          assert (forall i : 'I_n.+1,
                                                             is_finite (fprec ty) (femax ty)
                                                               (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
                                          assert (forall i : 'I_n.+1,
                                                               is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
-                                         by specialize (H5 H6 H7 H8).
+                                         by specialize (H5 H6 H7).
                                   +++++  apply Rle_trans with
                                         (vec_inf_norm (FT2R_mat b) + vec_inf_norm (-(A2_J_real (FT2R_mat A) *m 
                                                                           FT2R_mat (X_m_jacobi k x0 b A))))%Re.
@@ -1432,21 +1290,20 @@ induction k.
                                 default_abs ty)%Re).
                        { rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
                          pose proof (@inverse_mat_norm_bound ty n A ).
-                         assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by apply H2.
                          assert (forall i : 'I_n.+1,
                                   is_finite (fprec ty) (femax ty)
                                     (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
                          assert (forall i : 'I_n.+1,
                                     is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
-                         specialize (H5 H6 H7 H8).
+                         specialize (H5 H6 H7).
                          assert ((vec_inf_norm
                                       (FT2R_mat (A1_inv_J A) -
                                        A1_diag A_real) <=
                                     vec_inf_norm (A1_diag A_real) *
                                     default_rel ty + default_abs ty)). { by apply /RleP. }
-                         apply reverse_triang_ineq in H9.
+                         apply reverse_triang_ineq in H8.
                          assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
-                         { intros. nra. } apply H10. by apply /RleP.
+                         { intros. nra. } apply H9. by apply /RleP.
                        } eapply Rle_trans.
                        **** apply Rplus_le_compat_r.
                             apply Rplus_le_compat.
@@ -1464,24 +1321,23 @@ induction k.
                                                    nra. apply g_pos.
                                              ***** apply Rmult_le_compat_r. apply /RleP. apply matrix_norm_pd.
                                                    pose proof (@inverse_mat_norm_bound ty n A ).
-                                                   assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by apply H2.
                                                    assert (forall i : 'I_n.+1,
                                                             is_finite (fprec ty) (femax ty)
                                                               (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
                                                    assert (forall i : 'I_n.+1,
                                                               is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
-                                                   specialize (H6 H7 H8 H9).
+                                                   specialize (H6 H7 H8).
                                                    assert ((vec_inf_norm
                                                                 (FT2R_mat (A1_inv_J A) -
                                                                  A1_diag A_real) <=
                                                               vec_inf_norm (A1_diag A_real) *
                                                               default_rel ty + default_abs ty)). { by apply /RleP. }
-                                                   apply reverse_triang_ineq in H10.
+                                                   apply reverse_triang_ineq in H9.
                                                    assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
                                                    { intros. nra. } 
                                                    apply Rle_trans with 
                                                    (vec_inf_norm (A1_diag A_real) * (1+ default_rel ty) + default_abs ty)%Re.
-                                                   rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.  apply H11. by apply /RleP.
+                                                   rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.  apply H10. by apply /RleP.
                                                    apply Rle_refl.
                                   +++++ apply Rplus_le_compat_r. apply Rplus_le_compat.
                                          ----- apply Rmult_le_compat_l. apply Rplus_le_le_0_compat.
@@ -1489,48 +1345,46 @@ induction k.
                                                apply default_rel_ge_0. apply default_rel_ge_0.
                                                apply Rmult_le_compat_r. apply /RleP. apply vec_norm_pd.
                                                pose proof (@inverse_mat_norm_bound ty n A ).
-                                                   assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by apply H2.
                                                    assert (forall i : 'I_n.+1,
                                                             is_finite (fprec ty) (femax ty)
                                                               (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
                                                    assert (forall i : 'I_n.+1,
                                                               is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
-                                                   specialize (H6 H7 H8 H9).
+                                                   specialize (H6 H7 H8).
                                                    assert ((vec_inf_norm
                                                                 (FT2R_mat (A1_inv_J A) -
                                                                  A1_diag A_real) <=
                                                               vec_inf_norm (A1_diag A_real) *
                                                               default_rel ty + default_abs ty)). { by apply /RleP. }
-                                                   apply reverse_triang_ineq in H10.
+                                                   apply reverse_triang_ineq in H9.
                                                    assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
                                                    { intros. nra. }
                                                    apply Rle_trans with 
                                                    (vec_inf_norm (A1_diag A_real) * (1+ default_rel ty) + default_abs ty)%Re.
-                                                   rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.  apply H11. by apply /RleP.
+                                                   rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.  apply H10. by apply /RleP.
                                                    apply Rle_refl.
                                          ----- apply Rmult_le_compat_l.
                                                apply Rmult_le_pos. apply Rmult_le_pos; try apply g1_pos.  
                                                apply Rplus_le_le_0_compat. nra. apply g_pos.
                                                apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
                                                pose proof (@inverse_mat_norm_bound ty n A ).
-                                                   assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) by apply H2.
                                                    assert (forall i : 'I_n.+1,
                                                             is_finite (fprec ty) (femax ty)
                                                               (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
                                                    assert (forall i : 'I_n.+1,
                                                               is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
-                                                   specialize (H6 H7 H8 H9).
+                                                   specialize (H6 H7 H8).
                                                    assert ((vec_inf_norm
                                                                 (FT2R_mat (A1_inv_J A) -
                                                                  A1_diag A_real) <=
                                                               vec_inf_norm (A1_diag A_real) *
                                                               default_rel ty + default_abs ty)). { by apply /RleP. }
-                                                   apply reverse_triang_ineq in H10.
+                                                   apply reverse_triang_ineq in H9.
                                                    assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
                                                    { intros. nra. }
                                                    apply Rle_trans with 
                                                    (vec_inf_norm (A1_diag A_real) * (1+ default_rel ty) + default_abs ty)%Re.
-                                                   rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.  apply H11. by apply /RleP.
+                                                   rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.  apply H10. by apply /RleP.
                                                    apply Rle_refl.
                              ---- apply Rle_refl.
                        **** assert ((((1 + g ty n.+1) * (1 + default_rel ty) *
