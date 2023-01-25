@@ -76,6 +76,17 @@ Require Import fma_real_func_model fma_floating_point_model.
 
 Require Import inf_norm_properties common.
 
+Search "ceil".
+
+
+Definition f_error {ty} {n:nat} m b x0 x (A: 'M[ftype ty]_n.+1):=
+  let x_k := X_m_jacobi m x0 b A in 
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x := x_fix x b_real A_real in
+  vec_inf_norm (FT2R_mat x_k - x).
+
+
 
 Definition jacobi_iteration_bound {t: type}
   (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
@@ -119,29 +130,42 @@ Definition jacobi_iteration_bound {t: type}
                       default_abs t) *
                      matrix_inf_norm (A2_J_real A_real)) *
                     vec_inf_norm (x_fix x b_real A_real)) in
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let x0' := @vector_inj _ x0 n.+1 in
   
-  (forall i, Binary.is_finite _ _ (A' i i) = true) /\
+  (** dimension of A is positive **)
+  (0 < length A)%coq_nat /\
+  (** Finiteness of A **)
+  (forall i j, Binary.is_finite _ _ (A' i j) = true) /\
+  (** x <> 0 **)
   x != 0 /\
+  (** constant for the contraction mapping **)
   (rho < 1)%Re /\
+  (** Invertibility of A **)
   A_real \in unitmx /\
+  (** Finiteness of the inverse of diagonal elements of A **)
   (forall i : 'I_n.+1,
     Binary.is_finite (fprec t) (femax t)
       (BDIV t (Zconst t 1) (A' i i)) = true) /\
-  (forall x0: 'cV[ftype t]_n.+1, 
-    (forall k:nat, 
-      forall i, Binary.is_finite _ _ ((X_m_jacobi k x0 b' A') i ord0) = true)).
-(*
+  (** Finiteness of solution vector at each iteration **)
+  (forall k:nat, 
+      forall i, Binary.is_finite _ _ ((X_m_jacobi k x0' b' A') i ord0) = true) /\
+  (** Constraint on Gamma **)
+  (Rsqr (g1 t n.+1 (n.+1 - 1)) < FT2R (accuracy))%Re /\
+  (** constraint on k **)
+  (k > Z.to_N (Zceil (ln (((1- rho) * sqrt (INR n.+1) * (1 + g t n.+1) * (f_error 0 b' x0' x A' - d_mag / (1-rho))) /
+                          (sqrt (FT2R (accuracy)  - g1 t n.+1 (n.+1 - 1)))) /
+                      ln (1 / rho))))%coq_nat.
+       
 
-
-  False.  (* need to fill this in! *)
-*)
 
 Lemma jacobi_iteration_bound_monotone:
   forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k k': nat),
    (k <= k')%nat ->
    jacobi_iteration_bound A b acc k ->
    jacobi_iteration_bound A b acc k'.
-Proof. auto. Qed.
+Proof. 
+Admitted.
 
 Lemma jacobi_iteration_bound_corollaries:
   forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
@@ -150,7 +174,44 @@ Lemma jacobi_iteration_bound_corollaries:
    Forall (Forall finite) A /\
    Forall finite (invert_diagmatrix (diag_of_matrix A)) /\
    Forall finite b /\ finite acc.
-Proof. intros. contradiction H. Qed.
+Proof. 
+intros. unfold jacobi_iteration_bound in H.
+destruct H as [Hla [HfA [Hxneq0 [Hrho [HAinv [Hinvf Hsolf]]]]]].
+repeat split.
++ unfold matrix_cols, matrix_rows. simpl.
+  admit.
++ apply Forall_nth. intros.
+  apply Forall_nth. intros.
+  specialize (HfA (@inord (length A).-1 i) (@inord (length A).-1 i0)).
+  apply finite_is_finite. rewrite !mxE in HfA.
+  rewrite !inordK in HfA.
+  - admit.
+  - rewrite prednK. by apply /ssrnat.ltP. by apply /ssrnat.ltP.
+  - rewrite prednK.
+    assert (length (nth i A d) = length A).
+    { 
+
+
+
+ 
+    admit. by apply /ssrnat.ltP.
++ apply Forall_nth. intros.
+  unfold invert_diagmatrix. 
+  rewrite (nth_map_inrange (Zconst t 0)).
+  - specialize (Hinvf (@inord (length A).-1 i)).
+    rewrite !mxE in Hinvf. unfold diag_of_matrix.
+    rewrite nth_map_seq.
+    * unfold matrix_index. rewrite inordK in Hinvf.
+      ++ apply finite_is_finite. apply Hinvf.
+      ++ rewrite prednK. rewrite !map_length seq_length /matrix_rows_nat in H.
+         by apply /ssrnat.ltP. by apply /ssrnat.ltP.
+    * unfold matrix_rows_nat. 
+      by rewrite !map_length seq_length /matrix_rows_nat in H.
+  - rewrite !map_length seq_length.
+    by rewrite !map_length seq_length in H.
++  admit.
++ admit. 
+Admitted.
 
 Lemma jacobi_iteration_bound_correct {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
