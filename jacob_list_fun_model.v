@@ -169,6 +169,24 @@ Lemma jacobi_iteration_bound_monotone:
 Proof. 
 Admitted.
 
+From Flocq Require Import Binary.
+
+(** remove this later. Also in the fma_jacobi_forward_error file **)
+Lemma bfma_overflow_implies {t : type}: 
+  forall x y z, 
+  Binary.is_finite _ _ (@BFMA _ t x y z) = true ->
+  Binary.is_finite _ _ x = true /\
+  Binary.is_finite _ _ y = true /\
+  Binary.is_finite _ _ z = true.
+Proof.
+intros.
+destruct x, y, z; (unfold BFMA, BINOP, Bfma, is_finite in *; simpl in *; auto;
+  try destruct (eqb s (~~ s0)); simpl in * ;auto; try by []; 
+  try unfold is_finite in H1; simpl in *; auto);
+  by destruct s,s0,s1;simpl in *; auto.
+Qed.
+
+
 Lemma jacobi_iteration_bound_corollaries:
   forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
@@ -207,7 +225,24 @@ repeat split.
       by rewrite !map_length seq_length /matrix_rows_nat in H.
   - rewrite !map_length seq_length.
     by rewrite !map_length seq_length in H.
-+  admit.
++ specialize (Hsolf k.+1).
+  apply Forall_nth. intros.
+  specialize (Hsolf (@inord (length A).-1 i)).
+  apply finite_is_finite.  
+  remember (length A).-1 as m. clear Hk HcG2 HcG1.
+  rewrite mxE in Hsolf.
+  rewrite !nth_vec_to_list_float in Hsolf.
+  rewrite inord_val in Hsolf. 
+  apply bmult_overflow_implies in Hsolf.
+  
+
+
+Print matrix_inj.
+  unfold X_m_jacobi,vector_inj, matrix_inj,jacobi_iter  in Hsolf. rewrite !mxE in Hsolf.
+
+
+
+ admit.
 + by apply finite_is_finite.
 Admitted.
 
