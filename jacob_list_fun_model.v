@@ -319,12 +319,18 @@ destruct H as [Hla [Hlab [HfA [Hxneq0 [Hrho [HAinv [Hinvf [Hsolf [HcG1 [HcG2 Hk]
 repeat split.
 + admit. (** BMULT acc acc is finite **)
 + exists k.-1. repeat split.
-  -
-  
+  - apply leq_pred.
+  - intros. admit.
+    (** use the compatibility relation from norms **)
+  - Search "BCMP". unfold BCMP.
+    rewrite Bcompare_correct; simpl.
+    * admit. (** show that before k, residual > acc2 **)
+    * admit.
+    * admit.
+Admitted.
 
 
-contradiction H.
-Qed.
+
 
 End WITH_NANS.
 
