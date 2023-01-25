@@ -490,57 +490,37 @@ Qed.
 
 
 
-(*
-Lemma bmult_overflow_implies {t : type}: 
-  forall x y , 
-  Binary.is_finite _ _ (BMULT t x y) = true ->
-  is_finite _ _ x = true /\
-  is_finite _ _ y = true.
-Proof.
-intros.
-destruct x, y; (unfold BMULT, BINOP, Bmult in *; simpl in *; auto;
-  try destruct (eqb s (~~ s0)); simpl in * ;auto; try by []; 
-  try unfold is_finite in H1; simpl in *; auto).
-Qed.
-
-Lemma Bminus_bplus_opp_implies {ty} (x y : ftype ty):
-  is_finite _ _ (BMINUS ty x y) -> 
-  is_finite _ _ (BPLUS ty x (BOPP ty y)).
-Proof.
-intros.
-destruct x, y; (unfold BMINUS, BPLUS, BOPP, BINOP, Bplus, Bminus, Bopp in *; simpl in *; auto;
-try destruct (eqb s (~~ s0)); simpl in * ;auto; try by []; 
-try unfold is_finite in H1; simpl in *; auto);
-(destruct (BinarySingleNaN.binary_normalize 
-    (fprec ty) (femax ty) (fprec_gt_0 ty)
-    (fprec_lt_femax ty) BinarySingleNaN.mode_NE
-    (BinarySingleNaN.Fplus_naive s m e 
-       (~~ s0) m0 e1 (Z.min e e1)) 
-    (Z.min e e1) false); simpl;auto;
-  by destruct s,s0;simpl in *; auto).
-Qed.
-
-Lemma bplus_overflow_implies {t : type}: 
-  forall x y , 
-  Binary.is_finite _ _ (BPLUS t x y) = true ->
-  is_finite _ _ x = true /\
-  is_finite _ _ y = true.
-Proof.
-intros.
-destruct x, y; (unfold BPLUS, BINOP, Bplus, is_finite in *; simpl in *; auto;
-  try destruct (eqb s (~~ s0)); simpl in * ;auto; try by []; 
-  try unfold is_finite in H1; simpl in *; auto);
-  by destruct s,s0;simpl in *; auto.
-Qed.
-*)
-
 
 Definition Bdiv_no_overflow (t: type) (x y: R) : Prop :=
   (Rabs (rounded t  (x / y)) < Raux.bpow Zaux.radix2 (femax t))%R.
 
+Lemma is_finite_BDIV_no_overflow {NAN: Nans} (t : type) :
+  forall (x y : ftype t)
+  (HFINb : Binary.is_finite (fprec t) (femax t) (BDIV t (Zconst t 1) y) = true),
+  is_finite _ _ y = true ->
+  Bdiv_no_overflow t (FT2R (Zconst t 1)) (FT2R y).
+Proof.
+intros.
+assert (FT2R y <> 0%Re).
+{ by apply BDIV_FT2R_sep_zero. }
+pose proof Rle_or_lt (bpow Zaux.radix2 (femax t)) 
+  (Rabs (rounded t (FT2R (Zconst t 1) / FT2R y)))  as Hor;
+  destruct Hor; auto.
+apply Rlt_bool_false in H1; red.
+unfold rounded, FT2R  in H1.
+pose proof (Binary.Bdiv_correct  (fprec t) (femax t)  
+    (fprec_gt_0 t) (fprec_lt_femax t) (div_nan t) BinarySingleNaN.mode_NE (Zconst t 1) y) as
+  H2.
+specialize (H2 H0).
+simpl in H2; simpl in H1;
+rewrite H1 in H2.  unfold BDIV, BINOP in HFINb.
+destruct ((Binary.Bdiv (fprec t) (femax t) (fprec_gt_0 t) 
+             (fprec_lt_femax t) (div_nan t) BinarySingleNaN.mode_NE (Zconst t 1) y));
+simpl;  try discriminate. 
+Qed.
 
 
-
+(*
 
 Lemma is_finite_BDIV_no_overflow {NAN: Nans} (t : type) :
   forall (x y : ftype t)
@@ -549,10 +529,14 @@ Lemma is_finite_BDIV_no_overflow {NAN: Nans} (t : type) :
   is_finite _ _ y = true ->
   Bdiv_no_overflow t (FT2R x) (FT2R y).
 Proof.
-(*
 intros.
 assert (FT2R y <> 0%Re).
-{ pose proof BDIV_sep_zero.
+{ apply BDIV_FT2R_sep_zero. 
+
+
+
+
+pose proof BDIV_sep_zero.
   specialize (H1 t x y HFINb).
   destruct x; destruct y; simpl; try discriminate; auto.
   destruct s, s0; simpl in *; auto.
@@ -591,7 +575,7 @@ destruct ((Binary.Bdiv (fprec t) (femax t) (fprec_gt_0 t)
 simpl;  try discriminate.
 Qed.
 *)
-Admitted.
+
 
 Lemma BDIV_accurate' {NAN: Nans}: 
    forall (t: type) x y 
