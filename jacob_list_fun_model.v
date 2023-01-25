@@ -154,7 +154,7 @@ Definition jacobi_preconditions {t: type}
   (** Constraint on Gamma **)
   (Rsqr (g1 t n.+1 (n.+1 - 1)) < FT2R (accuracy))%Re /\
   (** Gamma is finite **)
-  Binary.is_finite _ _ accuracy = true /\
+  Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
   (** constraint on k **)
   (k > Z.to_N (Zceil (ln (((1- rho) * sqrt (INR n.+1) * (1 + g t n.+1) * (f_error 0 b' x0' x A' - d_mag / (1-rho))) /
                           (sqrt (FT2R (accuracy)  - g1 t n.+1 (n.+1 - 1)))) /
