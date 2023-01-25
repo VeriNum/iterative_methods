@@ -252,7 +252,8 @@ is_finite (fprec t) (femax t)
 Proof.
 induction v.
 + by simpl.
-+ unfold dotprod.
++ unfold dotprod. admit.
+Admitted.
 
 
 
@@ -291,6 +292,12 @@ repeat split.
     * Search "Rcompare".
       rewrite Rcompare_Lt; first by [].
       (** use k to do the proof **)
+      Search "Zceil".
+      change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
+      unfold acc2.
+      assert (FT2R (norm2 (resid (jacobi_n A b x0 k.-1))) = 
+              Rabs (FT2R (norm2 (resid (jacobi_n A b x0 k.-1))))).
+      { rewrite Rabs_right. nra.
 
 
 
