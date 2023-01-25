@@ -494,7 +494,7 @@ Qed.
 Definition Bdiv_no_overflow (t: type) (x y: R) : Prop :=
   (Rabs (rounded t  (x / y)) < Raux.bpow Zaux.radix2 (femax t))%R.
 
-Lemma is_finite_BDIV_no_overflow {NAN: Nans} (t : type) :
+Lemma is_finite_Binv_no_overflow {NAN: Nans} (t : type) :
   forall (x y : ftype t)
   (HFINb : Binary.is_finite (fprec t) (femax t) (BDIV t (Zconst t 1) y) = true),
   is_finite _ _ y = true ->
@@ -577,19 +577,19 @@ Qed.
 *)
 
 
-Lemma BDIV_accurate' {NAN: Nans}: 
-   forall (t: type) x y 
-  (FIN: Bdiv_no_overflow t (FT2R x) (FT2R y)), 
+Lemma Binv_accurate' {NAN: Nans}: 
+   forall (t: type) y 
+  (FIN: Bdiv_no_overflow t (FT2R (Zconst t 1)) (FT2R y)), 
   FT2R y <> 0%Re ->
   exists delta, exists epsilon,
    (delta * epsilon)%Re = 0%Re /\
    (Rabs delta <= default_rel t)%Re /\
    (Rabs epsilon <= default_abs t)%Re /\ 
-   (FT2R (BDIV t x y) = (FT2R x / FT2R y) * (1+delta) + epsilon)%Re.
+   (FT2R (BDIV t (Zconst t 1) y) = (FT2R (Zconst t 1) / FT2R y) * (1+delta) + epsilon)%Re.
 Proof.
 intros.
 pose proof (Binary.Bdiv_correct (fprec t) (femax t) (fprec_gt_0 t) (fprec_lt_femax t) 
-                (div_nan t) BinarySingleNaN.mode_NE x y).
+                (div_nan t) BinarySingleNaN.mode_NE (Zconst t 1) y).
 change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
 cbv zeta in H0.
 specialize (H0 H).
@@ -599,7 +599,7 @@ pose proof (
            (Generic_fmt.round Zaux.radix2
               (SpecFloat.fexp (fprec t) (femax t))
               (BinarySingleNaN.round_mode
-                 BinarySingleNaN.mode_NE) (FT2R x / FT2R y)))
+                 BinarySingleNaN.mode_NE) (FT2R (Zconst t 1) / FT2R y)))
         (Raux.bpow Zaux.radix2 (femax t))).
 destruct H1.
 destruct H0 as [? _].
@@ -613,20 +613,19 @@ Lemma is_finite_one {ty}:
   is_finite (fprec ty) (femax ty)  (Zconst ty 1) = true.
 Admitted.
 
-Lemma BDIV_accurate {NAN: Nans}: 
-   forall (t: type) x y 
-  (FIN: Binary.is_finite (fprec t) (femax t) (BDIV t x y) = true )
-  (FINx : is_finite _ _ x = true)
+Lemma Binv_accurate {NAN: Nans}: 
+   forall (t: type) y 
+  (FIN: Binary.is_finite (fprec t) (femax t) (BDIV t (Zconst t 1) y) = true )
   (FINy : is_finite _ _ y = true) , 
-  FT2R y <> 0%Re ->
   exists delta, exists epsilon,
    (delta * epsilon)%Re = 0%Re /\
    (Rabs delta <= default_rel t)%Re /\
    (Rabs epsilon <= default_abs t)%Re /\ 
-   (FT2R (BDIV t x y) = (FT2R x / FT2R y) * (1+delta) + epsilon)%Re.
+   (FT2R (BDIV t (Zconst t 1) y) = (FT2R (Zconst t 1) / FT2R y) * (1+delta) + epsilon)%Re.
 Proof.
 intros.
-by apply BDIV_accurate'; try apply is_finite_BDIV_no_overflow .
+pose proof (@BDIV_FT2R_sep_zero _ t y FIN FINy).
+by apply Binv_accurate'; try apply is_finite_Binv_no_overflow .
 Qed.
 
 Lemma real_const_1 {ty}:
@@ -636,7 +635,7 @@ Admitted.
 
 (*** Lemma for error bound on the inverse ***)
 Lemma inverse_mat_norm_bound {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
-  (forall i, FT2R (A i i) <> 0%Re) ->
+  (* (forall i, FT2R (A i i) <> 0%Re) -> *)
   (forall i, is_finite _ _ (BDIV ty (Zconst ty 1) (A i i )) = true) ->
   (forall i, is_finite _ _ (A i i) = true) ->
   let A_real := FT2R_mat A in
@@ -644,30 +643,32 @@ Lemma inverse_mat_norm_bound {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
     vec_inf_norm (A1_diag A_real) * (default_rel ty) + (default_abs ty))%Re.
 Proof.
 intros.
+assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
+{ intros. by apply BDIV_FT2R_sep_zero. }
 unfold vec_inf_norm. rewrite RmultE. rewrite mulrC.
 rewrite -bigmaxr_mulr.
 + apply bigmax_le; first by rewrite size_map size_enum_ord.
   intros. rewrite seq_equiv. 
-  rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H2.
+  rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H1.
   rewrite !mxE. 
   apply Rle_trans with 
   ([seq (default_rel ty *
          Rabs (A1_diag A_real i0 0))%Ri
       | i0 <- enum 'I_n.+1]`_i + (default_abs ty))%Re.
   - rewrite seq_equiv. rewrite nth_mkseq;
-    last by rewrite size_map size_enum_ord in H2.
+    last by rewrite size_map size_enum_ord in H1.
     rewrite -RmultE -RminusE. rewrite !mxE.
-    specialize (H1 (@inord n i)). specialize (H0 (@inord n i)).
-    pose proof (@BDIV_accurate _ ty (Zconst ty 1) (A (inord i) (inord i))) .
-    specialize (H3 H0 is_finite_one H1).
-    specialize (H (@inord n i)). specialize (H3 H).
-    destruct H3 as [d [e [Hpr [Hdf [Hde H3]]]]].
-    rewrite H3 /=. rewrite real_const_1.
+    specialize (H0 (@inord n i)). specialize (H (@inord n i)).
+    pose proof (@Binv_accurate _ ty (A (inord i) (inord i))) .
+    specialize (H2 H H0).
+    (*specialize (H (@inord n i)). specialize (H3 H). *)
+    destruct H2 as [d [e [Hpr [Hdf [Hde H2]]]]].
+    rewrite H2 /=. rewrite real_const_1.
     assert ((1 / FT2R (A (inord  i) (inord i)) *
               (1 + d) + e -
               1 / FT2R (A (inord i) (inord i)))%Re = 
             ((1 / FT2R (A (inord i) (inord i))) * d + e)%Re).
-    { nra. } rewrite H4.
+    { nra. } rewrite H3.
     eapply Rle_trans.
     apply Rabs_triang.
     * apply Rplus_le_compat.
@@ -680,7 +681,7 @@ rewrite -bigmaxr_mulr.
                                      Rabs (A1_diag A_real i0 0)
                                    | i0 <- enum 'I_n.+1] i).
     rewrite size_map size_enum_ord.
-    by rewrite size_map size_enum_ord in H2.
+    by rewrite size_map size_enum_ord in H1.
 + apply /RleP. apply default_rel_ge_0.
 Qed.
 
@@ -775,7 +776,7 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
 
   (rho < 1)%Re ->
   A_real \in unitmx ->
-  (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) ->
+  (*(forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) -> *)
   (forall i : 'I_n.+1,
     is_finite (fprec ty) (femax ty)
       (BDIV ty (Zconst ty 1) (A i i)) = true) ->
@@ -785,7 +786,10 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
   (forall k:nat,
    (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag))%Re.
 Proof.
-intro HAf. intros ? ? ? ? ? ? ? ? ? ? ? Hdivf ? Hfin ?.
+intro HAf. 
+intros ? ? ? ? ? ? ? ? ? ?  Hdivf ? Hfin ?.
+assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re).
+{ intros. by apply BDIV_FT2R_sep_zero. }
 induction k.
 + simpl. nra.
 + simpl.
