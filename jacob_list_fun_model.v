@@ -171,65 +171,8 @@ Proof.
 Admitted.
 
 From Flocq Require Import Binary.
+Require Import finite_lemmas_additional.
 
-(** remove this later. Also in the fma_jacobi_forward_error file **)
-Lemma bfma_overflow_implies {t : type}: 
-  forall x y z, 
-  Binary.is_finite _ _ (@BFMA _ t x y z) = true ->
-  Binary.is_finite _ _ x = true /\
-  Binary.is_finite _ _ y = true /\
-  Binary.is_finite _ _ z = true.
-Proof.
-intros.
-destruct x, y, z; (unfold BFMA, BINOP, Bfma, is_finite in *; simpl in *; auto;
-  try destruct (eqb s (~~ s0)); simpl in * ;auto; try by []; 
-  try unfold is_finite in H1; simpl in *; auto);
-  by destruct s,s0,s1;simpl in *; auto.
-Qed.
-
-
-Lemma bmult_overflow_implies {t : type}: 
-  forall x y , 
-  Binary.is_finite _ _ (BMULT t x y) = true ->
-  is_finite _ _ x = true /\
-  is_finite _ _ y = true.
-Proof.
-intros.
-destruct x, y; (unfold BMULT, BINOP, Bmult in *; simpl in *; auto;
-  try destruct (eqb s (~~ s0)); simpl in * ;auto; try by []; 
-  try unfold is_finite in H1; simpl in *; auto).
-Qed.
-
-
-Lemma Bminus_bplus_opp_implies {ty} (x y : ftype ty):
-  is_finite _ _ (BMINUS ty x y) -> 
-  is_finite _ _ (BPLUS ty x (BOPP ty y)).
-Proof.
-intros.
-destruct x, y; (unfold BMINUS, BPLUS, BOPP, BINOP, Bplus, Bminus, Bopp in *; simpl in *; auto;
-try destruct (Bool.eqb s (~~ s0)); simpl in * ;auto; try by []; 
-try unfold is_finite in H1; simpl in *; auto);
-(destruct (BinarySingleNaN.binary_normalize 
-    (fprec ty) (femax ty) (fprec_gt_0 ty)
-    (fprec_lt_femax ty) BinarySingleNaN.mode_NE
-    (BinarySingleNaN.Fplus_naive s m e 
-       (~~ s0) m0 e1 (Z.min e e1)) 
-    (Z.min e e1) false); simpl;auto;
-  by destruct s,s0;simpl in *; auto).
-Qed.
-
-Lemma bplus_overflow_implies {t : type}: 
-  forall x y , 
-  Binary.is_finite _ _ (BPLUS t x y) = true ->
-  is_finite _ _ x = true /\
-  is_finite _ _ y = true.
-Proof.
-intros.
-destruct x, y; (unfold BPLUS, BINOP, Bplus, is_finite in *; simpl in *; auto;
-  try destruct (eqb s (~~ s0)); simpl in * ;auto; try by []; 
-  try unfold is_finite in H1; simpl in *; auto);
-  by destruct s,s0;simpl in *; auto.
-Qed.
 
 Lemma jacobi_iteration_bound_corollaries:
   forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
@@ -296,8 +239,23 @@ repeat split.
   - rewrite inordK;
     (try rewrite Heqm;try rewrite prednK; try by apply /ssrnat.ltP;
      try rewrite Hlab;try  by apply /ssrnat.ltP); try by apply /ssrnat.ltP.
-+ by apply finite_is_finite.
++ apply finite_is_finite.
+  apply bmult_overflow_implies in HcG2. by destruct HcG2.
 Admitted.
+
+
+
+(** finiteness of dot product **)
+Lemma dotprod_finite {t: type} (v : vector t):
+is_finite (fprec t) (femax t)
+  (dotprod v v) = true.
+Proof.
+induction v.
++ by simpl.
++ unfold dotprod.
+
+
+
 
 Lemma jacobi_iteration_bound {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
@@ -317,16 +275,29 @@ intros.
 unfold jacobi_preconditions in H.
 destruct H as [Hla [Hlab [HfA [Hxneq0 [Hrho [HAinv [Hinvf [Hsolf [HcG1 [HcG2 Hk]]]]]]]]]].
 repeat split.
-+ admit. (** BMULT acc acc is finite **)
++ apply finite_is_finite. unfold acc2. apply HcG2.
 + exists k.-1. repeat split.
   - apply leq_pred.
-  - intros. admit.
+  - intros. apply finite_is_finite.
+    unfold norm2.
+    
+
+
+
+    admit.
     (** use the compatibility relation from norms **)
   - Search "BCMP". unfold BCMP.
     rewrite Bcompare_correct; simpl.
-    * admit. (** show that before k, residual > acc2 **)
+    * Search "Rcompare".
+      rewrite Rcompare_Lt; first by [].
+      (** use k to do the proof **)
+
+
+
+
+ admit. (** show that before k, residual > acc2 **)
     * admit.
-    * admit.
+    * unfold acc2. apply HcG2.
 Admitted.
 
 
