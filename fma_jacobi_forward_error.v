@@ -288,13 +288,6 @@ rewrite !mxE. rewrite !nth_vec_to_list_real.
 Qed.
 
 
-(** remember to remove this later **)
-Lemma ft2r_mat_equiv {ty} {m n : nat} (A : 'M[ftype ty]_(m.+1,n.+1)):
-  fma_matrix_vec_mult.FT2R_mat A = FT2R_mat A.
-Proof.
-by unfold fma_matrix_vec_mult.FT2R_mat, FT2R_mat.
-Qed.
-
 Lemma rel_le_1 {ty} {n:nat}:
   (/ INR n.+1 *
      ((1 + default_rel ty) *
@@ -1292,8 +1285,7 @@ induction k.
                      apply bplus_overflow_implies in Hfin2; try apply Hfin2.
                      destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
                      by rewrite mxE in Hfin22.
-            *** rewrite !ft2r_mat_equiv .
-                eapply Rle_trans.
+            *** eapply Rle_trans.
                 ++++ apply Rplus_le_compat_r. apply Rplus_le_compat_r. apply Rplus_le_compat_l.
                     rewrite -!RmultE -!RplusE. apply Rmult_le_compat_l.
                     --- apply /RleP. apply vec_norm_pd.
