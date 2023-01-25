@@ -2,7 +2,9 @@
   operations such as BPLUS, BFMA, and BMULT. *)
 
 Require Import vcfloat.VCFloat.
+From vcfloat Require Import IEEE754_extra.
 Require Import common op_defs.
+Require Import ZArith.
 
 Section NAN.
 
@@ -301,7 +303,7 @@ pose proof BPLUS_accurate t x A y B (is_finite_sum_no_overflow t x y FIN);
   auto.
 Qed.
 
-Lemma BDIV_sep_zero {NAN: Nans} (t : type) :
+Lemma BDIV_sep_zero' {NAN: Nans} (t : type) :
   forall (f1 f2 : ftype t)
   (Hfin: Binary.is_finite _ _ (BDIV t f1 f2) = true)
   (Hfin1: Binary.is_finite_strict _ _ f1 = true)
@@ -311,6 +313,96 @@ Proof.
 intros ? ?;
 destruct f2; destruct f1; simpl; try discriminate; auto.
 Qed.
+
+Lemma fprec_lb {NAN: Nans} (t : type) :
+  (2 <= fprec t)%Z.
+Proof. pose proof ( fprec_gt_one t); lia. Qed.
+
+Lemma femax_lb {NAN: Nans} (t : type) :
+  (3 <= femax t)%Z.
+Proof. 
+pose proof fprec_lb t;
+pose proof fprec_lt_femax t; lia. 
+Qed.
+
+Lemma femax_minus_fprec (t: type): 
+  (0 < (femax t - fprec t))%Z.
+Proof.
+pose proof fprec_lt_femax t; lia. 
+Qed.
+
+Lemma in_fprec_bound1 {NAN: Nans} (t : type) :
+ (- 2 ^ fprec t <= 1 <= 2 ^ fprec t)%Z.
+Proof.
+split. eapply Z.le_trans with (-2 ^ 2)%Z; [|lia].
+apply Z.opp_le_mono; rewrite !Z.opp_involutive.
+apply Z.pow_le_mono_r; [lia |apply fprec_lb ].
+eapply Z.le_trans with (2 ^ 2)%Z; [lia|].
+apply Z.pow_le_mono_r; [lia |apply fprec_lb ].
+Qed.
+
+Lemma in_fprec_bound0 {NAN: Nans} (t : type) :
+ (- 2 ^ fprec t <= 0 <= 2 ^ fprec t)%Z.
+Proof.
+split. eapply Z.le_trans with (-2 ^ 2)%Z; [|lia].
+apply Z.opp_le_mono; rewrite !Z.opp_involutive.
+apply Z.pow_le_mono_r; [lia |apply fprec_lb ].
+eapply Z.le_trans with (2 ^ 2)%Z; [lia|].
+apply Z.pow_le_mono_r; [lia |apply fprec_lb ].
+Qed.
+
+Lemma Bone_strict_finite {NAN: Nans} (t : type) :
+  Binary.is_finite_strict _ _ (Zconst t 1) = true.
+Proof.
+destruct 
+  (BofZ_exact (fprec t) (femax t) (Pos2Z.is_pos (fprecp t)) (fprec_lt_femax t) 1 (in_fprec_bound1 t)) 
+  as ( A & H & _); fold (Zconst t 1) in *.
+destruct (Zconst t 1);
+  simpl; simpl in A; try discriminate; auto.
+nra.
+Qed.
+
+Lemma BDIV_sep_zero1 {NAN: Nans} (t : type) :
+  forall (f1 : ftype t)
+  (Hfin: Binary.is_finite _ _ (BDIV t (Zconst t 1) f1) = true)
+  (Hfin1: Binary.is_finite _ _ f1 = true),
+  f1 <> (Zconst t 0).
+Proof.
+intros. intros HF.
+pose proof BDIV_sep_zero' t (Zconst t 1) f1 Hfin (Bone_strict_finite t) Hfin1.
+destruct f1; try discriminate; auto.
+Qed.
+
+Lemma BDIV_sep_zero2 {NAN: Nans} (t : type) :
+  forall (f1 : ftype t)
+  (Hfin: Binary.is_finite _ _ (BDIV t (Zconst t 1) f1) = true)
+  (Hfin1: Binary.is_finite _ _ f1 = true),
+  f1 <> (neg_zero).
+Proof.
+intros. intros HF.
+pose proof BDIV_sep_zero' t (Zconst t 1) f1 Hfin (Bone_strict_finite t) Hfin1.
+destruct f1; try discriminate; auto.
+Qed.
+
+Lemma BDIV_FT2R_sep_zero {NAN: Nans} (t : type) :
+  forall (f1 : ftype t)
+  (Hfin: Binary.is_finite _ _ (BDIV t (Zconst t 1) f1) = true)
+  (Hfin1: Binary.is_finite _ _ f1 = true),
+  FT2R f1 <> 0.
+Proof.
+intros. intros HF.
+pose proof BDIV_sep_zero1 t f1 Hfin Hfin1 as H0.
+pose proof BDIV_sep_zero2 t f1 Hfin Hfin1 as H1.
+pose proof Binary.B2R_Bsign_inj (fprec t) (femax t) f1 neg_zero Hfin1 (neg_zero_is_finite t) as HA.
+assert (HFIN : Binary.is_finite (fprec t) (femax t) (Zconst t 0) = true) by (
+  set (y:= Zconst t 0) in *; hnf in y; subst y; simpl; auto).
+pose proof Binary.B2R_Bsign_inj (fprec t) (femax t) f1 (Zconst t 0) Hfin1 HFIN as HB; clear HFIN.
+pose proof BDIV_sep_zero' t (Zconst t 1) f1 Hfin (Bone_strict_finite t) Hfin1 as HFIN.
+set (y:= Zconst t 0) in *; hnf in y; subst y.
+destruct f1; try discriminate; auto.
+destruct s; try discriminate; auto.
+Qed. 
+
 
 
 End NAN.
