@@ -248,7 +248,42 @@ Notation "-f A" := (opp_mat A) (at level 50).
 Notation "A *f B" := (mulmx_float A B) (at level 70).
 Notation "A -f B" := (sub_mat A B) (at level 80).
 
-Lemma vector_residual_rel {t: type} :
+Definition A1_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
+  \col_i (A i i).
+
+
+Definition residual_math {t}  {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):=
+  diag_vector_mult (A1_J A) 
+    ((X_m_jacobi k x0 b A) -f (X_m_jacobi k.-1 x0 b A)).
+   
+
+
+Lemma iter_length {ty} n (A: matrix ty) (b: vector ty) (x: vector ty):
+  length b = length A ->
+  length x = length A ->
+  length
+  (Nat.iter n
+     (fun x0 : vector ty =>
+      diagmatrix_vector_mult
+        (invert_diagmatrix (diag_of_matrix A))
+        (vector_sub b
+           (matrix_vector_mult (remove_diag A) x0)))
+     x) = length A.
+Proof.
+induction n.
++ by simpl.
++ simpl. repeat rewrite !map_length combine_length.
+  unfold matrix_vector_mult. rewrite map_length.
+  rewrite !map_length !seq_length /matrix_rows_nat /=.
+  intros. rewrite H. by rewrite !Nat.min_id.
+Qed.
+  
+
+
+
+
+Lemma vector_residual_equiv {t: type} :
  forall (A: matrix t) (b x0: vector t) (k:nat),
   let n := (length A).-1 in
   let A' := @matrix_inj _ A n.+1 n.+1 in
@@ -257,16 +292,33 @@ Lemma vector_residual_rel {t: type} :
   let b_real := FT2R_mat b' in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   let x0' := @vector_inj _ x0 n.+1 in
-  @vector_inj _ (rev (resid (jacobi_n A b x0 k.-1))) n.+1 = 
-  ((X_m_jacobi k x0' b' A') -f (X_m_jacobi k.-1 x0' b' A')).
+  length b = length A ->
+  length x0 = length A ->
+  (0 < length A)%coq_nat ->
+  @vector_inj _ (resid (jacobi_n A b x0 k.-1)) n.+1 = 
+  residual_math A' x0' b' k.
 Proof.
 intros.
 apply /matrixP. unfold eqrel. intros. rewrite !mxE.
-unfold resid, jacobi_residual. rewrite rev_nth.
+unfold resid, jacobi_residual. 
 + unfold diagmatrix_vector_mult, map2, uncurry.
-  rewrite (nth_map_inrange (Zconst t 1, Zconst t 0)).
-  - rewrite map_length. rewrite combine_nth.
-    *
+  rewrite (nth_map_inrange (Zconst t 0, Zconst t 0)).
+  - rewrite combine_nth.
+    * rewrite nth_vec_to_list_float; last by apply ltn_ord.
+      rewrite nth_vec_to_list_float; last by apply ltn_ord.
+      rewrite !mxE. rewrite inord_val.
+      
+
+
+      unfold diag_of_matrix.
+       
+
+
+
+unfold jacob_list_fun_model.jacobi_iter.
+      repeat rewrite !combine_length !map_length !seq_length.
+      unfold diagmatrix_vector_mult, map2, uncurry.
+      repeat rewrite !combine_length !map_length !seq_length.
 
 
 
