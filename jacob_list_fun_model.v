@@ -327,12 +327,18 @@ repeat split.
       (** use k to do the proof **)
       Search "Zceil".
       change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
+      remember (rho_def A b) as rho.
+      remember (d_mag_def A b) as d_mag.
+      remember (length A).-1 as n.
+      remember (f_error 0 (vector_inj b n.+1)
+                          (vector_inj (repeat (Zconst t 0) (length b))  n.+1) ((FT2R_mat (matrix_inj A n.+1 n.+1))^-1 *m 
+                           FT2R_mat (vector_inj b n.+1))  (matrix_inj A n.+1 n.+1)) as e_0. 
       unfold acc2.
       assert (FT2R (norm2 (resid (jacobi_n A b x0 k.-1))) = 
               Rabs (FT2R (norm2 (resid (jacobi_n A b x0 k.-1))))).
       { rewrite Rabs_right. nra. apply Rle_ge, norm2_ge_0. }
       rewrite H.
-      remember (length A).-1 as n.
+      
       pose proof (@norm2_vec_inf_norm_rel t n _).
       remember (rev (resid (jacobi_n A b x0 k.-1))) as v_l.
       specialize (H0 (@vector_inj _ v_l n.+1)). 
@@ -351,12 +357,12 @@ repeat split.
          -- apply Rplus_le_compat_r. apply Rmult_le_compat_r.
             ** apply Rplus_le_le_0_compat. nra. apply g_pos.
             ** apply Rmult_le_compat_l. apply pos_INR.
-               Print f_error.
-               remember (f_error 0 (vector_inj b n.+1)
-                          (vector_inj (repeat (Zconst t 0) (length b))  n.+1) ((FT2R_mat (matrix_inj A n.+1 n.+1))^-1 *m 
-                           FT2R_mat (vector_inj b n.+1))  (matrix_inj A n.+1 n.+1)) as e_0. 
+               
                apply Rle_trans with 
                ((rho^k * (1+ rho) * (e_0 - d_mag /  (1 - rho)))^2)%Re.
+               +++ admit.
+               +++ apply Rle_refl.
+
 
  admit. (** show that before k, residual > acc2 **)
     * admit.
