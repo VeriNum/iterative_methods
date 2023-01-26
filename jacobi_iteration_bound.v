@@ -256,47 +256,7 @@ Definition residual_math {t}  {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):=
   diag_vector_mult (A1_J A) 
     ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A)).
-   
-
-(*
-Lemma iter_length {ty} n (A: matrix ty) (b: vector ty) (x: vector ty):
-  length b = length A ->
-  length x = length A ->
-  length
-  (Nat.iter n
-     (fun x0 : vector ty =>
-      diagmatrix_vector_mult
-        (invert_diagmatrix (diag_of_matrix A))
-        (vector_sub b
-           (matrix_vector_mult (remove_diag A) x0)))
-     x) = length A.
-Proof.
-induction n.
-+ by simpl.
-+ simpl. repeat rewrite !map_length combine_length.
-  unfold matrix_vector_mult. rewrite map_length.
-  rewrite !map_length !seq_length /matrix_rows_nat /=.
-  intros. rewrite H. by rewrite !Nat.min_id.
-Qed.
   
-*)
-
-(**
-
-BMULT t (nth x (diag_of_matrix A) (Zconst t 0))
-  (nth x
-     (vector_sub
-        (jacob_list_fun_model.jacobi_iter
-           (diag_of_matrix A) (remove_diag A) b
-           (jacobi_n A b x0 k.-1))
-        (jacobi_n A b x0 k.-1)) 
-     (Zconst t 0)) =
-BMULT t (nth x (nth x A []) (Zconst t 0))
-  (BMINUS t (X_m_jacobi k x0' b' A' x ord0)
-     (X_m_jacobi k.-1 x0' b' A' x ord0))
-
-
-**)
 
 
 Lemma A1_equiv {t: type} :
@@ -309,18 +269,6 @@ intros.
 by rewrite  /diag_of_matrix nth_map_seq ?/matrix_index ?/matrix_rows_nat.
 Qed.
 
-(*
-Lemma x_m_diff_equiv:
-  (nth x
-     (vector_sub
-        (jacob_list_fun_model.jacobi_iter
-           (diag_of_matrix A) (remove_diag A) b
-           (jacobi_n A b x0 k.-1))
-        (jacobi_n A b x0 k.-1)) 
-     (Zconst t 0)) =
-  (BMINUS t (X_m_jacobi k x0' b' A' x ord0)
-     (X_m_jacobi k.-1 x0' b' A' x ord0)). 
-*)
 
 Require Import fma_dot_mat_model.
 
@@ -420,38 +368,42 @@ unfold resid, jacobi_residual.
           unfold matrix_vector_mult.
           rewrite !map_length. rewrite !seq_length.
           unfold matrix_rows_nat. by rewrite H !Nat.min_id.
-       -- rewrite combine
-
-
-
-          rewrite (nth_map_inrange (Zconst t 1, Zconst t 0)).
-
-          rewrite !map_length !seq_length /matrix_rows_nat.
-                  
-
- 
-
-rewrite func_model_equiv.
-
- admit.
+       -- rewrite combine_length. unfold jacobi_n.
+          unfold jacob_list_fun_model.jacobi_iter.
+          rewrite iter_length; last by []; last by [].
+          repeat rewrite !map_length !combine_length.
+          rewrite seq_length !map_length.
+          rewrite seq_length /matrix_rows_nat H !Nat.min_id.
+          assert (length A  = n.+1).
+          { unfold n. rewrite prednK. by []. 
+            by apply /ssrnat.ltP.
+          } rewrite H2. apply /ssrnat.ltP. apply ltn_ord.
       ++ apply /ssrnat.ltP. 
          assert (length A = n.+1). 
          { rewrite /n prednK. by []. by apply /ssrnat.ltP. }
          rewrite H2. apply ltn_ord.
-      
-
-
-      unfold diag_of_matrix.
-       
-
-
-
-unfold jacob_list_fun_model.jacobi_iter.
-      repeat rewrite !combine_length !map_length !seq_length.
-      unfold diagmatrix_vector_mult, map2, uncurry.
-      repeat rewrite !combine_length !map_length !seq_length.
-
-
+   * unfold vector_sub, map2, uncurry, jacobi_n.
+     rewrite !map_length combine_length. 
+     unfold jacob_list_fun_model.jacobi_iter.
+     repeat rewrite !map_length !combine_length iter_length;
+     last by []; last by [].
+     repeat rewrite /matrix_vector_mult !map_length !combine_length .
+     rewrite !map_length /matrix_rows_nat.
+     by rewrite !seq_length H !Nat.min_id.
+ - rewrite combine_length. 
+   rewrite !map_length !combine_length. 
+    unfold jacob_list_fun_model.jacobi_iter.
+     repeat rewrite !map_length !combine_length iter_length;
+     last by []; last by [].
+    rewrite !map_length /matrix_rows_nat !combine_length.
+    repeat rewrite /matrix_vector_mult !map_length !combine_length .
+     rewrite !map_length /matrix_rows_nat.
+    rewrite !seq_length H !Nat.min_id.
+    assert (length A  = n.+1).
+    { unfold n. rewrite prednK. by []. 
+      by apply /ssrnat.ltP.
+    } rewrite H2. apply /ssrnat.ltP. apply ltn_ord.
+Qed.
 
 
 Lemma FT2R_mat_dissoc {t} {n:nat} (v1 v2: 'cV[ftype t]_n.+1):
