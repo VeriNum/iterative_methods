@@ -322,6 +322,7 @@ Lemma x_m_diff_equiv:
      (X_m_jacobi k.-1 x0' b' A' x ord0)). 
 *)
 
+Require Import fma_dot_mat_model.
 
 Lemma vector_residual_equiv {t: type} :
  forall (A: matrix t) (b x0: vector t) (k:nat),
@@ -349,7 +350,14 @@ unfold resid, jacobi_residual.
       simpl.
       rewrite !mxE. rewrite inord_val.
       rewrite A1_equiv.
-      ++ 
+      ++ rewrite nth_vec_to_list_float; last by apply ltn_ord.
+         rewrite nth_vec_to_list_float; last by apply ltn_ord.
+         unfold vector_sub, map2, uncurry.
+         rewrite (nth_map_inrange (Zconst t 0, Zconst t 0)).
+         -- rewrite combine_nth.
+            assert (nth x (jacobi_n A b x0 k) (Zconst t 0) = 
+                      X_m_jacobi k x0' b' A' x ord0).
+            { rewrite <- func_model_equiv.
 
  admit.
       ++ apply /ssrnat.ltP. 
