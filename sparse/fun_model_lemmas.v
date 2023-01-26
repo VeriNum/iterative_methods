@@ -430,15 +430,17 @@ destruct (going _ _); auto.
 apply (IHk (jacobi_iter (diag_of_matrix A) (remove_diag A) b x0)).
 Qed.
 
+Import PlaceHolder.
+
 Lemma jacobi_n_jacobi {NAN: Nans} {t: type}:
   forall A b acc k, 
-   jacobi_iteration_bound A b acc k ->
+   jacobi_preconditions A b acc k ->
   let acc2 := BMULT t acc acc in
   let x0 := (repeat  (Zconst t 0) (length b)) in
   exists j, (j<=k)%nat /\ snd (jacobi A b x0 acc2 (S k)) = jacobi_n A b x0 j.
 Proof.
 intros.
-apply jacobi_iteration_bound_correct in H.
+apply jacobi_iteration_bound in H.
 destruct H as [FINacc2 [j [? [H2 H3]]]].
 pose proof I.
 unfold jacobi.

@@ -1,6 +1,7 @@
 Require Import VST.floyd.proofauto.
 From Iterative Require Import floatlib jacob_list_fun_model.
 From Iterative.sparse Require Import jacobi sparse_model.
+Import PlaceHolder.
 Import RelationPairs.
 Require Import vcfloat.VCFloat.
 Require Import vcfloat.FPCompCert.
@@ -82,7 +83,7 @@ Definition jacobi2_highspec :=
       acc: ftype Tdouble, maxiter: Z, gv: globals
  PRE [ tptr tdouble, tptr t_crs, tptr tdouble, tptr tdouble, tdouble, tuint ]
     PROP(readable_share shA1; readable_share shA2; readable_share shb;
-             jacobi_iteration_bound A b acc (Z.to_nat (maxiter-1));
+             jacobi_preconditions A b acc (Z.to_nat (maxiter-1));
              0 < matrix_rows A < Int.max_unsigned;
              0 < maxiter <= Int.max_unsigned)
     PARAMS(A1p; A2p; bp; xp; Vfloat acc; Vint (Int.repr maxiter)) GLOBALS(gv)
