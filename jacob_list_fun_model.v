@@ -256,7 +256,20 @@ induction v.
 Admitted.
 
 
+Lemma norm2_ge_0 {t: type} (v : vector t):
+  (0 <= FT2R (norm2 v))%Re.
+Proof.
+unfold norm2.
+induction v.
++ simpl. nra.
++ unfold dotprod.
+  assert (combine (a :: v) (a :: v) = (a, a) :: combine v v).
+  { unfold combine;auto. } rewrite H.
+  simpl. admit.
+Admitted.
 
+
+Require Import norm_compat.
 
 Lemma jacobi_iteration_bound {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
@@ -297,8 +310,24 @@ repeat split.
       unfold acc2.
       assert (FT2R (norm2 (resid (jacobi_n A b x0 k.-1))) = 
               Rabs (FT2R (norm2 (resid (jacobi_n A b x0 k.-1))))).
-      { rewrite Rabs_right. nra.
-
+      { rewrite Rabs_right. nra. apply Rle_ge, norm2_ge_0. }
+      rewrite H.
+      remember (length A).-1 as n.
+      pose proof (@norm2_vec_inf_norm_rel t n _).
+      remember (rev (resid (jacobi_n A b x0 k.-1))) as v_l.
+      specialize (H0 (@vector_inj _ v_l n.+1)). 
+      assert (rev (vec_to_list_float n.+1 (vector_inj v_l n.+1)) = resid (jacobi_n A b x0 k.-1)).
+      { apply nth_ext with (Zconst t 0) (Zconst t 0).
+        + rewrite rev_length. rewrite length_veclist.
+          repeat rewrite !map_length !combine_length. 
+          admit.
+        + intros. admit.
+      } rewrite -H1.
+      eapply Rle_lt_trans.
+      ++ apply H0. 
+         admit. (** finiteness of each element in the list **)
+         admit. (** finiteness of 2-norm of the residual **)
+      ++
 
 
 
