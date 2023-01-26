@@ -310,9 +310,60 @@ ______________________________________(1/1)
 
 **)
 
+Notation "A +f B" := (addmx_float A B) (at level 80).
+Notation "-f A" := (opp_mat A) (at level 50).
+Notation "A *f B" := (mulmx_float A B) (at level 70).
+Notation "A -f B" := (sub_mat A B) (at level 80).
 
 
-Lemma jacobi_iteration_bound {t: type} :
+Print X_m_jacobi.
+Lemma vector_residual_rel {t: type} :
+ forall (A: matrix t) (b x0: vector t) (k:nat),
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let A_real := FT2R_mat A' in
+  let b_real := FT2R_mat b' in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  let x0' := @vector_inj _ x0 n.+1 in
+  @vector_inj _ (rev (resid (jacobi_n A b x0 k.-1))) n.+1 = 
+  ((X_m_jacobi k x0' b' A') -f (X_m_jacobi k.-1 x0' b' A')).
+Proof.
+intros.
+
+
+
+Lemma FT2R_mat_dissoc {t} {n:nat} (v1 v2: 'cV[ftype t]_n.+1):
+  FT2R_mat (v1 -f v2) = (FT2R_mat v1 - FT2R_mat v2) * 
+
+
+Lemma residual_inf_norm_le {t: type} :
+ forall (A: matrix t) (b: vector t) (k:nat),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  let v_l := rev (resid (jacobi_n A b x0 k.-1)) in
+  let rho := rho_def A b in
+  let d_mag := d_mag_def A b in
+  let n := (length A).-1 in
+  let e_0 := f_error 0 (vector_inj b n.+1)
+                          (vector_inj (repeat (Zconst t 0) (length b))  n.+1) ((FT2R_mat (matrix_inj A n.+1 n.+1))^-1 *m 
+                           FT2R_mat (vector_inj b n.+1))  (matrix_inj A n.+1 n.+1) in    
+  ((vec_inf_norm (FT2R_mat (vector_inj v_l n.+1)))² <=
+  (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho))) ^ 2)%Re
+Proof.
+intros.
+unfold v_l.
+assert ((vector_inj (rev (resid (jacobi_n A b x0 k.-1))) n.+1)
+
+
+
+unfold resid.
+unfold jacobi_residual. 
+(** assertion that jacobi residual = x_k+1 - x_k **)
+
+
+
+Lemma jacobi_iteratio_bound {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
    let acc2 := BMULT t acc acc in
