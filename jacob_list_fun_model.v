@@ -330,6 +330,13 @@ Lemma vector_residual_rel {t: type} :
   ((X_m_jacobi k x0' b' A') -f (X_m_jacobi k.-1 x0' b' A')).
 Proof.
 intros.
+apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+unfold resid, jacobi_residual. rewrite rev_nth.
++ unfold diagmatrix_vector_mult, map2, uncurry.
+  rewrite (nth_map_inrange (Zconst t 1, Zconst t 0)).
+  - rewrite map_length. rewrite combine_nth.
+    *
+
 
 
 
@@ -351,6 +358,7 @@ Lemma residual_inf_norm_le {t: type} :
   ((vec_inf_norm (FT2R_mat (vector_inj v_l n.+1)))² <=
   (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho))) ^ 2)%Re
 Proof.
+
 intros.
 unfold v_l.
 assert ((vector_inj (rev (resid (jacobi_n A b x0 k.-1))) n.+1)
