@@ -357,7 +357,36 @@ unfold resid, jacobi_residual.
          -- rewrite combine_nth.
             assert (nth x (jacobi_n A b x0 k) (Zconst t 0) = 
                       X_m_jacobi k x0' b' A' x ord0).
-            { rewrite <- func_model_equiv.
+            { pose proof (@func_model_equiv _ t A b x0 k).
+              unfold x0', b', A'. unfold n.
+              rewrite -H2. rewrite !mxE. by [].
+              by apply /ssrnat.ltP. apply H. apply H0.
+            } rewrite -H2.
+            assert (nth x
+                        (jacob_list_fun_model.jacobi_iter
+                           (diag_of_matrix A)
+                           (remove_diag A) b
+                           (jacobi_n A b x0 k)) 
+                        (Zconst t 0) = BMULT t (A1_inv_J A' (inord x) ord0)
+                    ((b' -f
+                      A2_J A' *f X_m_jacobi k x0' b' A')
+                       (inord x) ord0)).
+            { rewrite !mxE. unfold jacob_list_fun_model.jacobi_iter.
+              unfold diagmatrix_vector_mult, map2, uncurry.
+              rewrite (nth_map_inrange (Zconst t 1, Zconst t 0)).
+              + rewrite combine_nth.
+                rewrite A1_invert_equiv. 
+                - rewrite inord_val. unfold vector_sub, map2, uncurry.
+                  rewrite (nth_map_inrange (Zconst t 0, Zconst t 0)).
+                  * rewrite combine_nth. rewrite residual_equiv.
+                    ++ unfold A', x0', b', n. rewrite func_model_equiv.
+                       rewrite inord_val. reflexivity.
+                       by apply /ssrnat.ltP. by []. by [].
+                    ++
+
+ 
+
+rewrite func_model_equiv.
 
  admit.
       ++ apply /ssrnat.ltP. 
