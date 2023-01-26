@@ -281,7 +281,33 @@ Qed.
   
 
 
+(**
 
+BMULT t (nth x (diag_of_matrix A) (Zconst t 0))
+  (nth x
+     (vector_sub
+        (jacob_list_fun_model.jacobi_iter
+           (diag_of_matrix A) (remove_diag A) b
+           (jacobi_n A b x0 k.-1))
+        (jacobi_n A b x0 k.-1)) 
+     (Zconst t 0)) =
+BMULT t (nth x (nth x A []) (Zconst t 0))
+  (BMINUS t (X_m_jacobi k x0' b' A' x ord0)
+     (X_m_jacobi k.-1 x0' b' A' x ord0))
+
+
+**)
+
+
+Lemma A1_equiv {t: type} :
+ forall (A: matrix t) (x : nat),
+ (x < length A)%coq_nat ->
+ nth x (diag_of_matrix A) (Zconst t 0) =
+ nth x (nth x A []) (Zconst t 0). 
+Proof.
+intros. 
+by rewrite  /diag_of_matrix nth_map_seq ?/matrix_index ?/matrix_rows_nat.
+Qed.
 
 Lemma vector_residual_equiv {t: type} :
  forall (A: matrix t) (b x0: vector t) (k:nat),
@@ -307,6 +333,12 @@ unfold resid, jacobi_residual.
     * rewrite nth_vec_to_list_float; last by apply ltn_ord.
       rewrite nth_vec_to_list_float; last by apply ltn_ord.
       rewrite !mxE. rewrite inord_val.
+      rewrite A1_equiv.
+      ++ admit.
+      ++ apply /ssrnat.ltP. 
+         assert (length A = n.+1). 
+         { rewrite /n prednK. by []. by apply /ssrnat.ltP. }
+         rewrite H2. apply ltn_ord.
       
 
 
