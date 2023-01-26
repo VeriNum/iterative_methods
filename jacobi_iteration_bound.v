@@ -255,7 +255,7 @@ Definition A1_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
 Definition residual_math {t}  {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):=
   diag_vector_mult (A1_J A) 
-    ((X_m_jacobi k x0 b A) -f (X_m_jacobi k.-1 x0 b A)).
+    ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A)).
    
 
 
@@ -309,6 +309,20 @@ intros.
 by rewrite  /diag_of_matrix nth_map_seq ?/matrix_index ?/matrix_rows_nat.
 Qed.
 
+(*
+Lemma x_m_diff_equiv:
+  (nth x
+     (vector_sub
+        (jacob_list_fun_model.jacobi_iter
+           (diag_of_matrix A) (remove_diag A) b
+           (jacobi_n A b x0 k.-1))
+        (jacobi_n A b x0 k.-1)) 
+     (Zconst t 0)) =
+  (BMINUS t (X_m_jacobi k x0' b' A' x ord0)
+     (X_m_jacobi k.-1 x0' b' A' x ord0)). 
+*)
+
+
 Lemma vector_residual_equiv {t: type} :
  forall (A: matrix t) (b x0: vector t) (k:nat),
   let n := (length A).-1 in
@@ -321,7 +335,7 @@ Lemma vector_residual_equiv {t: type} :
   length b = length A ->
   length x0 = length A ->
   (0 < length A)%coq_nat ->
-  @vector_inj _ (resid (jacobi_n A b x0 k.-1)) n.+1 = 
+  @vector_inj _ (resid (jacobi_n A b x0 k)) n.+1 = 
   residual_math A' x0' b' k.
 Proof.
 intros.
@@ -332,9 +346,12 @@ unfold resid, jacobi_residual.
   - rewrite combine_nth.
     * rewrite nth_vec_to_list_float; last by apply ltn_ord.
       rewrite nth_vec_to_list_float; last by apply ltn_ord.
+      simpl.
       rewrite !mxE. rewrite inord_val.
       rewrite A1_equiv.
-      ++ admit.
+      ++ 
+
+ admit.
       ++ apply /ssrnat.ltP. 
          assert (length A = n.+1). 
          { rewrite /n prednK. by []. by apply /ssrnat.ltP. }
