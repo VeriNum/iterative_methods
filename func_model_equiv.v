@@ -39,10 +39,6 @@ Definition X_m_jacobi {n:nat} m x0 b (A: 'M[ftype Tsingle]_n.+1) :
     and mathcomp definition of matrix
 **)
 
-Print List.nth.
-
-
-
 Definition matrix_inj {t} (A: matrix t) n  : 'M[ftype t]_n:=
     \matrix_(i < n, j < n) 
      nth j (nth i A [::]) (Zconst t 0).
@@ -51,8 +47,6 @@ Definition matrix_inj {t} (A: matrix t) n  : 'M[ftype t]_n:=
 (** Check **)
 Definition A_check : (matrix Tsingle) :=  
   [[1%F32 ; 2%F32]; [3%F32 ; 4%F32]].
-
-Check A_check.
 
 Definition A_1 : 'M[ftype Tsingle]_2 :=
   \matrix_(i < 2, j < 2)

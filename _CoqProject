@@ -14,6 +14,9 @@ dot_prod_defn.v
 float_model_generic.v
 fma_floating_point_model.v
 fma_real_func_model.v
+finite_lemmas_additional.v
+norm_compat.v
+jacobi_iteration_bound.v
 
 StationaryMethods/common.v
 StationaryMethods/op_defs.v
