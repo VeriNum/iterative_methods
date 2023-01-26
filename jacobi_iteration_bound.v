@@ -258,7 +258,7 @@ Definition residual_math {t}  {n:nat}
     ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A)).
    
 
-
+(*
 Lemma iter_length {ty} n (A: matrix ty) (b: vector ty) (x: vector ty):
   length b = length A ->
   length x = length A ->
@@ -279,7 +279,7 @@ induction n.
   intros. rewrite H. by rewrite !Nat.min_id.
 Qed.
   
-
+*)
 
 (**
 
@@ -382,7 +382,52 @@ unfold resid, jacobi_residual.
                     ++ unfold A', x0', b', n. rewrite func_model_equiv.
                        rewrite inord_val. reflexivity.
                        by apply /ssrnat.ltP. by []. by [].
-                    ++
+                    ++ by apply /ssrnat.ltP.
+                    ++ unfold jacobi_n, jacob_list_fun_model.jacobi_iter.
+                       by rewrite iter_length.
+                    ++ assert (length A  = n.+1).
+                       { unfold n. rewrite prednK. by []. 
+                         by apply /ssrnat.ltP.
+                       } rewrite H3. apply ltn_ord.
+                    ++ unfold matrix_vector_mult. 
+                       rewrite !map_length seq_length.
+                       by unfold matrix_rows_nat.
+                  * rewrite combine_length. 
+                    rewrite !map_length !seq_length /matrix_rows_nat.
+                    rewrite H Nat.min_id.
+                    assert (length A  = n.+1).
+                    { unfold n. rewrite prednK. by []. 
+                      by apply /ssrnat.ltP.
+                    } rewrite H3. apply /ssrnat.ltP. apply ltn_ord.
+                -  assert (length A  = n.+1).
+                    { unfold n. rewrite prednK. by []. 
+                      by apply /ssrnat.ltP.
+                    } rewrite H3. apply /ssrnat.ltP. apply ltn_ord.
+                - rewrite !map_length !seq_length /matrix_rows_nat.
+                  rewrite combine_length !map_length !seq_length /matrix_rows_nat.
+                  by rewrite H Nat.min_id.
+            + repeat rewrite combine_length !map_length !seq_length /matrix_rows_nat.
+              rewrite H !Nat.min_id.
+              assert (length A  = n.+1).
+                    { unfold n. rewrite prednK. by []. 
+                      by apply /ssrnat.ltP.
+                    } rewrite H3. apply /ssrnat.ltP. apply ltn_ord.
+          } rewrite H3. reflexivity.
+          unfold jacobi_n, jacob_list_fun_model.jacobi_iter.
+          rewrite iter_length; last by []; last by [].  
+          unfold diagmatrix_vector_mult, map2, uncurry.
+          repeat rewrite !map_length !combine_length.
+          unfold matrix_vector_mult.
+          rewrite !map_length. rewrite !seq_length.
+          unfold matrix_rows_nat. by rewrite H !Nat.min_id.
+       -- rewrite combine
+
+
+
+          rewrite (nth_map_inrange (Zconst t 1, Zconst t 0)).
+
+          rewrite !map_length !seq_length /matrix_rows_nat.
+                  
 
  
 
