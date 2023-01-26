@@ -291,6 +291,27 @@ Admitted.
 
 Require Import norm_compat.
 
+Lemma residual_is_finite {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  forall k,
+  is_finite (fprec t) (femax t)
+  (norm2 (resid (jacobi_n A b x0 k))) = true.
+Admitted.
+
+(**
+Heqv_l : v_l = rev (resid (jacobi_n A b x0 k.-1))
+H1 : rev (vec_to_list_float n.+1 (vector_inj v_l n.+1)) =
+     resid (jacobi_n A b x0 k.-1)
+______________________________________(1/1)
+((vec_inf_norm (FT2R_mat (vector_inj v_l n.+1)))² <=
+ (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho))) ^ 2)%Re
+
+**)
+
+
+
 Lemma jacobi_iteration_bound {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
@@ -313,12 +334,7 @@ repeat split.
 + exists k.-1. repeat split.
   - apply leq_pred.
   - intros. apply finite_is_finite.
-    unfold norm2.
-    
-
-
-
-    admit.
+    apply residual_is_finite .
     (** use the compatibility relation from norms **)
   - Search "BCMP". unfold BCMP.
     rewrite Bcompare_correct; simpl.
@@ -338,7 +354,6 @@ repeat split.
               Rabs (FT2R (norm2 (resid (jacobi_n A b x0 k.-1))))).
       { rewrite Rabs_right. nra. apply Rle_ge, norm2_ge_0. }
       rewrite H.
-      
       pose proof (@norm2_vec_inf_norm_rel t n _).
       remember (rev (resid (jacobi_n A b x0 k.-1))) as v_l.
       specialize (H0 (@vector_inj _ v_l n.+1)). 
@@ -351,8 +366,8 @@ repeat split.
       } rewrite -H1.
       eapply Rle_lt_trans.
       ++ apply H0. 
-         admit. (** finiteness of each element in the list **)
-         admit. (** finiteness of 2-norm of the residual **)
+         -- admit. (** finiteness of each element in the list **)
+         -- rewrite H1. apply residual_is_finite . (** finiteness of 2-norm of the residual **)
       ++ eapply Rle_lt_trans.
          -- apply Rplus_le_compat_r. apply Rmult_le_compat_r.
             ** apply Rplus_le_le_0_compat. nra. apply g_pos.
@@ -362,10 +377,11 @@ repeat split.
                ((rho^k * (1+ rho) * (e_0 - d_mag /  (1 - rho)))^2)%Re.
                +++ admit.
                +++ apply Rle_refl.
+         -- 
 
 
  admit. (** show that before k, residual > acc2 **)
-    * admit.
+    * apply residual_is_finite .
     * unfold acc2. apply HcG2.
 Admitted.
 
