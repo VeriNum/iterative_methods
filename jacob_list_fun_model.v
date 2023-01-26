@@ -86,31 +86,36 @@ Definition f_error {ty} {n:nat} m b x0 x (A: 'M[ftype ty]_n.+1):=
   let x := x_fix x b_real A_real in
   vec_inf_norm (FT2R_mat x_k - x).
 
-
-
-Definition jacobi_preconditions {t: type}
-  (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
-  (* some property of A,b,accuracy holds such that 
-    jacobi_n will indeed converge within k iterations to this accuracy, 
-   without ever overflowing *)
+Definition rho_def  {t: type} (A: matrix t) (b: vector t) :=
   let n := (length A).-1 in
   let A' := @matrix_inj _ A n.+1 n.+1 in
   let b' := @vector_inj _ b n.+1 in
   let A_real := FT2R_mat A' in
-  let b_real := FT2R_mat b' in
-  
+  let b_real := FT2R_mat b' in  
   let x:= mulmx (A_real^-1) b_real in
-  let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real)) in
+  let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
   let delta := default_rel t in
-  let rho := ((((1 + g t n.+1) * (1 + delta) *
+  ((((1 + g t n.+1) * (1 + delta) *
                   g t n.+1 + delta * (1 + g t n.+1) +
                   g t n.+1) * (1 + delta) + delta) * R +
                 (((1 + g t n.+1) * (1 + delta) *
                   g t n.+1 + delta * (1 + g t n.+1) +
                   g t n.+1) * default_abs t +
                  default_abs t) *
-                matrix_inf_norm (A2_J_real A_real) + R) in
-   let d_mag := ((g t n.+1 * (1 + delta) + delta) *
+                matrix_inf_norm (A2_J_real A_real) + R)%Re.
+
+
+
+Definition d_mag_def {t: type} (A: matrix t) (b: vector t) :=
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let A_real := FT2R_mat A' in
+  let b_real := FT2R_mat b' in  
+  let x:= mulmx (A_real^-1) b_real in
+  let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
+  let delta := default_rel t in
+  ((g t n.+1 * (1 + delta) + delta) *
                     ((vec_inf_norm (A1_diag A_real) *
                       (1 + delta) + default_abs t) *
                      vec_inf_norm b_real) +
@@ -129,7 +134,22 @@ Definition jacobi_preconditions {t: type}
                        g t n.+1) * default_abs t +
                       default_abs t) *
                      matrix_inf_norm (A2_J_real A_real)) *
-                    vec_inf_norm (x_fix x b_real A_real)) in
+                    vec_inf_norm (x_fix x b_real A_real))%Re.
+
+Definition jacobi_preconditions {t: type}
+  (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
+  (* some property of A,b,accuracy holds such that 
+    jacobi_n will indeed converge within k iterations to this accuracy, 
+   without ever overflowing *)
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let A_real := FT2R_mat A' in
+  let b_real := FT2R_mat b' in
+  
+  let x:= mulmx (A_real^-1) b_real in
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let x0' := @vector_inj _ x0 n.+1 in
   
@@ -327,9 +347,16 @@ repeat split.
       ++ apply H0. 
          admit. (** finiteness of each element in the list **)
          admit. (** finiteness of 2-norm of the residual **)
-      ++
-
-
+      ++ eapply Rle_lt_trans.
+         -- apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+            ** apply Rplus_le_le_0_compat. nra. apply g_pos.
+            ** apply Rmult_le_compat_l. apply pos_INR.
+               Print f_error.
+               remember (f_error 0 (vector_inj b n.+1)
+                          (vector_inj (repeat (Zconst t 0) (length b))  n.+1) ((FT2R_mat (matrix_inj A n.+1 n.+1))^-1 *m 
+                           FT2R_mat (vector_inj b n.+1))  (matrix_inj A n.+1 n.+1)) as e_0. 
+               apply Rle_trans with 
+               ((rho^k * (1+ rho) * (e_0 - d_mag /  (1 - rho)))^2)%Re.
 
  admit. (** show that before k, residual > acc2 **)
     * admit.
