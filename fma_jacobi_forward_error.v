@@ -8,8 +8,7 @@ Import List ListNotations.
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
                             Float_notations Automate.
 
-Require Import floatlib jacob_list_fun_model fma_dot_mat_model 
-               inf_norm_properties fma_matrix_vec_mult.
+Require Import floatlib inf_norm_properties.
 
 Require Import common fma_dot_acc float_acc_lems dotprod_model.
 Require Import fma_matrix_vec_mult vec_sum_inf_norm_rel.
@@ -635,7 +634,6 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
 
   (rho < 1)%Re ->
   A_real \in unitmx ->
-  (*(forall i : 'I_n.+1, FT2R (A i i) <> 0%Re) -> *)
   (forall i : 'I_n.+1,
     is_finite (fprec ty) (femax ty)
       (BDIV ty (Zconst ty 1) (A i i)) = true) ->
