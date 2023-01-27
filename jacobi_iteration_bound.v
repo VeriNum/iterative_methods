@@ -472,7 +472,25 @@ apply Rle_trans with
                  (FT2R_mat (X_m_jacobi k x0' b' A') -
                   x_fix x b_real A_real) = f_error k b' x0' x A').
       { by rewrite /f_error. } rewrite H3 H4.
-      
+      pose proof (@jacobi_forward_error_bound _ t n A' b').
+      assert (forall i : 'I_n.+1,
+                is_finite (fprec t) (femax t) (A' i i) = true) by admit.
+      assert (x != 0 ) by admit.
+      assert ((rho < 1)%Re) by admit.
+      assert (FT2R_mat A' \in unitmx) by admit.  
+      assert (forall i : 'I_n.+1,
+              is_finite (fprec t) (femax t)
+                (BDIV t (Zconst t 1) (A' i i)) = true) by admit.
+     assert (forall (k : nat) (i : 'I_n.+1),
+                is_finite (fprec t) (femax t)
+                  (X_m_jacobi k x0' b' A' i ord0) = true) by admit. 
+     specialize (H5 H6 H7 H8 H9 H10 x0' H11).
+     assert ((f_error k.+1 b' x0' x A' <= rho^k.+1 * (f_error 0 b' x0' x A') + 
+                    ((1 - rho^k.+1) / (1 - rho))* d_mag)%Re).
+     { by apply (H5 k.+1). }
+     assert ((f_error k b' x0' x A' <= rho^k * (f_error 0 b' x0' x A') + 
+                    ((1 - rho^k) / (1 - rho))* d_mag)%Re).
+     { by apply (H5 k). }
 
 
 
