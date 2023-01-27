@@ -481,7 +481,12 @@ split.
     pose proof (@v_equiv t).
     specialize (H6 (resid (jacobi_n A b x0 i)) n).
     assert (length (resid (jacobi_n A b x0 i)) = n.+1).
-    { rewrite !map_length combine_length. admit. }
+    { repeat rewrite /matrix_vector_mult !map_length combine_length.
+      rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+      rewrite !seq_length /matrix_rows_nat H2 !Nat.min_id.
+      rewrite Heqn prednK. by []. by apply /ssrnat.ltP.
+      by []. by []. 
+    }
     specialize (H6 H7).
     rewrite H6. 
     assert ((\col_j0 vector_inj
@@ -503,7 +508,12 @@ split.
     pose proof (@v_equiv t).
     specialize (H5 (resid (jacobi_n A b x0 j)) n).
     assert (length (resid (jacobi_n A b x0 j)) = n.+1).
-    { rewrite !map_length combine_length. admit. }
+    { repeat rewrite /matrix_vector_mult !map_length combine_length.
+      rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+      rewrite !seq_length H1 !Nat.min_id.
+      rewrite Heqn prednK. by []. by apply /ssrnat.ltP.
+      by []. by [].
+    }
     specialize (H5 H6).
     rewrite H5. 
     assert ((\col_j0 vector_inj
