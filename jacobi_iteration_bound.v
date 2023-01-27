@@ -28,7 +28,6 @@ Definition rho_def  {t: type} (A: matrix t) (b: vector t) :=
   let b' := @vector_inj _ b n.+1 in
   let A_real := FT2R_mat A' in
   let b_real := FT2R_mat b' in  
-  let x:= mulmx (A_real^-1) b_real in
   let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
   let delta := default_rel t in
   ((((1 + g t n.+1) * (1 + delta) *
@@ -39,8 +38,6 @@ Definition rho_def  {t: type} (A: matrix t) (b: vector t) :=
                   g t n.+1) * default_abs t +
                  default_abs t) *
                 matrix_inf_norm (A2_J_real A_real) + R)%Re.
-
-
 
 Definition d_mag_def {t: type} (A: matrix t) (b: vector t) :=
   let n := (length A).-1 in
@@ -510,7 +507,7 @@ split.
     rewrite H7. apply Hlt.
 Qed.
 
-
+(*
 Lemma FT2R_mat_dissoc {t} {n:nat} (v1 v2: 'cV[ftype t]_n.+1):
   FT2R_mat (v1 -f v2) = (FT2R_mat v1 - FT2R_mat v2) * 
 
@@ -540,7 +537,7 @@ unfold resid.
 unfold jacobi_residual. 
 (** assertion that jacobi residual = x_k+1 - x_k **)
 
-
+*)
 
 
 

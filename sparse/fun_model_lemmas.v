@@ -2,8 +2,6 @@ Require Import VST.floyd.proofauto.
 From Iterative Require Import floatlib jacob_list_fun_model.
 From Iterative.sparse Require Import jacobi sparse_model.
 Require Import vcfloat.VCFloat.
-(*Require Import vcfloat.FPCompCert.*)
-(*Require Import VSTlib.spec_math.*)
 
 Set Bullet Behavior "Strict Subproofs".
 
@@ -430,7 +428,9 @@ destruct (going _ _); auto.
 apply (IHk (jacobi_iter (diag_of_matrix A) (remove_diag A) b x0)).
 Qed.
 
-Import PlaceHolder.
+Import PlaceHolder. (* FIXME: When the proofs in
+  jacobi_iteration_bound.v are done, then get rid of PlaceHolder
+ and use the real proofs instead *)
 
 Lemma jacobi_n_jacobi {NAN: Nans} {t: type}:
   forall A b acc k, 
@@ -440,7 +440,7 @@ Lemma jacobi_n_jacobi {NAN: Nans} {t: type}:
   exists j, (j<=k)%nat /\ snd (jacobi A b x0 acc2 (S k)) = jacobi_n A b x0 j.
 Proof.
 intros.
-apply jacobi_iteration_bound in H.
+apply jacobi_iteration_bound_lowlevel in H.
 destruct H as [FINacc2 [j [? [H2 H3]]]].
 pose proof I.
 unfold jacobi.

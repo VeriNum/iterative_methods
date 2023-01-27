@@ -97,7 +97,7 @@ Lemma jacobi_iteration_bound_corollaries:
    Forall finite b /\ finite acc.
 Proof. intros. contradiction. Qed.
 
-Lemma jacobi_iteration_bound {t: type} :
+Lemma jacobi_iteration_bound_lowlevel {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
    let acc2 := BMULT t acc acc in
