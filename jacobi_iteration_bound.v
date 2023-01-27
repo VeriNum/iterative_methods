@@ -490,7 +490,33 @@ apply Rle_trans with
      { by apply (H5 k.+1). }
      assert ((f_error k b' x0' x A' <= rho^k * (f_error 0 b' x0' x A') + 
                     ((1 - rho^k) / (1 - rho))* d_mag)%Re).
-     { by apply (H5 k). }
+     { by apply (H5 k). } 
+     eapply Rle_trans.
+     ++ apply Rle_trans with
+        ((rho ^ k.+1 * f_error 0 b' x0' x A' +
+            (1 - rho ^ k.+1) / (1 - rho) * d_mag) + 
+        (rho ^ k * f_error 0 b' x0' x A' +
+          (1 - rho ^ k) / (1 - rho) * d_mag))%Re.
+        -- by apply Rplus_le_compat.
+        -- apply Rle_refl.
+     ++ fold e_0.
+        assert ((rho ^ k.+1 * e_0 +
+                     (1 - rho ^ k.+1) / (1 - rho) * d_mag +
+                     (rho ^ k * e_0 +
+                      (1 - rho ^ k) / (1 - rho) * d_mag))%Re = 
+               ((rho^k.+1 * (1 - rho) * e_0 + (1 - rho^k+1) * d_mag + 
+                rho^k * (1- rho) * e_0 + (1 - rho^k) * d_mag) * / (1-rho))%Re).
+        { assert ((rho ^ k.+1 * e_0 +
+                     (1 - rho ^ k.+1) / (1 - rho) * d_mag +
+                     (rho ^ k * e_0 +
+                      (1 - rho ^ k) / (1 - rho) * d_mag))%Re = 
+                  ((rho ^ k.+1 * e_0 * (1 - rho)) * / (1-rho) +
+                     ((1 - rho ^ k.+1) * d_mag) * / (1 - rho)  +
+                     ((rho ^ k * e_0 * (1 - rho)) * / (1- rho)  +
+                      ((1 - rho ^ k) * d_mag) * / (1 - rho)))%Re).
+          { assert ((rho ^ k.+1 * e_0 * (1 - rho)) * / (1-rho) = 
+                    
+
 
 
 
