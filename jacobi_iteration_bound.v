@@ -432,7 +432,7 @@ Lemma jacobi_iteration_bound {t: type} {n : nat} :
    (*jacobi_preconditions A b acc k -> *)
    let acc2 := BMULT t acc acc in
    let x0 := \col_(j < n.+1) (Zconst t 0) in
-   let resid := residual_math A b x0 in
+   let resid := residual_math A x0 b in
    finite acc2 /\ 
    exists j,
     (j <= k)%nat /\
@@ -471,14 +471,17 @@ split.
   exists j. split; try by [].
   intros. destruct H0 as [Hf Hlt]. split.
   - intros.  specialize (Hf i H0).
-    pose proof (@vector_residual_equiv t A b x0 k).
+    pose proof (@vector_residual_equiv t A b x0 i).
     assert (length b = length A) by admit.
     assert (length x0 = length A) by admit.
     assert ((0 < length A)%coq_nat) by admit.
     specialize (H1 H2 H3 H4).
     rewrite HeqA' Heqb' in Hf. rewrite -Heqn in H1.
     assert (vector_inj x0 n.+1 = \col_(j < n.+1) (Zconst t 0)).
-    {
+    { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+      by rewrite nth_repeat.
+    } rewrite H5 in H1. rewrite -H1 in Hf.
+    
 
 
     rewrite vector_residual_equiv  in Hf.
