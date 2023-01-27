@@ -440,8 +440,27 @@ Lemma jacobi_iteration_bound {t: type} {n : nat} :
     BCMP t Lt false (norm2 (vec_to_list_float n.+1 (resid j))) acc2 = false.
 Admitted.
 
+Print vector_inj'.
+Lemma vec_to_list_inj {t} (v : vector t) (n:nat):
+  vec_to_list_float n.+1 (@vector_inj _ v n.+1) = v.
+Proof.
+apply nth_ext with (Zconst t 0) (Zconst t 0).
++ rewrite length_veclist. admit.
++ intros.
+  assert (vec_to_list_float n.+1 (vector_inj v n.+1) = 
+          rev (rev (vec_to_list_float n.+1 (vector_inj v n.+1)))).
+  { by rewrite rev_involutive. } rewrite H0.
+  rewrite rev_nth.
+  assert (length
+           (rev
+              (vec_to_list_float n.+1
+                 (vector_inj v n.+1))) = n.+1).
+  { by rewrite rev_length length_veclist. }
+  rewrite H1.
+  assert ((n.+1 - n0.+1)%coq_nat = (n.+1.-1 - n0)%coq_nat).
+  { lia. } rewrite H2. rewrite nth_ 
 
-
+  rewrite -[in LHS]rev_involutive.
 
 
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
