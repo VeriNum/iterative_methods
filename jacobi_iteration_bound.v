@@ -408,25 +408,6 @@ Qed.
 
 (** Lemma in terms of mathcomp **)
 
-Print dotprod_r.
-
-(**
-Lemma jacobi_iteratio_bound {t: type} :
- forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
-   jacobi_preconditions A b acc k ->
-   let acc2 := BMULT t acc acc in
-   let x0 := (repeat  (Zconst t 0) (length b)) in
-   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
-   finite acc2 /\ 
-   exists j,
-    (j <= k)%nat /\
-    let y :=  jacobi_n A b x0 j in
-    let r2 := norm2 (resid y) in
-    (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
-    BCMP t Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
-Proof.
-**)
-
 Lemma jacobi_iteration_bound {t: type} {n : nat} :
  forall (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (acc: ftype t) (k: nat),
    (*jacobi_preconditions A b acc k -> *)
@@ -438,6 +419,7 @@ Lemma jacobi_iteration_bound {t: type} {n : nat} :
     (j <= k)%nat /\
     (forall i, (i <= j)%nat -> finite (norm2 (rev (vec_to_list_float n.+1 (resid i))))) /\
     BCMP t Lt false (norm2 (rev (vec_to_list_float n.+1 (resid j)))) acc2 = false.
+    (** rev (_ ) fits perfectly well with norm2_vec_inf_norm_rel **)
 Admitted.
 
 
@@ -462,6 +444,8 @@ remember (@matrix_inj _ A n.+1 n.+1) as A'.
 remember (@vector_inj _ b n.+1) as b'.
 specialize (H0 A' b' acc k).
 destruct H0 as [Hacc H0].
+unfold jacobi_preconditions in H.
+destruct H as [HlA [Hlab H]]. 
 split.
 + by unfold acc2.
 + destruct H0 as [j [Hjrel H0]].
@@ -469,9 +453,10 @@ split.
   intros. destruct H0 as [Hf Hlt]. split.
   - intros.  specialize (Hf i H0).
     pose proof (@vector_residual_equiv t A b x0 i).
-    assert (length b = length A) by admit.
-    assert (length x0 = length A) by admit.
-    assert ((0 < length A)%coq_nat) by admit.
+    assert (length b = length A) by (symmetry; apply  Hlab).
+    assert (length x0 = length A).
+    { unfold x0. by rewrite !repeat_length. }
+    assert ((0 < length A)%coq_nat) by apply HlA.
     specialize (H1 H2 H3 H4).
     rewrite HeqA' Heqb' in Hf. rewrite -Heqn in H1.
     assert (vector_inj x0 n.+1 = \col_(j < n.+1) (Zconst t 0)).
@@ -496,9 +481,10 @@ split.
     { apply /matrixP. unfold eqrel. intros. by rewrite !mxE. }
     rewrite H8. apply Hf.
   - pose proof (@vector_residual_equiv t A b x0 j).
-    assert (length b = length A) by admit.
-    assert (length x0 = length A) by admit.
-    assert ((0 < length A)%coq_nat) by admit.
+    assert (length b = length A) by (symmetry; apply  Hlab).
+    assert (length x0 = length A).
+    { unfold x0. by rewrite !repeat_length. }
+    assert ((0 < length A)%coq_nat) by apply HlA.
     specialize (H0 H1 H2 H3).
     rewrite HeqA' Heqb' in Hlt. rewrite -Heqn in H0.
     assert (vector_inj x0 n.+1 = \col_(j < n.+1) (Zconst t 0)).
@@ -522,10 +508,7 @@ split.
             vector_inj (resid (jacobi_n A b x0 j)) n.+1).
     { apply /matrixP. unfold eqrel. intros. by rewrite !mxE. }
     rewrite H7. apply Hlt.
-Admitted.
-
-
-
+Qed.
 
 
 Lemma FT2R_mat_dissoc {t} {n:nat} (v1 v2: 'cV[ftype t]_n.+1):
