@@ -406,6 +406,66 @@ unfold resid, jacobi_residual.
 Qed.
 
 
+(** Lemma in terms of mathcomp **)
+
+Print dotprod_r.
+
+(**
+Lemma jacobi_iteratio_bound {t: type} :
+ forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
+   jacobi_preconditions A b acc k ->
+   let acc2 := BMULT t acc acc in
+   let x0 := (repeat  (Zconst t 0) (length b)) in
+   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+   finite acc2 /\ 
+   exists j,
+    (j <= k)%nat /\
+    let y :=  jacobi_n A b x0 j in
+    let r2 := norm2 (resid y) in
+    (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
+    BCMP t Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
+Proof.
+**)
+
+Lemma jacobi_iteration_bound {t: type} {n : nat} :
+ forall (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (acc: ftype t) (k: nat),
+   (*jacobi_preconditions A b acc k -> *)
+   let acc2 := BMULT t acc acc in
+   let x0 := \col_(j < n.+1) (Zconst t 0) in
+   let resid := residual_math A b x0 in
+   finite acc2 /\ 
+   exists j,
+    (j <= k)%nat /\
+    (forall i, (i <= j)%nat -> finite (norm2 (vec_to_list_float n.+1 (resid i)))) /\
+    BCMP t Lt false (norm2 (vec_to_list_float n.+1 (resid j))) acc2 = false.
+Admitted.
+
+
+
+
+
+Lemma jacobi_iteration_bound_lowlevel {t: type} :
+ forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
+   jacobi_preconditions A b acc k ->
+   let acc2 := BMULT t acc acc in
+   let x0 := (repeat  (Zconst t 0) (length b)) in
+   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+   finite acc2 /\ 
+   exists j,
+    (j <= k)%nat /\
+    let y :=  jacobi_n A b x0 j in
+    let r2 := norm2 (resid y) in
+    (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
+    BCMP t Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
+Admitted.
+
+
+
+
+
+
+
+
 Lemma FT2R_mat_dissoc {t} {n:nat} (v1 v2: 'cV[ftype t]_n.+1):
   FT2R_mat (v1 -f v2) = (FT2R_mat v1 - FT2R_mat v2) * 
 
@@ -434,6 +494,9 @@ assert ((vector_inj (rev (resid (jacobi_n A b x0 k.-1))) n.+1)
 unfold resid.
 unfold jacobi_residual. 
 (** assertion that jacobi residual = x_k+1 - x_k **)
+
+
+
 
 
 
