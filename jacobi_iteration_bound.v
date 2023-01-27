@@ -402,7 +402,15 @@ unfold resid, jacobi_residual.
     } rewrite H2. apply /ssrnat.ltP. apply ltn_ord.
 Qed.
 
-Require Import vec_sum_inf_norm_rel.
+Require Import vec_sum_inf_norm_rel fma_jacobi_forward_error.
+
+Lemma add_vec_distr_5 {n:nat}:
+  forall a b c d: 'cV[R]_n,
+  (a- b) - (c - b) = a - c.
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+Qed.
 
 
 Lemma vec_succ_err {t: type} (A: matrix t) (b: vector t) (k:nat) :
@@ -445,6 +453,18 @@ apply Rle_trans with
   { intros. nra. } apply H1.
   by apply /RleP.
 + apply Rmult_le_compat_r.
+  - apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+  - assert (FT2R_mat (X_m_jacobi k.+1 x0' b' A') -
+                FT2R_mat (X_m_jacobi k x0' b' A') = 
+            (FT2R_mat (X_m_jacobi k.+1 x0' b' A') - x) - 
+            (FT2R_mat (X_m_jacobi k x0' b' A') - x)).
+    { by rewrite add_vec_distr_5. } rewrite H1.
+    eapply Rle_trans.
+    * apply /RleP. apply triang_ineq .
+    * rewrite -vec_inf_norm_opp. rewrite -RplusE.
+      rewrite x_fixpoint.
+
+fold (@f_error t).
 
 
 Admitted.
