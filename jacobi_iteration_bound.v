@@ -402,6 +402,8 @@ unfold resid, jacobi_residual.
     } rewrite H2. apply /ssrnat.ltP. apply ltn_ord.
 Qed.
 
+Require Import vec_sum_inf_norm_rel.
+
 
 Lemma vec_succ_err {t: type} (A: matrix t) (b: vector t) (k:nat) :
   let rho := rho_def A b in 
@@ -419,7 +421,20 @@ Lemma vec_succ_err {t: type} (A: matrix t) (b: vector t) (k:nat) :
     rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)))%Re.
 Proof.
 intros.
-pose proof 
+pose proof (@vec_float_sub_1 _ t n).
+specialize (H (X_m_jacobi k.+1 x0' b' A') (X_m_jacobi k x0' b' A')).
+assert (forall xy : ftype t * ftype t,
+             In xy
+               (combine
+                  (vec_to_list_float n.+1
+                     (X_m_jacobi k.+1 x0' b' A'))
+                  (vec_to_list_float n.+1
+                     (X_m_jacobi k x0' b' A'))) ->
+             is_finite (fprec t) (femax t) xy.1 = true /\
+             is_finite (fprec t) (femax t) xy.2 = true /\
+             is_finite (fprec t) (femax t)
+               (BPLUS t xy.1 (BOPP t xy.2)) = true).
+{ admit. } specialize (H H0).
 
 
 
