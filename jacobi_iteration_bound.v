@@ -467,7 +467,25 @@ specialize (H0 A' b' acc k).
 destruct H0 as [Hacc H0].
 split.
 + by unfold acc2.
-+ destuct
++ destruct H0 as [j [Hjrel H0]].
+  exists j. split; try by [].
+  intros. destruct H0 as [Hf Hlt]. split.
+  - intros.  specialize (Hf i H0).
+    pose proof (@vector_residual_equiv t A b x0 k).
+    assert (length b = length A) by admit.
+    assert (length x0 = length A) by admit.
+    assert ((0 < length A)%coq_nat) by admit.
+    specialize (H1 H2 H3 H4).
+    rewrite HeqA' Heqb' in Hf. rewrite -Heqn in H1.
+    assert (vector_inj x0 n.+1 = \col_(j < n.+1) (Zconst t 0)).
+    {
+
+
+    rewrite vector_residual_equiv  in Hf.
+
+
+ unfold norm2. unfold norm2 in Hf.
+    
 
 
 
