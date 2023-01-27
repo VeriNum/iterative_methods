@@ -436,13 +436,10 @@ Lemma jacobi_iteration_bound {t: type} {n : nat} :
    finite acc2 /\ 
    exists j,
     (j <= k)%nat /\
-    (forall i, (i <= j)%nat -> finite (norm2 (vec_to_list_float n.+1 (resid i)))) /\
-    BCMP t Lt false (norm2 (vec_to_list_float n.+1 (resid j))) acc2 = false.
+    (forall i, (i <= j)%nat -> finite (norm2 (rev (vec_to_list_float n.+1 (resid i))))) /\
+    BCMP t Lt false (norm2 (rev (vec_to_list_float n.+1 (resid j)))) acc2 = false.
 Admitted.
 
-Lemma vec_to_list_inj {t} (v : vector t) (n:nat):
-  vec_to_list_float n.+1 (@vector_inj _ v n.+1) = v.
-Admitted.
 
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
@@ -481,8 +478,18 @@ split.
     { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
       by rewrite nth_repeat.
     } rewrite H5 in H1. rewrite -H1 in Hf.
-    rewrite vec_to_list_inj in Hf.
-    apply Hf.
+    pose proof (@v_equiv t).
+    specialize (H6 (resid (jacobi_n A b x0 i)) n).
+    assert (length (resid (jacobi_n A b x0 i)) = n.+1).
+    { rewrite !map_length combine_length. admit. }
+    specialize (H6 H7).
+    rewrite H6. 
+    assert ((\col_j0 vector_inj
+                      (resid (jacobi_n A b x0 i))
+                      n.+1 j0 ord0) = 
+            vector_inj (resid (jacobi_n A b x0 i)) n.+1).
+    { apply /matrixP. unfold eqrel. intros. by rewrite !mxE. }
+    rewrite H8. apply Hf.
   - pose proof (@vector_residual_equiv t A b x0 j).
     assert (length b = length A) by admit.
     assert (length x0 = length A) by admit.
@@ -493,7 +500,18 @@ split.
     { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
       by rewrite nth_repeat.
     } rewrite H4 in H0. rewrite -H0 in Hlt.
-    rewrite vec_to_list_inj in Hlt. apply Hlt.
+    pose proof (@v_equiv t).
+    specialize (H5 (resid (jacobi_n A b x0 j)) n).
+    assert (length (resid (jacobi_n A b x0 j)) = n.+1).
+    { rewrite !map_length combine_length. admit. }
+    specialize (H5 H6).
+    rewrite H5. 
+    assert ((\col_j0 vector_inj
+                      (resid (jacobi_n A b x0 j))
+                      n.+1 j0 ord0) = 
+            vector_inj (resid (jacobi_n A b x0 j)) n.+1).
+    { apply /matrixP. unfold eqrel. intros. by rewrite !mxE. }
+    rewrite H7. apply Hlt.
 Admitted.
 
 
