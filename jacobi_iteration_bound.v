@@ -462,7 +462,21 @@ apply Rle_trans with
     eapply Rle_trans.
     * apply /RleP. apply triang_ineq .
     * rewrite -vec_inf_norm_opp. rewrite -RplusE.
-      rewrite x_fixpoint.
+      assert (x = x_fix x b_real A_real).
+      { admit. } rewrite H2.
+      assert (vec_inf_norm
+                 (FT2R_mat (X_m_jacobi k.+1 x0' b' A') -
+                  x_fix x b_real A_real) = f_error k.+1 b' x0' x A').
+      { by rewrite /f_error. }
+      assert (vec_inf_norm
+                 (FT2R_mat (X_m_jacobi k x0' b' A') -
+                  x_fix x b_real A_real) = f_error k b' x0' x A').
+      { by rewrite /f_error. } rewrite H3 H4.
+      
+
+
+
+rewrite x_fixpoint.
 
 fold (@f_error t).
 
