@@ -411,10 +411,18 @@ Lemma vec_succ_err {t: type} (A: matrix t) (b: vector t) (k:nat) :
   let x0' := @vector_inj _ x0 n.+1 in
   let A' := @matrix_inj _ A n.+1 n.+1 in
   let b' := @vector_inj _ b n.+1 in
-  let e_0 := f_error 0 b' x0' ((FT2R_mat (matrix_inj A n.+1 n.+1))^-1 *m 
-                           FT2R_mat (vector_inj b n.+1)) A' in
+  let A_real := FT2R_mat A' in
+  let b_real := FT2R_mat b' in
+  let x:= mulmx (A_real^-1) b_real in
+  let e_0 := f_error 0 b' x0' x A' in
   (vec_inf_norm (FT2R_mat ((X_m_jacobi k.+1 x0' b' A') -f (X_m_jacobi k x0' b' A'))) <=
     rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)))%Re.
+Proof.
+intros.
+pose proof 
+
+
+
 Admitted.
 
 
