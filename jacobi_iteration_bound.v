@@ -418,7 +418,7 @@ Lemma vec_succ_err {t: type} (A: matrix t) (b: vector t) (k:nat) :
   let x:= mulmx (A_real^-1) b_real in
   let e_0 := f_error 0 b' x0' x A' in
   (vec_inf_norm (FT2R_mat ((X_m_jacobi k.+1 x0' b' A') -f (X_m_jacobi k x0' b' A'))) <=
-    rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)))%Re.
+    (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho))) * (1+ default_rel t))%Re.
 Proof.
 intros.
 pose proof (@vec_float_sub_1 _ t n).
@@ -435,7 +435,16 @@ assert (forall xy : ftype t * ftype t,
              is_finite (fprec t) (femax t)
                (BPLUS t xy.1 (BOPP t xy.2)) = true).
 { admit. } specialize (H H0).
-
+apply reverse_triang_ineq in H.
+apply Rle_trans with
+(vec_inf_norm
+      (FT2R_mat (X_m_jacobi k.+1 x0' b' A') -
+       FT2R_mat (X_m_jacobi k x0' b' A')) * (1 + default_rel t))%Re.
++ rewrite Rmult_plus_distr_l Rmult_1_r.
+  assert (forall x y z:R, (x - y <= z)%Re -> (x <= y + z)%Re).
+  { intros. nra. } apply H1.
+  by apply /RleP.
++ apply Rmult_le_compat_r.
 
 
 Admitted.
