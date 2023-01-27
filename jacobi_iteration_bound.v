@@ -457,8 +457,17 @@ Lemma jacobi_iteration_bound_lowlevel {t: type} :
     let r2 := norm2 (resid y) in
     (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
     BCMP t Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
-Admitted.
-
+Proof.
+intros.
+pose proof (@jacobi_iteration_bound t (length A).-1).
+remember (length A).-1 as n.
+remember (@matrix_inj _ A n.+1 n.+1) as A'.
+remember (@vector_inj _ b n.+1) as b'.
+specialize (H0 A' b' acc k).
+destruct H0 as [Hacc H0].
+split.
++ by unfold acc2.
++ destuct
 
 
 
