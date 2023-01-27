@@ -440,28 +440,9 @@ Lemma jacobi_iteration_bound {t: type} {n : nat} :
     BCMP t Lt false (norm2 (vec_to_list_float n.+1 (resid j))) acc2 = false.
 Admitted.
 
-Print vector_inj'.
 Lemma vec_to_list_inj {t} (v : vector t) (n:nat):
   vec_to_list_float n.+1 (@vector_inj _ v n.+1) = v.
-Proof.
-apply nth_ext with (Zconst t 0) (Zconst t 0).
-+ rewrite length_veclist. admit.
-+ intros.
-  assert (vec_to_list_float n.+1 (vector_inj v n.+1) = 
-          rev (rev (vec_to_list_float n.+1 (vector_inj v n.+1)))).
-  { by rewrite rev_involutive. } rewrite H0.
-  rewrite rev_nth.
-  assert (length
-           (rev
-              (vec_to_list_float n.+1
-                 (vector_inj v n.+1))) = n.+1).
-  { by rewrite rev_length length_veclist. }
-  rewrite H1.
-  assert ((n.+1 - n0.+1)%coq_nat = (n.+1.-1 - n0)%coq_nat).
-  { lia. } rewrite H2. rewrite nth_ 
-
-  rewrite -[in LHS]rev_involutive.
-
+Admitted.
 
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
@@ -500,16 +481,20 @@ split.
     { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
       by rewrite nth_repeat.
     } rewrite H5 in H1. rewrite -H1 in Hf.
-    
-
-
-    rewrite vector_residual_equiv  in Hf.
-
-
- unfold norm2. unfold norm2 in Hf.
-    
-
-
+    rewrite vec_to_list_inj in Hf.
+    apply Hf.
+  - pose proof (@vector_residual_equiv t A b x0 j).
+    assert (length b = length A) by admit.
+    assert (length x0 = length A) by admit.
+    assert ((0 < length A)%coq_nat) by admit.
+    specialize (H0 H1 H2 H3).
+    rewrite HeqA' Heqb' in Hlt. rewrite -Heqn in H0.
+    assert (vector_inj x0 n.+1 = \col_(j < n.+1) (Zconst t 0)).
+    { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+      by rewrite nth_repeat.
+    } rewrite H4 in H0. rewrite -H0 in Hlt.
+    rewrite vec_to_list_inj in Hlt. apply Hlt.
+Admitted.
 
 
 
