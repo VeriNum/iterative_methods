@@ -514,9 +514,10 @@ apply Rle_trans with
                      ((1 - rho ^ k.+1) * d_mag) * / (1 - rho)  +
                      ((rho ^ k * e_0 * (1 - rho)) * / (1- rho)  +
                       ((1 - rho ^ k) * d_mag) * / (1 - rho)))%Re).
-          { assert ((rho ^ k.+1 * e_0 * (1 - rho)) * / (1-rho) = 
-                    
-
+          { assert (((rho ^ k.+1 * e_0 * (1 - rho)) * / (1-rho))%Re = 
+                     ((rho ^k.+1 * e_0) * ((1 - rho) * / (1-rho)))%Re).
+            { nra. } rewrite H14. rewrite Rinv_r; last by nra.
+            
 
 
 
