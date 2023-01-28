@@ -688,7 +688,7 @@ unfold jacobi_residual.
 
 
 
-Lemma jacobi_iteratio_bound {t: type} :
+Lemma old_jacobi_iteration_bound {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
    let acc2 := BMULT t acc acc in
