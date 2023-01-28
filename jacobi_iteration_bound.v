@@ -426,7 +426,7 @@ Lemma vec_succ_err {t: type} (A: matrix t) (b: vector t) (k:nat) :
   let x:= mulmx (A_real^-1) b_real in
   let e_0 := f_error 0 b' x0' x A' in
   (vec_inf_norm (FT2R_mat ((X_m_jacobi k.+1 x0' b' A') -f (X_m_jacobi k x0' b' A'))) <=
-    (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho))) * (1+ default_rel t))%Re.
+    (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))%Re.
 Proof.
 intros.
 pose proof (@vec_float_sub_1 _ t n).
@@ -535,20 +535,12 @@ apply Rle_trans with
                 ((rho ^ k * (1 + rho) * ((1-rho) * e_0 - d_mag)) + 2 * d_mag)%Re).
         { nra. } rewrite H14. clear H14.
         rewrite Rmult_plus_distr_r.
-        Search (( _ - _)*_)%Re.
         assert ((rho ^ k * (1 + rho) *
                     ((1 - rho) * e_0 - d_mag) * / (1 - rho))%Re =
                 (rho ^ k * (1 + rho) * 
                 (e_0 * ( (1 - rho) * / (1 - rho)) - d_mag * /(1 - rho)))%Re).
         { nra. } rewrite H14. clear H14. rewrite Rinv_r; last by nra.
-        rewrite Rmult_1_r.
-
-
-rewrite x_fixpoint.
-
-fold (@f_error t).
-
-
+        rewrite Rmult_1_r. nra.
 Admitted.
 
 
