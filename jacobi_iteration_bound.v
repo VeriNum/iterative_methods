@@ -504,7 +504,7 @@ apply Rle_trans with
                      (1 - rho ^ k.+1) / (1 - rho) * d_mag +
                      (rho ^ k * e_0 +
                       (1 - rho ^ k) / (1 - rho) * d_mag))%Re = 
-               ((rho^k.+1 * (1 - rho) * e_0 + (1 - rho^k+1) * d_mag + 
+               ((rho^k.+1 * (1 - rho) * e_0 + (1 - rho^k.+1) * d_mag + 
                 rho^k * (1- rho) * e_0 + (1 - rho^k) * d_mag) * / (1-rho))%Re).
         { assert ((rho ^ k.+1 * e_0 +
                      (1 - rho ^ k.+1) / (1 - rho) * d_mag +
@@ -517,8 +517,31 @@ apply Rle_trans with
           { assert (((rho ^ k.+1 * e_0 * (1 - rho)) * / (1-rho))%Re = 
                      ((rho ^k.+1 * e_0) * ((1 - rho) * / (1-rho)))%Re).
             { nra. } rewrite H14. rewrite Rinv_r; last by nra.
-            
-
+            rewrite Rmult_1_r.
+            assert (((rho ^ k * e_0 * (1 - rho)) * / (1- rho))%Re = 
+                     ( (rho^k * e_0) * ((1 - rho) * / (1- rho)))%Re).
+            { nra. } rewrite H15. rewrite Rinv_r; nra.
+          } rewrite H14. clear H14. nra.
+        } rewrite H14. clear H14.
+        assert ((rho ^ k.+1 * (1 - rho) * e_0 +
+                  (1 - rho ^ k.+1) * d_mag +
+                  rho ^ k * (1 - rho) * e_0 +
+                  (1 - rho ^ k) * d_mag)%Re = 
+                (rho ^ k * (1+ rho) * (1 - rho) * e_0 + 
+                  2* d_mag  - rho^k * (1 + rho) * d_mag)%Re).
+        { simpl. nra. } rewrite H14. clear H14.
+        assert ((rho ^ k * (1 + rho) * (1 - rho) * e_0 +
+                  2 * d_mag - rho ^ k * (1 + rho) * d_mag)%Re = 
+                ((rho ^ k * (1 + rho) * ((1-rho) * e_0 - d_mag)) + 2 * d_mag)%Re).
+        { nra. } rewrite H14. clear H14.
+        rewrite Rmult_plus_distr_r.
+        Search (( _ - _)*_)%Re.
+        assert ((rho ^ k * (1 + rho) *
+                    ((1 - rho) * e_0 - d_mag) * / (1 - rho))%Re =
+                (rho ^ k * (1 + rho) * 
+                (e_0 * ( (1 - rho) * / (1 - rho)) - d_mag * /(1 - rho)))%Re).
+        { nra. } rewrite H14. clear H14. rewrite Rinv_r; last by nra.
+        rewrite Rmult_1_r.
 
 
 rewrite x_fixpoint.
