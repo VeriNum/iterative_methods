@@ -603,10 +603,29 @@ eapply Rle_trans.
                      is_finite (fprec t) (femax t)
                        (BMULT t xy.1 xy.2) = true).
             { admit. } specialize (H H0).
-            
-
-
-         Search diag_vector_mult.
+            assert ((vec_inf_norm
+                     (FT2R_mat
+                        (diag_vector_mult (A1_J A')
+                           (X_m_jacobi k.+1 x0' b' A' -f
+                            X_m_jacobi k x0' b' A')) -
+                      diag_matrix_vec_mult_R
+                        (FT2R_mat (A1_J A'))
+                        (FT2R_mat
+                           (X_m_jacobi k.+1 x0' b' A' -f
+                            X_m_jacobi k x0' b' A'))) <=
+                   vec_inf_norm (FT2R_mat (A1_J A')) *
+                   vec_inf_norm
+                     (FT2R_mat
+                        (X_m_jacobi k.+1 x0' b' A' -f
+                         X_m_jacobi k x0' b' A')) * 
+                   g t n.+1 + g1 t n.+1 (n.+1 - 1))).
+           { by apply /RleP. } apply reverse_triang_ineq in H1.
+           match goal with |-context[(_ <= ?a + ?b + ?c)%Re]=>
+            replace (a + b + c)%Re with (a + (b + c))%Re by nra
+           end.
+           assert (forall x y z:R,  (x - y <= z)%Re -> (x <= y + z)%Re).
+           { intros. nra. } apply H2.  by apply /RleP. 
+        -- 
 
 
 
