@@ -577,7 +577,36 @@ eapply Rle_trans.
     * apply Rplus_le_le_0_compat; try nra; try apply g_pos.
     * Search (Rsqr _ <= Rsqr _)%Re.
       apply Rsqr_incr_1.
-      ++ 
+      ++ unfold resid, residual_math. 
+         Search diag_vector_mult.
+         apply Rle_trans with
+         (vec_inf_norm 
+            (diag_matrix_vec_mult_R (FT2R_mat (A1_J A'))
+            (FT2R_mat (X_m_jacobi k.+1 x0' b' A' -f
+                          X_m_jacobi k x0' b' A'))) +
+          vec_inf_norm (FT2R_mat (A1_J A')) *
+          vec_inf_norm (FT2R_mat (X_m_jacobi k.+1 x0' b' A' -f
+                          X_m_jacobi k x0' b' A')) * 
+          g t n.+1 +  g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
+         -- pose proof (@vec_norm_diag _ t n (A1_J A') 
+                        (X_m_jacobi k.+1 x0' b' A' -f
+                          X_m_jacobi k x0' b' A')).
+            assert (forall xy : ftype t * ftype t,
+                     In xy
+                       (combine
+                          (vec_to_list_float n.+1 (A1_J A'))
+                          (vec_to_list_float n.+1
+                             (X_m_jacobi k.+1 x0' b' A' -f
+                              X_m_jacobi k x0' b' A'))) ->
+                     is_finite (fprec t) (femax t) xy.1 = true /\
+                     is_finite (fprec t) (femax t) xy.2 = true /\
+                     is_finite (fprec t) (femax t)
+                       (BMULT t xy.1 xy.2) = true).
+            { admit. } specialize (H H0).
+            
+
+
+         Search diag_vector_mult.
 
 
 
