@@ -564,6 +564,22 @@ Lemma residual_bound {t: type} (A: matrix t) (b: vector t) (k:nat) :
       ((rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t)) *
       (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
 Proof.
+intros.
+eapply Rle_trans.
++ apply norm2_vec_inf_norm_rel; admit.
+  (** finiteness of residual and elements in the list **)
++ apply Rplus_le_compat_r. 
+  match goal with |-context[((?a * ?b) *?c <= _)%Re]=>
+    replace ((a * b) * c)%Re with (a * (b * c))%Re by nra
+  end. apply Rmult_le_compat_l.
+  - apply pos_INR.
+  - apply Rmult_le_compat_r.
+    * apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+    * 
+  
+
+
+
 Admitted.
 
 
