@@ -625,7 +625,13 @@ eapply Rle_trans.
            end.
            assert (forall x y z:R,  (x - y <= z)%Re -> (x <= y + z)%Re).
            { intros. nra. } apply H2.  by apply /RleP. 
-        -- 
+        -- Search diag_matrix_vec_mult_R.
+           (** vec_inf_norm_diag_matrix_vec_mult_R **)
+           eapply Rle_trans. 
+           ** repeat apply Rplus_le_compat_r.
+              apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R.
+           ** rewrite -RmultE.
+           
 
 
 
