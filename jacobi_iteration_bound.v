@@ -631,7 +631,24 @@ eapply Rle_trans.
            ** repeat apply Rplus_le_compat_r.
               apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R.
            ** rewrite -RmultE.
-           
+              assert ((vec_inf_norm (FT2R_mat (A1_J A')) *
+                       vec_inf_norm
+                         (FT2R_mat
+                            (X_m_jacobi k.+1 x0' b' A' -f
+                             X_m_jacobi k x0' b' A')) +
+                       vec_inf_norm (FT2R_mat (A1_J A')) *
+                       vec_inf_norm
+                         (FT2R_mat
+                            (X_m_jacobi k.+1 x0' b' A' -f
+                             X_m_jacobi k x0' b' A')) * 
+                       g t n.+1 + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re = 
+                      (vec_inf_norm (FT2R_mat (A1_J A')) *
+                       vec_inf_norm
+                         (FT2R_mat
+                            (X_m_jacobi k.+1 x0' b' A' -f
+                             X_m_jacobi k x0' b' A')) * ( 1 + g t n.+1) + 
+                       g1 t n.+1 (n.+1 - 1)%coq_nat)%Re).
+             { nra. } rewrite H.
 
 
 
