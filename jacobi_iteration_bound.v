@@ -560,8 +560,8 @@ Lemma residual_bound {t: type} (A: matrix t) (b: vector t) (k:nat) :
   let v_l := (vec_to_list_float n.+1 (resid k)) in
   (Rabs (FT2R (norm2 (rev v_l))) <= 
     INR n.+1 * 
-    ( vec_inf_norm (FT2R_mat (A1_inv_J A')) * 
-      ((rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t)) *
+    (Rsqr (vec_inf_norm (FT2R_mat (A1_inv_J A')) * 
+      ((rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))) *
       (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
 Proof.
 intros.
@@ -575,11 +575,19 @@ eapply Rle_trans.
   - apply pos_INR.
   - apply Rmult_le_compat_r.
     * apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-    * 
-  
+    * Search (Rsqr _ <= Rsqr _)%Re.
+      apply Rsqr_incr_1.
+      ++ 
 
 
 
+
+ admit.
+      ++ apply /RleP. apply vec_norm_pd.
+      ++ repeat apply Rmult_le_pos.
+         -- apply /RleP. apply vec_norm_pd.
+         -- apply Rplus_le_le_0_compat; admit.
+         -- apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0. 
 Admitted.
 
 
