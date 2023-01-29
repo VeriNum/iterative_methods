@@ -543,7 +543,28 @@ apply Rle_trans with
         rewrite Rmult_1_r. nra.
 Admitted.
 
-
+(*** Bound for the residual ***)
+Lemma residual_bound {t: type} (A: matrix t) (b: vector t) (k:nat) :
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in
+  let n := (length A).-1 in
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let x0' := @vector_inj _ x0 n.+1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let A_real := FT2R_mat A' in
+  let b_real := FT2R_mat b' in
+  let x:= mulmx (A_real^-1) b_real in
+  let e_0 := f_error 0 b' x0' x A' in
+  let resid := residual_math A' x0' b' in
+  let v_l := (vec_to_list_float n.+1 (resid k)) in
+  (Rabs (FT2R (norm2 (rev v_l))) <= 
+    INR n.+1 * 
+    ( vec_inf_norm (FT2R_mat (A1_inv_J A')) * 
+      ((rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t)) *
+      (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
+Proof.
+Admitted.
 
 
 
