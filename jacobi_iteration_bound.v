@@ -69,6 +69,35 @@ Definition d_mag_def {t: type} (A: matrix t) (b: vector t) :=
                      matrix_inf_norm (A2_J_real A_real)) *
                     vec_inf_norm (x_fix x b_real A_real))%Re.
 
+
+
+
+
+Lemma d_mag_ge_0 {t: type} (A: matrix t) (b: vector t):
+  (0 <= d_mag_def A b)%Re.
+Proof.
+unfold d_mag_def.
+repeat apply Rplus_le_le_0_compat.
++ repeat try apply Rmult_le_pos; try repeat apply Rplus_le_le_0_compat.
+  - apply Rmult_le_pos; try apply g_pos.
+    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+  - apply default_rel_ge_0.
+  - apply Rmult_le_pos. 
+    apply /RleP. apply vec_norm_pd.
+    apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+  - apply default_abs_ge_0.
+
+
+
+
+Admitted. 
+  
+
+
+
+
+
+
 Definition jacobi_preconditions {t: type}
   (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
   (* some property of A,b,accuracy holds such that 
