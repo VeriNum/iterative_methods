@@ -734,7 +734,7 @@ eapply Rle_trans.
                    --- admit.
                +++ repeat apply Rmult_le_pos.
                    --- nra.
-                   --- admit.
+                   --- apply d_mag_ge_0.
                    --- apply Rlt_le. apply Rinv_0_lt_compat. nra.
             ** apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
             ** apply Rplus_le_le_0_compat. nra. apply g_pos.
@@ -759,6 +759,22 @@ Lemma jacobi_iteration_bound {t: type} {n : nat} :
     (forall i, (i <= j)%nat -> finite (norm2 (rev (vec_to_list_float n.+1 (resid i))))) /\
     BCMP t Lt false (norm2 (rev (vec_to_list_float n.+1 (resid j)))) acc2 = false.
     (** rev (_ ) fits perfectly well with norm2_vec_inf_norm_rel **)
+Proof.
+intros.
+split.
++ admit.
++ exists k. (** dummy for now **)
+  repeat split.
+  - by [].
+  - admit.
+  - unfold BCMP.
+    rewrite Bcompare_correct. 
+    * rewrite Rcompare_Lt; first by [].
+      change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
+      unfold acc2. 
+  
+
+
 Admitted.
 
 
