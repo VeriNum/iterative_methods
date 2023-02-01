@@ -86,7 +86,39 @@ repeat apply Rplus_le_le_0_compat.
     apply /RleP. apply vec_norm_pd.
     apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
   - apply default_abs_ge_0.
+  - apply /RleP. apply vec_norm_pd.
++ repeat try apply Rmult_le_pos.
+  - apply Rplus_le_le_0_compat. nra. apply g_pos.
+  - apply pos_INR.
+  - nra.
+  - apply bpow_ge_0.
+  - apply Rplus_le_le_0_compat. nra. apply g_pos.
+  - apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0. 
+  - apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
+    apply Rmult_le_pos; last by (apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0).
+    apply /RleP. apply vec_norm_pd.
++ apply g1_pos.
++ apply Rmult_le_pos; last by (apply /RleP; try apply vec_norm_pd).
+  apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
+  apply Rmult_le_pos; last by apply default_rel_ge_0.
+  apply /RleP. apply vec_norm_pd.
++ repeat apply Rmult_le_pos; last by (apply /RleP; try apply vec_norm_pd).
+  repeat apply Rplus_le_le_0_compat.
+  - repeat apply Rmult_le_pos.
+    * repeat apply Rplus_le_le_0_compat; last by apply default_rel_ge_0.
+      repeat apply Rmult_le_pos.
+      ++ apply Rplus_le_le_0_compat; last by apply g_pos.
+         apply Rplus_le_le_0_compat.
+         -- repeat apply Rmult_le_pos;last by apply g_pos.
+            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+            apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+         -- apply Rmult_le_pos; first by apply default_rel_ge_0.
 
+
+
+ admit.
+    * apply /RleP. apply vec_norm_pd.
+    * apply /RleP. apply matrix_norm_pd.
 
 
 
