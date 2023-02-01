@@ -558,6 +558,7 @@ Lemma residual_bound {t: type} (A: matrix t) (b: vector t) (k:nat) :
   let e_0 := f_error 0 b' x0' x A' in
   let resid := residual_math A' x0' b' in
   let v_l := (vec_to_list_float n.+1 (resid k)) in
+  (rho < 1)%Re ->
   (Rabs (FT2R (norm2 (rev v_l))) <= 
     INR n.+1 * 
     (Rsqr (vec_inf_norm (FT2R_mat (A1_J A')) * 
@@ -603,7 +604,7 @@ eapply Rle_trans.
                      is_finite (fprec t) (femax t) xy.2 = true /\
                      is_finite (fprec t) (femax t)
                        (BMULT t xy.1 xy.2) = true).
-            { admit. } specialize (H H0).
+            { admit. } specialize (H0 H1).
             assert ((vec_inf_norm
                      (FT2R_mat
                         (diag_vector_mult (A1_J A')
@@ -620,12 +621,12 @@ eapply Rle_trans.
                         (X_m_jacobi k.+1 x0' b' A' -f
                          X_m_jacobi k x0' b' A')) * 
                    g t n.+1 + g1 t n.+1 (n.+1 - 1))).
-           { by apply /RleP. } apply reverse_triang_ineq in H1.
+           { by apply /RleP. } apply reverse_triang_ineq in H2.
            match goal with |-context[(_ <= ?a + ?b + ?c)%Re]=>
             replace (a + b + c)%Re with (a + (b + c))%Re by nra
            end.
            assert (forall x y z:R,  (x - y <= z)%Re -> (x <= y + z)%Re).
-           { intros. nra. } apply H2.  by apply /RleP. 
+           { intros. nra. } apply H3.  by apply /RleP. 
         -- Search diag_matrix_vec_mult_R.
            (** vec_inf_norm_diag_matrix_vec_mult_R **)
            eapply Rle_trans. 
@@ -649,7 +650,7 @@ eapply Rle_trans.
                             (X_m_jacobi k.+1 x0' b' A' -f
                              X_m_jacobi k x0' b' A')) * ( 1 + g t n.+1) + 
                        g1 t n.+1 (n.+1 - 1)%coq_nat)%Re).
-             { nra. } rewrite H.
+             { nra. } rewrite H0.
              apply Rplus_le_compat_r. apply Rmult_le_compat_r.
              +++ apply Rplus_le_le_0_compat; try nra; try apply g_pos.
              +++ apply Rmult_le_compat_l. 
@@ -659,9 +660,17 @@ eapply Rle_trans.
       ++ apply Rplus_le_le_0_compat.
          -- repeat apply Rmult_le_pos.
             ** apply /RleP. apply vec_norm_pd.
-            ** apply Rplus_le_le_0_compat; admit.
-            ** apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0. 
-            ** apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+            ** apply Rplus_le_le_0_compat.
+               +++ repeat apply Rmult_le_pos.
+                   --- apply pow_le. by apply rho_ge_0.
+                   --- apply Rplus_le_le_0_compat; try nra; try by apply rho_ge_0.
+                   --- admit.
+               +++ repeat apply Rmult_le_pos.
+                   --- nra.
+                   --- admit.
+                   --- apply Rlt_le. apply Rinv_0_lt_compat. nra.
+            ** apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+            ** apply Rplus_le_le_0_compat. nra. apply g_pos.
          -- apply g1_pos.
 Admitted.
 
