@@ -833,7 +833,26 @@ split.
                +++ admit. (** (e_0 - d_mag / (1 - rho) > 0)%Re **)
                +++ apply Rcomplements.Rlt_div_r;
                    first by (apply Rplus_lt_le_0_compat; try nra; try rewrite Heqrho; by apply rho_ge_0).
-                   
+                   assert ((rho ^ k_min A b acc)%Re = (/ / rho ^ k_min A b acc)%Re).
+                   { by rewrite Rinv_inv. }
+                   rewrite H1.
+                   match goal with |-context[(_ < ?x / ?y / ?z)%Re]=>
+                      replace (x / y / z)%Re with (/ (y * z / x))%Re 
+                   end. 
+                   --- admit.
+                   --- rewrite Rinv_div. 
+                       
+
+
+                   assert ( (/ ( ((e_0 - d_mag / (1 - rho)) / (1 + rho))%Re /
+                                ((sqrt
+                                   ((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) /
+                                    INR n.+1 / (1 + g t n.+1)) -
+                                 g1 t n.+1 (n.+1 - 1)%coq_nat) / 
+                                (1 + g t n.+1) /
+                                vec_inf_norm (FT2R_mat (A1_J A)) /
+                                (1 + default_rel t) - 2 * d_mag / (1 - rho))))%Re = 
+                              
 
 
 
