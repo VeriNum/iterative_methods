@@ -188,7 +188,7 @@ Definition k_min {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let e_0 := f_error 0 b x0 x A in
   let Gamma := FT2R (BMULT t acc acc) in
   let delta := default_rel t in
-  Z.to_N (Zceil (Rlog (1 / rho)%Re 
+  Z.to_nat (Zceil (Rlog (1 / rho)%Re 
            (( (1+ rho) * (e_0 - d_mag / (1- rho)) ) /
             ( sqrt( ( (Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) / (INR n.+1 * (1 + g t n.+1))) /
                    (vec_inf_norm (FT2R_mat (A1_J A)) * (1 + delta) * (1 + g t n.+1)) )
@@ -775,12 +775,15 @@ Qed.
 
 (** Lemma in terms of mathcomp **)
 Lemma zceil_inj: forall x:R,
-  INR (Z.to_N (Zceil x)) = x.
+  (0 < Zceil x)%Z ->
+  INR (Z.to_nat (Zceil x)) = x.
 Proof.
 intros.
-Search "Zceil".
-Search Z.to_N.
-*)
+rewrite Zceil_INR; last by [].
+Search Zceil.
+Admitted.
+
+
 
 Lemma jacobi_iteration_bound {t: type} {n : nat} :
  forall (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (acc: ftype t) (k: nat),
@@ -891,7 +894,7 @@ split.
                           rewrite H3. apply Rpower_lt .
                           ++++ admit.
                           ++++ unfold k_min.
-                               Search "Zceil".
+                               rewrite Zceil_INR.
 
 
 
