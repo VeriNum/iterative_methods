@@ -841,7 +841,34 @@ split.
                    end. 
                    --- apply Rinv_lt_contravar.
                        *** admit.
-                       *** 
+                       *** rewrite -pow_inv.
+                           assert (((e_0 - d_mag / (1 - rho)) * (1 + rho) /
+                                     ((sqrt
+                                         ((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) /
+                                          INR n.+1 / (1 + g t n.+1)) -
+                                       g1 t n.+1 (n.+1 - 1)%coq_nat) / 
+                                      (1 + g t n.+1) /
+                                      vec_inf_norm (FT2R_mat (A1_J A)) /
+                                      (1 + default_rel t) - 2 * d_mag / (1 - rho)))%Re  =
+                                   Rpower (/rho)%Re 
+                                   ( Rlog (/rho)%Re 
+                                     ((e_0 - d_mag / (1 - rho)) * (1 + rho) /
+                                       ((sqrt
+                                           ((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) /
+                                            INR n.+1 / (1 + g t n.+1)) -
+                                         g1 t n.+1 (n.+1 - 1)%coq_nat) / 
+                                        (1 + g t n.+1) /
+                                        vec_inf_norm (FT2R_mat (A1_J A)) /
+                                        (1 + default_rel t) - 2 * d_mag / (1 - rho)))%Re)).
+                          { rewrite Rpower_Rlog. by []. admit. admit. admit. }
+                          rewrite H2.
+                          assert ( ((/ rho) ^ k_min A b acc)%Re = 
+                                   Rpower (/rho)%Re (INR (k_min A b acc))).
+                          { rewrite Rpower_pow. nra. admit. }
+                          rewrite H3. apply Rpower_lt .
+                          ++++ admit.
+                          ++++ unfold k_min.
+                               Search "INR".
 
 
 
