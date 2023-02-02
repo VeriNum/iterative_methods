@@ -821,7 +821,20 @@ split.
              nra. apply g_pos.
          } rewrite H0. 
          apply Rsqr_incrst_1.
-         -- 
+         -- apply Rcomplements.Rlt_minus_r.
+            apply Rcomplements.Rlt_div_r;
+            first  by (apply Rplus_lt_le_0_compat; try nra; try apply g_pos).
+            rewrite Rmult_comm. apply Rcomplements.Rlt_div_r.
+            ** admit. (** vec_norm of diagonal matrix A1 is positive **)
+            ** apply Rcomplements.Rlt_div_r;
+               first  by (apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0).
+               apply Rcomplements.Rlt_minus_r.
+               apply Rcomplements.Rlt_div_r.
+               +++ admit. (** (e_0 - d_mag / (1 - rho) > 0)%Re **)
+               +++ apply Rcomplements.Rlt_div_r;
+                   first by (apply Rplus_lt_le_0_compat; try nra; try rewrite Heqrho; by apply rho_ge_0).
+                   
+
 
 
 
