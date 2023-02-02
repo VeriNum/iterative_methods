@@ -755,9 +755,32 @@ eapply Rle_trans.
          -- apply g1_pos.
 Admitted.
 
+ Search "Zceil".
+Print IZR.
+Search"Zlt".
+
+Local Open Scope Z_scope.
+Lemma Zceil_INR: forall x:Z,
+  (0 < x)%Z ->
+  INR (Z.to_nat x) = IZR x.
+Proof.
+intros.
+destruct x.
++ auto.
++ unfold IZR.
+  rewrite Z2Nat.inj_pos. apply INR_IPR.
++ auto.
+  contradict H. lia.
+Qed.
 
 (** Lemma in terms of mathcomp **)
-
+Lemma zceil_inj: forall x:R,
+  INR (Z.to_N (Zceil x)) = x.
+Proof.
+intros.
+Search "Zceil".
+Search Z.to_N.
+*)
 
 Lemma jacobi_iteration_bound {t: type} {n : nat} :
  forall (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (acc: ftype t) (k: nat),
@@ -868,7 +891,7 @@ split.
                           rewrite H3. apply Rpower_lt .
                           ++++ admit.
                           ++++ unfold k_min.
-                               Search "INR".
+                               Search "Zceil".
 
 
 
