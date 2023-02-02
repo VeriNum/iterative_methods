@@ -538,25 +538,24 @@ Lemma vec_succ_err {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) :
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
-  let x0 := (repeat  (Zconst t 0) n.+1) in
-  let x0' := @vector_inj _ x0 n.+1 in
+  let x0 := \col_(j < n.+1) (Zconst t 0) in
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x:= mulmx (A_real^-1) b_real in
-  let e_0 := f_error 0 b x0' x A in
-  (vec_inf_norm (FT2R_mat ((X_m_jacobi k.+1 x0' b A) -f (X_m_jacobi k x0' b A))) <=
+  let e_0 := f_error 0 b x0 x A in
+  (vec_inf_norm (FT2R_mat ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A))) <=
     (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))%Re.
 Proof.
 intros.
 pose proof (@vec_float_sub_1 _ t n).
-specialize (H (X_m_jacobi k.+1 x0' b A) (X_m_jacobi k x0' b A)).
+specialize (H (X_m_jacobi k.+1 x0 b A) (X_m_jacobi k x0 b A)).
 assert (forall xy : ftype t * ftype t,
              In xy
                (combine
                   (vec_to_list_float n.+1
-                     (X_m_jacobi k.+1 x0' b A))
+                     (X_m_jacobi k.+1 x0 b A))
                   (vec_to_list_float n.+1
-                     (X_m_jacobi k x0' b A))) ->
+                     (X_m_jacobi k x0 b A))) ->
              is_finite (fprec t) (femax t) xy.1 = true /\
              is_finite (fprec t) (femax t) xy.2 = true /\
              is_finite (fprec t) (femax t)
@@ -565,18 +564,18 @@ assert (forall xy : ftype t * ftype t,
 apply reverse_triang_ineq in H.
 apply Rle_trans with
 (vec_inf_norm
-      (FT2R_mat (X_m_jacobi k.+1 x0' b A) -
-       FT2R_mat (X_m_jacobi k x0' b A)) * (1 + default_rel t))%Re.
+      (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
+       FT2R_mat (X_m_jacobi k x0 b A)) * (1 + default_rel t))%Re.
 + rewrite Rmult_plus_distr_l Rmult_1_r.
   assert (forall x y z:R, (x - y <= z)%Re -> (x <= y + z)%Re).
   { intros. nra. } apply H1.
   by apply /RleP.
 + apply Rmult_le_compat_r.
   - apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
-  - assert (FT2R_mat (X_m_jacobi k.+1 x0' b A) -
-                FT2R_mat (X_m_jacobi k x0' b A) = 
-            (FT2R_mat (X_m_jacobi k.+1 x0' b A) - x) - 
-            (FT2R_mat (X_m_jacobi k x0' b A) - x)).
+  - assert (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
+                FT2R_mat (X_m_jacobi k x0 b A) = 
+            (FT2R_mat (X_m_jacobi k.+1 x0 b A) - x) - 
+            (FT2R_mat (X_m_jacobi k x0 b A) - x)).
     { by rewrite add_vec_distr_5. } rewrite H1.
     eapply Rle_trans.
     * apply /RleP. apply triang_ineq .
@@ -584,12 +583,12 @@ apply Rle_trans with
       assert (x = x_fix x b_real A_real).
       { admit. } rewrite H2.
       assert (vec_inf_norm
-                 (FT2R_mat (X_m_jacobi k.+1 x0' b A) -
-                  x_fix x b_real A_real) = f_error k.+1 b x0' x A).
+                 (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
+                  x_fix x b_real A_real) = f_error k.+1 b x0 x A).
       { by rewrite /f_error. }
       assert (vec_inf_norm
-                 (FT2R_mat (X_m_jacobi k x0' b A) -
-                  x_fix x b_real A_real) = f_error k b x0' x A).
+                 (FT2R_mat (X_m_jacobi k x0 b A) -
+                  x_fix x b_real A_real) = f_error k b x0 x A).
       { by rewrite /f_error. } rewrite H3 H4.
       pose proof (@jacobi_forward_error_bound _ t n A b).
       assert (forall i : 'I_n.+1,
@@ -602,19 +601,19 @@ apply Rle_trans with
                 (BDIV t (Zconst t 1) (A i i)) = true) by admit.
      assert (forall (k : nat) (i : 'I_n.+1),
                 is_finite (fprec t) (femax t)
-                  (X_m_jacobi k x0' b A i ord0) = true) by admit. 
-     specialize (H5 H6 H7 H8 H9 H10 x0' H11).
-     assert ((f_error k.+1 b x0' x A <= rho^k.+1 * (f_error 0 b x0' x A) + 
+                  (X_m_jacobi k x0 b A i ord0) = true) by admit. 
+     specialize (H5 H6 H7 H8 H9 H10 x0 H11).
+     assert ((f_error k.+1 b x0 x A <= rho^k.+1 * (f_error 0 b x0 x A) + 
                     ((1 - rho^k.+1) / (1 - rho))* d_mag)%Re).
      { by apply (H5 k.+1). }
-     assert ((f_error k b x0' x A <= rho^k * (f_error 0 b x0' x A) + 
+     assert ((f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + 
                     ((1 - rho^k) / (1 - rho))* d_mag)%Re).
      { by apply (H5 k). } 
      eapply Rle_trans.
      ++ apply Rle_trans with
-        ((rho ^ k.+1 * f_error 0 b x0' x A +
+        ((rho ^ k.+1 * f_error 0 b x0 x A +
             (1 - rho ^ k.+1) / (1 - rho) * d_mag) + 
-        (rho ^ k * f_error 0 b x0' x A +
+        (rho ^ k * f_error 0 b x0 x A +
           (1 - rho ^ k) / (1 - rho) * d_mag))%Re.
         -- by apply Rplus_le_compat.
         -- apply Rle_refl.
@@ -800,13 +799,12 @@ Lemma residual_bound {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) :
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
-  let x0 := (repeat  (Zconst t 0) n.+1) in
-  let x0' := @vector_inj _ x0 n.+1 in
+  let x0:=  \col_(j < n.+1) (Zconst t 0) in
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x:= mulmx (A_real^-1) b_real in
-  let e_0 := f_error 0 b x0' x A in
-  let resid := residual_math A x0' b in
+  let e_0 := f_error 0 b x0 x A in
+  let resid := residual_math A x0 b in
   let v_l := (vec_to_list_float n.+1 (resid k)) in
   (rho < 1)%Re ->
   (Rabs (FT2R (norm2 (rev v_l))) <= 
@@ -834,22 +832,22 @@ eapply Rle_trans.
          apply Rle_trans with
          (vec_inf_norm 
             (diag_matrix_vec_mult_R (FT2R_mat (A1_J A))
-            (FT2R_mat (X_m_jacobi k.+1 x0' b A -f
-                          X_m_jacobi k x0' b A))) +
+            (FT2R_mat (X_m_jacobi k.+1 x0 b A -f
+                          X_m_jacobi k x0 b A))) +
           vec_inf_norm (FT2R_mat (A1_J A)) *
-          vec_inf_norm (FT2R_mat (X_m_jacobi k.+1 x0' b A -f
-                          X_m_jacobi k x0' b A)) * 
+          vec_inf_norm (FT2R_mat (X_m_jacobi k.+1 x0 b A -f
+                          X_m_jacobi k x0 b A)) * 
           g t n.+1 +  g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
          -- pose proof (@vec_norm_diag _ t n (A1_J A) 
-                        (X_m_jacobi k.+1 x0' b A -f
-                          X_m_jacobi k x0' b A)).
+                        (X_m_jacobi k.+1 x0 b A -f
+                          X_m_jacobi k x0 b A)).
             assert (forall xy : ftype t * ftype t,
                      In xy
                        (combine
                           (vec_to_list_float n.+1 (A1_J A))
                           (vec_to_list_float n.+1
-                             (X_m_jacobi k.+1 x0' b A -f
-                              X_m_jacobi k x0' b A))) ->
+                             (X_m_jacobi k.+1 x0 b A -f
+                              X_m_jacobi k x0 b A))) ->
                      is_finite (fprec t) (femax t) xy.1 = true /\
                      is_finite (fprec t) (femax t) xy.2 = true /\
                      is_finite (fprec t) (femax t)
@@ -858,18 +856,18 @@ eapply Rle_trans.
             assert ((vec_inf_norm
                      (FT2R_mat
                         (diag_vector_mult (A1_J A)
-                           (X_m_jacobi k.+1 x0' b A -f
-                            X_m_jacobi k x0' b A)) -
+                           (X_m_jacobi k.+1 x0 b A -f
+                            X_m_jacobi k x0 b A)) -
                       diag_matrix_vec_mult_R
                         (FT2R_mat (A1_J A))
                         (FT2R_mat
-                           (X_m_jacobi k.+1 x0' b A -f
-                            X_m_jacobi k x0' b A))) <=
+                           (X_m_jacobi k.+1 x0 b A -f
+                            X_m_jacobi k x0 b A))) <=
                    vec_inf_norm (FT2R_mat (A1_J A)) *
                    vec_inf_norm
                      (FT2R_mat
-                        (X_m_jacobi k.+1 x0' b A -f
-                         X_m_jacobi k x0' b A)) * 
+                        (X_m_jacobi k.+1 x0 b A -f
+                         X_m_jacobi k x0 b A)) * 
                    g t n.+1 + g1 t n.+1 (n.+1 - 1))).
            { by apply /RleP. } apply reverse_triang_ineq in H2.
            match goal with |-context[(_ <= ?a + ?b + ?c)%Re]=>
@@ -886,19 +884,19 @@ eapply Rle_trans.
               assert ((vec_inf_norm (FT2R_mat (A1_J A)) *
                        vec_inf_norm
                          (FT2R_mat
-                            (X_m_jacobi k.+1 x0' b A -f
-                             X_m_jacobi k x0' b A)) +
+                            (X_m_jacobi k.+1 x0 b A -f
+                             X_m_jacobi k x0 b A)) +
                        vec_inf_norm (FT2R_mat (A1_J A)) *
                        vec_inf_norm
                          (FT2R_mat
-                            (X_m_jacobi k.+1 x0' b A -f
-                             X_m_jacobi k x0' b A)) * 
+                            (X_m_jacobi k.+1 x0 b A -f
+                             X_m_jacobi k x0 b A)) * 
                        g t n.+1 + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re = 
                       (vec_inf_norm (FT2R_mat (A1_J A)) *
                        vec_inf_norm
                          (FT2R_mat
-                            (X_m_jacobi k.+1 x0' b A -f
-                             X_m_jacobi k x0' b A)) * ( 1 + g t n.+1) + 
+                            (X_m_jacobi k.+1 x0 b A -f
+                             X_m_jacobi k x0 b A)) * ( 1 + g t n.+1) + 
                        g1 t n.+1 (n.+1 - 1)%coq_nat)%Re).
              { nra. } rewrite H0.
              apply Rplus_le_compat_r. apply Rmult_le_compat_r.
@@ -1091,16 +1089,21 @@ split.
       rewrite H.
       remember (rho_def A b) as rho.
       remember (d_mag_def A b) as d_mag.
-      remember (length A).-1 as n.
-      apply Rlt_le_trans with
+      remember (mulmx ((FT2R_mat A)^-1) (FT2R_mat b)) as x.
+      remember (f_error 0 b x0 x A) as e_0.
+      apply Rle_lt_trans with
       (INR n.+1 * 
         (Rsqr (vec_inf_norm (FT2R_mat (A1_J A)) * 
           ((rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))
             * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat) *
           (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
-
-
-
+      ++ pose proof (@residual_bound t n A b k).
+         assert ((rho_def A b < 1)%Re) by admit.
+         specialize (H0 H1). unfold resid,x0. rewrite Heqe_0 Heqrho Heqd_mag Heqx.
+         unfold x0. apply H0.
+      ++  admit. 
+    * admit.
+    * admit.
 Admitted.
 
 
