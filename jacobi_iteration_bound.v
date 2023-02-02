@@ -802,7 +802,33 @@ split.
          assert ((rho_def A b < 1)%Re) by admit.
          specialize (H0 H1). unfold resid,x0. rewrite Heqe_0 Heqrho Heqd_mag Heqx.
          unfold x0. apply H0.
-      ++  admit. 
+      ++ apply Rcomplements.Rlt_minus_r.
+         rewrite Rmult_comm. 
+         apply Rcomplements.Rlt_div_r; 
+         first by (apply lt_0_INR; lia).
+         Search ( ( _  < _ / _)%Re).
+         apply Rcomplements.Rlt_div_r;
+         first  by (apply Rplus_lt_le_0_compat; try nra; try apply g_pos).
+         assert (((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) / INR n.+1 /
+                    (1 + g t n.+1))%Re = 
+                  Rsqr (sqrt ((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) / INR n.+1 /
+                                  (1 + g t n.+1))%Re)).
+         { symmetry. apply Rsqr_sqrt. 
+           repeat apply Rmult_le_pos.
+           + admit. (** constraint on Gamma **)
+           + apply Rlt_le. apply Rinv_0_lt_compat. apply lt_0_INR; lia.
+           + apply Rlt_le. apply Rinv_0_lt_compat. apply Rplus_lt_le_0_compat.
+             nra. apply g_pos.
+         } rewrite H0. 
+         apply Rsqr_incrst_1.
+         -- 
+
+
+
+
+
+
+admit. 
     * admit.
     * admit.
 Admitted.
