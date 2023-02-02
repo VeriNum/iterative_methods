@@ -837,30 +837,23 @@ split.
                    { by rewrite Rinv_inv. }
                    rewrite H1.
                    match goal with |-context[(_ < ?x / ?y / ?z)%Re]=>
-                      replace (x / y / z)%Re with (/ (y * z / x))%Re 
+                      replace (x / y / z)%Re with (/ ((y * z)  / x))%Re 
                    end. 
-                   --- admit.
+                   ---  
+
+
+
+
+admit.
                    --- rewrite Rinv_div. 
-                       
-
-
-                   assert ( (/ ( ((e_0 - d_mag / (1 - rho)) / (1 + rho))%Re /
-                                ((sqrt
-                                   ((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) /
-                                    INR n.+1 / (1 + g t n.+1)) -
-                                 g1 t n.+1 (n.+1 - 1)%coq_nat) / 
-                                (1 + g t n.+1) /
-                                vec_inf_norm (FT2R_mat (A1_J A)) /
-                                (1 + default_rel t) - 2 * d_mag / (1 - rho))))%Re = 
-                              
-
-
-
-
-
-
-
-admit. 
+                       match goal with |-context[( _ = ?a / ?b / ?c)%Re]=>
+                        replace (a / b / c)%Re with (a * (/b * /c))%Re by nra
+                       end. rewrite -Rinv_mult_distr.
+                       nra. admit.
+                       assert (forall x:R, (0 <= x)%Re -> (1 + x)%Re <> 0%Re).
+                       { intros. nra. } apply H2. rewrite Heqrho. by apply rho_ge_0.
+          -- admit.
+          -- apply sqrt_pos.
     * admit.
     * admit.
 Admitted.
