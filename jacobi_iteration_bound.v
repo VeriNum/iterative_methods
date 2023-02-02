@@ -839,7 +839,9 @@ split.
                    match goal with |-context[(_ < ?x / ?y / ?z)%Re]=>
                       replace (x / y / z)%Re with (/ ((y * z)  / x))%Re 
                    end. 
-                   ---  
+                   --- apply Rinv_lt_contravar.
+                       *** admit.
+                       *** 
 
 
 
