@@ -172,6 +172,31 @@ Definition jacobi_preconditions {t: type}
        
 *)
 
+
+Definition A1_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
+  \col_i (A i i).
+
+
+Definition k_min {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
+  (b : 'cV[ftype t]_n.+1) (acc : ftype t) :=
+  let rho := rho_def A b in
+  let d_mag := d_mag_def A b in
+  let x0 := \col_(j < n.+1) (Zconst t 0) in
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= mulmx (A_real^-1) b_real in
+  let e_0 := f_error 0 b x0 x A in
+  let Gamma := FT2R (BMULT t acc acc) in
+  let delta := default_rel t in
+  Rlog (1 / rho)%Re 
+       (( (1+ rho) * (e_0 - d_mag / (1- rho)) ) /
+        ( sqrt( ( (Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) / (INR n.+1 * (1 + g t n.+1))) /
+               (vec_inf_norm (FT2R_mat (A1_J A)) * (1 + delta) * (1 + g t n.+1)) )
+          - (2 * d_mag / (1 - rho))))%Re.
+
+
+  
+
 Definition jacobi_preconditions {t: type}
   (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
   (* some property of A,b,accuracy holds such that 
@@ -309,8 +334,6 @@ Notation "-f A" := (opp_mat A) (at level 50).
 Notation "A *f B" := (mulmx_float A B) (at level 70).
 Notation "A -f B" := (sub_mat A B) (at level 80).
 
-Definition A1_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
-  \col_i (A i i).
 
 
 Definition residual_math {t}  {n:nat}
