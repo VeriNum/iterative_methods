@@ -189,10 +189,16 @@ Definition k_min {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let Gamma := FT2R (BMULT t acc acc) in
   let delta := default_rel t in
   Z.to_nat (Zceil (Rlog (1 / rho)%Re 
-           (( (1+ rho) * (e_0 - d_mag / (1- rho)) ) /
-            ( sqrt( ( (Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) / (INR n.+1 * (1 + g t n.+1))) /
-                   (vec_inf_norm (FT2R_mat (A1_J A)) * (1 + delta) * (1 + g t n.+1)) )
-              - (2 * d_mag / (1 - rho))))%Re)).
+             ((e_0 - d_mag / (1 - rho)) * (1 + rho) /
+                ((sqrt
+                    ((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) /
+                     INR n.+1 / (1 + g t n.+1)) -
+                  g1 t n.+1 (n.+1 - 1)%coq_nat) /
+                 (1 + g t n.+1) /
+                 vec_inf_norm (FT2R_mat (A1_J A)) /
+                 (1 + delta) -
+                 2 * d_mag / (1 - rho)))%Re)).
+
 
 
 Definition jacobi_preconditions {t: type}
@@ -801,7 +807,7 @@ Proof.
 intros.
 split.
 + admit.
-+ exists (k_min A b acc). 
++ exists (k_min A b acc).+1. 
   repeat split.
   - admit.
   - admit.
@@ -810,8 +816,8 @@ split.
     * rewrite Rcompare_Lt; first by [].
       change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
       remember (FT2R acc2) as Gamma.
-      assert (FT2R (norm2 (rev (vec_to_list_float n.+1 (resid (k_min A b acc))))) = 
-              Rabs (FT2R (norm2 (rev (vec_to_list_float n.+1 (resid (k_min A b acc))))))).
+      assert (FT2R (norm2 (rev (vec_to_list_float n.+1 (resid (k_min A b acc).+1)))) = 
+              Rabs (FT2R (norm2 (rev (vec_to_list_float n.+1 (resid (k_min A b acc).+1)))))).
       { rewrite Rabs_right. nra. apply Rle_ge, norm2_ge_0. }
       rewrite H.
       remember (rho_def A b) as rho.
@@ -821,10 +827,10 @@ split.
       apply Rle_lt_trans with
       (INR n.+1 * 
         (Rsqr (vec_inf_norm (FT2R_mat (A1_J A)) * 
-          ((rho ^ (k_min A b acc) * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))
+          ((rho ^ (k_min A b acc).+1 * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))
             * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat) *
           (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
-      ++ pose proof (@residual_bound t n A b (k_min A b acc)).
+      ++ pose proof (@residual_bound t n A b (k_min A b acc).+1).
          assert ((rho_def A b < 1)%Re) by admit.
          specialize (H0 H1). unfold resid,x0. rewrite Heqe_0 Heqrho Heqd_mag Heqx.
          unfold x0. apply H0.
@@ -859,7 +865,7 @@ split.
                +++ admit. (** (e_0 - d_mag / (1 - rho) > 0)%Re **)
                +++ apply Rcomplements.Rlt_div_r;
                    first by (apply Rplus_lt_le_0_compat; try nra; try rewrite Heqrho; by apply rho_ge_0).
-                   assert ((rho ^ k_min A b acc)%Re = (/ / rho ^ k_min A b acc)%Re).
+                   assert ((rho ^ (k_min A b acc).+1)%Re = (/ / rho ^ (k_min A b acc).+1)%Re).
                    { by rewrite Rinv_inv. }
                    rewrite H1.
                    match goal with |-context[(_ < ?x / ?y / ?z)%Re]=>
@@ -888,12 +894,21 @@ split.
                                         (1 + default_rel t) - 2 * d_mag / (1 - rho)))%Re)).
                           { rewrite Rpower_Rlog. by []. admit. admit. admit. }
                           rewrite H2.
-                          assert ( ((/ rho) ^ k_min A b acc)%Re = 
-                                   Rpower (/rho)%Re (INR (k_min A b acc))).
+                          assert ( ((/ rho) ^ (k_min A b acc).+1)%Re = 
+                                   Rpower (/rho)%Re (INR (k_min A b acc).+1)).
                           { rewrite Rpower_pow. nra. admit. }
                           rewrite H3. apply Rpower_lt .
                           ++++ admit.
-                          ++++ unfold k_min.
+                          ++++ apply Rle_lt_trans with (INR (k_min A b acc)).
+                               ---- unfold k_min. rewrite Zceil_INR.
+                                    unfold rho.
+
+
+
+unfold k_min.
+                               Search "Zceil".
+
+
                                rewrite Zceil_INR.
 
 
