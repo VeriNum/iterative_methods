@@ -15,7 +15,7 @@ Section WITH_NANS.
 
 Context {NANS: Nans}.
 
-Definition f_error {ty} {n:nat} m b x0 x (A: 'M[ftype ty]_n.+1):=
+Definition f_error {NANS: Nans} {ty} {n:nat} m b x0 x (A: 'M[ftype ty]_n.+1):=
   let x_k := X_m_jacobi m x0 b A in 
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -177,7 +177,7 @@ Definition A1_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
   \col_i (A i i).
 
 
-Definition k_min {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
+Definition k_min {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   (b : 'cV[ftype t]_n.+1) (acc : ftype t) :=
   let rho := rho_def A b in
   let d_mag := d_mag_def A b in
@@ -185,7 +185,7 @@ Definition k_min {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x:= mulmx (A_real^-1) b_real in
-  let e_0 := f_error 0 b x0 x A in
+  let e_0 := @f_error _ _ _ 0 b x0 x A in
   let Gamma := FT2R (BMULT t acc acc) in
   let delta := default_rel t in
   Z.to_nat (Zceil (Rlog (1 / rho)%Re 
@@ -823,7 +823,7 @@ split.
       remember (rho_def A b) as rho.
       remember (d_mag_def A b) as d_mag.
       remember (mulmx ((FT2R_mat A)^-1) (FT2R_mat b)) as x.
-      remember (f_error 0 b x0 x A) as e_0.
+      remember (WITH_NANS.f_error 0 b x0 x A) as e_0.
       apply Rle_lt_trans with
       (INR n.+1 * 
         (Rsqr (vec_inf_norm (FT2R_mat (A1_J A)) * 
@@ -901,20 +901,10 @@ split.
                           ++++ admit.
                           ++++ apply Rle_lt_trans with (INR (k_min A b acc)).
                                ---- unfold k_min. rewrite Zceil_INR.
-                                    unfold rho.
-
-
-
-unfold k_min.
-                               Search "Zceil".
-
-
-                               rewrite Zceil_INR.
-
-
-
-
-admit.
+                                    rewrite Heqrho Heqe_0 /x0 Heqx Heqd_mag HeqGamma. 
+                                    assert ((/ rho_def A b)%Re = (1 / rho_def A b)%Re). { nra. }
+                                    rewrite H4. apply Zceil_ub. admit.
+                               ---- apply lt_INR. lia.
                    --- rewrite Rinv_div. 
                        match goal with |-context[( _ = ?a / ?b / ?c)%Re]=>
                         replace (a / b / c)%Re with (a * (/b * /c))%Re by nra
