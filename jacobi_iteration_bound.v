@@ -188,14 +188,12 @@ Definition k_min {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let e_0 := f_error 0 b x0 x A in
   let Gamma := FT2R (BMULT t acc acc) in
   let delta := default_rel t in
-  Zceil (Rlog (1 / rho)%Re 
+  Z.to_N (Zceil (Rlog (1 / rho)%Re 
            (( (1+ rho) * (e_0 - d_mag / (1- rho)) ) /
             ( sqrt( ( (Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) / (INR n.+1 * (1 + g t n.+1))) /
                    (vec_inf_norm (FT2R_mat (A1_J A)) * (1 + delta) * (1 + g t n.+1)) )
-              - (2 * d_mag / (1 - rho))))%Re).
+              - (2 * d_mag / (1 - rho))))%Re)).
 
-Search "Zceil".
-  
 
 Definition jacobi_preconditions {t: type}
   (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
@@ -777,17 +775,17 @@ Proof.
 intros.
 split.
 + admit.
-+ exists k. (** dummy for now **)
++ exists (k_min A b acc). 
   repeat split.
-  - by [].
+  - admit.
   - admit.
   - unfold BCMP.
     rewrite Bcompare_correct. 
     * rewrite Rcompare_Lt; first by [].
       change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
       remember (FT2R acc2) as Gamma.
-      assert (FT2R (norm2 (rev (vec_to_list_float n.+1 (resid k)))) = 
-              Rabs (FT2R (norm2 (rev (vec_to_list_float n.+1 (resid k)))))).
+      assert (FT2R (norm2 (rev (vec_to_list_float n.+1 (resid (k_min A b acc))))) = 
+              Rabs (FT2R (norm2 (rev (vec_to_list_float n.+1 (resid (k_min A b acc))))))).
       { rewrite Rabs_right. nra. apply Rle_ge, norm2_ge_0. }
       rewrite H.
       remember (rho_def A b) as rho.
@@ -797,10 +795,10 @@ split.
       apply Rle_lt_trans with
       (INR n.+1 * 
         (Rsqr (vec_inf_norm (FT2R_mat (A1_J A)) * 
-          ((rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))
+          ((rho ^ (k_min A b acc) * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))
             * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat) *
           (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
-      ++ pose proof (@residual_bound t n A b k).
+      ++ pose proof (@residual_bound t n A b (k_min A b acc)).
          assert ((rho_def A b < 1)%Re) by admit.
          specialize (H0 H1). unfold resid,x0. rewrite Heqe_0 Heqrho Heqd_mag Heqx.
          unfold x0. apply H0.
