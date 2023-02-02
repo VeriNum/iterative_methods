@@ -188,13 +188,13 @@ Definition k_min {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let e_0 := f_error 0 b x0 x A in
   let Gamma := FT2R (BMULT t acc acc) in
   let delta := default_rel t in
-  Rlog (1 / rho)%Re 
-       (( (1+ rho) * (e_0 - d_mag / (1- rho)) ) /
-        ( sqrt( ( (Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) / (INR n.+1 * (1 + g t n.+1))) /
-               (vec_inf_norm (FT2R_mat (A1_J A)) * (1 + delta) * (1 + g t n.+1)) )
-          - (2 * d_mag / (1 - rho))))%Re.
+  Zceil (Rlog (1 / rho)%Re 
+           (( (1+ rho) * (e_0 - d_mag / (1- rho)) ) /
+            ( sqrt( ( (Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) / (INR n.+1 * (1 + g t n.+1))) /
+                   (vec_inf_norm (FT2R_mat (A1_J A)) * (1 + delta) * (1 + g t n.+1)) )
+              - (2 * d_mag / (1 - rho))))%Re).
 
-
+Search "Zceil".
   
 
 Definition jacobi_preconditions {t: type}
