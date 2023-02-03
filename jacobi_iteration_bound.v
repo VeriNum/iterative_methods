@@ -65,7 +65,17 @@ Definition d_mag_def {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
                      matrix_inf_norm (A2_J_real A_real)) *
                     vec_inf_norm (x_fix x b_real A_real))%Re.
 
+(** x = A_1^{-1} (b - A_2 x) 
+  ||x || = ||A^-1 || ||b||
+         \leq (||A|| ||A^-1|| ||b||) / ||A||
+          = k (A) ||b|| / || A ||
 
+  ||x|| \leq ( k(A) ||b||) / ||A||
+  https://www.maths.manchester.ac.uk/~higham/talks/claode13.pdf 
+  https://link.springer.com/content/pdf/10.1007/978-94-017-1116-6_9.pdf
+
+
+**)
 
 Lemma d_mag_ge_0 {t: type} {n:nat} (A: 'M[ftype t]_n.+1) 
   (b: 'cV[ftype t]_n.+1):
@@ -225,9 +235,10 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
     Binary.is_finite (fprec t) (femax t)
       (BDIV t (Zconst t 1) (A i i)) = true) /\
   (** Finiteness of solution vector at each iteration **)
-  (forall k:nat, 
+  (*(forall k:nat, 
       forall i, Binary.is_finite _ _ ((X_m_jacobi k x0 b A) i ord0) = true) /\
-  (** Constraint on Gamma **)
+  *)
+(** Constraint on Gamma **)
   (g1 t n.+1 (n.+1 - 1)%coq_nat <= FT2R (BMULT t accuracy accuracy))%Re /\
   (** Gamma is finite **)
   Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
@@ -568,7 +579,13 @@ assert (forall xy : ftype t * ftype t,
              is_finite (fprec t) (femax t) xy.2 = true /\
              is_finite (fprec t) (femax t)
                (BPLUS t xy.1 (BOPP t xy.2)) = true).
-{ admit. } specialize (H H0).
+{ (** if the  residual is finite then 
+      x_k+1 - x_k is finite
+  **)
+
+
+
+ admit. } specialize (H H0).
 apply reverse_triang_ineq in H.
 apply Rle_trans with
 (vec_inf_norm
@@ -610,6 +627,7 @@ apply Rle_trans with
      assert (forall (k : nat) (i : 'I_n.+1),
                 is_finite (fprec t) (femax t)
                   (X_m_jacobi k x0 b A i ord0) = true) by admit. 
+     (** also implied by finiteness of residual **)
      specialize (H5 H6 H7 H8 H9 H10 x0 H11).
      assert ((f_error k.+1 b x0 x A <= rho^k.+1 * (f_error 0 b x0 x A) + 
                     ((1 - rho^k.+1) / (1 - rho))* d_mag)%Re).
@@ -731,7 +749,7 @@ eapply Rle_trans.
                      is_finite (fprec t) (femax t) xy.2 = true /\
                      is_finite (fprec t) (femax t)
                        (BMULT t xy.1 xy.2) = true).
-            { admit. } specialize (H0 H1).
+            { admit. (** Implied by finiteness of the residual **) } specialize (H0 H1).
             assert ((vec_inf_norm
                      (FT2R_mat
                         (diag_vector_mult (A1_J A)
@@ -992,7 +1010,7 @@ split.
                               - admit.
                               - nra.
                               - apply Rinv_0_lt_compat.
-                                admit.
+                                admit. (** modify the constraint on Gamma **)
                           }
                           rewrite H2.
                           assert ( ((/ rho) ^ (k_min A b acc).+1)%Re = 
