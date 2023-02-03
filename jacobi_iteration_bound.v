@@ -1009,7 +1009,13 @@ split.
           -- apply Rplus_le_le_0_compat; last by apply g1_pos.
              repeat apply Rmult_le_pos.
              ** apply /RleP. apply vec_norm_pd.
-             ** admit.
+             ** apply Rplus_le_le_0_compat.
+                +++ repeat apply Rmult_le_pos.
+                    --- rewrite Heqrho. by apply rho_ge_0.
+                    --- apply pow_le. rewrite Heqrho. by apply rho_ge_0.
+                    --- apply Rplus_le_le_0_compat. nra. rewrite Heqrho. by apply rho_ge_0.
+                    --- admit. (*** (0 <= e_0 - d_mag / (1 - rho))%Re **)
+                +++ admit.
              ** apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
              ** apply Rplus_le_le_0_compat. nra. apply g_pos.
           -- apply sqrt_pos.
