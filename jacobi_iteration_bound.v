@@ -232,7 +232,7 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
   (** Gamma is finite **)
   Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
   (** constraint on k **)
-  (k_min A b accuracy <= k)%coq_nat.
+  (k_min A b accuracy < k)%coq_nat.
 
 
 
@@ -848,7 +848,7 @@ Admitted.
 
 Lemma jacobi_iteration_bound {t: type} {n : nat} :
  forall (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (acc: ftype t) (k: nat),
-   (*jacobi_preconditions A b acc k -> *)
+   jacobi_preconditions_math A b acc k -> 
    let acc2 := BMULT t acc acc in
    let x0 := \col_(j < n.+1) (Zconst t 0) in
    let resid := residual_math A x0 b in
@@ -860,12 +860,14 @@ Lemma jacobi_iteration_bound {t: type} {n : nat} :
     (** rev (_ ) fits perfectly well with norm2_vec_inf_norm_rel **)
 Proof.
 intros.
+unfold jacobi_preconditions_math in H.
+destruct H as [HfA [Hneqx [Hrho [HinvA [Hfbdiv [Hfxk [HG [Hfacc Hk]]]]]]]].
 split.
-+ admit.
++ unfold acc2. by apply finite_is_finite.
 + exists (k_min A b acc).+1. 
   repeat split.
-  - admit.
-  - admit.
+  - by apply /ssrnat.ltP.
+  - intros. admit.
   - unfold BCMP.
     rewrite Bcompare_correct. 
     * rewrite Rcompare_Lt; first by [].
