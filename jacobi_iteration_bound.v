@@ -1050,11 +1050,6 @@ split.
     { unfold x0. by rewrite !repeat_length. }
     assert ((0 < length A)%coq_nat) by apply H1.
     specialize (H3 H4 H5 H6).
-    (*rewrite HeqA' Heqb' in Hf.  rewrite -Heqn in H1. *)
-    (*assert (vector_inj x0 n.+1 = \col_(j < n.+1) (Zconst t 0)).
-    { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
-      by rewrite nth_repeat.
-    } rewrite H5 in H1. rewrite -H1 in Hf. *)
     pose proof (@v_equiv t).
     specialize (H7 (resid (jacobi_n A b x0 i)) n).
     assert (length (resid (jacobi_n A b x0 i)) = n.+1).
@@ -1073,152 +1068,42 @@ split.
     { apply /matrixP. unfold eqrel. intros. by rewrite !mxE. }
     rewrite H9. rewrite -/n in Hf.
     rewrite vector_residual_equiv; try by [].
-    
-
-
-
-
-
-
-
-
-apply Hf.
-  - pose proof (@vector_residual_equiv t A b x0 j).
-    assert (length b = length A) by (symmetry; apply  Hlab).
-    assert (length x0 = length A).
-    { unfold x0. by rewrite !repeat_length. }
-    assert ((0 < length A)%coq_nat) by apply HlA.
-    specialize (H0 H1 H2 H3).
-    rewrite HeqA' Heqb' in Hlt. rewrite -Heqn in H0.
+    unfold A' , b' in Hf. rewrite -/n.
     assert (vector_inj x0 n.+1 = \col_(j < n.+1) (Zconst t 0)).
     { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
       by rewrite nth_repeat.
-    } rewrite H4 in H0. rewrite -H0 in Hlt.
+    } rewrite H10. apply Hf.
+  - pose proof (@vector_residual_equiv t A b x0 j).
+    assert (length b = length A) by (symmetry; apply H0).
+    assert (length x0 = length A).
+    { unfold x0. by rewrite !repeat_length. }
+    assert ((0 < length A)%coq_nat) by apply H1.
+    specialize (H2 H3 H4 H5).
     pose proof (@v_equiv t).
-    specialize (H5 (resid (jacobi_n A b x0 j)) n).
+    specialize (H6 (resid (jacobi_n A b x0 j)) n).
     assert (length (resid (jacobi_n A b x0 j)) = n.+1).
     { repeat rewrite /matrix_vector_mult !map_length combine_length.
       rewrite !map_length. unfold jacobi_n. rewrite iter_length.
-      rewrite !seq_length H1 !Nat.min_id.
-      rewrite Heqn prednK. by []. by apply /ssrnat.ltP.
+      rewrite !seq_length H3 !Nat.min_id.
+      rewrite -/n prednK. by []. by apply /ssrnat.ltP.
       by []. by [].
     }
-    specialize (H5 H6).
-    rewrite H5. 
+    specialize (H6 H7).
+    rewrite H6. 
     assert ((\col_j0 vector_inj
                       (resid (jacobi_n A b x0 j))
                       n.+1 j0 ord0) = 
             vector_inj (resid (jacobi_n A b x0 j)) n.+1).
     { apply /matrixP. unfold eqrel. intros. by rewrite !mxE. }
-    rewrite H7. apply Hlt.
+    rewrite H8. rewrite -/n in Hlt. 
+    rewrite vector_residual_equiv; try by [].
+    unfold A' , b' in Hlt. rewrite -/n.
+    assert (vector_inj x0 n.+1 = \col_(j < n.+1) (Zconst t 0)).
+    { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+      by rewrite nth_repeat.
+    } by rewrite H9. 
 Qed.
 
-(*
-Lemma FT2R_mat_dissoc {t} {n:nat} (v1 v2: 'cV[ftype t]_n.+1):
-  FT2R_mat (v1 -f v2) = (FT2R_mat v1 - FT2R_mat v2) * 
-
-
-Lemma residual_inf_norm_le {t: type} :
- forall (A: matrix t) (b: vector t) (k:nat),
-  let x0 := (repeat  (Zconst t 0) (length b)) in
-  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
-  let v_l := rev (resid (jacobi_n A b x0 k.-1)) in
-  let rho := rho_def A b in
-  let d_mag := d_mag_def A b in
-  let n := (length A).-1 in
-  let e_0 := f_error 0 (vector_inj b n.+1)
-                          (vector_inj (repeat (Zconst t 0) (length b))  n.+1) ((FT2R_mat (matrix_inj A n.+1 n.+1))^-1 *m 
-                           FT2R_mat (vector_inj b n.+1))  (matrix_inj A n.+1 n.+1) in    
-  ((vec_inf_norm (FT2R_mat (vector_inj v_l n.+1)))² <=
-  (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho))) ^ 2)%Re
-Proof.
-
-intros.
-unfold v_l.
-assert ((vector_inj (rev (resid (jacobi_n A b x0 k.-1))) n.+1)
-
-
-
-unfold resid.
-unfold jacobi_residual. 
-(** assertion that jacobi residual = x_k+1 - x_k **)
-
-*)
-
-
-
-
-Lemma old_jacobi_iteration_bound {t: type} :
- forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
-   jacobi_preconditions A b acc k ->
-   let acc2 := BMULT t acc acc in
-   let x0 := (repeat  (Zconst t 0) (length b)) in
-   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
-   finite acc2 /\ 
-   exists j,
-    (j <= k)%nat /\
-    let y :=  jacobi_n A b x0 j in
-    let r2 := norm2 (resid y) in
-    (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
-    BCMP t Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
-Proof.
-intros.
-unfold jacobi_preconditions in H.
-destruct H as [Hla [Hlab [HfA [Hxneq0 [Hrho [HAinv [Hinvf [Hsolf [HcG1 [HcG2 Hk]]]]]]]]]].
-repeat split.
-+ apply finite_is_finite. unfold acc2. apply HcG2.
-+ exists k.-1. repeat split.
-  - apply leq_pred.
-  - intros. apply finite_is_finite.
-    apply residual_is_finite .
-    (** use the compatibility relation from norms **)
-  - unfold BCMP.
-    rewrite Bcompare_correct; simpl.
-    * 
-      rewrite Rcompare_Lt; first by [].
-      (** use k to do the proof **)
-      change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
-      remember (rho_def A b) as rho.
-      remember (d_mag_def A b) as d_mag.
-      remember (length A).-1 as n.
-      remember (f_error 0 (vector_inj b n.+1)
-                          (vector_inj (repeat (Zconst t 0) (length b))  n.+1) ((FT2R_mat (matrix_inj A n.+1 n.+1))^-1 *m 
-                           FT2R_mat (vector_inj b n.+1))  (matrix_inj A n.+1 n.+1)) as e_0. 
-      unfold acc2.
-      assert (FT2R (norm2 (resid (jacobi_n A b x0 k.-1))) = 
-              Rabs (FT2R (norm2 (resid (jacobi_n A b x0 k.-1))))).
-      { rewrite Rabs_right. nra. apply Rle_ge, norm2_ge_0. }
-      rewrite H.
-      pose proof (@norm2_vec_inf_norm_rel t n _).
-      remember (rev (resid (jacobi_n A b x0 k.-1))) as v_l.
-      specialize (H0 (@vector_inj _ v_l n.+1)). 
-      assert (rev (vec_to_list_float n.+1 (vector_inj v_l n.+1)) = resid (jacobi_n A b x0 k.-1)).
-      { apply nth_ext with (Zconst t 0) (Zconst t 0).
-        + rewrite rev_length. rewrite length_veclist.
-          repeat rewrite !map_length !combine_length. 
-          admit.
-        + intros. admit.
-      } rewrite -H1.
-      eapply Rle_lt_trans.
-      ++ apply H0. 
-         -- admit. (** finiteness of each element in the list **)
-         -- rewrite H1. apply residual_is_finite . (** finiteness of 2-norm of the residual **)
-      ++ eapply Rle_lt_trans.
-         -- apply Rplus_le_compat_r. apply Rmult_le_compat_r.
-            ** apply Rplus_le_le_0_compat. nra. apply g_pos.
-            ** apply Rmult_le_compat_l. apply pos_INR.
-               
-               apply Rle_trans with 
-               ((rho^k * (1+ rho) * (e_0 - d_mag /  (1 - rho)))^2)%Re.
-               +++ admit.
-               +++ apply Rle_refl.
-         -- 
-
-
- admit. (** show that before k, residual > acc2 **)
-    * apply residual_is_finite .
-    * unfold acc2. apply HcG2.
-Admitted.
 
 End WITH_NANS.
 
