@@ -349,6 +349,7 @@ induction v.
   simpl. admit.
 Admitted.
 
+(*
 Lemma residual_is_finite {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -357,16 +358,8 @@ Lemma residual_is_finite {t: type} :
   is_finite (fprec t) (femax t)
   (norm2 (resid (jacobi_n A b x0 k))) = true.
 Admitted.
+*)
 
-(**
-Heqv_l : v_l = rev (resid (jacobi_n A b x0 k.-1))
-H1 : rev (vec_to_list_float n.+1 (vector_inj v_l n.+1)) =
-     resid (jacobi_n A b x0 k.-1)
-______________________________________(1/1)
-((vec_inf_norm (FT2R_mat (vector_inj v_l n.+1)))² <=
- (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho))) ^ 2)%Re
-
-**)
 
 Notation "A +f B" := (addmx_float A B) (at level 80).
 Notation "-f A" := (opp_mat A) (at level 50).
@@ -391,6 +384,16 @@ Proof.
 intros. 
 by rewrite  /diag_of_matrix nth_map_seq ?/matrix_index ?/matrix_rows_nat.
 Qed.
+
+
+Lemma residual_is_finite {t: type} {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
+  let resid := residual_math A x0 b in
+  is_finite (fprec t) (femax t)
+    (norm2
+       (rev
+          (vec_to_list_float n.+1 (resid k)))) = true.
+Admitted.
 
 
 Require Import fma_dot_mat_model.
@@ -885,7 +888,8 @@ split.
 + exists (k_min A b acc).+1. 
   repeat split.
   - by apply /ssrnat.ltP.
-  - intros. admit.
+  - intros. apply finite_is_finite.
+    apply residual_is_finite.
   - unfold BCMP.
     rewrite Bcompare_correct. 
     * rewrite Rcompare_Lt; first by [].
@@ -1004,7 +1008,7 @@ split.
                        { intros. nra. } apply H2. rewrite Heqrho. by apply rho_ge_0.
           -- admit.
           -- apply sqrt_pos.
-    * admit.
+    * apply residual_is_finite.
     * by unfold acc2. 
 Admitted.
 
