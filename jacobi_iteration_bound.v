@@ -693,7 +693,9 @@ Lemma residual_bound {t: type} {n:nat}
 Proof.
 intros.
 eapply Rle_trans.
-+ apply norm2_vec_inf_norm_rel; admit.
++ apply norm2_vec_inf_norm_rel.
+  - admit.
+  - apply residual_is_finite.
   (** finiteness of residual and elements in the list **)
 + apply Rplus_le_compat_r. 
   match goal with |-context[((?a * ?b) *?c <= _)%Re]=>
