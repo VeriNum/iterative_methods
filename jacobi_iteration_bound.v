@@ -1006,7 +1006,12 @@ split.
                        nra. admit.
                        assert (forall x:R, (0 <= x)%Re -> (1 + x)%Re <> 0%Re).
                        { intros. nra. } apply H2. rewrite Heqrho. by apply rho_ge_0.
-          -- admit.
+          -- apply Rplus_le_le_0_compat; last by apply g1_pos.
+             repeat apply Rmult_le_pos.
+             ** apply /RleP. apply vec_norm_pd.
+             ** admit.
+             ** apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+             ** apply Rplus_le_le_0_compat. nra. apply g_pos.
           -- apply sqrt_pos.
     * apply residual_is_finite.
     * by unfold acc2. 
