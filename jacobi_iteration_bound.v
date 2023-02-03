@@ -954,7 +954,13 @@ split.
                       replace (x / y / z)%Re with (/ ((y * z)  / x))%Re 
                    end. 
                    --- apply Rinv_lt_contravar.
-                       *** admit.
+                       *** repeat apply Rmult_lt_0_compat.
+                           ++++ admit.
+                           ++++ nra.
+                           ++++ apply Rinv_0_lt_compat.
+                                admit.
+                           ++++ apply Rinv_0_lt_compat.
+                                apply pow_lt. apply Hrho.
                        *** rewrite -pow_inv.
                            assert (((e_0 - d_mag / (1 - rho)) * (1 + rho) /
                                      ((sqrt
@@ -980,7 +986,11 @@ split.
                                apply Rinv_lt_contravar. rewrite Rmult_1_r.
                                apply Hrho. apply Hrho.
                             + apply Rinv_0_lt_compat. apply Hrho.
-                            + admit. 
+                            + repeat apply Rmult_lt_0_compat.
+                              - admit.
+                              - nra.
+                              - apply Rinv_0_lt_compat.
+                                admit.
                           }
                           rewrite H2.
                           assert ( ((/ rho) ^ (k_min A b acc).+1)%Re = 
