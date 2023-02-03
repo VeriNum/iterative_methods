@@ -970,13 +970,27 @@ split.
                                         (1 + g t n.+1) /
                                         vec_inf_norm (FT2R_mat (A1_J A)) /
                                         (1 + default_rel t) - 2 * d_mag / (1 - rho)))%Re)).
-                          { rewrite Rpower_Rlog. by []. admit. admit. admit. }
+                          { rewrite Rpower_Rlog. by []. 
+                            
+
+
+
+admit. admit. admit. }
                           rewrite H2.
                           assert ( ((/ rho) ^ (k_min A b acc).+1)%Re = 
                                    Rpower (/rho)%Re (INR (k_min A b acc).+1)).
-                          { rewrite Rpower_pow. nra. admit. }
+                          { rewrite Rpower_pow. nra.
+                            
+
+
+
+
+ admit. }
                           rewrite H3. apply Rpower_lt .
-                          ++++ admit.
+                          ++++ replace 1%Re with (/1)%Re by nra.
+                               apply Rinv_lt_contravar. rewrite Rmult_1_r.
+                               admit.
+                               apply Hrho.
                           ++++ apply Rle_lt_trans with (INR (k_min A b acc)).
                                ---- unfold k_min. rewrite Zceil_INR.
                                     rewrite Heqrho Heqe_0 /x0 Heqx Heqd_mag HeqGamma. 
