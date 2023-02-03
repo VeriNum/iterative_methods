@@ -217,7 +217,7 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
   (** x <> 0 **)
   x != 0 /\
   (** constant for the contraction mapping **)
-  (rho < 1)%Re /\
+  (0 < rho /\ rho < 1)%Re /\
   (** Invertibility of A **)
   A_real \in unitmx /\
   (** Finiteness of the inverse of diagonal elements of A **)
@@ -911,7 +911,7 @@ split.
           (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
       ++ pose proof (@residual_bound t n A b (k_min A b acc).+1).
          assert ((rho_def A b < 1)%Re).
-         { by rewrite Heqrho in Hrho. } 
+         { rewrite Heqrho in Hrho. apply Hrho. } 
          specialize (H0 H1). unfold resid,x0. rewrite Heqe_0 Heqrho Heqd_mag Heqx.
          unfold x0. apply H0.
       ++ apply Rcomplements.Rlt_minus_r.
@@ -978,20 +978,20 @@ split.
                             + assert ( (1 < /rho)%Re -> / rho <> 1%Re). { nra. }
                               apply H2. replace 1%Re with (/1)%Re by nra.
                                apply Rinv_lt_contravar. rewrite Rmult_1_r.
-                               admit. apply Hrho.
-                            + apply Rinv_0_lt_compat. admit.
+                               apply Hrho. apply Hrho.
+                            + apply Rinv_0_lt_compat. apply Hrho.
                             + admit. 
                           }
                           rewrite H2.
                           assert ( ((/ rho) ^ (k_min A b acc).+1)%Re = 
                                    Rpower (/rho)%Re (INR (k_min A b acc).+1)).
                           { rewrite Rpower_pow. nra.
-                            apply Rinv_0_lt_compat. admit.
+                            apply Rinv_0_lt_compat. apply Hrho.
                           }
                           rewrite H3. apply Rpower_lt .
                           ++++ replace 1%Re with (/1)%Re by nra.
                                apply Rinv_lt_contravar. rewrite Rmult_1_r.
-                               admit.
+                               apply Hrho. 
                                apply Hrho.
                           ++++ apply Rle_lt_trans with (INR (k_min A b acc)).
                                ---- unfold k_min. rewrite Zceil_INR.
@@ -1015,7 +1015,9 @@ split.
                     --- apply pow_le. rewrite Heqrho. by apply rho_ge_0.
                     --- apply Rplus_le_le_0_compat. nra. rewrite Heqrho. by apply rho_ge_0.
                     --- admit. (*** (0 <= e_0 - d_mag / (1 - rho))%Re **)
-                +++ admit.
+                +++ repeat apply Rmult_le_pos ; try nra. rewrite Heqd_mag. apply d_mag_ge_0.
+                    apply Rlt_le. apply Rinv_0_lt_compat. 
+                    apply Rlt_Rminus. apply Hrho.
              ** apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
              ** apply Rplus_le_le_0_compat. nra. apply g_pos.
           -- apply sqrt_pos.
