@@ -971,21 +971,19 @@ split.
                                         vec_inf_norm (FT2R_mat (A1_J A)) /
                                         (1 + default_rel t) - 2 * d_mag / (1 - rho)))%Re)).
                           { rewrite Rpower_Rlog. by []. 
-                            
-
-
-
-admit. admit. admit. }
+                            + assert ( (1 < /rho)%Re -> / rho <> 1%Re). { nra. }
+                              apply H2. replace 1%Re with (/1)%Re by nra.
+                               apply Rinv_lt_contravar. rewrite Rmult_1_r.
+                               admit. apply Hrho.
+                            + apply Rinv_0_lt_compat. admit.
+                            + admit. 
+                          }
                           rewrite H2.
                           assert ( ((/ rho) ^ (k_min A b acc).+1)%Re = 
                                    Rpower (/rho)%Re (INR (k_min A b acc).+1)).
                           { rewrite Rpower_pow. nra.
-                            
-
-
-
-
- admit. }
+                            apply Rinv_0_lt_compat. admit.
+                          }
                           rewrite H3. apply Rpower_lt .
                           ++++ replace 1%Re with (/1)%Re by nra.
                                apply Rinv_lt_contravar. rewrite Rmult_1_r.
@@ -1007,7 +1005,7 @@ admit. admit. admit. }
           -- admit.
           -- apply sqrt_pos.
     * admit.
-    * admit.
+    * by unfold acc2. 
 Admitted.
 
 
