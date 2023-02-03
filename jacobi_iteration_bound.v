@@ -228,7 +228,7 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
   (forall k:nat, 
       forall i, Binary.is_finite _ _ ((X_m_jacobi k x0 b A) i ord0) = true) /\
   (** Constraint on Gamma **)
-  (Rsqr (g1 t n.+1 (n.+1 - 1)) < FT2R (accuracy))%Re /\
+  (g1 t n.+1 (n.+1 - 1)%coq_nat <= FT2R (BMULT t accuracy accuracy))%Re /\
   (** Gamma is finite **)
   Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
   (** constraint on k **)
@@ -826,6 +826,7 @@ Admitted.
 
 Search "Zceil".
 Locate Zceil_IZR.
+Close Scope Z_scope.
 
 (*
 Lemma zceil_gt_0: forall x:R,
@@ -844,7 +845,24 @@ assert (x = 0
 Admitted.
 *)
 
+Require Import float_acc_lems lemmas.
 
+
+
+Lemma vec_norm_strong_not_0 {n:nat} (v: 'cV[R]_n.+1):
+  (forall i, v i ord0 <> 0%Re) ->
+  (0 < vec_inf_norm v)%Re.
+Proof.
+intros.
+unfold vec_inf_norm.
+apply Rlt_le_trans with 
+[seq Rabs (v i 0) | i <- enum 'I_n.+1]`_0.
++ rewrite seq_equiv. rewrite nth_mkseq; last by [].
+  specialize (H (@inord n 0)). by apply Rabs_pos_lt.
++ apply /RleP.
+  apply (@bigmaxr_ler _ 0%Re [seq Rabs (v i 0) | i <- enum 'I_n.+1] 0).
+  by rewrite size_map size_enum_ord.
+Qed.
 
 Lemma jacobi_iteration_bound {t: type} {n : nat} :
  forall (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (acc: ftype t) (k: nat),
@@ -888,14 +906,14 @@ split.
             * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat) *
           (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
       ++ pose proof (@residual_bound t n A b (k_min A b acc).+1).
-         assert ((rho_def A b < 1)%Re) by admit.
+         assert ((rho_def A b < 1)%Re).
+         { by rewrite Heqrho in Hrho. } 
          specialize (H0 H1). unfold resid,x0. rewrite Heqe_0 Heqrho Heqd_mag Heqx.
          unfold x0. apply H0.
       ++ apply Rcomplements.Rlt_minus_r.
          rewrite Rmult_comm. 
          apply Rcomplements.Rlt_div_r; 
          first by (apply lt_0_INR; lia).
-         Search ( ( _  < _ / _)%Re).
          apply Rcomplements.Rlt_div_r;
          first  by (apply Rplus_lt_le_0_compat; try nra; try apply g_pos).
          assert (((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) / INR n.+1 /
@@ -904,7 +922,7 @@ split.
                                   (1 + g t n.+1))%Re)).
          { symmetry. apply Rsqr_sqrt. 
            repeat apply Rmult_le_pos.
-           + admit. (** constraint on Gamma **)
+           + apply Rle_0_minus. by rewrite HeqGamma.
            + apply Rlt_le. apply Rinv_0_lt_compat. apply lt_0_INR; lia.
            + apply Rlt_le. apply Rinv_0_lt_compat. apply Rplus_lt_le_0_compat.
              nra. apply g_pos.
@@ -914,7 +932,10 @@ split.
             apply Rcomplements.Rlt_div_r;
             first  by (apply Rplus_lt_le_0_compat; try nra; try apply g_pos).
             rewrite Rmult_comm. apply Rcomplements.Rlt_div_r.
-            ** admit. (** vec_norm of diagonal matrix A1 is positive **)
+            ** assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
+               { intros. by apply BDIV_FT2R_sep_zero. }
+               apply vec_norm_strong_not_0. intros. 
+               rewrite !mxE. apply Hneq.
             ** apply Rcomplements.Rlt_div_r;
                first  by (apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0).
                apply Rcomplements.Rlt_minus_r.
@@ -1171,3 +1192,4 @@ repeat split.
 Admitted.
 
 End WITH_NANS.
+
