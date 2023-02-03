@@ -201,6 +201,41 @@ Definition k_min {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
 
 
 
+Definition jacobi_preconditions_math {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
+  (* some property of A,b,accuracy holds such that 
+    jacobi_n will indeed converge within k iterations to this accuracy, 
+   without ever overflowing *)
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in 
+  let x:= mulmx (A_real^-1) b_real in
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in
+  let x0 := \col_(j < n.+1) (Zconst t 0) in
+  (** Finiteness of A **)
+  (forall i j, Binary.is_finite _ _ (A i j) = true) /\
+  (** x <> 0 **)
+  x != 0 /\
+  (** constant for the contraction mapping **)
+  (rho < 1)%Re /\
+  (** Invertibility of A **)
+  A_real \in unitmx /\
+  (** Finiteness of the inverse of diagonal elements of A **)
+  (forall i : 'I_n.+1,
+    Binary.is_finite (fprec t) (femax t)
+      (BDIV t (Zconst t 1) (A i i)) = true) /\
+  (** Finiteness of solution vector at each iteration **)
+  (forall k:nat, 
+      forall i, Binary.is_finite _ _ ((X_m_jacobi k x0 b A) i ord0) = true) /\
+  (** Constraint on Gamma **)
+  (Rsqr (g1 t n.+1 (n.+1 - 1)) < FT2R (accuracy))%Re /\
+  (** Gamma is finite **)
+  Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
+  (** constraint on k **)
+  (k_min A b accuracy <= k)%coq_nat.
+
+
+
 Definition jacobi_preconditions {t: type}
   (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
   (* some property of A,b,accuracy holds such that 
@@ -788,6 +823,26 @@ intros.
 rewrite Zceil_INR; last by [].
 Search Zceil.
 Admitted.
+
+Search "Zceil".
+Locate Zceil_IZR.
+
+(*
+Lemma zceil_gt_0: forall x:R,
+  (0 < x)%Re ->
+  (0 < Zceil x).
+Proof.
+intros. unfold Zceil.
+Search (0 < - _)%Z.
+apply Z.opp_pos_neg.
+pose proof Zceil_le.
+specialize (H0 0%Re x).
+assert (x = 0 
+
+
+
+Admitted.
+*)
 
 
 
