@@ -978,12 +978,17 @@ eapply Rle_trans.
                 by rewrite inordK;
                  rewrite   Heqr_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
                   apply /ssrnat.ltP.
-                 
-                rewrite inord_val in Hf2.
-                assert (is_finite _ _ (X_m_jacobi k.+1 x0 b A
-                                            (inord m) ord0) = true /\
-                        is_finite _ _  (X_m_jacobi k x0 b A
-                                          (inord m) ord0) = true).
+                rewrite nth_vec_to_list_float in H4; last 
+                by rewrite inordK;
+                 rewrite   Heqr_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
+                  apply /ssrnat.ltP.
+                rewrite inord_val in H4. 
+                assert (is_finite _ _ (A1_J A (inord m) ord0) = true /\
+                        is_finite _ _  (nth (n.+1.-1 - @inord m)
+                                         (vec_to_list_float n.+1
+                                            (X_m_jacobi k.+1 x0 b A -f
+                                             X_m_jacobi k x0 b A))
+                                         (Zconst t 0)) = true).
                 { apply bplus_overflow_implies  in Hf2.
                   split; try apply Hf2.
                   rewrite is_finite_Bopp in Hf2.
