@@ -662,7 +662,30 @@ assert (forall xy : ftype t * ftype t,
       rewrite Heqv_l in Hnth. rewrite rev_nth in Hnth.
       rewrite combine_length !length_veclist Nat.min_id in Hnth.
       rewrite combine_nth in Hnth.
-      
+      assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat).
+      { lia. } rewrite H3 in Hnth. 
+      rewrite nth_vec_to_list_float in Hnth.
+      * rewrite nth_vec_to_list_float in Hnth;
+        last by  rewrite  Heqv_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
+           apply /ssrnat.ltP. 
+        rewrite inord_val in Hf2.
+        assert (is_finite _ _ (X_m_jacobi k.+1 x0 b A
+                                    (inord m) ord0) = true /\
+                is_finite _ _  (X_m_jacobi k x0 b A
+                                  (inord m) ord0) = true).
+        { apply bplus_overflow_implies  in Hf2.
+          split; try apply Hf2.
+          rewrite is_finite_Bopp in Hf2.
+          try apply Hf2.
+        } 
+        assert (xy.1 = 
+
+
+
+
+      * by  rewrite  Heqv_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
+        apply /ssrnat.ltP.
+      * by rewrite !length_veclist.
 
       apply bplus_overflow_implies  in Hf2.
       rewrite inord_val in Hf2.
