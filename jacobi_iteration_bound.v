@@ -73,6 +73,7 @@ Definition d_mag_def {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
   ||x|| \leq ( k(A) ||b||) / ||A||
   https://www.maths.manchester.ac.uk/~higham/talks/claode13.pdf 
   https://link.springer.com/content/pdf/10.1007/978-94-017-1116-6_9.pdf
+  https://nhigham.com/2021/06/08/bounds-for-the-matrix-condition-number/
 
 
 **)
@@ -245,7 +246,7 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
   (** constraint on k **)
   (k_min A b accuracy < k)%coq_nat.
 
-
+(** Use: lower case gamma **)
 
 Definition jacobi_preconditions {t: type}
   (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
@@ -336,15 +337,13 @@ repeat split.
 Admitted.
 *)
 
-
+Require Import fma_is_finite.
 (** finiteness of dot product **)
 Lemma dotprod_finite {t: type} (v : vector t):
 is_finite (fprec t) (femax t)
   (dotprod v v) = true.
 Proof.
-induction v.
-+ by simpl.
-+ unfold dotprod. admit.
+pose proof (@fma_is_finite _ t v v).
 Admitted.
 
 
@@ -384,7 +383,7 @@ Definition residual_math {t}  {n:nat}
   diag_vector_mult (A1_J A) 
     ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A)).
   
-
+Print diag_vector_mult.
 
 Lemma A1_equiv {t: type} :
  forall (A: matrix t) (x : nat),
@@ -404,7 +403,9 @@ Lemma residual_is_finite {t: type} {n:nat}
     (norm2
        (rev
           (vec_to_list_float n.+1 (resid k)))) = true.
-Admitted.
+Proof.
+unfold norm2. apply dotprod_finite.
+Qed.
 
 
 Require Import fma_dot_mat_model.
@@ -553,6 +554,13 @@ intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
 Qed.
 
 
+Lemma dotprod_finite_implies {t: type} (v : vector t):
+is_finite (fprec t) (femax t) (dotprod v v) = true ->
+(forall x, In x v -> 
+           is_finite (fprec t) (femax t) x = true).
+Admitted.
+  
+
 Lemma vec_succ_err {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) :
   let rho := rho_def A b in 
@@ -582,7 +590,26 @@ assert (forall xy : ftype t * ftype t,
 { (** if the  residual is finite then 
       x_k+1 - x_k is finite
   **)
+  intros. 
+  pose proof (@residual_is_finite  t n A x0 b k).
+  unfold norm2 in H1. 
+  pose proof (@dotprod_finite_implies t).
+  specialize (H2 (rev
+             (vec_to_list_float n.+1
+                (residual_math A x0 b k))) H1).
+  pose proof (@residual_is_finite  t n A x0 b k.+1).
+  unfold norm2 in H3. 
+  pose proof (@dotprod_finite_implies t).
+  specialize (H4 (rev
+             (vec_to_list_float n.+1
+                (residual_math A x0 b k.+1))) H3).
+  
+  
+  
 
+
+
+apply dotprod_finite_implies in H1.
 
 
  admit. } specialize (H H0).
