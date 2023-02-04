@@ -923,7 +923,18 @@ eapply Rle_trans.
                      is_finite (fprec t) (femax t)
                        (BMULT t xy.1 xy.2) = true).
             { intros.
-
+              pose proof (@residual_is_finite  t n A x0 b k).
+              unfold norm2 in H2.
+              pose proof (@dotprod_finite_implies t).
+              specialize (H3 (rev
+                         (vec_to_list_float n.+1
+                            (residual_math A x0 b k))) H2).
+              pose proof (@dotprod_finite_implies t).
+              specialize (H4 (rev
+                              (vec_to_list_float n.+1
+                                 (residual_math A x0 b k))) H2).
+              
+              
 
 
 
