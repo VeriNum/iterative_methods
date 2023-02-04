@@ -654,6 +654,13 @@ assert (forall xy : ftype t * ftype t,
     - rewrite nth_vec_to_list_float in H3; last 
       by rewrite inordK; rewrite  Heqv_l  combine_length !length_veclist Nat.min_id in Hm;
       apply /ssrnat.ltP.
+      apply bmult_overflow_implies in H3.
+      destruct H3 as [Hf1 Hf2].
+      rewrite mxE in Hf2.
+      apply Bminus_bplus_opp_implies in Hf2.
+      apply bplus_overflow_implies  in Hf2.
+      rewrite inord_val in Hf2.
+      destruct Hf2 as [Hf21 Hf22].
 
 
 
