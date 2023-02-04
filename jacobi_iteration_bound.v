@@ -577,10 +577,11 @@ Lemma vec_succ_err {t: type} {n:nat}
   let b_real := FT2R_mat b in
   let x:= mulmx (A_real^-1) b_real in
   let e_0 := f_error 0 b x0 x A in
+  A_real \in unitmx ->
   (vec_inf_norm (FT2R_mat ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A))) <=
     (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))%Re.
 Proof.
-intros.
+intros ? ? ? ? ? ? ? HAinv.
 pose proof (@vec_float_sub_1 _ t n).
 specialize (H (X_m_jacobi k.+1 x0 b A) (X_m_jacobi k x0 b A)).
 assert (forall xy : ftype t * ftype t,
@@ -604,8 +605,6 @@ assert (forall xy : ftype t * ftype t,
   specialize (H2 (rev
              (vec_to_list_float n.+1
                 (residual_math A x0 b k))) H1).
-  (*pose proof (@residual_is_finite  t n A x0 b k.+1).
-  unfold norm2 in H3.  *)
   pose proof (@dotprod_finite_implies t).
   specialize (H3 (rev
              (vec_to_list_float n.+1
@@ -684,45 +683,23 @@ assert (forall xy : ftype t * ftype t,
           destruct Hnth as [Hnth1 Hnth2].
           by rewrite Hnth1.
         }
-
-
-
-
+        assert (xy.2 = X_m_jacobi k x0 b A  (inord m) ord0).
+        { destruct xy. simpl in *. 
+          apply pair_equal_spec in Hnth. 
+          destruct Hnth as [Hnth1 Hnth2].
+          by rewrite Hnth2.
+        } rewrite H7 H8. repeat split; try apply H6; try apply Hf2.
       * by  rewrite  Heqv_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
         apply /ssrnat.ltP.
       * by rewrite !length_veclist.
-
-      apply bplus_overflow_implies  in Hf2.
-      rewrite inord_val in Hf2.
-      destruct Hf2 as [Hf21 Hf22].
-      
-      
-
-
-
-
- admit.
-    - by rewrite inordK; rewrite  Heqv_l  combine_length !length_veclist Nat.min_id in Hm;
+      * rewrite Heqv_l in Hm. by rewrite rev_length in Hm.
+    - by rewrite inordK; rewrite  Heqv_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
       apply /ssrnat.ltP.
-    
-    
-
-
-
- admit.
-  + rewrite  Heqv_l  combine_length !length_veclist Nat.min_id in Hm.
+  + rewrite  Heqv_l rev_length combine_length !length_veclist Nat.min_id in Hm.
     by apply /ssrnat.ltP.
   + rewrite length_veclist.
-    by rewrite  Heqv_l  combine_length !length_veclist Nat.min_id in Hm.
-
-    
-
-
-
-apply dotprod_finite_implies in H1.
-
-
- admit. } specialize (H H0).
+    by rewrite  Heqv_l rev_length combine_length !length_veclist Nat.min_id in Hm.
+} specialize (H H0).
 apply reverse_triang_ineq in H.
 apply Rle_trans with
 (vec_inf_norm
@@ -743,7 +720,18 @@ apply Rle_trans with
     * apply /RleP. apply triang_ineq .
     * rewrite -vec_inf_norm_opp. rewrite -RplusE.
       assert (x = x_fix x b_real A_real).
-      { admit. } rewrite H2.
+      { apply x_fixpoint.
+        + unfold x. rewrite mulmxA.
+          assert (FT2R_mat A *m A_real^-1 = 1).
+          { fold A_real. by rewrite mulmxV . }
+          rewrite H2. by rewrite mul1mx /b_real.
+        +
+
+
+
+
+
+ } rewrite H2.
       assert (vec_inf_norm
                  (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
                   x_fix x b_real A_real) = f_error k.+1 b x0 x A).
