@@ -240,7 +240,13 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
       forall i, Binary.is_finite _ _ ((X_m_jacobi k x0 b A) i ord0) = true) /\
   *)
 (** Constraint on Gamma **)
-  (g1 t n.+1 (n.+1 - 1)%coq_nat <= FT2R (BMULT t accuracy accuracy))%Re /\
+  (FT2R (BMULT t accuracy accuracy) >
+     g1 t n.+1 (n.+1 - 1)%coq_nat +
+     INR n.+1 * (1 + g t n.+1) *
+     (g1 t n.+1 (n.+1 - 1)%coq_nat +
+      2 * (1 + g t n.+1) * (1 + default_rel t) *
+      vec_inf_norm (FT2R_mat (A1_J A)) *
+      d_mag_def A b * / (1 - rho_def A b))²)%Re /\
   (** Gamma is finite **)
   Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
   (** constraint on k **)
@@ -1398,6 +1404,8 @@ split.
                                 rewrite Heqd_mag Heqrho.
                                 apply Gamma_constraint. auto.
                                 rewrite Heqrho in Hrho. apply Hrho.
+                                intros.
+                                rewrite !mxE. by apply BDIV_FT2R_sep_zero.
                                 
 
                            ++++ apply Rinv_0_lt_compat.
