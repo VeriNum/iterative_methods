@@ -1007,7 +1007,11 @@ eapply Rle_trans.
                     apply pair_equal_spec in Hnth. 
                     destruct Hnth as [Hnth1 Hnth2].
                     by rewrite Hnth2.
-                  } rewrite H9 H10. 
+                  } rewrite H9 H10.
+                  repeat split; try apply H7; try apply H4.
+               - by rewrite !length_veclist.
+               - by rewrite Heqr_l rev_length in Hm. 
+             +
 
 
 
