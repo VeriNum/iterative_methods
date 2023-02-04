@@ -860,24 +860,32 @@ apply Rle_trans with
 Qed.
 
 
+Require Import float_acc_lems lemmas.
 
 
-(**
-(0 <
- (sqrt
-    ((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) /
-     INR n.+1 / (1 + g t n.+1)) -
-  g1 t n.+1 (n.+1 - 1)%coq_nat) /
- (1 + g t n.+1) /
- vec_inf_norm (FT2R_mat (A1_J A)) /
- (1 + default_rel t) -
- 2 * d_mag / (1 - rho))%Re
-**)
+Lemma vec_norm_strong_not_0 {n:nat} (v: 'cV[R]_n.+1):
+  (forall i, v i ord0 <> 0%Re) ->
+  (0 < vec_inf_norm v)%Re.
+Proof.
+intros.
+unfold vec_inf_norm.
+apply Rlt_le_trans with 
+[seq Rabs (v i 0) | i <- enum 'I_n.+1]`_0.
++ rewrite seq_equiv. rewrite nth_mkseq; last by [].
+  specialize (H (@inord n 0)). by apply Rabs_pos_lt.
++ apply /RleP.
+  apply (@bigmaxr_ler _ 0%Re [seq Rabs (v i 0) | i <- enum 'I_n.+1] 0).
+  by rewrite size_map size_enum_ord.
+Qed.
+
+
 Lemma Gamma_constraint {t}  {n:nat} 
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) (acc : ftype t) :
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
   let Gamma := FT2R (BMULT t acc acc) in 
+  (rho < 1)%Re ->
+  (forall i : 'I_n.+1, FT2R_mat (A1_J A) i ord0 <> 0%Re) ->
   (Gamma > g1 t n.+1 (n.+1 - 1)%coq_nat + 
           (INR n.+1 * (1 + g t n.+1) * 
            Rsqr (g1 t n.+1 (n.+1 - 1)%coq_nat + 
@@ -894,15 +902,12 @@ Lemma Gamma_constraint {t}  {n:nat}
  2 * d_mag / (1 - rho))%Re.
 Proof.
 intros.
-Search (0 < _ - _)%Re.
 apply Rlt_Rminus.
-Search (_ < _ / _)%Re.
 repeat apply Rdiv_lt_right.
 + apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
-+ admit.
++ by apply vec_norm_strong_not_0.
 + apply Rplus_lt_le_0_compat. nra. apply g_pos.
-+ Search (_ < _ - _)%Re.
-  apply Rcomplements.Rlt_minus_r.
++ apply Rcomplements.Rlt_minus_r.
   assert ((2 * d_mag / (1 - rho) * (1 + default_rel t) *
              vec_inf_norm (FT2R_mat (A1_J A)) *
              (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re = 
@@ -914,9 +919,9 @@ repeat apply Rdiv_lt_right.
     repeat apply Rmult_le_pos; try nra; try apply d_mag_ge_0;
     (try apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0; try apply g_pos).
     + apply Rlt_le, Rinv_0_lt_compat. apply Rlt_Rminus.
-      admit.
+      apply H.
     + apply /RleP. apply vec_norm_pd.
-  } rewrite H0. clear H0.
+  } rewrite H2. clear H2.
   apply sqrt_lt_1_alt . split.
   - apply Rle_0_sqr.
   - repeat apply Rdiv_lt_right.
@@ -953,16 +958,9 @@ repeat apply Rdiv_lt_right.
           rewrite -![in RHS]Rmult_assoc. 
           rewrite -![in LHS]Rmult_assoc.
           apply Rmult_eq_compat_r. rewrite Rmult_comm. nra.
-        } by rewrite H0.
-      } rewrite H0. apply H.
-Admitted.
-
-
-
-
-
-
-
+        } by rewrite H2.
+      } rewrite H2. apply H1.
+Qed.
 
 
 (*** Bound for the residual ***)
@@ -1298,24 +1296,8 @@ assert (x = 0
 Admitted.
 *)
 
-Require Import float_acc_lems lemmas.
 
 
-
-Lemma vec_norm_strong_not_0 {n:nat} (v: 'cV[R]_n.+1):
-  (forall i, v i ord0 <> 0%Re) ->
-  (0 < vec_inf_norm v)%Re.
-Proof.
-intros.
-unfold vec_inf_norm.
-apply Rlt_le_trans with 
-[seq Rabs (v i 0) | i <- enum 'I_n.+1]`_0.
-+ rewrite seq_equiv. rewrite nth_mkseq; last by [].
-  specialize (H (@inord n 0)). by apply Rabs_pos_lt.
-+ apply /RleP.
-  apply (@bigmaxr_ler _ 0%Re [seq Rabs (v i 0) | i <- enum 'I_n.+1] 0).
-  by rewrite size_map size_enum_ord.
-Qed.
 
 Lemma jacobi_iteration_bound {t: type} {n : nat} :
  forall (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (acc: ftype t) (k: nat),
