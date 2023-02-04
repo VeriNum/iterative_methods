@@ -1424,8 +1424,7 @@ split.
                                 rewrite Heqrho in Hrho. apply Hrho.
                                 intros.
                                 rewrite !mxE. by apply BDIV_FT2R_sep_zero.
-                                apply HG.
-
+                                rewrite Heqrho Heqd_mag in HG. apply HG.
                            ++++ apply Rinv_0_lt_compat.
                                 apply pow_lt. apply Hrho.
                        *** rewrite -pow_inv.
@@ -1457,7 +1456,13 @@ split.
                               - admit.
                               - nra.
                               - apply Rinv_0_lt_compat.
-                                admit. (** modify the constraint on Gamma **)
+                                rewrite HeqGamma. unfold acc2. 
+                                rewrite Heqd_mag Heqrho.
+                                apply Gamma_constraint. auto.
+                                rewrite Heqrho in Hrho. apply Hrho.
+                                intros.
+                                rewrite !mxE. by apply BDIV_FT2R_sep_zero.
+                                rewrite Heqrho Heqd_mag in HG. apply HG.
                           }
                           rewrite H2.
                           assert ( ((/ rho) ^ (k_min A b acc).+1)%Re = 
