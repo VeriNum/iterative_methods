@@ -578,6 +578,8 @@ Lemma vec_succ_err {t: type} {n:nat}
   let b_real := FT2R_mat b in
   let x:= mulmx (A_real^-1) b_real in
   let e_0 := f_error 0 b x0 x A in
+  x != 0 ->
+  (rho < 1)%Re ->
   A_real \in unitmx ->
   (forall i, is_finite (fprec t) (femax t)
               (BDIV t (Zconst t 1) (A i i)) = true) ->
@@ -585,7 +587,7 @@ Lemma vec_succ_err {t: type} {n:nat}
   (vec_inf_norm (FT2R_mat ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A))) <=
     (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))%Re.
 Proof.
-intros ? ? ? ? ? ? ? HAinv HfinvA HfA.
+intros ? ? ? ? ? ? ? Hxneq0 Hrho HAinv HfinvA HfA.
 pose proof (@vec_float_sub_1 _ t n).
 specialize (H (X_m_jacobi k.+1 x0 b A) (X_m_jacobi k x0 b A)).
 assert (forall xy : ftype t * ftype t,
@@ -742,8 +744,8 @@ apply Rle_trans with
       pose proof (@jacobi_forward_error_bound _ t n A b).
       assert (forall i : 'I_n.+1,
                 is_finite (fprec t) (femax t) (A i i) = true) by (intros; apply HfA).
-      assert (x != 0 ) by admit.
-      assert ((rho < 1)%Re) by admit.
+      assert (x != 0 ) by apply Hxneq0.
+      assert ((rho < 1)%Re) by apply Hrho.
       assert (FT2R_mat A \in unitmx). 
       { by rewrite /A_real in HAinv. }
       assert (forall i : 'I_n.+1,
@@ -751,7 +753,11 @@ apply Rle_trans with
                 (BDIV t (Zconst t 1) (A i i)) = true) by (intros; apply HfinvA).
      assert (forall (k : nat) (i : 'I_n.+1),
                 is_finite (fprec t) (femax t)
-                  (X_m_jacobi k x0 b A i ord0) = true) by admit. 
+                  (X_m_jacobi k x0 b A i ord0) = true).
+     {
+
+
+ by admit. 
      (** also implied by finiteness of residual **)
      specialize (H5 H6 H7 H8 H9 H10 x0 H11).
      assert ((f_error k.+1 b x0 x A <= rho^k.+1 * (f_error 0 b x0 x A) + 
