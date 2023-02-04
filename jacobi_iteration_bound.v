@@ -604,13 +604,13 @@ assert (forall xy : ftype t * ftype t,
   specialize (H2 (rev
              (vec_to_list_float n.+1
                 (residual_math A x0 b k))) H1).
-  pose proof (@residual_is_finite  t n A x0 b k.+1).
-  unfold norm2 in H3. 
+  (*pose proof (@residual_is_finite  t n A x0 b k.+1).
+  unfold norm2 in H3.  *)
   pose proof (@dotprod_finite_implies t).
-  specialize (H4 (rev
+  specialize (H3 (rev
              (vec_to_list_float n.+1
-                (residual_math A x0 b k.+1))) H3).
-  unfold residual_math in H4.
+                (residual_math A x0 b k))) H1).
+  unfold residual_math in H3.
   remember (combine
           (vec_to_list_float n.+1
              (X_m_jacobi k.+1 x0 b A))
@@ -618,35 +618,61 @@ assert (forall xy : ftype t * ftype t,
              (X_m_jacobi k x0 b A))) as v_l.
   assert (exists m, (m < length v_l)%coq_nat /\
                     nth m v_l (Zconst t 0, Zconst t 0) = xy).
-  { by apply In_nth. } destruct H5 as [m [Hm Hnth]].
-  specialize (H4 (nth m (rev
+  { by apply In_nth. } destruct H4 as [m [Hm Hnth]].
+  specialize (H3 (nth m (rev
                           (vec_to_list_float n.+1
                              (diag_vector_mult 
                                 (A1_J A)
-                                (X_m_jacobi k.+2 x0 b A -f
-                                 X_m_jacobi k.+1 x0 b A)))) (Zconst t 0))).
+                                (X_m_jacobi k.+1 x0 b A -f
+                                 X_m_jacobi k x0 b A)))) (Zconst t 0))).
   assert (In
            (nth m
               (rev
                  (vec_to_list_float n.+1
                     (diag_vector_mult 
                        (A1_J A)
-                       (X_m_jacobi k.+2 x0 b A -f
-                        X_m_jacobi k.+1 x0 b A))))
+                       (X_m_jacobi k.+1 x0 b A -f
+                        X_m_jacobi k x0 b A))))
               (Zconst t 0))
            (rev
               (vec_to_list_float n.+1
                  (diag_vector_mult 
                     (A1_J A)
-                    (X_m_jacobi k.+2 x0 b A -f
-                     X_m_jacobi k.+1 x0 b A))))).
+                    (X_m_jacobi k.+1 x0 b A -f
+                     X_m_jacobi k x0 b A))))).
   { apply nth_In. rewrite Heqv_l in Hm.
     rewrite rev_length length_veclist .
     by rewrite combine_length !length_veclist Nat.min_id in Hm.
-  } specialize (H4 H5).
-  rewrite rev_nth in H4.
-  rewrite length_veclist in H4.
-  assert ((n.+1 - m.+1)%coq_nat = (n.-1
+  } specialize (H3 H4).
+  rewrite rev_nth in H3.
+  rewrite length_veclist in H3.
+  assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat).
+  { lia. } rewrite H5 in H3.
+  rewrite nth_vec_to_list_float in H3.
+  + rewrite !mxE in H3. 
+    rewrite nth_vec_to_list_float in H3.
+    - rewrite nth_vec_to_list_float in H3; last 
+      by rewrite inordK; rewrite  Heqv_l  combine_length !length_veclist Nat.min_id in Hm;
+      apply /ssrnat.ltP.
+
+
+
+
+ admit.
+    - by rewrite inordK; rewrite  Heqv_l  combine_length !length_veclist Nat.min_id in Hm;
+      apply /ssrnat.ltP.
+    
+    
+
+
+
+ admit.
+  + rewrite  Heqv_l  combine_length !length_veclist Nat.min_id in Hm.
+    by apply /ssrnat.ltP.
+  + rewrite length_veclist.
+    by rewrite  Heqv_l  combine_length !length_veclist Nat.min_id in Hm.
+
+    
 
 
 
