@@ -916,7 +916,9 @@ eapply Rle_trans.
                 (vec_to_list_float n.+1
                    (residual_math A x0 b k)))).
     { apply nth_In.
-      rewrite Heqr_l in Hm.
+      rewrite Heqr_l rev_length combine_length Nat.min_id /resid in Hm.
+      by rewrite rev_length.
+    } 
 
 
 
