@@ -892,6 +892,15 @@ Lemma Gamma_constraint {t}  {n:nat}
  (1 + default_rel t) -
  2 * d_mag / (1 - rho))%Re.
 Proof.
+intros.
+Search (0 < _ - _)%Re.
+apply Rlt_Rminus.
+Search (_ < _ / _)%Re.
+apply Rdiv_lt_right.
++ apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
++
+
+
 
 
 
