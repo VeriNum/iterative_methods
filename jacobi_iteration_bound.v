@@ -616,8 +616,9 @@ assert (forall xy : ftype t * ftype t,
              (X_m_jacobi k.+1 x0 b A))
           (vec_to_list_float n.+1
              (X_m_jacobi k x0 b A))) as v_l.
-  assert (exists m, (m < length v_l)%coq_nat /\
-                    nth m v_l (Zconst t 0, Zconst t 0) = xy).
+  apply in_rev  in H0.
+  assert (exists m, (m < length (rev v_l))%coq_nat /\
+                    nth m (rev v_l) (Zconst t 0, Zconst t 0) = xy).
   { by apply In_nth. } destruct H4 as [m [Hm Hnth]].
   specialize (H3 (nth m (rev
                           (vec_to_list_float n.+1
@@ -642,7 +643,7 @@ assert (forall xy : ftype t * ftype t,
                      X_m_jacobi k x0 b A))))).
   { apply nth_In. rewrite Heqv_l in Hm.
     rewrite rev_length length_veclist .
-    by rewrite combine_length !length_veclist Nat.min_id in Hm.
+    by rewrite rev_length combine_length !length_veclist Nat.min_id in Hm.
   } specialize (H3 H4).
   rewrite rev_nth in H3.
   rewrite length_veclist in H3.
@@ -652,15 +653,22 @@ assert (forall xy : ftype t * ftype t,
   + rewrite !mxE in H3. 
     rewrite nth_vec_to_list_float in H3.
     - rewrite nth_vec_to_list_float in H3; last 
-      by rewrite inordK; rewrite  Heqv_l  combine_length !length_veclist Nat.min_id in Hm;
+      by rewrite inordK; rewrite  Heqv_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
       apply /ssrnat.ltP.
       apply bmult_overflow_implies in H3.
       destruct H3 as [Hf1 Hf2].
       rewrite mxE in Hf2.
       apply Bminus_bplus_opp_implies in Hf2.
+      rewrite Heqv_l in Hnth. rewrite rev_nth in Hnth.
+      rewrite combine_length !length_veclist Nat.min_id in Hnth.
+      rewrite combine_nth in Hnth.
+      
+
       apply bplus_overflow_implies  in Hf2.
       rewrite inord_val in Hf2.
       destruct Hf2 as [Hf21 Hf22].
+      
+      
 
 
 
@@ -1250,4 +1258,5 @@ Qed.
 
 
 End WITH_NANS.
+
 
