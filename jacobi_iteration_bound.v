@@ -1222,7 +1222,7 @@ Lemma jacobi_iteration_bound {t: type} {n : nat} :
 Proof.
 intros.
 unfold jacobi_preconditions_math in H.
-destruct H as [HfA [Hneqx [Hrho [HinvA [Hfbdiv [Hfxk [HG [Hfacc Hk]]]]]]]].
+destruct H as [HfA [Hneqx [Hrho [HinvA [Hfbdiv [HG [Hfacc Hk]]]]]]].
 split.
 + unfold acc2. by apply finite_is_finite.
 + exists (k_min A b acc).+1. 
@@ -1253,7 +1253,11 @@ split.
          assert ((rho_def A b < 1)%Re).
          { rewrite Heqrho in Hrho. apply Hrho. } 
          specialize (H0 H1). unfold resid,x0. rewrite Heqe_0 Heqrho Heqd_mag Heqx.
-         unfold x0. apply H0.
+         unfold x0. apply H0. 
+         by rewrite Heqx in Hneqx.
+         apply HinvA.
+         by intros.
+         by intros.
       ++ apply Rcomplements.Rlt_minus_r.
          rewrite Rmult_comm. 
          apply Rcomplements.Rlt_div_r; 
