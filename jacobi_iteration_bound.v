@@ -344,6 +344,13 @@ is_finite (fprec t) (femax t)
   (dotprod v v) = true.
 Proof.
 pose proof (@fma_is_finite _ t v v).
+assert (length v = length v).
+{ lia. } specialize (H H0).
+specialize (H (dotprod v v)).
+apply H; admit.
+
+
+
 Admitted.
 
 
@@ -603,7 +610,7 @@ assert (forall xy : ftype t * ftype t,
   specialize (H4 (rev
              (vec_to_list_float n.+1
                 (residual_math A x0 b k.+1))) H3).
-  
+  specialize (
   
   
 
