@@ -915,8 +915,12 @@ repeat apply Rdiv_lt_right.
     + apply Rlt_le, Rinv_0_lt_compat. apply Rlt_Rminus.
       admit.
     + apply /RleP. apply vec_norm_pd.
-  }
-    
+  } rewrite H0. clear H0.
+  apply sqrt_lt_1_alt . split.
+  - apply Rle_0_sqr.
+  - repeat apply Rdiv_lt_right.
+    *
+
 
 
 
