@@ -764,7 +764,21 @@ apply Rle_trans with
        specialize (H12 (nth i (rev
                                (vec_to_list_float n.+1
                                   (residual_math A x0 b k0))) (Zconst t 0))).
-       
+       assert (In
+                (nth i
+                   (rev
+                      (vec_to_list_float n.+1
+                         (residual_math A x0 b k0)))
+                   (Zconst t 0))
+                (rev
+                   (vec_to_list_float n.+1
+                      (residual_math A x0 b k0)))).
+       { apply nth_In. rewrite rev_length length_veclist.
+         apply /ssrnat.ltP. apply ltn_ord.
+       } specialize (H12 H13).
+       rewrite rev_nth in H12. rewrite length_veclist in H12.
+       assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat).
+       { lia. } rewrite H14 in H12.
 
 
 
