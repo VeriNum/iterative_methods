@@ -754,7 +754,24 @@ apply Rle_trans with
      assert (forall (k : nat) (i : 'I_n.+1),
                 is_finite (fprec t) (femax t)
                   (X_m_jacobi k x0 b A i ord0) = true).
-     {
+     { intros. 
+       pose proof (@residual_is_finite  t n A x0 b k0).
+       unfold norm2 in H11.
+       pose proof (@dotprod_finite_implies t).
+       specialize (H12 (rev
+             (vec_to_list_float n.+1
+                (residual_math A x0 b k0))) H11).
+       specialize (H12 (nth i (rev
+                               (vec_to_list_float n.+1
+                                  (residual_math A x0 b k0))) (Zconst t 0))).
+       
+
+
+
+
+
+
+
 
 
  by admit. 
