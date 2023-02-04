@@ -935,7 +935,10 @@ repeat apply Rdiv_lt_right.
                   2 * (1 + g t n.+1) * (1 + default_rel t) *
                   vec_inf_norm (FT2R_mat (A1_J A)) * d_mag */
                   (1 - rho))²)%Re).
-      { rewrite Rplus_comm.
+      { rewrite Rplus_comm. apply Rplus_eq_compat_l.
+        rewrite Rmult_comm. rewrite [in RHS]Rmult_assoc.
+        apply Rmult_eq_compat_l. rewrite Rmult_comm.
+        apply Rmult_eq_compat_l. nra.
 
 
 
