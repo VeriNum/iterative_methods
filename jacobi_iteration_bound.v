@@ -918,7 +918,11 @@ eapply Rle_trans.
     { apply nth_In.
       rewrite Heqr_l rev_length combine_length Nat.min_id /resid in Hm.
       by rewrite rev_length.
-    } 
+    } specialize (H3 H4). 
+    rewrite Heqr_l in Hnth.
+    rewrite -combine_rev in Hnth; last by [].
+    rewrite combine_nth in Hnth.
+    
 
 
 
