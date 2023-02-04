@@ -363,7 +363,12 @@ induction v.
 + unfold dotprod.
   assert (combine (a :: v) (a :: v) = (a, a) :: combine v v).
   { unfold combine;auto. } rewrite H.
-  simpl. admit.
+  simpl. unfold dotprod in IHv.
+
+
+
+
+ admit.
 Admitted.
 
 (*
@@ -853,6 +858,41 @@ apply Rle_trans with
         { nra. } rewrite H14. clear H14. rewrite Rinv_r; last by nra.
         rewrite Rmult_1_r. nra.
 Qed.
+
+
+
+
+(**
+(0 <
+ (sqrt
+    ((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) /
+     INR n.+1 / (1 + g t n.+1)) -
+  g1 t n.+1 (n.+1 - 1)%coq_nat) /
+ (1 + g t n.+1) /
+ vec_inf_norm (FT2R_mat (A1_J A)) /
+ (1 + default_rel t) -
+ 2 * d_mag / (1 - rho))%Re
+**)
+Lemma Gamma_constraint {t}  {n:nat} 
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) (acc : ftype t) :
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in
+  let Gamma := FT2R (BMULT t acc acc) in 
+  (Gamma > g1 t n.+1 (n.+1 - 1)%coq_nat + 
+           Rsqr (INR n.+1 * (1 + g t n.+1) * (g1 t n.+1 (n.+1 - 1)%coq_nat + 
+           2 * (1 + g t n.+1) * (1 + default_rel t) * 
+           vec_inf_norm (FT2R_mat (A1_J A)) * d_mag / (1 - rho))))%Re ->
+  (0 <
+ (sqrt
+    ((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) /
+     INR n.+1 / (1 + g t n.+1)) -
+  g1 t n.+1 (n.+1 - 1)%coq_nat) /
+ (1 + g t n.+1) /
+ vec_inf_norm (FT2R_mat (A1_J A)) /
+ (1 + default_rel t) -
+ 2 * d_mag / (1 - rho))%Re.
+Proof.
+
 
 
 (*** Bound for the residual ***)
