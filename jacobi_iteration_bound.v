@@ -1011,20 +1011,11 @@ eapply Rle_trans.
                   repeat split; try apply H7; try apply H4.
                - by rewrite !length_veclist.
                - by rewrite Heqr_l rev_length in Hm. 
-             +
-
-
-
-
-
-
-
-
-
-
-
-
-admit. (** Implied by finiteness of the residual **) } specialize (H0 H1).
+             + by rewrite   Heqr_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
+                  apply /ssrnat.ltP.
+             + rewrite Heqr_l rev_length combine_length !length_veclist Nat.min_id in Hm.
+               by rewrite length_veclist.
+           (** Implied by finiteness of the residual **) } specialize (H0 H1).
             assert ((vec_inf_norm
                      (FT2R_mat
                         (diag_vector_mult (A1_J A)
