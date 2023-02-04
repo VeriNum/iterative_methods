@@ -791,15 +791,9 @@ apply Rle_trans with
        apply bplus_overflow_implies in Hf2.
        destruct Hf2 as [Hf21 Hf22].
        rewrite inord_val in Hf22.
-       
-
-
-
-
-
-
-
- by admit. 
+       by rewrite is_finite_Bopp in Hf22.
+       rewrite length_veclist. apply /ssrnat.ltP. apply ltn_ord.
+     } 
      (** also implied by finiteness of residual **)
      specialize (H5 H6 H7 H8 H9 H10 x0 H11).
      assert ((f_error k.+1 b x0 x A <= rho^k.+1 * (f_error 0 b x0 x A) + 
@@ -858,7 +852,7 @@ apply Rle_trans with
                 (e_0 * ( (1 - rho) * / (1 - rho)) - d_mag * /(1 - rho)))%Re).
         { nra. } rewrite H14. clear H14. rewrite Rinv_r; last by nra.
         rewrite Rmult_1_r. nra.
-Admitted.
+Qed.
 
 
 
