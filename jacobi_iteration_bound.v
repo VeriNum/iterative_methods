@@ -678,7 +678,12 @@ assert (forall xy : ftype t * ftype t,
           rewrite is_finite_Bopp in Hf2.
           try apply Hf2.
         } 
-        assert (xy.1 = 
+        assert (xy.1 = X_m_jacobi k.+1 x0 b A  (inord m) ord0).
+        { destruct xy. simpl in *. 
+          apply pair_equal_spec in Hnth. 
+          destruct Hnth as [Hnth1 Hnth2].
+          by rewrite Hnth1.
+        }
 
 
 
