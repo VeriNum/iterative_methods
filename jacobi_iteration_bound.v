@@ -973,6 +973,34 @@ eapply Rle_trans.
               assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat).
               { lia. } rewrite H6 in H4.
               rewrite nth_vec_to_list_float in H4.
+              + rewrite !mxE in H4.
+                rewrite nth_vec_to_list_float in H4; last 
+                by rewrite inordK;
+                 rewrite   Heqr_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
+                  apply /ssrnat.ltP.
+                 
+                rewrite inord_val in Hf2.
+                assert (is_finite _ _ (X_m_jacobi k.+1 x0 b A
+                                            (inord m) ord0) = true /\
+                        is_finite _ _  (X_m_jacobi k x0 b A
+                                          (inord m) ord0) = true).
+                { apply bplus_overflow_implies  in Hf2.
+                  split; try apply Hf2.
+                  rewrite is_finite_Bopp in Hf2.
+                  try apply Hf2.
+                } 
+                assert (xy.1 = X_m_jacobi k.+1 x0 b A  (inord m) ord0).
+                { destruct xy. simpl in *. 
+                  apply pair_equal_spec in Hnth. 
+                  destruct Hnth as [Hnth1 Hnth2].
+                  by rewrite Hnth1.
+                }
+                assert (xy.2 = X_m_jacobi k x0 b A  (inord m) ord0).
+                { destruct xy. simpl in *. 
+                  apply pair_equal_spec in Hnth. 
+                  destruct Hnth as [Hnth1 Hnth2].
+                  by rewrite Hnth2.
+                } rewrite H7 H8. 
 
 
 
