@@ -855,7 +855,6 @@ apply Rle_trans with
 Qed.
 
 
-
 (*** Bound for the residual ***)
 Lemma residual_bound {t: type} {n:nat} 
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) :
@@ -869,6 +868,13 @@ Lemma residual_bound {t: type} {n:nat}
   let resid := residual_math A x0 b in
   let v_l := (vec_to_list_float n.+1 (resid k)) in
   (rho < 1)%Re ->
+  (x != 0) ->
+  (FT2R_mat A \in unitmx) ->
+  (forall i : 'I_n.+1,
+          is_finite (fprec t) (femax t)
+            (BDIV t (Zconst t 1) (A i i)) = true) ->
+  (forall i : 'I_n.+1,
+      is_finite (fprec t) (femax t) (A i i) = true) ->
   (Rabs (FT2R (norm2 (rev v_l))) <= 
     INR n.+1 * 
     (Rsqr (vec_inf_norm (FT2R_mat (A1_J A)) * 
@@ -876,7 +882,7 @@ Lemma residual_bound {t: type} {n:nat}
         * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat) *
       (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
 Proof.
-intros.
+intros ? ? ? ? ? ? ? ? ? ? Hxneq0 HinvA HfinvA HfA.
 eapply Rle_trans.
 + apply norm2_vec_inf_norm_rel.
   - admit.
@@ -916,7 +922,21 @@ eapply Rle_trans.
                      is_finite (fprec t) (femax t) xy.2 = true /\
                      is_finite (fprec t) (femax t)
                        (BMULT t xy.1 xy.2) = true).
-            { admit. (** Implied by finiteness of the residual **) } specialize (H0 H1).
+            { intros.
+
+
+
+
+
+
+
+
+
+
+
+
+
+admit. (** Implied by finiteness of the residual **) } specialize (H0 H1).
             assert ((vec_inf_norm
                      (FT2R_mat
                         (diag_vector_mult (A1_J A)
@@ -967,7 +987,7 @@ eapply Rle_trans.
              +++ apply Rplus_le_le_0_compat; try nra; try apply g_pos.
              +++ apply Rmult_le_compat_l. 
                  --- apply /RleP. apply vec_norm_pd.
-                 --- apply vec_succ_err.
+                 --- by apply vec_succ_err.
       ++ apply /RleP. apply vec_norm_pd.
       ++ apply Rplus_le_le_0_compat.
          -- repeat apply Rmult_le_pos.
