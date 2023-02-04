@@ -1394,7 +1394,12 @@ split.
                            ++++ admit.
                            ++++ nra.
                            ++++ apply Rinv_0_lt_compat.
-                                admit.
+                                rewrite HeqGamma. unfold acc2. 
+                                rewrite Heqd_mag Heqrho.
+                                apply Gamma_constraint. auto.
+                                rewrite Heqrho in Hrho. apply Hrho.
+                                
+
                            ++++ apply Rinv_0_lt_compat.
                                 apply pow_lt. apply Hrho.
                        *** rewrite -pow_inv.
