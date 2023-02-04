@@ -1368,7 +1368,25 @@ split.
                                   (1 + g t n.+1))%Re)).
          { symmetry. apply Rsqr_sqrt. 
            repeat apply Rmult_le_pos.
-           + apply Rle_0_minus. by rewrite HeqGamma.
+           + apply Rle_0_minus.
+             apply Rle_trans with 
+             (g1 t n.+1 (n.+1 - 1)%coq_nat +
+                INR n.+1 * (1 + g t n.+1) *
+                (g1 t n.+1 (n.+1 - 1)%coq_nat +
+                 2 * (1 + g t n.+1) *
+                 (1 + default_rel t) *
+                 vec_inf_norm (FT2R_mat (A1_J A)) *
+                 d_mag * / (1 - rho))²)%Re.
+             - assert (( 0 <= INR n.+1 * (1 + g t n.+1) *
+                               (g1 t n.+1 (n.+1 - 1)%coq_nat +
+                                2 * (1 + g t n.+1) * (1 + default_rel t) *
+                                vec_inf_norm (FT2R_mat (A1_J A)) * d_mag *
+                                / (1 - rho))²)%Re).
+               { apply Rmult_le_pos; last by apply Rle_0_sqr.
+                 apply Rmult_le_pos. apply pos_INR.
+                 apply Rplus_le_le_0_compat. nra. apply g_pos.
+               } nra.
+             - apply Rlt_le. rewrite HeqGamma. by unfold acc2.
            + apply Rlt_le. apply Rinv_0_lt_compat. apply lt_0_INR; lia.
            + apply Rlt_le. apply Rinv_0_lt_compat. apply Rplus_lt_le_0_compat.
              nra. apply g_pos.
@@ -1406,7 +1424,7 @@ split.
                                 rewrite Heqrho in Hrho. apply Hrho.
                                 intros.
                                 rewrite !mxE. by apply BDIV_FT2R_sep_zero.
-                                
+                                apply HG.
 
                            ++++ apply Rinv_0_lt_compat.
                                 apply pow_lt. apply Hrho.
