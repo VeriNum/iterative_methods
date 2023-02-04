@@ -896,8 +896,10 @@ intros.
 Search (0 < _ - _)%Re.
 apply Rlt_Rminus.
 Search (_ < _ / _)%Re.
-apply Rdiv_lt_right.
+repeat apply Rdiv_lt_right.
 + apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
++ admit.
++ apply Rplus_lt_le_0_compat. nra. apply g_pos.
 +
 
 
