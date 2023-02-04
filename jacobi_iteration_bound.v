@@ -879,9 +879,10 @@ Lemma Gamma_constraint {t}  {n:nat}
   let d_mag := d_mag_def A b in
   let Gamma := FT2R (BMULT t acc acc) in 
   (Gamma > g1 t n.+1 (n.+1 - 1)%coq_nat + 
-           Rsqr (INR n.+1 * (1 + g t n.+1) * (g1 t n.+1 (n.+1 - 1)%coq_nat + 
+          (INR n.+1 * (1 + g t n.+1) * 
+           Rsqr (g1 t n.+1 (n.+1 - 1)%coq_nat + 
            2 * (1 + g t n.+1) * (1 + default_rel t) * 
-           vec_inf_norm (FT2R_mat (A1_J A)) * d_mag / (1 - rho))))%Re ->
+           vec_inf_norm (FT2R_mat (A1_J A)) * d_mag */ (1 - rho))))%Re ->
   (0 <
  (sqrt
     ((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) /
@@ -919,7 +920,22 @@ repeat apply Rdiv_lt_right.
   apply sqrt_lt_1_alt . split.
   - apply Rle_0_sqr.
   - repeat apply Rdiv_lt_right.
-    *
+    * apply Rplus_lt_le_0_compat. nra. apply g_pos.
+    * apply lt_0_INR. lia.
+    * apply Rcomplements.Rlt_minus_r. apply Rgt_lt. 
+      assert (((2 * d_mag */ (1 - rho) * (1 + default_rel t) *
+                  vec_inf_norm (FT2R_mat (A1_J A)) *
+                  (1 + g t n.+1) +
+                  g1 t n.+1 (n.+1 - 1)%coq_nat)² *
+                 (1 + g t n.+1) * INR n.+1 +
+                 g1 t n.+1 (n.+1 - 1)%coq_nat)%Re = 
+              (g1 t n.+1 (n.+1 - 1)%coq_nat +
+                 INR n.+1 * (1 + g t n.+1) *
+                 (g1 t n.+1 (n.+1 - 1)%coq_nat +
+                  2 * (1 + g t n.+1) * (1 + default_rel t) *
+                  vec_inf_norm (FT2R_mat (A1_J A)) * d_mag */
+                  (1 - rho))²)%Re).
+      { rewrite Rplus_comm.
 
 
 
