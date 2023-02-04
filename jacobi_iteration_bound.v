@@ -779,8 +779,15 @@ apply Rle_trans with
        rewrite rev_nth in H12. rewrite length_veclist in H12.
        assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat).
        { lia. } rewrite H14 in H12.
-
-
+       rewrite nth_vec_to_list_float in H12;
+        last by  apply ltn_ord.
+       rewrite !mxE in H12. 
+       apply bmult_overflow_implies in H12.
+       destruct H12 as [Hf1 Hf2].
+       rewrite nth_vec_to_list_float in Hf2;
+        last by  apply ltn_ord. rewrite inord_val in Hf2.
+       rewrite mxE in Hf2. 
+       
 
 
 
