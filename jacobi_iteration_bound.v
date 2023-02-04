@@ -900,7 +900,25 @@ repeat apply Rdiv_lt_right.
 + apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
 + admit.
 + apply Rplus_lt_le_0_compat. nra. apply g_pos.
-+
++ Search (_ < _ - _)%Re.
+  apply Rcomplements.Rlt_minus_r.
+  assert ((2 * d_mag / (1 - rho) * (1 + default_rel t) *
+             vec_inf_norm (FT2R_mat (A1_J A)) *
+             (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re = 
+           sqrt (Rsqr (2 * d_mag / (1 - rho) * (1 + default_rel t) *
+                       vec_inf_norm (FT2R_mat (A1_J A)) *
+                       (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat))).
+  { rewrite sqrt_Rsqr; try nra.
+    apply Rplus_le_le_0_compat; try apply g1_pos.
+    repeat apply Rmult_le_pos; try nra; try apply d_mag_ge_0;
+    (try apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0; try apply g_pos).
+    + apply Rlt_le, Rinv_0_lt_compat. apply Rlt_Rminus.
+      admit.
+    + apply /RleP. apply vec_norm_pd.
+  }
+    
+
+
 
 
 
