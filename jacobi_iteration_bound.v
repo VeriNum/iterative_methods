@@ -964,11 +964,15 @@ eapply Rle_trans.
                                 (A1_J A)
                                 (X_m_jacobi k.+1 x0 b A -f
                                  X_m_jacobi k x0 b A))))).
-              { apply nth_In. rewrite Heqv_l in Hm.
+              { apply nth_In. rewrite Heqr_l in Hm.
                 rewrite rev_length length_veclist .
                 by rewrite rev_length combine_length !length_veclist Nat.min_id in Hm.
-              } specialize (H3 H4).
-              
+              } specialize (H4 H5).
+              rewrite rev_nth in H4.
+              rewrite length_veclist in H4.
+              assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat).
+              { lia. } rewrite H6 in H4.
+              rewrite nth_vec_to_list_float in H4.
 
 
 
