@@ -787,6 +787,10 @@ apply Rle_trans with
        rewrite nth_vec_to_list_float in Hf2;
         last by  apply ltn_ord. rewrite inord_val in Hf2.
        rewrite mxE in Hf2. 
+       apply Bminus_bplus_opp_implies in Hf2.
+       apply bplus_overflow_implies in Hf2.
+       destruct Hf2 as [Hf21 Hf22].
+       rewrite inord_val in Hf22.
        
 
 
