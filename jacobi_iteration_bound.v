@@ -942,7 +942,32 @@ eapply Rle_trans.
               assert (exists m, (m < length (rev r_l))%coq_nat /\
                                 nth m (rev r_l) (Zconst t 0, Zconst t 0) = xy).
               { by apply In_nth. } destruct H5 as [m [Hm Hnth]].
-              
+              unfold residual_math in H4.
+              specialize (H4 (nth m (rev
+                          (vec_to_list_float n.+1
+                             (diag_vector_mult 
+                                (A1_J A)
+                                (X_m_jacobi k.+1 x0 b A -f
+                                 X_m_jacobi k x0 b A)))) (Zconst t 0))).
+              assert (In
+                       (nth m
+                          (rev
+                             (vec_to_list_float n.+1
+                                (diag_vector_mult 
+                                   (A1_J A)
+                                   (X_m_jacobi k.+1 x0 b A -f
+                                    X_m_jacobi k x0 b A))))
+                          (Zconst t 0))
+                       (rev
+                          (vec_to_list_float n.+1
+                             (diag_vector_mult 
+                                (A1_J A)
+                                (X_m_jacobi k.+1 x0 b A -f
+                                 X_m_jacobi k x0 b A))))).
+              { apply nth_In. rewrite Heqv_l in Hm.
+                rewrite rev_length length_veclist .
+                by rewrite rev_length combine_length !length_veclist Nat.min_id in Hm.
+              } specialize (H3 H4).
               
 
 
