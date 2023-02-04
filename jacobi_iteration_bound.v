@@ -885,7 +885,57 @@ Proof.
 intros ? ? ? ? ? ? ? ? ? ? Hxneq0 HinvA HfinvA HfA.
 eapply Rle_trans.
 + apply norm2_vec_inf_norm_rel.
-  - admit.
+  - intros.
+    pose proof (@residual_is_finite  t n A x0 b k).
+    unfold norm2 in H1. 
+    pose proof (@dotprod_finite_implies t).
+    specialize (H2 (rev
+               (vec_to_list_float n.+1
+                  (residual_math A x0 b k))) H1).
+    pose proof (@dotprod_finite_implies t).
+    specialize (H3 (rev
+                     (vec_to_list_float n.+1
+                        (residual_math A x0 b k))) H1).
+    remember (combine
+                (vec_to_list_float n.+1 (resid k))
+                (vec_to_list_float n.+1 (resid k))) as r_l.
+    apply in_rev  in H0.
+    assert (exists m, (m < length (rev r_l))%coq_nat /\
+                      nth m (rev r_l) (Zconst t 0, Zconst t 0) = xy).
+    { by apply In_nth. } destruct H4 as [m [Hm Hnth]].
+    specialize (H3 (nth m (rev
+                            (vec_to_list_float n.+1
+                               (residual_math A x0 b k))) (Zconst t 0))).
+    assert (In
+             (nth m
+                (rev
+                   (vec_to_list_float n.+1
+                      (residual_math A x0 b k)))
+                (Zconst t 0))
+             (rev
+                (vec_to_list_float n.+1
+                   (residual_math A x0 b k)))).
+    { apply nth_In.
+      rewrite Heqr_l in Hm.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+admit.
   - apply residual_is_finite.
   (** finiteness of residual and elements in the list **)
 + apply Rplus_le_compat_r. 
