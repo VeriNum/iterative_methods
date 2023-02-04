@@ -938,7 +938,25 @@ repeat apply Rdiv_lt_right.
       { rewrite Rplus_comm. apply Rplus_eq_compat_l.
         rewrite Rmult_comm. rewrite [in RHS]Rmult_assoc.
         apply Rmult_eq_compat_l. rewrite Rmult_comm.
-        apply Rmult_eq_compat_l. nra.
+        apply Rmult_eq_compat_l. 
+        assert ((2 * d_mag * / (1 - rho) * (1 + default_rel t) *
+                   vec_inf_norm (FT2R_mat (A1_J A)) *
+                   (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re = 
+                (g1 t n.+1 (n.+1 - 1)%coq_nat +
+                   2 * (1 + g t n.+1) * (1 + default_rel t) *
+                   vec_inf_norm (FT2R_mat (A1_J A)) * d_mag *
+                   / (1 - rho))%Re).
+        { rewrite Rplus_comm. apply Rplus_eq_compat_l.
+          rewrite ![in RHS]Rmult_assoc. 
+          rewrite ![in LHS]Rmult_assoc.
+          apply Rmult_eq_compat_l. rewrite [in RHS]Rmult_comm.
+          rewrite -![in RHS]Rmult_assoc. 
+          rewrite -![in LHS]Rmult_assoc.
+          apply Rmult_eq_compat_r. rewrite Rmult_comm. nra.
+        } by rewrite H0.
+      } rewrite H0. apply H.
+Admitted.
+
 
 
 
