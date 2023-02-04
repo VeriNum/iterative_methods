@@ -933,6 +933,15 @@ eapply Rle_trans.
               specialize (H4 (rev
                               (vec_to_list_float n.+1
                                  (residual_math A x0 b k))) H2).
+              remember (combine
+                          (vec_to_list_float n.+1 (A1_J A))
+                          (vec_to_list_float n.+1
+                             (X_m_jacobi k.+1 x0 b A -f
+                              X_m_jacobi k x0 b A))) as r_l.
+              apply in_rev  in H1.
+              assert (exists m, (m < length (rev r_l))%coq_nat /\
+                                nth m (rev r_l) (Zconst t 0, Zconst t 0) = xy).
+              { by apply In_nth. } destruct H5 as [m [Hm Hnth]].
               
               
 
