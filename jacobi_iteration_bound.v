@@ -567,6 +567,7 @@ is_finite (fprec t) (femax t) (dotprod v v) = true ->
            is_finite (fprec t) (femax t) x = true).
 Admitted.
   
+Require Import float_acc_lems.
 
 Lemma vec_succ_err {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) :
@@ -578,10 +579,13 @@ Lemma vec_succ_err {t: type} {n:nat}
   let x:= mulmx (A_real^-1) b_real in
   let e_0 := f_error 0 b x0 x A in
   A_real \in unitmx ->
+  (forall i, is_finite (fprec t) (femax t)
+              (BDIV t (Zconst t 1) (A i i)) = true) ->
+  (forall i, is_finite (fprec t) (femax t) (A i i) = true) ->
   (vec_inf_norm (FT2R_mat ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A))) <=
     (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))%Re.
 Proof.
-intros ? ? ? ? ? ? ? HAinv.
+intros ? ? ? ? ? ? ? HAinv HfinvA HfA.
 pose proof (@vec_float_sub_1 _ t n).
 specialize (H (X_m_jacobi k.+1 x0 b A) (X_m_jacobi k x0 b A)).
 assert (forall xy : ftype t * ftype t,
@@ -725,13 +729,8 @@ apply Rle_trans with
           assert (FT2R_mat A *m A_real^-1 = 1).
           { fold A_real. by rewrite mulmxV . }
           rewrite H2. by rewrite mul1mx /b_real.
-        +
-
-
-
-
-
- } rewrite H2.
+        + intros. unfold A_real. rewrite !mxE. by apply BDIV_FT2R_sep_zero.
+      }  rewrite H2.
       assert (vec_inf_norm
                  (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
                   x_fix x b_real A_real) = f_error k.+1 b x0 x A).
@@ -742,13 +741,14 @@ apply Rle_trans with
       { by rewrite /f_error. } rewrite H3 H4.
       pose proof (@jacobi_forward_error_bound _ t n A b).
       assert (forall i : 'I_n.+1,
-                is_finite (fprec t) (femax t) (A i i) = true) by admit.
+                is_finite (fprec t) (femax t) (A i i) = true) by (intros; apply HfA).
       assert (x != 0 ) by admit.
       assert ((rho < 1)%Re) by admit.
-      assert (FT2R_mat A \in unitmx) by admit.  
+      assert (FT2R_mat A \in unitmx). 
+      { by rewrite /A_real in HAinv. }
       assert (forall i : 'I_n.+1,
               is_finite (fprec t) (femax t)
-                (BDIV t (Zconst t 1) (A i i)) = true) by admit.
+                (BDIV t (Zconst t 1) (A i i)) = true) by (intros; apply HfinvA).
      assert (forall (k : nat) (i : 'I_n.+1),
                 is_finite (fprec t) (femax t)
                   (X_m_jacobi k x0 b A i ord0) = true) by admit. 
