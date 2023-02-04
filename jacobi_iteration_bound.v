@@ -921,27 +921,25 @@ eapply Rle_trans.
     } specialize (H3 H4). 
     rewrite Heqr_l in Hnth.
     rewrite -combine_rev in Hnth; last by [].
-    rewrite combine_nth in Hnth.
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-admit.
+    rewrite combine_nth in Hnth ; last by [].
+    assert (xy.1 = nth m
+                      (rev
+                         (vec_to_list_float n.+1
+                            (resid k))) (Zconst t 0)).
+    { destruct xy. simpl in *. 
+          apply pair_equal_spec in Hnth. 
+          destruct Hnth as [Hnth1 Hnth2].
+          by rewrite Hnth1.
+    }
+    assert (xy.2 = nth m
+                      (rev
+                         (vec_to_list_float n.+1
+                            (resid k))) (Zconst t 0)).
+    { destruct xy. simpl in *. 
+          apply pair_equal_spec in Hnth. 
+          destruct Hnth as [Hnth1 Hnth2].
+          by rewrite Hnth2.
+    } rewrite H5 H6. unfold resid. split; by apply H3.
   - apply residual_is_finite.
   (** finiteness of residual and elements in the list **)
 + apply Rplus_le_compat_r. 
