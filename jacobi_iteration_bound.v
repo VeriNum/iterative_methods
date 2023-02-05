@@ -1423,11 +1423,8 @@ split.
                    assert (WITH_NANS.f_error 0 b x0 x A = 
                             f_error 0 b x0 x A ).
                    { unfold WITH_NANS.f_error, f_error. reflexivity. }
-                   rewrite H2. apply H1.
-
-
-
-                   admit. (** (e_0 - d_mag / (1 - rho) > 0)%Re **)
+                   rewrite H2. simpl in H1. specialize (H1 A b). 
+                   rewrite /x0 Heqx. apply H1.
                +++ apply Rcomplements.Rlt_div_r;
                    first by (apply Rplus_lt_le_0_compat; try nra; try rewrite Heqrho; by apply rho_ge_0).
                    assert ((rho ^ (k_min A b acc).+1)%Re = (/ / rho ^ (k_min A b acc).+1)%Re).
@@ -1438,7 +1435,14 @@ split.
                    end. 
                    --- apply Rinv_lt_contravar.
                        *** repeat apply Rmult_lt_0_compat.
-                           ++++ admit.
+                           ++++ apply Rlt_gt.
+                                 pose proof (@e_0_dmag_rel t n).
+                                 rewrite Heqe_0 /x0 Heqd_mag Heqrho.
+                                 assert (WITH_NANS.f_error 0 b x0 x A = 
+                                          f_error 0 b x0 x A ).
+                                 { unfold WITH_NANS.f_error, f_error. reflexivity. }
+                                 rewrite H3. simpl in H2. specialize (H2 A b). 
+                                 rewrite /x0 Heqx. apply H2.
                            ++++ nra.
                            ++++ apply Rinv_0_lt_compat.
                                 rewrite HeqGamma. unfold acc2. 
@@ -1476,7 +1480,14 @@ split.
                                apply Hrho. apply Hrho.
                             + apply Rinv_0_lt_compat. apply Hrho.
                             + repeat apply Rmult_lt_0_compat.
-                              - admit.
+                              - apply Rlt_gt.
+                                 pose proof (@e_0_dmag_rel t n).
+                                 rewrite Heqe_0 /x0 Heqd_mag Heqrho.
+                                 assert (WITH_NANS.f_error 0 b x0 x A = 
+                                          f_error 0 b x0 x A ).
+                                 { unfold WITH_NANS.f_error, f_error. reflexivity. }
+                                 rewrite H3. simpl in H2. specialize (H2 A b). 
+                                 rewrite /x0 Heqx. apply H2.
                               - nra.
                               - apply Rinv_0_lt_compat.
                                 rewrite HeqGamma. unfold acc2. 
@@ -1508,7 +1519,16 @@ split.
                        match goal with |-context[( _ = ?a / ?b / ?c)%Re]=>
                         replace (a / b / c)%Re with (a * (/b * /c))%Re by nra
                        end. rewrite -Rinv_mult_distr.
-                       nra. admit.
+                       nra. 
+                       pose proof (@e_0_dmag_rel t n).
+                       rewrite Heqe_0 /x0 Heqd_mag Heqrho.
+                       assert (WITH_NANS.f_error 0 b x0 x A = 
+                                f_error 0 b x0 x A ).
+                       { unfold WITH_NANS.f_error, f_error. reflexivity. }
+                       rewrite H3. simpl in H2. specialize (H2 A b). 
+                       rewrite /x0 Heqx.
+                       assert (forall x:R, (0 < x)%Re -> x <> 0%Re).
+                       { intros. nra. } apply H4. apply H2.
                        assert (forall x:R, (0 <= x)%Re -> (1 + x)%Re <> 0%Re).
                        { intros. nra. } apply H2. rewrite Heqrho. by apply rho_ge_0.
           -- apply Rplus_le_le_0_compat; last by apply g1_pos.
@@ -1519,7 +1539,14 @@ split.
                     --- rewrite Heqrho. by apply rho_ge_0.
                     --- apply pow_le. rewrite Heqrho. by apply rho_ge_0.
                     --- apply Rplus_le_le_0_compat. nra. rewrite Heqrho. by apply rho_ge_0.
-                    --- admit. (*** (0 <= e_0 - d_mag / (1 - rho))%Re **)
+                    --- apply Rlt_le.
+                         pose proof (@e_0_dmag_rel t n).
+                         rewrite Heqe_0 /x0 Heqd_mag Heqrho.
+                         assert (WITH_NANS.f_error 0 b x0 x A = 
+                                  f_error 0 b x0 x A ).
+                         { unfold WITH_NANS.f_error, f_error. reflexivity. }
+                         rewrite H2. simpl in H1. specialize (H1 A b). 
+                         rewrite /x0 Heqx. apply H1.
                 +++ repeat apply Rmult_le_pos ; try nra. rewrite Heqd_mag. apply d_mag_ge_0.
                     apply Rlt_le. apply Rinv_0_lt_compat. 
                     apply Rlt_Rminus. apply Hrho.
