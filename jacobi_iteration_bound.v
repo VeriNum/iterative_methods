@@ -1256,7 +1256,7 @@ eapply Rle_trans.
                +++ repeat apply Rmult_le_pos.
                    --- apply pow_le. by apply rho_ge_0.
                    --- apply Rplus_le_le_0_compat; try nra; try by apply rho_ge_0.
-                   --- admit.
+                   --- apply Rlt_le, e_0_dmag_rel.
                +++ repeat apply Rmult_le_pos.
                    --- nra.
                    --- apply d_mag_ge_0.
@@ -1264,7 +1264,7 @@ eapply Rle_trans.
             ** apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
             ** apply Rplus_le_le_0_compat. nra. apply g_pos.
          -- apply g1_pos.
-Admitted.
+Qed.
 
  Search "Zceil".
 Print IZR.
@@ -1417,7 +1417,17 @@ split.
                first  by (apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0).
                apply Rcomplements.Rlt_minus_r.
                apply Rcomplements.Rlt_div_r.
-               +++ admit. (** (e_0 - d_mag / (1 - rho) > 0)%Re **)
+               +++ apply Rlt_gt.
+                   pose proof (@e_0_dmag_rel t n).
+                   rewrite Heqe_0 /x0 Heqd_mag Heqrho.
+                   assert (WITH_NANS.f_error 0 b x0 x A = 
+                            f_error 0 b x0 x A ).
+                   { unfold WITH_NANS.f_error, f_error. reflexivity. }
+                   rewrite H2. apply H1.
+
+
+
+                   admit. (** (e_0 - d_mag / (1 - rho) > 0)%Re **)
                +++ apply Rcomplements.Rlt_div_r;
                    first by (apply Rplus_lt_le_0_compat; try nra; try rewrite Heqrho; by apply rho_ge_0).
                    assert ((rho ^ (k_min A b acc).+1)%Re = (/ / rho ^ (k_min A b acc).+1)%Re).
