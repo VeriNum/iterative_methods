@@ -969,6 +969,19 @@ repeat apply Rdiv_lt_right.
 Qed.
 
 
+
+Lemma e_0_dmag_rel {t: type} {n:nat} 
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in
+  let x0:=  \col_(j < n.+1) (Zconst t 0) in
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= mulmx (A_real^-1) b_real in
+  let e_0 := f_error 0 b x0 x A in
+  (0 < e_0 - d_mag / (1 - rho))%Re.
+Admitted.
+
 (*** Bound for the residual ***)
 Lemma residual_bound {t: type} {n:nat} 
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) :
@@ -1601,5 +1614,4 @@ Qed.
 
 
 End WITH_NANS.
-
 
