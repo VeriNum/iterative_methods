@@ -1280,9 +1280,16 @@ destruct x.
   contradict H. lia.
 Qed.
 
-
-Lemma Zceil_rlog_gt_0 (x y :R) :
-  (0 < Zceil (Rlog x y))%Z.
+Search "Zceil".
+Lemma Zceil_rlog_ge_0 (x y :R) :
+  (0 <= Zceil (Rlog x y))%Z.
+Proof.
+assert (Zceil 0 = 0).
+{ by rewrite Zceil_IZR. }
+rewrite -H.
+Search "Zceil".
+apply Zceil_le. unfold Rlog.
+apply Rmult_le_pos; admit.
 Admitted.
 
 
