@@ -1485,10 +1485,30 @@ split.
                                apply Hrho. 
                                apply Hrho.
                           ++++ apply Rle_lt_trans with (INR (k_min A b acc)).
-                               ---- unfold k_min. rewrite Zceil_INR.
+                               ---- unfold k_min.
+                                    assert (WITH_NANS.f_error 0 b x0 x A = 
+                                          f_error 0 b x0 x A ).
+                                     { unfold WITH_NANS.f_error, f_error. reflexivity. }
+                                     rewrite /x0 Heqx in H4.  rewrite  Heqrho Heqd_mag Heqe_0 HeqGamma /x0 Heqx !H4 /acc2.
+                                     assert ((1 / rho_def A b)%Re = (/ rho_def A b)%Re). { nra. }
+                                     rewrite H5.
+                                    match goal with |-context[(?a <= INR (Z.to_nat (Zceil ?a )))%Re]=>
+                                      remember a as p
+                                    end.
+
+
+
+
+  (** be careful here **)
+
+
+rewrite Zceil_INR.
                                     rewrite Heqrho Heqe_0 /x0 Heqx Heqd_mag HeqGamma. 
                                     assert ((/ rho_def A b)%Re = (1 / rho_def A b)%Re). { nra. }
-                                    rewrite H4. apply Zceil_ub.
+                                    rewrite H4. Search 
+
+
+apply Zceil_ub.
 
 
  apply Zceil_rlog_gt_0.
