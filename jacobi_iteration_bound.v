@@ -1262,9 +1262,6 @@ eapply Rle_trans.
          -- apply g1_pos.
 Qed.
 
- Search "Zceil".
-Print IZR.
-Search"Zlt".
 
 Local Open Scope Z_scope.
 Lemma Zceil_INR: forall x:Z,
@@ -1280,17 +1277,23 @@ destruct x.
   contradict H. lia.
 Qed.
 
-Search "Zceil".
-Lemma Zceil_rlog_ge_0 (x y :R) :
-  (0 <= Zceil (Rlog x y))%Z.
+
+Lemma IZR_ceil_rel (p : R):
+  (p <= INR (Z.to_nat (Zceil p)))%Re.
 Proof.
-assert (Zceil 0 = 0).
-{ by rewrite Zceil_IZR. }
-rewrite -H.
-Search "Zceil".
-apply Zceil_le. unfold Rlog.
-apply Rmult_le_pos; admit.
-Admitted.
+assert ((p < 0)%Re \/ (0 <= p)%Re).
+{ nra. } destruct H.
++ apply Rle_trans with 0%Re.
+  nra. 
+  apply pos_INR.
++ rewrite Zceil_INR.
+  apply Zceil_ub.
+  assert (Zceil 0 = 0).
+  { by rewrite Zceil_IZR. }
+  rewrite -H0.
+  by apply Zceil_le.
+Qed.
+ 
 
 
 Lemma jacobi_iteration_bound {t: type} {n : nat} :
@@ -1494,24 +1497,7 @@ split.
                                      rewrite H5.
                                     match goal with |-context[(?a <= INR (Z.to_nat (Zceil ?a )))%Re]=>
                                       remember a as p
-                                    end.
-
-
-
-
-  (** be careful here **)
-
-
-rewrite Zceil_INR.
-                                    rewrite Heqrho Heqe_0 /x0 Heqx Heqd_mag HeqGamma. 
-                                    assert ((/ rho_def A b)%Re = (1 / rho_def A b)%Re). { nra. }
-                                    rewrite H4. Search 
-
-
-apply Zceil_ub.
-
-
- apply Zceil_rlog_gt_0.
+                                    end. apply IZR_ceil_rel .
                                ---- apply lt_INR. lia.
                    --- rewrite Rinv_div. 
                        match goal with |-context[( _ = ?a / ?b / ?c)%Re]=>
