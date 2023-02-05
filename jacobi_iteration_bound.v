@@ -1284,38 +1284,10 @@ destruct x.
   contradict H. lia.
 Qed.
 
-(** Lemma in terms of mathcomp **)
-Lemma zceil_inj: forall x:R,
-  (0 < Zceil x)%Z ->
-  INR (Z.to_nat (Zceil x)) = x.
-Proof.
-intros.
-rewrite Zceil_INR; last by [].
-Search Zceil.
+
+Lemma Zceil_rlog_gt_0 (x y :R) :
+  (0 < Zceil (Rlog x y))%Z.
 Admitted.
-
-Search "Zceil".
-Locate Zceil_IZR.
-Close Scope Z_scope.
-
-(*
-Lemma zceil_gt_0: forall x:R,
-  (0 < x)%Re ->
-  (0 < Zceil x).
-Proof.
-intros. unfold Zceil.
-Search (0 < - _)%Z.
-apply Z.opp_pos_neg.
-pose proof Zceil_le.
-specialize (H0 0%Re x).
-assert (x = 0 
-
-
-
-Admitted.
-*)
-
-
 
 
 Lemma jacobi_iteration_bound {t: type} {n : nat} :
@@ -1513,7 +1485,7 @@ split.
                                ---- unfold k_min. rewrite Zceil_INR.
                                     rewrite Heqrho Heqe_0 /x0 Heqx Heqd_mag HeqGamma. 
                                     assert ((/ rho_def A b)%Re = (1 / rho_def A b)%Re). { nra. }
-                                    rewrite H4. apply Zceil_ub. admit.
+                                    rewrite H4. apply Zceil_ub. apply Zceil_rlog_gt_0.
                                ---- apply lt_INR. lia.
                    --- rewrite Rinv_div. 
                        match goal with |-context[( _ = ?a / ?b / ?c)%Re]=>
@@ -1555,7 +1527,7 @@ split.
           -- apply sqrt_pos.
     * apply residual_is_finite.
     * by unfold acc2. 
-Admitted.
+Qed.
 
 
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
