@@ -235,10 +235,6 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
   (forall i : 'I_n.+1,
     Binary.is_finite (fprec t) (femax t)
       (BDIV t (Zconst t 1) (A i i)) = true) /\
-  (** Finiteness of solution vector at each iteration **)
-  (*(forall k:nat, 
-      forall i, Binary.is_finite _ _ ((X_m_jacobi k x0 b A) i ord0) = true) /\
-  *)
 (** Constraint on Gamma **)
   (FT2R (BMULT t accuracy accuracy) >
      g1 t n.+1 (n.+1 - 1)%coq_nat +
@@ -1272,7 +1268,7 @@ Search"Zlt".
 
 Local Open Scope Z_scope.
 Lemma Zceil_INR: forall x:Z,
-  (0 < x)%Z ->
+  (0 <= x)%Z ->
   INR (Z.to_nat x) = IZR x.
 Proof.
 intros.
@@ -1485,7 +1481,10 @@ split.
                                ---- unfold k_min. rewrite Zceil_INR.
                                     rewrite Heqrho Heqe_0 /x0 Heqx Heqd_mag HeqGamma. 
                                     assert ((/ rho_def A b)%Re = (1 / rho_def A b)%Re). { nra. }
-                                    rewrite H4. apply Zceil_ub. apply Zceil_rlog_gt_0.
+                                    rewrite H4. apply Zceil_ub.
+
+
+ apply Zceil_rlog_gt_0.
                                ---- apply lt_INR. lia.
                    --- rewrite Rinv_div. 
                        match goal with |-context[( _ = ?a / ?b / ?c)%Re]=>
