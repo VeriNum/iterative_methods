@@ -343,6 +343,19 @@ Admitted.
 
 (** finiteness of dot product **)
 Lemma dotprod_finite {t: type} (v : vector t):
+(forall xy : ftype t * ftype t,
+In xy (combine (rev v) (rev v)) ->
+is_finite (fprec t) (femax t) xy.1 = true /\
+is_finite (fprec t) (femax t) xy.2 = true /\
+(let n := length (rev v) in
+ (Rabs (FT2R xy.1) <=
+  sqrt
+    (F' t / 2 /
+     (INR n * (1 + default_rel t) ^ n)))%Re /\
+ (Rabs (FT2R xy.2) <=
+  sqrt
+    (F' t / 2 /
+     (INR n * (1 + default_rel t) ^ n)))%Re)) ->
 is_finite (fprec t) (femax t)
   (dotprod v v) = true.
 Proof.
@@ -351,29 +364,13 @@ assert (length (rev v) = length (rev v)).
 { lia. } specialize (H H0).
 specialize (H (dotprod v v)).
 apply H. 
-+ pose proof (@fma_dot_prod_rel_fold_right _ t).
-  specialize (H1 v v).
-  rewrite combine_rev; last by [].
-  assert (fma_dotprod t v v = dotprod v v).
-  { by unfold fma_dotprod, dotprod. } rewrite -H2. apply H1.
-+
+pose proof (@fma_dot_prod_rel_fold_right _ t).
+specialize (H1 v v).
+rewrite combine_rev; last by [].
+assert (fma_dotprod t v v = dotprod v v).
+{ by unfold fma_dotprod, dotprod. } rewrite -H2. apply H1.
+Qed.
 
-
-
-Admitted.
-
-
-
-(*
-Lemma residual_is_finite {t: type} :
- forall (A: matrix t) (b: vector t),
-  let x0 := (repeat  (Zconst t 0) (length b)) in
-  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
-  forall k,
-  is_finite (fprec t) (femax t)
-  (norm2 (resid (jacobi_n A b x0 k))) = true.
-Admitted.
-*)
 
 
 Notation "A +f B" := (addmx_float A B) (at level 80).
