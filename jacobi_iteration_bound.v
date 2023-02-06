@@ -578,7 +578,16 @@ induction v.
 + by simpl in H0.
 + assert (dotprod (a :: v) (a :: v) = 
            @BFMA _ t a a (dotprod v v)).
-  {
+  { rewrite [in LHS]/dotprod.
+    assert (combine (a :: v) (a :: v)  = 
+            (a,a) :: combine v v).
+    { by simpl. } rewrite H1.
+    simpl. admit.
+  } rewrite H1 in H.
+  apply bfma_overflow_implies in H.
+  destruct H as [Ha1 [Ha2 Hd]].
+  destruct H0.
+  
   
 
 
