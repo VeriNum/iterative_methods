@@ -607,8 +607,13 @@ induction v.
     assert (combine (a :: v) (a :: v)  = 
             (a,a) :: combine v v).
     { by simpl. } rewrite H1.
-    rewrite <- fold_left_rev_right.
-    
+    rewrite <- fold_left_rev_right. simpl.
+    rewrite fold_right_app . simpl. cbv.
+
+
+simpl.
+    unfold fold_right.
+    destruct l.
 
     repeat simpl.
 
