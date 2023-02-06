@@ -886,9 +886,7 @@ Qed.
 
 
 
-
-
-
+(*
 Lemma vec_succ_err {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) :
   let rho := rho_def A b in 
@@ -1173,7 +1171,7 @@ apply Rle_trans with
         { nra. } rewrite H14. clear H14. rewrite Rinv_r; last by nra.
         rewrite Rmult_1_r. nra.
 Qed.
-
+*)
 
 Require Import float_acc_lems lemmas.
 
@@ -1325,11 +1323,11 @@ eapply Rle_trans.
     pose proof (@residual_is_finite  t n A x0 b k).
     unfold norm2 in H1. 
     pose proof (@dotprod_finite_implies t).
-    specialize (H2 (rev
+    specialize (H2 (
                (vec_to_list_float n.+1
                   (residual_math A x0 b k))) H1).
     pose proof (@dotprod_finite_implies t).
-    specialize (H3 (rev
+    specialize (H3 (
                      (vec_to_list_float n.+1
                         (residual_math A x0 b k))) H1).
     remember (combine
@@ -1348,12 +1346,13 @@ eapply Rle_trans.
                    (vec_to_list_float n.+1
                       (residual_math A x0 b k)))
                 (Zconst t 0))
-             (rev
+             (
                 (vec_to_list_float n.+1
                    (residual_math A x0 b k)))).
-    { apply nth_In.
-      rewrite Heqr_l rev_length combine_length Nat.min_id /resid in Hm.
-      by rewrite rev_length.
+    { rewrite rev_nth. apply nth_In. rewrite Heqr_l in Hm.
+      rewrite length_veclist . lia. rewrite Heqr_l in Hm.
+      rewrite rev_length combine_length !length_veclist Nat.min_id in Hm.
+      by rewrite !length_veclist.
     } specialize (H3 H4). 
     rewrite Heqr_l in Hnth.
     rewrite -combine_rev in Hnth; last by [].
@@ -1416,11 +1415,11 @@ eapply Rle_trans.
               pose proof (@residual_is_finite  t n A x0 b k).
               unfold norm2 in H2.
               pose proof (@dotprod_finite_implies t).
-              specialize (H3 (rev
+              specialize (H3 (
                          (vec_to_list_float n.+1
                             (residual_math A x0 b k))) H2).
               pose proof (@dotprod_finite_implies t).
-              specialize (H4 (rev
+              specialize (H4 (
                               (vec_to_list_float n.+1
                                  (residual_math A x0 b k))) H2).
               remember (combine
@@ -1448,15 +1447,16 @@ eapply Rle_trans.
                                    (X_m_jacobi k.+1 x0 b A -f
                                     X_m_jacobi k x0 b A))))
                           (Zconst t 0))
-                       (rev
+                       (
                           (vec_to_list_float n.+1
                              (diag_vector_mult 
                                 (A1_J A)
                                 (X_m_jacobi k.+1 x0 b A -f
                                  X_m_jacobi k x0 b A))))).
-              { apply nth_In. rewrite Heqr_l in Hm.
-                rewrite rev_length length_veclist .
-                by rewrite rev_length combine_length !length_veclist Nat.min_id in Hm.
+              { rewrite rev_nth. apply nth_In. rewrite Heqr_l in Hm.
+                rewrite length_veclist . lia. rewrite Heqr_l in Hm.
+                rewrite rev_length combine_length !length_veclist Nat.min_id in Hm.
+                by rewrite !length_veclist.
               } specialize (H4 H5).
               rewrite rev_nth in H4.
               rewrite length_veclist in H4.
@@ -1575,9 +1575,7 @@ eapply Rle_trans.
          -- apply g1_pos.
 Qed.
 
-
-
-
+(*
 
 (*** Bound for the residual ***)
 Lemma residual_bound {t: type} {n:nat} 
@@ -1863,7 +1861,7 @@ eapply Rle_trans.
          -- apply g1_pos.
 Qed.
 
-
+*)
 Local Open Scope Z_scope.
 Lemma Zceil_INR: forall x:Z,
   (0 <= x)%Z ->
