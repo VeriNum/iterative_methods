@@ -1,7 +1,7 @@
 Require Import vcfloat.VCFloat.
 From mathcomp Require Import all_ssreflect ssralg  ssrnat all_algebra seq matrix .
 From mathcomp.analysis Require Import Rstruct.
-
+Require Import fma_is_finite dotprod_model.
 Require Import floatlib jacob_list_fun_model.
 Require Import fma_real_func_model fma_floating_point_model.
 Require Import inf_norm_properties common.
@@ -9,6 +9,7 @@ Require Import norm_compat.
 
 Require Import Coq.Lists.List. Import ListNotations.
 Set Bullet Behavior "Strict Subproofs".
+
 Require Import fma_floating_point_model.
 
 Section WITH_NANS.
@@ -339,22 +340,23 @@ repeat split.
 Admitted.
 *)
 
-Require Import fma_is_finite dotprod_model.
+
 (** finiteness of dot product **)
 Lemma dotprod_finite {t: type} (v : vector t):
 is_finite (fprec t) (femax t)
-  (dotprod t v v) = true.
+  (dotprod v v) = true.
 Proof.
 pose proof (@fma_is_finite _ t (rev v) (rev v)).
 assert (length (rev v) = length (rev v)).
 { lia. } specialize (H H0).
-specialize (H (dotprod t v v)).
+specialize (H (dotprod v v)).
 apply H. 
 + pose proof (@fma_dot_prod_rel_fold_right _ t).
   specialize (H1 v v).
   rewrite combine_rev; last by [].
-  assert (fma_dotprod t v v = dotprod t v v).
-  { unfold fma_dotprod, dotprod.
+  assert (fma_dotprod t v v = dotprod v v).
+  { by unfold fma_dotprod, dotprod. } rewrite -H2. apply H1.
++
 
 
 
