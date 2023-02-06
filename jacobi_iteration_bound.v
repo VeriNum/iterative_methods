@@ -357,6 +357,36 @@ Admitted.
 
 
 Lemma norm2_ge_0 {t: type} (v : vector t):
+  (0 <= FT2R (norm2 (rev v)))%Re.
+Proof.
+unfold norm2.
+induction v.
++ simpl. nra.
++ unfold dotprod.
+  assert (combine (rev (a :: v)) (rev (a :: v)) = 
+           combine (rev v) (rev v) ++ [(a, a)]).
+  { rewrite combine_rev; last by [].
+    simpl. rewrite combine_rev; last by [].
+    by [].
+  } rewrite H.
+  rewrite <- fold_left_rev_right.
+  rewrite rev_unit. simpl. unfold dotprod in IHv.
+  rewrite fold_left_rev_right.
+  
+
+
+
+  assert (combine (a :: v) (a :: v) = (a, a) :: combine v v).
+  { unfold combine;auto. } rewrite H.
+  simpl. unfold dotprod in IHv.
+
+
+
+
+
+
+
+Lemma norm2_ge_0 {t: type} (v : vector t):
   (0 <= FT2R (norm2 v))%Re.
 Proof.
 unfold norm2.
