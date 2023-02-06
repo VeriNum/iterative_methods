@@ -567,67 +567,32 @@ intros. apply matrixP. unfold eqrel.
 intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
 Qed.
 
-
-(**
-intros.
-rewrite ! fold_symmetric by (intros; lra).
-induction al; simpl; intros; lra.
-**)
-
-(*
-Lemma fold_left_BFMA_simpl {t: type} (v : vector t) (a: ftype t):
-  fold_left
-  (fun (s : ftype t)
-     (x12 : ftype t * ftype t) =>
-   BFMA x12.1 x12.2 s) (combine v v)
-  (BFMA a a (Zconst t 0)) =
-  BFMA a a (dotprod v v).
-Proof.
-elim: v a => [ |a0 v IHv] a.
-+ simpl. by unfold dotprod; simpl.
-+ simpl. unfold
-
-induction v.
-+ simpl. by unfold dotprod; simpl.
-+ simpl.
-*)
-
-
 Lemma dotprod_finite_implies {t: type} (v : vector t):
-is_finite (fprec t) (femax t) (dotprod v v) = true ->
+is_finite (fprec t) (femax t) (dotprod (rev v) (rev v)) = true ->
 (forall x, In x v -> 
            is_finite (fprec t) (femax t) x = true).
 Proof.
 intros.
 induction v.
 + by simpl in H0.
-+ assert (dotprod (a :: v) (a :: v) = 
-           @BFMA _ t a a (dotprod v v)).
++ assert (dotprod (rev (a :: v)) (rev (a :: v)) = 
+           @BFMA _ t a a (dotprod (rev v) (rev v))).
   { rewrite [in LHS]/dotprod.
-    assert (combine (a :: v) (a :: v)  = 
-            (a,a) :: combine v v).
-    { by simpl. } rewrite H1.
-    rewrite <- fold_left_rev_right. simpl.
-    rewrite fold_right_app . simpl. cbv.
-
-
-simpl.
-    unfold fold_right.
-    destruct l.
-
-    repeat simpl.
-
-
-
-
-    simpl. admit.
+    assert (combine (rev (a :: v)) (rev (a :: v))  = 
+            (combine (rev v) (rev v)) ++ [(a,a)]).
+    { rewrite combine_rev . simpl. 
+      by rewrite combine_rev. by [].
+    } rewrite H1. rewrite <- fold_left_rev_right.
+    rewrite rev_unit. simpl. unfold dotprod.
+    rewrite combine_rev. rewrite <- fold_left_rev_right. by [].
+    by [].
   } rewrite H1 in H.
   apply bfma_overflow_implies in H.
   destruct H as [Ha1 [Ha2 Hd]].
   destruct H0.
   - by rewrite -H.
   - by specialize (IHv Hd H).
-Admitted.
+Qed.
   
 Require Import float_acc_lems.
 
