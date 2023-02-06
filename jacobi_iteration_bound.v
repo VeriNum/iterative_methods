@@ -587,12 +587,8 @@ induction v.
   apply bfma_overflow_implies in H.
   destruct H as [Ha1 [Ha2 Hd]].
   destruct H0.
-  
-  
-
-
-
-
+  - by rewrite -H.
+  - by specialize (IHv Hd H).
 Admitted.
   
 Require Import float_acc_lems.
