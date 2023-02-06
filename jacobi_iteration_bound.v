@@ -355,7 +355,7 @@ apply H; admit.
 
 Admitted.
 
-
+(*
 Lemma norm2_ge_0 {t: type} (v : vector t):
   (0 <= FT2R (norm2 (rev v)))%Re.
 Proof.
@@ -384,7 +384,7 @@ induction v.
 
 
 
-
+*)
 
 Lemma norm2_ge_0 {t: type} (v : vector t):
   (0 <= FT2R (norm2 v))%Re.
@@ -1377,6 +1377,33 @@ split.
     * rewrite Rcompare_Lt; first by [].
       change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
       remember (FT2R acc2) as Gamma.
+      assert ((FT2R
+                 (norm2
+                    (rev
+                       (vec_to_list_float n.+1
+                          (resid (k_min A b acc).+1)))) < 0)%Re \/             
+               (0 <= FT2R
+                 (norm2
+                    (rev
+                       (vec_to_list_float n.+1
+                          (resid (k_min A b acc).+1)))))%Re).
+      { nra. }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       assert (FT2R (norm2 (rev (vec_to_list_float n.+1 (resid (k_min A b acc).+1)))) = 
               Rabs (FT2R (norm2 (rev (vec_to_list_float n.+1 (resid (k_min A b acc).+1)))))).
       { rewrite Rabs_right. nra. apply Rle_ge, norm2_ge_0. }
