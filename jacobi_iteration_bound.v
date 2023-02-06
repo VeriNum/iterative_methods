@@ -568,6 +568,31 @@ intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
 Qed.
 
 
+(**
+intros.
+rewrite ! fold_symmetric by (intros; lra).
+induction al; simpl; intros; lra.
+**)
+
+(*
+Lemma fold_left_BFMA_simpl {t: type} (v : vector t) (a: ftype t):
+  fold_left
+  (fun (s : ftype t)
+     (x12 : ftype t * ftype t) =>
+   BFMA x12.1 x12.2 s) (combine v v)
+  (BFMA a a (Zconst t 0)) =
+  BFMA a a (dotprod v v).
+Proof.
+elim: v a => [ |a0 v IHv] a.
++ simpl. by unfold dotprod; simpl.
++ simpl. unfold
+
+induction v.
++ simpl. by unfold dotprod; simpl.
++ simpl.
+*)
+
+
 Lemma dotprod_finite_implies {t: type} (v : vector t):
 is_finite (fprec t) (femax t) (dotprod v v) = true ->
 (forall x, In x v -> 
@@ -582,6 +607,14 @@ induction v.
     assert (combine (a :: v) (a :: v)  = 
             (a,a) :: combine v v).
     { by simpl. } rewrite H1.
+    rewrite <- fold_left_rev_right.
+    
+
+    repeat simpl.
+
+
+
+
     simpl. admit.
   } rewrite H1 in H.
   apply bfma_overflow_implies in H.
