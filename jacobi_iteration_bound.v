@@ -339,17 +339,22 @@ repeat split.
 Admitted.
 *)
 
-Require Import fma_is_finite.
+Require Import fma_is_finite dotprod_model.
 (** finiteness of dot product **)
 Lemma dotprod_finite {t: type} (v : vector t):
 is_finite (fprec t) (femax t)
-  (dotprod v v) = true.
+  (dotprod t v v) = true.
 Proof.
-pose proof (@fma_is_finite _ t v v).
-assert (length v = length v).
+pose proof (@fma_is_finite _ t (rev v) (rev v)).
+assert (length (rev v) = length (rev v)).
 { lia. } specialize (H H0).
-specialize (H (dotprod v v)).
-apply H; admit.
+specialize (H (dotprod t v v)).
+apply H. 
++ pose proof (@fma_dot_prod_rel_fold_right _ t).
+  specialize (H1 v v).
+  rewrite combine_rev; last by [].
+  assert (fma_dotprod t v v = dotprod t v v).
+  { unfold fma_dotprod, dotprod.
 
 
 
