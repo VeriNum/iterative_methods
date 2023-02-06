@@ -271,7 +271,7 @@ Require Import finite_lemmas_additional.
 (*
 Lemma jacobi_iteration_bound_corollaries:
   forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
-   jacobi_preconditions A b acc k ->
+   jacobi_preconditions_math A b acc k ->
    matrix_cols A (matrix_rows A) /\
    Forall (Forall finite) A /\
    Forall finite (invert_diagmatrix (diag_of_matrix A)) /\
@@ -572,6 +572,18 @@ Lemma dotprod_finite_implies {t: type} (v : vector t):
 is_finite (fprec t) (femax t) (dotprod v v) = true ->
 (forall x, In x v -> 
            is_finite (fprec t) (femax t) x = true).
+Proof.
+intros.
+induction v.
++ by simpl in H0.
++ assert (dotprod (a :: v) (a :: v) = 
+           @BFMA _ t a a (dotprod v v)).
+  {
+  
+
+
+
+
 Admitted.
   
 Require Import float_acc_lems.
