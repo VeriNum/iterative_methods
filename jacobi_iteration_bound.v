@@ -421,11 +421,15 @@ Lemma residual_is_finite {t: type} {n:nat}
 Proof.
 unfold norm2. apply dotprod_finite.
 intros.
-split.
+repeat split.
 + admit.
-+ split.
-  - admit.
-  - intros.
++ admit.
++ rewrite !rev_length  length_veclist.
+  rewrite rev_involutive in H.
+  destruct xy.
+  apply in_combine_l in H.
+  assert ((f, f0).1 = f). { auto. } rewrite H0; clear H0.
+  
 
 
 
