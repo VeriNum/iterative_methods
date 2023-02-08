@@ -413,8 +413,10 @@ Qed.
 Require Import float_acc_lems.
 
 
-Lemma BMULT_no_overflow_is_finite {NAN: Nans} (t : type) :
+Lemma BMULT_no_overflow_is_finite {NAN: Nans} (t : type): 
   forall (x y : ftype t) 
+  (Hx : is_finite _ _ x = true)
+  (Hy : is_finite _ _ y = true)
   (Hnov: Bmult_no_overflow t (FT2R x) (FT2R y)),
    Binary.is_finite (fprec t) (femax t) (BMULT t x y) = true.
 Proof.
@@ -424,32 +426,11 @@ pose proof (Binary.Bmult_correct  (fprec t) (femax t)
   H0.
 unfold Bmult_no_overflow in Hnov.
 unfold rounded in Hnov.
-
-
-
-
-
-
-
-
-
-
-
-pose proof Rle_or_lt (bpow Zaux.radix2 (femax t)) 
-  (Rabs (rounded t (FT2R x * FT2R y)))  as Hor;
-  destruct Hor; auto.
-apply Rlt_bool_false in H; red.
-unfold rounded, FT2R  in H.
-pose proof (Binary.Bmult_correct  (fprec t) (femax t)  
-    (fprec_gt_0 t) (fprec_lt_femax t) (mult_nan t) BinarySingleNaN.mode_NE x y) as
-  H0.
-simpl in H0; simpl in H;
-rewrite H in H0.  unfold BMULT, BINOP in HFINb.
-destruct ((Binary.Bmult (fprec t) (femax t) (fprec_gt_0 t) 
-             (fprec_lt_femax t) (mult_nan t) BinarySingleNaN.mode_NE x y));
-simpl;  try discriminate.
+apply Rlt_bool_true in Hnov.
+rewrite Hnov in H0.
+destruct H0 as [H01 [H02 H03]].
+rewrite H02. by apply /andP.
 Qed.
-
 
 
 
