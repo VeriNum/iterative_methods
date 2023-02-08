@@ -459,7 +459,30 @@ apply BMULT_no_overflow_is_finite .
             (Zconst t 0)))%Re ).
   destruct H as [d [e [Hde [Hd [He H]]]]].
   rewrite H.
-  
+  rewrite nth_vec_to_list_float; last by apply ltn_ord.
+  rewrite nth_vec_to_list_float; last by apply ltn_ord.
+  apply Rle_lt_trans with 
+  (Rabs
+   (FT2R (A1_J A (inord i) ord0) *
+    FT2R
+      ((X_m_jacobi k.+1 x0 b A -f
+        X_m_jacobi k x0 b A) 
+         (inord i) ord0)) * 
+    (1 + default_rel t) + default_abs t)%Re.
+  - eapply Rle_trans.
+    * apply Rabs_triang.
+    * apply Rplus_le_compat; last by [].
+      rewrite Rabs_mult. apply Rmult_le_compat; try by apply Rabs_pos.
+      apply Rle_refl. eapply Rle_trans; first by apply Rabs_triang.
+      rewrite Rabs_R1. by apply Rplus_le_compat_l.
+  -
+      
+      
+
+
+
+  eapply Rle_lt_trans.
+  - apply Rle_tar
 
 
 
