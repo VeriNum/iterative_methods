@@ -339,7 +339,20 @@ repeat split.
   apply bmult_overflow_implies in HcG2. by destruct HcG2.
 Admitted.
 *)
+(*
+F' t = 2^e_max ( 1 - 2^-p)
+*)
 
+(**
+
+res_k+1 = A_1 \otimes (x_k+1 \ominus x_k)
+
+x_k+1 = D^-1 \otimes (b \ominus (N \otimes x_k))
+**)
+
+(** TODO: can we remove the additional finites in the 
+    hypothesis and clean up the hypothesis a bit?
+**)
 
 (** finiteness of dot product **)
 Lemma dotprod_finite {t: type} (v : vector t):
@@ -407,6 +420,17 @@ Lemma residual_is_finite {t: type} {n:nat}
           (vec_to_list_float n.+1 (resid k)))) = true.
 Proof.
 unfold norm2. apply dotprod_finite.
+intros.
+split.
++ admit.
++ split.
+  - admit.
+  - intros.
+
+
+
+
+
 Qed.
 
 
