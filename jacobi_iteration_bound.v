@@ -435,6 +435,23 @@ Qed.
 
 Require Import vec_sum_inf_norm_rel.
 
+
+(**
+Rabs
+   (FT2R
+      (X_m_jacobi k.+1 x0 b A 
+         (inord i) ord0) +
+    -
+    FT2R
+      (X_m_jacobi k x0 b A (inord i) ord0))
+**)
+
+
+
+
+
+
+
 Lemma resid_elem_is_finite {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
   let resid := residual_math A x0 b in
@@ -540,12 +557,10 @@ apply BMULT_no_overflow_is_finite .
 
 
 
-
-
-
- admit. 
+admit. 
     * admit.  (** finitenss of x_k+1 **)
     * admit. (** finitenss of x_k **)
+Admitted.
 
 
 
