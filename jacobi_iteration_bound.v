@@ -504,7 +504,36 @@ apply BMULT_no_overflow_is_finite .
       specialize (H0 H3).
       destruct H0 as [d1 [Hd1 H0]].
       rewrite H0.
-      
+      assert (FT2R
+               (BOPP t
+                  (X_m_jacobi k x0 b A 
+                     (inord i) ord0)) = 
+              (- (FT2R (X_m_jacobi k x0 b A 
+                     (inord i) ord0)))%Re).
+      { unfold FT2R. by rewrite B2R_Bopp. } rewrite H4.
+      apply Rle_lt_trans with 
+      ((Rabs (FT2R (A (inord i) (inord i))) *
+       Rabs
+         ((FT2R
+             (X_m_jacobi k.+1 x0 b A 
+                (inord i) ord0) +
+           -
+           FT2R
+             (X_m_jacobi k x0 b A 
+                (inord i) ord0)))) * 
+          (1 + default_rel t) * (1 + default_rel t) +
+          default_abs t)%Re.
+      ++ apply Rplus_le_compat_r.
+         apply Rmult_le_compat_r.
+         -- apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+         -- rewrite Rabs_mult. 
+            rewrite Rmult_assoc. apply Rmult_le_compat_l.
+            apply Rabs_pos.
+            apply Rmult_le_compat_l.
+            apply Rabs_pos.
+            eapply Rle_trans. apply Rabs_triang.
+            rewrite Rabs_R1. nra.
+      ++ 
 
 
 
