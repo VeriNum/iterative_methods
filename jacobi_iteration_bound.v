@@ -442,8 +442,14 @@ repeat split.
   rewrite length_veclist.
   assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat).
   { lia. } rewrite H0.
-  rewrite nth_vec_to_list_float.
-  
+  rewrite nth_vec_to_list_float; 
+  last by (rewrite rev_length length_veclist in Hlenk; apply /ssrnat.ltP).
+  rewrite !mxE.
+  repeat (rewrite nth_vec_to_list_float; last by 
+  (rewrite inordK;
+   rewrite rev_length length_veclist in Hlenk;
+   apply /ssrnat.ltP)).
+  rewrite mxE inord_val.
 
 
 
