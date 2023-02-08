@@ -419,6 +419,7 @@ Lemma BMULT_no_overflow_is_finite {NAN: Nans} (t : type):
   (Hy : is_finite _ _ y = true)
   (Hnov: Bmult_no_overflow t (FT2R x) (FT2R y)),
    Binary.is_finite (fprec t) (femax t) (BMULT t x y) = true.
+  
 Proof.
 intros.
 pose proof (Binary.Bmult_correct  (fprec t) (femax t)  
@@ -441,10 +442,24 @@ Lemma resid_elem_is_finite {t: type} {n:nat}
 Proof.
 intros.
 rewrite mxE.
-unfold is_finite.
-
-
-
+apply BMULT_no_overflow_is_finite .
++ admit. (** finitness of A1 **)
++ admit. (** finiteness of x_k+1 - x_k **)
++ unfold Bmult_no_overflow.
+  unfold rounded.
+  pose proof (@generic_round_property t (FT2R
+         (nth (n.+1.-1 - i)
+            (vec_to_list_float n.+1
+               (A1_J A)) (Zconst t 0)) *
+       FT2R
+         (nth (n.+1.-1 - i)
+            (vec_to_list_float n.+1
+               (X_m_jacobi k.+1 x0 b A -f
+                X_m_jacobi k x0 b A))
+            (Zconst t 0)))%Re ).
+  destruct H as [d [e [Hde [Hd [He H]]]]].
+  rewrite H.
+  
 
 
 
