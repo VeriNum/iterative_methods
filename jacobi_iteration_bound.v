@@ -433,7 +433,7 @@ destruct H0 as [H01 [H02 H03]].
 rewrite H02. by apply /andP.
 Qed.
 
-
+Require Import vec_sum_inf_norm_rel.
 
 Lemma resid_elem_is_finite {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
@@ -475,15 +475,48 @@ apply BMULT_no_overflow_is_finite .
       rewrite Rabs_mult. apply Rmult_le_compat; try by apply Rabs_pos.
       apply Rle_refl. eapply Rle_trans; first by apply Rabs_triang.
       rewrite Rabs_R1. by apply Rplus_le_compat_l.
-  -
+  - rewrite Rabs_mult.
+    rewrite mxE. rewrite mxE.
+    rewrite Bminus_bplus_opp_equiv.
+    * pose proof (@BPLUS_accurate _ t).
+      specialize (H0 (X_m_jacobi k.+1 x0 b A
+                          (inord i) ord0)).
+      assert (is_finite (fprec t) (femax t)
+               (X_m_jacobi k.+1 x0 b A 
+                  (inord i) ord0) = true) by admit.
+      specialize (H0 H1).
+      specialize (H0 (BOPP t
+                      (X_m_jacobi k x0 b A
+                         (inord i) ord0))).
+      assert (is_finite (fprec t) (femax t)
+               (BOPP t
+                  (X_m_jacobi k x0 b A 
+                     (inord i) ord0)) = true) by admit.
+      specialize (H0 H2).
+      assert (Bplus_no_overflow t
+                 (FT2R
+                    (X_m_jacobi k.+1 x0 b A
+                       (inord i) ord0))
+                 (FT2R
+                    (BOPP t
+                       (X_m_jacobi k x0 b A
+                          (inord i) ord0)))) by admit.
+      specialize (H0 H3).
+      destruct H0 as [d1 [Hd1 H0]].
+      rewrite H0.
       
-      
 
 
 
-  eapply Rle_lt_trans.
-  - apply Rle_tar
 
+
+
+
+
+
+ admit. 
+    * admit.  (** finitenss of x_k+1 **)
+    * admit. (** finitenss of x_k **)
 
 
 
