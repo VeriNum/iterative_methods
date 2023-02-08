@@ -410,6 +410,18 @@ intros.
 by rewrite  /diag_of_matrix nth_map_seq ?/matrix_index ?/matrix_rows_nat.
 Qed.
 
+Require Import float_acc_lems.
+
+
+
+Lemma resid_elem_is_finite {t: type} {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
+  let resid := residual_math A x0 b in
+  (forall i, is_finite _ _ ((resid k) i ord0) = true).
+Proof.
+intros.
+rewrite mxE.
+
 
 Lemma residual_is_finite {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
@@ -430,7 +442,7 @@ repeat split.
   apply in_combine_l in H.
   assert ((f, f0).1 = f). { auto. } rewrite H0; clear H0.
   unfold residual_math in H.
-  apply in_rev in H.
+  apply in_rev in H. 
   pose proof (@In_nth _ (rev
                            (vec_to_list_float n.+1
                               (diag_vector_mult (A1_J A)
@@ -450,7 +462,7 @@ repeat split.
    rewrite rev_length length_veclist in Hlenk;
    apply /ssrnat.ltP)).
   rewrite mxE inord_val.
-
+  
 
 
 
