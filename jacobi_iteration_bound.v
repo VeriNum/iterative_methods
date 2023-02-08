@@ -445,7 +445,25 @@ Rabs
     FT2R
       (X_m_jacobi k x0 b A (inord i) ord0))
 **)
-
+Lemma res_elem_bound {t: type} {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
+  let rho_tilde := 
+  forall i,
+  (Rabs
+   (FT2R
+      (X_m_jacobi k.+1 x0 b A 
+         (inord i) ord0) +
+    -
+    FT2R
+      (X_m_jacobi k x0 b A (inord i) ord0)) <=
+  rho_tilde ^ k * 
+  Rabs
+   (FT2R
+      (X_m_jacobi 1 x0 b A 
+         (inord i) ord0) +
+    -
+    FT2R
+      (X_m_jacobi 0 x0 b A (inord i) ord0)))%Re.
 
 
 
