@@ -429,6 +429,20 @@ repeat split.
   destruct xy.
   apply in_combine_l in H.
   assert ((f, f0).1 = f). { auto. } rewrite H0; clear H0.
+  unfold residual_math in H.
+  apply in_rev in H.
+  pose proof (@In_nth _ (rev
+                           (vec_to_list_float n.+1
+                              (diag_vector_mult (A1_J A)
+                                 (X_m_jacobi k.+1 x0 b A -f
+                                  X_m_jacobi k x0 b A)))) f (Zconst t 0) H).
+  destruct H0 as [m [Hlenk Hmth]].
+  rewrite -Hmth.
+  rewrite rev_nth; last by rewrite rev_length in Hlenk.
+  rewrite length_veclist.
+  assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat).
+  { lia. } rewrite H0.
+  rewrite nth_vec_to_list_float.
   
 
 
