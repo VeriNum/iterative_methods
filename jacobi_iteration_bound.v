@@ -66,6 +66,42 @@ Definition d_mag_def {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
                      matrix_inf_norm (A2_J_real A_real)) *
                     vec_inf_norm (x_fix x b_real A_real))%Re.
 
+
+(** As suggested by David:
+  ||x|| <= ||D^-1 b || / (1 - rho) 
+  [ since ||x || = || (D+ N)^-1 b|| <= ||D^-1 b || / (1 - rho) for rho < 1
+**)
+
+Print A1_diag.
+Definition d_mag_def_alt {t: type} {n:nat} (A: 'M[ftype t]_n.+1) 
+  (b: 'cV[ftype t]_n.+1) :=
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in  
+  let x:= mulmx (A_real^-1) b_real in
+  let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
+  let delta := default_rel t in
+  ((g t n.+1 * (1 + delta) + delta) *
+                    ((vec_inf_norm (A1_diag A_real) *
+                      (1 + delta) + default_abs t) *
+                     vec_inf_norm b_real) +
+                    (1 + g t n.+1) * g1 t n.+1 (n.+1 - 1) *
+                    (1 + delta) *
+                    (vec_inf_norm (A1_diag A_real) *
+                     (1 + delta) + default_abs t) +
+                    g1 t n.+1 (n.+1 - 1) +
+                    (vec_inf_norm (A1_diag A_real) * delta +
+                     default_abs t) * vec_inf_norm b_real +
+                    ((((1 + g t n.+1) * (1 + delta) *
+                       g t n.+1 + delta * (1 + g t n.+1) +
+                       g t n.+1) * (1 + delta) + delta) * R +
+                     (((1 + g t n.+1) * (1 + delta) *
+                       g t n.+1 + delta * (1 + g t n.+1) +
+                       g t n.+1) * default_abs t +
+                      default_abs t) *
+                     matrix_inf_norm (A2_J_real A_real)) *
+                     (vec_inf_norm (A1_diag A_real) * 
+                       vec_inf_norm b_real * (/ (1 - rho_def A b))))%Re.
+
 (** x = A_1^{-1} (b - A_2 x) 
   ||x || = ||A^-1 || ||b||
          \leq (||A|| ||A^-1|| ||b||) / ||A||
@@ -722,9 +758,8 @@ Lemma residual_is_finite {t: type} {n:nat}
        (rev
           (vec_to_list_float n.+1 (resid k)))) = true.
 Proof.
-(*
 unfold norm2. apply dotprod_finite.
-intros.
+Print dotprod_finite.
 repeat split.
 + admit.
 + admit.
@@ -755,6 +790,8 @@ repeat split.
    apply /ssrnat.ltP)).
   rewrite mxE inord_val.
   Print BMULT_accurate'.
+
+  res = A_1 * (x_k+1 - x_k)
 
   ( x *f y = (x *r y) (1 + d) + e )
   
