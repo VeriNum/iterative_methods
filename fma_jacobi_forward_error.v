@@ -495,11 +495,11 @@ pose proof IEEE754_extra.BofZ_exact.
 specialize (H (fprec ty) (femax ty) (Pos2Z.is_pos (fprecp ty))
             (fprec_lt_femax ty) 1%Z).
 assert ((- 2 ^ fprec ty <= 1 <= 2 ^ fprec ty)%Z).
-{ admit. }
+{ apply in_fprec_bound1. }
 specialize (H H0).
 destruct H as [H H1].
 by rewrite H.
-Admitted.
+Qed.
 
 
 (*** Lemma for error bound on the inverse ***)
