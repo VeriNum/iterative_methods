@@ -445,10 +445,13 @@ Rabs
     FT2R
       (X_m_jacobi k x0 b A (inord i) ord0))
 **)
+
+
 Lemma res_elem_bound {t: type} {n:nat}
-  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
-  let rho_tilde := 
-  forall i,
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) i:
+  let rho_tilde := (Rabs (FT2R (A1_J A i ord0)) * 
+                     bigmaxr 0%Re [seq (Rabs (FT2R (A2_J A i j))) | j <- enum 'I_n.+1] *
+                     (1 + g t n.+1) * (1 + default_rel t))%Re in  
   (Rabs
    (FT2R
       (X_m_jacobi k.+1 x0 b A 
@@ -464,6 +467,16 @@ Lemma res_elem_bound {t: type} {n:nat}
     -
     FT2R
       (X_m_jacobi 0 x0 b A (inord i) ord0)))%Re.
+Proof.
+intros.
+induction k.
++ simpl. nra.
++ simpl. unfold jacobi_iter.
+  rewrite !mxE.
+  repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
+  pose proof BMULT_accurate'.
+
+
 
 
 
@@ -585,7 +598,7 @@ Admitted.
 
 
 
-
+*)
 
 Lemma residual_is_finite {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
@@ -626,6 +639,9 @@ repeat split.
    rewrite rev_length length_veclist in Hlenk;
    apply /ssrnat.ltP)).
   rewrite mxE inord_val.
+  Print BMULT_accurate'.
+
+  ( x *f y = (x *r y) (1 + d) + e )
   
 
 
