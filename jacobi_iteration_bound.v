@@ -77,7 +77,6 @@ Definition d_mag_def_alt {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
   (b: 'cV[ftype t]_n.+1) :=
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in  
-  let x:= mulmx (A_real^-1) b_real in
   let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
   let delta := default_rel t in
   ((g t n.+1 * (1 + delta) + delta) *
