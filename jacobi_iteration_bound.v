@@ -524,7 +524,9 @@ induction k.
                   (inord i) ord0) * (1 + d1))) + 
             (e - e1))%Re).
   { nra. } rewrite H3. clear H3.
-  
+  eapply Rle_trans.
+  apply Rabs_triang. 
+  rewrite Rabs_mult.
   
   
   
