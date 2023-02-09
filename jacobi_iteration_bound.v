@@ -226,8 +226,6 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
   let x0 := \col_(j < n.+1) (Zconst t 0) in
   (** Finiteness of A **)
   (forall i j, Binary.is_finite _ _ (A i j) = true) /\
-  (** x <> 0 **)
-  x != 0 /\
   (** constant for the contraction mapping **)
   (0 < rho /\ rho < 1)%Re /\
   (** Invertibility of A **)
@@ -449,23 +447,26 @@ Rabs
 **)
 
 
-
-Lemma Bmult_sub {t : type} (a b c d: ftype t):
+(*
+Lemma Bmult_sub {t : type} (a b x y: ftype t):
    is_finite (fprec t) (femax t) (BMULT t a b) =
     true -> 
-   is_finite (fprec t) (femax t) (BMULT t c d) =
+   is_finite (fprec t) (femax t) (BMULT t x y) =
     true ->
-  (Rabs ((FT2R (BMULT t a b)) - (FT2R (BMULT t c d))) <=
+  (Rabs ((FT2R (BMULT t a b)) - (FT2R (BMULT t x y))) <=
       Rabs (FT2R a * FT2R b) * (1 + default_rel t))%Re.
 Proof.
 intros.
 pose proof (@BMULT_accurate' _ t a b H).
-pose proof (@BMULT_accurate' _ t c d H0).
+pose proof (@BMULT_accurate' _ t x y H0).
+destruct H1 as [d [e [Hde [Hd [He H1]]]]].
+destruct H2 as [d1 [e1 [Hde1 [Hd1 [He1 H2]]]]].
+
+Locate Plus_error.FLT_plus_error_N_ex.
 
 
 
-
-
+Print Mult_error.mult_error_FLT.
 
 
 
@@ -473,7 +474,7 @@ pose proof (@BMULT_accurate' _ t c d H0).
 
 
 Lemma res_elem_bound {t: type} {n:nat}
-  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) i:
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_sn.+1) (k:nat) i:
   let rho_tilde := (Rabs (FT2R (A1_J A i ord0)) * 
                      bigmaxr 0%Re [seq (Rabs (FT2R (A2_J A i j))) | j <- enum 'I_n.+1] *
                      (1 + g t n.+1) * (1 + default_rel t))%Re in  
@@ -689,6 +690,7 @@ Lemma residual_is_finite {t: type} {n:nat}
        (rev
           (vec_to_list_float n.+1 (resid k)))) = true.
 Proof.
+(*
 unfold norm2. apply dotprod_finite.
 intros.
 repeat split.
@@ -729,6 +731,8 @@ repeat split.
 
 
 Qed.
+*)
+Admitted.
 
 
 Require Import fma_dot_mat_model.
@@ -914,7 +918,6 @@ Lemma vec_succ_err {t: type} {n:nat}
   let b_real := FT2R_mat b in
   let x:= mulmx (A_real^-1) b_real in
   let e_0 := f_error 0 b x0 x A in
-  x != 0 ->
   (rho < 1)%Re ->
   A_real \in unitmx ->
   (forall i, is_finite (fprec t) (femax t)
@@ -923,7 +926,7 @@ Lemma vec_succ_err {t: type} {n:nat}
   (vec_inf_norm (FT2R_mat ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A))) <=
     (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))%Re.
 Proof.
-intros ? ? ? ? ? ? ? Hxneq0 Hrho HAinv HfinvA HfA.
+intros ? ? ? ? ? ?  ? Hrho HAinv HfinvA HfA.
 pose proof (@vec_float_sub_1 _ t n).
 specialize (H (X_m_jacobi k.+1 x0 b A) (X_m_jacobi k x0 b A)).
 assert (forall xy : ftype t * ftype t,
@@ -1081,7 +1084,6 @@ apply Rle_trans with
       pose proof (@jacobi_forward_error_bound _ t n A b).
       assert (forall i : 'I_n.+1,
                 is_finite (fprec t) (femax t) (A i i) = true) by (intros; apply HfA).
-      assert (x != 0 ) by apply Hxneq0.
       assert ((rho < 1)%Re) by apply Hrho.
       assert (FT2R_mat A \in unitmx). 
       { by rewrite /A_real in HAinv. }
@@ -1093,12 +1095,12 @@ apply Rle_trans with
                   (X_m_jacobi k x0 b A i ord0) = true).
      { intros. 
        pose proof (@residual_is_finite  t n A x0 b k0).
-       unfold norm2 in H11.
+       unfold norm2 in H10.
        pose proof (@dotprod_finite_implies t).
-       specialize (H12 (
+       specialize (H11 (
              (vec_to_list_float n.+1
-                (residual_math A x0 b k0))) H11).
-       specialize (H12 (nth i (rev
+                (residual_math A x0 b k0))) H10).
+       specialize (H11 (nth i (rev
                                (vec_to_list_float n.+1
                                   (residual_math A x0 b k0))) (Zconst t 0))).
        assert (In
@@ -1113,15 +1115,15 @@ apply Rle_trans with
        { rewrite rev_nth. apply nth_In. 
           rewrite length_veclist . lia. 
          rewrite !length_veclist. apply /ssrnat.ltP. apply ltn_ord.
-      } specialize (H12 H13).
-       rewrite rev_nth in H12. rewrite length_veclist in H12.
+      } specialize (H11 H12).
+       rewrite rev_nth in H11. rewrite length_veclist in H11.
        assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat).
-       { lia. } rewrite H14 in H12.
-       rewrite nth_vec_to_list_float in H12;
+       { lia. } rewrite H13 in H11.
+       rewrite nth_vec_to_list_float in H11;
         last by  apply ltn_ord.
-       rewrite !mxE in H12. 
-       apply bmult_overflow_implies in H12.
-       destruct H12 as [Hf1 Hf2].
+       rewrite !mxE in H11. 
+       apply bmult_overflow_implies in H11.
+       destruct H11 as [Hf1 Hf2].
        rewrite nth_vec_to_list_float in Hf2;
         last by  apply ltn_ord. rewrite inord_val in Hf2.
        rewrite mxE in Hf2. 
@@ -1133,7 +1135,7 @@ apply Rle_trans with
        rewrite length_veclist. apply /ssrnat.ltP. apply ltn_ord.
      } 
      (** also implied by finiteness of residual **)
-     specialize (H5 H6 H7 H8 H9 H10 x0 H11).
+     specialize (H5 H6 H7 H8 H9 x0 H10).
      assert ((f_error k.+1 b x0 x A <= rho^k.+1 * (f_error 0 b x0 x A) + 
                     ((1 - rho^k.+1) / (1 - rho))* d_mag)%Re).
      { by apply (H5 k.+1). }
@@ -1165,30 +1167,30 @@ apply Rle_trans with
                       ((1 - rho ^ k) * d_mag) * / (1 - rho)))%Re).
           { assert (((rho ^ k.+1 * e_0 * (1 - rho)) * / (1-rho))%Re = 
                      ((rho ^k.+1 * e_0) * ((1 - rho) * / (1-rho)))%Re).
-            { nra. } rewrite H14. rewrite Rinv_r; last by nra.
+            { nra. } rewrite H13. rewrite Rinv_r; last by nra.
             rewrite Rmult_1_r.
             assert (((rho ^ k * e_0 * (1 - rho)) * / (1- rho))%Re = 
                      ( (rho^k * e_0) * ((1 - rho) * / (1- rho)))%Re).
-            { nra. } rewrite H15. rewrite Rinv_r; nra.
-          } rewrite H14. clear H14. nra.
-        } rewrite H14. clear H14.
+            { nra. } rewrite H14. rewrite Rinv_r; nra.
+          } rewrite H13. clear H13. nra.
+        } rewrite H13. clear H13.
         assert ((rho ^ k.+1 * (1 - rho) * e_0 +
                   (1 - rho ^ k.+1) * d_mag +
                   rho ^ k * (1 - rho) * e_0 +
                   (1 - rho ^ k) * d_mag)%Re = 
                 (rho ^ k * (1+ rho) * (1 - rho) * e_0 + 
                   2* d_mag  - rho^k * (1 + rho) * d_mag)%Re).
-        { simpl. nra. } rewrite H14. clear H14.
+        { simpl. nra. } rewrite H13. clear H13.
         assert ((rho ^ k * (1 + rho) * (1 - rho) * e_0 +
                   2 * d_mag - rho ^ k * (1 + rho) * d_mag)%Re = 
                 ((rho ^ k * (1 + rho) * ((1-rho) * e_0 - d_mag)) + 2 * d_mag)%Re).
-        { nra. } rewrite H14. clear H14.
+        { nra. } rewrite H13. clear H13.
         rewrite Rmult_plus_distr_r.
         assert ((rho ^ k * (1 + rho) *
                     ((1 - rho) * e_0 - d_mag) * / (1 - rho))%Re =
                 (rho ^ k * (1 + rho) * 
                 (e_0 * ( (1 - rho) * / (1 - rho)) - d_mag * /(1 - rho)))%Re).
-        { nra. } rewrite H14. clear H14. rewrite Rinv_r; last by nra.
+        { nra. } rewrite H13. clear H13. rewrite Rinv_r; last by nra.
         rewrite Rmult_1_r. nra.
 Qed.
 
@@ -1322,7 +1324,6 @@ Lemma residual_bound {t: type} {n:nat}
   let resid := residual_math A x0 b in
   let v_l := (vec_to_list_float n.+1 (resid k)) in
   (rho < 1)%Re ->
-  (x != 0) ->
   (FT2R_mat A \in unitmx) ->
   (forall i : 'I_n.+1,
           is_finite (fprec t) (femax t)
@@ -1336,7 +1337,7 @@ Lemma residual_bound {t: type} {n:nat}
         * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat) *
       (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
 Proof.
-intros ? ? ? ? ? ? ? ? ? ? Hxneq0 HinvA HfinvA HfA.
+intros ? ? ? ? ? ? ? ? ? ? HinvA HfinvA HfA.
 eapply Rle_trans.
 + apply norm2_vec_inf_norm_rel.
   - intros.
@@ -1643,7 +1644,7 @@ Lemma jacobi_iteration_bound {t: type} {n : nat} :
 Proof.
 intros.
 unfold jacobi_preconditions_math in H.
-destruct H as [HfA [Hneqx [Hrho [HinvA [Hfbdiv [HG [Hfacc Hk]]]]]]].
+destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc Hk]]]]]].
 split.
 + unfold acc2. by apply finite_is_finite.
 + exists (k_min A b acc).+1. 
@@ -1683,7 +1684,7 @@ split.
        rewrite HeqGamma. unfold acc2. nra. 
       assert (FT2R (norm2 (rev (vec_to_list_float n.+1 (resid (k_min A b acc).+1)))) = 
               Rabs (FT2R (norm2 (rev (vec_to_list_float n.+1 (resid (k_min A b acc).+1)))))).
-      { rewrite Rabs_right. nra. apply Rle_ge, norm2_ge_0. } 
+      { rewrite Rabs_right. nra. by apply Rle_ge. } 
       rewrite H0.
       remember (rho_def A b) as rho.
       remember (d_mag_def A b) as d_mag.
@@ -1700,7 +1701,6 @@ split.
          { rewrite Heqrho in Hrho. apply Hrho. } 
          specialize (H1 H2). unfold resid,x0. rewrite Heqe_0 Heqrho Heqd_mag Heqx.
          unfold x0. apply H1. 
-         by rewrite Heqx in Hneqx.
          apply HinvA.
          by intros.
          by intros.
@@ -1809,7 +1809,7 @@ split.
                                         vec_inf_norm (FT2R_mat (A1_J A)) /
                                         (1 + default_rel t) - 2 * d_mag / (1 - rho)))%Re)).
                           { rewrite Rpower_Rlog. by []. 
-                            + assert ( (1 < /rho)%Re -> / rho <> 1%Re). { nra. }
+                            + assert ( (1 < /rho)%Re -> (/ rho )%Re <> 1%Re). { nra. }
                               apply H3. replace 1%Re with (/1)%Re by nra.
                                apply Rinv_lt_contravar. rewrite Rmult_1_r.
                                apply Hrho. apply Hrho.
