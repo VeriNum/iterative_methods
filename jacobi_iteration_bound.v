@@ -471,7 +471,15 @@ Proof.
 intros.
 induction k.
 + simpl. nra.
-+ simpl. unfold jacobi_iter.
++ assert (X_m_jacobi k.+2 x0 b A (inord i) ord0 = 
+            jacobi_iter (X_m_jacobi k.+1 x0 b A) b A
+                  (inord i) ord0).
+  { by simpl. } rewrite H. clear H.
+  assert (X_m_jacobi k.+1 x0 b A (inord i) ord0 = 
+          jacobi_iter (X_m_jacobi k x0 b A) b A
+                  (inord i) ord0).
+  { by simpl. } rewrite H. clear H.
+  unfold jacobi_iter.
   rewrite !mxE.
   repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
   pose proof BMULT_accurate'.
