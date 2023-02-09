@@ -436,6 +436,8 @@ Qed.
 Require Import vec_sum_inf_norm_rel.
 
 
+
+
 (**
 Rabs
    (FT2R
@@ -445,6 +447,29 @@ Rabs
     FT2R
       (X_m_jacobi k x0 b A (inord i) ord0))
 **)
+
+
+
+Lemma Bmult_sub {t : type} (a b c d: ftype t):
+   is_finite (fprec t) (femax t) (BMULT t a b) =
+    true -> 
+   is_finite (fprec t) (femax t) (BMULT t c d) =
+    true ->
+  (Rabs ((FT2R (BMULT t a b)) - (FT2R (BMULT t c d))) <=
+      Rabs (FT2R a * FT2R b) * (1 + default_rel t))%Re.
+Proof.
+intros.
+pose proof (@BMULT_accurate' _ t a b H).
+pose proof (@BMULT_accurate' _ t c d H0).
+
+
+
+
+
+
+
+
+
 
 
 Lemma res_elem_bound {t: type} {n:nat}
@@ -467,6 +492,7 @@ Lemma res_elem_bound {t: type} {n:nat}
     -
     FT2R
       (X_m_jacobi 0 x0 b A (inord i) ord0)))%Re.
+
 Proof.
 intros.
 induction k.
