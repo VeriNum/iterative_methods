@@ -286,11 +286,15 @@ unfold jacobi_preconditions_math in H0.
 unfold jacobi_preconditions_math.
 repeat split; try apply H0.
 apply /ssrnat.ltP.
-apply ltn_leq_trans.
-
-
-
-Admitted.
+rewrite leq_eqVlt  in H.
+assert (k == k' \/ (k < k')%nat).
+{ by apply /orP. } destruct H1.
++ assert (k = k'). { by apply /eqP. } rewrite -H2.
+  apply /ssrnat.ltP. by apply H0.
++ apply ltn_trans with k.
+  apply /ssrnat.ltP. by apply H0.
+  by []. 
+Qed.
 
 From Flocq Require Import Binary.
 Require Import finite_lemmas_additional.
