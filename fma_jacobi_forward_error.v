@@ -490,6 +490,15 @@ Qed.
 Lemma real_const_1 {ty}:
   FT2R (Zconst ty 1) = 1%Re.
 Proof.
+unfold FT2R. unfold Zconst.
+pose proof IEEE754_extra.BofZ_exact.
+specialize (H (fprec ty) (femax ty) (Pos2Z.is_pos (fprecp ty))
+            (fprec_lt_femax ty) 1%Z).
+assert ((- 2 ^ fprec ty <= 1 <= 2 ^ fprec ty)%Z).
+{ admit. }
+specialize (H H0).
+destruct H as [H H1].
+by rewrite H.
 Admitted.
 
 
