@@ -274,10 +274,22 @@ Definition jacobi_preconditions {t: type}
 
 Lemma jacobi_iteration_bound_monotone:
   forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k k': nat),
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
    (k <= k')%nat ->
-   jacobi_preconditions A b acc k ->
-   jacobi_preconditions A b acc k'.
+   jacobi_preconditions_math A' b' acc k ->
+   jacobi_preconditions_math A' b' acc k'.
 Proof. 
+intros.
+unfold jacobi_preconditions_math in H0.
+unfold jacobi_preconditions_math.
+repeat split; try apply H0.
+apply /ssrnat.ltP.
+apply ltn_leq_trans.
+
+
+
 Admitted.
 
 From Flocq Require Import Binary.
