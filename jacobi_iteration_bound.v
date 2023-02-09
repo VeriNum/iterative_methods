@@ -482,7 +482,52 @@ induction k.
   unfold jacobi_iter.
   rewrite !mxE.
   repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
-  pose proof BMULT_accurate'.
+  rewrite inord_val.
+  pose proof (@BMULT_accurate' _ t (A1_inv_J A (inord i) ord0)
+              ((b -f
+                   A2_J A *f X_m_jacobi k.+1 x0 b A)
+                    (inord i) ord0)).
+  assert (is_finite (fprec t) (femax t)
+            (BMULT t (A1_inv_J A (inord i) ord0)
+               ((b -f
+                 A2_J A *f X_m_jacobi k.+1 x0 b A)
+                  (inord i) ord0)) = true) by admit.
+  specialize (H H0).
+  pose proof (@BMULT_accurate' _ t (A1_inv_J A (inord i) ord0)
+              ((b -f
+                   A2_J A *f X_m_jacobi k x0 b A)
+                    (inord i) ord0)).
+  assert (is_finite (fprec t) (femax t)
+            (BMULT t (A1_inv_J A (inord i) ord0)
+               ((b -f
+                 A2_J A *f X_m_jacobi k x0 b A)
+                  (inord i) ord0)) = true) by admit.
+  specialize (H1 H2).
+  destruct H as [d [e [Hde [Hd [He H]]]]].
+  destruct H1 as [d1 [e1 [Hde1 [Hd1 [He1 H1]]]]].
+  rewrite H H1.
+  assert ((FT2R (A1_inv_J A (inord i) ord0) *
+            FT2R
+              ((b -f A2_J A *f X_m_jacobi k.+1 x0 b A)
+                 (inord i) ord0) * (1 + d) + e +
+            -
+            (FT2R (A1_inv_J A (inord i) ord0) *
+             FT2R
+               ((b -f A2_J A *f X_m_jacobi k x0 b A)
+                  (inord i) ord0) * (1 + d1) + e1))%Re = 
+          (((FT2R (A1_inv_J A (inord i) ord0)) * 
+           ( FT2R
+              ((b -f A2_J A *f X_m_jacobi k.+1 x0 b A)
+                 (inord i) ord0) * (1 + d) - 
+             FT2R
+               ((b -f A2_J A *f X_m_jacobi k x0 b A)
+                  (inord i) ord0) * (1 + d1))) + 
+            (e - e1))%Re).
+  { nra. } rewrite H3. clear H3.
+  
+  
+  
+  
 
 
 
