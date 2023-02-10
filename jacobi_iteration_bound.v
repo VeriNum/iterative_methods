@@ -415,6 +415,58 @@ x_k+1 = D^-1 \otimes (b \ominus (N \otimes x_k))
 
 (** finiteness of dot product **)
 Lemma dotprod_finite {t: type} (v : vector t):
+(forall xy : ftype t,
+  In xy (rev v) ->
+  is_finite (fprec t) (femax t) xy = true /\
+  (let n := length (rev v) in
+   (Rabs (FT2R xy) <=
+    sqrt
+      (F' t / 2 /
+       (INR n * (1 + default_rel t) ^ n)))%Re)) ->
+is_finite (fprec t) (femax t)
+  (dotprod v v) = true.
+Proof.
+intros.
+pose proof (@fma_is_finite _ t (rev v) (rev v)).
+assert (length (rev v) = length (rev v)).
+{ lia. } specialize (H0 H1).
+specialize (H0 (dotprod v v)).
+pose proof (@fma_dot_prod_rel_fold_right _ t).
+specialize (H2 v v).
+rewrite -combine_rev in H2; last by [].
+assert (fma_dotprod t v v = dotprod v v).
+{ by unfold fma_dotprod, dotprod. }
+rewrite H3 in H2. specialize (H0 H2).
+apply H0.
+intros.
+repeat split.
++ specialize (H xy.1).
+  apply H.
+  destruct xy. apply in_combine_l in H4.
+  auto.
++ specialize (H xy.2).
+  apply H.
+  destruct xy. apply in_combine_r in H4.
+  auto.
++ specialize (H xy.1).
+  apply H. destruct xy. apply in_combine_l in H4.
+  auto.
++ specialize (H xy.2).
+  apply H. destruct xy. apply in_combine_r in H4.
+  auto.
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+Lemma dotprod_finite {t: type} (v : vector t):
 (forall xy : ftype t * ftype t,
 In xy (combine (rev v) (rev v)) ->
 is_finite (fprec t) (femax t) xy.1 = true /\
@@ -826,18 +878,14 @@ repeat split.
     rewrite -Rmult_assoc.
     apply Rdiv_le_right_elim; first by
     apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-    
-
-
-    
-
-
-
-
- admit.
+    (** at this point, we have that 
+        |A_ii | | x_k+1 - x_k | <= \sqrt{ F' / (2 * n * d^n)} / (1+ d)^2
+     **)
+    admit.
   - admit.
   - rewrite is_finite_Bopp. admit.
   - admit.
++
 
   
  
