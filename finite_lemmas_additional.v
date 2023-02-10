@@ -10,6 +10,120 @@ Section WITHNANS.
 Context {NANS: Nans}. 
 
 
+Lemma Bminus_bplus_opp_equiv {ty} (x y : ftype ty):
+  is_finite _ _ x = true ->
+  is_finite _ _ (BOPP ty y) = true ->
+  is_finite _ _ (BPLUS ty x (BOPP ty y)) ->
+  BMINUS ty x y = BPLUS ty x (BOPP ty y).
+Proof.
+intros.
+destruct x, y; (unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *; simpl in *; auto;
+  try destruct (Bool.eqb s (~~ s0)); simpl in * ;auto; try by []; 
+  try unfold is_finite in H1; simpl in *; auto);
+  (destruct (BinarySingleNaN.binary_normalize 
+    (fprec ty) (femax ty) (fprec_gt_0 ty)
+    (fprec_lt_femax ty) BinarySingleNaN.mode_NE
+    (BinarySingleNaN.Fplus_naive s m e 
+       (~~ s0) m0 e1 (Z.min e e1)) 
+    (Z.min e e1) false); simpl;auto;
+  by destruct s,s0;simpl in *; auto).
+Qed.
+
+
+
+Lemma BPLUS_le_rel
+  {NAN: Nans} (t : type) :
+  forall x y 
+  (FIN: Binary.is_finite _ _ (BPLUS t x y) = true),
+  Rabs (FT2R (BPLUS t x y )) <= (Rabs (FT2R x) + Rabs (FT2R y)) * (1+ default_rel t).
+Proof.
+intros.
+pose proof (BPLUS_accurate' t x y FIN).
+destruct H as [delta H].
+destruct H as [Hd Heq].
+rewrite Heq.
+rewrite Rabs_mult.
+apply Rmult_le_compat; try apply Rabs_pos; try apply Rabs_triang.
+apply Rle_trans with (Rabs 1 + Rabs delta).
++ apply Rabs_triang.
++ rewrite Rabs_R1. apply Rplus_le_compat_l.
+  apply Hd.
+Qed.
+
+Lemma BPLUS_error_le_rel
+  {NAN: Nans} (t : type) :
+  forall x y 
+  (FIN: Binary.is_finite _ _ (BPLUS t x y) = true),
+  Rabs (FT2R (BPLUS t x y ) - (FT2R x + FT2R y)) <= (Rabs (FT2R x) + Rabs (FT2R y)) * (default_rel t).
+Proof.
+intros.
+pose proof (BPLUS_accurate' t x y FIN).
+destruct H as [delta H].
+destruct H as [Hd Heq].
+rewrite Heq.
+assert (((FT2R x + FT2R y) * (1 + delta) - (FT2R x + FT2R y)) =
+        ((FT2R x + FT2R y) * delta)).
+{ nra. } rewrite H.
+rewrite Rabs_mult.
+apply Rmult_le_compat; try by apply Rabs_pos.
++ apply Rabs_triang.
++ apply Hd.
+Qed.
+
+
+Lemma BPLUS_error_le_rel'
+  {NAN: Nans} (t : type) :
+  forall x y 
+  (FIN: Binary.is_finite _ _ (BPLUS t x y) = true),
+  Rabs (FT2R (BPLUS t x y ) - (FT2R x + FT2R y)) <= (Rabs (FT2R x + FT2R y)) * (default_rel t).
+Proof.
+intros.
+pose proof (BPLUS_accurate' t x y FIN).
+destruct H as [delta H].
+destruct H as [Hd Heq].
+rewrite Heq.
+assert (((FT2R x + FT2R y) * (1 + delta) - (FT2R x + FT2R y)) =
+        ((FT2R x + FT2R y) * delta)).
+{ nra. } rewrite H.
+rewrite Rabs_mult.
+apply Rmult_le_compat; try by apply Rabs_pos.
++ nra.
++ apply Hd.
+Qed.
+
+
+
+
+Lemma Bplus_no_ov_is_finite : 
+   forall (t: type) 
+             x (FINx: Binary.is_finite (fprec t) (femax t) x = true) 
+             y (FINy: Binary.is_finite (fprec t) (femax t) y = true) 
+          (FIN: Bplus_no_overflow t (FT2R x) (FT2R y)), 
+          Binary.is_finite (fprec t) (femax t) (BPLUS t x y) = true.
+Proof.
+intros.
+pose proof (Binary.Bplus_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan t) 
+                      BinarySingleNaN.mode_NE x y FINx FINy ).
+change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
+cbv zeta in H.
+pose proof (
+   Raux.Rlt_bool_spec
+        (Rabs
+           (Generic_fmt.round Zaux.radix2
+              (SpecFloat.fexp (fprec t) (femax t))
+              (BinarySingleNaN.round_mode
+                 BinarySingleNaN.mode_NE) (FT2R x + FT2R y)))
+        (Raux.bpow Zaux.radix2 (femax t))).
+destruct H0.
+{ destruct H as ( _ & Hyp & _).
+fold (@BPLUS _ t) in Hyp; auto. }
+red in FIN. unfold rounded in FIN.
+Lra.lra.
+Qed.
+
+
+
+
 Lemma bmult_overflow_implies {t : type}: 
   forall x y , 
   Binary.is_finite _ _ (BMULT t x y) = true ->
