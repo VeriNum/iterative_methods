@@ -440,7 +440,30 @@ Lemma residual_is_finite {t: type} {n:nat}
 Proof.
 unfold norm2. apply dotprod_finite.
 repeat split.
-+ admit.
++ apply in_rev in H.
+  pose proof (@In_nth _ (rev
+                           (vec_to_list_float n.+1
+                              (diag_vector_mult (A1_J A)
+                                 (X_m_jacobi k.+1 x0 b A -f
+                                  X_m_jacobi k x0 b A)))) xy (Zconst t 0) H).
+  destruct H0 as [m [Hlenk Hmth]].
+  rewrite -Hmth.
+  rewrite rev_nth; last by rewrite rev_length in Hlenk.
+  rewrite length_veclist.
+  assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat).
+  { lia. } rewrite H0.
+  rewrite nth_vec_to_list_float; 
+  last by (rewrite rev_length length_veclist in Hlenk; apply /ssrnat.ltP).
+  rewrite !mxE.
+  repeat (rewrite nth_vec_to_list_float; last by 
+  (rewrite inordK;
+   rewrite rev_length length_veclist in Hlenk;
+   apply /ssrnat.ltP)).
+  rewrite mxE inord_val.
+  apply BMULT_no_overflow_is_finite.
+  - admit.
+  - admit.
+  - admit.
 + rewrite !rev_length  length_veclist.
   rewrite rev_involutive in H.
   unfold residual_math in H.
