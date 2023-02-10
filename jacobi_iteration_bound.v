@@ -798,6 +798,17 @@ repeat split.
                   (BOPP t
                      (X_m_jacobi k x0 b A
                         (inord m) ord0)))) by admit.
+    specialize (H3 H6).
+    destruct H3 as [d1 [Hd1 H3]].
+    rewrite H3.
+    assert (FT2R
+             (BOPP t
+                (X_m_jacobi k x0 b A 
+                   (inord m) ord0)) = 
+              (- (FT2R (X_m_jacobi k x0 b A 
+                     (inord m) ord0)))%Re).
+    { unfold FT2R. by rewrite B2R_Bopp. }
+    rewrite H7. eapply Rle_trans.
     
 
 
