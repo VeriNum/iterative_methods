@@ -809,6 +809,17 @@ repeat split.
                      (inord m) ord0)))%Re).
     { unfold FT2R. by rewrite B2R_Bopp. }
     rewrite H7. eapply Rle_trans.
+    apply Rplus_le_compat_r.
+    apply Rmult_le_compat_r.
+    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+    apply Rmult_le_compat_l; first by apply Rabs_pos.
+    rewrite Rabs_mult.
+    apply Rmult_le_compat_l; first by apply Rabs_pos.
+    apply Rle_trans with (Rabs 1 + Rabs d1)%Re.
+    apply Rabs_triang.
+    apply Rplus_le_compat_l. apply Hd1.
+    rewrite Rabs_R1.
+
     
 
 
