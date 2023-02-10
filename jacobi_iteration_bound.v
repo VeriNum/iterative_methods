@@ -773,6 +773,41 @@ repeat split.
   apply Rle_trans with (Rabs 1 + Rabs d)%Re.
   apply Rabs_triang.
   rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd.
+  rewrite Rabs_mult. rewrite mxE.
+  rewrite Bminus_bplus_opp_equiv.
+  - pose proof (@BPLUS_accurate _ t).
+    specialize (H3 (X_m_jacobi k.+1 x0 b A
+                           (inord m) ord0)).
+    assert (is_finite (fprec t) (femax t)
+               (X_m_jacobi k.+1 x0 b A 
+                  (inord m) ord0) = true) by admit.
+    specialize (H3 H4).
+    specialize (H3 (BOPP t
+                        (X_m_jacobi k x0 b A  
+                             (inord m) ord0))).
+    assert (is_finite (fprec t) (femax t)
+               (BOPP t
+                  (X_m_jacobi k x0 b A 
+                     (inord m) ord0)) = true) by admit.
+    specialize (H3 H5).
+    assert ( Bplus_no_overflow t
+               (FT2R
+                  (X_m_jacobi k.+1 x0 b A
+                     (inord m) ord0))
+               (FT2R
+                  (BOPP t
+                     (X_m_jacobi k x0 b A
+                        (inord m) ord0)))) by admit.
+    
+
+
+
+
+ admit.
+  - admit.
+  - rewrite is_finite_Bopp. admit.
+  - admit.
+
   
  
 
