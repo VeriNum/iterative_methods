@@ -169,53 +169,6 @@ repeat apply Rplus_le_le_0_compat.
     * nra.
 Qed.
   
-(*
-Definition jacobi_preconditions {t: type}
-  (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
-  (* some property of A,b,accuracy holds such that 
-    jacobi_n will indeed converge within k iterations to this accuracy, 
-   without ever overflowing *)
-  let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let A_real := FT2R_mat A' in
-  let b_real := FT2R_mat b' in
-  
-  let x:= mulmx (A_real^-1) b_real in
-  let rho := rho_def A b in 
-  let d_mag := d_mag_def A b in
-  let x0 := (repeat  (Zconst t 0) (length b)) in
-  let x0' := @vector_inj _ x0 n.+1 in
-  
-  (** dimension of A is positive **)
-  (0 < length A)%coq_nat /\
-  (length A = length b) /\
-  (** Finiteness of A **)
-  (forall i j, Binary.is_finite _ _ (A' i j) = true) /\
-  (** x <> 0 **)
-  x != 0 /\
-  (** constant for the contraction mapping **)
-  (rho < 1)%Re /\
-  (** Invertibility of A **)
-  A_real \in unitmx /\
-  (** Finiteness of the inverse of diagonal elements of A **)
-  (forall i : 'I_n.+1,
-    Binary.is_finite (fprec t) (femax t)
-      (BDIV t (Zconst t 1) (A' i i)) = true) /\
-  (** Finiteness of solution vector at each iteration **)
-  (forall k:nat, 
-      forall i, Binary.is_finite _ _ ((X_m_jacobi k x0' b' A') i ord0) = true) /\
-  (** Constraint on Gamma **)
-  (Rsqr (g1 t n.+1 (n.+1 - 1)) < FT2R (accuracy))%Re /\
-  (** Gamma is finite **)
-  Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
-  (** constraint on k **)
-  (k > Z.to_N (Zceil (ln (((1- rho) * sqrt (INR n.+1) * (1 + g t n.+1) * (f_error 0 b' x0' x A' - d_mag / (1-rho))) /
-                          (sqrt (FT2R (accuracy)  - g1 t n.+1 (n.+1 - 1)))) /
-                      ln (1 / rho))))%coq_nat.
-       
-*)
-
 
 Definition A1_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
   \col_i (A i i).
@@ -242,21 +195,6 @@ Definition k_min {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                  vec_inf_norm (FT2R_mat (A1_J A)) /
                  (1 + delta) -
                  2 * d_mag / (1 - rho)))%Re)).
-
-
-(*
-Lemma e_0_dmag_rel {t: type} {n:nat} 
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
-  let rho := rho_def A b in 
-  let d_mag := d_mag_def A b in
-  let x0:=  \col_(j < n.+1) (Zconst t 0) in
-  let A_real := FT2R_mat A in
-  let b_real := FT2R_mat b in
-  let x:= mulmx (A_real^-1) b_real in
-  let e_0 := f_error 0 b x0 x A in
-  (0 < e_0 - d_mag / (1 - rho))%Re.
-Admitted.
-*)
 
 
 Definition jacobi_preconditions_math {t: type} {n:nat}
@@ -720,22 +658,17 @@ Lemma residual_is_finite {t: type} {n:nat}
           (vec_to_list_float n.+1 (resid k)))) = true.
 Proof.
 unfold norm2. apply dotprod_finite.
-Print dotprod_finite.
 repeat split.
-+ admit.
 + admit.
 + rewrite !rev_length  length_veclist.
   rewrite rev_involutive in H.
-  destruct xy.
-  apply in_combine_l in H.
-  assert ((f, f0).1 = f). { auto. } rewrite H0; clear H0.
   unfold residual_math in H.
   apply in_rev in H. 
   pose proof (@In_nth _ (rev
                            (vec_to_list_float n.+1
                               (diag_vector_mult (A1_J A)
                                  (X_m_jacobi k.+1 x0 b A -f
-                                  X_m_jacobi k x0 b A)))) f (Zconst t 0) H).
+                                  X_m_jacobi k x0 b A)))) xy (Zconst t 0) H).
   destruct H0 as [m [Hlenk Hmth]].
   rewrite -Hmth.
   rewrite rev_nth; last by rewrite rev_length in Hlenk.
@@ -819,7 +752,6 @@ repeat split.
     apply Rplus_le_compat_l. apply Hd1.
     rewrite Rabs_R1.
     apply Rcomplements.Rle_minus_r.
-    Search ( _ * _ <= _)%Re.
     apply Rdiv_le_right_elim; first by
     apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
     rewrite -Rmult_assoc.
@@ -832,18 +764,7 @@ repeat split.
   - admit.
   - rewrite is_finite_Bopp. admit.
   - admit.
-+
-
-  
- 
-
-  
-
- 
-
 Qed.
-*)
-Admitted.
 
 
 Require Import fma_dot_mat_model.
