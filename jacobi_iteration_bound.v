@@ -105,13 +105,10 @@ Definition d_mag_def_alt {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
   ||x || = ||A^-1 || ||b||
          \leq (||A|| ||A^-1|| ||b||) / ||A||
           = k (A) ||b|| / || A ||
-
   ||x|| \leq ( k(A) ||b||) / ||A||
   https://www.maths.manchester.ac.uk/~higham/talks/claode13.pdf 
   https://link.springer.com/content/pdf/10.1007/978-94-017-1116-6_9.pdf
   https://nhigham.com/2021/06/08/bounds-for-the-matrix-condition-number/
-
-
 **)
 
 Lemma d_mag_ge_0 {t: type} {n:nat} (A: 'M[ftype t]_n.+1) 
@@ -349,7 +346,6 @@ repeat split.
 + unfold matrix_cols, matrix_rows. simpl.
   apply Forall_forall.
   intros.
-
   admit.
 + apply Forall_nth. intros.
   apply Forall_nth. intros.
@@ -409,9 +405,7 @@ F' t = 2^e_max ( 1 - 2^-p)
 *)
 
 (**
-
 res_k+1 = A_1 \otimes (x_k+1 \ominus x_k)
-
 x_k+1 = D^-1 \otimes (b \ominus (N \otimes x_k))
 **)
 
@@ -528,18 +522,8 @@ pose proof (@BMULT_accurate' _ t a b H).
 pose proof (@BMULT_accurate' _ t x y H0).
 destruct H1 as [d [e [Hde [Hd [He H1]]]]].
 destruct H2 as [d1 [e1 [Hde1 [Hd1 [He1 H2]]]]].
-
 Locate Plus_error.FLT_plus_error_N_ex.
-
-
-
 Print Mult_error.mult_error_FLT.
-
-
-
-
-
-
 Lemma res_elem_bound {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_sn.+1) (k:nat) i:
   let rho_tilde := (Rabs (FT2R (A1_J A i ord0)) * 
@@ -560,7 +544,6 @@ Lemma res_elem_bound {t: type} {n:nat}
     -
     FT2R
       (X_m_jacobi 0 x0 b A (inord i) ord0)))%Re.
-
 Proof.
 intros.
 induction k.
@@ -624,14 +607,6 @@ induction k.
   
   
   
-
-
-
-
-
-
-
-
 Lemma resid_elem_is_finite {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
   let resid := residual_math A x0 b in
@@ -731,22 +706,10 @@ apply BMULT_no_overflow_is_finite .
             eapply Rle_trans. apply Rabs_triang.
             rewrite Rabs_R1. nra.
       ++ 
-
-
-
-
-
-
 admit. 
     * admit.  (** finitenss of x_k+1 **)
     * admit. (** finitenss of x_k **)
 Admitted.
-
-
-
-
-
-
 *)
 
 Lemma residual_is_finite {t: type} {n:nat}
@@ -788,15 +751,21 @@ repeat split.
    rewrite rev_length length_veclist in Hlenk;
    apply /ssrnat.ltP)).
   rewrite mxE inord_val.
-  Print BMULT_accurate'.
+  (** bound x_k by max_i { (D^-1 b)_i} \rho ^ i **)
+  pose proof (@BMULT_accurate' _ t (A (inord m) (inord m))
+              ((X_m_jacobi k.+1 x0 b A -f
+                 X_m_jacobi k x0 b A) (inord m) ord0)).
+  assert (is_finite (fprec t) (femax t)
+             (BMULT t (A (inord m) (inord m))
+                ((X_m_jacobi k.+1 x0 b A -f
+                  X_m_jacobi k x0 b A)
+                   (inord m) ord0)) = true) by admit.
+  
+ 
 
-  res = A_1 * (x_k+1 - x_k)
-
-  ( x *f y = (x *r y) (1 + d) + e )
   
 
-
-
+ 
 
 Qed.
 *)
@@ -2018,4 +1987,3 @@ Qed.
 
 
 End WITH_NANS.
-
