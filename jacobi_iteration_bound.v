@@ -760,6 +760,19 @@ repeat split.
                 ((X_m_jacobi k.+1 x0 b A -f
                   X_m_jacobi k x0 b A)
                    (inord m) ord0)) = true) by admit.
+  specialize (H1 H2).
+  destruct H1 as [d [e [Hde [Hd [He H1]]]]].
+  rewrite H1.
+  eapply Rle_trans.
+  apply Rabs_triang.
+  eapply Rle_trans.
+  apply Rplus_le_compat_l. apply He.
+  rewrite Rabs_mult. eapply Rle_trans.
+  apply Rplus_le_compat_r.
+  apply Rmult_le_compat_l. apply Rabs_pos.
+  apply Rle_trans with (Rabs 1 + Rabs d)%Re.
+  apply Rabs_triang.
+  rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd.
   
  
 
