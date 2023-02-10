@@ -17,7 +17,9 @@ Set Bullet Behavior "Strict Subproofs".
 Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
-Require Import lemmas fma_is_finite.
+Require Import lemmas fma_is_finite finite_lemmas_additional.
+Require Import Coq.ZArith.BinInt.
+
 
 Open Scope ring_scope.
 
@@ -36,123 +38,6 @@ Notation "A +f B" := (addmx_float A B) (at level 80).
 Notation "-f A" := (opp_mat A) (at level 50).
 Notation "A *f B" := (mulmx_float A B) (at level 70).
 Notation "A -f B" := (sub_mat A B) (at level 80).
-
-
-
-
-Lemma Bminus_bplus_opp_equiv {ty} (x y : ftype ty):
-  is_finite _ _ x = true ->
-  is_finite _ _ (BOPP ty y) = true ->
-  is_finite _ _ (BPLUS ty x (BOPP ty y)) ->
-  BMINUS ty x y = BPLUS ty x (BOPP ty y).
-Proof.
-intros.
-destruct x, y; (unfold BMINUS, BPLUS, BOPP, BINOP, Bminus, Bplus in *; simpl in *; auto;
-  try destruct (eqb s (~~ s0)); simpl in * ;auto; try by []; 
-  try unfold is_finite in H1; simpl in *; auto);
-  (destruct (BinarySingleNaN.binary_normalize 
-    (fprec ty) (femax ty) (fprec_gt_0 ty)
-    (fprec_lt_femax ty) BinarySingleNaN.mode_NE
-    (BinarySingleNaN.Fplus_naive s m e 
-       (~~ s0) m0 e1 (Z.min e e1)) 
-    (Z.min e e1) false); simpl;auto;
-  by destruct s,s0;simpl in *; auto).
-Qed.
-
-
-
-Lemma BPLUS_le_rel
-  {NAN: Nans} (t : type) :
-  forall x y 
-  (FIN: Binary.is_finite _ _ (BPLUS t x y) = true),
-  Rabs (FT2R (BPLUS t x y )) <= (Rabs (FT2R x) + Rabs (FT2R y)) * (1+ default_rel t).
-Proof.
-intros.
-pose proof (BPLUS_accurate' t x y FIN).
-destruct H as [delta H].
-destruct H as [Hd Heq].
-rewrite Heq.
-rewrite Rabs_mult.
-apply /RleP. rewrite -RmultE -!RplusE.
-apply Rmult_le_compat; try apply Rabs_pos; try apply Rabs_triang.
-apply Rle_trans with (Rabs 1 + Rabs delta)%Re.
-+ apply Rabs_triang.
-+ rewrite Rabs_R1. apply Rplus_le_compat_l.
-  apply Hd.
-Qed.
-
-Lemma BPLUS_error_le_rel
-  {NAN: Nans} (t : type) :
-  forall x y 
-  (FIN: Binary.is_finite _ _ (BPLUS t x y) = true),
-  Rabs (FT2R (BPLUS t x y ) - (FT2R x + FT2R y)) <= (Rabs (FT2R x) + Rabs (FT2R y)) * (default_rel t).
-Proof.
-intros.
-pose proof (BPLUS_accurate' t x y FIN).
-destruct H as [delta H].
-destruct H as [Hd Heq].
-rewrite Heq.
-assert (((FT2R x + FT2R y) * (1 + delta) - (FT2R x + FT2R y))%Re =
-        ((FT2R x + FT2R y) * delta)%Re).
-{ nra. } rewrite H.
-rewrite Rabs_mult.
-apply /RleP. rewrite -RmultE -RplusE.
-apply Rmult_le_compat; try by apply Rabs_pos.
-+ apply Rabs_triang.
-+ apply Hd.
-Qed.
-
-
-Lemma BPLUS_error_le_rel'
-  {NAN: Nans} (t : type) :
-  forall x y 
-  (FIN: Binary.is_finite _ _ (BPLUS t x y) = true),
-  Rabs (FT2R (BPLUS t x y ) - (FT2R x + FT2R y)) <= (Rabs (FT2R x + FT2R y)) * (default_rel t).
-Proof.
-intros.
-pose proof (BPLUS_accurate' t x y FIN).
-destruct H as [delta H].
-destruct H as [Hd Heq].
-rewrite Heq.
-assert (((FT2R x + FT2R y) * (1 + delta) - (FT2R x + FT2R y))%Re =
-        ((FT2R x + FT2R y) * delta)%Re).
-{ nra. } rewrite H.
-rewrite Rabs_mult.
-apply /RleP. rewrite -RmultE.
-apply Rmult_le_compat; try by apply Rabs_pos.
-+ nra.
-+ apply Hd.
-Qed.
-
-
-
-
-Lemma Bplus_no_ov_is_finite : 
-   forall (t: type) 
-             x (FINx: Binary.is_finite (fprec t) (femax t) x = true) 
-             y (FINy: Binary.is_finite (fprec t) (femax t) y = true) 
-          (FIN: Bplus_no_overflow t (FT2R x) (FT2R y)), 
-          Binary.is_finite (fprec t) (femax t) (BPLUS t x y) = true.
-Proof.
-intros.
-pose proof (Binary.Bplus_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan t) 
-                      BinarySingleNaN.mode_NE x y FINx FINy ).
-change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
-cbv zeta in H.
-pose proof (
-   Raux.Rlt_bool_spec
-        (Rabs
-           (Generic_fmt.round Zaux.radix2
-              (SpecFloat.fexp (fprec t) (femax t))
-              (BinarySingleNaN.round_mode
-                 BinarySingleNaN.mode_NE) (FT2R x + FT2R y)))
-        (Raux.bpow Zaux.radix2 (femax t))).
-destruct H0.
-{ destruct H as ( _ & Hyp & _).
-fold (@BPLUS _ t) in Hyp; auto. }
-red in FIN. unfold rounded in FIN.
-Lra.lra.
-Qed.
 
 
 Lemma F_p_ge_0 {ty}:
@@ -177,8 +62,6 @@ apply Rmult_le_pos.
      { by unfold bpow. } rewrite H1.
      apply bpow_lt. apply Z.lt_0_sub, fprec_gt_one.
 Qed.
-
-Require Import Coq.ZArith.BinInt.
 
 
 Lemma finite_bminus {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1) i:
@@ -245,13 +128,10 @@ apply Bplus_no_ov_is_finite .
                rewrite Z.add_comm. rewrite Rmult_comm.
                rewrite -bpow_plus. apply bpow_lt. rewrite Z.add_shuffle0.
                apply Z.add_lt_mono_r.
-               Search (_ + _  < _ + _)%Z.
                apply Z.lt_sub_lt_add. simpl.
                unfold Z.sub. rewrite Z.opp_involutive. 
-               Search (_ + _ = _)%Z.
                assert (2%Z = (1+1)%Z). { by simpl. }
                rewrite H2.  
-               Search (_ + _  < _ + _)%Z.
                apply Z.add_lt_mono;
                apply Z.lt_trans with (fprec ty); try apply fprec_gt_one;
                try apply fprec_lt_femax.
@@ -375,7 +255,7 @@ rewrite Bminus_bplus_opp_equiv.
   rewrite H0.
   apply Rle_trans with 
   ((Rabs (FT2R (v1 (inord i) ord0)) + Rabs (FT2R (BOPP ty (v2 (inord i) ord0)))) * (default_rel ty))%Re.
-  - apply /RleP. apply BPLUS_error_le_rel.
+  - apply BPLUS_error_le_rel.
     apply Hfin. 
   - apply Rle_trans with
     ((bigmaxr 0%Re
@@ -462,7 +342,7 @@ rewrite Bminus_bplus_opp_equiv.
   rewrite H0.
   apply Rle_trans with 
   (Rabs (FT2R (v1 (inord i) ord0) + (FT2R (BOPP ty (v2 (inord i) ord0)))) * (default_rel ty))%Re.
-  - apply /RleP. apply BPLUS_error_le_rel'.
+  - apply BPLUS_error_le_rel'.
     apply Hfin.
   - apply Rmult_le_compat_r.
     * apply default_rel_ge_0.
@@ -489,8 +369,6 @@ rewrite Bminus_bplus_opp_equiv.
 + rewrite is_finite_Bopp. apply Hfin.
 + by apply Hfin. 
 Qed.
-
-
 
 
 
