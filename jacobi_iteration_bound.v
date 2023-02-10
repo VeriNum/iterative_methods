@@ -409,9 +409,6 @@ res_k+1 = A_1 \otimes (x_k+1 \ominus x_k)
 x_k+1 = D^-1 \otimes (b \ominus (N \otimes x_k))
 **)
 
-(** TODO: can we remove the additional finites in the 
-    hypothesis and clean up the hypothesis a bit?
-**)
 
 (** finiteness of dot product **)
 Lemma dotprod_finite {t: type} (v : vector t):
@@ -439,62 +436,12 @@ assert (fma_dotprod t v v = dotprod v v).
 rewrite H3 in H2. specialize (H0 H2).
 apply H0.
 intros.
-repeat split.
-+ specialize (H xy.1).
-  apply H.
-  destruct xy. apply in_combine_l in H4.
-  auto.
-+ specialize (H xy.2).
-  apply H.
-  destruct xy. apply in_combine_r in H4.
-  auto.
-+ specialize (H xy.1).
-  apply H. destruct xy. apply in_combine_l in H4.
-  auto.
-+ specialize (H xy.2).
-  apply H. destruct xy. apply in_combine_r in H4.
-  auto.
+repeat split;
+try (specialize (H xy.1); apply H;
+      destruct xy; apply in_combine_l in H4; auto);
+try (specialize (H xy.2); apply H;
+      destruct xy; apply in_combine_r in H4; auto).
 Qed.
-
-
-
-
-
-
-
-
-
-
-
-Lemma dotprod_finite {t: type} (v : vector t):
-(forall xy : ftype t * ftype t,
-In xy (combine (rev v) (rev v)) ->
-is_finite (fprec t) (femax t) xy.1 = true /\
-is_finite (fprec t) (femax t) xy.2 = true /\
-(let n := length (rev v) in
- (Rabs (FT2R xy.1) <=
-  sqrt
-    (F' t / 2 /
-     (INR n * (1 + default_rel t) ^ n)))%Re /\
- (Rabs (FT2R xy.2) <=
-  sqrt
-    (F' t / 2 /
-     (INR n * (1 + default_rel t) ^ n)))%Re)) ->
-is_finite (fprec t) (femax t)
-  (dotprod v v) = true.
-Proof.
-pose proof (@fma_is_finite _ t (rev v) (rev v)).
-assert (length (rev v) = length (rev v)).
-{ lia. } specialize (H H0).
-specialize (H (dotprod v v)).
-apply H. 
-pose proof (@fma_dot_prod_rel_fold_right _ t).
-specialize (H1 v v).
-rewrite combine_rev; last by [].
-assert (fma_dotprod t v v = dotprod v v).
-{ by unfold fma_dotprod, dotprod. } rewrite -H2. apply H1.
-Qed.
-
 
 
 Notation "A +f B" := (addmx_float A B) (at level 80).
