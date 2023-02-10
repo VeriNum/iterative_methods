@@ -819,6 +819,15 @@ repeat split.
     apply Rabs_triang.
     apply Rplus_le_compat_l. apply Hd1.
     rewrite Rabs_R1.
+    apply Rcomplements.Rle_minus_r.
+    Search ( _ * _ <= _)%Re.
+    apply Rdiv_le_right_elim; first by
+    apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+    rewrite -Rmult_assoc.
+    apply Rdiv_le_right_elim; first by
+    apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+    
+
 
     
 
