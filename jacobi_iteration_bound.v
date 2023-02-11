@@ -847,6 +847,20 @@ induction k.
     apply Rabs_triang. rewrite Rabs_R1. apply Rplus_le_compat_l.
     apply Hd3. 
     rewrite -Rmult_minus_distr_l. rewrite Rabs_mult.
+    assert ((1 + d3 - (1 + d4))%Re = (d3 - d4)%Re).
+    { nra. } rewrite H9. apply Rmult_le_compat_l.
+    apply Rabs_pos. apply Rle_trans with (2 * (default_rel t))%Re.
+    eapply Rle_trans. apply Rabs_triang. 
+    rewrite Rabs_Ropp. nra.
+    apply Rle_refl.
+    apply Rmult_le_compat_r. 
+    apply Rmult_le_pos; try nra; try apply default_rel_ge_0.
+    rewrite Rabs_mult. apply Rmult_le_compat_l.
+    apply Rabs_pos.
+    apply Rle_trans with (Rabs 1 + Rabs d4)%Re.
+    apply Rabs_triang. rewrite Rabs_R1. apply Rplus_le_compat_l.
+    apply Hd4.
+    
 
 
 
