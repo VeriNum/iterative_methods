@@ -644,7 +644,38 @@ induction k.
   apply Rle_trans with (2 * (default_rel t))%Re.
   eapply Rle_trans. apply Rabs_triang.
   rewrite Rabs_Ropp. nra. apply Rle_refl.
-  
+  rewrite !mxE.
+  rewrite !Bminus_bplus_opp_equiv.
+  - pose proof (@BPLUS_accurate _ t).
+    specialize (H5 (b (inord m) ord0)).
+    assert (is_finite (fprec t) 
+                 (femax t) (b (inord m) ord0) = true) by admit.
+    specialize (H5 H6).
+    remember (vec_to_list_float  n.+1
+                         (\row_j  A2_J A  (inord m) j)^T) as L1.
+    remember (vec_to_list_float n.+1
+                         (\col_j X_m_jacobi k.+1  x0 b A j ord0)) as L2.
+    remember (vec_to_list_float n.+1
+                   (\col_j  X_m_jacobi k x0 b A j ord0)) as L3.
+    
+
+
+    specialize (H5 (BOPP t
+                    (let l1 :=
+                       vec_to_list_float
+                         n.+1
+                         (\row_j 
+                          A2_J A 
+                            (inord m) j)^T
+                       in
+                     let l2 :=
+                       vec_to_list_float
+                         n.+1
+                         (\col_j 
+                          X_m_jacobi k.+1
+                            x0 b A j ord0)
+                       in
+                     dotprod_r l1 l2))
 
   
 
