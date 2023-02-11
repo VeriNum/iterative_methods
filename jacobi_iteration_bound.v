@@ -628,6 +628,25 @@ induction k.
   apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
   apply Rplus_le_compat_r. apply Rmult_le_compat_l.
   apply Rabs_pos. apply Rabs_triang.
+  rewrite -Rmult_minus_distr_l.
+  assert ((1 + d1 - (1 + d2))%Re = (d1 - d2)%Re).
+  { nra. } rewrite H5. clear H5.
+  eapply Rle_lt_trans. apply Rplus_le_compat_r.
+  apply Rmult_le_compat_r.
+  apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+  apply Rplus_le_compat_r. apply Rmult_le_compat_l.
+  apply Rabs_pos. 
+  apply Rplus_le_compat. rewrite Rabs_mult. apply Rmult_le_compat_l.
+  apply Rabs_pos. apply Rle_trans with (Rabs 1 + Rabs d1)%Re.
+  apply Rabs_triang. rewrite Rabs_R1. 
+  apply Rplus_le_compat_l. apply Hd1.
+  rewrite Rabs_mult. apply Rmult_le_compat_l. apply Rabs_pos.
+  apply Rle_trans with (2 * (default_rel t))%Re.
+  eapply Rle_trans. apply Rabs_triang.
+  rewrite Rabs_Ropp. nra. apply Rle_refl.
+  
+
+  
 
 
 
