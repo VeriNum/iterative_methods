@@ -756,7 +756,90 @@ induction k.
                    in
                  dotprod_r l1 l2)))%Re).
    { unfold FT2R. by rewrite B2R_Bopp. } rewrite H9. clear H9.
-   
+   assert (((FT2R (b (inord m) ord0) +
+             -
+             FT2R
+               (let l1 :=
+                  vec_to_list_float n.+1
+                    (\row_j A2_J A 
+                              (inord m) j)^T
+                  in
+                let l2 :=
+                  vec_to_list_float n.+1
+                    (\col_j X_m_jacobi k.+1
+                              x0 b A j ord0)
+                  in
+                dotprod_r l1 l2)) * 
+            (1 + d3) -
+            (FT2R (b (inord m) ord0) +
+             -
+             FT2R
+               (let l1 :=
+                  vec_to_list_float n.+1
+                    (\row_j A2_J A 
+                              (inord m) j)^T
+                  in
+                let l2 :=
+                  vec_to_list_float n.+1
+                    (\col_j X_m_jacobi k x0 b
+                              A j ord0) in
+                dotprod_r l1 l2)) * 
+            (1 + d4))%Re = 
+            (((FT2R (b (inord m) ord0) - FT2R
+               (let l1 :=
+                  vec_to_list_float n.+1
+                    (\row_j A2_J A 
+                              (inord m) j)^T
+                  in
+                let l2 :=
+                  vec_to_list_float n.+1
+                    (\col_j X_m_jacobi k.+1
+                              x0 b A j ord0)
+                  in
+                dotprod_r l1 l2)) - 
+            (FT2R (b (inord m) ord0) - FT2R
+               (let l1 :=
+                  vec_to_list_float n.+1
+                    (\row_j A2_J A 
+                              (inord m) j)^T
+                  in
+                let l2 :=
+                  vec_to_list_float n.+1
+                    (\col_j X_m_jacobi k x0 b
+                              A j ord0) in
+                dotprod_r l1 l2))) * (1 + d3) +
+            ((FT2R (b (inord m) ord0) - FT2R
+               (let l1 :=
+                  vec_to_list_float n.+1
+                    (\row_j A2_J A 
+                              (inord m) j)^T
+                  in
+                let l2 :=
+                  vec_to_list_float n.+1
+                    (\col_j X_m_jacobi k x0 b
+                              A j ord0) in
+                dotprod_r l1 l2)) * (1 + d3) - 
+            (FT2R (b (inord m) ord0) - FT2R
+               (let l1 :=
+                  vec_to_list_float n.+1
+                    (\row_j A2_J A 
+                              (inord m) j)^T
+                  in
+                let l2 :=
+                  vec_to_list_float n.+1
+                    (\col_j X_m_jacobi k x0 b
+                              A j ord0) in
+                dotprod_r l1 l2)) * (1 + d4)))%Re).
+    { nra. } rewrite H9. clear H9.
+    eapply Rle_lt_trans. apply Rplus_le_compat_r. 
+    apply Rmult_le_compat_r.
+    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+    apply Rplus_le_compat_r.
+    apply Rmult_le_compat_l. apply Rabs_pos.
+    apply Rplus_le_compat. apply Rmult_le_compat_r.
+    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+    eapply Rle_trans. apply Rabs_triang.
+    apply Rplus_le_compat.
 
 
 
