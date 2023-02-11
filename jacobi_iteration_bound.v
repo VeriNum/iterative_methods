@@ -430,6 +430,16 @@ rewrite H02. by apply /andP.
 Qed.
 
 
+Lemma ov_no_finite {t: type}:
+  forall (x : ftype t) ,
+  is_nan _ _ x = false ->
+  valid_binary (fprec t) (femax t) (B2FF _ _ x) = true ->
+  is_finite _ _ x = true.
+Proof.
+intros. 
+destruct x; simpl in *; auto.
+Admitted.
+
 Lemma residual_is_finite {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
   let resid := residual_math A x0 b in
