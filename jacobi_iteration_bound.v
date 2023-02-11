@@ -701,7 +701,62 @@ induction k.
                              ord0) in
                  dotprod_r l1 l2)))%Re).
     { unfold FT2R. by rewrite B2R_Bopp. } rewrite H7. clear H7.
-    
+    pose proof (@BPLUS_accurate' _ t).
+    specialize (H7 (b (inord m) ord0) (BOPP t
+                    (let l1 :=
+                       vec_to_list_float n.+1
+                         (\row_j 
+                          A2_J A 
+                            (inord m) j)^T in
+                     let l2 :=
+                       vec_to_list_float n.+1
+                         (\col_j 
+                          X_m_jacobi k x0 b A
+                            j ord0) in
+                     dotprod_r l1 l2))).
+    assert (is_finite (fprec t) (femax t)
+             (BPLUS t (b (inord m) ord0)
+                (BOPP t
+                   (let l1 :=
+                      vec_to_list_float n.+1
+                        (\row_j 
+                         A2_J A 
+                           (inord m) j)^T in
+                    let l2 :=
+                      vec_to_list_float n.+1
+                        (\col_j 
+                         X_m_jacobi k x0 b A
+                           j ord0) in
+                    dotprod_r l1 l2))) = true) by admit.
+   specialize (H7 H8).
+   destruct H7 as [d4 [Hd4 H7]].
+   rewrite H7.
+   assert (FT2R
+             (BOPP t
+                (let l1 :=
+                   vec_to_list_float n.+1
+                     (\row_j A2_J A
+                             (inord m) j)^T
+                   in
+                 let l2 :=
+                   vec_to_list_float n.+1
+                     (\col_j X_m_jacobi k
+                             x0 b A j ord0)
+                   in
+                 dotprod_r l1 l2)) = 
+            (- (FT2R (let l1 :=
+                   vec_to_list_float n.+1
+                     (\row_j A2_J A
+                             (inord m) j)^T
+                   in
+                 let l2 :=
+                   vec_to_list_float n.+1
+                     (\col_j X_m_jacobi k
+                             x0 b A j ord0)
+                   in
+                 dotprod_r l1 l2)))%Re).
+   { unfold FT2R. by rewrite B2R_Bopp. } rewrite H9. clear H9.
+   
 
 
 
