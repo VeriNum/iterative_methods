@@ -840,6 +840,13 @@ induction k.
     apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
     eapply Rle_trans. apply Rabs_triang.
     apply Rplus_le_compat.
+    assert (forall a b c:R, ((a - b) - (a - c))%Re = (- (b - c))%Re).
+    { intros. nra. } rewrite H9. rewrite Rabs_mult. rewrite Rabs_Ropp.
+    apply Rmult_le_compat_l. apply Rabs_pos.
+    apply Rle_trans with (Rabs 1 + Rabs d3)%Re.
+    apply Rabs_triang. rewrite Rabs_R1. apply Rplus_le_compat_l.
+    apply Hd3. 
+    rewrite -Rmult_minus_distr_l. rewrite Rabs_mult.
 
 
 
