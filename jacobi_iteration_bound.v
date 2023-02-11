@@ -592,7 +592,42 @@ induction k.
   rewrite Rabs_Ropp. nra. apply Rle_refl.
   rewrite !Rmult_assoc.
   rewrite -Rmult_minus_distr_l. rewrite Rabs_mult.
-  
+  assert ((FT2R
+             ((b -f
+               A2_J A *f
+               X_m_jacobi k.+1 x0 b A)
+                (inord m) ord0) *   (1 + d1) -
+             FT2R
+               ((b -f
+                 A2_J A *f
+                 X_m_jacobi k x0 b A)
+                  (inord m) ord0) *  (1 + d2))%Re = 
+          ((FT2R
+             ((b -f
+               A2_J A *f
+               X_m_jacobi k.+1 x0 b A)
+                (inord m) ord0)  - 
+           FT2R
+               ((b -f
+                 A2_J A *f
+                 X_m_jacobi k x0 b A)
+                  (inord m) ord0)) * (1+ d1) +
+          (FT2R
+               ((b -f
+                 A2_J A *f
+                 X_m_jacobi k x0 b A)
+                  (inord m) ord0) * (1+ d1) - 
+            FT2R
+               ((b -f
+                 A2_J A *f
+                 X_m_jacobi k x0 b A)
+                  (inord m) ord0) * (1+ d2)))%Re).
+  { nra. } rewrite H5. clear H5.
+  eapply Rle_lt_trans. apply Rplus_le_compat_r.
+  apply Rmult_le_compat_r.
+  apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+  apply Rplus_le_compat_r. apply Rmult_le_compat_l.
+  apply Rabs_pos. apply Rabs_triang.
 
 
 
