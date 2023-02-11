@@ -155,6 +155,26 @@ try unfold is_finite in H1; simpl in *; auto);
 Qed.
 
 
+
+Lemma Bplus_bminus_opp_implies {ty} (x y : ftype ty): 
+  is_finite _ _ (BPLUS ty x (BOPP ty y)) ->
+  is_finite _ _ (BMINUS ty x y).
+Proof.
+intros.
+destruct x, y; (unfold BMINUS, BPLUS, BOPP, BINOP, Bplus, Bminus, Bopp in *; simpl in *; auto;
+try destruct (Bool.eqb s (~~ s0)); simpl in * ;auto; try by []; 
+try unfold is_finite in H1; simpl in *; auto);
+(destruct (BinarySingleNaN.binary_normalize 
+    (fprec ty) (femax ty) (fprec_gt_0 ty)
+    (fprec_lt_femax ty) BinarySingleNaN.mode_NE
+    (BinarySingleNaN.Fplus_naive s m e 
+       (~~ s0) m0 e1 (Z.min e e1)) 
+    (Z.min e e1) false); simpl;auto;
+  by destruct s,s0;simpl in *; auto).
+Qed.
+
+
+
 Lemma bplus_overflow_implies {t : type}: 
   forall x y , 
   Binary.is_finite _ _ (BPLUS t x y) = true ->
