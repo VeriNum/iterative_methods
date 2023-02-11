@@ -588,6 +588,10 @@ induction k.
   apply Rplus_le_compat_l.
   apply Rle_trans with (2 * (default_abs t))%Re.
   eapply Rle_trans.
+  apply Rabs_triang .
+  rewrite Rabs_Ropp. nra. apply Rle_refl.
+  rewrite !Rmult_assoc.
+  rewrite -Rmult_minus_distr_l. rewrite Rabs_mult.
   
 
 
