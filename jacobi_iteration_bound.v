@@ -440,6 +440,33 @@ intros.
 destruct x; simpl in *; auto.
 Admitted.
 
+
+(**
+ Bplus_no_overflow t
+               (FT2R
+                  (X_m_jacobi k.+1 x0 b A
+                     (inord m) ord0))
+               (FT2R
+                  (BOPP t
+                     (X_m_jacobi k x0 b A
+                        (inord m) ord0)))
+
+**)
+Lemma Bplus_x_kp_x_k_no_oveflow {t: type} {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
+  Bplus_no_overflow t
+               (FT2R
+                  (X_m_jacobi k.+1 x0 b A
+                     (inord m) ord0))
+               (FT2R
+                  (BOPP t
+                     (X_m_jacobi k x0 b A
+                        (inord m) ord0))).
+Proof.
+Admitted.
+
+
+
 Lemma residual_is_finite {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
   let resid := residual_math A x0 b in
@@ -472,7 +499,11 @@ repeat split.
   rewrite mxE inord_val.
   apply BMULT_no_overflow_is_finite.
   - admit.
-  - admit.
+  - rewrite mxE.  apply Bplus_bminus_opp_implies.
+    apply Bplus_no_ov_is_finite.
+    * admit.
+    * admit.
+    * apply Bplus_x_kp_x_k_no_oveflow.
   - admit.
 + rewrite !rev_length  length_veclist.
   rewrite rev_involutive in H.
