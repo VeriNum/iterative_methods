@@ -504,11 +504,37 @@ induction k.
                  FT2R
                    (BOPP t
                       (X_m_jacobi k.+1 x0 b A
-                         (inord m) ord0)))).
+                         (inord m) ord0)))%Re ).
   destruct H0 as [d [e [Hde [Hd [He H0]]]]].
   rewrite H0. clear H0.
+  assert (X_m_jacobi k.+2 x0 b A (inord m) ord0 = 
+          jacobi_iter
+             (X_m_jacobi k.+1 x0 b A) b A (inord m) ord0).
+  { by simpl. } rewrite H0. clear H0.
+  assert (X_m_jacobi k.+1 x0 b A (inord m) ord0 = 
+          jacobi_iter
+             (X_m_jacobi k x0 b A) b A (inord m) ord0).
+  { by simpl. } rewrite H0. clear H0.
+  assert ((FT2R
+             (jacobi_iter
+                (X_m_jacobi k.+1 x0 b A) b
+                A (inord m) ord0) +
+           FT2R
+             (BOPP t
+                (jacobi_iter
+                   (X_m_jacobi k x0 b A) b
+                   A (inord m) ord0)))%Re = 
+           (FT2R (jacobi_iter
+                    (X_m_jacobi k.+1 x0 b A) b A (inord m) ord0) - 
+            FT2R (jacobi_iter
+                   (X_m_jacobi k x0 b A) b A (inord m) ord0))%Re).
+  { unfold FT2R. by rewrite B2R_Bopp. } rewrite H0. clear H0.
   
   
+
+
+
+  simpl.
   
 
 
