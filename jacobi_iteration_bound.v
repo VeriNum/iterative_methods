@@ -646,43 +646,62 @@ induction k.
   rewrite Rabs_Ropp. nra. apply Rle_refl.
   rewrite !mxE.
   rewrite !Bminus_bplus_opp_equiv.
-  - pose proof (@BPLUS_accurate _ t).
-    specialize (H5 (b (inord m) ord0)).
-    assert (is_finite (fprec t) 
-                 (femax t) (b (inord m) ord0) = true) by admit.
+  - pose proof (@BPLUS_accurate' _ t).
+    specialize (H5 (b (inord m) ord0) (BOPP t
+                      (let l1 :=
+                         vec_to_list_float n.+1
+                           (\row_j 
+                            A2_J A 
+                              (inord m) j)^T in
+                       let l2 :=
+                         vec_to_list_float n.+1
+                           (\col_j 
+                            X_m_jacobi k.+1 x0
+                              b A j ord0) in
+                       dotprod_r l1 l2))).
+    assert (is_finite (fprec t) (femax t)
+               (BPLUS t (b (inord m) ord0)
+                  (BOPP t
+                     (let l1 :=
+                        vec_to_list_float n.+1
+                          (\row_j 
+                           A2_J A 
+                             (inord m) j)^T in
+                      let l2 :=
+                        vec_to_list_float n.+1
+                          (\col_j 
+                           X_m_jacobi k.+1 x0 b
+                             A j ord0) in
+                      dotprod_r l1 l2))) = true) by admit.
     specialize (H5 H6).
-    remember (vec_to_list_float  n.+1
-                         (\row_j  A2_J A  (inord m) j)^T) as L1.
-    remember (vec_to_list_float n.+1
-                         (\col_j X_m_jacobi k.+1  x0 b A j ord0)) as L2.
-    remember (vec_to_list_float n.+1
-                   (\col_j  X_m_jacobi k x0 b A j ord0)) as L3.
+    destruct H5 as [d3 [Hd3 H5]].
+    rewrite H5.
+    assert (FT2R
+             (BOPP t
+                (let l1 :=
+                   vec_to_list_float n.+1
+                     (\row_j A2_J A
+                             (inord m) j)^T
+                   in
+                 let l2 :=
+                   vec_to_list_float n.+1
+                     (\col_j X_m_jacobi
+                             k.+1 x0 b A j
+                             ord0) in
+                 dotprod_r l1 l2)) = 
+            (- (FT2R (let l1 :=
+                   vec_to_list_float n.+1
+                     (\row_j A2_J A
+                             (inord m) j)^T
+                   in
+                 let l2 :=
+                   vec_to_list_float n.+1
+                     (\col_j X_m_jacobi
+                             k.+1 x0 b A j
+                             ord0) in
+                 dotprod_r l1 l2)))%Re).
+    { unfold FT2R. by rewrite B2R_Bopp. } rewrite H7. clear H7.
     
-
-
-    specialize (H5 (BOPP t
-                    (let l1 :=
-                       vec_to_list_float
-                         n.+1
-                         (\row_j 
-                          A2_J A 
-                            (inord m) j)^T
-                       in
-                     let l2 :=
-                       vec_to_list_float
-                         n.+1
-                         (\col_j 
-                          X_m_jacobi k.+1
-                            x0 b A j ord0)
-                       in
-                     dotprod_r l1 l2))
-
-  
-
-
-
-
-
 
 
 
