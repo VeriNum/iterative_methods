@@ -454,6 +454,7 @@ Admitted.
 **)
 Lemma Bplus_x_kp_x_k_no_oveflow {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
+  (m < n.+1)%nat ->
   (exists F:R, 
       forall k,
         (Rabs ((FT2R (X_m_jacobi k.+1 x0 b A
@@ -473,15 +474,15 @@ intros.
 unfold Bplus_no_overflow.
 induction k.
 + pose proof (@generic_round_property t).
-  specialize (H0 (FT2R
+  specialize (H1 (FT2R
                      (X_m_jacobi 1 x0 b A
                         (inord m) ord0) +
                    FT2R
                      (BOPP t
                         (X_m_jacobi 0 x0 b A
                            (inord m) ord0)))%Re).
-  destruct H0 as [d [e [Hde [Hd [He H0]]]]].
-  rewrite H0. clear H0.
+  destruct H1 as [d [e [Hde [Hd [He H1]]]]].
+  rewrite H1. clear H1.
   assert ((FT2R
              (X_m_jacobi 1 x0 b A
                 (inord m) ord0) +
@@ -495,26 +496,26 @@ induction k.
            FT2R (X_m_jacobi 0 x0 b A
                    (inord m) ord0))%Re).
   { unfold  FT2R. by rewrite B2R_Bopp. }
-  rewrite H0.
+  rewrite H1.
   admit.
 + pose proof (@generic_round_property t).
-  specialize (H0 (FT2R
+  specialize (H1 (FT2R
                    (X_m_jacobi k.+2 x0 b A
                       (inord m) ord0) +
                  FT2R
                    (BOPP t
                       (X_m_jacobi k.+1 x0 b A
                          (inord m) ord0)))%Re ).
-  destruct H0 as [d [e [Hde [Hd [He H0]]]]].
-  rewrite H0. clear H0.
+  destruct H1 as [d [e [Hde [Hd [He H1]]]]].
+  rewrite H1. clear H1.
   assert (X_m_jacobi k.+2 x0 b A (inord m) ord0 = 
           jacobi_iter
              (X_m_jacobi k.+1 x0 b A) b A (inord m) ord0).
-  { by simpl. } rewrite H0. clear H0.
+  { by simpl. } rewrite H1. clear H1.
   assert (X_m_jacobi k.+1 x0 b A (inord m) ord0 = 
           jacobi_iter
              (X_m_jacobi k x0 b A) b A (inord m) ord0).
-  { by simpl. } rewrite H0. clear H0.
+  { by simpl. } rewrite H1. clear H1.
   assert ((FT2R
              (jacobi_iter
                 (X_m_jacobi k.+1 x0 b A) b
@@ -528,7 +529,7 @@ induction k.
                     (X_m_jacobi k.+1 x0 b A) b A (inord m) ord0) - 
             FT2R (jacobi_iter
                    (X_m_jacobi k x0 b A) b A (inord m) ord0))%Re).
-  { unfold FT2R. by rewrite B2R_Bopp. } rewrite H0. clear H0.
+  { unfold FT2R. by rewrite B2R_Bopp. } rewrite H1. clear H1.
   eapply Rle_lt_trans.
   apply Rabs_triang.
   eapply Rle_lt_trans.
@@ -541,9 +542,60 @@ induction k.
   apply Hd.
   unfold jacobi_iter.
   rewrite !mxE.
+  repeat (rewrite nth_vec_to_list_float; last by rewrite inordK).
+  rewrite inord_val.
+  pose proof (@BMULT_accurate' _ t).
+  specialize (H1 (A1_inv_J A (inord m) ord0) ((b -f
+                   A2_J A *f
+                   X_m_jacobi k.+1 x0 b A)
+                    (inord m) ord0)).
+  assert (is_finite (fprec t) 
+             (femax t)
+             (BMULT t
+                (A1_inv_J A (inord m) ord0)
+                ((b -f
+                  A2_J A *f
+                  X_m_jacobi k.+1 x0 b A)
+                   (inord m) ord0)) = true) by admit.
+  specialize (H1 H2). 
+  destruct H1 as [d1 [e1 [Hde1 [Hd1 [He1 H1]]]]].
+  pose proof (@BMULT_accurate' _ t).
+  specialize (H3 (A1_inv_J A (inord m) ord0) ((b -f
+                   A2_J A *f
+                   X_m_jacobi k x0 b A)
+                    (inord m) ord0)).
+  assert (is_finite (fprec t) 
+             (femax t)
+             (BMULT t
+                (A1_inv_J A (inord m) ord0)
+                ((b -f
+                  A2_J A *f
+                  X_m_jacobi k x0 b A)
+                   (inord m) ord0)) = true) by admit.
+  specialize (H3 H4). 
+  destruct H3 as [d2 [e2 [Hde2 [Hd2 [He2 H3]]]]].
+  rewrite H1 H3.
+  match goal with |-context[(Rabs (?a + ?b - (?c + ?d)) * _ + _ < _)%Re]=>
+    replace (a + b - (c + d))%Re with ((a - c) + (b - d))%Re by nra
+  end.
+  eapply Rle_lt_trans. apply Rplus_le_compat_r.
+  apply Rmult_le_compat_r.
+  apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+  apply Rabs_triang.
+  eapply Rle_lt_trans. apply Rplus_le_compat_r.
+  apply Rmult_le_compat_r.
+  apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+  apply Rplus_le_compat_l.
+  apply Rle_trans with (2 * (default_abs t))%Re.
+  eapply Rle_trans.
   
-  
-  
+
+
+
+
+
+
+
 
 
 
