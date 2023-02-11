@@ -529,6 +529,19 @@ induction k.
             FT2R (jacobi_iter
                    (X_m_jacobi k x0 b A) b A (inord m) ord0))%Re).
   { unfold FT2R. by rewrite B2R_Bopp. } rewrite H0. clear H0.
+  eapply Rle_lt_trans.
+  apply Rabs_triang.
+  eapply Rle_lt_trans.
+  apply Rplus_le_compat_l. apply He.
+  rewrite Rabs_mult. eapply Rle_lt_trans.
+  apply Rplus_le_compat_r. apply Rmult_le_compat_l.
+  apply Rabs_pos. 
+  apply Rle_trans with (Rabs 1 + Rabs d)%Re.
+  apply Rabs_triang. rewrite Rabs_R1. apply Rplus_le_compat_l.
+  apply Hd.
+  unfold jacobi_iter.
+  rewrite !mxE.
+  
   
   
 
