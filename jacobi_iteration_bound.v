@@ -454,6 +454,12 @@ Admitted.
 **)
 Lemma Bplus_x_kp_x_k_no_oveflow {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
+  (exists F:R, 
+      forall k,
+        (Rabs ((FT2R (X_m_jacobi k.+1 x0 b A
+                     (inord m) ord0)) - 
+               FT2R (X_m_jacobi k x0 b A
+                        (inord m) ord0)) <= F)%Re) -> 
   Bplus_no_overflow t
                (FT2R
                   (X_m_jacobi k.+1 x0 b A
@@ -463,6 +469,16 @@ Lemma Bplus_x_kp_x_k_no_oveflow {t: type} {n:nat}
                      (X_m_jacobi k x0 b A
                         (inord m) ord0))).
 Proof.
+intros.
+unfold Bplus_no_overflow.
+induction k.
++ pose proof BPLUS_accurate'.
+  
+
+
+
+
+
 Admitted.
 
 
@@ -608,7 +624,10 @@ repeat split.
     admit.
   - admit.
   - rewrite is_finite_Bopp. admit.
-  - admit.
+  - apply Bplus_no_ov_is_finite.
+    * admit.
+    * admit.
+    * apply Bplus_x_kp_x_k_no_oveflow.
 Admitted.
 
 
