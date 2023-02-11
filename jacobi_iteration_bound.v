@@ -472,7 +472,43 @@ Proof.
 intros.
 unfold Bplus_no_overflow.
 induction k.
-+ pose proof BPLUS_accurate'.
++ pose proof (@generic_round_property t).
+  specialize (H0 (FT2R
+                     (X_m_jacobi 1 x0 b A
+                        (inord m) ord0) +
+                   FT2R
+                     (BOPP t
+                        (X_m_jacobi 0 x0 b A
+                           (inord m) ord0)))%Re).
+  destruct H0 as [d [e [Hde [Hd [He H0]]]]].
+  rewrite H0. clear H0.
+  assert ((FT2R
+             (X_m_jacobi 1 x0 b A
+                (inord m) ord0) +
+           FT2R
+             (BOPP t
+                (X_m_jacobi 0 x0 b A
+                   (inord m) ord0)))%Re = 
+          (FT2R
+             (X_m_jacobi 1 x0 b A
+                (inord m) ord0) - 
+           FT2R (X_m_jacobi 0 x0 b A
+                   (inord m) ord0))%Re).
+  { unfold  FT2R. by rewrite B2R_Bopp. }
+  rewrite H0.
+  admit.
++ pose proof (@generic_round_property t).
+  specialize (H0 (FT2R
+                   (X_m_jacobi k.+2 x0 b A
+                      (inord m) ord0) +
+                 FT2R
+                   (BOPP t
+                      (X_m_jacobi k.+1 x0 b A
+                         (inord m) ord0)))).
+  destruct H0 as [d [e [Hde [Hd [He H0]]]]].
+  rewrite H0. clear H0.
+  
+  
   
 
 
