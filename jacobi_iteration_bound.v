@@ -1479,7 +1479,12 @@ induction k.
            try (apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0).
         -- by apply dot_prod_sub.
      ++ apply Rmult_le_compat_l.
-        
+        -- repeat apply Rmult_le_pos; try nra; try apply Rabs_pos; try apply bpow_ge_0.
+           apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+        -- apply Rplus_le_compat_l.
+           by apply dot_prod_sub1.
+           
+           
 
            
     
