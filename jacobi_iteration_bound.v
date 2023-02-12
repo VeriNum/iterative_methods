@@ -621,7 +621,7 @@ assert (\sum_j
 } rewrite H4 in H0.
 specialize (H0 (R_dot_prod_rel_abs_holds    n.+1 m (A2_J A)
               (\col_j X_m_jacobi k.+1 x0 b A j ord0))).
-clear H3 H4.
+rewrite -H4 in H0. clear H3 H4.
 assert (forall xy : ftype t * ftype t,
           In xy
             (combine
@@ -724,7 +724,7 @@ assert (\sum_j
 } rewrite H8 in H5.
 specialize (H5 (R_dot_prod_rel_abs_holds    n.+1 m (A2_J A)
               (\col_j X_m_jacobi k x0 b A j ord0))).
-clear H7 H8.
+rewrite -H8 in H5. clear H7 H8.
 assert (forall xy : ftype t * ftype t,
           In xy
             (combine
@@ -750,7 +750,7 @@ assert (is_finite (fprec t)
                        k x0 b A
                        j ord0))) = true) by admit.
 specialize (H5 H7 H8).
-
+clear H8 H7 H4 H3.
 
 
 
