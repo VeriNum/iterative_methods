@@ -903,7 +903,13 @@ induction k.
               ( a * b * d + (a * c * d + a * e))%Re by nra
      end.
      apply Rplus_le_compat. nra.  
-     
+     match goal with |-context[(?a * (?b * ?c) * ?d + ?a * (?e * ?d * ?c) <= _)%Re]=>
+        replace (a * (b * c) * d + a * (e * d * c))%Re with 
+                (a * ((c * d) * (b + e)))%Re by nra
+     end.
+     match goal with |-context[( _ <= 4 * ?b * ?c * ?a * ?d)%Re]=>
+       replace (4 * b * c * a * d)%Re with (a * (2 * ((2 * b) * c) * d))%Re by nra
+     end. apply Rmult_le_compat_l. apply Rabs_pos.
 
 
 
@@ -2282,3 +2288,5 @@ Qed.
 
 
 End WITH_NANS.
+
+
