@@ -500,7 +500,35 @@ Lemma dot_prod_sub  {t: type} {n:nat}
           (vec_to_list_float n.+1
              (\col_j X_m_jacobi k
                        x0 b A j
-                       ord0)))) <= 1)%Re.
+                       ord0)))) <= 
+   Rabs
+   (\sum_j
+       FT2R (A2_J A (inord m) j) *
+       FT2R
+         (X_m_jacobi k.+1 x0 b A j
+            ord0) -
+    \sum_j
+       FT2R (A2_J A (inord m) j) *
+       FT2R
+         (X_m_jacobi k x0 b A j ord0)) +
+ (g t n.+1 *
+  (Rabs
+     (\sum_j
+         Rabs
+           (FT2R (A2_J A (inord m) j)) *
+         Rabs
+           (FT2R
+              (X_m_jacobi k.+1 x0 b A
+                 j ord0))) +
+   Rabs
+     (\sum_j
+         Rabs
+           (FT2R (A2_J A (inord m) j)) *
+         Rabs
+           (FT2R
+              (X_m_jacobi k x0 b A j
+                 ord0)))) +
+  2 * g1 t n.+1 (n.+1 - 1)%coq_nat))%Re.
 Proof.
 intros.
 pose proof (@fma_dotprod_forward_error _ t).
@@ -810,8 +838,9 @@ apply Rle_trans with
 rewrite Rplus_comm.
 apply Rcomplements.Rle_minus_l.
 eapply Rle_trans. apply Rabs_triang_inv.
-apply H3. 
-admit. 
+apply H3. rewrite -Rmult_plus_distr_l.
+nra.
+Admitted.
 
 
 
