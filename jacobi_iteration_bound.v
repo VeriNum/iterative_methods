@@ -898,27 +898,12 @@ induction k.
              (vec_to_list_float n.+1
                 (\col_j X_m_jacobi k x0 b
                           A j ord0)))))%Re.
-   * assert (FT2R
-               (let l1 :=
-                  vec_to_list_float n.+1
-                    (\row_j A2_J A (inord m) j)^T
-                  in
-                let l2 :=
-                  vec_to_list_float n.+1
-                    (\col_j X_m_jacobi k x0 b A
-                              j ord0) in
-                dotprod_r l1 l2) = FT2R
-              (dotprod_r
-                 (vec_to_list_float n.+1
-                    (\row_j A2_J A (inord m) j)^T)
-                 (vec_to_list_float n.+1
-                    (\col_j X_m_jacobi k x0 b
-                              A j ord0)))).
-    { by simpl. } rewrite H9. clear H9. 
-    rewrite !Rmult_plus_distr_r. nra.
-    
-
-
+   * match goal with |-context[(?a * ((?b + ?c) * ?d + ?e) <= _)%Re]=>
+      replace (a * ((b+c)*d + e))%Re with 
+              ( a * b * d + (a * c * d + a * e))%Re by nra
+     end.
+     apply Rplus_le_compat. nra.  
+     
 
 
 
