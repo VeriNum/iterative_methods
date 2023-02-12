@@ -785,7 +785,7 @@ apply Rle_trans with
                (A2_J A (inord m) j) *
              FT2R
                (X_m_jacobi k x0 b A j
-                  ord0)) + g t n.+1 *
+                  ord0)) + (g t n.+1 *
       Rabs
         (\sum_j
             Rabs
@@ -806,9 +806,12 @@ apply Rle_trans with
                  (X_m_jacobi k x0 b A
                     j ord0))) +
       2 *
-      g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
-
-
+      g1 t n.+1 (n.+1 - 1)%coq_nat))%Re.
+rewrite Rplus_comm.
+apply Rcomplements.Rle_minus_l.
+eapply Rle_trans. apply Rabs_triang_inv.
+apply H3. 
+admit. 
 
 
 
