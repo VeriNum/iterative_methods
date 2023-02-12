@@ -585,7 +585,7 @@ assert (\sum_j
 } rewrite H4 in H0.
 specialize (H0 (R_dot_prod_rel_abs_holds    n.+1 m (A2_J A)
               (\col_j X_m_jacobi k.+1 x0 b A j ord0))).
-rewrite -H4 in H0. clear H3 H4.
+rewrite -H4 in H0. rewrite -H3 in H0. clear H3 H4.
 assert (forall xy : ftype t * ftype t,
           In xy
             (combine
@@ -688,7 +688,7 @@ assert (\sum_j
 } rewrite H8 in H5.
 specialize (H5 (R_dot_prod_rel_abs_holds    n.+1 m (A2_J A)
               (\col_j X_m_jacobi k x0 b A j ord0))).
-rewrite -H8 in H5. clear H7 H8.
+rewrite -H8 in H5. rewrite -H7 in H5. clear H7 H8.
 assert (forall xy : ftype t * ftype t,
           In xy
             (combine
@@ -717,8 +717,19 @@ specialize (H5 H7 H8).
 clear H8 H7 H4 H3.
 apply Rabs_def3 in H0.
 apply Rabs_def3 in H5.
+assert (forall a b x y:R, (- a <= x <= a)%Re -> (-b <= y <= b)%Re ->
+                 (- (a + b) <= x - y <= a + b)%Re).
+{ intros. nra. } 
+specialize (H3 
+
+
+
 destruct H0 as [H01 H02].
 destruct H5 as [H51 H52].
+apply Rabs_le.
+split.
++ 
+  
 
 
 
