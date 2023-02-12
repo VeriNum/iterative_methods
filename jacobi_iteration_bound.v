@@ -463,33 +463,56 @@ Admitted.
                        ord0))))
 *)
 
-Require Import fma_dot_acc.
+Require Import fma_dot_acc fma_matrix_vec_mult.
+
+(*
+Lemma dotprod_cons {t: type} (v1 v2: list (ftype t)) (x y : ftype t): 
+  length v1 = length v2 ->
+  dotprod_r (x :: v1) (y :: v2) = 
+  BFMA x y (dotprod_r v1 v2).
+Proof.
+intros. by unfold dotprod_r. 
+Qed.
 
 
 Lemma fma_x_m_p_rel {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
-  (m < n.+1)%nat ->
   fma_dot_prod_rel
        (combine
-          (vec_to_list_float n.+1
+          (@vec_to_list_float _ n m
              (\row_j A2_J A
                        (inord m) j)^T)
-          (vec_to_list_float n.+1
+          (@vec_to_list_float _ n m
              (\col_j X_m_jacobi
                        k.+1 x0 b A
                        j ord0)))
        (dotprod_r
-          (vec_to_list_float n.+1
+          (@vec_to_list_float _ n m
              (\row_j A2_J A
                        (inord m) j)^T)
-          (vec_to_list_float n.+1
+          (@vec_to_list_float _ n m
              (\col_j X_m_jacobi
                        k.+1 x0 b A
                        j ord0))).
 Proof.
 intros.
+induction m.
++ simpl. unfold dotprod_r. simpl. apply fma_dot_prod_rel_nil.
++ simpl. rewrite mxE.
 
 
+  rewrite mxE.
+  assert ( (dotprod_r
+             (A (inord i) (inord m)
+              :: vec_to_list_float m (\row_j A (inord i) j)^T)
+             (v (inord m) ord0 :: vec_to_list_float m v)) = 
+            BFMA (A (inord i) (inord m)) (v (inord m) ord0) 
+            (dotprod_r (vec_to_list_float m (\row_j A (inord i) j)^T)
+                      (vec_to_list_float m v))).
+  { apply dotprod_cons. by rewrite !length_veclist. } 
+  rewrite H. by apply fma_dot_prod_rel_cons.
+
+*)
 
 
 Lemma dot_prod_sub  {t: type} {n:nat}
@@ -552,6 +575,9 @@ specialize (H0
 specialize (H0 
              (\sum_j (Rabs (FT2R (A2_J A (inord m) j)) * 
                       Rabs (FT2R (X_m_jacobi k.+1 x0 b A j ord0)))%Re)).
+specialize (H0 (@fma_dot_prod_rel_holds _ _ _ n.+1 m (A2_J A) 
+                  (\col_j X_m_jacobi k.+1 x0 b A j ord0))).
+
 
 
 
