@@ -466,7 +466,7 @@ Admitted.
 Require Import fma_dot_acc fma_matrix_vec_mult.
 
 Lemma Rabs_def3 : forall x a:R, (Rabs x <= a)%Re -> 
-  (x <= a)%Re /\ (- a <= x)%Re.
+  (x <= a /\ - a <= x)%Re.
 Proof.
 intros.
 assert (Rabs x = a \/(Rabs x < a)%Re).
@@ -715,12 +715,56 @@ assert (is_finite (fprec t)
                        j ord0))) = true) by admit.
 specialize (H5 H7 H8).
 clear H8 H7 H4 H3.
+assert (forall a b x y:R, (x <= a /\ - a <= x)%Re -> (y <= b /\ -b <= y)%Re ->
+                 (- (a + b) <= x - y <= a + b)%Re).
+{ intros. nra. } rewrite length_veclist in H0.
+rewrite length_veclist in H5.
 apply Rabs_def3 in H0.
 apply Rabs_def3 in H5.
-assert (forall a b x y:R, (- a <= x <= a)%Re -> (-b <= y <= b)%Re ->
-                 (- (a + b) <= x - y <= a + b)%Re).
-{ intros. nra. } 
-specialize (H3 
+specialize (H3 (g t n.+1 *
+                    Rabs
+                      (\sum_j
+                          Rabs
+                            (FT2R (A2_J A (inord m) j)) *
+                          Rabs
+                            (FT2R
+                               (X_m_jacobi k.+1 x0 b A j
+                                  ord0))) +
+                    g1 t n.+1 (n.+1 - 1)%coq_nat)%Re 
+              ( g t n.+1 *
+                Rabs
+                  (\sum_j
+                      Rabs
+                        (FT2R (A2_J A (inord m) j)) *
+                      Rabs
+                        (FT2R
+                           (X_m_jacobi k x0 b A j
+                              ord0))) +
+                g1 t n.+1 (n.+1 - 1)%coq_nat)%Re
+              (FT2R
+                  (dotprod_r
+                     (vec_to_list_float n.+1
+                        (\row_j A2_J A (inord m) j)^T)
+                     (vec_to_list_float n.+1
+                        (\col_j X_m_jacobi k.+1 x0
+                                  b A j ord0))) -
+                \sum_j
+                   (FT2R (A2_J A (inord m) j) *
+                    FT2R
+                      (X_m_jacobi k.+1 x0 b A j
+                         ord0)))%Re 
+              (FT2R
+                  (dotprod_r
+                     (vec_to_list_float n.+1
+                        (\row_j A2_J A (inord m) j)^T)
+                     (vec_to_list_float n.+1
+                        (\col_j X_m_jacobi k x0 b
+                                  A j ord0))) -
+                \sum_j
+                   (FT2R (A2_J A (inord m) j) *
+                    FT2R
+                      (X_m_jacobi k x0 b A j ord0)))%Re).
+specialize (H3 H0 H5). 
 
 
 
