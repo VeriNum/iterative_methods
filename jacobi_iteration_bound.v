@@ -1483,21 +1483,13 @@ induction k.
            apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
         -- apply Rplus_le_compat_l.
            by apply dot_prod_sub1.
-           
-           
-
-           
-    
-
-
-
-
-  simpl.
-  
-
-
-
-
+     ++ admit.
+  - admit.
+  - admit.
+  - admit.
+  - admit.
+  - admit.
+  - admit.
 
 Admitted.
 
