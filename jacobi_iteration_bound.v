@@ -570,13 +570,30 @@ specialize ( H0 (dotprod_r
                                k.+1 x0 b A
                                j ord0)))).
 specialize (H0 
-             (\sum_j (Rabs (FT2R (A2_J A (inord m) j)) * 
-                      Rabs (FT2R (X_m_jacobi k.+1 x0 b A j ord0)))%Re)).
+             (\sum_j ( (FT2R (A2_J A (inord m) j)) * 
+                       (FT2R (X_m_jacobi k.+1 x0 b A j ord0)))%Re)).
 specialize (H0 
              (\sum_j (Rabs (FT2R (A2_J A (inord m) j)) * 
                       Rabs (FT2R (X_m_jacobi k.+1 x0 b A j ord0)))%Re)).
 specialize (H0 (@fma_dot_prod_rel_holds _ _ _ n.+1 m (A2_J A) 
                   (\col_j X_m_jacobi k.+1 x0 b A j ord0))).
+assert (\sum_j
+           (FT2R
+              (A2_J A (inord m) j) *
+            FT2R
+              (X_m_jacobi k.+1 x0 b
+                 A j ord0))%Re = 
+        \sum_(j < n.+1)
+                FT2R_mat (A2_J A) (inord m) (@widen_ord n.+1 n.+1 (leqnn n.+1) j) * 
+                FT2R_mat (\col_j X_m_jacobi k.+1 x0 b A j ord0) (@widen_ord n.+1 n.+1 (leqnn n.+1) j) ord0).
+{ apply eq_big. intros. by []. intros.
+  assert ((widen_ord (m:=n.+1) (leqnn n.+1) i) = i).
+  { unfold widen_ord. 
+    apply val_inj. by simpl. 
+  } rewrite H4. by rewrite !mxE.
+} rewrite H3 in H0.
+specialize (H0 (@R_dot_prod_rel_holds _ _  n.+1 m (leqnn n.+1) (A2_J A)
+              (\col_j X_m_jacobi k.+1 x0 b A j ord0))).   
 
 
 
