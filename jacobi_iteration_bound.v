@@ -593,7 +593,61 @@ assert (\sum_j
   } rewrite H4. by rewrite !mxE.
 } rewrite H3 in H0.
 specialize (H0 (@R_dot_prod_rel_holds _ _  n.+1 m (leqnn n.+1) (A2_J A)
-              (\col_j X_m_jacobi k.+1 x0 b A j ord0))).   
+              (\col_j X_m_jacobi k.+1 x0 b A j ord0))). 
+assert (\sum_j
+           (Rabs
+              (FT2R
+                 (A2_J A 
+                    (inord m) j)) *
+            Rabs
+              (FT2R
+                 (X_m_jacobi k.+1
+                    x0 b A j ord0))) =  
+        sum_fold
+          (map (uncurry Rmult)
+             (map Rabsp
+                (map FR2
+                   (combine
+                      (vec_to_list_float n.+1
+                         (\row_j (A2_J A) (inord m) j)^T)
+                      (vec_to_list_float n.+1 
+                        (\col_j X_m_jacobi k.+1 x0 b A j ord0))))))).
+{ rewrite -sum_fold_mathcomp_equiv.
+  apply eq_big. by []. intros.
+  assert ((widen_ord (m:=n.+1) (leqnn n.+1) i) = i).
+  { unfold widen_ord. 
+    apply val_inj. by simpl. 
+  } rewrite H5. by rewrite !mxE.
+} rewrite H4 in H0.
+specialize (H0 (R_dot_prod_rel_abs_holds    n.+1 m (A2_J A)
+              (\col_j X_m_jacobi k.+1 x0 b A j ord0))).
+clear H3 H4.
+assert (forall xy : ftype t * ftype t,
+          In xy
+            (combine
+               (vec_to_list_float n.+1
+                  (\row_j A2_J A
+                           (inord m) j)^T)
+               (vec_to_list_float n.+1
+                  (\col_j X_m_jacobi
+                           k.+1 x0 b A
+                           j ord0))) ->
+          is_finite (fprec t) 
+            (femax t) xy.1 = true /\
+          is_finite (fprec t) 
+            (femax t) xy.2 = true) by admit.
+assert (is_finite (fprec t) 
+       (femax t)
+       (dotprod_r
+          (vec_to_list_float n.+1
+             (\row_j A2_J A
+                       (inord m) j)^T)
+          (vec_to_list_float n.+1
+             (\col_j X_m_jacobi
+                       k.+1 x0 b A
+                       j ord0))) = true) by admit.
+specialize (H0 H3 H4).
+
 
 
 
