@@ -1469,7 +1469,19 @@ induction k.
      apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
      apply Rabs_triang.
    * rewrite Rabs_Ropp.
+     eapply Rle_lt_trans.
+     apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+     apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+     apply Rplus_le_compat_r.
+     apply Rplus_le_compat.
+     ++ apply Rmult_le_compat_l.
+        -- repeat apply Rmult_le_pos; try nra; try apply Rabs_pos;
+           try (apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0).
+        -- by apply dot_prod_sub.
+     ++ apply Rmult_le_compat_l.
+        
 
+           
     
 
 
