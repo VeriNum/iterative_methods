@@ -915,7 +915,11 @@ induction k.
      assert (forall x:R, (2 * x)%Re = (x + x)%Re) by (intros;nra).
      rewrite H9. clear H9. apply Rplus_le_compat_l.
      apply Rle_refl.
-   *
+   * apply Rplus_le_compat_l. repeat apply Rmult_le_compat_l.
+     repeat apply Rmult_le_pos; try nra; try apply bpow_ge_0; try apply Rabs_pos.
+     apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+     apply Rabs_triang.
+   * rewrite Rabs_Ropp.
 
     
 
