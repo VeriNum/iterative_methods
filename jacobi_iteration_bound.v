@@ -465,6 +465,33 @@ Admitted.
 
 Require Import fma_dot_acc.
 
+
+Lemma fma_x_m_p_rel {t: type} {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
+  (m < n.+1)%nat ->
+  fma_dot_prod_rel
+       (combine
+          (vec_to_list_float n.+1
+             (\row_j A2_J A
+                       (inord m) j)^T)
+          (vec_to_list_float n.+1
+             (\col_j X_m_jacobi
+                       k.+1 x0 b A
+                       j ord0)))
+       (dotprod_r
+          (vec_to_list_float n.+1
+             (\row_j A2_J A
+                       (inord m) j)^T)
+          (vec_to_list_float n.+1
+             (\col_j X_m_jacobi
+                       k.+1 x0 b A
+                       j ord0))).
+Proof.
+intros.
+
+
+
+
 Lemma dot_prod_sub  {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
   (m < n.+1)%nat ->
@@ -511,7 +538,23 @@ assert ( length
               (\col_j X_m_jacobi k.+1
                         x0 b A j ord0))).
 { by rewrite !length_veclist. } specialize (H0 H2).
- 
+specialize ( H0 (dotprod_r
+                  (vec_to_list_float n.+1
+                     (\row_j A2_J A
+                               (inord m) j)^T)
+                  (vec_to_list_float n.+1
+                     (\col_j X_m_jacobi
+                               k.+1 x0 b A
+                               j ord0)))).
+specialize (H0 
+             (\sum_j (Rabs (FT2R (A2_J A (inord m) j)) * 
+                      Rabs (FT2R (X_m_jacobi k.+1 x0 b A j ord0)))%Re)).
+specialize (H0 
+             (\sum_j (Rabs (FT2R (A2_J A (inord m) j)) * 
+                      Rabs (FT2R (X_m_jacobi k.+1 x0 b A j ord0)))%Re)).
+
+
+
 
 
 
