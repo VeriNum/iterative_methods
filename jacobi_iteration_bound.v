@@ -908,8 +908,16 @@ induction k.
                 (a * ((c * d) * (b + e)))%Re by nra
      end.
      match goal with |-context[( _ <= 4 * ?b * ?c * ?a * ?d)%Re]=>
-       replace (4 * b * c * a * d)%Re with (a * (2 * ((2 * b) * c) * d))%Re by nra
-     end. apply Rmult_le_compat_l. apply Rabs_pos.
+       replace (4 * b * c * a * d)%Re with (a * (((2 * b) * c) *(2 * d)))%Re by nra
+     end. apply Rmult_le_compat_l. apply Rabs_pos. apply Rmult_le_compat_l.
+     repeat apply Rmult_le_pos; try nra; try apply bpow_ge_0.
+     apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+     assert (forall x:R, (2 * x)%Re = (x + x)%Re) by (intros;nra).
+     rewrite H9. clear H9. apply Rplus_le_compat_l.
+     apply Rle_refl.
+   *
+
+    
 
 
 
