@@ -773,6 +773,42 @@ assert (forall a b c d :R, (- (a + b + (c + b)) <= d <= (a + b + (c + b)))%Re ->
                              (- ((a + c) + 2 * b) <= d <= ((a + c) + 2 * b))%Re).
 { intros. nra. } apply H0 in H3. clear H0.
 apply Rabs_le in H3.
+apply Rle_trans with 
+(Rabs (\sum_j
+             FT2R
+               (A2_J A (inord m) j) *
+             FT2R
+               (X_m_jacobi k.+1 x0 b
+                  A j ord0) -
+          \sum_j
+             FT2R
+               (A2_J A (inord m) j) *
+             FT2R
+               (X_m_jacobi k x0 b A j
+                  ord0)) + g t n.+1 *
+      Rabs
+        (\sum_j
+            Rabs
+              (FT2R
+                 (A2_J A (inord m) j)) *
+            Rabs
+              (FT2R
+                 (X_m_jacobi k.+1 x0
+                    b A j ord0))) +
+      g t n.+1 *
+      Rabs
+        (\sum_j
+            Rabs
+              (FT2R
+                 (A2_J A (inord m) j)) *
+            Rabs
+              (FT2R
+                 (X_m_jacobi k x0 b A
+                    j ord0))) +
+      2 *
+      g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
+
+
 
 
 
