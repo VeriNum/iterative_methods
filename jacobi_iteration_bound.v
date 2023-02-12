@@ -440,6 +440,90 @@ intros.
 destruct x; simpl in *; auto.
 Admitted.
 
+(*
+        (A (inord m) (inord m)))) *
+  Rabs
+    (FT2R
+       (dotprod_r
+          (vec_to_list_float n.+1
+             (\row_j A2_J A
+                       (inord m) j)^T)
+          (vec_to_list_float n.+1
+             (\col_j X_m_jacobi
+                       k.+1 x0 b A
+                       j ord0))) -
+     FT2R
+       (dotprod_r
+          (vec_to_list_float n.+1
+             (\row_j A2_J A
+                       (inord m) j)^T)
+          (vec_to_list_float n.+1
+             (\col_j X_m_jacobi k
+                       x0 b A j
+                       ord0))))
+*)
+
+Require Import fma_dot_acc.
+
+Lemma dot_prod_sub  {t: type} {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
+  (m < n.+1)%nat ->
+  (Rabs
+    (FT2R
+       (dotprod_r
+          (vec_to_list_float n.+1
+             (\row_j A2_J A
+                       (inord m) j)^T)
+          (vec_to_list_float n.+1
+             (\col_j X_m_jacobi
+                       k.+1 x0 b A
+                       j ord0))) -
+     FT2R
+       (dotprod_r
+          (vec_to_list_float n.+1
+             (\row_j A2_J A
+                       (inord m) j)^T)
+          (vec_to_list_float n.+1
+             (\col_j X_m_jacobi k
+                       x0 b A j
+                       ord0)))) <= 1)%Re.
+Proof.
+intros.
+pose proof (@fma_dotprod_forward_error _ t).
+specialize (H0 (vec_to_list_float n.+1
+             (\row_j A2_J A
+                       (inord m) j)^T)  (vec_to_list_float n.+1
+             (\col_j X_m_jacobi
+                       k.+1 x0 b A
+                       j ord0))).
+assert ((1 <=
+            length
+              (vec_to_list_float n.+1
+                 (\row_j A2_J A 
+                           (inord m) j)^T))%coq_nat).
+{ rewrite length_veclist. lia. } specialize (H0 H1).
+assert ( length
+           (vec_to_list_float n.+1
+              (\row_j A2_J A 
+                        (inord m) j)^T) =
+         length
+           (vec_to_list_float n.+1
+              (\col_j X_m_jacobi k.+1
+                        x0 b A j ord0))).
+{ by rewrite !length_veclist. } specialize (H0 H2).
+ 
+
+
+
+
+
+
+
+
+
+
+
+
 
 (**
  Bplus_no_overflow t
