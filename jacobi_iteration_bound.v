@@ -764,15 +764,18 @@ specialize (H3 (g t n.+1 *
                    (FT2R (A2_J A (inord m) j) *
                     FT2R
                       (X_m_jacobi k x0 b A j ord0)))%Re).
-specialize (H3 H0 H5). 
+specialize (H3 H0 H5).
+clear H0 H5.
+assert (forall a b c d e:R, (-e <= (a - b) - (c -  d) <= e)%Re ->
+                            (-e <= (a - c) - (b - d) <= e)%Re).
+{ intros. nra. } apply H0 in H3. clear H0.
+assert (forall a b c d :R, (- (a + b + (c + b)) <= d <= (a + b + (c + b)))%Re ->
+                             (- ((a + c) + 2 * b) <= d <= ((a + c) + 2 * b))%Re).
+{ intros. nra. } apply H0 in H3. clear H0.
+apply Rabs_le in H3.
 
 
 
-destruct H0 as [H01 H02].
-destruct H5 as [H51 H52].
-apply Rabs_le.
-split.
-+ 
   
 
 
@@ -2652,5 +2655,6 @@ Qed.
 
 
 End WITH_NANS.
+
 
 
