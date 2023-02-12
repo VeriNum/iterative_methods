@@ -715,6 +715,12 @@ assert (is_finite (fprec t)
                        j ord0))) = true) by admit.
 specialize (H5 H7 H8).
 clear H8 H7 H4 H3.
+apply Rabs_def3 in H0.
+apply Rabs_def3 in H5.
+destruct H0 as [H01 H02].
+destruct H5 as [H51 H52].
+
+
 
 
 
