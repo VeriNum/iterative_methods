@@ -860,7 +860,42 @@ induction k.
     apply Rle_trans with (Rabs 1 + Rabs d4)%Re.
     apply Rabs_triang. rewrite Rabs_R1. apply Rplus_le_compat_l.
     apply Hd4.
-    
+    eapply Rle_lt_trans. apply Rplus_le_compat_r.
+    apply Rmult_le_compat_r.
+    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+    apply Rplus_le_compat_r.
+    apply Rle_trans with 
+    ((1 + default_rel t)^2 * Rabs
+       (FT2R
+          (BDIV t (Zconst t 1)
+             (A (inord m) (inord m)))) * 
+       (Rabs
+         (FT2R
+            (dotprod_r
+               (vec_to_list_float n.+1
+                  (\row_j A2_J A (inord m) j)^T)
+               (vec_to_list_float n.+1
+                  (\col_j X_m_jacobi k.+1 x0
+                            b A j ord0))) -
+          FT2R
+            (dotprod_r
+               (vec_to_list_float n.+1
+                  (\row_j A2_J A (inord m) j)^T)
+               (vec_to_list_float n.+1
+                  (\col_j X_m_jacobi k x0 b
+                            A j ord0))))) +
+      4 * (default_rel t) * (1 + default_rel t) * 
+      Rabs
+       (FT2R (b (inord m) ord0) -
+        FT2R
+          (dotprod_r
+             (vec_to_list_float n.+1
+                (\row_j A2_J A (inord m) j)^T)
+             (vec_to_list_float n.+1
+                (\col_j X_m_jacobi k x0 b
+                          A j ord0)))))%Re.
+   *
+
 
 
 
