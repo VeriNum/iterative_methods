@@ -1111,24 +1111,31 @@ induction k.
       rewrite Bminus_bplus_opp_equiv.
       ++ pose proof (@BPLUS_accurate' _ t (b (inord m) ord0)
                         (BOPP t ((A2_J A *f x0) (inord m) ord0))).
-         
-
-
-
-
-admit.
+         assert (is_finite (fprec t) (femax t)
+                   (BPLUS t (b (inord m) ord0)
+                      (BOPP t
+                         ((A2_J A *f x0) 
+                            (inord m) ord0))) = true) by admit.
+         specialize (H5 H6).
+         destruct H5 as [d2 [Hd2 H5]].
+         rewrite H5. rewrite Rabs_mult.
+         apply Rmult_le_compat; try apply Rabs_pos.
+         apply Rabs_triang.
+         apply Rle_trans with (Rabs 1 + Rabs d2)%Re.
+         apply Rabs_triang. rewrite Rabs_R1. apply Rplus_le_compat_l.
+         apply Hd2.
+      ++ admit.
+      ++ admit.
+      ++ admit.
     * apply Rle_trans with (Rabs 1 + Rabs d1)%Re; try apply Rabs_triang.
       rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd1.
   - apply Rle_trans with (Rabs 1 + Rabs d)%Re. apply Rabs_triang.
     rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd.
-  - 
-
-
-
-
-
-
-  admit.
+  - assert (Rabs (FT2R (BOPP t ((A2_J A *f x0) (inord m) ord0))) = 
+            Rabs (FT2R ((A2_J A *f x0) (inord m) ord0))).
+    { unfold FT2R.  rewrite B2R_Bopp. by rewrite Rabs_Ropp. }
+    rewrite H2.
+    admit.
 + pose proof (@generic_round_property t).
   specialize (H1 (FT2R
                    (X_m_jacobi k.+2 x0 b A
