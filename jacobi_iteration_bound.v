@@ -1082,7 +1082,14 @@ induction k.
            FT2R (X_m_jacobi 0 x0 b A
                    (inord m) ord0))%Re).
   { unfold  FT2R. by rewrite B2R_Bopp. }
-  rewrite H1.
+  rewrite H1. rewrite !mxE.
+  repeat (rewrite nth_vec_to_list_float; last by rewrite inordK).
+  
+
+
+
+
+
   admit.
 + pose proof (@generic_round_property t).
   specialize (H1 (FT2R
