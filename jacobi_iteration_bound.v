@@ -1009,21 +1009,95 @@ apply eq_big. by [].
 intros. by rewrite Rabs_mult.
 Qed.
 
-
-Lemma Rmult_plus_distr3:
-  forall (a b c d:R), 
-  (a * (b + c + d))%Re = (a * b + a * c + a * d)%Re.
-intros. nra. Qed. 
+(**
+((1 + default_rel t) ^ 2 *
+ Rabs
+   (FT2R
+      (BDIV t (Zconst t 1)
+         (A (inord m) (inord m)))) *
+ Rabs
+   (\sum_j
+       FT2R (A2_J A (inord m) j) *
+       FT2R (X_m_jacobi k.+1 x0 b A j ord0) -
+    \sum_j
+       FT2R (A2_J A (inord m) j) *
+       FT2R (X_m_jacobi k x0 b A j ord0)) +
+ (1 + default_rel t) *
+ Rabs
+   (FT2R
+      (BDIV t (Zconst t 1)
+         (A (inord m) (inord m)))) *
+ (g t n.+1 * (1 + default_rel t) +
+  4 * default_rel t * (1 + g t n.+1)) *
+ (\sum_j
+     Rabs
+       (FT2R (A2_J A (inord m) j) *
+        FT2R (X_m_jacobi k x0 b A j ord0))) +
+ (1 + default_rel t) ^ 2 *
+ Rabs
+   (FT2R
+      (BDIV t (Zconst t 1)
+         (A (inord m) (inord m)))) * 
+ g t n.+1 *
+ (\sum_j
+     Rabs
+       (FT2R (A2_J A (inord m) j) *
+        FT2R (X_m_jacobi k.+1 x0 b A j ord0))) <
+ (bpow Zaux.radix2 (femax t) - default_abs t) /
+ (1 + default_rel t) -
+ (2 * (1 + default_rel t) ^ 2 *
+  Rabs
+    (FT2R
+       (BDIV t (Zconst t 1)
+          (A (inord m) (inord m)))) *
+  g1 t n.+1 (n.+1 - 1)%coq_nat +
+  4 * default_rel t * (1 + default_rel t) *
+  Rabs
+    (FT2R
+       (BDIV t (Zconst t 1)
+          (A (inord m) (inord m)))) *
+  (Rabs (FT2R (b (inord m) ord0)) +
+   g1 t n.+1 (n.+1 - 1)%coq_nat) +
+  2 * default_abs t))%Re
+***)
 
 Lemma Bplus_x_kp_x_k_no_oveflow {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
   (m < n.+1)%nat ->
-  (exists F:R, 
+  (exists F:R,
+      let a_inv := Rabs (FT2R (BDIV t (Zconst t 1)
+                                  (A (inord m) (inord m)))) in
+      (F < (bpow Zaux.radix2 (femax t) - default_abs t) /
+               (1 + default_rel t) -
+               (2 * (1 + default_rel t) ^ 2 * a_inv *
+                g1 t n.+1 (n.+1 - 1)%coq_nat +
+                4 * default_rel t * (1 + default_rel t) *
+                a_inv *
+                (Rabs (FT2R (b (inord m) ord0)) +
+                 g1 t n.+1 (n.+1 - 1)%coq_nat) +
+                2 * default_abs t))%Re /\
       forall k,
-        (Rabs ((FT2R (X_m_jacobi k.+1 x0 b A
-                     (inord m) ord0)) - 
-               FT2R (X_m_jacobi k x0 b A
-                        (inord m) ord0)) <= F)%Re) -> 
+          ((1 + default_rel t) ^ 2 * a_inv *
+           Rabs
+             (\sum_j
+                 FT2R (A2_J A (inord m) j) *
+                 FT2R (X_m_jacobi k.+1 x0 b A j ord0) -
+              \sum_j
+                 FT2R (A2_J A (inord m) j) *
+                 FT2R (X_m_jacobi k x0 b A j ord0)) +
+           (1 + default_rel t) * a_inv *
+           (g t n.+1 * (1 + default_rel t) +
+            4 * default_rel t * (1 + g t n.+1)) *
+           (\sum_j
+               Rabs
+                 (FT2R (A2_J A (inord m) j) *
+                  FT2R (X_m_jacobi k x0 b A j ord0))) +
+           (1 + default_rel t) ^ 2 * a_inv * 
+           g t n.+1 *
+           (\sum_j
+               Rabs
+                 (FT2R (A2_J A (inord m) j) *
+                  FT2R (X_m_jacobi k.+1 x0 b A j ord0))) <= F)%Re) ->
   Bplus_no_overflow t
                (FT2R
                   (X_m_jacobi k.+1 x0 b A
@@ -1559,21 +1633,21 @@ induction k.
                (Rabs (FT2R (b (inord m) ord0)) + g1 t n.+1 (n.+1 - 1)%coq_nat) + 
               2 *  default_abs t))%Re.
         ** nra. 
-        **
-
-
-
-
-
-
-admit.
+        ** apply Rle_refl.
+        ** (** we can now derive a bound for f(x_k+1, x_k) **)
+            apply Rcomplements.Rlt_minus_r.
+            apply Rcomplements.Rlt_div_r.
+            apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+            apply Rcomplements.Rlt_minus_r.
+            destruct H0 as [F [Hf Hind]].
+            apply Rle_lt_trans with F.  apply Hind.
+            apply Hf.
   - admit.
   - admit.
   - admit.
   - admit.
   - admit.
   - admit.
-
 Admitted.
 
 
