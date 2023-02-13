@@ -1502,7 +1502,45 @@ induction k.
         -- apply Rplus_le_compat_l. apply Rplus_le_compat_r.
            apply /RleP. apply Rabs_ineq.
         -- repeat (rewrite sum_abs_eq; try (intros; apply Rabs_pos)).
-           
+           eapply Rle_lt_trans. apply Rplus_le_compat_r.
+           apply Rmult_le_compat_r. 
+           apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+           apply Rle_trans with
+          ( ( (1 + default_rel t) ^ 2 *
+                 Rabs
+                   (FT2R
+                      (BDIV t (Zconst t 1)
+                         (A (inord m) (inord m)))) *
+                 Rabs
+                    (\sum_j
+                        FT2R (A2_J A (inord m) j) *
+                        FT2R
+                          (X_m_jacobi k.+1 x0 b A j ord0) -
+                     \sum_j
+                        FT2R (A2_J A (inord m) j) *
+                        FT2R
+                          (X_m_jacobi k x0 b A j ord0)) + 
+              ((1 + default_rel t) ^ 2 *
+                 Rabs
+                   (FT2R
+                      (BDIV t (Zconst t 1)
+                         (A (inord m) (inord m)))) * 
+                (g t n.+1 * (1 + default_rel t) + 
+                 4 * (default_rel t) * (1 + g t n.+1)) *
+                \sum_j
+                   Rabs
+                     (FT2R (A2_J A (inord m) j) *
+                      FT2R (X_m_jacobi k x0 b A j ord0))) +
+              ((1 + default_rel t) ^ 2 *
+                 Rabs
+                   (FT2R
+                      (BDIV t (Zconst t 1)
+                         (A (inord m) (inord m)))) * g t n.+1 *
+                \sum_j
+                   Rabs
+                     (FT2R (A2_J A (inord m) j) *
+                      FT2R (X_m_jacobi k.+1 x0 b A j ord0)))) +
+            (2 * 
 
 
 
