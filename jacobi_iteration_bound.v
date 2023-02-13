@@ -1000,6 +1000,15 @@ apply Rabs_triang_inv.
 apply H0.
 Admitted.
 
+Lemma Rabs_sum_in {n:nat} (f1 f2 : 'I_n.+1 -> R):
+  \sum_j (Rabs (f1 j) * Rabs (f2 j))%Re = 
+   \sum_j (Rabs (f1 j * f2 j))%Re.
+Proof.
+apply eq_big. by [].
+intros. by rewrite Rabs_mult.
+Qed.
+
+
 
 Lemma Bplus_x_kp_x_k_no_oveflow {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
@@ -1483,7 +1492,18 @@ induction k.
            apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
         -- apply Rplus_le_compat_l.
            by apply dot_prod_sub1.
-     ++ admit.
+     ++ rewrite !Rabs_sum_in.
+        
+
+
+
+
+
+
+
+
+
+admit.
   - admit.
   - admit.
   - admit.
