@@ -1009,6 +1009,12 @@ apply eq_big. by [].
 intros. by rewrite Rabs_mult.
 Qed.
 
+
+Lemma Rmult_plus_distr3:
+  forall (a b c d:R), 
+  (a * (b + c + d))%Re = (a * b + a * c + a * d)%Re.
+intros. nra. Qed. 
+
 Lemma Bplus_x_kp_x_k_no_oveflow {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
   (m < n.+1)%nat ->
@@ -1571,8 +1577,10 @@ induction k.
                               (FT2R (A2_J A (inord m) j) *
                                FT2R (X_m_jacobi k x0 b A j ord0)))) +
                         g1 t n.+1 (n.+1 - 1)%coq_nat)%Re). 
-           { nra. } rewrite H9.
-           
+           { nra. } rewrite H9. rewrite !Rmult_plus_distr3.
+           match goal with |-context[(?a * (?b + (?c + ?d)) + _ + _ <= _)%Re]=>
+              replace (a * (b + (c + d)))%Re with (a * b + a * c + a * d)%Re by nra
+           end. apply Rplus_le_compat_l.
               
 
 
@@ -2956,6 +2964,7 @@ Qed.
 
 
 End WITH_NANS.
+
 
 
 
