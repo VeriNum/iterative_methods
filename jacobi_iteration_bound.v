@@ -1526,7 +1526,7 @@ induction k.
                         FT2R (A2_J A (inord m) j) *
                         FT2R
                           (X_m_jacobi k x0 b A j ord0)) + 
-              ((1 + default_rel t) ^ 2 *
+              ((1 + default_rel t)  *
                  Rabs
                    (FT2R
                       (BDIV t (Zconst t 1)
@@ -1558,40 +1558,8 @@ induction k.
                          (A (inord m) (inord m)))) *
                (Rabs (FT2R (b (inord m) ord0)) + g1 t n.+1 (n.+1 - 1)%coq_nat) + 
               2 *  default_abs t))%Re.
-        ** assert ( (Rabs (FT2R (b (inord m) ord0)) +
-                        (\sum_j
-                            Rabs
-                              (FT2R (A2_J A (inord m) j) *
-                               FT2R (X_m_jacobi k x0 b A j ord0)) +
-                         (g t n.+1 *
-                          (\sum_j
-                              Rabs
-                                (FT2R (A2_J A (inord m) j) *
-                                 FT2R
-                                   (X_m_jacobi k x0 b A j ord0))) +
-                          g1 t n.+1 (n.+1 - 1)%coq_nat)))%Re = 
-                      (Rabs (FT2R (b (inord m) ord0)) + 
-                       ((1 + g t n.+1) * 
-                        \sum_j
-                            (Rabs
-                              (FT2R (A2_J A (inord m) j) *
-                               FT2R (X_m_jacobi k x0 b A j ord0)))) +
-                        g1 t n.+1 (n.+1 - 1)%coq_nat)%Re). 
-           { nra. } rewrite H9. rewrite !Rmult_plus_distr3.
-           match goal with |-context[(?a * (?b + (?c + ?d)) + _ + _ <= _)%Re]=>
-              replace (a * (b + (c + d)))%Re with (a * b + a * c + a * d)%Re by nra
-           end. 
-           match goal with |-context[(((?a + ?b * (?x * (?c + ?d))) + ?e) + (?f + ?g +?h) + ?p <= _)%Re]=>
-            replace (((a + b  * (x * (c + d))) + e) + (f + g +h)+ p)%Re with 
-                    ((a + b * x * c + b *x *  d + g) + (e + f + h + p))%Re by nra
-           end. apply Rplus_le_compat; last by nra.
-           match goal with |-context[(?a + ?b + ?c + ?d <= _)%Re]=>
-              replace (a + b + c + d)%Re with (a + ((c + d) + b))%Re by nra
-           end. 
-           match goal with |-context[( _ <= ?a + ?b + ?c)%Re]=>
-              replace (a + b + c)%Re with (a + (b + c))%Re by nra
-           end. apply Rplus_le_compat_l. apply Rplus_le_compat_r.   
-           
+        ** nra. 
+        **
 
 
 
