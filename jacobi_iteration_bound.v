@@ -1106,7 +1106,17 @@ induction k.
     eapply Rle_trans. apply Rabs_triang.
     apply Rplus_le_compat; last by apply He1.
     rewrite Rabs_mult. apply Rmult_le_compat; try apply Rabs_pos.
-    * admit.
+    * rewrite Rabs_mult. apply Rmult_le_compat_l; try apply Rabs_pos.
+      rewrite mxE.
+      rewrite Bminus_bplus_opp_equiv.
+      ++ pose proof (@BPLUS_accurate' _ t (b (inord m) ord0)
+                        (BOPP t ((A2_J A *f x0) (inord m) ord0))).
+         
+
+
+
+
+admit.
     * apply Rle_trans with (Rabs 1 + Rabs d1)%Re; try apply Rabs_triang.
       rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd1.
   - apply Rle_trans with (Rabs 1 + Rabs d)%Re. apply Rabs_triang.
