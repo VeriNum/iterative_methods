@@ -1540,7 +1540,20 @@ induction k.
                    Rabs
                      (FT2R (A2_J A (inord m) j) *
                       FT2R (X_m_jacobi k.+1 x0 b A j ord0)))) +
-            (2 * 
+            (2 * (1 + default_rel t) ^ 2 * 
+                Rabs
+                   (FT2R
+                      (BDIV t (Zconst t 1)
+                         (A (inord m) (inord m)))) * g1 t n.+1 (n.+1 - 1)%coq_nat +
+              4 * (default_rel t) * (1 + default_rel t) *
+               Rabs
+                   (FT2R
+                      (BDIV t (Zconst t 1)
+                         (A (inord m) (inord m)))) *
+               (Rabs (FT2R (b (inord m) ord0)) + g1 t n.+1 (n.+1 - 1)%coq_nat) + 
+              2 *  default_abs t))%Re.
+        ** rewrite -!Rplus_assoc. apply Rplus_le_compat_r. 
+           
 
 
 
