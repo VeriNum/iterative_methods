@@ -1025,6 +1025,8 @@ Lemma Bplus_x_kp_x_k_no_oveflow {t: type} {n:nat}
                 (Rabs (FT2R (b (inord m) ord0)) +
                  g1 t n.+1 (n.+1 - 1)%coq_nat) +
                 2 * default_abs t))%Re /\
+      (forall k, 
+          forall i, is_finite _ _ (X_m_jacobi k x0 b A i ord0) = true) /\
       forall k,
           ((1 + default_rel t) ^ 2 * a_inv *
            Rabs
