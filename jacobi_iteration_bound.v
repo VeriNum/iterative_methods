@@ -1584,10 +1584,8 @@ induction k.
            match goal with |-context[(((?a + ?b * (?x * (?c + ?d))) + ?e) + (?f + ?g +?h) + ?p <= _)%Re]=>
             replace (((a + b  * (x * (c + d))) + e) + (f + g +h)+ p)%Re with 
                     ((a + b * x * c + b *x *  d + g) + (e + f + h + p))%Re by nra
-           end. apply Rplus_le_compat.
-              
-
-
+           end. apply Rplus_le_compat; last by nra.
+           
 
 
 
