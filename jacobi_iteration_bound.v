@@ -1493,6 +1493,25 @@ induction k.
         -- apply Rplus_le_compat_l.
            by apply dot_prod_sub1.
      ++ rewrite !Rabs_sum_in.
+        eapply Rle_lt_trans. apply Rplus_le_compat_r.
+        apply Rmult_le_compat_r.
+        apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+        apply Rplus_le_compat_r. apply Rplus_le_compat_l.
+        apply Rmult_le_compat_l.
+        -- repeat apply Rmult_le_pos; try nra; try apply bpow_ge_0; try apply Rabs_pos.
+           apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+        -- apply Rplus_le_compat_l. apply Rplus_le_compat_r.
+           
+
+           
+
+
+
+
+
+
+
+        repeat (rewrite sum_abs_eq; try (intros; apply Rabs_pos)).
         
 
 
