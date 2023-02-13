@@ -10,7 +10,8 @@ Require Import norm_compat.
 Require Import Coq.Lists.List. Import ListNotations.
 Set Bullet Behavior "Strict Subproofs".
 
-Require Import fma_floating_point_model.
+Require Import fma_floating_point_model lemmas.
+Require Import fma_dot_acc fma_matrix_vec_mult.
 
 Section WITH_NANS.
 
@@ -463,7 +464,7 @@ Admitted.
                        ord0))))
 *)
 
-Require Import fma_dot_acc fma_matrix_vec_mult.
+
 
 Lemma Rabs_def3 : forall x a:R, (Rabs x <= a)%Re -> 
   (x <= a /\ - a <= x)%Re.
@@ -1008,8 +1009,6 @@ apply eq_big. by [].
 intros. by rewrite Rabs_mult.
 Qed.
 
-
-
 Lemma Bplus_x_kp_x_k_no_oveflow {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
   (m < n.+1)%nat ->
@@ -1501,18 +1500,9 @@ induction k.
         -- repeat apply Rmult_le_pos; try nra; try apply bpow_ge_0; try apply Rabs_pos.
            apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
         -- apply Rplus_le_compat_l. apply Rplus_le_compat_r.
+           apply /RleP. apply Rabs_ineq.
+        -- repeat (rewrite sum_abs_eq; try (intros; apply Rabs_pos)).
            
-
-           
-
-
-
-
-
-
-
-        repeat (rewrite sum_abs_eq; try (intros; apply Rabs_pos)).
-        
 
 
 
@@ -2897,6 +2887,7 @@ Qed.
 
 
 End WITH_NANS.
+
 
 
 
