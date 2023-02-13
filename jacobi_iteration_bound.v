@@ -1009,57 +1009,6 @@ apply eq_big. by [].
 intros. by rewrite Rabs_mult.
 Qed.
 
-(**
-((1 + default_rel t) ^ 2 *
- Rabs
-   (FT2R
-      (BDIV t (Zconst t 1)
-         (A (inord m) (inord m)))) *
- Rabs
-   (\sum_j
-       FT2R (A2_J A (inord m) j) *
-       FT2R (X_m_jacobi k.+1 x0 b A j ord0) -
-    \sum_j
-       FT2R (A2_J A (inord m) j) *
-       FT2R (X_m_jacobi k x0 b A j ord0)) +
- (1 + default_rel t) *
- Rabs
-   (FT2R
-      (BDIV t (Zconst t 1)
-         (A (inord m) (inord m)))) *
- (g t n.+1 * (1 + default_rel t) +
-  4 * default_rel t * (1 + g t n.+1)) *
- (\sum_j
-     Rabs
-       (FT2R (A2_J A (inord m) j) *
-        FT2R (X_m_jacobi k x0 b A j ord0))) +
- (1 + default_rel t) ^ 2 *
- Rabs
-   (FT2R
-      (BDIV t (Zconst t 1)
-         (A (inord m) (inord m)))) * 
- g t n.+1 *
- (\sum_j
-     Rabs
-       (FT2R (A2_J A (inord m) j) *
-        FT2R (X_m_jacobi k.+1 x0 b A j ord0))) <
- (bpow Zaux.radix2 (femax t) - default_abs t) /
- (1 + default_rel t) -
- (2 * (1 + default_rel t) ^ 2 *
-  Rabs
-    (FT2R
-       (BDIV t (Zconst t 1)
-          (A (inord m) (inord m)))) *
-  g1 t n.+1 (n.+1 - 1)%coq_nat +
-  4 * default_rel t * (1 + default_rel t) *
-  Rabs
-    (FT2R
-       (BDIV t (Zconst t 1)
-          (A (inord m) (inord m)))) *
-  (Rabs (FT2R (b (inord m) ord0)) +
-   g1 t n.+1 (n.+1 - 1)%coq_nat) +
-  2 * default_abs t))%Re
-***)
 
 Lemma Bplus_x_kp_x_k_no_oveflow {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
