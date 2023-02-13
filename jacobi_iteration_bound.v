@@ -1084,7 +1084,24 @@ induction k.
   { unfold  FT2R. by rewrite B2R_Bopp. }
   rewrite H1. rewrite !mxE.
   repeat (rewrite nth_vec_to_list_float; last by rewrite inordK).
-  
+  rewrite inord_val. 
+  eapply Rle_lt_trans.
+  apply Rabs_triang. eapply Rle_lt_trans.
+  apply Rplus_le_compat; last by apply He.
+  rewrite Rabs_mult. apply Rmult_le_compat; try apply Rabs_pos.
+  - pose proof (@BMULT_accurate' _ t (A1_inv_J A (inord m) ord0)
+              ((b -f A2_J A *f x0) (inord m) ord0)).
+    assert (is_finite (fprec t) (femax t)
+             (BMULT t
+                (A1_inv_J A (inord m) ord0)
+                ((b -f A2_J A *f x0)
+                   (inord m) ord0)) = true) by admit.
+    specialize (H2 H3).
+    destruct H2 as [d1 [e1 [Hde1 [Hd1 [He1 H2]]]]].
+    rewrite H2. eapply Rle_trans.
+    apply Rabs_triang. rewrite Rabs_Ropp.
+
+
 
 
 
