@@ -1100,7 +1100,18 @@ induction k.
     destruct H2 as [d1 [e1 [Hde1 [Hd1 [He1 H2]]]]].
     rewrite H2. eapply Rle_trans.
     apply Rabs_triang. rewrite Rabs_Ropp.
-
+    assert (X_m_jacobi 0 x0 b A (inord m) ord0 = x0 (inord m) ord0).
+    { by simpl. } rewrite H4.
+    apply Rplus_le_compat_r.
+    eapply Rle_trans. apply Rabs_triang.
+    apply Rplus_le_compat; last by apply He1.
+    rewrite Rabs_mult. apply Rmult_le_compat; try apply Rabs_pos.
+    * admit.
+    * apply Rle_trans with (Rabs 1 + Rabs d1)%Re; try apply Rabs_triang.
+      rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd1.
+  - apply Rle_trans with (Rabs 1 + Rabs d)%Re. apply Rabs_triang.
+    rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd.
+  - 
 
 
 
