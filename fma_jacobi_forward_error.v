@@ -602,6 +602,7 @@ Definition x_fix_FT2R {ty} {n:nat} x b (A: 'M[ftype ty]_n.+1) :
   diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) r.
 
 
+
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
@@ -661,7 +662,26 @@ induction k.
   intros. apply Hx0. 
 + assert (Hfin: (forall i : 'I_n.+1,
                  is_finite (fprec ty) (femax ty)
-                   (X_m_jacobi k.+1 x0 b A i ord0) =  true)) by admit.
+                   (X_m_jacobi k.+1 x0 b A i ord0) =  true)).
+  { intros. simpl.
+    unfold jacobi_iter.
+    rewrite mxE.
+    rewrite nth_vec_to_list_float; last by apply ltn_ord.
+    apply BMULT_no_overflow_is_finite.
+
+
+
+
+
+
+
+
+
+
+
+
+
+by admit.
   split.
   (** finiteness of x_k+1 **)
   { apply Hfin. }
