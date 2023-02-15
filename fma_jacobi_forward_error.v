@@ -716,7 +716,13 @@ induction k.
         apply Rmult_le_compat_l. apply Rabs_pos.
         apply Rle_trans with (Rabs 1 + Rabs d1)%Re.
         apply Rabs_triang. rewrite Rabs_R1. apply Rplus_le_compat_l.
-        apply Hd1.
+        apply Hd1. rewrite -Rmult_assoc.
+        apply Rcomplements.Rlt_div_r.
+        apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+        eapply Rle_lt_trans. apply Rmult_le_compat_l.
+        apply Rabs_pos. apply Rabs_triang.
+        
+        
 
   
 
