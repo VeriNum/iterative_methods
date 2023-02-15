@@ -689,8 +689,30 @@ induction k.
       eapply Rle_lt_trans. apply Rmult_le_compat_l. apply Rabs_pos.
       apply Rle_trans with (Rabs 1 + Rabs d)%Re.
       apply Rabs_triang. rewrite Rabs_R1.
-      apply Rplus_le_compat_l. apply Hd.  
-  
+      apply Rplus_le_compat_l. apply Hd. 
+      apply Rcomplements.Rlt_div_r.
+      apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+      rewrite Rabs_mult. rewrite [in X in (_ * X < _)%Re]mxE. 
+      rewrite Bminus_bplus_opp_equiv.
+      pose proof (@BPLUS_accurate' _ ty).
+      specialize (H3 (b (inord i) ord0) (BOPP ty
+            ((A2_J A *f X_m_jacobi k x0 b A)
+                          (inord i) ord0))).
+      assert (is_finite (fprec ty) (femax ty)
+               (BPLUS ty (b (inord i) ord0)
+                  (BOPP ty
+                     ((A2_J A *f
+                       X_m_jacobi k x0 b A)
+                        (inord i) ord0))) = true).
+      { apply BPLUS_no_overflow_is_finite.
+        + admit.
+        + rewrite is_finite_Bopp. rewrite mxE. admit.
+        + unfold Bplus_no_overflow. admit.
+      } specialize (H3 H4).
+      destruct H3 as [d1 [Hd1 H3]].
+      rewrite H3.
+      - 
+
   
 
 
