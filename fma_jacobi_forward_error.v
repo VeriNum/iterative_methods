@@ -681,6 +681,17 @@ induction k.
                          A2_J A *f X_m_jacobi k x0 b A)
                           (inord i) ord0))).
       destruct H2 as [d [e [Hde [Hd [He H2]]]]].
+      rewrite H2. 
+      eapply Rle_lt_trans.
+      apply Rabs_triang. eapply Rle_lt_trans.
+      apply Rplus_le_compat_l. apply He.
+      apply Rcomplements.Rlt_minus_r. rewrite Rabs_mult.
+      eapply Rle_lt_trans. apply Rmult_le_compat_l. apply Rabs_pos.
+      apply Rle_trans with (Rabs 1 + Rabs d)%Re.
+      apply Rabs_triang. rewrite Rabs_R1.
+      apply Rplus_le_compat_l. apply Hd.  
+  
+  
 
 
 
