@@ -668,6 +668,19 @@ induction k.
     rewrite mxE.
     rewrite nth_vec_to_list_float; last by apply ltn_ord.
     apply BMULT_no_overflow_is_finite.
+    + admit.
+    + rewrite nth_vec_to_list_float; last by apply ltn_ord.
+      rewrite mxE. admit.
+    + rewrite nth_vec_to_list_float; last by apply ltn_ord.
+      unfold Bmult_no_overflow.
+      unfold rounded.
+      pose proof (@generic_round_property ty 
+                  (FT2R (A1_inv_J A (inord i) ord0) *
+                     FT2R
+                       ((b -f
+                         A2_J A *f X_m_jacobi k x0 b A)
+                          (inord i) ord0))).
+      destruct H2 as [d [e [Hde [Hd [He H2]]]]].
 
 
 
