@@ -15,6 +15,7 @@ Proof. simpl; auto. Qed.
 Definition fma_no_overflow (t: type) (x y z: R) : Prop :=
   (Rabs (rounded t  (x * y + z)) < Raux.bpow Zaux.radix2 (femax t))%R.
 
+
 Definition Bmult_no_overflow (t: type) (x y: R) : Prop :=
   (Rabs (rounded t  (x * y)) < Raux.bpow Zaux.radix2 (femax t))%R.
 
@@ -403,6 +404,36 @@ destruct f1; try discriminate; auto.
 destruct s; try discriminate; auto.
 Qed. 
 
+Lemma is_finite_fma_no_overflow' {NAN: Nans} (t : type) :
+  forall x y z
+  (Hfinx: Binary.is_finite (fprec t) (femax t) x = true)
+  (Hfiny: Binary.is_finite (fprec t) (femax t) y = true)
+  (Hfinz: Binary.is_finite (fprec t) (femax t) z = true)
+  (Hov : fma_no_overflow t (FT2R x) (FT2R y) (FT2R z)),
+ Binary.is_finite (fprec t) (femax t) (BFMA x y z) = true.
+Proof.
+intros.
+pose proof (Binary.Bfma_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (fma_nan t)
+                      BinarySingleNaN.mode_NE x y z Hfinx Hfiny Hfinz).
+unfold fma_no_overflow, FT2R, rounded in Hov;
+apply Rlt_bool_true in Hov.
+cbv zeta in H.
+rewrite Hov in H; simpl in H; destruct H as (_ & B & _); simpl; auto.
+Qed.
+
+
+Lemma BMFA_finite_e {NAN: Nans} {t: type}:
+ forall (a u f : ftype t)
+ (Hfin : Binary.is_finite _ _ (BFMA a f u) = true),
+ Binary.is_finite _ _ a = true  /\ 
+ Binary.is_finite _ _ f = true /\ 
+ Binary.is_finite _ _ u = true.
+Proof.
+intros.
+destruct a,f,u; inversion Hfin; clear Hfin; subst; 
+ try solve [split; [ | split]; simpl; auto; constructor; auto].
+all: try solve [destruct s,s0,s1; discriminate].
+Qed.
 
 
 End NAN.

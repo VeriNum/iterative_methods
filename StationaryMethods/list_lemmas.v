@@ -148,4 +148,19 @@ rewrite ! fold_symmetric by (intros; lra).
 induction al; simpl; intros; lra.
 Qed.
 
+Lemma length_split {A : Type} (l : list (A * A)) :
+length (fst (List.split l)) = length (snd (List.split l)).
+Proof. 
+induction l; [simpl; auto | ].
+destruct a; simpl; destruct (List.split l); simpl.
+simpl in IHl; lia.
+Qed.
 
+
+Lemma combine_split {A : Type} (l : list (A * A)) :
+combine (fst (List.split l)) (snd (List.split l)) = l.
+Proof.
+induction l; [simpl; auto | ].
+destruct a; simpl; destruct (List.split l); simpl.
+simpl in IHl; rewrite IHl; auto.
+Qed.

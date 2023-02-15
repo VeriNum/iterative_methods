@@ -13,29 +13,26 @@ Open Scope R.
 Section NAN.
 Variable NAN: Nans.
 
+
 (* forward error bounds *)
 Lemma fma_dotprod_forward_error:
   forall (t: type) (v1 v2: list (ftype t))
-  (Hlen1: (1 <= length v1)%nat)
-  (Hlen2: length v1 = length v2)
+  (Hlen: length v1 = length v2)
   (fp : ftype t) (rp rp_abs : R)
   (Hfp: fma_dot_prod_rel (List.combine v1 v2) fp)
   (Hrp: R_dot_prod_rel (List.combine (map FT2R v1) (map FT2R v2)) rp)
   (Hra: R_dot_prod_rel (List.combine (map Rabs (map FT2R v1))  (map Rabs (map FT2R v2)) ) rp_abs)
-  (Hin: (forall xy, In xy (List.combine v1 v2) ->
-      Binary.is_finite (fprec t) (femax t) (fst xy) = true /\
-      Binary.is_finite _ _ (snd xy) = true))
   (Hfin: Binary.is_finite (fprec t) (femax t) fp = true),
   Rabs (FT2R fp - rp) <=  g t (length v1) * Rabs rp_abs + g1 t (length v1) (length v1 - 1).
 Proof.
-intros ? ? ? ? ?.
+intros ? ? ? ?.
 rewrite (combine_map _ _ FT2R FR2).
 replace (combine (map Rabs (map FT2R v1))
      (map Rabs (map FT2R v2))) with (map Rabsp (map FR2 (combine v1 v2))) in *
  by (clear; revert v2; induction v1; destruct v2; simpl; auto; f_equal; auto).
 assert (Datatypes.length (combine v1 v2) = length v1) by
  (rewrite combine_length; lia).
-rewrite <- H. clear H; revert Hlen1 Hlen2.
+rewrite <- H. clear H; revert Hlen.
 induction (List.combine v1 v2).
 {
 intros;
@@ -80,19 +77,9 @@ simpl in Hrp; auto.
 (* non-empty l *)
 intros; inversion Hfp;
 inversion Hrp; inversion Hra; subst.
-assert (HFINa:
-        Binary.is_finite (fprec t) (femax t) (fst a) = true /\
-      Binary.is_finite (fprec t) (femax t) (snd a) = true) by (apply Hin; simpl; auto).
+(destruct (BMFA_finite_e _ _ _ Hfin) as (A & B & C)).
 (* IHl *)
-assert (Hinl:forall xy : ftype t * ftype t,
-       In xy l ->
-       Binary.is_finite (fprec t) (femax t) (fst xy) = true /\
-       Binary.is_finite (fprec t) (femax t) (snd xy) = true).
-{ intros; apply Hin; simpl; auto. }
-clear Hin. destruct HFINa as (A & B).
-assert (Hfins: Binary.is_finite (fprec t) (femax t) s = true).
-{ subst; destruct a, s; destruct f; destruct f0; try discriminate; auto. }
-specialize (IHl Hlen1 Hlen2 s s0 s1 H3 H7 H11 Hinl Hfins).
+specialize (IHl Hlen s s0 s1 H3 H7 H11 C).
 pose proof (fma_accurate' t (fst a) (snd a) s Hfin) as Hplus.
 destruct Hplus as (d' & e'& Hz & Hd'& He'& Hplus); rewrite Hplus;
   clear Hplus.
@@ -180,7 +167,7 @@ assert (Datatypes.length (combine v1 v2) = length v1) by
  (rewrite combine_length; lia).
 assert (Hlenr : length (rev v1) = length (rev v2)) by (rewrite !rev_length; auto).
 rewrite <- rev_length in Hlen1.
-pose proof fma_dotprod_forward_error t (rev v1) (rev v2) Hlen1 Hlenr
+pose proof fma_dotprod_forward_error t (rev v1) (rev v2) Hlenr
   (fma_dotprod t v1 v2) (sum_fold prods) (sum_fold abs_prods) as H2.
 rewrite rev_length in H2.
 rewrite combine_rev in H2; auto.
@@ -203,7 +190,6 @@ subst prods.
 rewrite (combine_map _ _ FT2R FR2); try simpl; auto.
 pose proof R_dot_prod_rel_fold_right t v1 v2 as HRrel; simpl in HRrel; auto.
 rewrite !map_length; auto. }
-{ intros. apply in_rev in H0. specialize (Hin xy H0); auto. }
 symmetry.
 apply (R_dot_prod_rel_Rabs_eq (combine (map FT2R (rev v1)) (map FT2R (rev v2))) (sum_fold abs_prods)).
 rewrite <- (combine_map R R Rabs Rabsp); auto.

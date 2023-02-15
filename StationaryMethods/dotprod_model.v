@@ -196,5 +196,87 @@ destruct u.
     (a * r * a0 + a * s) by nra. apply R_dot_prod_rel_cons; auto.
 Qed.
 
+
+Lemma dotprod_rel_R_exists {NAN: Nans}:
+  forall (t : type) (l : list (ftype t * ftype t)) (fp : ftype t)
+  (Hfp : dot_prod_rel l fp),
+  exists rp, R_dot_prod_rel (map FR2 l) rp.
+Proof.
+intros ?. induction l.
+{ simpl; exists 0. apply R_dot_prod_rel_nil. }
+intros. inversion Hfp; subst. 
+destruct (IHl s H2) as (rs & Hrs); clear IHl.
+exists (FT2R (fst a) * FT2R (snd a) + rs); simpl. 
+apply R_dot_prod_rel_cons; auto.
+Qed.
+
+Lemma dotprod_rel_R_exists_fma {NAN: Nans}:
+  forall (t : type) (l : list (ftype t * ftype t)) (fp : ftype t)
+  (Hfp : fma_dot_prod_rel l fp),
+  exists rp, R_dot_prod_rel (map FR2 l) rp.
+Proof.
+intros ?. induction l.
+{ simpl; exists 0. apply R_dot_prod_rel_nil. }
+intros. inversion Hfp; subst. 
+destruct (IHl s H2) as (rs & Hrs); clear IHl.
+exists (FT2R (fst a) * FT2R (snd a) + rs); simpl. 
+apply R_dot_prod_rel_cons; auto.
+Qed.
+
+Lemma sum_rel_R_abs_exists_fma {NAN: Nans}:
+  forall (t : type) (l : list (ftype t * ftype t)) (fp : ftype t)
+  (Hfp : fma_dot_prod_rel l fp),
+  exists rp, R_dot_prod_rel (map Rabsp (map FR2 l)) rp.
+Proof.
+intros ?. induction l.
+{ simpl; exists 0. apply R_dot_prod_rel_nil. }
+intros. inversion Hfp; subst. 
+destruct (IHl s H2) as (rs & Hrs); clear IHl.
+exists (Rabs (FT2R (fst a)) * Rabs (FT2R (snd a)) + rs); simpl. 
+apply R_dot_prod_rel_cons; auto.
+Qed.
+
+Lemma dotprodR_rel_bound'  :
+  forall (t : type) (l : list (ftype t * ftype t)) (rp a: R)
+  (Ha : 0 <= a)
+  (Hrp : R_dot_prod_rel (map FR2 l) rp)
+  (Hin : forall x, In x l -> Rabs (FT2R (fst x)) <= sqrt a /\ Rabs (FT2R (snd x)) <= sqrt a),
+  Rabs rp <= INR (length l) * a.
+Proof.
+induction l; intros.
+{ inversion Hrp; subst; simpl; rewrite Rabs_R0; nra. }
+  inversion Hrp; subst. 
+  eapply Rle_trans; [apply Rabs_triang|].
+  eapply Rle_trans; [apply Rplus_le_compat | ].
+  rewrite Rabs_mult; apply Rmult_le_compat; try apply Rabs_pos.
+  apply Hin; simpl; auto.
+  apply Hin; simpl; auto.
+  apply IHl; auto; [ apply Ha| intros; apply Hin; simpl; auto].
+  rewrite sqrt_def; auto. apply Req_le;
+  replace (length (a::l)) with ( S(length l)) by auto. 
+  rewrite S_INR; nra.
+Qed.
+
+Lemma dotprodR_rel_bound''  :
+  forall (t : type) (l : list (ftype t * ftype t)) (rs_abs a: R)
+  (Ha : 0 <= a)
+  (Hrp : R_dot_prod_rel (map Rabsp (map FR2 l)) rs_abs)
+  (Hin : forall x, In x l -> Rabs (FT2R (fst x)) <= sqrt a /\ Rabs (FT2R (snd x)) <= sqrt a),
+  rs_abs <= INR (length l) * a.
+Proof.
+induction l; intros.
+{ inversion Hrp; subst; simpl; nra. }
+  inversion Hrp; subst. 
+  eapply Rle_trans; [ apply Rplus_le_compat | ].
+  apply Rmult_le_compat; 
+  [ destruct a; simpl; apply Rabs_pos | destruct a; simpl; apply Rabs_pos | | ].
+  apply Hin; simpl; auto.
+  apply Hin; simpl; auto.
+  apply IHl; auto; [ apply Ha| intros; apply Hin; simpl; auto].
+  rewrite sqrt_def; auto. apply Req_le;
+  replace (length (a::l)) with ( S(length l)) by auto. 
+  rewrite S_INR; nra.
+Qed.
+
 Close Scope R.
 

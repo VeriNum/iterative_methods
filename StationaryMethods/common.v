@@ -235,6 +235,199 @@ rewrite S_O_plus_INR. simpl; nra.
 Qed.
 
 
+Lemma defualt_abs_le_fmax t :
+default_abs t <= bpow Zaux.radix2 (femax t).
+Proof.
+replace (bpow Zaux.radix2 (femax t)) with (1 * bpow Zaux.radix2 (femax t)) by nra.
+unfold default_abs; apply Rmult_le_compat; try nra.
+apply bpow_ge_0.
+apply bpow_le.
+apply Z.le_sub_le_add_r.
+apply Z.le_sub_le_add_r.
+eapply Z.le_trans with (fprec t + fprec t + femax t)%Z; 
+  [ | repeat apply Zplus_le_compat_r; apply Z.lt_le_incl; apply fprec_lt_femax].
+eapply Z.le_trans with (fprec t + fprec t + fprec t)%Z;
+[ |  repeat apply Zplus_le_compat_l;apply Z.lt_le_incl; apply fprec_lt_femax ].
+eapply Z.le_trans with (1 + fprec t + fprec t)%Z;
+[ |  repeat apply Zplus_le_compat_r;apply Z.lt_le_incl;apply fprec_gt_one].
+eapply Z.le_trans with (1 + 1 + fprec t)%Z;
+[ |  repeat apply Zplus_le_compat_r; repeat apply Zplus_le_compat_l; apply Z.lt_le_incl;
+apply fprec_gt_one].
+eapply Z.le_trans with (1 + 1 + 1)%Z;
+[ lia |  repeat apply Zplus_le_compat_r; repeat apply Zplus_le_compat_l; apply Z.lt_le_incl;
+apply fprec_gt_one].
+Qed.
+
+Lemma bpow_femax_lb t : 
+4 <= bpow Zaux.radix2 (femax t).
+Proof. 
+pose proof fprec_gt_one t.
+pose proof fprec_lt_femax t.
+assert (1 < femax t)%Z.
+eapply Z.lt_trans with (fprec t); auto.
+eapply Rle_trans with (bpow Zaux.radix2 2).
+unfold bpow; simpl; nra.
+apply bpow_le; lia.
+Qed.
+
+Lemma bpow_fprec_lb t : 
+2 <= bpow Zaux.radix2 (fprec t).
+Proof. 
+pose proof fprec_gt_one t.
+eapply Rle_trans with (bpow Zaux.radix2 1).
+unfold bpow; simpl; nra.
+apply bpow_le; lia.
+Qed.
+
+Lemma default_abs_ub t :
+default_abs t <= 1.
+Proof.
+unfold default_abs.
+pose proof bpow_gt_0 Zaux.radix2 (femax t).
+pose proof bpow_gt_0 Zaux.radix2 (fprec t).
+replace (3 - femax t - fprec t)%Z with (3 +- femax t +- fprec t)%Z by lia.
+rewrite !bpow_plus.
+rewrite <- !Rmult_assoc.
+replace (/ 2 * bpow Zaux.radix2 3) with 4; [|simpl;nra].
+rewrite !bpow_opp, !Rcomplements.Rle_div_r. 
+field_simplify; try nra.
+eapply Rle_trans; [| apply Rmult_le_compat ;[ | | apply bpow_fprec_lb | apply bpow_femax_lb  ]]; try nra.
+apply Rlt_gt. 
+replace (/ bpow Zaux.radix2 (femax t)) with (1 / bpow Zaux.radix2 (femax t)) by nra.
+apply Rdiv_lt_0_compat; try nra.
+apply Rlt_gt;
+replace (/ bpow Zaux.radix2 (fprec t)) with (1 / bpow Zaux.radix2 (fprec t)) by nra;
+apply Rdiv_lt_0_compat; try nra.
+Qed.
+
+Lemma default_rel_ub t :
+default_rel t <= 1.
+Proof.
+unfold default_rel.
+pose proof bpow_gt_0 Zaux.radix2 (fprec t).
+rewrite !bpow_plus.
+rewrite <- !Rmult_assoc.
+rewrite Rmult_comm.
+rewrite <- !Rmult_assoc.
+replace (bpow Zaux.radix2 1 * / 2) with 1; [|simpl;nra].
+rewrite !bpow_opp, !Rcomplements.Rle_div_r. 
+field_simplify; try nra.
+replace 1 with  (bpow Zaux.radix2 0).
+apply bpow_le.
+pose proof fprec_gt_one t; lia.
+simpl; auto.
+apply Rlt_gt;
+replace (/ bpow Zaux.radix2 (fprec t)) with (1 / bpow Zaux.radix2 (fprec t)) by nra;
+apply Rdiv_lt_0_compat; try nra.
+Qed.
+
+
+Lemma default_rel_plus_1_gt_1 t :
+1 < 1 + default_rel t.
+Proof.
+rewrite Rplus_comm. 
+apply Rcomplements.Rlt_minus_l; field_simplify.
+apply default_rel_gt_0.
+Qed.
+
+Lemma default_rel_plus_1_gt_0 t :
+0 < 1 + default_rel t.
+Proof.
+eapply Rlt_trans with 1; [nra | ].
+apply default_rel_plus_1_gt_1.
+Qed.
+
+
+Lemma mult_d_e_g1_le' t n m:
+(1 <= n )%nat -> (1 <= m)%nat ->
+g1 t n m * (1 + default_rel t)  + default_abs t <= g1 t (S n) (S m).
+Proof.
+intros; replace (S n) with (n + 1)%nat by lia.
+replace (S m) with (m + 1)%nat by lia.
+unfold g1, g; field_simplify.
+replace (INR (n + 1)) with (INR n + 1) by 
+  (rewrite Nat.add_comm; rewrite S_O_plus_INR; simpl; nra).
+replace (INR (m + 1)) with (INR m + 1) by
+  (rewrite Nat.add_comm; rewrite S_O_plus_INR; simpl; nra).
+rewrite !Rmult_plus_distr_l.
+rewrite !Rmult_1_r. replace
+(INR n * default_abs t * (1 + default_rel t) ^ m * default_rel t +
+INR n * default_abs t * (1 + default_rel t) ^ m) with
+(INR n * default_abs t * (1 + default_rel t) ^ m * (1 + default_rel t)) by nra.
+rewrite !Rmult_plus_distr_r.
+apply Rplus_le_compat.
+rewrite !Rmult_assoc.
+rewrite Rmult_comm.
+rewrite !Rmult_assoc.
+apply Rmult_le_compat_l. 
+apply default_abs_ge_0.
+rewrite <- !Rmult_assoc.
+rewrite Rmult_comm.
+apply Rmult_le_compat_l; [apply pos_INR| ].
+rewrite Rmult_comm.
+rewrite tech_pow_Rmult.
+replace (S m) with (m + 1)%nat by lia; nra.
+replace (default_abs t) with (default_abs t * 1) at 1 by nra.
+apply Rmult_le_compat_l; [apply  default_abs_ge_0 | ].
+apply default_rel_plus_1_ge_1'.
+Qed.
+
+
+
+Lemma g1n_le_g1Sn t n:
+(1 <= n )%nat ->
+g1 t n (n - 1) <= g1 t (S n) (S (n - 1)).
+Proof.
+intros;
+replace (S n) with (n + 1)%nat by lia.
+unfold g1; field_simplify.
+replace (INR (n + 1)) with (INR n + 1).
+rewrite !Rmult_plus_distr_l.
+rewrite !Rmult_1_r. 
+apply Rplus_le_compat.
+apply Rmult_le_compat; [
+apply Rmult_le_pos; [apply pos_INR | apply default_abs_ge_0 ] | 
+  apply g_pos | | ].
+rewrite Rplus_comm;
+apply Rcomplements.Rle_minus_l; field_simplify; apply default_abs_ge_0.
+replace ((n + 1 - 1))%nat with (S (n-1))%nat by lia.
+apply le_g_Sn. 
+rewrite Rplus_comm;
+apply Rcomplements.Rle_minus_l; field_simplify; apply default_abs_ge_0.
+rewrite Nat.add_comm. 
+rewrite S_O_plus_INR. simpl; nra. 
+Qed.
+
+Lemma Rplus_le_lt_compat a1 a2 b1 b2 :
+ a1 <= a2 -> b1 < b2 ->  a1 + b1 < a2 + b2.
+Proof.  nra. Qed.
+
+Lemma g1n_lt_g1Sn t n:
+(1 <= n )%nat ->
+g1 t n (n - 1) < g1 t (S n) (S (n - 1)).
+Proof.
+intros;
+replace (S n) with (n + 1)%nat by lia.
+unfold g1; field_simplify.
+replace (INR (n + 1)) with (INR n + 1).
+rewrite !Rmult_plus_distr_l.
+rewrite !Rmult_1_r.
+assert (INR n * default_abs t < default_abs t * INR n + default_abs t).
+{ apply Rle_lt_trans with (INR n * default_abs t + 0) ; try nra.
+apply Rplus_le_lt_compat; try nra.
+apply default_abs_gt_0. }
+apply Rplus_le_lt_compat; try nra.
+apply Rmult_le_compat; [
+apply Rmult_le_pos; [apply pos_INR | apply default_abs_ge_0 ] | 
+  apply g_pos | | ].
+rewrite Rplus_comm;
+apply Rcomplements.Rle_minus_l; field_simplify; apply default_abs_ge_0.
+apply le_g_Sn.
+rewrite Nat.add_comm. 
+rewrite S_O_plus_INR. simpl; nra. 
+Qed.
+
+
 Definition error_rel (t: type) (n: nat) (r : R) : R :=
   let e := default_abs t in
   let d := default_rel t in
