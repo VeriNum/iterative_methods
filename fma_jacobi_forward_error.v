@@ -856,22 +856,15 @@ induction k.
       * apply Rle_refl.
       * rewrite  Rabs_sum_in.
         rewrite sum_abs_eq ; last by (intros; apply Rabs_pos).
-        
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-by admit.
+        (** This gives us information about conditions in terms of 
+            conditions on input
+        **)
+        admit.
+   - admit.
+   - rewrite is_finite_Bopp. rewrite mxE.
+     (** conditions on bound for x_k **) admit.
+   - admit.
+ }
   split.
   (** finiteness of x_k+1 **)
   { apply Hfin. }
