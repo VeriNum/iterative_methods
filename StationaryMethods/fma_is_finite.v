@@ -1,3 +1,6 @@
+(* The main theorem in this file is "finite_fma_from_bounded". It states that under
+some restrictions on the elements of the vectors, an fma dot product will never overflow *)
+
 Require Import vcfloat.VCFloat.
 Require Import List.
 Import ListNotations.
@@ -11,12 +14,16 @@ Open Scope R.
 Section NAN.
 Variable NAN: Nans.
 
+(* the overflow threshold *)
 Definition fmax (t: type) := bpow Zaux.radix2 (femax t).
 
+(* the square of the bounds we use on each element of the combined vector
+ that we perform an fma dot product on *)
 Definition fun_bnd (t : type) (n : nat) :=
 let x := (fmax t - default_abs t) / (1 + default_rel t) - g1 t n (n-1) in
 let y := 1 / (1 + INR n * (g t (n - 1) + 1)) in x * y.
 
+(* start helper lemmas on R *)
 Lemma rdiv_lt (a b: R) :
   0 < b -> 0 < a -> b < a -> / a < / b. 
 Proof. 
@@ -52,8 +59,10 @@ Proof.  nra. Qed.
 Lemma Rminus_lt_minus a b c :
  b < c -> a - c < a - b.
 Proof.  nra. Qed.
+(* end helper lemmas on R *)
 
 
+(* start facts about the bound fun_bnd *)
 Lemma fun_bnd_pos_1 : 
 forall t n
 (Hn : g1 t (n + 1) n <= fmax t), 
@@ -140,8 +149,10 @@ apply Rplus_lt_le_0_compat; try nra.
 apply Rmult_le_pos; try apply pos_INR.
 apply Rplus_le_le_0_compat; try nra; apply g_pos.
 Qed.
+(* end facts about the bound fun_bnd *)
 
 
+(* main theorem *)
 Lemma finite_fma_from_bounded : 
   forall (t: type) (v1 v2: list (ftype t))
   (fp : ftype t) 
