@@ -431,40 +431,6 @@ rewrite H02. by apply /andP.
 Qed.
 
 
-Lemma ov_no_finite {t: type}:
-  forall (x : ftype t) ,
-  is_nan _ _ x = false ->
-  valid_binary (fprec t) (femax t) (B2FF _ _ x) = true ->
-  is_finite _ _ x = true.
-Proof.
-intros. 
-destruct x; simpl in *; auto.
-Admitted.
-
-(*
-        (A (inord m) (inord m)))) *
-  Rabs
-    (FT2R
-       (dotprod_r
-          (vec_to_list_float n.+1
-             (\row_j A2_J A
-                       (inord m) j)^T)
-          (vec_to_list_float n.+1
-             (\col_j X_m_jacobi
-                       k.+1 x0 b A
-                       j ord0))) -
-     FT2R
-       (dotprod_r
-          (vec_to_list_float n.+1
-             (\row_j A2_J A
-                       (inord m) j)^T)
-          (vec_to_list_float n.+1
-             (\col_j X_m_jacobi k
-                       x0 b A j
-                       ord0))))
-*)
-
-
 
 Lemma Rabs_def3 : forall x a:R, (Rabs x <= a)%Re -> 
   (x <= a /\ - a <= x)%Re.
@@ -478,6 +444,19 @@ assert (Rabs x = a \/(Rabs x < a)%Re).
   - rewrite Rabs_left in H; nra.
 + apply Rabs_def2 in H0. nra.
 Qed.
+
+
+
+Lemma x_k_is_finite {t: type} {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
+  (forall i , is_finite _ _ (x0 i ord0) = true) ->
+  (forall i, is_finite _ _ (X_m_jacobi k x0 b A i ord0) = true).
+Proof.
+intros.
+induction k.
++ apply H.
++ simpl.
+  
 
 
 Lemma dot_prod_sub  {t: type} {n:nat}
@@ -1127,7 +1106,7 @@ induction k.
          apply Rabs_triang. rewrite Rabs_R1. apply Rplus_le_compat_l.
          apply Hd2.
       ++ admit.
-      ++ admit.
+      ++ rewrite is_finite_Bopp. admit.
       ++ admit.
     * apply Rle_trans with (Rabs 1 + Rabs d1)%Re; try apply Rabs_triang.
       rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd1.
