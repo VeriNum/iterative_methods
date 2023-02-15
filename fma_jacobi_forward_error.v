@@ -721,9 +721,18 @@ induction k.
         apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
         eapply Rle_lt_trans. apply Rmult_le_compat_l.
         apply Rabs_pos. apply Rabs_triang.
-        
-        
-
+        rewrite [in X in (_ * (_ + X) < _)%Re]/FT2R B2R_Bopp.
+        rewrite Rabs_Ropp. fold (@FT2R ty).
+        rewrite [in X in (_ * (_ + X) < _)%Re]mxE.
+        pose proof (@fma_dotprod_forward_error _ ty).
+        specialize (H5 (vec_to_list_float n.+1
+                                (\row_j A2_J A (inord i) j)^T)
+                       (vec_to_list_float n.+1
+                          (\col_j X_m_jacobi k x0 b A j  ord0))).
+        rewrite !length_veclist in H5.
+        assert ((1 <= n.+1)%coq_nat). { lia. }
+        assert (n.+1 = n.+1). { lia. } specialize (H5 H6 H7). 
+        clear H6 H7.
   
 
 
