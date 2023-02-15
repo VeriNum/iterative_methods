@@ -646,12 +646,14 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
     is_finite (fprec ty) (femax ty)
       (BDIV ty (Zconst ty 1) (A i i)) = true) ->
   forall x0: 'cV[ftype ty]_n.+1, 
+  (forall i : 'I_n.+1, is_finite (fprec ty) (femax ty)
+                              (X_m_jacobi 0 x0 b A i ord0) = true) ->
   (forall k:nat, 
    (forall i, is_finite _ _ ((X_m_jacobi k x0 b A) i ord0) = true) /\
    (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re).
 Proof.
 intro HAf. 
-intros ? ? ? ? ? ? ? ? ?   Hdivf ? k.
+intros ? ? ? ? ? ? ? ? ?   Hdivf ? Hfin k.
 assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re).
 { intros. by apply BDIV_FT2R_sep_zero. }
 induction k.
