@@ -450,13 +450,28 @@ Qed.
 Lemma x_k_is_finite {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
   (forall i , is_finite _ _ (x0 i ord0) = true) ->
+  (forall i, is_finite (fprec t) (femax t)
+                  (A1_inv_J A (inord i) ord0) = true) ->
   (forall i, is_finite _ _ (X_m_jacobi k x0 b A i ord0) = true).
 Proof.
 intros.
 induction k.
 + apply H.
 + simpl.
-  
+  unfold jacobi_iter.
+  rewrite mxE.
+  rewrite nth_vec_to_list_float; last by apply ltn_ord.
+  apply BMULT_no_overflow_is_finite.
+  - apply H0.
+  -
+
+
+
+
+
+
+
+
 
 
 Lemma dot_prod_sub  {t: type} {n:nat}
