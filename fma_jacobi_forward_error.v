@@ -791,31 +791,57 @@ induction k.
       specialize (H5 (R_dot_prod_rel_abs_holds    n.+1 i (A2_J A)
                     (\col_j X_m_jacobi k x0 b A j ord0))).
       rewrite -H7 in H5. rewrite -H6 in H5. clear H6 H7.
-      assert (forall xy : ftype t * ftype t,
+      assert (forall xy : ftype ty * ftype ty,
                 In xy
                   (combine
                      (vec_to_list_float n.+1
                         (\row_j A2_J A
-                                 (inord m) j)^T)
+                                 (inord i) j)^T)
                      (vec_to_list_float n.+1
                         (\col_j X_m_jacobi
-                                 k.+1 x0 b A
+                                 k x0 b A
                                  j ord0))) ->
-                is_finite (fprec t) 
-                  (femax t) xy.1 = true /\
-                is_finite (fprec t) 
-                  (femax t) xy.2 = true) by admit.
-      assert (is_finite (fprec t) 
-             (femax t)
+                is_finite (fprec ty) 
+                  (femax ty) xy.1 = true /\
+                is_finite (fprec ty) 
+                  (femax ty) xy.2 = true) by admit.
+      assert (is_finite (fprec ty) 
+             (femax ty)
              (dotprod_r
                 (vec_to_list_float n.+1
                    (\row_j A2_J A
-                             (inord m) j)^T)
+                             (inord i) j)^T)
                 (vec_to_list_float n.+1
                    (\col_j X_m_jacobi
-                             k.+1 x0 b A
+                             k x0 b A
                              j ord0))) = true) by admit.
-      specialize (H0 H3 H4). 
+      specialize (H5 H6 H7). 
+      eapply Rle_lt_trans. apply Rmult_le_compat_l. apply Rabs_pos.
+      apply Rplus_le_compat_l.
+      apply Rle_trans with 
+      ((1 + g ty n.+1) * 
+        Rabs  (\sum_j
+                  Rabs (FT2R (A2_J A (inord i) j)) *
+                  Rabs (FT2R (X_m_jacobi k x0 b A j ord0))) + 
+        g1 ty n.+1 (n.+1 - 1)%coq_nat)%Re.
+      * apply Rle_trans with 
+        (Rabs ( \sum_j
+                  (FT2R (A2_J A (inord i) j) *
+                   FT2R(X_m_jacobi k x0 b A j ord0)))  +
+          (g ty n.+1 *
+              Rabs
+                (\sum_j
+                    Rabs
+                      (FT2R (A2_J A (inord i) j)) *
+                    Rabs
+                      (FT2R
+                         (X_m_jacobi k x0 b A j
+                            ord0))) +
+              g1 ty n.+1 (n.+1 - 1)%coq_nat))%Re.
+        rewrite Rplus_comm.
+        apply Rcomplements.Rle_minus_l.
+        eapply Rle_trans. apply Rabs_triang_inv.
+        apply H5.
   
 
 
