@@ -647,18 +647,26 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
       (BDIV ty (Zconst ty 1) (A i i)) = true) ->
   forall x0: 'cV[ftype ty]_n.+1, 
   (forall i : 'I_n.+1, is_finite (fprec ty) (femax ty)
-                              (X_m_jacobi 0 x0 b A i ord0) = true) ->
+                              (x0 i ord0) = true) ->
   (forall k:nat, 
-   (forall i, is_finite _ _ ((X_m_jacobi k x0 b A) i ord0) = true) /\
+   (forall i, is_finite _ _ (X_m_jacobi k x0 b A i ord0) = true) /\
    (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re).
 Proof.
 intro HAf. 
-intros ? ? ? ? ? ? ? ? ?   Hdivf ? Hfin k.
+intros ? ? ? ? ? ? ? ? ?   Hdivf ? Hx0 k.
 assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re).
 { intros. by apply BDIV_FT2R_sep_zero. }
 induction k.
-+ simpl. nra.
-+ simpl.
++ split; simpl; try nra.
+  intros. apply Hx0. 
++ assert (Hfin: (forall i : 'I_n.+1,
+                 is_finite (fprec ty) (femax ty)
+                   (X_m_jacobi k.+1 x0 b A i ord0) =  true)) by admit.
+  split.
+  (** finiteness of x_k+1 **)
+  { apply Hfin. }
+  destruct IHk as [Hfx_k IHk].
+  simpl.
   assert (((1 - rho * rho ^ k) / (1 - rho))%Re = 
            (rho * ((1 - rho ^ k) / (1 - rho)) + 1)%Re).
   { assert ((rho * ((1 - rho ^ k) / (1 - rho)) + 1)%Re = 
@@ -802,7 +810,7 @@ induction k.
                                  { lia. } rewrite H6 in Hnth. rewrite combine_nth in Hnth.
                                  rewrite !nth_vec_to_list_float in Hnth.
                                  rewrite -Hnth /=.
-                                 specialize (Hfin k.+1 (@inord n j)).
+                                 specialize (Hfin (@inord n j)).
                                  rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
                                  rewrite inord_val in Hfin. repeat split; try apply Hfin.
                                  apply bmult_overflow_implies in Hfin; try apply Hfin.
@@ -837,7 +845,7 @@ induction k.
                                    { lia. } rewrite H5 in Hnth. rewrite combine_nth in Hnth.
                                    rewrite !nth_vec_to_list_float in Hnth.
                                    rewrite -Hnth /=.
-                                   specialize (Hfin k.+1 (@inord n j)).
+                                   specialize (Hfin (@inord n j)).
                                    rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
                                    rewrite inord_val in Hfin. repeat split; try apply Hfin.
                                    apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
@@ -887,7 +895,7 @@ induction k.
                                                ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
                                                 * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
                                       { apply matrix_vec_mult_bound_corollary. intros.
-                                        specialize (Hfin k.+1 (@inord n i)). 
+                                        specialize (Hfin (@inord n i)). 
                                         rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite inord_val in Hfin. repeat split; try apply Hfin.
@@ -951,7 +959,7 @@ induction k.
                                         by rewrite !length_veclist.
                                         
                                         intros.
-                                        specialize (Hfin k.+1 (@inord n i)). 
+                                        specialize (Hfin (@inord n i)). 
                                         rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite inord_val in Hfin. repeat split; try apply Hfin.
@@ -1026,7 +1034,7 @@ induction k.
                                    { lia. } rewrite H5 in Hnth. rewrite combine_nth in Hnth.
                                    rewrite !nth_vec_to_list_float in Hnth.
                                    rewrite -Hnth /=.
-                                   specialize (Hfin k.+1 (@inord n j)).
+                                   specialize (Hfin (@inord n j)).
                                    rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
                                    rewrite inord_val in Hfin. repeat split; try apply Hfin.
                                    apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
@@ -1050,7 +1058,7 @@ induction k.
                        by case: (x1 == y :> nat).
                     } rewrite H4. apply /RleP. apply matrix_vec_mult_bound_corollary.
                     intros.
-                    specialize (Hfin k.+1 (@inord n i)). 
+                    specialize (Hfin (@inord n i)). 
                     rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                     rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                     rewrite inord_val in Hfin. repeat split; try apply Hfin.
@@ -1114,7 +1122,7 @@ induction k.
                      by rewrite !length_veclist.
                                         
                      intros.
-                     specialize (Hfin k.+1 (@inord n i)). 
+                     specialize (Hfin (@inord n i)). 
                      rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                      rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                      rewrite inord_val in Hfin. repeat split; try apply Hfin.
@@ -1140,7 +1148,7 @@ induction k.
                                                 * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
                            { apply matrix_vec_mult_bound_corollary. intros.
 
-                             specialize (Hfin k.+1 (@inord n i)). 
+                             specialize (Hfin  (@inord n i)). 
                                         rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite inord_val in Hfin. repeat split; try apply Hfin.
@@ -1204,7 +1212,7 @@ induction k.
                                         by rewrite !length_veclist.
                                         
                                         intros.
-                                        specialize (Hfin k.+1 (@inord n i)). 
+                                        specialize (Hfin (@inord n i)). 
                                         rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite inord_val in Hfin. repeat split; try apply Hfin.
@@ -1587,27 +1595,9 @@ induction k.
  - apply Rplus_le_compat_r. apply Rmult_le_compat_l.
     * by apply rho_ge_0.
     * nra.
-Qed. 
+Admitted.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+(*
 
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
@@ -2593,5 +2583,7 @@ induction k.
     * by apply rho_ge_0.
     * nra.
 Qed. 
+
+*)
   
 End WITHNANS.
