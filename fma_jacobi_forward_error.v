@@ -733,6 +733,89 @@ induction k.
         assert ((1 <= n.+1)%coq_nat). { lia. }
         assert (n.+1 = n.+1). { lia. } specialize (H5 H6 H7). 
         clear H6 H7.
+        specialize (H5 (dotprod_r 
+                          (vec_to_list_float n.+1
+                              (\row_j A2_J A (inord i) j)^T)
+                          (vec_to_list_float n.+1
+                               (\col_j X_m_jacobi k x0 b A j  ord0)))).
+       specialize (H5 
+                   (\sum_j ( (FT2R (A2_J A (inord i) j)) * 
+                             (FT2R (X_m_jacobi k x0 b A j ord0)))%Re)).
+      specialize (H5 
+                   (\sum_j (Rabs (FT2R (A2_J A (inord i) j)) * 
+                            Rabs (FT2R (X_m_jacobi k x0 b A j ord0)))%Re)).
+      specialize (H5 (@fma_dot_prod_rel_holds _ _ _ n.+1 i (A2_J A) 
+                        (\col_j X_m_jacobi k x0 b A j ord0))).
+      assert (\sum_j
+                 (FT2R
+                    (A2_J A (inord i) j) *
+                  FT2R
+                    (X_m_jacobi k x0 b
+                       A j ord0))%Re = 
+              \sum_(j < n.+1)
+                      FT2R_mat (A2_J A) (inord i) (@widen_ord n.+1 n.+1 (leqnn n.+1) j) * 
+                      FT2R_mat (\col_j X_m_jacobi k x0 b A j ord0) (@widen_ord n.+1 n.+1 (leqnn n.+1) j) ord0).
+      { apply eq_big. intros. by []. intros.
+        assert ((widen_ord (m:=n.+1) (leqnn n.+1) i0) = i0).
+        { unfold widen_ord. 
+          apply val_inj. by simpl. 
+        } rewrite H7. by rewrite !mxE.
+      } rewrite H6 in H5.
+      specialize (H5 (@R_dot_prod_rel_holds _ _  n.+1 i (leqnn n.+1) (A2_J A)
+                    (\col_j X_m_jacobi k x0 b A j ord0))). 
+      assert (\sum_j
+                 (Rabs
+                    (FT2R
+                       (A2_J A 
+                          (inord i) j)) *
+                  Rabs
+                    (FT2R
+                       (X_m_jacobi k
+                          x0 b A j ord0))) =  
+              sum_fold
+                (map (uncurry Rmult)
+                   (map Rabsp
+                      (map FR2
+                         (combine
+                            (vec_to_list_float n.+1
+                               (\row_j (A2_J A) (inord i) j)^T)
+                            (vec_to_list_float n.+1 
+                              (\col_j X_m_jacobi k x0 b A j ord0))))))).
+      { rewrite -sum_fold_mathcomp_equiv.
+        apply eq_big. by []. intros.
+        assert ((widen_ord (m:=n.+1) (leqnn n.+1) i0) = i0).
+        { unfold widen_ord. 
+          apply val_inj. by simpl. 
+        } rewrite H8. by rewrite !mxE.
+      } rewrite H7 in H5.
+      specialize (H5 (R_dot_prod_rel_abs_holds    n.+1 i (A2_J A)
+                    (\col_j X_m_jacobi k x0 b A j ord0))).
+      rewrite -H7 in H5. rewrite -H6 in H5. clear H6 H7.
+      assert (forall xy : ftype t * ftype t,
+                In xy
+                  (combine
+                     (vec_to_list_float n.+1
+                        (\row_j A2_J A
+                                 (inord m) j)^T)
+                     (vec_to_list_float n.+1
+                        (\col_j X_m_jacobi
+                                 k.+1 x0 b A
+                                 j ord0))) ->
+                is_finite (fprec t) 
+                  (femax t) xy.1 = true /\
+                is_finite (fprec t) 
+                  (femax t) xy.2 = true) by admit.
+      assert (is_finite (fprec t) 
+             (femax t)
+             (dotprod_r
+                (vec_to_list_float n.+1
+                   (\row_j A2_J A
+                             (inord m) j)^T)
+                (vec_to_list_float n.+1
+                   (\col_j X_m_jacobi
+                             k.+1 x0 b A
+                             j ord0))) = true) by admit.
+      specialize (H0 H3 H4). 
   
 
 
