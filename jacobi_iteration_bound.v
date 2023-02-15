@@ -431,6 +431,29 @@ rewrite H02. by apply /andP.
 Qed.
 
 
+Lemma BPLUS_no_overflow_is_finite {NAN: Nans} (t : type): 
+  forall (x y : ftype t) 
+  (Hx : is_finite _ _ x = true)
+  (Hy : is_finite _ _ y = true)
+  (Hnov: Bplus_no_overflow t (FT2R x) (FT2R y)),
+   Binary.is_finite (fprec t) (femax t) (BPLUS t x y) = true.
+  
+Proof.
+intros.
+pose proof (Binary.Bplus_correct  (fprec t) (femax t)  
+    (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan t) BinarySingleNaN.mode_NE x y) as
+  H0.
+unfold Bplus_no_overflow in Hnov.
+unfold rounded in Hnov.
+apply Rlt_bool_true in Hnov.
+rewrite Hnov in H0. specialize (H0 Hx Hy).
+destruct H0 as [H01 [H02 H03]].
+by rewrite H02.
+Qed.
+
+
+
+
 
 Lemma Rabs_def3 : forall x a:R, (Rabs x <= a)%Re -> 
   (x <= a /\ - a <= x)%Re.
@@ -452,6 +475,8 @@ Lemma x_k_is_finite {t: type} {n:nat}
   (forall i , is_finite _ _ (x0 i ord0) = true) ->
   (forall i, is_finite (fprec t) (femax t)
                   (A1_inv_J A (inord i) ord0) = true) ->
+  (forall i, is_finite (fprec t) (femax t)
+                          (b (inord i) ord0) = true) ->
   (forall i, is_finite _ _ (X_m_jacobi k x0 b A i ord0) = true).
 Proof.
 intros.
@@ -463,7 +488,18 @@ induction k.
   rewrite nth_vec_to_list_float; last by apply ltn_ord.
   apply BMULT_no_overflow_is_finite.
   - apply H0.
-  -
+  - rewrite nth_vec_to_list_float; last by apply ltn_ord.
+    rewrite mxE. rewrite Bminus_bplus_opp_equiv.
+    * apply BPLUS_no_overflow_is_finite.
+      ++ apply H1.
+      ++ rewrite is_finite_Bopp. rewrite mxE. admit.
+      ++ admit.
+    * apply H1.
+    * rewrite is_finite_Bopp. rewrite mxE.
+      admit.
+    * admit.
+  -  rewrite nth_vec_to_list_float; last by apply ltn_ord.
+Admitted.
 
 
 
