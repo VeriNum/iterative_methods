@@ -711,7 +711,12 @@ induction k.
       } specialize (H3 H4).
       destruct H3 as [d1 [Hd1 H3]].
       rewrite H3.
-      - 
+      - rewrite Rabs_mult. eapply Rle_lt_trans.
+        apply Rmult_le_compat_l. apply Rabs_pos.
+        apply Rmult_le_compat_l. apply Rabs_pos.
+        apply Rle_trans with (Rabs 1 + Rabs d1)%Re.
+        apply Rabs_triang. rewrite Rabs_R1. apply Rplus_le_compat_l.
+        apply Hd1.
 
   
 
