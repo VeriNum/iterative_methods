@@ -601,6 +601,13 @@ Definition x_fix_FT2R {ty} {n:nat} x b (A: 'M[ftype ty]_n.+1) :
   let r := b - ((A2_J_real (FT2R_mat A)) *m x) in
   diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) r.
 
+Lemma Rabs_sum_in {n:nat} (f1 f2 : 'I_n.+1 -> R):
+  \sum_j (Rabs (f1 j) * Rabs (f2 j))%Re = 
+   \sum_j (Rabs (f1 j * f2 j))%Re.
+Proof.
+apply eq_big. by [].
+intros. by rewrite Rabs_mult.
+Qed.
 
 
 (** State the forward error theorem **)
@@ -841,7 +848,15 @@ induction k.
         rewrite Rplus_comm.
         apply Rcomplements.Rle_minus_l.
         eapply Rle_trans. apply Rabs_triang_inv.
-        apply H5.
+        apply H5. rewrite -Rplus_assoc. apply Rplus_le_compat_r.
+        rewrite Rmult_plus_distr_r. apply Rplus_le_compat_r.
+        rewrite Rmult_1_l. rewrite Rabs_sum_in.
+        rewrite sum_abs_eq ; last by (intros; apply Rabs_pos).
+        apply /RleP. apply Rabs_ineq.
+      * apply Rle_refl.
+      * rewrite  Rabs_sum_in.
+        rewrite sum_abs_eq ; last by (intros; apply Rabs_pos).
+        
   
 
 
