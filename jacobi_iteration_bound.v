@@ -12,6 +12,8 @@ Set Bullet Behavior "Strict Subproofs".
 
 Require Import fma_floating_point_model lemmas.
 Require Import fma_dot_acc fma_matrix_vec_mult.
+From Flocq Require Import Binary.
+Require Import finite_lemmas_additional.
 
 Section WITH_NANS.
 
@@ -267,8 +269,7 @@ assert (k == k' \/ (k < k')%nat).
   by []. 
 Qed.
 
-From Flocq Require Import Binary.
-Require Import finite_lemmas_additional.
+
 
 (*
 Lemma jacobi_iteration_bound_corollaries:
@@ -348,6 +349,9 @@ res_k+1 = A_1 \otimes (x_k+1 \ominus x_k)
 x_k+1 = D^-1 \otimes (b \ominus (N \otimes x_k))
 **)
 
+Lemma g1_le_fmax {t: type} {n:nat} :
+  (g1 t (n + 1)%coq_nat n <= fmax t)%Re.
+Admitted.
 
 (** finiteness of dot product **)
 Lemma dotprod_finite {t: type} (v : vector t):
@@ -355,31 +359,31 @@ Lemma dotprod_finite {t: type} (v : vector t):
   In xy (rev v) ->
   is_finite (fprec t) (femax t) xy = true /\
   (let n := length (rev v) in
-   (Rabs (FT2R xy) <=
-    sqrt
-      (F' t / 2 /
-       (INR n * (1 + default_rel t) ^ n)))%Re)) ->
+   (Rabs (FT2R xy) < sqrt  (fun_bnd t n))%Re)) ->
 is_finite (fprec t) (femax t)
   (dotprod v v) = true.
 Proof.
 intros.
-pose proof (@fma_is_finite _ t (rev v) (rev v)).
-assert (length (rev v) = length (rev v)).
-{ lia. } specialize (H0 H1).
+pose proof (@finite_fma_from_bounded _ t (rev v) (rev v)).
 specialize (H0 (dotprod v v)).
 pose proof (@fma_dot_prod_rel_fold_right _ t).
-specialize (H2 v v).
-rewrite -combine_rev in H2; last by [].
+specialize (H1 v v).
+rewrite -combine_rev in H1; last by [].
 assert (fma_dotprod t v v = dotprod v v).
 { by unfold fma_dotprod, dotprod. }
-rewrite H3 in H2. specialize (H0 H2).
+rewrite H2 in H1. specialize (H0 H1).
+rewrite -rev_combine in H0; last by [].
+rewrite rev_length combine_length Nat.min_id in H0.
 apply H0.
+apply g1_le_fmax.
 intros.
 repeat split;
-try (specialize (H xy.1); apply H;
-      destruct xy; apply in_combine_l in H4; auto);
-try (specialize (H xy.2); apply H;
-      destruct xy; apply in_combine_r in H4; auto).
+try (specialize (H x.1); apply in_rev in H3;
+      destruct x; apply in_combine_l in H3; simpl in *;
+      apply in_rev in H3; try rewrite rev_length in H;by apply H);
+try (specialize (H x.2); apply in_rev in H3;
+      destruct x; apply in_combine_r in H3; simpl in *;
+      apply in_rev in H3; try rewrite rev_length in H;by apply H).
 Qed.
 
 
