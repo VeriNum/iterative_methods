@@ -188,20 +188,19 @@ pose proof (fma_dotprod_forward_error _ ty
             (vec_to_list_float n.+1 (\row_j A (inord i) j)^T)
              (vec_to_list_float n.+1 v)).
 rewrite !length_veclist in H2.
-assert ((1 <= n.+1)%coq_nat). { lia. } 
 assert (n.+1 = n.+1). { lia. } 
-specialize (H2 H3 H4).
+specialize (H2 H3).
 apply Rle_trans with (e_i (@inord n i) A v).
 + unfold e_i. rewrite !mxE -RminusE.
   rewrite !length_veclist.
   apply H2.
   assert (v = \col_j v j ord0).
   {  apply matrixP.  unfold eqrel. intros. rewrite !mxE /=.
-      assert ( y = ord0). { apply ord1. } by rewrite H5.
-  } rewrite -H5.
+      assert ( y = ord0). { apply ord1. } by rewrite H4.
+  } rewrite -H4.
   - apply fma_dot_prod_rel_holds .
   - pose proof (@R_dot_prod_rel_holds n ty n.+1 i (leqnn n.+1)).
-    specialize (H5 A v).
+    specialize (H4 A v).
     assert (\sum_(j < n.+1)
                FT2R_mat A (inord i)
                  (widen_ord (leqnn n.+1) j) *
@@ -212,17 +211,15 @@ apply Rle_trans with (e_i (@inord n i) A v).
     { apply eq_big. by []. intros.
       assert (widen_ord (leqnn n.+1) i0 = i0).
       { unfold widen_ord. apply val_inj. by simpl. }
-      by rewrite H7.
-    } by rewrite -H6. 
+      by rewrite H6.
+    } by rewrite -H5. 
   - apply R_dot_prod_rel_abs_holds.
-  - intros. specialize (H xy (@inord n i)).
-    rewrite inord_val in H. specialize (H H5).
-    split; apply H.
-  - by [].
+  - intros. specialize (H0 (@inord n i)). 
+    rewrite inord_val in H0. apply H0. 
 + assert (e_i (inord i) A v = 
          [seq e_i i0 A v | i0 <- enum 'I_n.+1]`_i).
   { rewrite seq_equiv nth_mkseq. nra. by rewrite size_map size_enum_ord in H1. } 
-  rewrite H5. apply /RleP.
+  rewrite H4. apply /RleP.
   apply (@bigmaxr_ler _  _ [seq e_i i0 A v | i0 <- enum 'I_n.+1] i).
   rewrite size_map size_enum_ord.
   by rewrite size_map size_enum_ord in H1.
