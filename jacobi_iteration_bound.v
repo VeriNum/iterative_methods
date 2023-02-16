@@ -2115,11 +2115,10 @@ apply Rle_trans with
       assert (forall i : 'I_n.+1,
               is_finite (fprec t) (femax t)
                 (BDIV t (Zconst t 1) (A i i)) = true) by (intros; apply HfinvA).
-      unfold jacobi_preconditions_math in Hjacobi.
-      unfold rho_def in Hjacobi. specialize (Hjacobi k).
-      destruct Hjacobi as [HfA1 [Hrho_gt_1 [HinvA1 [HdivA1 [HG1 [Hacc1 [Hk1 [He01 [Hfx01 [HfA1_inv [HfA2 Hfb]]]]]]]]]]].
+      unfold forward_error_cond in Hcond.
+      unfold rho_def in Hcond. 
+      destruct Hcond as [HfA1 [Hrho_gt_1 [HinvA1 [Hdiv1 [Hfx01 [HfA1_inv [HfA2 Hfb]]]]]]].
       specialize (H5 H6 H7 H8 H9 x0 Hfx01 HfA1_inv HfA2 Hfb).
-      rewrite  -/rho_def in H5.
      assert ((f_error k.+1 b x0 x A <= rho^k.+1 * (f_error 0 b x0 x A) + 
                     ((1 - rho^k.+1) / (1 - rho))* d_mag)%Re).
      { by apply (H5 k.+1). }
