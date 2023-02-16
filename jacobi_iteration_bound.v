@@ -14,6 +14,7 @@ Require Import fma_floating_point_model lemmas.
 Require Import fma_dot_acc fma_matrix_vec_mult.
 From Flocq Require Import Binary.
 Require Import finite_lemmas_additional.
+Require Import fma_jacobi_forward_error.
 
 Section WITH_NANS.
 
@@ -427,47 +428,6 @@ assert (Rabs x = a \/(Rabs x < a)%Re).
 + apply Rabs_def2 in H0. nra.
 Qed.
 
-Require Import fma_jacobi_forward_error.
-
-Lemma x_k_is_finite {t: type} {n:nat}
-  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
-  (forall i , is_finite _ _ (x0 i ord0) = true) ->
-  (forall i, is_finite (fprec t) (femax t)
-                  (A1_inv_J A (inord i) ord0) = true) ->
-  (forall i, is_finite (fprec t) (femax t)
-                          (b (inord i) ord0) = true) ->
-  (forall i, is_finite _ _ (X_m_jacobi k x0 b A i ord0) = true).
-Proof.
-intros.
-induction k.
-+ apply H.
-+ simpl.
-  unfold jacobi_iter.
-  rewrite mxE.
-  rewrite nth_vec_to_list_float; last by apply ltn_ord.
-  apply BMULT_no_overflow_is_finite.
-  - apply H0.
-  - rewrite nth_vec_to_list_float; last by apply ltn_ord.
-    rewrite mxE. rewrite Bminus_bplus_opp_equiv.
-    * apply BPLUS_no_overflow_is_finite.
-      ++ apply H1.
-      ++ rewrite is_finite_Bopp. rewrite mxE. admit.
-      ++ admit.
-    * apply H1.
-    * rewrite is_finite_Bopp. rewrite mxE.
-      admit.
-    * admit.
-  -  rewrite nth_vec_to_list_float; last by apply ltn_ord.
-Admitted.
-
-
-
-
-
-
-
-
-
 
 Lemma dot_prod_sub  {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
@@ -528,12 +488,6 @@ specialize (H0 (vec_to_list_float n.+1
              (\col_j X_m_jacobi
                        k.+1 x0 b A
                        j ord0))).
-assert ((1 <=
-            length
-              (vec_to_list_float n.+1
-                 (\row_j A2_J A 
-                           (inord m) j)^T))%coq_nat).
-{ rewrite length_veclist. lia. } specialize (H0 H1).
 assert ( length
            (vec_to_list_float n.+1
               (\row_j A2_J A 
@@ -542,7 +496,7 @@ assert ( length
            (vec_to_list_float n.+1
               (\col_j X_m_jacobi k.+1
                         x0 b A j ord0))).
-{ by rewrite !length_veclist. } specialize (H0 H2).
+{ by rewrite !length_veclist. } specialize (H0 H1).
 specialize ( H0 (dotprod_r
                   (vec_to_list_float n.+1
                      (\row_j A2_J A
@@ -572,8 +526,8 @@ assert (\sum_j
   assert ((widen_ord (m:=n.+1) (leqnn n.+1) i) = i).
   { unfold widen_ord. 
     apply val_inj. by simpl. 
-  } rewrite H4. by rewrite !mxE.
-} rewrite H3 in H0.
+  } rewrite H3. by rewrite !mxE.
+} rewrite H2 in H0.
 specialize (H0 (@R_dot_prod_rel_holds _ _  n.+1 m (leqnn n.+1) (A2_J A)
               (\col_j X_m_jacobi k.+1 x0 b A j ord0))). 
 assert (\sum_j
@@ -599,25 +553,11 @@ assert (\sum_j
   assert ((widen_ord (m:=n.+1) (leqnn n.+1) i) = i).
   { unfold widen_ord. 
     apply val_inj. by simpl. 
-  } rewrite H5. by rewrite !mxE.
-} rewrite H4 in H0.
+  } rewrite H4. by rewrite !mxE.
+} rewrite H3 in H0.
 specialize (H0 (R_dot_prod_rel_abs_holds    n.+1 m (A2_J A)
               (\col_j X_m_jacobi k.+1 x0 b A j ord0))).
-rewrite -H4 in H0. rewrite -H3 in H0. clear H3 H4.
-assert (forall xy : ftype t * ftype t,
-          In xy
-            (combine
-               (vec_to_list_float n.+1
-                  (\row_j A2_J A
-                           (inord m) j)^T)
-               (vec_to_list_float n.+1
-                  (\col_j X_m_jacobi
-                           k.+1 x0 b A
-                           j ord0))) ->
-          is_finite (fprec t) 
-            (femax t) xy.1 = true /\
-          is_finite (fprec t) 
-            (femax t) xy.2 = true) by admit.
+rewrite -H3 in H0. rewrite -H2 in H0. clear H2 H3.
 assert (is_finite (fprec t) 
        (femax t)
        (dotprod_r
@@ -628,15 +568,14 @@ assert (is_finite (fprec t)
              (\col_j X_m_jacobi
                        k.+1 x0 b A
                        j ord0))) = true) by admit.
-specialize (H0 H3 H4).
+specialize (H0 H2).
 pose proof (@fma_dotprod_forward_error _ t).
-specialize (H5 (vec_to_list_float n.+1
+specialize (H3 (vec_to_list_float n.+1
              (\row_j A2_J A
                        (inord m) j)^T)  (vec_to_list_float n.+1
              (\col_j X_m_jacobi
                        k x0 b A
                        j ord0))).
-specialize (H5 H1).
 assert ( length
            (vec_to_list_float n.+1
               (\row_j A2_J A 
@@ -645,8 +584,8 @@ assert ( length
            (vec_to_list_float n.+1
               (\col_j X_m_jacobi k
                         x0 b A j ord0))).
-{ by rewrite !length_veclist. } specialize (H5 H6).
-specialize ( H5 (dotprod_r
+{ by rewrite !length_veclist. } specialize (H3 H4).
+specialize ( H3 (dotprod_r
                   (vec_to_list_float n.+1
                      (\row_j A2_J A
                                (inord m) j)^T)
@@ -654,13 +593,13 @@ specialize ( H5 (dotprod_r
                      (\col_j X_m_jacobi
                                k x0 b A
                                j ord0)))).
-specialize (H5 
+specialize (H3 
              (\sum_j ( (FT2R (A2_J A (inord m) j)) * 
                        (FT2R (X_m_jacobi k x0 b A j ord0)))%Re)).
-specialize (H5 
+specialize (H3 
              (\sum_j (Rabs (FT2R (A2_J A (inord m) j)) * 
                       Rabs (FT2R (X_m_jacobi k x0 b A j ord0)))%Re)).
-specialize (H5 (@fma_dot_prod_rel_holds _ _ _ n.+1 m (A2_J A) 
+specialize (H3 (@fma_dot_prod_rel_holds _ _ _ n.+1 m (A2_J A) 
                   (\col_j X_m_jacobi k x0 b A j ord0))).
 assert (\sum_j
            (FT2R
@@ -675,9 +614,9 @@ assert (\sum_j
   assert ((widen_ord (m:=n.+1) (leqnn n.+1) i) = i).
   { unfold widen_ord. 
     apply val_inj. by simpl. 
-  } rewrite H8. by rewrite !mxE.
-} rewrite H7 in H5.
-specialize (H5 (@R_dot_prod_rel_holds _ _  n.+1 m (leqnn n.+1) (A2_J A)
+  } rewrite H6. by rewrite !mxE.
+} rewrite H5 in H3.
+specialize (H3 (@R_dot_prod_rel_holds _ _  n.+1 m (leqnn n.+1) (A2_J A)
               (\col_j X_m_jacobi k x0 b A j ord0))). 
 assert (\sum_j
            (Rabs
@@ -702,25 +641,11 @@ assert (\sum_j
   assert ((widen_ord (m:=n.+1) (leqnn n.+1) i) = i).
   { unfold widen_ord. 
     apply val_inj. by simpl. 
-  } rewrite H9. by rewrite !mxE.
-} rewrite H8 in H5.
-specialize (H5 (R_dot_prod_rel_abs_holds    n.+1 m (A2_J A)
+  } rewrite H7. by rewrite !mxE.
+} rewrite H6 in H3.
+specialize (H3 (R_dot_prod_rel_abs_holds    n.+1 m (A2_J A)
               (\col_j X_m_jacobi k x0 b A j ord0))).
-rewrite -H8 in H5. rewrite -H7 in H5. clear H7 H8.
-assert (forall xy : ftype t * ftype t,
-          In xy
-            (combine
-               (vec_to_list_float n.+1
-                  (\row_j A2_J A
-                           (inord m) j)^T)
-               (vec_to_list_float n.+1
-                  (\col_j X_m_jacobi
-                           k x0 b A
-                           j ord0))) ->
-          is_finite (fprec t) 
-            (femax t) xy.1 = true /\
-          is_finite (fprec t) 
-            (femax t) xy.2 = true) by admit.
+rewrite -H6 in H3. rewrite -H5 in H3. clear H5 H6.
 assert (is_finite (fprec t) 
        (femax t)
        (dotprod_r
@@ -731,15 +656,15 @@ assert (is_finite (fprec t)
              (\col_j X_m_jacobi
                        k x0 b A
                        j ord0))) = true) by admit.
-specialize (H5 H7 H8).
-clear H8 H7 H4 H3.
+specialize (H3 H5).
+clear H5 H2. 
 assert (forall a b x y:R, (x <= a /\ - a <= x)%Re -> (y <= b /\ -b <= y)%Re ->
                  (- (a + b) <= x - y <= a + b)%Re).
 { intros. nra. } rewrite length_veclist in H0.
-rewrite length_veclist in H5.
+rewrite length_veclist in H3.
 apply Rabs_def3 in H0.
-apply Rabs_def3 in H5.
-specialize (H3 (g t n.+1 *
+apply Rabs_def3 in H3.
+specialize (H2 (g t n.+1 *
                     Rabs
                       (\sum_j
                           Rabs
@@ -782,15 +707,15 @@ specialize (H3 (g t n.+1 *
                    (FT2R (A2_J A (inord m) j) *
                     FT2R
                       (X_m_jacobi k x0 b A j ord0)))%Re).
-specialize (H3 H0 H5).
-clear H0 H5.
+specialize (H2 H0 H3).
+clear H0 H3.
 assert (forall a b c d e:R, (-e <= (a - b) - (c -  d) <= e)%Re ->
                             (-e <= (a - c) - (b - d) <= e)%Re).
-{ intros. nra. } apply H0 in H3. clear H0.
+{ intros. nra. } apply H0 in H2. clear H0.
 assert (forall a b c d :R, (- (a + b + (c + b)) <= d <= (a + b + (c + b)))%Re ->
                              (- ((a + c) + 2 * b) <= d <= ((a + c) + 2 * b))%Re).
-{ intros. nra. } apply H0 in H3. clear H0.
-apply Rabs_le in H3.
+{ intros. nra. } apply H0 in H2. clear H0.
+apply Rabs_le in H2.
 apply Rle_trans with 
 (Rabs (\sum_j
              FT2R
@@ -828,7 +753,7 @@ apply Rle_trans with
 rewrite Rplus_comm.
 apply Rcomplements.Rle_minus_l.
 eapply Rle_trans. apply Rabs_triang_inv.
-apply H3. rewrite -Rmult_plus_distr_l.
+apply H2. rewrite -Rmult_plus_distr_l.
 nra.
 Admitted.
 
