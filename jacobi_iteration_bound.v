@@ -1599,16 +1599,16 @@ Definition forward_error_cond {ty} {n:nat}
 
 
 Lemma residual_is_finite {t: type} {n:nat}
-  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) (k:nat) (acc : ftype t):
+  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) (k:nat):
   let x0 := \col_(j < n.+1) (Zconst t 0) in 
   let resid := residual_math A x0 b in
-  (forall k, jacobi_preconditions_math A b acc k) ->
+  forward_error_cond A x0 b ->
   is_finite (fprec t) (femax t)
     (norm2
        (rev
           (vec_to_list_float n.+1 (resid k)))) = true.
 Proof.
-intros ? ? Hjacobi.
+intros ? ? Hcond.
 unfold norm2. apply dotprod_finite.
 repeat split.
 + apply in_rev in H.
@@ -1632,19 +1632,19 @@ repeat split.
    apply /ssrnat.ltP)).
   rewrite mxE inord_val.
   apply BMULT_no_overflow_is_finite.
-  - unfold jacobi_preconditions_math in Hjacobi.
-    apply Hjacobi. auto.
+  - unfold forward_error_cond in Hcond.
+    apply Hcond. 
   - rewrite mxE.  apply Bplus_bminus_opp_implies.
     apply Bplus_no_ov_is_finite.
     * pose proof (@jacobi_forward_error_bound _ t n).
-      unfold jacobi_preconditions_math in Hjacobi.
-      unfold rho_def in Hjacobi.
-      apply H1; try (intros; apply Hjacobi);auto.
+      unfold forward_error_cond in Hcond.
+      unfold rho_def in Hcond.
+      apply H1; try (intros; apply Hcond).
     * rewrite  is_finite_Bopp. 
       pose proof (@jacobi_forward_error_bound _ t n).
-      unfold jacobi_preconditions_math in Hjacobi.
-      unfold rho_def in Hjacobi.
-      apply H1; try (intros; apply Hjacobi; auto).
+      unfold forward_error_cond in Hcond.
+      unfold rho_def in Hcond.
+      apply H1; try (intros; apply Hcond).
     * (*apply Bplus_x_kp_x_k_no_oveflow. *) admit.
   - admit.
 + rewrite !rev_length  length_veclist.
@@ -1934,7 +1934,7 @@ Qed.
 Require Import float_acc_lems.
 
 Lemma vec_succ_err {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) (acc: ftype t):
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) :
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
   let x0 := \col_(j < n.+1) (Zconst t 0) in
@@ -1947,11 +1947,11 @@ Lemma vec_succ_err {t: type} {n:nat}
   (forall i, is_finite (fprec t) (femax t)
               (BDIV t (Zconst t 1) (A i i)) = true) ->
   (forall i, is_finite (fprec t) (femax t) (A i i) = true) ->
-  (forall k, jacobi_preconditions_math A b acc k) ->
+  forward_error_cond A x0 b ->
   (vec_inf_norm (FT2R_mat ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A))) <=
     (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))%Re.
 Proof.
-intros ? ? ? ? ? ?  ? Hrho HAinv HfinvA HfA Hjacobi.
+intros ? ? ? ? ? ?  ? Hrho HAinv HfinvA HfA Hcond.
 pose proof (@vec_float_sub_1 _ t n).
 specialize (H (X_m_jacobi k.+1 x0 b A) (X_m_jacobi k x0 b A)).
 assert (forall xy : ftype t * ftype t,
@@ -1969,7 +1969,7 @@ assert (forall xy : ftype t * ftype t,
       x_k+1 - x_k is finite
   **)
   intros. 
-  pose proof (@residual_is_finite  t n A b k _  Hjacobi).
+  pose proof (@residual_is_finite  t n A b k Hcond).
   unfold norm2 in H1. 
   pose proof (@dotprod_finite_implies t).
   specialize (H2 (
