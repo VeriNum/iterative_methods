@@ -434,6 +434,35 @@ assert (Rabs x = a \/(Rabs x < a)%Re).
 + apply Rabs_def2 in H0. nra.
 Qed.
 
+(***
+(Rabs (FT2R (A (inord m) (inord m))) *
+ Rabs
+   (FT2R
+      (X_m_jacobi k.+1 x0 b A (inord m) ord0) +
+    FT2R
+      (BOPP t
+         (X_m_jacobi k x0 b A (inord m) ord0))) <
+ (sqrt (fun_bnd t n.+1) - default_abs t) /
+ (1 + default_rel t) / (1 + default_rel t))%Re
+***)
+Lemma bound_1 {t: type} {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
+  (m < n.+1)%nat ->
+  (Rabs (FT2R (A (inord m) (inord m))) *
+   Rabs
+     (FT2R
+        (X_m_jacobi k.+1 x0 b A (inord m) ord0) +
+      FT2R
+        (BOPP t
+           (X_m_jacobi k x0 b A (inord m) ord0))) <
+   (sqrt (fun_bnd t n.+1) - default_abs t) /
+   (1 + default_rel t) / (1 + default_rel t))%Re.
+Admitted.
+
+
+
+
+
 
 Lemma dot_prod_sub  {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
@@ -1908,7 +1937,7 @@ admit.
     rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd6.
     apply Rcomplements.Rlt_div_r.
     apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-  
+    unfold n0.
 
 
 
