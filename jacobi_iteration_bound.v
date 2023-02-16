@@ -1664,7 +1664,14 @@ repeat split.
                         (inord m) ord0))).
     destruct H1 as [d3 [e3 [Hde3 [Hd3 [He3 H1]]]]].
     rewrite H1. rewrite mxE.
-
+    eapply Rle_lt_trans. apply Rabs_triang.
+    eapply Rle_lt_trans. apply Rplus_le_compat_l.
+    apply He3. 
+    apply Rcomplements.Rlt_minus_r. rewrite Rabs_mult.
+    eapply Rle_lt_trans. apply Rmult_le_compat_l. apply Rabs_pos.
+    eapply Rle_trans. apply Rabs_triang. rewrite Rabs_R1.
+    apply Rplus_le_compat_l. apply Hd3.
+    apply Rcomplements.Rlt_div_r.
 
 
 admit.
