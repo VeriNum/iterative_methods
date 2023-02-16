@@ -1636,7 +1636,7 @@ Admitted.
 Lemma is_finite_Bmult_res {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
   (m < n.+1)%coq_nat ->
-  (forall i, is_finite _ _ (A i i) = true) ->
+  forward_error_cond A x0 b ->
   is_finite (fprec t) (femax t)
              (BMULT t (A (inord m) (inord m))
                 ((X_m_jacobi k.+1 x0 b A -f
@@ -1645,8 +1645,19 @@ Lemma is_finite_Bmult_res {t: type} {n:nat}
 Proof.
 intros.
 apply BMULT_no_overflow_is_finite.
-+ apply H0.
-+ rewrite mxE.
++ unfold forward_error_cond in H0. apply H0.
++ rewrite mxE. apply Bplus_bminus_opp_implies.
+  by apply is_finite_xkp1_minus_xk.
++ unfold Bmult_no_overflow. unfold rounded.
+  pose proof (@generic_round_property t 
+                (FT2R (A (inord m) (inord m)) *
+                   FT2R
+                     ((X_m_jacobi k.+1 x0 b A -f
+                       X_m_jacobi k x0 b A) 
+                        (inord m) ord0))).
+  destruct H1 as [d [e [Hde [Hd [He H1]]]]].
+  rewrite H1. 
+  
 
 
 
