@@ -1746,7 +1746,36 @@ admit.
   (rewrite inordK;
    rewrite rev_length length_veclist in Hlenk;
    apply /ssrnat.ltP)).
-  rewrite mxE inord_val. admit.
+  rewrite mxE inord_val.
+  pose proof (@BMULT_accurate' _ t).
+  specialize (H1 (A (inord m) (inord m)) 
+                 ((X_m_jacobi k.+1 x0 b A -f
+                    X_m_jacobi k x0 b A) (inord m) ord0)).
+  assert (is_finite (fprec t) (femax t)
+             (BMULT t (A (inord m) (inord m))
+                ((X_m_jacobi k.+1 x0 b A -f
+                  X_m_jacobi k x0 b A) 
+                   (inord m) ord0)) = true) by admit.
+  specialize (H1 H2).
+  destruct H1 as [d5 [e5 [Hde5 [Hd5 [He5 H1]]]]].
+  rewrite H1. intros.
+  eapply Rle_lt_trans. apply Rabs_triang.
+  eapply Rle_lt_trans. apply Rplus_le_compat_l.
+  apply He5. apply Rcomplements.Rlt_minus_r.
+  rewrite Rabs_mult. eapply Rle_lt_trans.
+  apply Rmult_le_compat_l. apply Rabs_pos.
+  eapply Rle_trans. apply Rabs_triang.
+  rewrite Rabs_R1. apply Rplus_le_compat_l.
+  
+  
+
+
+
+
+
+
+
+ admit.
   (*
   (** bound x_k by max_i { (D^-1 b)_i} \rho ^ i **)
   pose proof (@BMULT_accurate' _ t (A (inord m) (inord m))
