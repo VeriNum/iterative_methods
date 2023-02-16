@@ -1766,8 +1766,19 @@ admit.
   apply Rmult_le_compat_l. apply Rabs_pos.
   eapply Rle_trans. apply Rabs_triang.
   rewrite Rabs_R1. apply Rplus_le_compat_l.
-  
-  
+  apply Hd5. 
+  apply Rcomplements.Rlt_div_r.
+  apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+  rewrite Rabs_mult. rewrite mxE.
+  assert (is_finite (fprec t) (femax t)
+               (BPLUS t
+                  (X_m_jacobi k.+1 x0 b A
+                     (inord m) ord0)
+                  (BOPP t
+                     (X_m_jacobi k x0 b A
+                        (inord m) ord0))) = true) by admit.
+  rewrite Bminus_bplus_opp_equiv.
+  - pose proof (@BPLUS_accurate' _ t).
 
 
 
