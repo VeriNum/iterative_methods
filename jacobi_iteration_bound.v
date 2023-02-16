@@ -1779,6 +1779,18 @@ admit.
                         (inord m) ord0))) = true) by admit.
   rewrite Bminus_bplus_opp_equiv.
   - pose proof (@BPLUS_accurate' _ t).
+    specialize (H4 (X_m_jacobi k.+1 x0 b A 
+                        (inord m) ord0)
+                   (BOPP t
+                      (X_m_jacobi k x0 b A 
+                         (inord m) ord0))).
+    specialize (H4 H3).
+    destruct H4 as [d6 [Hd6 H4]].
+    rewrite H4. rewrite Rabs_mult. rewrite -Rmult_assoc.
+    eapply Rle_lt_trans. apply Rmult_le_compat_l. 
+    apply Rmult_le_pos; apply Rabs_pos.
+    eapply Rle_trans. apply Rabs_triang.
+
 
 
 
