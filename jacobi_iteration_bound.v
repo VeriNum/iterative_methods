@@ -20,15 +20,6 @@ Section WITH_NANS.
 
 Context {NANS: Nans}.
 
-(*
-Definition f_error {NANS: Nans} {ty} {n:nat} m b x0 x (A: 'M[ftype ty]_n.+1):=
-  let x_k := X_m_jacobi m x0 b A in 
-  let A_real := FT2R_mat A in
-  let b_real := FT2R_mat b in
-  let x := x_fix x b_real A_real in
-  vec_inf_norm (FT2R_mat x_k - x).
-*)
-
 Definition rho_def  {t: type} {n:nat} (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) :=
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in  
@@ -1571,7 +1562,6 @@ induction k.
   - admit.
   - admit.
 Admitted.
-
 *)
 
 Definition forward_error_cond {ty} {n:nat} 
@@ -2616,14 +2606,15 @@ Lemma jacobi_iteration_bound {t: type} {n : nat} :
 Proof.
 intros.
 unfold jacobi_preconditions_math in H.
-destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk He0]]]]]]].
+destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [Hfx0 [HfA1_inv [HfA2 Hfb ]]]]]]]]]]].
 split.
 + unfold acc2. by apply finite_is_finite.
 + exists (k_min A b acc).+1. 
   repeat split.
   - by apply /ssrnat.ltP.
   - intros. apply finite_is_finite.
-    apply residual_is_finite with acc.
+    apply residual_is_finite.
+    unfold forward_error_cond. repeat split; try (by intros). apply Hrho.
   - unfold BCMP.
     rewrite Bcompare_correct. 
     * rewrite Rcompare_Lt; first by [].
@@ -2934,9 +2925,5 @@ Qed.
 
 
 End WITH_NANS.
-
-
-
-
 
 
