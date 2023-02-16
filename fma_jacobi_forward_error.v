@@ -679,23 +679,32 @@ induction k.
     rewrite mxE.
     rewrite nth_vec_to_list_float; last by apply ltn_ord.
     assert (is_finite (fprec ty) (femax ty)
+              (let l1 :=
+                 vec_to_list_float n.+1
+                   (\row_j A2_J A (inord i) j)^T in
+               let l2 :=
+                 vec_to_list_float n.+1
+                   (\col_j X_m_jacobi k x0 b A j
+                             ord0) in
+               dotprod_r l1 l2) = true) by admit.
+    assert (is_finite (fprec ty) (femax ty)
             (BMINUS ty (b (inord i) ord0)
                ((A2_J A *f X_m_jacobi k x0 b A)
                   (inord i) ord0)) = true).
     { apply Bplus_bminus_opp_implies.
       apply BPLUS_no_overflow_is_finite.
         + apply Hb.
-        + rewrite is_finite_Bopp. rewrite mxE. admit.
+        + rewrite is_finite_Bopp. rewrite mxE. apply H2.
         + unfold Bplus_no_overflow. 
           pose proof (@generic_round_property ty).
-          specialize (H2 (FT2R (b (inord i) ord0) +
+          specialize (H3 (FT2R (b (inord i) ord0) +
                              FT2R
                                (BOPP ty
                                   ((A2_J A *f
                                     X_m_jacobi k x0 b A)
                                      (inord i) ord0)))%Re).
-          destruct H2 as [d1 [e1 [Hde1 [Hd1 [He1 H2]]]]].
-          rewrite H2.
+          destruct H3 as [d1 [e1 [Hde1 [Hd1 [He1 H3]]]]].
+          rewrite H3.
           eapply Rle_lt_trans. apply Rabs_triang.
           eapply Rle_lt_trans. apply Rplus_le_compat_l.
           apply He1. apply Rcomplements.Rlt_minus_r.
@@ -710,19 +719,10 @@ induction k.
           rewrite [in X in (_ + X < _)%Re]/FT2R B2R_Bopp Rabs_Ropp.
           fold (@FT2R ty). rewrite mxE. admit.
     }
-    assert (is_finite (fprec ty) (femax ty)
-              (let l1 :=
-                 vec_to_list_float n.+1
-                   (\row_j A2_J A (inord i) j)^T in
-               let l2 :=
-                 vec_to_list_float n.+1
-                   (\col_j X_m_jacobi k x0 b A j
-                             ord0) in
-               dotprod_r l1 l2) = true) by admit.
     apply BMULT_no_overflow_is_finite.
     + apply Ha1_inv.
     + rewrite nth_vec_to_list_float; last by apply ltn_ord.
-      rewrite mxE. apply H2.
+      rewrite mxE. apply H3.
     + rewrite nth_vec_to_list_float; last by apply ltn_ord.
       unfold Bmult_no_overflow.
       unfold rounded.
@@ -839,7 +839,7 @@ induction k.
       specialize (H7 (R_dot_prod_rel_abs_holds    n.+1 i (A2_J A)
                     (\col_j X_m_jacobi k x0 b A j ord0))).
       rewrite -H9 in H7. rewrite -H8 in H7. clear H8 H9.
-      specialize (H7 H3). 
+      specialize (H7 H2). 
       eapply Rle_lt_trans. apply Rmult_le_compat_l. apply Rabs_pos.
       apply Rplus_le_compat_l.
       apply Rle_trans with 
@@ -878,7 +878,7 @@ induction k.
         **)
         admit.
    - apply Hb.
-   - rewrite is_finite_Bopp. rewrite mxE. apply H3.
+   - rewrite is_finite_Bopp. rewrite mxE. apply H2.
    - by apply Bminus_bplus_opp_implies .
  }
   split.
