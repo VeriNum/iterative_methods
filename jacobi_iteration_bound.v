@@ -2652,7 +2652,7 @@ split.
       remember (rho_def A b) as rho.
       remember (d_mag_def A b) as d_mag.
       remember (mulmx ((FT2R_mat A)^-1) (FT2R_mat b)) as x.
-      remember (WITH_NANS.f_error 0 b x0 x A) as e_0.
+      remember (f_error 0 b x0 x A) as e_0.
       apply Rle_lt_trans with
       (INR n.+1 * 
         (Rsqr (vec_inf_norm (FT2R_mat (A1_J A)) * 
@@ -2666,11 +2666,8 @@ split.
          unfold x0. apply H1. 
          apply HinvA.
          by intros.
-         by intros. 
-         assert (WITH_NANS.f_error 0 b x0 x A = 
-                            f_error 0 b x0 x A ).
-         { unfold WITH_NANS.f_error, f_error. reflexivity. }
-         rewrite /x0 Heqx in H3. rewrite -H3. rewrite Heqd_mag Heqrho Heqx in He0. apply He0.
+         by intros. rewrite Heqd_mag Heqrho Heqx in He0. apply He0.
+         unfold forward_error_cond. repeat split; try (by intros). 
       ++ apply Rcomplements.Rlt_minus_r.
          rewrite Rmult_comm. 
          apply Rcomplements.Rlt_div_r; 
@@ -2792,12 +2789,9 @@ split.
                                apply Hrho.
                           ++++ apply Rle_lt_trans with (INR (k_min A b acc)).
                                ---- unfold k_min.
-                                    assert (WITH_NANS.f_error 0 b x0 x A = 
-                                          f_error 0 b x0 x A ).
-                                     { unfold WITH_NANS.f_error, f_error. reflexivity. }
-                                     rewrite /x0 Heqx in H5.  rewrite  Heqrho Heqd_mag Heqe_0 HeqGamma /x0 Heqx !H5 /acc2.
+                                    rewrite  Heqrho Heqd_mag Heqe_0 HeqGamma /x0 Heqx  /acc2.
                                      assert ((1 / rho_def A b)%Re = (/ rho_def A b)%Re). { nra. }
-                                     rewrite H6.
+                                     rewrite H5.
                                     match goal with |-context[(?a <= INR (Z.to_nat (Zceil ?a )))%Re]=>
                                       remember a as p
                                     end. apply IZR_ceil_rel .
@@ -2828,6 +2822,7 @@ split.
              ** apply Rplus_le_le_0_compat. nra. apply g_pos.
           -- apply sqrt_pos.
     * apply residual_is_finite.
+      unfold forward_error_cond. repeat split; try (by intros). apply Hrho.
     * by unfold acc2. 
 Qed.
 
