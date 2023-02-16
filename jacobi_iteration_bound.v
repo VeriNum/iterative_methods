@@ -410,51 +410,6 @@ Qed.
 Require Import float_acc_lems.
 
 
-Lemma BMULT_no_overflow_is_finite {NAN: Nans} (t : type): 
-  forall (x y : ftype t) 
-  (Hx : is_finite _ _ x = true)
-  (Hy : is_finite _ _ y = true)
-  (Hnov: Bmult_no_overflow t (FT2R x) (FT2R y)),
-   Binary.is_finite (fprec t) (femax t) (BMULT t x y) = true.
-  
-Proof.
-intros.
-pose proof (Binary.Bmult_correct  (fprec t) (femax t)  
-    (fprec_gt_0 t) (fprec_lt_femax t) (mult_nan t) BinarySingleNaN.mode_NE x y) as
-  H0.
-unfold Bmult_no_overflow in Hnov.
-unfold rounded in Hnov.
-apply Rlt_bool_true in Hnov.
-rewrite Hnov in H0.
-destruct H0 as [H01 [H02 H03]].
-rewrite H02. by apply /andP.
-Qed.
-
-
-Lemma BPLUS_no_overflow_is_finite {NAN: Nans} (t : type): 
-  forall (x y : ftype t) 
-  (Hx : is_finite _ _ x = true)
-  (Hy : is_finite _ _ y = true)
-  (Hnov: Bplus_no_overflow t (FT2R x) (FT2R y)),
-   Binary.is_finite (fprec t) (femax t) (BPLUS t x y) = true.
-  
-Proof.
-intros.
-pose proof (Binary.Bplus_correct  (fprec t) (femax t)  
-    (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan t) BinarySingleNaN.mode_NE x y) as
-  H0.
-unfold Bplus_no_overflow in Hnov.
-unfold rounded in Hnov.
-apply Rlt_bool_true in Hnov.
-rewrite Hnov in H0. specialize (H0 Hx Hy).
-destruct H0 as [H01 [H02 H03]].
-by rewrite H02.
-Qed.
-
-
-
-
-
 Lemma Rabs_def3 : forall x a:R, (Rabs x <= a)%Re -> 
   (x <= a /\ - a <= x)%Re.
 Proof.
@@ -468,7 +423,7 @@ assert (Rabs x = a \/(Rabs x < a)%Re).
 + apply Rabs_def2 in H0. nra.
 Qed.
 
-
+Require Import fma_jacobi_forward_error.
 
 Lemma x_k_is_finite {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
