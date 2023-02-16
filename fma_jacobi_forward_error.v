@@ -674,10 +674,42 @@ induction k.
     unfold jacobi_iter.
     rewrite mxE.
     rewrite nth_vec_to_list_float; last by apply ltn_ord.
+    assert (is_finite (fprec ty) (femax ty)
+            (BMINUS ty (b (inord i) ord0)
+               ((A2_J A *f X_m_jacobi k x0 b A)
+                  (inord i) ord0)) = true).
+    { apply Bplus_bminus_opp_implies.
+      apply BPLUS_no_overflow_is_finite.
+        + admit.
+        + rewrite is_finite_Bopp. rewrite mxE. admit.
+        + unfold Bplus_no_overflow. 
+          pose proof (@generic_round_property ty).
+          specialize (H2 (FT2R (b (inord i) ord0) +
+                             FT2R
+                               (BOPP ty
+                                  ((A2_J A *f
+                                    X_m_jacobi k x0 b A)
+                                     (inord i) ord0)))%Re).
+          destruct H2 as [d1 [e1 [Hde1 [Hd1 [He1 H2]]]]].
+          rewrite H2.
+          eapply Rle_lt_trans. apply Rabs_triang.
+          eapply Rle_lt_trans. apply Rplus_le_compat_l.
+          apply He1. apply Rcomplements.Rlt_minus_r.
+          rewrite Rabs_mult.
+          eapply Rle_lt_trans.
+          apply Rmult_le_compat_l. apply Rabs_pos.
+          eapply Rle_trans. apply Rabs_triang.
+          rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd1.
+          apply Rcomplements.Rlt_div_r.
+          apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+          eapply Rle_lt_trans. apply Rabs_triang.
+          rewrite [in X in (_ + X < _)%Re]/FT2R B2R_Bopp Rabs_Ropp.
+          fold (@FT2R ty). rewrite mxE. admit.
+    }
     apply BMULT_no_overflow_is_finite.
     + admit.
     + rewrite nth_vec_to_list_float; last by apply ltn_ord.
-      rewrite mxE. admit.
+      rewrite mxE. apply H2.
     + rewrite nth_vec_to_list_float; last by apply ltn_ord.
       unfold Bmult_no_overflow.
       unfold rounded.
@@ -687,8 +719,8 @@ induction k.
                        ((b -f
                          A2_J A *f X_m_jacobi k x0 b A)
                           (inord i) ord0))).
-      destruct H2 as [d [e [Hde [Hd [He H2]]]]].
-      rewrite H2. 
+      destruct H3 as [d [e [Hde [Hd [He H3]]]]].
+      rewrite H3. 
       eapply Rle_lt_trans.
       apply Rabs_triang. eapply Rle_lt_trans.
       apply Rplus_le_compat_l. apply He.
@@ -702,7 +734,7 @@ induction k.
       rewrite Rabs_mult. rewrite [in X in (_ * X < _)%Re]mxE. 
       rewrite Bminus_bplus_opp_equiv.
       pose proof (@BPLUS_accurate' _ ty).
-      specialize (H3 (b (inord i) ord0) (BOPP ty
+      specialize (H4 (b (inord i) ord0) (BOPP ty
             ((A2_J A *f X_m_jacobi k x0 b A)
                           (inord i) ord0))).
       assert (is_finite (fprec ty) (femax ty)
@@ -711,39 +743,10 @@ induction k.
                      ((A2_J A *f
                        X_m_jacobi k x0 b A)
                         (inord i) ord0))) = true).
-      { apply BPLUS_no_overflow_is_finite.
-        + admit.
-        + rewrite is_finite_Bopp. rewrite mxE. admit.
-        + unfold Bplus_no_overflow. 
-          pose proof (@generic_round_property ty).
-          specialize (H4 (FT2R (b (inord i) ord0) +
-                             FT2R
-                               (BOPP ty
-                                  ((A2_J A *f
-                                    X_m_jacobi k x0 b A)
-                                     (inord i) ord0)))%Re).
-          destruct H4 as [d1 [e1 [Hde1 [Hd1 [He1 H4]]]]].
-          rewrite H4.
-          eapply Rle_lt_trans. apply Rabs_triang.
-          eapply Rle_lt_trans. apply Rplus_le_compat_l.
-          apply He1. apply Rcomplements.Rlt_minus_r.
-          rewrite Rabs_mult.
-          eapply Rle_lt_trans.
-          apply Rmult_le_compat_l. apply Rabs_pos.
-          eapply Rle_trans. apply Rabs_triang.
-          rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd1.
-          apply Rcomplements.Rlt_div_r.
-          apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-          eapply Rle_lt_trans. apply Rabs_triang.
-          rewrite [in X in (_ + X < _)%Re]/FT2R B2R_Bopp Rabs_Ropp.
-          fold (@FT2R ty).
-
-
-
-admit.
-      } specialize (H3 H4).
-      destruct H3 as [d1 [Hd1 H3]].
-      rewrite H3.
+      { by apply Bminus_bplus_opp_implies . }
+      specialize (H4 H5).
+      destruct H4 as [d1 [Hd1 H4]].
+      rewrite H4.
       - rewrite Rabs_mult. eapply Rle_lt_trans.
         apply Rmult_le_compat_l. apply Rabs_pos.
         apply Rmult_le_compat_l. apply Rabs_pos.
@@ -758,25 +761,25 @@ admit.
         rewrite Rabs_Ropp. fold (@FT2R ty).
         rewrite [in X in (_ * (_ + X) < _)%Re]mxE.
         pose proof (@fma_dotprod_forward_error _ ty).
-        specialize (H5 (vec_to_list_float n.+1
+        specialize (H6 (vec_to_list_float n.+1
                                 (\row_j A2_J A (inord i) j)^T)
                        (vec_to_list_float n.+1
                           (\col_j X_m_jacobi k x0 b A j  ord0))).
-        rewrite !length_veclist in H5.
-        assert (n.+1 = n.+1). { lia. } specialize (H5 H6). 
-        clear H6.
-        specialize (H5 (dotprod_r 
+        rewrite !length_veclist in H6.
+        assert (n.+1 = n.+1). { lia. } specialize (H6 H7). 
+        clear H7.
+        specialize (H6 (dotprod_r 
                           (vec_to_list_float n.+1
                               (\row_j A2_J A (inord i) j)^T)
                           (vec_to_list_float n.+1
                                (\col_j X_m_jacobi k x0 b A j  ord0)))).
-       specialize (H5 
+       specialize (H6 
                    (\sum_j ( (FT2R (A2_J A (inord i) j)) * 
                              (FT2R (X_m_jacobi k x0 b A j ord0)))%Re)).
-      specialize (H5 
+      specialize (H6 
                    (\sum_j (Rabs (FT2R (A2_J A (inord i) j)) * 
                             Rabs (FT2R (X_m_jacobi k x0 b A j ord0)))%Re)).
-      specialize (H5 (@fma_dot_prod_rel_holds _ _ _ n.+1 i (A2_J A) 
+      specialize (H6 (@fma_dot_prod_rel_holds _ _ _ n.+1 i (A2_J A) 
                         (\col_j X_m_jacobi k x0 b A j ord0))).
       assert (\sum_j
                  (FT2R
@@ -791,9 +794,9 @@ admit.
         assert ((widen_ord (m:=n.+1) (leqnn n.+1) i0) = i0).
         { unfold widen_ord. 
           apply val_inj. by simpl. 
-        } rewrite H7. by rewrite !mxE.
-      } rewrite H6 in H5.
-      specialize (H5 (@R_dot_prod_rel_holds _ _  n.+1 i (leqnn n.+1) (A2_J A)
+        } rewrite H8. by rewrite !mxE.
+      } rewrite H7 in H6.
+      specialize (H6 (@R_dot_prod_rel_holds _ _  n.+1 i (leqnn n.+1) (A2_J A)
                     (\col_j X_m_jacobi k x0 b A j ord0))). 
       assert (\sum_j
                  (Rabs
@@ -818,11 +821,11 @@ admit.
         assert ((widen_ord (m:=n.+1) (leqnn n.+1) i0) = i0).
         { unfold widen_ord. 
           apply val_inj. by simpl. 
-        } rewrite H8. by rewrite !mxE.
-      } rewrite H7 in H5.
-      specialize (H5 (R_dot_prod_rel_abs_holds    n.+1 i (A2_J A)
+        } rewrite H9. by rewrite !mxE.
+      } rewrite H8 in H6.
+      specialize (H6 (R_dot_prod_rel_abs_holds    n.+1 i (A2_J A)
                     (\col_j X_m_jacobi k x0 b A j ord0))).
-      rewrite -H7 in H5. rewrite -H6 in H5. clear H6 H7.
+      rewrite -H8 in H6. rewrite -H7 in H6. clear H7 H8.
       assert (is_finite (fprec ty) 
              (femax ty)
              (dotprod_r
@@ -833,7 +836,7 @@ admit.
                    (\col_j X_m_jacobi
                              k x0 b A
                              j ord0))) = true) by admit.
-      specialize (H5 H6). 
+      specialize (H6 H7). 
       eapply Rle_lt_trans. apply Rmult_le_compat_l. apply Rabs_pos.
       apply Rplus_le_compat_l.
       apply Rle_trans with 
@@ -859,7 +862,7 @@ admit.
         rewrite Rplus_comm.
         apply Rcomplements.Rle_minus_l.
         eapply Rle_trans. apply Rabs_triang_inv.
-        apply H5. rewrite -Rplus_assoc. apply Rplus_le_compat_r.
+        apply H6. rewrite -Rplus_assoc. apply Rplus_le_compat_r.
         rewrite Rmult_plus_distr_r. apply Rplus_le_compat_r.
         rewrite Rmult_1_l. rewrite Rabs_sum_in.
         rewrite sum_abs_eq ; last by (intros; apply Rabs_pos).
@@ -874,7 +877,7 @@ admit.
    - admit.
    - rewrite is_finite_Bopp. rewrite mxE.
      (** conditions on bound for x_k **) admit.
-   - admit.
+   - by apply Bminus_bplus_opp_implies .
  }
   split.
   (** finiteness of x_k+1 **)
