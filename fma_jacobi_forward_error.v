@@ -724,8 +724,19 @@ induction k.
                                      (inord i) ord0)))%Re).
           destruct H4 as [d1 [e1 [Hde1 [Hd1 [He1 H4]]]]].
           rewrite H4.
-
-
+          eapply Rle_lt_trans. apply Rabs_triang.
+          eapply Rle_lt_trans. apply Rplus_le_compat_l.
+          apply He1. apply Rcomplements.Rlt_minus_r.
+          rewrite Rabs_mult.
+          eapply Rle_lt_trans.
+          apply Rmult_le_compat_l. apply Rabs_pos.
+          eapply Rle_trans. apply Rabs_triang.
+          rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd1.
+          apply Rcomplements.Rlt_div_r.
+          apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+          eapply Rle_lt_trans. apply Rabs_triang.
+          rewrite [in X in (_ + X < _)%Re]/FT2R B2R_Bopp Rabs_Ropp.
+          fold (@FT2R ty).
 
 
 
