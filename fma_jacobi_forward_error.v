@@ -663,6 +663,8 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
                               (x0 i ord0) = true) ->
   (forall i, is_finite (fprec ty) (femax ty)
                         (A1_inv_J A i ord0) = true) ->
+  (forall i j, is_finite (fprec ty) (femax ty)
+                  (A2_J A i j) = true) -> 
   (forall i, is_finite (fprec ty) (femax ty)
                           (b i ord0) = true) ->
   (forall k:nat, 
@@ -670,7 +672,7 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
    (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re).
 Proof.
 intro HAf. 
-intros ? ? ? ? ? ? ? ? ?   Hdivf ? Hx0 Ha1_inv Hb k.
+intros ? ? ? ? ? ? ? ? ?   Hdivf ? Hx0 Ha1_inv HfA2 Hb k.
 assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re).
 { intros. by apply BDIV_FT2R_sep_zero. }
 induction k.
@@ -706,7 +708,21 @@ induction k.
       specialize (H2 (@fma_dot_prod_rel_holds _ _ _ n.+1 i (A2_J A) 
                           (\col_j X_m_jacobi k x0 b A j ord0))).
       assert ((g1 ty (n.+2 + 1)%coq_nat n.+2 <=  fmax ty)%Re).
-      { apply g1_le_fmax. }
+      { apply g1_le_fmax. } specialize (H2 H3).
+      apply H2. intros.
+      repeat split.
+      + destruct x1. simpl. apply in_combine_l in H4.
+        apply in_rev in H4.
+        pose proof (@In_nth _ (rev (vec_to_list_float n.+1
+                                 (\row_j A2_J A (inord i) j)^T)) f (Zconst ty 0) H4).
+        destruct H5 as [m [H51 H52]]. rewrite rev_nth in H52.
+        rewrite length_veclist in H52.
+        assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat) by lia.
+        rewrite H5 in H52. rewrite nth_vec_to_list_float  in H52.
+        - rewrite mxE in H52. rewrite mxE in H52. rewrite -H52. apply HfA2.
+        - rewrite rev_length length_veclist in H51. by apply /ssrnat.ltP. 
+        - rewrite rev_length in H51. apply H51.
+      +
 
 
 
