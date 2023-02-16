@@ -40,6 +40,9 @@ Notation "A *f B" := (mulmx_float A B) (at level 70).
 Notation "A -f B" := (sub_mat A B) (at level 80).
 
 
+Definition F' (t: type) := 
+    (fmax t * (1 -  2 * default_rel t))%Re.
+
 Lemma F_p_ge_0 {ty}:
   (0 <= F' ty)%Re.
 Proof.
