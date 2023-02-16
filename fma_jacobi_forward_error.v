@@ -717,7 +717,133 @@ induction k.
           apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
           eapply Rle_lt_trans. apply Rabs_triang.
           rewrite [in X in (_ + X < _)%Re]/FT2R B2R_Bopp Rabs_Ropp.
-          fold (@FT2R ty). rewrite mxE. admit.
+          fold (@FT2R ty). rewrite mxE.
+          pose proof (@fma_dotprod_forward_error _ ty).
+          specialize (H4 (vec_to_list_float n.+1
+                                  (\row_j A2_J A (inord i) j)^T)
+                         (vec_to_list_float n.+1
+                            (\col_j X_m_jacobi k x0 b A j  ord0))).
+          rewrite !length_veclist in H4.
+          assert (n.+1 = n.+1). { lia. } specialize (H4 H5). 
+          clear H5.
+          specialize (H4 (dotprod_r 
+                            (vec_to_list_float n.+1
+                                (\row_j A2_J A (inord i) j)^T)
+                            (vec_to_list_float n.+1
+                                 (\col_j X_m_jacobi k x0 b A j  ord0)))).
+          specialize (H4 
+                     (\sum_j ( (FT2R (A2_J A (inord i) j)) * 
+                               (FT2R (X_m_jacobi k x0 b A j ord0)))%Re)).
+          specialize (H4
+                     (\sum_j (Rabs (FT2R (A2_J A (inord i) j)) * 
+                              Rabs (FT2R (X_m_jacobi k x0 b A j ord0)))%Re)).
+          specialize (H4 (@fma_dot_prod_rel_holds _ _ _ n.+1 i (A2_J A) 
+                          (\col_j X_m_jacobi k x0 b A j ord0))).
+          assert (\sum_j
+                     (FT2R
+                        (A2_J A (inord i) j) *
+                      FT2R
+                        (X_m_jacobi k x0 b
+                           A j ord0))%Re = 
+                  \sum_(j < n.+1)
+                          FT2R_mat (A2_J A) (inord i) (@widen_ord n.+1 n.+1 (leqnn n.+1) j) * 
+                          FT2R_mat (\col_j X_m_jacobi k x0 b A j ord0) (@widen_ord n.+1 n.+1 (leqnn n.+1) j) ord0).
+          { apply eq_big. intros. by []. intros.
+            assert ((widen_ord (m:=n.+1) (leqnn n.+1) i0) = i0).
+            { unfold widen_ord. 
+              apply val_inj. by simpl. 
+            } rewrite H6. by rewrite !mxE.
+          } rewrite H5 in H4.
+          specialize (H4 (@R_dot_prod_rel_holds _ _  n.+1 i (leqnn n.+1) (A2_J A)
+                        (\col_j X_m_jacobi k x0 b A j ord0))). 
+          assert (\sum_j
+                     (Rabs
+                        (FT2R
+                           (A2_J A 
+                              (inord i) j)) *
+                      Rabs
+                        (FT2R
+                           (X_m_jacobi k
+                              x0 b A j ord0))) =  
+                  sum_fold
+                    (map (uncurry Rmult)
+                       (map Rabsp
+                          (map FR2
+                             (combine
+                                (vec_to_list_float n.+1
+                                   (\row_j (A2_J A) (inord i) j)^T)
+                                (vec_to_list_float n.+1 
+                                  (\col_j X_m_jacobi k x0 b A j ord0))))))).
+          { rewrite -sum_fold_mathcomp_equiv.
+            apply eq_big. by []. intros.
+            assert ((widen_ord (m:=n.+1) (leqnn n.+1) i0) = i0).
+            { unfold widen_ord. 
+              apply val_inj. by simpl. 
+            } rewrite H7. by rewrite !mxE.
+          } rewrite H6 in H4.
+          specialize (H4 (R_dot_prod_rel_abs_holds    n.+1 i (A2_J A)
+                        (\col_j X_m_jacobi k x0 b A j ord0))).
+          rewrite -H6 in H4. rewrite -H5 in H4. clear H5 H6.
+          specialize (H4 H2). 
+          eapply Rle_lt_trans. apply Rplus_le_compat_l. 
+          apply Rle_trans with 
+          ((1 + g ty n.+1) * 
+            Rabs  (\sum_j
+                      Rabs (FT2R (A2_J A (inord i) j)) *
+                      Rabs (FT2R (X_m_jacobi k x0 b A j ord0))) + 
+            g1 ty n.+1 (n.+1 - 1)%coq_nat)%Re.
+          * apply Rle_trans with 
+            (Rabs ( \sum_j
+                      (FT2R (A2_J A (inord i) j) *
+                       FT2R(X_m_jacobi k x0 b A j ord0)))  +
+              (g ty n.+1 *
+                  Rabs
+                    (\sum_j
+                        Rabs
+                          (FT2R (A2_J A (inord i) j)) *
+                        Rabs
+                          (FT2R
+                             (X_m_jacobi k x0 b A j
+                                ord0))) +
+                  g1 ty n.+1 (n.+1 - 1)%coq_nat))%Re.
+            rewrite Rplus_comm.
+            apply Rcomplements.Rle_minus_l.
+            eapply Rle_trans. apply Rabs_triang_inv.
+            apply H4. rewrite -Rplus_assoc. apply Rplus_le_compat_r.
+            rewrite Rmult_plus_distr_r. apply Rplus_le_compat_r.
+            rewrite Rmult_1_l. rewrite Rabs_sum_in.
+            rewrite sum_abs_eq ; last by (intros; apply Rabs_pos).
+            apply /RleP. apply Rabs_ineq.
+          * apply Rle_refl.
+          * rewrite Rabs_sum_in.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ admit.
     }
     apply BMULT_no_overflow_is_finite.
     + apply Ha1_inv.
