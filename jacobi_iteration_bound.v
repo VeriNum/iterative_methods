@@ -1650,6 +1650,17 @@ repeat split.
       rewrite H1.
       rewrite [in X in (Rabs (( _ + X) * _ + _) < _)%Re]/FT2R B2R_Bopp.
       fold (@FT2R t).
+      eapply Rle_lt_trans. apply Rabs_triang.
+      eapply Rle_lt_trans. apply Rplus_le_compat_l. apply He2.
+      apply Rcomplements.Rlt_minus_r.
+      rewrite Rabs_mult. 
+      eapply Rle_lt_trans. apply Rmult_le_compat_l. apply Rabs_pos.
+      eapply Rle_trans. apply Rabs_triang.
+      rewrite Rabs_R1. apply Rplus_le_compat_l.
+      apply Hd2.
+      apply Rcomplements.Rlt_div_r.
+      apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+    
 
 
 
@@ -1696,6 +1707,10 @@ repeat split.
       apply Rmult_le_compat_l. apply Rabs_pos.
       eapply Rle_trans. apply Rabs_triang. rewrite Rabs_R1.
       apply Rplus_le_compat_l. apply Hd4.
+      rewrite -Rmult_assoc.
+      apply Rcomplements.Rlt_div_r.
+      apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+      
 
 
 admit.
