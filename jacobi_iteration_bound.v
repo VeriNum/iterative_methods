@@ -1586,9 +1586,23 @@ Definition forward_error_cond {ty} {n:nat}
                           (b i ord0) = true).
 
 
+Lemma is_finite_xkp1_minus_xk {t: type} {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
+   (m < n.+1)%coq_nat ->
+  is_finite (fprec t) (femax t)
+               (BPLUS t
+                  (X_m_jacobi k.+1 x0 b A
+                     (inord m) ord0)
+                  (BOPP t
+                     (X_m_jacobi k x0 b A
+                        (inord m) ord0))) = true.
+
+
+
 Lemma is_finite_Bmult_res {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
   (m < n.+1)%coq_nat ->
+  (forall i, is_finite _ _ (A i i) = true) ->
   is_finite (fprec t) (femax t)
              (BMULT t (A (inord m) (inord m))
                 ((X_m_jacobi k.+1 x0 b A -f
@@ -1597,7 +1611,8 @@ Lemma is_finite_Bmult_res {t: type} {n:nat}
 Proof.
 intros.
 apply BMULT_no_overflow_is_finite.
-+
++ apply H0.
++ rewrite mxE.
 
 
 
