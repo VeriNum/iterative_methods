@@ -1692,7 +1692,10 @@ repeat split.
       rewrite H3.
       rewrite [in X in (_ * Rabs (( _ + X) * _ ) < _)%Re]/FT2R B2R_Bopp.
       fold (@FT2R t). rewrite Rabs_mult.
-      
+      eapply Rle_lt_trans. apply Rmult_le_compat_l. apply Rabs_pos.
+      apply Rmult_le_compat_l. apply Rabs_pos.
+      eapply Rle_trans. apply Rabs_triang. rewrite Rabs_R1.
+      apply Rplus_le_compat_l. apply Hd4.
 
 
 admit.
