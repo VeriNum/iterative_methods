@@ -1857,10 +1857,17 @@ repeat split.
       rewrite -Rmult_assoc.
       apply Rcomplements.Rlt_div_r.
       apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-      
-
-
-admit.
+      pose proof (@bound_1 t n A x0 b k m).
+      assert ((m < n.+1)%nat). 
+      { rewrite rev_length length_veclist in Hlenk. by apply /ssrnat.ltP. }
+      specialize (H4 H5).
+      eapply Rlt_trans. 
+      apply H4. 
+      repeat apply Rmult_lt_compat_r;
+      try apply Rinv_0_lt_compat;
+      try apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+      apply Rplus_lt_compat_r.
+      apply sqrt_fun_bnd_lt_fmax.
     * pose proof (@jacobi_forward_error_bound _ t n).
       unfold forward_error_cond in Hcond.
       unfold rho_def in Hcond.
@@ -1947,15 +1954,9 @@ admit.
     apply Rcomplements.Rlt_div_r.
     apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
     unfold n0.
-
-
-
-
-
-
-
-
- admit.
+    rewrite [in X in (_ * (Rabs (_ + X)) < _)%Re]/FT2R B2R_Bopp.
+    fold (@FT2R t). apply bound_1.
+    rewrite rev_length length_veclist in Hlenk. by apply /ssrnat.ltP.
   - pose proof (@jacobi_forward_error_bound _ t n).
     unfold forward_error_cond in Hcond.
     unfold rho_def in Hcond.
