@@ -1668,8 +1668,12 @@ apply BMULT_no_overflow_is_finite.
   apply Hd. apply Rcomplements.Rlt_div_r.
   apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
   rewrite Rabs_mult. rewrite mxE.
-  rewrite Bminus_bplus_opp_equiv.
-  - pose proof (@BPLUS_accurate' _ t).
+  rewrite Bminus_bplus_opp_equiv; try rewrite ?is_finite_Bopp;
+  try (pose proof (@jacobi_forward_error_bound _ t n );
+        unfold forward_error_cond in H0;
+        unfold rho_def in H0; apply H2; try (intros; apply H0));
+  try by apply is_finite_xkp1_minus_xk.
+    pose proof (@BPLUS_accurate' _ t).
     specialize (H2 (X_m_jacobi k.+1 x0 b A 
                       (inord m) ord0)
                     (BOPP t
@@ -1682,7 +1686,13 @@ apply BMULT_no_overflow_is_finite.
     fold (@FT2R t). rewrite Rabs_mult.
     rewrite -Rmult_assoc. 
     eapply Rle_lt_trans. apply Rmult_le_compat_l.
-
+    apply Rmult_le_pos; apply Rabs_pos.
+    eapply Rle_trans. apply Rabs_triang.
+    rewrite Rabs_R1. apply Rplus_le_compat_l.
+    apply Hd1. apply Rcomplements.Rlt_div_r.
+    apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+    admit.
+Admitted.
 
 
 Lemma residual_is_finite {t: type} {n:nat}
