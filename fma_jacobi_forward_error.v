@@ -610,6 +610,11 @@ intros. by rewrite Rabs_mult.
 Qed.
 
 
+Lemma g1_le_fmax {n:nat} {t : type} :
+  (g1 t (n + 1)%coq_nat n <=  fmax t)%Re.
+Admitted.
+
+
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
@@ -700,7 +705,8 @@ induction k.
                                  (\col_j X_m_jacobi k x0 b A j  ord0)))).
       specialize (H2 (@fma_dot_prod_rel_holds _ _ _ n.+1 i (A2_J A) 
                           (\col_j X_m_jacobi k x0 b A j ord0))).
-      
+      assert ((g1 ty (n.+2 + 1)%coq_nat n.+2 <=  fmax ty)%Re).
+      { apply g1_le_fmax. }
 
 
 
