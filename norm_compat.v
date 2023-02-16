@@ -199,11 +199,9 @@ Lemma norm2_error {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
 Proof.
 intros.
 pose proof (@fma_dotprod_forward_error _ t v_l v_l).
-assert ((1 <= length v_l)%coq_nat).
-{ unfold v_l. rewrite length_veclist. lia. }
 assert (length v_l = length v_l).
 { by rewrite !length_veclist. }
-specialize (H1 H2 H3).
+specialize (H1 H2).
 specialize (H1 (norm2 (rev v_l)) (Rsqr (vec_norm2 (FT2R_mat v))) 
               (Rsqr (vec_norm2 (FT2R_mat v)))).
 specialize (H1 (fma_dot_prod_norm2_holds n.+1 v)).
@@ -217,7 +215,7 @@ assert (Rsqr (vec_norm2 (FT2R_mat v)) =
     by rewrite inord_val.
   + apply /RleP. apply big_ge_0_ex_abstract. intros.
     apply /RleP. apply Rle_0_sqr.
-} rewrite H4 in H1.
+} rewrite H3 in H1.
 pose proof (R_dot_prod_norm2_holds v (leqnn n.+1)).
 assert ( \sum_j (FT2R_mat v  (widen_ord (leqnn n.+1) j) 0 *
                   FT2R_mat v  (widen_ord (leqnn n.+1) j) 0) = 
@@ -227,13 +225,13 @@ assert ( \sum_j (FT2R_mat v  (widen_ord (leqnn n.+1) j) 0 *
 { apply eq_big. by []. intros.
   assert (widen_ord (leqnn n.+1) i = i).
   { unfold widen_ord. apply val_inj. by simpl. }
-  rewrite H7. by rewrite inord_val.
-} rewrite -H6 in H1. specialize (H1 H5).
-specialize (H1 (R_dot_prod_norm2_abs_holds v (leqnn n.+1)) H H0).
-rewrite H4 -H6.
+  rewrite H6. by rewrite inord_val.
+} rewrite -H5 in H1. specialize (H1 H4).
+specialize (H1 (R_dot_prod_norm2_abs_holds v (leqnn n.+1)) H0).
+rewrite H3 -H5.
 assert (length v_l = n.+1).
 { unfold v_l. by rewrite length_veclist. }
-rewrite H7 in H1. rewrite sum_abs_eq in H1.
+rewrite H6 in H1. rewrite sum_abs_eq in H1.
 + apply H1.
 + intros. rewrite -RmultE. 
   assert (forall x:R, Rsqr x = (x * x)%Re).
