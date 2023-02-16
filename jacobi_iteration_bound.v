@@ -1604,6 +1604,31 @@ try (pose proof (@jacobi_forward_error_bound _ t n);
   unfold forward_error_cond in Hcond;
   unfold rho_def in Hcond;apply H0; try (intros; apply Hcond)).
 unfold Bplus_no_overflow.
+pose proof (@generic_round_property t 
+            (FT2R
+               (X_m_jacobi k.+1 x0 b A 
+                  (inord m) ord0) +
+             FT2R
+               (BOPP t
+                  (X_m_jacobi k x0 b A 
+                    (inord m) ord0)))).
+destruct H0 as [d [e [Hde [Hd [He H0]]]]].
+rewrite H0.
+eapply Rle_lt_trans. apply Rabs_triang.
+eapply Rle_lt_trans. apply Rplus_le_compat_l.
+apply He.
+apply Rcomplements.Rlt_minus_r.
+rewrite Rabs_mult.
+eapply Rle_lt_trans. apply Rmult_le_compat_l.
+apply Rabs_pos.
+eapply Rle_trans. apply Rabs_triang.
+rewrite Rabs_R1. apply Rplus_le_compat_l.
+apply Hd. apply Rcomplements.Rlt_div_r.
+apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+rewrite [in X in (Rabs ( _ + X) < _)%Re]/FT2R B2R_Bopp.
+fold (@FT2R t).
+Admitted.
+
 
 
 
