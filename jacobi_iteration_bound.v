@@ -20,12 +20,14 @@ Section WITH_NANS.
 
 Context {NANS: Nans}.
 
+(*
 Definition f_error {NANS: Nans} {ty} {n:nat} m b x0 x (A: 'M[ftype ty]_n.+1):=
   let x_k := X_m_jacobi m x0 b A in 
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x := x_fix x b_real A_real in
   vec_inf_norm (FT2R_mat x_k - x).
+*)
 
 Definition rho_def  {t: type} {n:nat} (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) :=
   let A_real := FT2R_mat A in
@@ -1573,13 +1575,16 @@ Admitted.
 *)
 
 Lemma residual_is_finite {t: type} {n:nat}
-  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
+  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) (k:nat) (acc : ftype t):
+  let x0 := \col_(j < n.+1) (Zconst t 0) in 
   let resid := residual_math A x0 b in
+  jacobi_preconditions_math A b acc k ->
   is_finite (fprec t) (femax t)
     (norm2
        (rev
           (vec_to_list_float n.+1 (resid k)))) = true.
 Proof.
+intros ? ? Hjacobi.
 unfold norm2. apply dotprod_finite.
 repeat split.
 + apply in_rev in H.
@@ -1603,11 +1608,19 @@ repeat split.
    apply /ssrnat.ltP)).
   rewrite mxE inord_val.
   apply BMULT_no_overflow_is_finite.
-  - admit.
+  - unfold jacobi_preconditions_math in Hjacobi.
+    apply Hjacobi.
   - rewrite mxE.  apply Bplus_bminus_opp_implies.
     apply Bplus_no_ov_is_finite.
-    * admit.
-    * rewrite  is_finite_Bopp. admit.
+    * pose proof (@jacobi_forward_error_bound _ t n).
+      unfold jacobi_preconditions_math in Hjacobi.
+      unfold rho_def in Hjacobi.
+      apply H1; try (intros; apply Hjacobi).
+    * rewrite  is_finite_Bopp. 
+      pose proof (@jacobi_forward_error_bound _ t n).
+      unfold jacobi_preconditions_math in Hjacobi.
+      unfold rho_def in Hjacobi.
+      apply H1; try (intros; apply Hjacobi).
     * (*apply Bplus_x_kp_x_k_no_oveflow. *) admit.
   - admit.
 + rewrite !rev_length  length_veclist.
@@ -1632,7 +1645,8 @@ repeat split.
   (rewrite inordK;
    rewrite rev_length length_veclist in Hlenk;
    apply /ssrnat.ltP)).
-  rewrite mxE inord_val.
+  rewrite mxE inord_val. admit.
+  (*
   (** bound x_k by max_i { (D^-1 b)_i} \rho ^ i **)
   pose proof (@BMULT_accurate' _ t (A (inord m) (inord m))
               ((X_m_jacobi k.+1 x0 b A -f
@@ -1717,6 +1731,7 @@ repeat split.
     * admit.
     * admit.
     * apply Bplus_x_kp_x_k_no_oveflow.
+*)
 Admitted.
 
 
@@ -1895,7 +1910,7 @@ Qed.
 Require Import float_acc_lems.
 
 Lemma vec_succ_err {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) :
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) (acc: ftype t):
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
   let x0 := \col_(j < n.+1) (Zconst t 0) in
@@ -1908,10 +1923,11 @@ Lemma vec_succ_err {t: type} {n:nat}
   (forall i, is_finite (fprec t) (femax t)
               (BDIV t (Zconst t 1) (A i i)) = true) ->
   (forall i, is_finite (fprec t) (femax t) (A i i) = true) ->
+  (forall k, jacobi_preconditions_math A b acc k) ->
   (vec_inf_norm (FT2R_mat ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A))) <=
     (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))%Re.
 Proof.
-intros ? ? ? ? ? ?  ? Hrho HAinv HfinvA HfA.
+intros ? ? ? ? ? ?  ? Hrho HAinv HfinvA HfA Hjacobi.
 pose proof (@vec_float_sub_1 _ t n).
 specialize (H (X_m_jacobi k.+1 x0 b A) (X_m_jacobi k x0 b A)).
 assert (forall xy : ftype t * ftype t,
@@ -1929,7 +1945,7 @@ assert (forall xy : ftype t * ftype t,
       x_k+1 - x_k is finite
   **)
   intros. 
-  pose proof (@residual_is_finite  t n A x0 b k).
+  pose proof (@residual_is_finite  t n A b k _  (Hjacobi k)).
   unfold norm2 in H1. 
   pose proof (@dotprod_finite_implies t).
   specialize (H2 (
@@ -2075,52 +2091,11 @@ apply Rle_trans with
       assert (forall i : 'I_n.+1,
               is_finite (fprec t) (femax t)
                 (BDIV t (Zconst t 1) (A i i)) = true) by (intros; apply HfinvA).
-     assert (forall (k : nat) (i : 'I_n.+1),
-                is_finite (fprec t) (femax t)
-                  (X_m_jacobi k x0 b A i ord0) = true).
-     { intros. 
-       pose proof (@residual_is_finite  t n A x0 b k0).
-       unfold norm2 in H10.
-       pose proof (@dotprod_finite_implies t).
-       specialize (H11 (
-             (vec_to_list_float n.+1
-                (residual_math A x0 b k0))) H10).
-       specialize (H11 (nth i (rev
-                               (vec_to_list_float n.+1
-                                  (residual_math A x0 b k0))) (Zconst t 0))).
-       assert (In
-                (nth i
-                   (rev
-                      (vec_to_list_float n.+1
-                         (residual_math A x0 b k0)))
-                   (Zconst t 0))
-                (
-                   (vec_to_list_float n.+1
-                      (residual_math A x0 b k0)))).
-       { rewrite rev_nth. apply nth_In. 
-          rewrite length_veclist . lia. 
-         rewrite !length_veclist. apply /ssrnat.ltP. apply ltn_ord.
-      } specialize (H11 H12).
-       rewrite rev_nth in H11. rewrite length_veclist in H11.
-       assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat).
-       { lia. } rewrite H13 in H11.
-       rewrite nth_vec_to_list_float in H11;
-        last by  apply ltn_ord.
-       rewrite !mxE in H11. 
-       apply bmult_overflow_implies in H11.
-       destruct H11 as [Hf1 Hf2].
-       rewrite nth_vec_to_list_float in Hf2;
-        last by  apply ltn_ord. rewrite inord_val in Hf2.
-       rewrite mxE in Hf2. 
-       apply Bminus_bplus_opp_implies in Hf2.
-       apply bplus_overflow_implies in Hf2.
-       destruct Hf2 as [Hf21 Hf22].
-       rewrite inord_val in Hf22.
-       by rewrite is_finite_Bopp in Hf22.
-       rewrite length_veclist. apply /ssrnat.ltP. apply ltn_ord.
-     } 
-     (** also implied by finiteness of residual **)
-     specialize (H5 H6 H7 H8 H9 x0 H10).
+      unfold jacobi_preconditions_math in Hjacobi.
+      unfold rho_def in Hjacobi. specialize (Hjacobi k).
+      destruct Hjacobi as [HfA1 [Hrho_gt_1 [HinvA1 [HdivA1 [HG1 [Hacc1 [Hk1 [He01 [Hfx01 [HfA1_inv [HfA2 Hfb]]]]]]]]]]].
+      specialize (H5 H6 H7 H8 H9 x0 Hfx01 HfA1_inv HfA2 Hfb).
+      rewrite  -/rho_def in H5.
      assert ((f_error k.+1 b x0 x A <= rho^k.+1 * (f_error 0 b x0 x A) + 
                     ((1 - rho^k.+1) / (1 - rho))* d_mag)%Re).
      { by apply (H5 k.+1). }
@@ -2152,30 +2127,30 @@ apply Rle_trans with
                       ((1 - rho ^ k) * d_mag) * / (1 - rho)))%Re).
           { assert (((rho ^ k.+1 * e_0 * (1 - rho)) * / (1-rho))%Re = 
                      ((rho ^k.+1 * e_0) * ((1 - rho) * / (1-rho)))%Re).
-            { nra. } rewrite H13. rewrite Rinv_r; last by nra.
+            { nra. } rewrite H12. rewrite Rinv_r; last by nra.
             rewrite Rmult_1_r.
             assert (((rho ^ k * e_0 * (1 - rho)) * / (1- rho))%Re = 
                      ( (rho^k * e_0) * ((1 - rho) * / (1- rho)))%Re).
-            { nra. } rewrite H14. rewrite Rinv_r; nra.
-          } rewrite H13. clear H13. nra.
-        } rewrite H13. clear H13.
+            { nra. } rewrite H13. rewrite Rinv_r; nra.
+          } rewrite H12. clear H12. nra.
+        } rewrite H12. clear H12.
         assert ((rho ^ k.+1 * (1 - rho) * e_0 +
                   (1 - rho ^ k.+1) * d_mag +
                   rho ^ k * (1 - rho) * e_0 +
                   (1 - rho ^ k) * d_mag)%Re = 
                 (rho ^ k * (1+ rho) * (1 - rho) * e_0 + 
                   2* d_mag  - rho^k * (1 + rho) * d_mag)%Re).
-        { simpl. nra. } rewrite H13. clear H13.
+        { simpl. nra. } rewrite H12. clear H12.
         assert ((rho ^ k * (1 + rho) * (1 - rho) * e_0 +
                   2 * d_mag - rho ^ k * (1 + rho) * d_mag)%Re = 
                 ((rho ^ k * (1 + rho) * ((1-rho) * e_0 - d_mag)) + 2 * d_mag)%Re).
-        { nra. } rewrite H13. clear H13.
+        { nra. } rewrite H12. clear H12.
         rewrite Rmult_plus_distr_r.
         assert ((rho ^ k * (1 + rho) *
                     ((1 - rho) * e_0 - d_mag) * / (1 - rho))%Re =
                 (rho ^ k * (1 + rho) * 
                 (e_0 * ( (1 - rho) * / (1 - rho)) - d_mag * /(1 - rho)))%Re).
-        { nra. } rewrite H13. clear H13. rewrite Rinv_r; last by nra.
+        { nra. } rewrite H12. clear H12. rewrite Rinv_r; last by nra.
         rewrite Rmult_1_r. nra.
 Qed.
 
