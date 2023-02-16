@@ -1656,7 +1656,10 @@ fold (@FT2R t).
 Admitted.
 
 
-
+Lemma sqrt_fun_bnd_lt_fmax {t} {n:nat}:
+  (sqrt (fun_bnd t n.+1) <
+        bpow Zaux.radix2 (femax t))%Re.
+Admitted.
 
 
 Lemma is_finite_Bmult_res {t: type} {n:nat}
@@ -1722,10 +1725,12 @@ apply BMULT_no_overflow_is_finite.
     specialize (H3 H4).
     eapply Rlt_trans. 
     apply H3. 
-
-
-admit.
-Admitted.
+    repeat apply Rmult_lt_compat_r;
+    try apply Rinv_0_lt_compat;
+    try apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+    apply Rplus_lt_compat_r.
+    apply sqrt_fun_bnd_lt_fmax.
+Qed.
 
 
 Lemma residual_is_finite {t: type} {n:nat}
