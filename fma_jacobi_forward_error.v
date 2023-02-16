@@ -686,7 +686,25 @@ induction k.
                  vec_to_list_float n.+1
                    (\col_j X_m_jacobi k x0 b A j
                              ord0) in
-               dotprod_r l1 l2) = true) by admit.
+               dotprod_r l1 l2) = true).
+    { pose proof (@finite_fma_from_bounded _ ty).
+      specialize (H2 (vec_to_list_float n.+1
+                         (\row_j A2_J A (inord i) j)^T)
+                      ( vec_to_list_float n.+1
+                          (\col_j X_m_jacobi k x0 b A j ord0))).
+      rewrite combine_length !length_veclist Nat.min_id in H2.
+      specialize (H2 (dotprod_r 
+                            (vec_to_list_float n.+1
+                                (\row_j A2_J A (inord i) j)^T)
+                            (vec_to_list_float n.+1
+                                 (\col_j X_m_jacobi k x0 b A j  ord0)))).
+      specialize (H2 (@fma_dot_prod_rel_holds _ _ _ n.+1 i (A2_J A) 
+                          (\col_j X_m_jacobi k x0 b A j ord0))).
+      
+
+
+
+ by admit.
     assert (is_finite (fprec ty) (femax ty)
             (BMINUS ty (b (inord i) ord0)
                ((A2_J A *f X_m_jacobi k x0 b A)
