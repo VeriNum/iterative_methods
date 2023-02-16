@@ -2283,7 +2283,7 @@ Qed.
 
 (*** Bound for the residual ***)
 Lemma residual_bound {t: type} {n:nat} 
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) (acc: ftype t):
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat):
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
   let x0:=  \col_(j < n.+1) (Zconst t 0) in
@@ -2301,7 +2301,7 @@ Lemma residual_bound {t: type} {n:nat}
   (forall i : 'I_n.+1,
       is_finite (fprec t) (femax t) (A i i) = true) ->
   (0 < f_error 0 b x0 x A - d_mag / (1 - rho))%Re ->
-  (forall k, jacobi_preconditions_math A b acc k) ->
+  forward_error_cond A x0 b ->
   (Rabs (FT2R (norm2 (rev v_l))) <= 
     INR n.+1 * 
     (Rsqr (vec_inf_norm (FT2R_mat (A1_J A)) * 
@@ -2309,11 +2309,11 @@ Lemma residual_bound {t: type} {n:nat}
         * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat) *
       (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
 Proof.
-intros ? ? ? ? ? ? ? ? ? ? HinvA HfinvA HfA He0 Hjacobi.
+intros ? ? ? ? ? ? ? ? ? ? HinvA HfinvA HfA He0 Hcond.
 eapply Rle_trans.
 + apply norm2_vec_inf_norm_rel.
   - intros.
-    pose proof (@residual_is_finite  t n A  b k acc Hjacobi).
+    pose proof (@residual_is_finite  t n A  b k Hcond).
     unfold norm2 in H1. 
     pose proof (@dotprod_finite_implies t).
     specialize (H2 (
@@ -2368,7 +2368,7 @@ eapply Rle_trans.
           destruct Hnth as [Hnth1 Hnth2].
           by rewrite Hnth2.
     } rewrite H5 H6. unfold resid. split; by apply H3.
-  - by apply residual_is_finite with acc.
+  - by apply residual_is_finite .
   (** finiteness of residual and elements in the list **)
 + apply Rplus_le_compat_r. 
   match goal with |-context[((?a * ?b) *?c <= _)%Re]=>
@@ -2405,7 +2405,7 @@ eapply Rle_trans.
                      is_finite (fprec t) (femax t)
                        (BMULT t xy.1 xy.2) = true).
             { intros.
-              pose proof (@residual_is_finite  t n A b k acc Hjacobi).
+              pose proof (@residual_is_finite  t n A b k Hcond).
               unfold norm2 in H2.
               pose proof (@dotprod_finite_implies t).
               specialize (H3 (
@@ -2549,7 +2549,7 @@ eapply Rle_trans.
              +++ apply Rplus_le_le_0_compat; try nra; try apply g_pos.
              +++ apply Rmult_le_compat_l. 
                  --- apply /RleP. apply vec_norm_pd.
-                 --- by apply vec_succ_err with acc.
+                 --- by apply vec_succ_err .
       ++ apply /RleP. apply vec_norm_pd.
       ++ apply Rplus_le_le_0_compat.
          -- repeat apply Rmult_le_pos.
