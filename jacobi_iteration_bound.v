@@ -1690,6 +1690,9 @@ repeat split.
                              (inord m) ord0)) H2).
       destruct H3 as [d4 [Hd4 H3]].
       rewrite H3.
+      rewrite [in X in (_ * Rabs (( _ + X) * _ ) < _)%Re]/FT2R B2R_Bopp.
+      fold (@FT2R t). rewrite Rabs_mult.
+      
 
 
 admit.
