@@ -235,7 +235,19 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
   (** constraint on k **)
   (k_min A b accuracy < k)%coq_nat /\
   (** lower bound on the initial error **)
-  (0 < f_error 0 b x0 x A - d_mag / (1 - rho))%Re.
+  (0 < f_error 0 b x0 x A - d_mag / (1 - rho))%Re /\
+  (** finiteness of x0 **)
+  (forall i : 'I_n.+1, is_finite (fprec t) (femax t)
+                              (x0 i ord0) = true) /\
+  (** finitenes of A1^{-} **)
+  (forall i, is_finite (fprec t) (femax t)
+                        (A1_inv_J A i ord0) = true) /\
+  (** finiteness of A2 **)
+  (forall i j, is_finite (fprec t) (femax t)
+                  (A2_J A i j) = true) /\
+  (** finitenes of b **) 
+  (forall i, is_finite (fprec t) (femax t)
+                          (b i ord0) = true).
 
 (** Use: lower case gamma **)
 
@@ -914,7 +926,7 @@ apply eq_big. by [].
 intros. by rewrite Rabs_mult.
 Qed.
 
-
+(*
 Lemma Bplus_x_kp_x_k_no_oveflow {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
   (m < n.+1)%nat ->
@@ -1558,7 +1570,7 @@ induction k.
   - admit.
 Admitted.
 
-
+*)
 
 Lemma residual_is_finite {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
@@ -1595,8 +1607,8 @@ repeat split.
   - rewrite mxE.  apply Bplus_bminus_opp_implies.
     apply Bplus_no_ov_is_finite.
     * admit.
-    * admit.
-    * apply Bplus_x_kp_x_k_no_oveflow.
+    * rewrite  is_finite_Bopp. admit.
+    * (*apply Bplus_x_kp_x_k_no_oveflow. *) admit.
   - admit.
 + rewrite !rev_length  length_veclist.
   rewrite rev_involutive in H.
