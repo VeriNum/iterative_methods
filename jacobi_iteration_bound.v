@@ -15,6 +15,7 @@ Require Import fma_dot_acc fma_matrix_vec_mult.
 From Flocq Require Import Binary.
 Require Import finite_lemmas_additional.
 Require Import fma_jacobi_forward_error.
+Require Import float_acc_lems.
 
 Section WITH_NANS.
 
@@ -1635,7 +1636,25 @@ repeat split.
       unfold forward_error_cond in Hcond.
       unfold rho_def in Hcond.
       apply H1; try (intros; apply Hcond).
-    * (*apply Bplus_x_kp_x_k_no_oveflow. *) admit.
+    * (*apply Bplus_x_kp_x_k_no_oveflow. *)
+      unfold Bplus_no_overflow.
+      pose proof (generic_round_property t 
+                     (FT2R
+                         (X_m_jacobi k.+1 x0 b A
+                            (inord m) ord0) +
+                       FT2R
+                         (BOPP t
+                            (X_m_jacobi k x0 b A
+                               (inord m) ord0)))).
+      destruct H1 as [d2 [e2 [Hde2 [Hd2 [He2 H1]]]]].
+      rewrite H1.
+      rewrite [in X in (Rabs (( _ + X) * _ + _) < _)%Re]/FT2R B2R_Bopp.
+      fold (@FT2R t).
+
+
+
+
+ admit.
   - admit.
 + rewrite !rev_length  length_veclist.
   rewrite rev_involutive in H.
@@ -2168,7 +2187,7 @@ apply Rle_trans with
 Qed.
 
 
-Require Import float_acc_lems lemmas.
+
 
 
 Lemma vec_norm_strong_not_0 {n:nat} (v: 'cV[R]_n.+1):
