@@ -1797,7 +1797,10 @@ repeat split.
                      (inord m) ord0)
                   (BOPP t
                      (X_m_jacobi k x0 b A
-                        (inord m) ord0))) = true) by admit.
+                        (inord m) ord0))) = true).
+    { apply is_finite_xkp1_minus_xk; try by [].
+      by rewrite rev_length length_veclist in Hlenk.
+    }
     rewrite Bminus_bplus_opp_equiv.
     * pose proof (@BPLUS_accurate' _ t).
       specialize (H3 (X_m_jacobi k.+1 x0 b A 
@@ -1861,7 +1864,10 @@ admit.
              (BMULT t (A (inord m) (inord m))
                 ((X_m_jacobi k.+1 x0 b A -f
                   X_m_jacobi k x0 b A) 
-                   (inord m) ord0)) = true) by admit.
+                   (inord m) ord0)) = true).
+  { apply is_finite_Bmult_res; try by [].
+    by rewrite rev_length length_veclist in Hlenk.
+  }
   specialize (H1 H2).
   destruct H1 as [d5 [e5 [Hde5 [Hd5 [He5 H1]]]]].
   rewrite H1. intros.
