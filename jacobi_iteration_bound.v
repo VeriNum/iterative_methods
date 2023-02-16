@@ -1657,7 +1657,31 @@ apply BMULT_no_overflow_is_finite.
                         (inord m) ord0))).
   destruct H1 as [d [e [Hde [Hd [He H1]]]]].
   rewrite H1. 
-  
+  eapply Rle_lt_trans. apply Rabs_triang.
+  eapply Rle_lt_trans. apply Rplus_le_compat_l. apply He.
+  apply Rcomplements.Rlt_minus_r.
+  rewrite Rabs_mult.
+  eapply Rle_lt_trans. apply Rmult_le_compat_l.
+  apply Rabs_pos.
+  eapply Rle_trans. apply Rabs_triang.
+  rewrite Rabs_R1. apply Rplus_le_compat_l.
+  apply Hd. apply Rcomplements.Rlt_div_r.
+  apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+  rewrite Rabs_mult. rewrite mxE.
+  rewrite Bminus_bplus_opp_equiv.
+  - pose proof (@BPLUS_accurate' _ t).
+    specialize (H2 (X_m_jacobi k.+1 x0 b A 
+                      (inord m) ord0)
+                    (BOPP t
+                      (X_m_jacobi k x0 b A 
+                         (inord m) ord0))).
+    specialize (H2 (is_finite_xkp1_minus_xk _ _ _ _ _ H H0)).
+    destruct H2 as [d1 [Hd1 H2]].
+    rewrite H2.
+    rewrite [in X in (_ * Rabs (( _ + X) * _) < _)%Re]/FT2R B2R_Bopp.
+    fold (@FT2R t). rewrite Rabs_mult.
+    rewrite -Rmult_assoc. 
+    eapply Rle_lt_trans. apply Rmult_le_compat_l.
 
 
 
