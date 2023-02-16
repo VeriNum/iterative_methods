@@ -722,11 +722,21 @@ induction k.
         - rewrite mxE in H52. rewrite mxE in H52. rewrite -H52. apply HfA2.
         - rewrite rev_length length_veclist in H51. by apply /ssrnat.ltP. 
         - rewrite rev_length in H51. apply H51.
-      +
-
-
-
- by admit.
+      + destruct x1. simpl. apply in_combine_r in H4.
+        apply in_rev in H4.
+        pose proof (@In_nth _ (rev
+                                (vec_to_list_float n.+1
+                                   (\col_j X_m_jacobi k x0 b A j ord0))) f0 (Zconst ty 0) H4).
+        destruct H5 as [m [H51 H52]]. rewrite rev_nth in H52.
+        rewrite length_veclist in H52.
+        assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat) by lia.
+        rewrite H5 in H52. rewrite nth_vec_to_list_float  in H52.
+        - rewrite mxE in H52. rewrite -H52. apply IHk.
+        - rewrite rev_length length_veclist in H51. by apply /ssrnat.ltP. 
+        - rewrite rev_length in H51. apply H51.
+      + admit.
+      + admit.
+    }
     assert (is_finite (fprec ty) (femax ty)
             (BMINUS ty (b (inord i) ord0)
                ((A2_J A *f X_m_jacobi k x0 b A)
