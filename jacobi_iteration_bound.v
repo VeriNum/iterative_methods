@@ -432,6 +432,20 @@ Qed.
 Lemma dot_prod_sub  {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
   (m < n.+1)%nat ->
+  is_finite (fprec t) (femax t)
+  (dotprod_r
+     (vec_to_list_float n.+1
+        (\row_j A2_J A (inord m) j)^T)
+     (vec_to_list_float n.+1
+        (\col_j X_m_jacobi k.+1 x0 b A j
+                  ord0))) = true ->
+  is_finite (fprec t) (femax t)
+    (dotprod_r
+       (vec_to_list_float n.+1
+          (\row_j A2_J A (inord m) j)^T)
+       (vec_to_list_float n.+1
+          (\col_j X_m_jacobi k x0 b A j
+                    ord0))) = true ->
   (Rabs
     (FT2R
        (dotprod_r
@@ -480,7 +494,7 @@ Lemma dot_prod_sub  {t: type} {n:nat}
                  ord0)))) +
   2 * g1 t n.+1 (n.+1 - 1)%coq_nat))%Re.
 Proof.
-intros.
+intros ? Hdotkp1 Hdotk.
 pose proof (@fma_dotprod_forward_error _ t).
 specialize (H0 (vec_to_list_float n.+1
              (\row_j A2_J A
@@ -567,7 +581,7 @@ assert (is_finite (fprec t)
           (vec_to_list_float n.+1
              (\col_j X_m_jacobi
                        k.+1 x0 b A
-                       j ord0))) = true) by admit.
+                       j ord0))) = true) by apply Hdotkp1.
 specialize (H0 H2).
 pose proof (@fma_dotprod_forward_error _ t).
 specialize (H3 (vec_to_list_float n.+1
@@ -655,7 +669,7 @@ assert (is_finite (fprec t)
           (vec_to_list_float n.+1
              (\col_j X_m_jacobi
                        k x0 b A
-                       j ord0))) = true) by admit.
+                       j ord0))) = true) by apply Hdotk.
 specialize (H3 H5).
 clear H5 H2. 
 assert (forall a b x y:R, (x <= a /\ - a <= x)%Re -> (y <= b /\ -b <= y)%Re ->
@@ -755,19 +769,9 @@ apply Rcomplements.Rle_minus_l.
 eapply Rle_trans. apply Rabs_triang_inv.
 apply H2. rewrite -Rmult_plus_distr_l.
 nra.
-Admitted.
+Qed.
 
 
-(** Rabs
-     (FT2R
-        (dotprod_r
-           (vec_to_list_float n.+1
-              (\row_j A2_J A
-                        (inord m) j)^T)
-           (vec_to_list_float n.+1
-              (\col_j X_m_jacobi k x0
-                        b A j ord0))
-**)
 Lemma dot_prod_sub1 {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
   (m < n.+1)%nat ->
