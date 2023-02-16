@@ -656,12 +656,16 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
   forall x0: 'cV[ftype ty]_n.+1, 
   (forall i : 'I_n.+1, is_finite (fprec ty) (femax ty)
                               (x0 i ord0) = true) ->
+  (forall i, is_finite (fprec ty) (femax ty)
+                        (A1_inv_J A i ord0) = true) ->
+  (forall i, is_finite (fprec ty) (femax ty)
+                          (b i ord0) = true) ->
   (forall k:nat, 
    (forall i, is_finite _ _ (X_m_jacobi k x0 b A i ord0) = true) /\
    (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re).
 Proof.
 intro HAf. 
-intros ? ? ? ? ? ? ? ? ?   Hdivf ? Hx0 k.
+intros ? ? ? ? ? ? ? ? ?   Hdivf ? Hx0 Ha1_inv Hb k.
 assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re).
 { intros. by apply BDIV_FT2R_sep_zero. }
 induction k.
@@ -680,7 +684,7 @@ induction k.
                   (inord i) ord0)) = true).
     { apply Bplus_bminus_opp_implies.
       apply BPLUS_no_overflow_is_finite.
-        + admit.
+        + apply Hb.
         + rewrite is_finite_Bopp. rewrite mxE. admit.
         + unfold Bplus_no_overflow. 
           pose proof (@generic_round_property ty).
@@ -716,7 +720,7 @@ induction k.
                              ord0) in
                dotprod_r l1 l2) = true) by admit.
     apply BMULT_no_overflow_is_finite.
-    + admit.
+    + apply Ha1_inv.
     + rewrite nth_vec_to_list_float; last by apply ltn_ord.
       rewrite mxE. apply H2.
     + rewrite nth_vec_to_list_float; last by apply ltn_ord.
@@ -873,7 +877,7 @@ induction k.
             conditions on input
         **)
         admit.
-   - admit.
+   - apply Hb.
    - rewrite is_finite_Bopp. rewrite mxE. apply H3.
    - by apply Bminus_bplus_opp_implies .
  }
