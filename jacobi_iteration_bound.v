@@ -452,15 +452,12 @@ Lemma bound_1 {t: type} {n:nat}
    Rabs
      (FT2R
         (X_m_jacobi k.+1 x0 b A (inord m) ord0) +
-      FT2R
-        (BOPP t
-           (X_m_jacobi k x0 b A (inord m) ord0))) <
+       -
+        FT2R
+          (X_m_jacobi k x0 b A (inord m) ord0)) <
    (sqrt (fun_bnd t n.+1) - default_abs t) /
    (1 + default_rel t) / (1 + default_rel t))%Re.
 Admitted.
-
-
-
 
 
 
@@ -1720,7 +1717,14 @@ apply BMULT_no_overflow_is_finite.
     rewrite Rabs_R1. apply Rplus_le_compat_l.
     apply Hd1. apply Rcomplements.Rlt_div_r.
     apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-    admit.
+    pose proof (@bound_1 t n A x0 b k m).
+    assert ((m < n.+1)%nat). { by apply /ssrnat.ltP. }
+    specialize (H3 H4).
+    eapply Rlt_trans. 
+    apply H3. 
+
+
+admit.
 Admitted.
 
 
