@@ -1790,6 +1790,10 @@ admit.
     eapply Rle_lt_trans. apply Rmult_le_compat_l. 
     apply Rmult_le_pos; apply Rabs_pos.
     eapply Rle_trans. apply Rabs_triang.
+    rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd6.
+    apply Rcomplements.Rlt_div_r.
+    apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+  
 
 
 
@@ -1799,6 +1803,16 @@ admit.
 
 
  admit.
+  - pose proof (@jacobi_forward_error_bound _ t n).
+    unfold forward_error_cond in Hcond.
+    unfold rho_def in Hcond.
+    apply H4; try (intros; apply Hcond).
+  - rewrite is_finite_Bopp.
+    pose proof (@jacobi_forward_error_bound _ t n).
+    unfold forward_error_cond in Hcond.
+    unfold rho_def in Hcond.
+    apply H4; try (intros; apply Hcond).
+  - apply H3.
   (*
   (** bound x_k by max_i { (D^-1 b)_i} \rho ^ i **)
   pose proof (@BMULT_accurate' _ t (A (inord m) (inord m))
