@@ -1655,7 +1655,19 @@ repeat split.
 
 
  admit.
-  - admit.
+  - unfold Bmult_no_overflow. unfold rounded.
+    pose proof (@generic_round_property t 
+                (FT2R (A (inord m) (inord m)) *
+                   FT2R
+                     ((X_m_jacobi k.+1 x0 b A -f
+                       X_m_jacobi k x0 b A) 
+                        (inord m) ord0))).
+    destruct H1 as [d3 [e3 [Hde3 [Hd3 [He3 H1]]]]].
+    rewrite H1. rewrite mxE.
+
+
+
+admit.
 + rewrite !rev_length  length_veclist.
   rewrite rev_involutive in H.
   unfold residual_math in H.
