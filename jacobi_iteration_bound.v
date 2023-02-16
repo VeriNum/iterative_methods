@@ -1714,6 +1714,16 @@ repeat split.
 
 
 admit.
+    * pose proof (@jacobi_forward_error_bound _ t n).
+      unfold forward_error_cond in Hcond.
+      unfold rho_def in Hcond.
+      apply H3; try (intros; apply Hcond).
+    * rewrite is_finite_Bopp.
+      pose proof (@jacobi_forward_error_bound _ t n).
+      unfold forward_error_cond in Hcond.
+      unfold rho_def in Hcond.
+      apply H3; try (intros; apply Hcond).
+    * apply H2.
 + rewrite !rev_length  length_veclist.
   rewrite rev_involutive in H.
   unfold residual_math in H.
