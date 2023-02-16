@@ -1578,7 +1578,7 @@ Lemma residual_is_finite {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) (k:nat) (acc : ftype t):
   let x0 := \col_(j < n.+1) (Zconst t 0) in 
   let resid := residual_math A x0 b in
-  jacobi_preconditions_math A b acc k ->
+  (forall k, jacobi_preconditions_math A b acc k) ->
   is_finite (fprec t) (femax t)
     (norm2
        (rev
@@ -1609,18 +1609,18 @@ repeat split.
   rewrite mxE inord_val.
   apply BMULT_no_overflow_is_finite.
   - unfold jacobi_preconditions_math in Hjacobi.
-    apply Hjacobi.
+    apply Hjacobi. auto.
   - rewrite mxE.  apply Bplus_bminus_opp_implies.
     apply Bplus_no_ov_is_finite.
     * pose proof (@jacobi_forward_error_bound _ t n).
       unfold jacobi_preconditions_math in Hjacobi.
       unfold rho_def in Hjacobi.
-      apply H1; try (intros; apply Hjacobi).
+      apply H1; try (intros; apply Hjacobi);auto.
     * rewrite  is_finite_Bopp. 
       pose proof (@jacobi_forward_error_bound _ t n).
       unfold jacobi_preconditions_math in Hjacobi.
       unfold rho_def in Hjacobi.
-      apply H1; try (intros; apply Hjacobi).
+      apply H1; try (intros; apply Hjacobi; auto).
     * (*apply Bplus_x_kp_x_k_no_oveflow. *) admit.
   - admit.
 + rewrite !rev_length  length_veclist.
@@ -1945,7 +1945,7 @@ assert (forall xy : ftype t * ftype t,
       x_k+1 - x_k is finite
   **)
   intros. 
-  pose proof (@residual_is_finite  t n A b k _  (Hjacobi k)).
+  pose proof (@residual_is_finite  t n A b k _  Hjacobi).
   unfold norm2 in H1. 
   pose proof (@dotprod_finite_implies t).
   specialize (H2 (
@@ -2260,7 +2260,7 @@ Qed.
 
 (*** Bound for the residual ***)
 Lemma residual_bound {t: type} {n:nat} 
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) :
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) (acc: ftype t):
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
   let x0:=  \col_(j < n.+1) (Zconst t 0) in
@@ -2278,6 +2278,7 @@ Lemma residual_bound {t: type} {n:nat}
   (forall i : 'I_n.+1,
       is_finite (fprec t) (femax t) (A i i) = true) ->
   (0 < f_error 0 b x0 x A - d_mag / (1 - rho))%Re ->
+  (forall k, jacobi_preconditions_math A b acc k) ->
   (Rabs (FT2R (norm2 (rev v_l))) <= 
     INR n.+1 * 
     (Rsqr (vec_inf_norm (FT2R_mat (A1_J A)) * 
@@ -2285,11 +2286,11 @@ Lemma residual_bound {t: type} {n:nat}
         * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat) *
       (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
 Proof.
-intros ? ? ? ? ? ? ? ? ? ? HinvA HfinvA HfA He0.
+intros ? ? ? ? ? ? ? ? ? ? HinvA HfinvA HfA He0 Hjacobi.
 eapply Rle_trans.
 + apply norm2_vec_inf_norm_rel.
   - intros.
-    pose proof (@residual_is_finite  t n A x0 b k).
+    pose proof (@residual_is_finite  t n A  b k acc Hjacobi).
     unfold norm2 in H1. 
     pose proof (@dotprod_finite_implies t).
     specialize (H2 (
@@ -2344,7 +2345,7 @@ eapply Rle_trans.
           destruct Hnth as [Hnth1 Hnth2].
           by rewrite Hnth2.
     } rewrite H5 H6. unfold resid. split; by apply H3.
-  - apply residual_is_finite.
+  - by apply residual_is_finite with acc.
   (** finiteness of residual and elements in the list **)
 + apply Rplus_le_compat_r. 
   match goal with |-context[((?a * ?b) *?c <= _)%Re]=>
@@ -2381,7 +2382,7 @@ eapply Rle_trans.
                      is_finite (fprec t) (femax t)
                        (BMULT t xy.1 xy.2) = true).
             { intros.
-              pose proof (@residual_is_finite  t n A x0 b k).
+              pose proof (@residual_is_finite  t n A b k acc Hjacobi).
               unfold norm2 in H2.
               pose proof (@dotprod_finite_implies t).
               specialize (H3 (
@@ -2525,7 +2526,7 @@ eapply Rle_trans.
              +++ apply Rplus_le_le_0_compat; try nra; try apply g_pos.
              +++ apply Rmult_le_compat_l. 
                  --- apply /RleP. apply vec_norm_pd.
-                 --- by apply vec_succ_err.
+                 --- by apply vec_succ_err with acc.
       ++ apply /RleP. apply vec_norm_pd.
       ++ apply Rplus_le_le_0_compat.
          -- repeat apply Rmult_le_pos.
@@ -2599,7 +2600,7 @@ split.
   repeat split.
   - by apply /ssrnat.ltP.
   - intros. apply finite_is_finite.
-    apply residual_is_finite.
+    apply residual_is_finite with acc.
   - unfold BCMP.
     rewrite Bcompare_correct. 
     * rewrite Rcompare_Lt; first by [].
