@@ -714,7 +714,22 @@ induction k.
       { apply BPLUS_no_overflow_is_finite.
         + admit.
         + rewrite is_finite_Bopp. rewrite mxE. admit.
-        + unfold Bplus_no_overflow. admit.
+        + unfold Bplus_no_overflow. 
+          pose proof (@generic_round_property ty).
+          specialize (H4 (FT2R (b (inord i) ord0) +
+                             FT2R
+                               (BOPP ty
+                                  ((A2_J A *f
+                                    X_m_jacobi k x0 b A)
+                                     (inord i) ord0)))%Re).
+          destruct H4 as [d1 [e1 [Hde1 [Hd1 [He1 H4]]]]].
+          rewrite H4.
+
+
+
+
+
+admit.
       } specialize (H3 H4).
       destruct H3 as [d1 [Hd1 H3]].
       rewrite H3.
@@ -737,9 +752,8 @@ induction k.
                        (vec_to_list_float n.+1
                           (\col_j X_m_jacobi k x0 b A j  ord0))).
         rewrite !length_veclist in H5.
-        assert ((1 <= n.+1)%coq_nat). { lia. }
-        assert (n.+1 = n.+1). { lia. } specialize (H5 H6 H7). 
-        clear H6 H7.
+        assert (n.+1 = n.+1). { lia. } specialize (H5 H6). 
+        clear H6.
         specialize (H5 (dotprod_r 
                           (vec_to_list_float n.+1
                               (\row_j A2_J A (inord i) j)^T)
@@ -798,20 +812,6 @@ induction k.
       specialize (H5 (R_dot_prod_rel_abs_holds    n.+1 i (A2_J A)
                     (\col_j X_m_jacobi k x0 b A j ord0))).
       rewrite -H7 in H5. rewrite -H6 in H5. clear H6 H7.
-      assert (forall xy : ftype ty * ftype ty,
-                In xy
-                  (combine
-                     (vec_to_list_float n.+1
-                        (\row_j A2_J A
-                                 (inord i) j)^T)
-                     (vec_to_list_float n.+1
-                        (\col_j X_m_jacobi
-                                 k x0 b A
-                                 j ord0))) ->
-                is_finite (fprec ty) 
-                  (femax ty) xy.1 = true /\
-                is_finite (fprec ty) 
-                  (femax ty) xy.2 = true) by admit.
       assert (is_finite (fprec ty) 
              (femax ty)
              (dotprod_r
@@ -822,7 +822,7 @@ induction k.
                    (\col_j X_m_jacobi
                              k x0 b A
                              j ord0))) = true) by admit.
-      specialize (H5 H6 H7). 
+      specialize (H5 H6). 
       eapply Rle_lt_trans. apply Rmult_le_compat_l. apply Rabs_pos.
       apply Rplus_le_compat_l.
       apply Rle_trans with 
