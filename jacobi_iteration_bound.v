@@ -388,7 +388,16 @@ repeat split.
     apply Rmult_le_pos. apply pos_INR.
     apply Rplus_le_le_0_compat. nra. apply g_pos.
     apply Rsqr_incr_1.
-    * admit.
+    * apply Rplus_le_compat_l. apply Rmult_le_compat_r.
+      apply Rlt_le. apply Rinv_0_lt_compat. 
+      apply Rlt_Rminus.
+      by apply diagonal_dominance_implies_rho_lt_1.
+      apply Rmult_le_compat_l.
+      ++ repeat apply Rmult_le_pos. nra.
+         apply Rplus_le_le_0_compat. nra. apply g_pos.
+         apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+         apply /RleP. apply vec_norm_pd.
+      ++ admit.
     * apply Rplus_le_le_0_compat. apply g1_pos.
       repeat apply Rmult_le_pos. nra.
       apply Rplus_le_le_0_compat. nra. apply g_pos.
@@ -397,14 +406,16 @@ repeat split.
       apply d_mag_ge_0.
       apply Rlt_le. apply Rinv_0_lt_compat. 
       apply Rlt_Rminus.
-      
-    
-
-
-
-
-
-admit.
+      by apply diagonal_dominance_implies_rho_lt_1.
+    * apply Rplus_le_le_0_compat. apply g1_pos.
+      repeat apply Rmult_le_pos. nra.
+      apply Rplus_le_le_0_compat. nra. apply g_pos.
+      apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+      apply /RleP. apply vec_norm_pd.
+      admit.
+      apply Rlt_le. apply Rinv_0_lt_compat. 
+      apply Rlt_Rminus.
+      by apply diagonal_dominance_implies_rho_lt_1.
   - apply Rgt_lt. apply HG1. 
 
 
