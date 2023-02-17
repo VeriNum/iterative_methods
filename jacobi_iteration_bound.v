@@ -1010,10 +1010,10 @@ repeat split.
       rewrite -Rmult_assoc.
       apply Rcomplements.Rlt_div_r.
       apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-      pose proof (@bound_1 t n A x0 b k m).
+      pose proof (@res_xkp1_minus_xk  t n A x0 b k m).
       assert ((m < n.+1)%nat). 
       { rewrite rev_length length_veclist in Hlenk. by apply /ssrnat.ltP. }
-      specialize (H4 H5).
+      specialize (H4 H5 Hcond Hf0).
       eapply Rlt_trans. 
       apply H4. 
       repeat apply Rmult_lt_compat_r;
