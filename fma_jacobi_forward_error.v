@@ -998,12 +998,17 @@ induction k.
             rewrite sum_abs_eq ; last by (intros; apply Rabs_pos).
             apply /RleP. apply Rabs_ineq.
           * apply Rle_refl.
-          * rewrite Rabs_sum_in.
+          * rewrite Rabs_sum_in. rewrite sum_abs_eq; last by (intros; apply Rabs_pos).
             eapply Rle_lt_trans. rewrite -Rplus_assoc. apply Rplus_le_compat_r.
             apply Rplus_le_compat_l.
             apply Rmult_le_compat_l.
             apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-            
+            apply Rle_trans with 
+            ((vec_inf_norm
+                 (x_fix x (FT2R_mat b) (FT2R_mat A)) +
+                     rho ^ k * f_error 0 b x0 x A +
+                     (1 - rho ^ k) / (1 - rho) * d_mag) * 
+              \sum_j (Rabs ( FT2R (A2_J A (inord i) j))))%Re.
 
 
 
