@@ -917,14 +917,46 @@ Lemma  bound_2 {ty} {n:nat}
   let x:= A_real^-1 *m b_real in
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in 
-  input_bound A x0 b k ->
+  input_bound_alt A x0 b ->
+  (rho < 1)%Re ->
   (vec_inf_norm
    (x_fix x (FT2R_mat b) (FT2R_mat A)) +
        rho ^ k *
        f_error 0 b x0 x A +
        (1 - rho ^ k) / (1 - rho) *
        d_mag < sqrt (fun_bnd ty n.+1))%Re.
-Proof. intros. apply H. Qed.
+Proof. 
+intros.
+unfold input_bound_alt in H.
+destruct H as [_ [bnd2 H]]. clear H.
+apply Rle_lt_trans with
+(vec_inf_norm
+          (x_fix
+             ((FT2R_mat A)^-1 *m 
+              FT2R_mat b)
+             (FT2R_mat b)
+             (FT2R_mat A)) +
+        1 * f_error 0 b x0
+          ((FT2R_mat A)^-1 *m 
+           FT2R_mat b) A +
+        1 / (1 - rho_def A b) * d_mag_def A b)%Re.
++ unfold x. unfold A_real, b_real. rewrite Rplus_assoc.
+  rewrite Rplus_assoc.
+  apply Rplus_le_compat_l. unfold rho, d_mag.
+  apply Rplus_le_compat.
+  
+
+
+
+ admit.
++ apply bnd2.
+
+
+
+
+
+
+intros. apply H. Qed.
 
 
 Lemma bound_3 {ty} {n:nat} 
@@ -3833,3 +3865,5 @@ induction k.
 Admitted.
  
 End WITHNANS.
+
+
