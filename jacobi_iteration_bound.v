@@ -244,7 +244,7 @@ Definition jacobi_preconditions_alt {t: type} {n:nat}
   (** constraint on k **)
   (k_min A b accuracy < k)%coq_nat /\
   (** lower bound on the initial error **)
-  (0 < f_error 0 b x0 x A - d_mag / (1 - rho))%Re /\
+  (0 < e_0 - d_mag / (1 - rho))%Re /\
   (** finiteness of x0 **)
   (forall i : 'I_n.+1, is_finite (fprec t) (femax t)
                               (x0 i ord0) = true) /\
