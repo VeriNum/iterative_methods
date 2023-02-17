@@ -1655,6 +1655,18 @@ rewrite [in X in (Rabs ( _ + X) < _)%Re]/FT2R B2R_Bopp.
 fold (@FT2R t).
 Admitted.
 
+Lemma g1_constraint {t} {n:nat}:
+  (g1 t (n.+1 + 1)%coq_nat n.+1 <= fmax t)%Re.
+Admitted.
+
+Lemma size_constraint {t} {n:nat}:
+  (INR n.+1 <
+ ((fmax t - default_abs t) /
+  (1 + default_rel t) -
+  g1 t n.+1 (n.+1 - 1)%coq_nat - 1) /
+ (g t (n.+1 - 1)%coq_nat + 1))%Re.
+Admitted.
+
 Lemma fun_bnd_lt_fmax {t} {n:nat}:
   (fun_bnd t n.+1 < bpow Zaux.radix2 (femax t))%Re.
 Proof.
@@ -1666,7 +1678,7 @@ apply Rle_lt_trans with
     replace a with (a * 1)%Re by nra
   end. 
   apply Rmult_le_compat.
-  - rewrite Rmult_1_r. apply fun_bnd_pos_1. admit.
+  - rewrite Rmult_1_r. apply fun_bnd_pos_1. apply g1_constraint.
   - apply Rlt_le. 
     replace (1 /  (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re with
     (/ (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re by nra.
@@ -1707,24 +1719,19 @@ apply Rle_lt_trans with
   - rewrite [in X in (X < _)%Re]H.
     apply Rplus_lt_compat_l.
     assert (n.+1 = S (n.+1 - 1)%coq_nat).
-    { lia. } rewrite H1. 
-    eapply Rlt_le_trans.
- 
-
-
-
-  admit.
-
-Admitted.
+    { lia. } 
+    assert (g1 t n.+1 (n.+1 - 1)%coq_nat = 
+            g1 t (S (n.+1 - 1)%coq_nat) (n.+1 - 1)%coq_nat).
+    { by rewrite -H1. } rewrite H2.
+    apply Rlt_le_trans with
+    (g1 t (n.+1 - 1)%coq_nat (n.+1 - 1)%coq_nat + default_abs t)%Re.
+    * apply Rplus_le_lt_0_compat. apply g1_pos.
+      apply default_abs_gt_0.
+    * apply plus_e_g1_le .
+  - assert ((0 < default_rel t)%Re) by apply default_rel_gt_0.
+    nra.
+Qed.
   
-Lemma size_constraint {t} {n:nat}:
-  (INR n.+1 <
- ((fmax t - default_abs t) /
-  (1 + default_rel t) -
-  g1 t n.+1 (n.+1 - 1)%coq_nat - 1) /
- (g t (n.+1 - 1)%coq_nat + 1))%Re.
-Admitted.
-
 
 Lemma fun_bnd_gt_1 {t} {n:nat}:
   (1 < fun_bnd t n.+1)%Re.
