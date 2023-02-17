@@ -489,7 +489,28 @@ repeat split.
 + intros.
   destruct Hinp as [_ [_ [_ [_ [bnd5 _]]]]].
   specialize (bnd5 i).
-  
+  eapply Rle_lt_trans; last by apply bnd5.
+  apply Rmult_le_compat_l. apply Rabs_pos.
+  apply Rplus_le_compat_r.
+  apply Rplus_le_compat_l.
+  apply Rmult_le_compat_l.
+  apply Rplus_le_le_0_compat. nra. apply g_pos.
+  apply Rmult_le_compat_r.
+  apply /RleP. apply big_ge_0_ex_abstract.
+  intros. apply /RleP. apply Rabs_pos.
+  apply Rplus_le_compat.
+  - apply Rplus_le_compat.
+    * apply x_bound_exists. admit.
+    * rewrite !Rmult_1_l. apply f_error0_bnd. auto. admit. 
+  - apply Rmult_le_compat_l.
+    apply Rlt_le. 
+    replace (1 / (1 - rho_def A b))%Re with 
+            (/ (1 - rho_def A b))%Re by nra.
+    apply Rinv_0_lt_compat. 
+    apply Rlt_Rminus.
+    by apply diagonal_dominance_implies_rho_lt_1.
+    admit.
+
 
 
 
