@@ -1141,13 +1141,36 @@ Definition forward_error_cond {ty} {n:nat}
   @size_constraint ty n /\
   input_bound A x0 b.
 
-
+(**
+H : (rho < 1)%Re
+H0 : A_real \in unitmx
+Hdivf : forall i : 'I_n.+1,
+        is_finite (fprec ty) 
+          (femax ty)
+          (BDIV ty (Zconst ty 1) (A i i)) =
+        true
+x0 : 'cV_n.+1
+Hx0 : forall i : 'I_n.+1,
+      is_finite (fprec ty) (femax ty)
+        (x0 i ord0) = true
+Ha1_inv : forall i : 'I_n.+1,
+          is_finite (fprec ty) 
+            (femax ty) (A1_inv_J A i ord0) =
+          true
+HfA2 : forall i j : 'I_n.+1,
+       is_finite (fprec ty) 
+         (femax ty) (A2_J A i j) = true
+Hb : forall i : 'I_n.+1,
+     is_finite (fprec ty) (femax ty)
+       (b i ord0) = true
+size_cons : size_constraint
+k : nat
+**)
 
 
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
-  (forall i, is_finite _ _ (A i i) = true) ->
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x:= A_real^-1 *m b_real in
@@ -1181,27 +1204,15 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
                       default_abs ty) *
                      matrix_inf_norm (A2_J_real A_real)) *
                     vec_inf_norm (x_fix x b_real A_real))%Re in
-  (rho < 1)%Re ->
-  A_real \in unitmx ->
-  (forall i : 'I_n.+1,
-    is_finite (fprec ty) (femax ty)
-      (BDIV ty (Zconst ty 1) (A i i)) = true) ->
-  forall x0: 'cV[ftype ty]_n.+1, 
-  (forall i : 'I_n.+1, is_finite (fprec ty) (femax ty)
-                              (x0 i ord0) = true) ->
-  (forall i, is_finite (fprec ty) (femax ty)
-                        (A1_inv_J A i ord0) = true) ->
-  (forall i j, is_finite (fprec ty) (femax ty)
-                  (A2_J A i j) = true) -> 
-  (forall i, is_finite (fprec ty) (femax ty)
-                          (b i ord0) = true) ->
-  @size_constraint ty n ->
+  forall x0: 'cV[ftype ty]_n.+1,
+  forward_error_cond A x0 b ->
   (forall k:nat, 
    (forall i, is_finite _ _ (X_m_jacobi k x0 b A i ord0) = true) /\
    (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re).
 Proof.
-intro HAf. 
-intros ? ? ? ? ? ? ? ? ?   Hdivf ? Hx0 Ha1_inv HfA2 Hb size_cons k.
+intros ? ? ? ? ? ? ? ? Hcond.
+unfold forward_error_cond in Hcond.
+destruct Hcond as [HAf [H [H0 [Hdivf [Hx0 [Ha1_inv [HfA2 [Hb [size_cons Hinp]]]]]]]]].
 assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re).
 { intros. by apply BDIV_FT2R_sep_zero. }
 induction k.
