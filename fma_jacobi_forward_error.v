@@ -665,40 +665,6 @@ Lemma x_k_bound {ty} {n:nat}
   let x:= A_real^-1 *m b_real in
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in 
-(*
-
-   let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
-   let delta := default_rel ty in
-   let rho := ((((1 + g ty n.+1) * (1 + delta) *
-                  g ty n.+1 + delta * (1 + g ty n.+1) +
-                  g ty n.+1) * (1 + delta) + delta) * R +
-                (((1 + g ty n.+1) * (1 + delta) *
-                  g ty n.+1 + delta * (1 + g ty n.+1) +
-                  g ty n.+1) * default_abs ty +
-                 default_abs ty) *
-                matrix_inf_norm (A2_J_real A_real) + R)%Re in
-   let d_mag := ((g ty n.+1 * (1 + delta) + delta) *
-                    ((vec_inf_norm (A1_diag A_real) *
-                      (1 + delta) + default_abs ty) *
-                     vec_inf_norm b_real) +
-                    (1 + g ty n.+1) * g1 ty n.+1 (n.+1 - 1) *
-                    (1 + delta) *
-                    (vec_inf_norm (A1_diag A_real) *
-                     (1 + delta) + default_abs ty) +
-                    g1 ty n.+1 (n.+1 - 1) +
-                    (vec_inf_norm (A1_diag A_real) * delta +
-                     default_abs ty) * vec_inf_norm b_real +
-                    ((((1 + g ty n.+1) * (1 + delta) *
-                       g ty n.+1 + delta * (1 + g ty n.+1) +
-                       g ty n.+1) * (1 + delta) + delta) * R +
-                     (((1 + g ty n.+1) * (1 + delta) *
-                       g ty n.+1 + delta * (1 + g ty n.+1) +
-                       g ty n.+1) * default_abs ty +
-                      default_abs ty) *
-                     matrix_inf_norm (A2_J_real A_real)) *
-                    vec_inf_norm (x_fix x b_real A_real))%Re in
-*)
-
    (f_error k b x0 x A <=
        rho ^ k * f_error 0 b x0 x A +
        (1 - rho ^ k) / (1 - rho) * d_mag)%Re ->
@@ -1033,6 +999,11 @@ induction k.
             apply /RleP. apply Rabs_ineq.
           * apply Rle_refl.
           * rewrite Rabs_sum_in.
+            eapply Rle_lt_trans. rewrite -Rplus_assoc. apply Rplus_le_compat_r.
+            apply Rplus_le_compat_l.
+            apply Rmult_le_compat_l.
+            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+            
 
 
 
