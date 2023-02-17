@@ -1690,7 +1690,29 @@ apply Rle_lt_trans with
       { apply Rmult_lt_0_compat. apply lt_0_INR. lia.
         apply Rplus_le_lt_0_compat. apply g_pos. nra.
       } nra.
-+ unfold fmax. 
++ unfold fmax. apply Rcomplements.Rlt_minus_l.
+  apply Rcomplements.Rlt_div_l.
+  apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
+  apply Rcomplements.Rlt_minus_l.
+  assert (bpow Zaux.radix2 (femax t) = 
+          (bpow Zaux.radix2 (femax t) + 0)%Re) by nra.
+  rewrite [in X in (X < _ )%Re]H. 
+  apply Rplus_lt_le_compat; last by apply default_abs_ge_0.
+  assert (bpow Zaux.radix2 (femax t) = 
+          (bpow Zaux.radix2 (femax t) * 1)%Re) by nra.
+  rewrite [in X in (X < _)%Re]H0.
+  apply Rmult_lt_compat.
+  - apply bpow_ge_0.
+  - nra.
+  - rewrite [in X in (X < _)%Re]H.
+    apply Rplus_lt_compat_l.
+    assert (n.+1 = S (n.+1 - 1)%coq_nat).
+    { lia. } rewrite H1. 
+    eapply Rlt_le_trans.
+ 
+
+
+
   admit.
 
 Admitted.
