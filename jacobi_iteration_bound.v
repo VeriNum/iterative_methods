@@ -417,11 +417,6 @@ repeat split.
       apply Rlt_Rminus.
       by apply diagonal_dominance_implies_rho_lt_1.
   - apply Rgt_lt. apply HG1. 
-
-
-
-
-admit.
 + apply Hfacc.
 + admit.
 + admit.
@@ -431,7 +426,17 @@ admit.
 + apply Hfb.
 + apply size_cons.
 + apply size_cons.
-+ admit.
++ intros. unfold input_bound_Rcompute in Hinp.
+  destruct Hinp as [bnd1 _]. specialize (bnd1 i).
+  eapply Rle_lt_trans; last by apply bnd1.
+  
+
+
+
+
+
+
+admit.
 + admit.
 + apply Hinp.
 + admit.
