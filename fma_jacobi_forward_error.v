@@ -616,13 +616,13 @@ Definition size_constraint {t} {n:nat}:=
   (1 + default_rel t) -
   g1 t n.+1 (n.+1 - 1)%coq_nat - 1) /
  (g t (n.+1 - 1)%coq_nat + 1))%Re /\
- (INR n.+1 <=
- fmax t / (1 + g t n.+1) / default_abs t - 1)%Re.
+ (INR n.+2 <=
+ fmax t / (1 + g t n.+2) / default_abs t - 1)%Re.
 
 
-Lemma g1_constraint {t} {n:nat}:
-  @size_constraint t n ->
-  (g1 t (n.+1 + 1)%coq_nat n.+1 <= fmax t)%Re.
+Lemma g1_constraint_Sn {t} {n:nat}:
+@size_constraint t n ->
+(g1 t (n.+2 + 1)%coq_nat n.+2 <= fmax t)%Re.
 Proof.
 intro size_cons.
 unfold g1.
@@ -634,6 +634,25 @@ rewrite plus_INR.
 replace (INR 1) with 1%Re by (simpl;nra).
 apply Rcomplements.Rle_minus_r.
 apply size_cons.
+Qed.
+
+
+Lemma g1_constraint {t} {n:nat}:
+  @size_constraint t n ->
+  (g1 t (n.+1 + 1)%coq_nat n.+1 <= fmax t)%Re.
+Proof.
+intros.
+apply Rle_trans with (g1 t (n.+2 + 1)%coq_nat n.+2).
++ pose proof (g1n_le_g1Sn t).
+  specialize (H0 (n.+1 + 1)%coq_nat).
+  assert ((1 <= (n.+1 + 1)%coq_nat)%coq_nat) by lia.
+  specialize (H0 H1). 
+  assert (((n.+1 + 1)%coq_nat - 1)%coq_nat = n.+1) by lia.
+  rewrite H2 in H0.
+  assert ((n.+1 + 1)%coq_nat.+1 = (n.+2 + 1)%coq_nat) by lia.
+  rewrite H3 in H0.
+  nra.
++ by apply g1_constraint_Sn.
 Qed.
 
 
@@ -882,7 +901,10 @@ induction k.
       specialize (H2 (@fma_dot_prod_rel_holds _ _ _ n.+1 i (A2_J A) 
                           (\col_j X_m_jacobi k x0 b A j ord0))).
       assert ((g1 ty (n.+2 + 1)%coq_nat n.+2 <=  fmax ty)%Re).
-      { apply g1_constraint. } specialize (H2 H3).
+      { Print g1_constraint.
+
+
+apply g1_constraint. apply size_cons. } specialize (H2 H3).
       apply H2. intros.
       repeat split.
       + destruct x1. simpl. apply in_combine_l in H4.
