@@ -1941,13 +1941,14 @@ Lemma is_finite_Bmult_res {t: type} {n:nat}
   (m < n.+1)%coq_nat ->
   forward_error_cond A x0 b ->
   @size_constraint t n ->
+  (rho_def A b < 1)%Re ->
   is_finite (fprec t) (femax t)
              (BMULT t (A (inord m) (inord m))
                 ((X_m_jacobi k.+1 x0 b A -f
                   X_m_jacobi k x0 b A) 
                    (inord m) ord0)) = true.
 Proof.
-intros ? ? size_cons.
+intros ? ? size_cons Hrho.
 apply BMULT_no_overflow_is_finite.
 + unfold forward_error_cond in H0. apply H0.
 + rewrite mxE. apply Bplus_bminus_opp_implies.
@@ -1983,7 +1984,7 @@ apply BMULT_no_overflow_is_finite.
                     (BOPP t
                       (X_m_jacobi k x0 b A 
                          (inord m) ord0))).
-    specialize (H2 (is_finite_xkp1_minus_xk _ _ _ _ _ H H0)).
+    specialize (H2 (is_finite_xkp1_minus_xk _ _ _ _ _ H H0 Hrho)).
     destruct H2 as [d1 [Hd1 H2]].
     rewrite H2.
     rewrite [in X in (_ * Rabs (( _ + X) * _) < _)%Re]/FT2R B2R_Bopp.
@@ -2014,12 +2015,13 @@ Lemma residual_is_finite {t: type} {n:nat}
   let resid := residual_math A x0 b in
   forward_error_cond A x0 b ->
   @size_constraint t n ->
+  (rho_def A b < 1)%Re ->
   is_finite (fprec t) (femax t)
     (norm2
        (rev
           (vec_to_list_float n.+1 (resid k)))) = true.
 Proof.
-intros ? ? Hcond size_cons.
+intros ? ? Hcond size_cons Hrho.
 unfold norm2. apply dotprod_finite.
 repeat split.
 + apply in_rev in H.
@@ -2080,7 +2082,7 @@ repeat split.
       apply Hd2.
       apply Rcomplements.Rlt_div_r.
       apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-      apply no_overflow_xkp1_minus_xk.
+      apply no_overflow_xkp1_minus_xk; try by [].
       by rewrite rev_length length_veclist in Hlenk.
   - unfold Bmult_no_overflow. unfold rounded.
     pose proof (@generic_round_property t 
