@@ -140,7 +140,9 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
   (** finitenes of b **) 
   (forall i, is_finite (fprec t) (femax t)
                           (b i ord0) = true) /\
+  (** constraint on the dimension **)
   @size_constraint t n /\
+  (** constraint on bounds for input **)
   input_bound A x0 b.
 
 (** Use: lower case gamma **)
