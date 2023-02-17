@@ -662,7 +662,23 @@ apply Rle_trans with
 (vec_inf_norm (x_fix x (FT2R_mat b) (FT2R_mat A)) + 
   rho ^ k * f_error 0 b x0 x A +
      (1 - rho ^ k) / (1 - rho) * d_mag)%Re.
-+ 
++ apply Rle_trans with 
+  (vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A))).
+  - unfold vec_inf_norm.
+    apply Rle_trans with 
+     [seq Rabs
+          (FT2R_mat (X_m_jacobi k x0 b A)
+             i0 0)
+          | i0 <- enum 'I_n.+1]`_i.
+    * rewrite seq_equiv. rewrite nth_mkseq; 
+      last by apply ltn_ord.
+      rewrite mxE. rewrite inord_val. apply Rle_refl.
+    * apply /RleP.
+      apply (@bigmaxr_ler  _ 0%Re [seq Rabs
+                                   (FT2R_mat (X_m_jacobi k x0 b A) i0 0)
+                               | i0 <- enum 'I_n.+1] i).
+      rewrite size_map size_enum_ord.
+      by apply ltn_ord.
 
 
 
