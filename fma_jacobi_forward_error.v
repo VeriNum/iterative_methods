@@ -743,6 +743,28 @@ Lemma bound_4 {ty} {n:nat}
 Admitted.
 
 
+Lemma bound_5 {ty} {n:nat} 
+  (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k i:
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in 
+(Rabs (FT2R (A1_inv_J A (inord i) ord0)) *
+ (Rabs (FT2R (b (inord i) ord0)) +
+  (1 + g ty n.+1) *
+  ((vec_inf_norm
+      (x_fix x (FT2R_mat b) (FT2R_mat A)) +
+    rho ^ k * f_error 0 b x0 x A +
+    (1 - rho ^ k) / (1 - rho) * d_mag) *
+   (\sum_j
+       Rabs (FT2R (A2_J A (inord i) j)))) +
+  g1 ty n.+1 (n.+1 - 1)%coq_nat) <
+ (bpow Zaux.radix2 (femax ty) -
+  default_abs ty) / (1 + default_rel ty) /
+ (1 + default_rel ty))%Re.
+Admitted.
+
 
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
@@ -1197,13 +1219,26 @@ induction k.
         (** This gives us information about conditions in terms of 
             conditions on input
         **)
-        
-
-
-
-
-
-        admit.
+        eapply Rle_lt_trans. apply Rmult_le_compat_l.
+        apply Rabs_pos. rewrite -Rplus_assoc.
+        apply Rplus_le_compat_r. apply Rplus_le_compat_l.
+        apply Rmult_le_compat_l.
+        apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+        apply Rle_trans with 
+            ((vec_inf_norm
+                 (x_fix x (FT2R_mat b) (FT2R_mat A)) +
+                     rho ^ k * f_error 0 b x0 x A +
+                     (1 - rho ^ k) / (1 - rho) * d_mag) * 
+              \sum_j (Rabs ( FT2R (A2_J A (inord i) j))))%Re.
+            ++ apply /RleP. rewrite RmultE.
+               rewrite big_distrr /=.
+               apply big_sum_ge_ex_abstract.
+               intros. rewrite -RmultE.
+               rewrite Rabs_mult. rewrite Rmult_comm.
+               apply Rmult_le_compat_r. apply Rabs_pos.
+               apply x_k_bound. apply IHk.
+            ++ apply Rle_refl.
+            ++ apply bound_5.
    - apply Hb.
    - rewrite is_finite_Bopp. rewrite mxE. apply H2.
    - by apply Bminus_bplus_opp_implies .
