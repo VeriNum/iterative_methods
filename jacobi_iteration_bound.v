@@ -2028,21 +2028,8 @@ split.
            + rewrite Heqrho in Hrho. apply Hrho.
            + apply size_cons.
            + apply size_cons.
-         } specialize (H1 H2).
-
-
-
- apply H1.
-
-         assert ((rho_def A b < 1)%Re).
-         { rewrite Heqrho in Hrho. apply Hrho. } 
-         specialize (H1 H2). unfold resid,x0. rewrite Heqe_0 Heqrho Heqd_mag Heqx.
+         } specialize (H1 H2).  unfold resid,x0. rewrite Heqe_0 Heqrho Heqd_mag Heqx.
          unfold x0. apply H1. 
-         apply HinvA.
-         by intros.
-         by intros. rewrite Heqd_mag Heqrho Heqx in He0. apply He0.
-         unfold forward_error_cond. repeat split; try (by intros). 
-         apply size_cons.
       ++ apply Rcomplements.Rlt_minus_r.
          rewrite Rmult_comm. 
          apply Rcomplements.Rlt_div_r; 
@@ -2197,8 +2184,11 @@ split.
              ** apply Rplus_le_le_0_compat. nra. apply g_pos.
           -- apply sqrt_pos.
     * apply residual_is_finite.
-      unfold forward_error_cond. repeat split; try (by intros). apply Hrho.
-      apply size_cons. apply Hrho.
+      unfold forward_error_cond. repeat split; try (by intros); try by (intros; apply Hinp); try apply Hrho. 
+      ++  apply Hrho.
+      ++ apply size_cons.
+      ++ apply size_cons.
+      ++ apply He0.
     * by unfold acc2. 
 Qed.
 
