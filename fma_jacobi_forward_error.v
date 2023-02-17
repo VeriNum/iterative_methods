@@ -944,7 +944,14 @@ apply Rle_lt_trans with
   rewrite Rplus_assoc.
   apply Rplus_le_compat_l. unfold rho, d_mag.
   apply Rplus_le_compat.
-  
+  - apply Rmult_le_compat_r.
+    * unfold f_error. apply /RleP.
+      apply vec_norm_pd.
+    * assert ( 1%Re = (1 ^ k)%Re) by (rewrite pow1; nra).
+      rewrite H. apply pow_incr.
+      split. by apply rho_ge_0.
+      apply Rlt_le. apply H0.
+  -
 
 
 
