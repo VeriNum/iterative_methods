@@ -479,11 +479,13 @@ repeat split.
     * apply x_bound_exists. admit.
     * rewrite !Rmult_1_l. apply f_error0_bnd. auto. admit. 
   - apply Rmult_le_compat_l.
-    
-
-
-
- admit.
+    apply Rlt_le. 
+    replace (1 / (1 - rho_def A b))%Re with 
+            (/ (1 - rho_def A b))%Re by nra.
+    apply Rinv_0_lt_compat. 
+    apply Rlt_Rminus.
+    by apply diagonal_dominance_implies_rho_lt_1.
+    admit.
 + admit.
 + admit.`
 Admitted.
