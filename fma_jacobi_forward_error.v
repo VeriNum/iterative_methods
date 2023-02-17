@@ -863,6 +863,8 @@ Lemma bound_1  {t: type} {n:nat}
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in 
   input_bound_alt A x0 b ->
+  (0 < f_error 0 b x0 x A -
+         d_mag_def A b * / (1 - rho_def A b))%Re ->
   (Rabs (FT2R (A (inord m) (inord m))) *
    (rho ^ k * (1 + rho) *
     (f_error 0 b x0 x A -
@@ -896,7 +898,9 @@ apply Rle_lt_trans with
 + apply Rmult_le_compat_l. apply Rabs_pos.
   unfold d_mag, rho.
   repeat apply Rplus_le_compat_r.
-
+  apply Rmult_le_compat_r. apply Rlt_le. apply H0.
+  apply Rmult_le_compat_r.
+  apply Rplus_le_le_0_compat.
   
 
 
