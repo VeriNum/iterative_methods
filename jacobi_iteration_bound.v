@@ -2022,8 +2022,9 @@ split.
             * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat) *
           (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
       ++ pose proof (@residual_bound t n A b (k_min A b acc).+1).
-         
-  
+         rewrite Heqx Heqd_mag Heqrho in He0. specialize (H1 He0).
+         assert (forward_error_cond A (\col__ Zconst t 0) b ).
+         { unfold forward_error_cond. repeat split; by [].
 
          assert ((rho_def A b < 1)%Re).
          { rewrite Heqrho in Hrho. apply Hrho. } 
