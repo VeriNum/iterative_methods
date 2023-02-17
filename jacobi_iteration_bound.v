@@ -161,6 +161,7 @@ Lemma x_bound_exists {t} {n:nat}
   let x1 := x_fix x b_real A_real in
   let R_def :=  (vec_inf_norm (A1_diag A_real) *
                 matrix_inf_norm (A2_J_real A_real))%Re in
+  (R_def < 1)%Re ->
  (vec_inf_norm x1 <= 
     vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
     (1 - R_def))%Re.
@@ -180,7 +181,9 @@ Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
       (1 - R_def))%Re. 
 Admitted.
 
+(** Replace Gamma with tau_squared  **)
 
+Print rho_def.
 Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   (b : 'cV[ftype t]_n.+1) (acc : ftype t) :=
   let rho := rho_def A b in
@@ -206,7 +209,7 @@ Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                  (1 + delta) -
                  2 * d_mag / (1 - rho)))%Re)).
 
-
+(** input bound' **)
 Definition input_bound_compute {t} {n:nat} 
   (A: 'M[ftype t]_n.+1) (x0 b: 'cV[ftype t]_n.+1):=
   let A_real := FT2R_mat A in
@@ -278,7 +281,7 @@ Definition input_bound_compute {t} {n:nat}
 
 
 
-
+(** Rcompute **)
 Definition jacobi_preconditions_compute {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
   (* some property of A,b,accuracy holds such that 
