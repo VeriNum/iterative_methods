@@ -314,8 +314,6 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
                 (1 - R_def))%Re in
   (** Finiteness of A **)
   (forall i j, Binary.is_finite _ _ (A i j) = true) /\
-  (** constant for the contraction mapping **)
-  (0 < rho /\ rho < 1)%Re /\
   (** diagonal dominance of A **)
   strict_diagonal_dominance A /\
   (** Finiteness of the inverse of diagonal elements of A **)
@@ -391,7 +389,15 @@ repeat split.
     apply Rplus_le_le_0_compat. nra. apply g_pos.
     apply Rsqr_incr_1.
     * admit.
-    *
+    * apply Rplus_le_le_0_compat. apply g1_pos.
+      repeat apply Rmult_le_pos. nra.
+      apply Rplus_le_le_0_compat. nra. apply g_pos.
+      apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+      apply /RleP. apply vec_norm_pd.
+      apply d_mag_ge_0.
+      apply Rlt_le. apply Rinv_0_lt_compat. 
+      apply Rlt_Rminus.
+      
     
 
 
