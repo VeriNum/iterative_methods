@@ -1966,7 +1966,7 @@ Lemma jacobi_iteration_bound {t: type} {n : nat} :
 Proof.
 intros.
 unfold jacobi_preconditions_math in H.
-destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [Hfx0 [HfA1_inv [HfA2 [Hfb size_cons]]]]]]]]]]]].
+destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [Hfx0 [HfA1_inv [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]]].
 split.
 + unfold acc2. by apply finite_is_finite.
 + exists (k_min A b acc).+1. 
@@ -1974,8 +1974,9 @@ split.
   - by apply /ssrnat.ltP.
   - intros. apply finite_is_finite.
     apply residual_is_finite.
-    unfold forward_error_cond. repeat split; try (by intros). apply Hrho.
-    apply size_cons. apply Hrho.
+    unfold forward_error_cond. 
+    repeat split; try (by intros); try apply Hrho; try apply Hinp; try apply Hrho; try apply size_cons.
+    apply He0.
   - unfold BCMP.
     rewrite Bcompare_correct. 
     * rewrite Rcompare_Lt; first by [].
@@ -2021,6 +2022,9 @@ split.
             * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat) *
           (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
       ++ pose proof (@residual_bound t n A b (k_min A b acc).+1).
+         
+  
+
          assert ((rho_def A b < 1)%Re).
          { rewrite Heqrho in Hrho. apply Hrho. } 
          specialize (H1 H2). unfold resid,x0. rewrite Heqe_0 Heqrho Heqd_mag Heqx.
