@@ -869,14 +869,13 @@ Lemma is_finite_Bmult_res {t: type} {n:nat}
   (m < n.+1)%coq_nat ->
   forward_error_cond A x0 b ->
   @size_constraint t n ->
-  (rho_def A b < 1)%Re ->
   is_finite (fprec t) (femax t)
              (BMULT t (A (inord m) (inord m))
                 ((X_m_jacobi k.+1 x0 b A -f
                   X_m_jacobi k x0 b A) 
                    (inord m) ord0)) = true.
 Proof.
-intros ? ? size_cons Hrho.
+intros ? ? size_cons.
 apply BMULT_no_overflow_is_finite.
 + unfold forward_error_cond in H0. apply H0.
 + rewrite mxE. apply Bplus_bminus_opp_implies.
@@ -912,7 +911,7 @@ apply BMULT_no_overflow_is_finite.
                     (BOPP t
                       (X_m_jacobi k x0 b A 
                          (inord m) ord0))).
-    specialize (H2 (is_finite_xkp1_minus_xk _ _ _ _ _ H H0 Hrho)).
+    specialize (H2 (is_finite_xkp1_minus_xk _ _ _ _ _ H H0 size_cons)).
     destruct H2 as [d1 [Hd1 H2]].
     rewrite H2.
     rewrite [in X in (_ * Rabs (( _ + X) * _) < _)%Re]/FT2R B2R_Bopp.
@@ -924,16 +923,17 @@ apply BMULT_no_overflow_is_finite.
     rewrite Rabs_R1. apply Rplus_le_compat_l.
     apply Hd1. apply Rcomplements.Rlt_div_r.
     apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-    pose proof (@bound_1 t n A x0 b k m).
+    pose proof (@res_xkp1_minus_xk t n A x0 b k m). 
     assert ((m < n.+1)%nat). { by apply /ssrnat.ltP. }
-    specialize (H3 H4).
+    specialize (H3 H4 H0 size_cons).
     eapply Rlt_trans. 
     apply H3. 
     repeat apply Rmult_lt_compat_r;
     try apply Rinv_0_lt_compat;
-    try apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+    try apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0. 
     apply Rplus_lt_compat_r.
     by apply sqrt_fun_bnd_lt_fmax.
+    apply size_cons. apply size_cons.
 Qed.
 
 
