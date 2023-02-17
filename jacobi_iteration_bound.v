@@ -329,7 +329,7 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
      (g1 t n.+1 (n.+1 - 1)%coq_nat +
       2 * (1 + g t n.+1) * (1 + default_rel t) *
       vec_inf_norm (FT2R_mat (A1_J A)) *
-      d_mag_def A b * / (1 - rho_def A b))²)%Re /\
+      d_mag_def_alt A b * / (1 - rho_def A b))²)%Re /\
   (** Gamma is finite **)
   Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
   (** constraint on k **)
@@ -373,7 +373,26 @@ repeat split.
 + apply Hrho.
 + by apply diagonal_dominance_implies_invertibility.
 + apply Hfdiv.
-+ admit.
++ apply Rlt_gt.
+  apply Rle_lt_trans with
+  ( g1 t n.+1
+         (n.+1 - 1)%coq_nat +
+       INR n.+1 * (1 + g t n.+1) *
+       (g1 t n.+1
+          (n.+1 - 1)%coq_nat +
+        2 * (1 + g t n.+1) *
+        (1 + default_rel t) *
+        vec_inf_norm
+          (FT2R_mat (A1_J A)) *
+        d_mag_def_alt A b *
+        / (1 - rho_def A b))²)%Re.
+  - admit.
+  - apply Rgt_lt. apply HG1. 
+
+
+
+
+admit.
 + apply Hfacc.
 + admit.
 + admit.
@@ -388,7 +407,7 @@ repeat split.
 + apply Hinp.
 + admit.
 + admit.
-+ admit.
++ admit.`
 Admitted.
 
 
