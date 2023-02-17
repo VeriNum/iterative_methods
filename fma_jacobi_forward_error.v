@@ -614,11 +614,59 @@ Lemma g1_le_fmax {n:nat} {t : type} :
   (g1 t (n + 1)%coq_nat n <=  fmax t)%Re.
 Admitted.
 
+Definition rho_def  {t: type} {n:nat} (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) :=
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in  
+  let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
+  let delta := default_rel t in
+  ((((1 + g t n.+1) * (1 + delta) *
+                  g t n.+1 + delta * (1 + g t n.+1) +
+                  g t n.+1) * (1 + delta) + delta) * R +
+                (((1 + g t n.+1) * (1 + delta) *
+                  g t n.+1 + delta * (1 + g t n.+1) +
+                  g t n.+1) * default_abs t +
+                 default_abs t) *
+                matrix_inf_norm (A2_J_real A_real) + R)%Re.
+
+
+Definition d_mag_def {t: type} {n:nat} (A: 'M[ftype t]_n.+1) 
+  (b: 'cV[ftype t]_n.+1) :=
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in  
+  let x:= mulmx (A_real^-1) b_real in
+  let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
+  let delta := default_rel t in
+  ((g t n.+1 * (1 + delta) + delta) *
+                    ((vec_inf_norm (A1_diag A_real) *
+                      (1 + delta) + default_abs t) *
+                     vec_inf_norm b_real) +
+                    (1 + g t n.+1) * g1 t n.+1 (n.+1 - 1) *
+                    (1 + delta) *
+                    (vec_inf_norm (A1_diag A_real) *
+                     (1 + delta) + default_abs t) +
+                    g1 t n.+1 (n.+1 - 1) +
+                    (vec_inf_norm (A1_diag A_real) * delta +
+                     default_abs t) * vec_inf_norm b_real +
+                    ((((1 + g t n.+1) * (1 + delta) *
+                       g t n.+1 + delta * (1 + g t n.+1) +
+                       g t n.+1) * (1 + delta) + delta) * R +
+                     (((1 + g t n.+1) * (1 + delta) *
+                       g t n.+1 + delta * (1 + g t n.+1) +
+                       g t n.+1) * default_abs t +
+                      default_abs t) *
+                     matrix_inf_norm (A2_J_real A_real)) *
+                    vec_inf_norm (x_fix x b_real A_real))%Re.
+
+
 Lemma x_k_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k i:
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x:= A_real^-1 *m b_real in
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in 
+(*
+
    let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
    let delta := default_rel ty in
    let rho := ((((1 + g ty n.+1) * (1 + delta) *
@@ -649,6 +697,7 @@ Lemma x_k_bound {ty} {n:nat}
                       default_abs ty) *
                      matrix_inf_norm (A2_J_real A_real)) *
                     vec_inf_norm (x_fix x b_real A_real))%Re in
+*)
 
    (f_error k b x0 x A <=
        rho ^ k * f_error 0 b x0 x A +
@@ -684,6 +733,28 @@ apply Rle_trans with
     by apply /RleP.
 Qed.
 
+(** sqrt (fun_bnd ty n.+1))%Re **)
+Lemma  bound_2 {ty} {n:nat} 
+  (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k:
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in 
+  (vec_inf_norm
+   (x_fix x (FT2R_mat b) (FT2R_mat A)) +
+       rho ^ k *
+       f_error 0 b x0 x A +
+       (1 - rho ^ k) / (1 - rho) *
+       d_mag < sqrt (fun_bnd ty n.+1))%Re.
+Admitted.
+
+
+Lemma bound_3 {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
+  forall i j, 
+  (Rabs (FT2R (A2_J A i j )) <
+    sqrt (fun_bnd ty n.+1))%Re.
+Admitted.
 
 
 (** State the forward error theorem **)
@@ -812,7 +883,8 @@ induction k.
         rewrite length_veclist in H52.
         assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat) by lia.
         rewrite H5 in H52. rewrite nth_vec_to_list_float  in H52.
-        - rewrite mxE in H52. rewrite mxE in H52. rewrite -H52. admit.
+        - rewrite mxE in H52. rewrite mxE in H52. rewrite -H52. 
+          apply bound_3.
         - rewrite rev_length length_veclist in H51. by apply /ssrnat.ltP. 
         - rewrite rev_length in H51. apply H51.
       + destruct x1. simpl. apply in_combine_r in H4.
@@ -828,12 +900,7 @@ induction k.
           destruct IHk as [IHk1 IHk2]. 
           apply (x_k_bound (@inord n m)) in IHk2.
           eapply Rle_lt_trans.
-          apply IHk2. fold rho.
-
-
-
-
-admit.
+          apply IHk2. apply bound_2.
         - rewrite rev_length length_veclist in H51. by apply /ssrnat.ltP. 
         - rewrite rev_length in H51. apply H51.
     }
