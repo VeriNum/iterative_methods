@@ -718,11 +718,11 @@ Lemma is_finite_xkp1_minus_xk {t: type} {n:nat}
                      (X_m_jacobi k x0 b A
                         (inord m) ord0))) = true.
 Proof.
-intros ? Hcond Hrho.
+intros ? Hcond size_cons.
 apply BPLUS_no_overflow_is_finite; try rewrite ?is_finite_Bopp;
 try (pose proof (@jacobi_forward_error_bound _ t n);
   unfold forward_error_cond in Hcond;
-  unfold rho_def in Hcond;apply H0; try (intros; apply Hcond)).
+  unfold rho_def in Hcond;apply H0; try (intros; apply Hcond); try apply size_cons).
 unfold Bplus_no_overflow.
 pose proof (@generic_round_property t 
             (FT2R
