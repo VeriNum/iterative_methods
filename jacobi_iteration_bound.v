@@ -590,7 +590,7 @@ Lemma no_overflow_xkp1_minus_xk {t: type} {n:nat}
   let d_mag := d_mag_def A b in 
    (m < n.+1)%coq_nat ->
   forward_error_cond A x0 b ->
-  (rho < 1)%Re ->
+  @size_constraint t n ->
   (Rabs
    (FT2R
       (X_m_jacobi k.+1 x0 b A 
@@ -611,14 +611,14 @@ assert ((f_error k.+1 b x0 x A <=
           (1 - rho ^ k.+1) / (1 - rho) * d_mag)%Re).
 { unfold forward_error_cond in H0.
   unfold rho_def in H0.
-  apply H2; try (intros; apply H0). 
+  by apply H2; try (intros; apply H0). 
 }
 assert ((f_error k b x0 x A <=
           rho ^ k * f_error 0 b x0 x A +
           (1 - rho ^ k) / (1 - rho) * d_mag)%Re).
 { unfold forward_error_cond in H0.
   unfold rho_def in H0.
-  apply H2; try (intros; apply H0). 
+  by apply H2; try (intros; apply H0). 
 } clear H2.
 apply (x_k_bound (@inord n m)) in H3.
 apply (x_k_bound (@inord n m)) in H4.
@@ -659,11 +659,13 @@ assert ((rho ^ k.+1 * e_0 +
                       ((1 - rho ^ k) * d_mag) * / (1 - rho)))%Re).
   { assert (((rho ^ k.+1 * e_0 * (1 - rho)) * / (1-rho))%Re = 
                      ((rho ^k.+1 * e_0) * ((1 - rho) * / (1-rho)))%Re).
-    { nra. } rewrite H2. rewrite Rinv_r; last by nra.
+    { nra. } rewrite H2.
+    assert ((rho < 1)%Re) by apply H0.
+    rewrite Rinv_r; last by nra.
     rewrite Rmult_1_r.
     assert (((rho ^ k * e_0 * (1 - rho)) * / (1- rho))%Re = 
                      ( (rho^k * e_0) * ((1 - rho) * / (1- rho)))%Re).
-    { nra. } rewrite H5. rewrite Rinv_r; nra.
+    { nra. } rewrite H6. rewrite Rinv_r; nra.
   } rewrite H2. clear H2. nra.
 } 
 assert ((rho ^ k.+1 * e_0 +
@@ -694,7 +696,9 @@ assert ((rho ^ k * (1 + rho) *
                     ((1 - rho) * e_0 - d_mag) * / (1 - rho))%Re =
                 (rho ^ k * (1 + rho) * 
                 (e_0 * ( (1 - rho) * / (1 - rho)) - d_mag * /(1 - rho)))%Re).
-{ nra. } rewrite H2. clear H2. rewrite Rinv_r; last by nra.
+{ nra. } rewrite H2. clear H2. 
+assert ((rho < 1)%Re) by apply H0.
+rewrite Rinv_r; last by nra.
 rewrite Rmult_1_r.
 rewrite Heqe_0.
 apply bound_5.
@@ -705,7 +709,7 @@ Lemma is_finite_xkp1_minus_xk {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
    (m < n.+1)%coq_nat ->
   forward_error_cond A x0 b ->
-  (rho_def A b < 1)%Re ->
+  @size_constraint t n ->
   is_finite (fprec t) (femax t)
                (BPLUS t
                   (X_m_jacobi k.+1 x0 b A
