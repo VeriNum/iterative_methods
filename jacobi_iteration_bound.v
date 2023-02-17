@@ -501,15 +501,14 @@ apply Rle_lt_trans with
   unfold d_mag, rho. apply Rplus_le_compat_r.
   unfold x, A_real, b_real.
   apply Rmult_le_compat_r. apply Rlt_le. apply H1.
-  
-  
-
-
-
-
-
- admit.
+  apply Rmult_le_compat_r.
+  apply Rplus_le_le_0_compat; try nra; by try apply rho_ge_0.
+  assert ( 1%Re = (1 ^ k)%Re) by (rewrite pow1; nra).
+  rewrite H. apply pow_incr.
+  split. by apply rho_ge_0.
+  apply Rlt_le. apply H0.
 + apply bnd6.
+Qed.
 
 
 
