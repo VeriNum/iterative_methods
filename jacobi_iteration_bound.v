@@ -1667,7 +1667,20 @@ apply Rle_lt_trans with
   end. 
   apply Rmult_le_compat.
   - admit.
-  - apply Rlt_le. apply Rinv_0_lt_compat.
+  - apply Rlt_le. 
+    replace (1 /  (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re with
+    (/ (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re by nra.
+    apply Rinv_0_lt_compat. 
+    apply Rplus_lt_le_0_compat; try nra.
+    apply Rmult_le_pos. apply pos_INR.
+    apply Rplus_le_le_0_compat. apply g_pos.
+    nra.
+  - nra.
+  - assert (1%Re = (/1)%Re) by nra.
+    rewrite [in X in (_ <= X)%Re]H.
+    replace (1 /  (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re with
+    (/ (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re by nra.
+    
 
   
 
