@@ -1075,7 +1075,8 @@ apply Rle_lt_trans with
           d_mag_def A b) *
          (\sum_j Rabs (FT2R (A2_J A i j)))) +
         g1 ty n.+1 (n.+1 - 1)%coq_nat)%Re.
-+ apply Rplus_le_compat_l.
++ apply Rplus_le_compat_r. apply Rplus_le_compat_l.
+  apply Rmult_le_compat_l.
 
 
 
