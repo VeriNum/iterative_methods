@@ -178,6 +178,7 @@ Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
     vec_inf_norm (FT2R_mat x0) + 
     vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
       (1 - R_def))%Re. 
+Admitted.
 
 
 Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
@@ -206,7 +207,7 @@ Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                  2 * d_mag / (1 - rho)))%Re)).
 
 
-Definition jacobi_preconditions_alt {t: type} {n:nat}
+Definition jacobi_preconditions_compute {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
   (* some property of A,b,accuracy holds such that 
     jacobi_n will indeed converge within k iterations to this accuracy, 
@@ -262,8 +263,11 @@ Definition jacobi_preconditions_alt {t: type} {n:nat}
   (** constraint on bounds for input **)
   input_bound A x0 b.
 
-
-
+Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat): 
+  jacobi_preconditions_compute A b accuracy k ->
+  jacobi_preconditions_math A b accuracy k.
+Admitted.
 
 
 
