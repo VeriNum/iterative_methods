@@ -1655,6 +1655,22 @@ rewrite [in X in (Rabs ( _ + X) < _)%Re]/FT2R B2R_Bopp.
 fold (@FT2R t).
 Admitted.
 
+Lemma fun_bnd_lt_fmax {t} {n:nat}:
+  (fun_bnd t n.+1 < bpow Zaux.radix2 (femax t))%Re.
+Proof.
+unfold fun_bnd.
+apply Rle_lt_trans with 
+((fmax t - default_abs t) / (1 + default_rel t) -
+  g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
++ match goal with |-context[(_ <= ?a)%Re]=>
+    replace a with (a * 1)%Re by nra
+  end. 
+  apply Rmult_le_compat.
+  - admit.
+  - apply Rlt_le. apply Rinv_0_lt_compat.
+
+  
+
 
 Lemma sqrt_fun_bnd_lt_fmax {t} {n:nat}:
   (sqrt (fun_bnd t n.+1) <
@@ -1967,92 +1983,6 @@ repeat split.
     unfold rho_def in Hcond.
     apply H4; try (intros; apply Hcond).
   - apply H3.
-  (*
-  (** bound x_k by max_i { (D^-1 b)_i} \rho ^ i **)
-  pose proof (@BMULT_accurate' _ t (A (inord m) (inord m))
-              ((X_m_jacobi k.+1 x0 b A -f
-                 X_m_jacobi k x0 b A) (inord m) ord0)).
-  assert (is_finite (fprec t) (femax t)
-             (BMULT t (A (inord m) (inord m))
-                ((X_m_jacobi k.+1 x0 b A -f
-                  X_m_jacobi k x0 b A)
-                   (inord m) ord0)) = true) by admit.
-  specialize (H1 H2).
-  destruct H1 as [d [e [Hde [Hd [He H1]]]]].
-  rewrite H1.
-  eapply Rle_trans.
-  apply Rabs_triang.
-  eapply Rle_trans.
-  apply Rplus_le_compat_l. apply He.
-  rewrite Rabs_mult. eapply Rle_trans.
-  apply Rplus_le_compat_r.
-  apply Rmult_le_compat_l. apply Rabs_pos.
-  apply Rle_trans with (Rabs 1 + Rabs d)%Re.
-  apply Rabs_triang.
-  rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd.
-  rewrite Rabs_mult. rewrite mxE.
-  rewrite Bminus_bplus_opp_equiv.
-  - pose proof (@BPLUS_accurate _ t).
-    specialize (H3 (X_m_jacobi k.+1 x0 b A
-                           (inord m) ord0)).
-    assert (is_finite (fprec t) (femax t)
-               (X_m_jacobi k.+1 x0 b A 
-                  (inord m) ord0) = true) by admit.
-    specialize (H3 H4).
-    specialize (H3 (BOPP t
-                        (X_m_jacobi k x0 b A  
-                             (inord m) ord0))).
-    assert (is_finite (fprec t) (femax t)
-               (BOPP t
-                  (X_m_jacobi k x0 b A 
-                     (inord m) ord0)) = true) by admit.
-    specialize (H3 H5).
-    assert ( Bplus_no_overflow t
-               (FT2R
-                  (X_m_jacobi k.+1 x0 b A
-                     (inord m) ord0))
-               (FT2R
-                  (BOPP t
-                     (X_m_jacobi k x0 b A
-                        (inord m) ord0)))) by admit.
-    specialize (H3 H6).
-    destruct H3 as [d1 [Hd1 H3]].
-    rewrite H3.
-    assert (FT2R
-             (BOPP t
-                (X_m_jacobi k x0 b A 
-                   (inord m) ord0)) = 
-              (- (FT2R (X_m_jacobi k x0 b A 
-                     (inord m) ord0)))%Re).
-    { unfold FT2R. by rewrite B2R_Bopp. }
-    rewrite H7. eapply Rle_trans.
-    apply Rplus_le_compat_r.
-    apply Rmult_le_compat_r.
-    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
-    apply Rmult_le_compat_l; first by apply Rabs_pos.
-    rewrite Rabs_mult.
-    apply Rmult_le_compat_l; first by apply Rabs_pos.
-    apply Rle_trans with (Rabs 1 + Rabs d1)%Re.
-    apply Rabs_triang.
-    apply Rplus_le_compat_l. apply Hd1.
-    rewrite Rabs_R1.
-    apply Rcomplements.Rle_minus_r.
-    apply Rdiv_le_right_elim; first by
-    apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-    rewrite -Rmult_assoc.
-    apply Rdiv_le_right_elim; first by
-    apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-    (** at this point, we have that 
-        |A_ii | | x_k+1 - x_k | <= \sqrt{ F' / (2 * n * d^n)} / (1+ d)^2
-     **)
-    admit.
-  - admit.
-  - rewrite is_finite_Bopp. admit.
-  - apply Bplus_no_ov_is_finite.
-    * admit.
-    * admit.
-    * apply Bplus_x_kp_x_k_no_oveflow.
-*)
 Admitted.
 
 
@@ -3227,5 +3157,4 @@ Qed.
 
 
 End WITH_NANS.
-
 
