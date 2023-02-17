@@ -654,15 +654,15 @@ Lemma x_k_bound {ty} {n:nat}
    (f_error k b x0 x A <=
        rho ^ k * f_error 0 b x0 x A +
        (1 - rho ^ k) / (1 - rho) * d_mag)%Re ->
-    (Rabs (FT2R (X_m_jacobi k x0 b A i ord0)) <= 1)%Re.
+    (Rabs (FT2R (X_m_jacobi k x0 b A i ord0)) <= 
+      vec_inf_norm
+         (x_fix x (FT2R_mat b) (FT2R_mat A)) +
+       rho ^ k * f_error 0 b x0 x A +
+       (1 - rho ^ k) / (1 - rho) * d_mag)%Re.
 Proof.
 intros.
 rewrite [in X in (X <= _)%Re]/f_error in H.
 apply Rle_trans with 
-(vec_inf_norm (x_fix x (FT2R_mat b) (FT2R_mat A)) + 
-  rho ^ k * f_error 0 b x0 x A +
-     (1 - rho ^ k) / (1 - rho) * d_mag)%Re.
-+ apply Rle_trans with 
   (vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A))).
   - unfold vec_inf_norm.
     apply Rle_trans with 
@@ -679,6 +679,11 @@ apply Rle_trans with
                                | i0 <- enum 'I_n.+1] i).
       rewrite size_map size_enum_ord.
       by apply ltn_ord.
+  - assert (forall x y z d: R, (x - y <= z + d)%Re -> (x <= y + z + d)%Re).
+    { intros. nra. } apply H0.
+    apply /RleP. apply reverse_triang_ineq.
+    by apply /RleP.
+Qed.
 
 
 
