@@ -741,22 +741,81 @@ apply Rle_trans with
     by apply /RleP.
 Qed.
 
-Definition input_bound {ty} {n:nat} 
-  (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k:
+Definition input_bound {t} {n:nat} 
+  (A: 'M[ftype t]_n.+1) (x0 b: 'cV[ftype t]_n.+1) k:=
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x:= A_real^-1 *m b_real in
   let rho := rho_def A b in 
-  let d_mag := d_mag_def A b in 
+  let d_mag := d_mag_def A b in
+  (forall i,
+    (Rabs (FT2R (A i i)) *
+     (rho ^ k * (1 + rho) *
+      (f_error 0 b x0 x A -
+       d_mag * / (1 - rho)) +
+      2 * d_mag * / (1 - rho) +
+      2 *
+      vec_inf_norm
+        (x_fix x (FT2R_mat b) (FT2R_mat A))) <
+     (sqrt (fun_bnd t n.+1) - default_abs t) /
+     (1 + default_rel t) /
+     (1 + default_rel t))%Re) /\ 
   (vec_inf_norm
    (x_fix x (FT2R_mat b) (FT2R_mat A)) +
        rho ^ k *
        f_error 0 b x0 x A +
        (1 - rho ^ k) / (1 - rho) *
-       d_mag < sqrt (fun_bnd ty n.+1))%Re /\
+       d_mag < sqrt (fun_bnd t n.+1))%Re /\
   (forall i j, 
       (Rabs (FT2R (A2_J A i j )) <
-        sqrt (fun_bnd ty n.+1))%Re) /\
+        sqrt (fun_bnd t n.+1))%Re) /\
+  (forall i,
+     (Rabs (FT2R (b i ord0)) +
+     (1 + g t n.+1) *
+     ((vec_inf_norm
+         (x_fix x (FT2R_mat b) (FT2R_mat A)) +
+       rho ^ k * f_error 0 b x0 x A +
+       (1 - rho ^ k) / (1 - rho) * d_mag) *
+      (\sum_j
+          Rabs (FT2R (A2_J A i j)))) +
+     g1 t n.+1 (n.+1 - 1)%coq_nat <
+     (bpow Zaux.radix2 (femax t) -
+      default_abs t) / (1 + default_rel t))%Re) /\
+  (forall i,
+    (Rabs (FT2R (A1_inv_J A (inord i) ord0)) *
+     (Rabs (FT2R (b (inord i) ord0)) +
+      (1 + g t n.+1) *
+      ((vec_inf_norm
+          (x_fix x (FT2R_mat b) (FT2R_mat A)) +
+        rho ^ k * f_error 0 b x0 x A +
+        (1 - rho ^ k) / (1 - rho) * d_mag) *
+       (\sum_j
+           Rabs (FT2R (A2_J A (inord i) j)))) +
+      g1 t n.+1 (n.+1 - 1)%coq_nat) <
+     (bpow Zaux.radix2 (femax t) -
+      default_abs t) / (1 + default_rel t) /
+     (1 + default_rel t))%Re).
+
+
+Lemma bound_1  {t: type} {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in 
+(Rabs (FT2R (A (inord m) (inord m))) *
+ (rho ^ k * (1 + rho) *
+  (f_error 0 b x0 x A -
+   d_mag * / (1 - rho)) +
+  2 * d_mag * / (1 - rho) +
+  2 *
+  vec_inf_norm
+    (x_fix x (FT2R_mat b) (FT2R_mat A))) <
+ (sqrt (fun_bnd t n.+1) - default_abs t) /
+ (1 + default_rel t) /
+ (1 + default_rel t))%Re.
+Admitted.
 
 
 Lemma  bound_2 {ty} {n:nat} 
