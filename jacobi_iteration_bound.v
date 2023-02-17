@@ -484,7 +484,28 @@ Proof.
 intros.
 unfold input_bound in H.
 destruct H as [_ [_ [_ [_ [_ bnd6]]]]].
+apply Rle_lt_trans with 
+(1 * (1 + rho_def A b) *
+        (f_error 0 b x0
+           ((FT2R_mat A)^-1 *m FT2R_mat b) A -
+         d_mag_def A b * / (1 - rho_def A b)) +
+        2 * d_mag_def A b *
+        / (1 - rho_def A b) +
+        2 *
+        vec_inf_norm
+          (x_fix
+             ((FT2R_mat A)^-1 *m FT2R_mat b)
+             (FT2R_mat b) (FT2R_mat A)))%Re.
++ apply Rplus_le_compat_r.
+  unfold d_mag, rho. apply Rplus_le_compat_r.
+  
 
+
+
+
+
+ admit.
++ apply bnd6.
 
 
 
