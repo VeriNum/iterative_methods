@@ -207,6 +207,78 @@ Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                  2 * d_mag / (1 - rho)))%Re)).
 
 
+Definition input_bound_compute {t} {n:nat} 
+  (A: 'M[ftype t]_n.+1) (x0 b: 'cV[ftype t]_n.+1):=
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let R_def :=  (vec_inf_norm (A1_diag A_real) *
+                matrix_inf_norm (A2_J_real A_real))%Re in
+  let x_bound :=  
+  (vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
+    (1 - R_def))%Re in 
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def_alt A b in
+  let e_0 := (vec_inf_norm (FT2R_mat x0) + 
+              vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
+                (1 - R_def))%Re in
+  (forall i,
+    (Rabs (FT2R (A i i)) *
+     (1 * (1 + rho) *
+      (e_0 -
+       d_mag * / (1 - rho)) +
+      2 * d_mag * / (1 - rho) +
+      2 *
+      x_bound ) <
+     (sqrt (fun_bnd t n.+1) - default_abs t) /
+     (1 + default_rel t) /
+     (1 + default_rel t))%Re) /\ 
+  (x_bound +
+       1 *
+       e_0 +
+       1 / (1 - rho) *
+       d_mag < sqrt (fun_bnd t n.+1))%Re /\
+  (forall i j, 
+      (Rabs (FT2R (A2_J A i j )) <
+        sqrt (fun_bnd t n.+1))%Re) /\
+  (forall i,
+     (Rabs (FT2R (b i ord0)) +
+     (1 + g t n.+1) *
+     (( x_bound +
+       1 * e_0 +
+       1 / (1 - rho) * d_mag) *
+      (\sum_j
+          Rabs (FT2R (A2_J A i j)))) +
+     g1 t n.+1 (n.+1 - 1)%coq_nat <
+     (bpow Zaux.radix2 (femax t) -
+      default_abs t) / (1 + default_rel t))%Re) /\
+  (forall i,
+    (Rabs (FT2R (A1_inv_J A (inord i) ord0)) *
+     (Rabs (FT2R (b (inord i) ord0)) +
+      (1 + g t n.+1) *
+      (( x_bound +
+        1 * e_0 +
+        1 / (1 - rho) * d_mag) *
+       (\sum_j
+           Rabs (FT2R (A2_J A (inord i) j)))) +
+      g1 t n.+1 (n.+1 - 1)%coq_nat) <
+     (bpow Zaux.radix2 (femax t) -
+      default_abs t) / (1 + default_rel t) /
+     (1 + default_rel t))%Re) /\
+  (1 * (1 + rho) *
+     (e_0 - d_mag * / (1 - rho)) +
+     2 * d_mag * / (1 - rho) +
+     2 *
+     x_bound <
+     (bpow Zaux.radix2 (femax t) -
+      default_abs t) / (1 + default_rel t))%Re.
+
+
+
+
+
+
+
+
 Definition jacobi_preconditions_compute {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
   (* some property of A,b,accuracy holds such that 
@@ -261,7 +333,7 @@ Definition jacobi_preconditions_compute {t: type} {n:nat}
   (** constraint on the dimension **)
   @size_constraint t n /\
   (** constraint on bounds for input **)
-  input_bound A x0 b.
+  input_bound_compute A x0 b.
 
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat): 
