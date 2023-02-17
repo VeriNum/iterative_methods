@@ -2649,6 +2649,7 @@ Lemma residual_bound {t: type} {n:nat}
       is_finite (fprec t) (femax t) (A i i) = true) ->
   (0 < f_error 0 b x0 x A - d_mag / (1 - rho))%Re ->
   forward_error_cond A x0 b ->
+  @size_constraint t n ->
   (Rabs (FT2R (norm2 (rev v_l))) <= 
     INR n.+1 * 
     (Rsqr (vec_inf_norm (FT2R_mat (A1_J A)) * 
@@ -2656,11 +2657,11 @@ Lemma residual_bound {t: type} {n:nat}
         * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat) *
       (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
 Proof.
-intros ? ? ? ? ? ? ? ? ? ? HinvA HfinvA HfA He0 Hcond.
+intros ? ? ? ? ? ? ? ? ? ? HinvA HfinvA HfA He0 Hcond size_cons.
 eapply Rle_trans.
 + apply norm2_vec_inf_norm_rel.
   - intros.
-    pose proof (@residual_is_finite  t n A  b k Hcond).
+    pose proof (@residual_is_finite  t n A  b k Hcond size_cons).
     unfold norm2 in H1. 
     pose proof (@dotprod_finite_implies t).
     specialize (H2 (
@@ -2752,7 +2753,7 @@ eapply Rle_trans.
                      is_finite (fprec t) (femax t)
                        (BMULT t xy.1 xy.2) = true).
             { intros.
-              pose proof (@residual_is_finite  t n A b k Hcond).
+              pose proof (@residual_is_finite  t n A b k Hcond size_cons).
               unfold norm2 in H2.
               pose proof (@dotprod_finite_implies t).
               specialize (H3 (
@@ -2963,7 +2964,7 @@ Lemma jacobi_iteration_bound {t: type} {n : nat} :
 Proof.
 intros.
 unfold jacobi_preconditions_math in H.
-destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [Hfx0 [HfA1_inv [HfA2 Hfb ]]]]]]]]]]].
+destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [Hfx0 [HfA1_inv [HfA2 [Hfb size_cons]]]]]]]]]]]].
 split.
 + unfold acc2. by apply finite_is_finite.
 + exists (k_min A b acc).+1. 
@@ -2972,6 +2973,7 @@ split.
   - intros. apply finite_is_finite.
     apply residual_is_finite.
     unfold forward_error_cond. repeat split; try (by intros). apply Hrho.
+    apply size_cons.
   - unfold BCMP.
     rewrite Bcompare_correct. 
     * rewrite Rcompare_Lt; first by [].
@@ -3025,6 +3027,7 @@ split.
          by intros.
          by intros. rewrite Heqd_mag Heqrho Heqx in He0. apply He0.
          unfold forward_error_cond. repeat split; try (by intros). 
+         apply size_cons.
       ++ apply Rcomplements.Rlt_minus_r.
          rewrite Rmult_comm. 
          apply Rcomplements.Rlt_div_r; 
@@ -3180,6 +3183,7 @@ split.
           -- apply sqrt_pos.
     * apply residual_is_finite.
       unfold forward_error_cond. repeat split; try (by intros). apply Hrho.
+      apply size_cons.
     * by unfold acc2. 
 Qed.
 
