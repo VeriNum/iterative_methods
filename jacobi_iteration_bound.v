@@ -21,51 +21,6 @@ Section WITH_NANS.
 
 Context {NANS: Nans}.
 
-(*
-Definition rho_def  {t: type} {n:nat} (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) :=
-  let A_real := FT2R_mat A in
-  let b_real := FT2R_mat b in  
-  let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
-  let delta := default_rel t in
-  ((((1 + g t n.+1) * (1 + delta) *
-                  g t n.+1 + delta * (1 + g t n.+1) +
-                  g t n.+1) * (1 + delta) + delta) * R +
-                (((1 + g t n.+1) * (1 + delta) *
-                  g t n.+1 + delta * (1 + g t n.+1) +
-                  g t n.+1) * default_abs t +
-                 default_abs t) *
-                matrix_inf_norm (A2_J_real A_real) + R)%Re.
-
-
-Definition d_mag_def {t: type} {n:nat} (A: 'M[ftype t]_n.+1) 
-  (b: 'cV[ftype t]_n.+1) :=
-  let A_real := FT2R_mat A in
-  let b_real := FT2R_mat b in  
-  let x:= mulmx (A_real^-1) b_real in
-  let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
-  let delta := default_rel t in
-  ((g t n.+1 * (1 + delta) + delta) *
-                    ((vec_inf_norm (A1_diag A_real) *
-                      (1 + delta) + default_abs t) *
-                     vec_inf_norm b_real) +
-                    (1 + g t n.+1) * g1 t n.+1 (n.+1 - 1) *
-                    (1 + delta) *
-                    (vec_inf_norm (A1_diag A_real) *
-                     (1 + delta) + default_abs t) +
-                    g1 t n.+1 (n.+1 - 1) +
-                    (vec_inf_norm (A1_diag A_real) * delta +
-                     default_abs t) * vec_inf_norm b_real +
-                    ((((1 + g t n.+1) * (1 + delta) *
-                       g t n.+1 + delta * (1 + g t n.+1) +
-                       g t n.+1) * (1 + delta) + delta) * R +
-                     (((1 + g t n.+1) * (1 + delta) *
-                       g t n.+1 + delta * (1 + g t n.+1) +
-                       g t n.+1) * default_abs t +
-                      default_abs t) *
-                     matrix_inf_norm (A2_J_real A_real)) *
-                    vec_inf_norm (x_fix x b_real A_real))%Re.
-
-*)
 (** As suggested by David:
   ||x|| <= ||D^-1 b || / (1 - rho) 
   [ since ||x || = || (D+ N)^-1 b|| <= ||D^-1 b || / (1 - rho) for rho < 1
@@ -440,21 +395,6 @@ assert (Rabs x = a \/(Rabs x < a)%Re).
 + apply Rabs_def2 in H0. nra.
 Qed.
 
-Lemma bound_1 {t: type} {n:nat}
-  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m: 
-  (m < n.+1)%nat ->
-  (Rabs (FT2R (A (inord m) (inord m))) *
-   Rabs
-     (FT2R
-        (X_m_jacobi k.+1 x0 b A (inord m) ord0) +
-       -
-        FT2R
-          (X_m_jacobi k x0 b A (inord m) ord0)) <
-   (sqrt (fun_bnd t n.+1) - default_abs t) /
-   (1 + default_rel t) / (1 + default_rel t))%Re.
-Admitted.
-
-
 
 Definition forward_error_cond {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) :=
@@ -476,9 +416,135 @@ Definition forward_error_cond {ty} {n:nat}
   (forall i, is_finite (fprec ty) (femax ty)
                           (b i ord0) = true).
 
+Lemma res_xkp1_minus_xk {t: type} {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in  
+  (m < n.+1)%nat ->
+  forward_error_cond A x0 b  ->
+  @size_constraint t n ->
+  (Rabs (FT2R (A (inord m) (inord m))) *
+   Rabs
+     (FT2R
+        (X_m_jacobi k.+1 x0 b A (inord m) ord0) +
+       -
+        FT2R
+          (X_m_jacobi k x0 b A (inord m) ord0)) <
+   (sqrt (fun_bnd t n.+1) - default_abs t) /
+   (1 + default_rel t) / (1 + default_rel t))%Re.
+Proof.
+intros.
+eapply Rle_lt_trans. apply Rmult_le_compat_l.
+apply Rabs_pos. eapply Rle_trans.
+apply Rabs_triang.
+rewrite Rabs_Ropp.
+pose proof (@jacobi_forward_error_bound _ t n).
+assert ((f_error k.+1 b x0 x A <=
+          rho ^ k.+1 * f_error 0 b x0 x A +
+          (1 - rho ^ k.+1) / (1 - rho) * d_mag)%Re).
+{ unfold forward_error_cond in H0.
+  unfold rho_def in H0.
+  apply H2; try (intros; apply H0). 
+  apply H1.
+}
+assert ((f_error k b x0 x A <=
+          rho ^ k * f_error 0 b x0 x A +
+          (1 - rho ^ k) / (1 - rho) * d_mag)%Re).
+{ unfold forward_error_cond in H0.
+  unfold rho_def in H0.
+  apply H2; try (intros; apply H0). 
+} clear H2.
+apply (x_k_bound (@inord n m)) in H3.
+apply (x_k_bound (@inord n m)) in H4.
+eapply Rle_lt_trans.
+apply Rplus_le_compat.
+apply H3. apply H4.
+rewrite -/x.
+rewrite -/rho -/d_mag.
+assert ((vec_inf_norm
+           (x_fix x (FT2R_mat b) (FT2R_mat A)) +
+         rho ^ k.+1 * f_error 0 b x0 x A +
+         (1 - rho ^ k.+1) / (1 - rho) * d_mag +
+         (vec_inf_norm
+            (x_fix x (FT2R_mat b) (FT2R_mat A)) +
+          rho ^ k * f_error 0 b x0 x A +
+          (1 - rho ^ k) / (1 - rho) * d_mag))%Re = 
+       ((rho ^ k.+1 * f_error 0 b x0 x A +
+         (1 - rho ^ k.+1) / (1 - rho) * d_mag + 
+        rho ^ k * f_error 0 b x0 x A +
+          (1 - rho ^ k) / (1 - rho) * d_mag) + 
+        2 * (vec_inf_norm
+              (x_fix x (FT2R_mat b) (FT2R_mat A))))%Re).
+{ nra. } rewrite H2. clear H2.
+remember (f_error 0 b x0 x A) as e_0.
+assert ((rho ^ k.+1 * e_0 +
+                     (1 - rho ^ k.+1) / (1 - rho) * d_mag +
+                     (rho ^ k * e_0 +
+                      (1 - rho ^ k) / (1 - rho) * d_mag))%Re = 
+               ((rho^k.+1 * (1 - rho) * e_0 + (1 - rho^k.+1) * d_mag + 
+                rho^k * (1- rho) * e_0 + (1 - rho^k) * d_mag) * / (1-rho))%Re).
+{ assert ((rho ^ k.+1 * e_0 +
+                     (1 - rho ^ k.+1) / (1 - rho) * d_mag +
+                     (rho ^ k * e_0 +
+                      (1 - rho ^ k) / (1 - rho) * d_mag))%Re = 
+                  ((rho ^ k.+1 * e_0 * (1 - rho)) * / (1-rho) +
+                     ((1 - rho ^ k.+1) * d_mag) * / (1 - rho)  +
+                     ((rho ^ k * e_0 * (1 - rho)) * / (1- rho)  +
+                      ((1 - rho ^ k) * d_mag) * / (1 - rho)))%Re).
+  { assert (((rho ^ k.+1 * e_0 * (1 - rho)) * / (1-rho))%Re = 
+                     ((rho ^k.+1 * e_0) * ((1 - rho) * / (1-rho)))%Re).
+    { nra. } rewrite H2. rewrite Rinv_r; last by nra.
+    rewrite Rmult_1_r.
+    assert (((rho ^ k * e_0 * (1 - rho)) * / (1- rho))%Re = 
+                     ( (rho^k * e_0) * ((1 - rho) * / (1- rho)))%Re).
+    { nra. } rewrite H5. rewrite Rinv_r; nra.
+  } rewrite H2. clear H2. nra.
+} 
+assert ((rho ^ k.+1 * e_0 +
+          (1 - rho ^ k.+1) / (1 - rho) *
+          d_mag +
+          (rho ^ k * e_0 +
+           (1 - rho ^ k) / (1 - rho) *
+           d_mag))%Re = 
+        (rho ^ k.+1 * e_0 +
+           (1 - rho ^ k.+1) / (1 - rho) * d_mag +
+           rho ^ k * e_0 +
+           (1 - rho ^ k) / (1 - rho) * d_mag)%Re) by nra.
+rewrite -H5. clear H5.
+rewrite H2. clear H2.
+assert ((rho ^ k.+1 * (1 - rho) * e_0 +
+                  (1 - rho ^ k.+1) * d_mag +
+                  rho ^ k * (1 - rho) * e_0 +
+                  (1 - rho ^ k) * d_mag)%Re = 
+                (rho ^ k * (1+ rho) * (1 - rho) * e_0 + 
+                  2* d_mag  - rho^k * (1 + rho) * d_mag)%Re).
+{ simpl. nra. } rewrite H2. clear H2.
+assert ((rho ^ k * (1 + rho) * (1 - rho) * e_0 +
+                  2 * d_mag - rho ^ k * (1 + rho) * d_mag)%Re = 
+                ((rho ^ k * (1 + rho) * ((1-rho) * e_0 - d_mag)) + 2 * d_mag)%Re).
+{ nra. } rewrite H2. clear H2.
+rewrite Rmult_plus_distr_r.
+assert ((rho ^ k * (1 + rho) *
+                    ((1 - rho) * e_0 - d_mag) * / (1 - rho))%Re =
+                (rho ^ k * (1 + rho) * 
+                (e_0 * ( (1 - rho) * / (1 - rho)) - d_mag * /(1 - rho)))%Re).
+{ nra. } rewrite H2. clear H2. rewrite Rinv_r; last by nra.
+rewrite Rmult_1_r.
+rewrite Heqe_0.
+ 
+
+
+Admitted.
+
+
+
+
 Lemma bound_5 {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
-   let A_real := FT2R_mat A in
+  let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x:= A_real^-1 *m b_real in
   let rho := rho_def A b in 
