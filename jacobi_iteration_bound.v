@@ -1771,12 +1771,12 @@ eapply Rle_trans.
                           (vec_to_list_float n.+1
                              (X_m_jacobi k.+1 x0 b A -f
                               X_m_jacobi k x0 b A))) as r_l.
-              apply in_rev  in H1.
+              apply in_rev  in H0.
               assert (exists m, (m < length (rev r_l))%coq_nat /\
                                 nth m (rev r_l) (Zconst t 0, Zconst t 0) = xy).
-              { by apply In_nth. } destruct H5 as [m [Hm Hnth]].
-              unfold residual_math in H4.
-              specialize (H4 (nth m (rev
+              { by apply In_nth. } destruct H4 as [m [Hm Hnth]].
+              unfold residual_math in H3.
+              specialize (H3 (nth m (rev
                           (vec_to_list_float n.+1
                              (diag_vector_mult 
                                 (A1_J A)
@@ -1801,31 +1801,31 @@ eapply Rle_trans.
                 rewrite length_veclist . lia. rewrite Heqr_l in Hm.
                 rewrite rev_length combine_length !length_veclist Nat.min_id in Hm.
                 by rewrite !length_veclist.
-              } specialize (H4 H5).
-              rewrite rev_nth in H4.
-              rewrite length_veclist in H4.
+              } specialize (H3 H4).
+              rewrite rev_nth in H3.
+              rewrite length_veclist in H3.
               assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat).
-              { lia. } rewrite H6 in H4.
-              rewrite nth_vec_to_list_float in H4.
-              + rewrite !mxE in H4.
-                rewrite nth_vec_to_list_float in H4; last 
+              { lia. } rewrite H5 in H3.
+              rewrite nth_vec_to_list_float in H3.
+              + rewrite !mxE in H3.
+                rewrite nth_vec_to_list_float in H3; last 
                 by rewrite inordK;
                  rewrite   Heqr_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
                   apply /ssrnat.ltP.
-                rewrite nth_vec_to_list_float in H4; last 
+                rewrite nth_vec_to_list_float in H3; last 
                 by rewrite inordK;
                  rewrite   Heqr_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
                   apply /ssrnat.ltP.
-                rewrite inord_val in H4. 
+                rewrite inord_val in H3. 
                 assert (is_finite _ _ (A1_J A (inord m) ord0) = true /\
                         is_finite _ _  ((X_m_jacobi k.+1 x0 b A -f
                                           X_m_jacobi k x0 b A) (inord m) ord0) = true).
-                { apply bmult_overflow_implies  in H4.
-                  split; try apply H4.
+                { apply bmult_overflow_implies  in H3.
+                  split; try apply H3.
                 }  rewrite Heqr_l in Hnth. rewrite rev_nth in Hnth.
                 rewrite combine_length !length_veclist Nat.min_id in Hnth.
                 assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat).
-                { lia. } rewrite H8 in Hnth. rewrite combine_nth in Hnth.
+                { lia. } rewrite H7 in Hnth. rewrite combine_nth in Hnth.
                repeat (rewrite nth_vec_to_list_float in Hnth; last 
                 by rewrite   Heqr_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
                   apply /ssrnat.ltP).
@@ -1841,15 +1841,14 @@ eapply Rle_trans.
                     apply pair_equal_spec in Hnth. 
                     destruct Hnth as [Hnth1 Hnth2].
                     by rewrite Hnth2.
-                  } rewrite H9 H10.
-                  repeat split; try apply H7; try apply H4.
+                  } rewrite H8 H9. split. apply H6. split. apply H6. apply H3.
                - by rewrite !length_veclist.
                - by rewrite Heqr_l rev_length in Hm. 
              + by rewrite   Heqr_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
                   apply /ssrnat.ltP.
              + rewrite Heqr_l rev_length combine_length !length_veclist Nat.min_id in Hm.
                by rewrite length_veclist.
-           (** Implied by finiteness of the residual **) } specialize (H0 H1).
+           (** Implied by finiteness of the residual **) } specialize (H H0).
             assert ((vec_inf_norm
                      (FT2R_mat
                         (diag_vector_mult (A1_J A)
