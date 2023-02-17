@@ -175,6 +175,7 @@ Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let x:= mulmx (A_real^-1) b_real in
   let R_def :=  (vec_inf_norm (A1_diag A_real) *
                 matrix_inf_norm (A2_J_real A_real))%Re in
+  (R_def < 1)%Re ->
   (@f_error _ _ _ 0 b x0 x A  <=
     vec_inf_norm (FT2R_mat x0) + 
     vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
@@ -350,7 +351,7 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (** constraint on the dimension **)
   @size_constraint t n /\
   (** constraint on bounds for input **)
-  input_bound_compute A x0 b.
+  input_bound_Rcompute A x0 b.
 
 
 
