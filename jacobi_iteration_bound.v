@@ -1455,9 +1455,9 @@ apply Rle_trans with
       { apply x_fixpoint.
         + unfold x. rewrite mulmxA.
           assert (FT2R_mat A *m A_real^-1 = 1).
-          { fold A_real. by rewrite mulmxV . }
+          { fold A_real.  rewrite mulmxV . by []. apply Hcond. }
           rewrite H2. by rewrite mul1mx /b_real.
-        + intros. unfold A_real. rewrite !mxE. by apply BDIV_FT2R_sep_zero.
+        + intros. unfold A_real. rewrite !mxE. apply BDIV_FT2R_sep_zero; apply Hcond.
       }  rewrite H2.
       assert (vec_inf_norm
                  (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
@@ -1469,7 +1469,7 @@ apply Rle_trans with
       { by rewrite /f_error. } rewrite H3 H4.
       pose proof (@jacobi_forward_error_bound _ t n A b).
       assert (forall i : 'I_n.+1,
-                is_finite (fprec t) (femax t) (A i i) = true) by (intros; apply HfA).
+                is_finite (fprec t) (femax t) (A i i) = true) by apply Hcond.
       assert ((rho < 1)%Re) by apply Hrho.
       assert (FT2R_mat A \in unitmx). 
       { by rewrite /A_real in HAinv. }
