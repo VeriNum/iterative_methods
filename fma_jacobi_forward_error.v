@@ -800,62 +800,6 @@ apply Rle_trans with
 Qed.
 
 Definition input_bound {t} {n:nat} 
-  (A: 'M[ftype t]_n.+1) (x0 b: 'cV[ftype t]_n.+1) k:=
-  let A_real := FT2R_mat A in
-  let b_real := FT2R_mat b in
-  let x:= A_real^-1 *m b_real in
-  let rho := rho_def A b in 
-  let d_mag := d_mag_def A b in
-  (forall i,
-    (Rabs (FT2R (A i i)) *
-     (rho ^ k * (1 + rho) *
-      (f_error 0 b x0 x A -
-       d_mag * / (1 - rho)) +
-      2 * d_mag * / (1 - rho) +
-      2 *
-      vec_inf_norm
-        (x_fix x (FT2R_mat b) (FT2R_mat A))) <
-     (sqrt (fun_bnd t n.+1) - default_abs t) /
-     (1 + default_rel t) /
-     (1 + default_rel t))%Re) /\ 
-  (vec_inf_norm
-   (x_fix x (FT2R_mat b) (FT2R_mat A)) +
-       rho ^ k *
-       f_error 0 b x0 x A +
-       (1 - rho ^ k) / (1 - rho) *
-       d_mag < sqrt (fun_bnd t n.+1))%Re /\
-  (forall i j, 
-      (Rabs (FT2R (A2_J A i j )) <
-        sqrt (fun_bnd t n.+1))%Re) /\
-  (forall i,
-     (Rabs (FT2R (b i ord0)) +
-     (1 + g t n.+1) *
-     ((vec_inf_norm
-         (x_fix x (FT2R_mat b) (FT2R_mat A)) +
-       rho ^ k * f_error 0 b x0 x A +
-       (1 - rho ^ k) / (1 - rho) * d_mag) *
-      (\sum_j
-          Rabs (FT2R (A2_J A i j)))) +
-     g1 t n.+1 (n.+1 - 1)%coq_nat <
-     (bpow Zaux.radix2 (femax t) -
-      default_abs t) / (1 + default_rel t))%Re) /\
-  (forall i,
-    (Rabs (FT2R (A1_inv_J A (inord i) ord0)) *
-     (Rabs (FT2R (b (inord i) ord0)) +
-      (1 + g t n.+1) *
-      ((vec_inf_norm
-          (x_fix x (FT2R_mat b) (FT2R_mat A)) +
-        rho ^ k * f_error 0 b x0 x A +
-        (1 - rho ^ k) / (1 - rho) * d_mag) *
-       (\sum_j
-           Rabs (FT2R (A2_J A (inord i) j)))) +
-      g1 t n.+1 (n.+1 - 1)%coq_nat) <
-     (bpow Zaux.radix2 (femax t) -
-      default_abs t) / (1 + default_rel t) /
-     (1 + default_rel t))%Re).
-
-
-Definition input_bound_alt {t} {n:nat} 
   (A: 'M[ftype t]_n.+1) (x0 b: 'cV[ftype t]_n.+1):=
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -920,7 +864,7 @@ Lemma bound_1  {t: type} {n:nat}
   let x:= A_real^-1 *m b_real in
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in 
-  input_bound_alt A x0 b ->
+  input_bound A x0 b ->
   (rho < 1)%Re ->
   (0 < f_error 0 b x0 x A -
          d_mag_def A b * / (1 - rho_def A b))%Re ->
@@ -975,7 +919,7 @@ Lemma  bound_2 {ty} {n:nat}
   let x:= A_real^-1 *m b_real in
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in 
-  input_bound_alt A x0 b ->
+  input_bound A x0 b ->
   (rho < 1)%Re ->
   (vec_inf_norm
    (x_fix x (FT2R_mat b) (FT2R_mat A)) +
@@ -1024,7 +968,7 @@ Qed.
 
 Lemma bound_3 {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1):
-  input_bound_alt A x0 b ->
+  input_bound A x0 b ->
   forall i j, 
   (Rabs (FT2R (A2_J A i j )) <
     sqrt (fun_bnd ty n.+1))%Re.
@@ -1042,7 +986,7 @@ Lemma bound_4 {ty} {n:nat}
   let x:= A_real^-1 *m b_real in
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in 
-  input_bound_alt A x0 b ->
+  input_bound A x0 b ->
   (rho < 1)%Re ->
   (Rabs (FT2R (b i ord0)) +
    (1 + g ty n.+1) *
@@ -1109,7 +1053,7 @@ Lemma bound_5 {ty} {n:nat}
   let x:= A_real^-1 *m b_real in
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in 
-  input_bound_alt A x0 b  ->
+  input_bound A x0 b  ->
   (rho < 1)%Re ->
   (Rabs (FT2R (A1_inv_J A (inord i) ord0)) *
    (Rabs (FT2R (b (inord i) ord0)) +
@@ -1148,12 +1092,32 @@ apply Rle_lt_trans with
               Rabs
                 (FT2R (A2_J A (inord i) j)))) +
          g1 ty n.+1 (n.+1 - 1)%coq_nat))%Re.
-
-
-
-
-
-intros. apply H. Qed.
++ apply Rmult_le_compat_l. apply Rabs_pos.
+  apply Rplus_le_compat_r. apply Rplus_le_compat_l.
+  apply Rmult_le_compat_l.
+  apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+  apply Rmult_le_compat_r.
+  - apply /RleP. apply big_ge_0_ex_abstract.
+    intros. apply /RleP. apply Rabs_pos.
+  - unfold x, A_real, b_real. 
+    apply Rplus_le_compat.
+    * apply Rplus_le_compat_l.
+      apply Rmult_le_compat_r. unfold f_error.
+      apply /RleP. apply vec_norm_pd.
+      assert ( 1%Re = (1 ^ k)%Re) by (rewrite pow1; nra).
+      rewrite H. apply pow_incr.
+      split. by apply rho_ge_0.
+      apply Rlt_le. apply H0.
+    * apply Rmult_le_compat_r.
+      apply d_mag_ge_0. apply Rmult_le_compat_r.
+      apply Rlt_le. apply Rinv_0_lt_compat.
+      apply Rlt_Rminus. apply H0.
+      apply Rcomplements.Rle_minus_l.
+      assert (forall a b:R, (0 <= b)%Re -> (a <= a + b)%Re).
+      { intros. nra. } apply H.
+      apply pow_le. by apply rho_ge_0.
++ apply bnd5.
+Qed.
 
 
 (** State the forward error theorem **)
