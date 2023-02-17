@@ -434,11 +434,10 @@ repeat split.
   - apply Rplus_le_compat.
     * rewrite Rmult_1_l. apply Rmult_le_compat_l.
       apply Rplus_le_le_0_compat. nra. by apply rho_ge_0.
-      
-      
-
-
-admit.
+      apply Rplus_le_compat.
+      ++ apply f_error0_bnd. auto. admit.
+      ++ admit. 
+         (** RHS should be 0 **)
     * apply Rmult_le_compat_r.
       apply Rlt_le. apply Rinv_0_lt_compat. 
       apply Rlt_Rminus.
@@ -447,13 +446,6 @@ admit.
       admit.
   - apply Rmult_le_compat_l. nra.
     apply x_bound_exists. admit.
-
-
-
-
-
-
-admit.
 + admit.
 + apply Hinp.
 + admit.
