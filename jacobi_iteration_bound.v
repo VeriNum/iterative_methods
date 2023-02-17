@@ -486,7 +486,15 @@ repeat split.
     apply Rlt_Rminus.
     by apply diagonal_dominance_implies_rho_lt_1.
     admit.
-+ admit.
++ intros.
+  destruct Hinp as [_ [_ [_ [_ [bnd5 _]]]]].
+  specialize (bnd5 i).
+  
+
+
+
+
+ admit.
 + admit.`
 Admitted.
 
