@@ -1764,6 +1764,7 @@ Lemma is_finite_xkp1_minus_xk {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
    (m < n.+1)%coq_nat ->
   forward_error_cond A x0 b ->
+  (rho_def A b < 1)%Re ->
   is_finite (fprec t) (femax t)
                (BPLUS t
                   (X_m_jacobi k.+1 x0 b A
@@ -1772,7 +1773,7 @@ Lemma is_finite_xkp1_minus_xk {t: type} {n:nat}
                      (X_m_jacobi k x0 b A
                         (inord m) ord0))) = true.
 Proof.
-intros ? Hcond.
+intros ? Hcond Hrho.
 apply BPLUS_no_overflow_is_finite; try rewrite ?is_finite_Bopp;
 try (pose proof (@jacobi_forward_error_bound _ t n);
   unfold forward_error_cond in Hcond;
