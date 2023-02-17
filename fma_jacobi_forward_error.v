@@ -657,7 +657,12 @@ Lemma x_k_bound {ty} {n:nat}
     (Rabs (FT2R (X_m_jacobi k x0 b A i ord0)) <= 1)%Re.
 Proof.
 intros.
-
+rewrite [in X in (X <= _)%Re]/f_error in H.
+apply Rle_trans with 
+(vec_inf_norm (x_fix x (FT2R_mat b) (FT2R_mat A)) + 
+  rho ^ k * f_error 0 b x0 x A +
+     (1 - rho ^ k) / (1 - rho) * d_mag)%Re.
++ 
 
 
 
