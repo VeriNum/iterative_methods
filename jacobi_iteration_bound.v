@@ -429,7 +429,21 @@ repeat split.
 + intros. unfold input_bound_Rcompute in Hinp.
   destruct Hinp as [bnd1 _]. specialize (bnd1 i).
   eapply Rle_lt_trans; last by apply bnd1.
-  
+  apply Rmult_le_compat_l. apply Rabs_pos.
+  apply Rplus_le_compat.
+  - apply Rplus_le_compat.
+    * 
+
+
+admit.
+    * apply Rmult_le_compat_r.
+      apply Rlt_le. apply Rinv_0_lt_compat. 
+      apply Rlt_Rminus.
+      by apply diagonal_dominance_implies_rho_lt_1.
+      apply Rmult_le_compat_l. nra.
+      admit.
+  - apply Rmult_le_compat_l. nra.
+    apply x_bound_exists. admit.
 
 
 
