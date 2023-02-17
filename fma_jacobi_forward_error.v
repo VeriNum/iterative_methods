@@ -1450,7 +1450,7 @@ induction k.
                apply Rmult_le_compat_r. apply Rabs_pos.
                apply x_k_bound. apply IHk.
             ++ apply Rle_refl.
-            ++ apply bound_4.
+            ++ by apply bound_4.
     }
     apply BMULT_no_overflow_is_finite.
     + apply Ha1_inv.
@@ -1644,7 +1644,7 @@ induction k.
             (rho * ((1 - rho ^ k) / (1 - rho)) + (1 - rho) * / (1 - rho))%Re).
     { assert ((rho < 1)%Re).
       { unfold rho. apply H. }
-      rewrite Rinv_r; nra. } rewrite H2. clear H2.
+       rewrite Rinv_r; nra. } rewrite H2. clear H2.
     assert ((rho * ((1 - rho ^ k) / (1 - rho)) +
                   (1 - rho) * / (1 - rho))%Re = 
              (( (rho * (1 - rho ^ k)) * / (1 - rho))%Re + 
@@ -2568,7 +2568,7 @@ induction k.
  - apply Rplus_le_compat_r. apply Rmult_le_compat_l.
     * by apply rho_ge_0.
     * nra.
-Admitted.
+Qed.
  
 End WITHNANS.
 
