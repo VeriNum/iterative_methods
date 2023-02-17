@@ -463,7 +463,27 @@ repeat split.
     by apply diagonal_dominance_implies_rho_lt_1.
     admit.
 + apply Hinp.
-+ admit.
++ intros.
+  destruct Hinp as [_ [_ [_ [bnd4 _]]]].
+  specialize (bnd4 i).
+  eapply Rle_lt_trans; last by apply bnd4.
+  apply Rplus_le_compat_r.
+  apply Rplus_le_compat_l.
+  apply Rmult_le_compat_l.
+  apply Rplus_le_le_0_compat. nra. apply g_pos.
+  apply Rmult_le_compat_r.
+  apply /RleP. apply big_ge_0_ex_abstract.
+  intros. apply /RleP. apply Rabs_pos.
+  apply Rplus_le_compat.
+  - apply Rplus_le_compat.
+    * apply x_bound_exists. admit.
+    * rewrite !Rmult_1_l. apply f_error0_bnd. auto. admit. 
+  - apply Rmult_le_compat_l.
+    
+
+
+
+ admit.
 + admit.
 + admit.`
 Admitted.
