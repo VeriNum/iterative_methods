@@ -366,7 +366,8 @@ Admitted.
 *)
 
 (** finiteness of dot product **)
-Lemma dotprod_finite {t: type} (v : vector t):
+Lemma dotprod_finite {t: type} (v : vector t)
+(Hg1: (g1 t ((length v).+1 + 1)%coq_nat (length v).+1 <= fmax t)%Re):
 (forall xy : ftype t,
   In xy (rev v) ->
   is_finite (fprec t) (femax t) xy = true /\
@@ -387,7 +388,7 @@ rewrite H2 in H1. specialize (H0 H1).
 rewrite -rev_combine in H0; last by [].
 rewrite rev_length combine_length Nat.min_id in H0.
 apply H0.
-apply g1_le_fmax.
+apply Hg1.
 intros.
 repeat split;
 try (specialize (H x.1); apply in_rev in H3;
