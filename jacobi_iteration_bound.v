@@ -882,19 +882,26 @@ Qed.
 
 Lemma residual_is_finite {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) (k:nat):
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in 
   let x0 := \col_(j < n.+1) (Zconst t 0) in 
   let resid := residual_math A x0 b in
   forward_error_cond A x0 b ->
+  ((0 < f_error 0 b x0 x A - d_mag * / (1 - rho))%Re) ->
   is_finite (fprec t) (femax t)
     (norm2
        (rev
           (vec_to_list_float n.+1 (resid k)))) = true.
 Proof.
-intros ? ? Hcond .
+intros ? ? ? ? ? ? ? Hcond Hf0.
 unfold norm2. apply dotprod_finite.
 rewrite rev_length length_veclist.
-apply g1_constraint. unfold forward_error_cond in Hcond.
+apply g1_constraint_Sn. 
 apply Hcond.
+intros.
 repeat split.
 + apply in_rev in H.
   pose proof (@In_nth _ (rev
