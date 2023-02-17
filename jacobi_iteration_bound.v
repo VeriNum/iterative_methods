@@ -1754,11 +1754,10 @@ assert ((rho ^ k * (1 + rho) *
                 (rho ^ k * (1 + rho) * 
                 (e_0 * ( (1 - rho) * / (1 - rho)) - d_mag * /(1 - rho)))%Re).
 { nra. } rewrite H2. clear H2. rewrite Rinv_r; last by nra.
-rewrite Rmult_1_r. 
-
-
-
-Admitted.
+rewrite Rmult_1_r.
+rewrite Heqe_0.
+apply bound_5.
+Qed.
 
 
 Lemma is_finite_xkp1_minus_xk {t: type} {n:nat}
