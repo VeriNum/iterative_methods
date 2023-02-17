@@ -1079,7 +1079,7 @@ Lemma bound_5 {ty} {n:nat}
 Proof. 
 intros.
 unfold input_bound in H.
-destruct H as [_ [_ [_ [_ bnd5]]]].
+destruct H as [_ [_ [_ [_ [bnd5 H]]]]].
 apply Rle_lt_trans with
 (Rabs(FT2R (A1_inv_J A (inord i) ord0)) *
         (Rabs (FT2R (b (inord i) ord0)) +
@@ -1113,7 +1113,7 @@ apply Rle_lt_trans with
       apply Rmult_le_compat_r. unfold f_error.
       apply /RleP. apply vec_norm_pd.
       assert ( 1%Re = (1 ^ k)%Re) by (rewrite pow1; nra).
-      rewrite H. apply pow_incr.
+      rewrite H1. apply pow_incr.
       split. by apply rho_ge_0.
       apply Rlt_le. apply H0.
     * apply Rmult_le_compat_r.
@@ -1122,7 +1122,7 @@ apply Rle_lt_trans with
       apply Rlt_Rminus. apply H0.
       apply Rcomplements.Rle_minus_l.
       assert (forall a b:R, (0 <= b)%Re -> (a <= a + b)%Re).
-      { intros. nra. } apply H.
+      { intros. nra. } apply H1.
       apply pow_le. by apply rho_ge_0.
 + apply bnd5.
 Qed.
