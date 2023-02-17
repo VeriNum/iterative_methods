@@ -1283,7 +1283,7 @@ induction k.
         assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat) by lia.
         rewrite H5 in H52. rewrite nth_vec_to_list_float  in H52.
         - rewrite mxE in H52. rewrite mxE in H52. rewrite -H52. 
-          apply bound_3.
+          by apply bound_3 with x0 b.
         - rewrite rev_length length_veclist in H51. by apply /ssrnat.ltP. 
         - rewrite rev_length in H51. apply H51.
       + destruct x1. simpl. apply in_combine_r in H4.
@@ -1299,7 +1299,7 @@ induction k.
           destruct IHk as [IHk1 IHk2]. 
           apply (x_k_bound (@inord n m)) in IHk2.
           eapply Rle_lt_trans.
-          apply IHk2. apply bound_2.
+          apply IHk2. by apply bound_2.
         - rewrite rev_length length_veclist in H51. by apply /ssrnat.ltP. 
         - rewrite rev_length in H51. apply H51.
     }
@@ -1628,7 +1628,7 @@ induction k.
                apply Rmult_le_compat_r. apply Rabs_pos.
                apply x_k_bound. apply IHk.
             ++ apply Rle_refl.
-            ++ apply bound_5.
+            ++ by apply bound_5.
    - apply Hb.
    - rewrite is_finite_Bopp. rewrite mxE. apply H2.
    - by apply Bminus_bplus_opp_implies .
@@ -1642,7 +1642,9 @@ induction k.
            (rho * ((1 - rho ^ k) / (1 - rho)) + 1)%Re).
   { assert ((rho * ((1 - rho ^ k) / (1 - rho)) + 1)%Re = 
             (rho * ((1 - rho ^ k) / (1 - rho)) + (1 - rho) * / (1 - rho))%Re).
-    { rewrite Rinv_r; nra. } rewrite H2. clear H2.
+    { assert ((rho < 1)%Re).
+      { unfold rho. apply H. }
+      rewrite Rinv_r; nra. } rewrite H2. clear H2.
     assert ((rho * ((1 - rho ^ k) / (1 - rho)) +
                   (1 - rho) * / (1 - rho))%Re = 
              (( (rho * (1 - rho ^ k)) * / (1 - rho))%Re + 
