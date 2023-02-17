@@ -372,14 +372,23 @@ repeat split.
 + apply Hrho.
 + apply Hrho.
 + by apply diagonal_dominance_implies_invertibility.
-+
-
-
-
-
-
-
-
++ apply Hfdiv.
++ admit.
++ apply Hfacc.
++ admit.
++ admit.
++ apply Hfx0.
++ apply Ha1_inv.
++ apply HfA2.
++ apply Hfb.
++ apply size_cons.
++ apply size_cons.
++ admit.
++ admit.
++ apply Hinp.
++ admit.
++ admit.
++ admit.
 Admitted.
 
 
