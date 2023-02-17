@@ -1150,7 +1150,7 @@ Definition forward_error_cond {ty} {n:nat}
   input_bound A x0 b.
 
 (** State the forward error theorem **)
-Theorem jacobi_forward_error_bound {ty} {n:nat} 
+Theorem jacobi_forward_error_bound_aux {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -2549,6 +2549,24 @@ induction k.
  - apply Rplus_le_compat_r. apply Rmult_le_compat_l.
     * by apply rho_ge_0.
     * nra.
+Qed.
+
+
+Theorem jacobi_forward_error_bound {ty} {n:nat} 
+  (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in 
+  forall x0: 'cV[ftype ty]_n.+1,
+  forward_error_cond A x0 b ->
+  (forall k:nat, 
+   (forall i, is_finite _ _ (X_m_jacobi k x0 b A i ord0) = true) /\
+   (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re).
+Proof.
+intros.
+by apply jacobi_forward_error_bound_aux.
 Qed.
  
 End WITHNANS.                  
