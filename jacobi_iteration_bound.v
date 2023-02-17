@@ -1307,17 +1307,12 @@ Lemma vec_succ_err {t: type} {n:nat}
   let b_real := FT2R_mat b in
   let x:= mulmx (A_real^-1) b_real in
   let e_0 := f_error 0 b x0 x A in
-  (rho < 1)%Re ->
-  A_real \in unitmx ->
-  (forall i, is_finite (fprec t) (femax t)
-              (BDIV t (Zconst t 1) (A i i)) = true) ->
-  (forall i, is_finite (fprec t) (femax t) (A i i) = true) ->
   forward_error_cond A x0 b ->
   ((0 < f_error 0 b x0 x A - d_mag * / (1 - rho))%Re) ->
   (vec_inf_norm (FT2R_mat ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A))) <=
     (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))%Re.
 Proof.
-intros ? ? ? ? ? ?  ? Hrho HAinv HfinvA HfA Hcond Hf0.
+intros ? ? ? ? ? ?  ?  Hcond Hf0.
 pose proof (@vec_float_sub_1 _ t n).
 specialize (H (X_m_jacobi k.+1 x0 b A) (X_m_jacobi k x0 b A)).
 assert (forall xy : ftype t * ftype t,
@@ -1483,7 +1478,7 @@ apply Rle_trans with
                 (BDIV t (Zconst t 1) (A i i)) = true) by (intros; apply HfinvA).
       unfold forward_error_cond in Hcond.
       unfold rho_def in Hcond. 
-      destruct Hcond as [HfA1 [Hrho_gt_1 [HinvA1 [Hdiv1 [Hfx01 [HfA1_inv [HfA2 Hfb]]]]]]].
+      destruct Hcond as [HfA1 [Hrho_gt_1 [HinvA1 [Hdiv1 [Hfx01 [HfA1_inv [HfA2 [Hfb [size_cons Hinp]]]]]]]]].
       specialize (H5 H6 H7 H8 H9 x0 Hfx01 HfA1_inv HfA2 Hfb).
      assert ((f_error k.+1 b x0 x A <= rho^k.+1 * (f_error 0 b x0 x A) + 
                     ((1 - rho^k.+1) / (1 - rho))* d_mag)%Re).
