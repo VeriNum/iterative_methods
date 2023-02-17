@@ -288,6 +288,12 @@ Lemma diagonal_dominance_implies_invertibility {t} {n:nat}
   (FT2R_mat A) \in unitmx.
 Admitted.
 
+Lemma diagonal_dominance_implies_rho_lt_1 {t} {n:nat} 
+  (A: 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1):
+  strict_diagonal_dominance A ->
+  (rho_def A b < 1)%Re.
+Admitted.
+
 
 (** Rcompute **)
 Definition jacobi_preconditions_compute {t: type} {n:nat}
@@ -309,8 +315,8 @@ Definition jacobi_preconditions_compute {t: type} {n:nat}
   (forall i j, Binary.is_finite _ _ (A i j) = true) /\
   (** constant for the contraction mapping **)
   (0 < rho /\ rho < 1)%Re /\
-  (** Invertibility of A **)
-  A_real \in unitmx /\
+  (** diagonal dominance of A **)
+  strict_diagonal_dominance A /\
   (** Finiteness of the inverse of diagonal elements of A **)
   (forall i : 'I_n.+1,
     Binary.is_finite (fprec t) (femax t)
@@ -347,11 +353,6 @@ Definition jacobi_preconditions_compute {t: type} {n:nat}
   input_bound_compute A x0 b.
 
 
-Locate finite.
-Check finite.
-About finite.
-Search finite.
-Print rho_def.
 
 (** g  g1  rho d_mag : what do they mean intuitively **)
 
