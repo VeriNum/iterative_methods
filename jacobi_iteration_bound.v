@@ -366,7 +366,13 @@ Proof.
 intros.
 unfold jacobi_preconditions_Rcompute in H.
 destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [Ha1_inv [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]]].
-
+unfold jacobi_preconditions_math.
+repeat split.
++ apply Hfa.
++ apply Hrho.
++ apply Hrho.
++ by apply diagonal_dominance_implies_invertibility.
++
 
 
 
