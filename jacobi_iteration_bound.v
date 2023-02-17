@@ -1680,15 +1680,36 @@ apply Rle_lt_trans with
     rewrite [in X in (_ <= X)%Re]H.
     replace (1 /  (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re with
     (/ (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re by nra.
-    
+    apply Rlt_le. apply Rinv_lt_contravar.
+    * rewrite Rmult_1_l. 
+      apply Rplus_lt_le_0_compat; try nra.
+      apply Rmult_le_pos. apply pos_INR.
+      apply Rplus_le_le_0_compat. apply g_pos.
+      nra.
+    * assert ((0 <  INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1))%Re).
+      { apply Rmult_lt_0_compat. apply lt_0_INR. lia.
+        apply Rplus_le_lt_0_compat. apply g_pos. nra.
+      } nra.
++ unfold fmax. 
+  admit.
 
+Admitted.
   
+
+Lemma fun_bnd_gt_1 {t} {n:nat}:
+  (1 < fun_bnd t n.+1)%Re.
+Admitted.
 
 
 Lemma sqrt_fun_bnd_lt_fmax {t} {n:nat}:
   (sqrt (fun_bnd t n.+1) <
         bpow Zaux.radix2 (femax t))%Re.
-Admitted.
+Proof.
+eapply Rlt_trans.
+apply sqrt_less_alt.
++ apply fun_bnd_gt_1.
++ apply fun_bnd_lt_fmax.
+Qed.
 
 
 Lemma is_finite_Bmult_res {t: type} {n:nat}
