@@ -333,7 +333,7 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (** Gamma is finite **)
   Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
   (** constraint on k **)
-  (k_min A b accuracy < k)%coq_nat /\
+  (k_min_alt A b accuracy < k)%coq_nat /\
   (** lower bound on the initial error **)
   (0 < e_0 - d_mag / (1 - rho))%Re /\
   (** finiteness of x0 **)
@@ -362,6 +362,18 @@ Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat): 
   jacobi_preconditions_Rcompute A b accuracy k ->
   jacobi_preconditions_math A b accuracy k.
+Proof.
+intros.
+unfold jacobi_preconditions_Rcompute in H.
+destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [Ha1_inv [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]]].
+
+
+
+
+
+
+
+
 Admitted.
 
 
