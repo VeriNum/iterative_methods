@@ -151,13 +151,20 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
 
 Print f_error.
 Print rho_def.
-Lemma x_bound_exists:
+
+
+Lemma x_bound_exists {t} {n:nat}
+  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
+  let x := A_real^-1 *m b_real in
   let x1 := x_fix x b_real A_real in
   let R :=  (vec_inf_norm (A1_diag A_real) *
                 matrix_inf_norm (A2_J_real A_real))%Re in
-  
+ (vec_inf_norm x1 <= 
+    vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
+    (1 - R))%Re.
+Admitted.
 
 
 
