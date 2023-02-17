@@ -147,6 +147,21 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
 
 (** Use: lower case gamma **)
 
+(** Statement for bound on ||x|| **)
+
+Print f_error.
+Print rho_def.
+Lemma x_bound_exists:
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x1 := x_fix x b_real A_real in
+  let R :=  (vec_inf_norm (A1_diag A_real) *
+                matrix_inf_norm (A2_J_real A_real))%Re in
+  
+
+
+
+
 Definition jacobi_preconditions {t: type}
   (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
   (* some property of A,b,accuracy holds such that 
@@ -2288,5 +2303,3 @@ Qed.
 
 
 End WITH_NANS.
-
-
