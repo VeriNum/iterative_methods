@@ -510,13 +510,28 @@ repeat split.
     apply Rlt_Rminus.
     by apply diagonal_dominance_implies_rho_lt_1.
     admit.
-
-
-
-
-
- admit.
-+ admit.`
++ intros.
+  destruct Hinp as [_ [_ [_ [_ [_ bnd6]]]]].
+  eapply Rle_lt_trans; last by apply bnd6.
+  apply Rplus_le_compat.
+  - apply Rplus_le_compat.
+    * rewrite Rmult_1_l. apply Rmult_le_compat_l.
+      apply Rplus_le_le_0_compat. nra. by apply rho_ge_0.
+      apply Rplus_le_compat.
+      ++ apply f_error0_bnd. auto. admit.
+      ++ admit.
+         (** replace RHS by 0 **)
+    * apply Rmult_le_compat_r.
+      apply Rlt_le. 
+      replace (1 / (1 - rho_def A b))%Re with 
+              (/ (1 - rho_def A b))%Re by nra.
+      apply Rinv_0_lt_compat. 
+      apply Rlt_Rminus.
+      by apply diagonal_dominance_implies_rho_lt_1.
+      apply Rmult_le_compat_l. nra. 
+      admit.
+  - apply Rmult_le_compat_l. nra.
+    apply x_bound_exists. admit.
 Admitted.
 
 
