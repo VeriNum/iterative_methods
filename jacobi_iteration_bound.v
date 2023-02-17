@@ -1623,6 +1623,22 @@ Definition forward_error_cond {ty} {n:nat}
   (forall i, is_finite (fprec ty) (femax ty)
                           (b i ord0) = true).
 
+Lemma bound_5 {t: type} {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
+   let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in 
+  (rho ^ k * (1 + rho) *
+ ((f_error 0 b x0 x A) - d_mag * / (1 - rho)) +
+ 2 * d_mag * / (1 - rho) +
+ 2 *
+ vec_inf_norm
+   (x_fix x (FT2R_mat b) (FT2R_mat A)) <
+ (bpow Zaux.radix2 (femax t) -
+  default_abs t) / (1 + default_rel t))%Re.
+Admitted.
 
 Lemma no_overflow_xkp1_minus_xk {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
