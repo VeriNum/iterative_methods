@@ -2455,7 +2455,7 @@ assert (forall xy : ftype t * ftype t,
       x_k+1 - x_k is finite
   **)
   intros. 
-  pose proof (@residual_is_finite  t n A b k Hcond size_cons).
+  pose proof (@residual_is_finite  t n A b k Hcond size_cons Hrho).
   unfold norm2 in H1. 
   pose proof (@dotprod_finite_implies t).
   specialize (H2 (
@@ -2800,7 +2800,7 @@ intros ? ? ? ? ? ? ? ? ? ? HinvA HfinvA HfA He0 Hcond size_cons.
 eapply Rle_trans.
 + apply norm2_vec_inf_norm_rel.
   - intros.
-    pose proof (@residual_is_finite  t n A  b k Hcond size_cons).
+    pose proof (@residual_is_finite  t n A  b k Hcond size_cons H).
     unfold norm2 in H1. 
     pose proof (@dotprod_finite_implies t).
     specialize (H2 (
@@ -2892,7 +2892,7 @@ eapply Rle_trans.
                      is_finite (fprec t) (femax t)
                        (BMULT t xy.1 xy.2) = true).
             { intros.
-              pose proof (@residual_is_finite  t n A b k Hcond size_cons).
+              pose proof (@residual_is_finite  t n A b k Hcond size_cons H).
               unfold norm2 in H2.
               pose proof (@dotprod_finite_implies t).
               specialize (H3 (
