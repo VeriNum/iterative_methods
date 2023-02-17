@@ -1708,44 +1708,37 @@ assert ((rho ^ k.+1 * e_0 +
                      ( (rho^k * e_0) * ((1 - rho) * / (1- rho)))%Re).
     { nra. } rewrite H5. rewrite Rinv_r; nra.
   } rewrite H2. clear H2. nra.
-} rewrite H2. clear H2.
-        assert ((rho ^ k.+1 * (1 - rho) * e_0 +
+} 
+assert ((rho ^ k.+1 * e_0 +
+          (1 - rho ^ k.+1) / (1 - rho) *
+          d_mag +
+          (rho ^ k * e_0 +
+           (1 - rho ^ k) / (1 - rho) *
+           d_mag))%Re = 
+        (rho ^ k.+1 * e_0 +
+           (1 - rho ^ k.+1) / (1 - rho) * d_mag +
+           rho ^ k * e_0 +
+           (1 - rho ^ k) / (1 - rho) * d_mag)%Re) by nra.
+rewrite -H5. clear H5.
+rewrite H2. clear H2.
+assert ((rho ^ k.+1 * (1 - rho) * e_0 +
                   (1 - rho ^ k.+1) * d_mag +
                   rho ^ k * (1 - rho) * e_0 +
                   (1 - rho ^ k) * d_mag)%Re = 
                 (rho ^ k * (1+ rho) * (1 - rho) * e_0 + 
                   2* d_mag  - rho^k * (1 + rho) * d_mag)%Re).
-        { simpl. nra. } rewrite H12. clear H12.
-        assert ((rho ^ k * (1 + rho) * (1 - rho) * e_0 +
+{ simpl. nra. } rewrite H2. clear H2.
+assert ((rho ^ k * (1 + rho) * (1 - rho) * e_0 +
                   2 * d_mag - rho ^ k * (1 + rho) * d_mag)%Re = 
                 ((rho ^ k * (1 + rho) * ((1-rho) * e_0 - d_mag)) + 2 * d_mag)%Re).
-        { nra. } rewrite H12. clear H12.
-        rewrite Rmult_plus_distr_r.
-        assert ((rho ^ k * (1 + rho) *
+{ nra. } rewrite H2. clear H2.
+rewrite Rmult_plus_distr_r.
+assert ((rho ^ k * (1 + rho) *
                     ((1 - rho) * e_0 - d_mag) * / (1 - rho))%Re =
                 (rho ^ k * (1 + rho) * 
                 (e_0 * ( (1 - rho) * / (1 - rho)) - d_mag * /(1 - rho)))%Re).
-        { nra. } rewrite H12. clear H12. rewrite Rinv_r; last by nra.
-        rewrite Rmult_1_r. nra.
-
-
-
-
-
-
-
-
-
-(** x_fix x (FT2R_mat b) (FT2R_mat A)) **)
-assert (FT2R
-      (X_m_jacobi k.+1 x0 b A 
-         (inord m) ord0) +
-    -
-    FT2R
-      (X_m_jacobi k x0 b A 
-         (inord m) ord0)
-
-
+{ nra. } rewrite H2. clear H2. rewrite Rinv_r; last by nra.
+rewrite Rmult_1_r. 
 
 
 
