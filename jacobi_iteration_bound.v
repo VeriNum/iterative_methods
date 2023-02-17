@@ -641,9 +641,14 @@ Qed.
 
 Lemma is_finite_xkp1_minus_xk {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in 
    (m < n.+1)%coq_nat ->
   forward_error_cond A x0 b ->
-  @size_constraint t n ->
+  ((0 < f_error 0 b x0 x A - d_mag * / (1 - rho))%Re) ->
   is_finite (fprec t) (femax t)
                (BPLUS t
                   (X_m_jacobi k.+1 x0 b A
@@ -652,7 +657,7 @@ Lemma is_finite_xkp1_minus_xk {t: type} {n:nat}
                      (X_m_jacobi k x0 b A
                         (inord m) ord0))) = true.
 Proof.
-intros ? Hcond size_cons.
+intros ? ? ? ? ? ? Hcond Hf0.
 apply BPLUS_no_overflow_is_finite; try rewrite ?is_finite_Bopp;
 try (pose proof (@jacobi_forward_error_bound _ t n);
   unfold forward_error_cond in Hcond;
