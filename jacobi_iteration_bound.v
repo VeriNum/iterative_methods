@@ -363,12 +363,12 @@ Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
 Proof.
 intros.
 unfold jacobi_preconditions_Rcompute in H.
-destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [Ha1_inv [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]]].
+destruct H as [Hfa [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [Ha1_inv [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]].
 unfold jacobi_preconditions_math.
 repeat split.
 + apply Hfa.
-+ apply Hrho.
-+ apply Hrho.
++ admit.
++ by apply diagonal_dominance_implies_rho_lt_1.
 + by apply diagonal_dominance_implies_invertibility.
 + apply Hfdiv.
 + apply Rlt_gt.
