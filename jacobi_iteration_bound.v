@@ -1666,7 +1666,7 @@ apply Rle_lt_trans with
     replace a with (a * 1)%Re by nra
   end. 
   apply Rmult_le_compat.
-  - admit.
+  - rewrite Rmult_1_r. apply fun_bnd_pos_1. admit.
   - apply Rlt_le. 
     replace (1 /  (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re with
     (/ (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re by nra.
@@ -1698,8 +1698,27 @@ Admitted.
 
 Lemma fun_bnd_gt_1 {t} {n:nat}:
   (1 < fun_bnd t n.+1)%Re.
-Admitted.
+Proof.
+unfold fun_bnd.
+replace (1 /  (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re with
+(/ (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re by nra.
+assert (((1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)) * 
+          /(1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re = 1%Re).
+{ apply Rinv_r.
+  assert ((0 < (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re).
+  { apply Rplus_lt_le_0_compat. nra.
+    apply Rmult_le_pos. apply pos_INR.
+    apply Rplus_le_le_0_compat. apply g_pos. nra.
+  }  nra.
+} rewrite -[in X in (X < _)%Re]H.
+apply Rmult_lt_compat_r.
+apply Rinv_0_lt_compat.
+apply Rplus_lt_le_0_compat. nra.
+apply Rmult_le_pos. apply pos_INR.
+apply Rplus_le_le_0_compat. apply g_pos. nra.
 
+
+Admitted.
 
 Lemma sqrt_fun_bnd_lt_fmax {t} {n:nat}:
   (sqrt (fun_bnd t n.+1) <
@@ -3191,4 +3210,5 @@ Qed.
 
 
 End WITH_NANS.
+
 
