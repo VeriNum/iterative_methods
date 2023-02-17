@@ -21,6 +21,7 @@ Section WITH_NANS.
 
 Context {NANS: Nans}.
 
+(*
 Definition rho_def  {t: type} {n:nat} (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) :=
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in  
@@ -64,7 +65,7 @@ Definition d_mag_def {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
                      matrix_inf_norm (A2_J_real A_real)) *
                     vec_inf_norm (x_fix x b_real A_real))%Re.
 
-
+*)
 (** As suggested by David:
   ||x|| <= ||D^-1 b || / (1 - rho) 
   [ since ||x || = || (D+ N)^-1 b|| <= ||D^-1 b || / (1 - rho) for rho < 1
@@ -1661,8 +1662,8 @@ assert ((f_error k b x0 x A <=
   unfold rho_def in H0.
   apply H1; try (intros; apply H0). 
 } clear H1.
-apply x_k_bound in H2.
-
+apply (x_k_bound (@inord n m)) in H2.
+apply (x_k_bound (@inord n m)) in H3.
 
 
 
