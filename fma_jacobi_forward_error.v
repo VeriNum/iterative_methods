@@ -1081,7 +1081,11 @@ apply Rle_lt_trans with
   apply Rmult_le_compat_r.
   - apply /RleP. apply big_ge_0_ex_abstract.
     intros. apply /RleP. apply Rabs_pos.
-  - 
+  - unfold x, A_real, b_real. 
+    apply Rplus_le_compat.
+    * apply Rplus_le_compat_l.
+      apply Rmult_le_compat_r. unfold f_error.
+      apply /RleP. apply vec_norm_pd.
 
 
 
