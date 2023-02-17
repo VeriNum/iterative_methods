@@ -722,6 +722,27 @@ Lemma bound_3 {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
     sqrt (fun_bnd ty n.+1))%Re.
 Admitted.
 
+Lemma bound_4 {ty} {n:nat} 
+  (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k i:
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in 
+  (Rabs (FT2R (b i ord0)) +
+   (1 + g ty n.+1) *
+   ((vec_inf_norm
+       (x_fix x (FT2R_mat b) (FT2R_mat A)) +
+     rho ^ k * f_error 0 b x0 x A +
+     (1 - rho ^ k) / (1 - rho) * d_mag) *
+    (\sum_j
+        Rabs (FT2R (A2_J A i j)))) +
+   g1 ty n.+1 (n.+1 - 1)%coq_nat <
+   (bpow Zaux.radix2 (femax ty) -
+    default_abs ty) / (1 + default_rel ty))%Re.
+Admitted.
+
+
 
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
@@ -1017,35 +1038,7 @@ induction k.
                apply Rmult_le_compat_r. apply Rabs_pos.
                apply x_k_bound. apply IHk.
             ++ apply Rle_refl.
-            ++ 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- admit.
+            ++ apply bound_4.
     }
     apply BMULT_no_overflow_is_finite.
     + apply Ha1_inv.
