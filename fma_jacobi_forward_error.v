@@ -824,7 +824,16 @@ induction k.
         rewrite length_veclist in H52.
         assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat) by lia.
         rewrite H5 in H52. rewrite nth_vec_to_list_float  in H52.
-        - rewrite mxE in H52. rewrite -H52. admit.
+        - rewrite mxE in H52. rewrite -H52.
+          destruct IHk as [IHk1 IHk2]. 
+          apply (x_k_bound (@inord n m)) in IHk2.
+          eapply Rle_lt_trans.
+          apply IHk2. fold rho.
+
+
+
+
+admit.
         - rewrite rev_length length_veclist in H51. by apply /ssrnat.ltP. 
         - rewrite rev_length in H51. apply H51.
     }
