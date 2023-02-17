@@ -1023,12 +1023,16 @@ Qed.
 
 
 Lemma bound_3 {ty} {n:nat} 
-  (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k:
-  input_bound A x0 b k ->
+  (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1):
+  input_bound_alt A x0 b ->
   forall i j, 
   (Rabs (FT2R (A2_J A i j )) <
     sqrt (fun_bnd ty n.+1))%Re.
-Proof. intros. apply H. Qed.
+Proof.
+intros. unfold input_bound_alt in H.
+destruct H as [_ [_ [bnd3 H]]]. clear H.
+apply bnd3. 
+Qed.
 
 
 Lemma bound_4 {ty} {n:nat} 
