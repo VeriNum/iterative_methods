@@ -1695,6 +1695,14 @@ apply Rle_lt_trans with
 
 Admitted.
   
+Lemma size_constraint {t} {n:nat}:
+  (INR n.+1 <
+ ((fmax t - default_abs t) /
+  (1 + default_rel t) -
+  g1 t n.+1 (n.+1 - 1)%coq_nat - 1) /
+ (g t (n.+1 - 1)%coq_nat + 1))%Re.
+Admitted.
+
 
 Lemma fun_bnd_gt_1 {t} {n:nat}:
   (1 < fun_bnd t n.+1)%Re.
@@ -1716,9 +1724,14 @@ apply Rinv_0_lt_compat.
 apply Rplus_lt_le_0_compat. nra.
 apply Rmult_le_pos. apply pos_INR.
 apply Rplus_le_le_0_compat. apply g_pos. nra.
-
-
-Admitted.
+rewrite Rplus_comm.
+assert (forall x y z:R, (x < z - y)%Re -> (x + y < z)%Re) 
+by (intros; nra).
+apply H0.
+apply Rcomplements.Rlt_div_r.
+apply Rplus_le_lt_0_compat. apply g_pos. nra.
+apply size_constraint.
+Qed.
 
 Lemma sqrt_fun_bnd_lt_fmax {t} {n:nat}:
   (sqrt (fun_bnd t n.+1) <
