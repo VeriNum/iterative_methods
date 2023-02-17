@@ -881,7 +881,7 @@ Lemma bound_1  {t: type} {n:nat}
    (1 + default_rel t))%Re.
 Proof.
 intros.
-unfold input_bound_alt in H.
+unfold input_bound in H.
 destruct H as [bnd1 H]. clear H.
 apply Rle_lt_trans with 
 (Rabs (FT2R (A (inord m) (inord m))) *
@@ -929,7 +929,7 @@ Lemma  bound_2 {ty} {n:nat}
        d_mag < sqrt (fun_bnd ty n.+1))%Re.
 Proof. 
 intros.
-unfold input_bound_alt in H.
+unfold input_bound in H.
 destruct H as [_ [bnd2 H]]. clear H.
 apply Rle_lt_trans with
 (vec_inf_norm
@@ -973,7 +973,7 @@ Lemma bound_3 {ty} {n:nat}
   (Rabs (FT2R (A2_J A i j )) <
     sqrt (fun_bnd ty n.+1))%Re.
 Proof.
-intros. unfold input_bound_alt in H.
+intros. unfold input_bound in H.
 destruct H as [_ [_ [bnd3 H]]]. clear H.
 apply bnd3. 
 Qed.
@@ -1000,7 +1000,7 @@ Lemma bound_4 {ty} {n:nat}
    (bpow Zaux.radix2 (femax ty) -
     default_abs ty) / (1 + default_rel ty))%Re.
 Proof.
-intros. unfold input_bound_alt in H.
+intros. unfold input_bound in H.
 destruct H as [_ [_ [_ [bnd4 H]]]]. clear H.
 apply Rle_lt_trans with
 (Rabs (FT2R (b i ord0)) +
@@ -1070,7 +1070,7 @@ Lemma bound_5 {ty} {n:nat}
    (1 + default_rel ty))%Re.
 Proof. 
 intros.
-unfold input_bound_alt in H.
+unfold input_bound in H.
 destruct H as [_ [_ [_ [_ bnd5]]]].
 apply Rle_lt_trans with
 (Rabs(FT2R (A1_inv_J A (inord i) ord0)) *
