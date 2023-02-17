@@ -1684,7 +1684,7 @@ assert ((vec_inf_norm
           (1 - rho ^ k) / (1 - rho) * d_mag) + 
         2 * (vec_inf_norm
               (x_fix x (FT2R_mat b) (FT2R_mat A))))%Re).
-{ nra. } rewrite H1. clear H1.
+{ nra. } rewrite H2. clear H2.
 remember (f_error 0 b x0 x A) as e_0.
 assert ((rho ^ k.+1 * e_0 +
                      (1 - rho ^ k.+1) / (1 - rho) * d_mag +
@@ -1692,7 +1692,7 @@ assert ((rho ^ k.+1 * e_0 +
                       (1 - rho ^ k) / (1 - rho) * d_mag))%Re = 
                ((rho^k.+1 * (1 - rho) * e_0 + (1 - rho^k.+1) * d_mag + 
                 rho^k * (1- rho) * e_0 + (1 - rho^k) * d_mag) * / (1-rho))%Re).
-        { assert ((rho ^ k.+1 * e_0 +
+{ assert ((rho ^ k.+1 * e_0 +
                      (1 - rho ^ k.+1) / (1 - rho) * d_mag +
                      (rho ^ k * e_0 +
                       (1 - rho ^ k) / (1 - rho) * d_mag))%Re = 
@@ -1700,15 +1700,15 @@ assert ((rho ^ k.+1 * e_0 +
                      ((1 - rho ^ k.+1) * d_mag) * / (1 - rho)  +
                      ((rho ^ k * e_0 * (1 - rho)) * / (1- rho)  +
                       ((1 - rho ^ k) * d_mag) * / (1 - rho)))%Re).
-          { assert (((rho ^ k.+1 * e_0 * (1 - rho)) * / (1-rho))%Re = 
+  { assert (((rho ^ k.+1 * e_0 * (1 - rho)) * / (1-rho))%Re = 
                      ((rho ^k.+1 * e_0) * ((1 - rho) * / (1-rho)))%Re).
-            { nra. } rewrite H1. rewrite Rinv_r; last by nra.
-            rewrite Rmult_1_r.
-            assert (((rho ^ k * e_0 * (1 - rho)) * / (1- rho))%Re = 
+    { nra. } rewrite H2. rewrite Rinv_r; last by nra.
+    rewrite Rmult_1_r.
+    assert (((rho ^ k * e_0 * (1 - rho)) * / (1- rho))%Re = 
                      ( (rho^k * e_0) * ((1 - rho) * / (1- rho)))%Re).
-            { nra. } rewrite H13. rewrite Rinv_r; nra.
-          } rewrite H12. clear H12. nra.
-        } rewrite H12. clear H12.
+    { nra. } rewrite H5. rewrite Rinv_r; nra.
+  } rewrite H2. clear H2. nra.
+} rewrite H2. clear H2.
         assert ((rho ^ k.+1 * (1 - rho) * e_0 +
                   (1 - rho ^ k.+1) * d_mag +
                   rho ^ k * (1 - rho) * e_0 +
