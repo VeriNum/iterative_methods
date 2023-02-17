@@ -446,7 +446,22 @@ repeat split.
       admit.
   - apply Rmult_le_compat_l. nra.
     apply x_bound_exists. admit.
-+ admit.
++ unfold input_bound_Rcompute in Hinp.
+  destruct Hinp as [_ [bnd2 _]].
+  eapply Rle_lt_trans; last by apply bnd2.
+  apply Rplus_le_compat.
+  - apply Rplus_le_compat.
+    * apply x_bound_exists. admit.
+    * rewrite !Rmult_1_l.
+      apply f_error0_bnd. auto. admit.
+  - apply Rmult_le_compat_l.
+    apply Rlt_le. 
+    replace (1 / (1 - rho_def A b))%Re with 
+            (/ (1 - rho_def A b))%Re by nra.
+    apply Rinv_0_lt_compat. 
+    apply Rlt_Rminus.
+    by apply diagonal_dominance_implies_rho_lt_1.
+    admit.
 + apply Hinp.
 + admit.
 + admit.
