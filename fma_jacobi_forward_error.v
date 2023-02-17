@@ -741,7 +741,24 @@ apply Rle_trans with
     by apply /RleP.
 Qed.
 
-(** sqrt (fun_bnd ty n.+1))%Re **)
+Definition input_bound {ty} {n:nat} 
+  (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k:
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in 
+  (vec_inf_norm
+   (x_fix x (FT2R_mat b) (FT2R_mat A)) +
+       rho ^ k *
+       f_error 0 b x0 x A +
+       (1 - rho ^ k) / (1 - rho) *
+       d_mag < sqrt (fun_bnd ty n.+1))%Re /\
+  (forall i j, 
+      (Rabs (FT2R (A2_J A i j )) <
+        sqrt (fun_bnd ty n.+1))%Re) /\
+
+
 Lemma  bound_2 {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k:
   let A_real := FT2R_mat A in
