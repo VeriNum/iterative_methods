@@ -65,65 +65,6 @@ Definition d_mag_def_alt {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
   https://nhigham.com/2021/06/08/bounds-for-the-matrix-condition-number/
 **)
 
-Lemma d_mag_ge_0 {t: type} {n:nat} (A: 'M[ftype t]_n.+1) 
-  (b: 'cV[ftype t]_n.+1):
-  (0 <= d_mag_def A b)%Re.
-Proof.
-unfold d_mag_def.
-repeat apply Rplus_le_le_0_compat.
-+ repeat try apply Rmult_le_pos; try repeat apply Rplus_le_le_0_compat.
-  - apply Rmult_le_pos; try apply g_pos.
-    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
-  - apply default_rel_ge_0.
-  - apply Rmult_le_pos. 
-    apply /RleP. apply vec_norm_pd.
-    apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
-  - apply default_abs_ge_0.
-  - apply /RleP. apply vec_norm_pd.
-+ repeat try apply Rmult_le_pos.
-  - apply Rplus_le_le_0_compat. nra. apply g_pos.
-  - apply pos_INR.
-  - nra.
-  - apply bpow_ge_0.
-  - apply Rplus_le_le_0_compat. nra. apply g_pos.
-  - apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0. 
-  - apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
-    apply Rmult_le_pos; last by (apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0).
-    apply /RleP. apply vec_norm_pd.
-+ apply g1_pos.
-+ apply Rmult_le_pos; last by (apply /RleP; try apply vec_norm_pd).
-  apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
-  apply Rmult_le_pos; last by apply default_rel_ge_0.
-  apply /RleP. apply vec_norm_pd.
-+ repeat apply Rmult_le_pos; last by (apply /RleP; try apply vec_norm_pd).
-  repeat apply Rplus_le_le_0_compat.
-  - repeat apply Rmult_le_pos.
-    * repeat apply Rplus_le_le_0_compat; last by apply default_rel_ge_0.
-      repeat apply Rmult_le_pos.
-      ++ apply Rplus_le_le_0_compat; last by apply g_pos.
-         apply Rplus_le_le_0_compat.
-         -- repeat apply Rmult_le_pos;last by apply g_pos.
-            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-            apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
-         -- apply Rmult_le_pos; first by apply default_rel_ge_0.
-            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-      ++ apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
-    * apply /RleP. apply vec_norm_pd.
-    * apply /RleP. apply matrix_norm_pd.
-  - repeat apply Rmult_le_pos; last by (apply /RleP; apply matrix_norm_pd).
-    repeat apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
-    repeat apply Rmult_le_pos; last by apply bpow_ge_0.
-    * apply Rplus_le_le_0_compat;last by apply g_pos.
-      apply Rplus_le_le_0_compat.
-      ++ repeat apply Rmult_le_pos;last by apply g_pos.
-         apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-         apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
-      ++ apply Rmult_le_pos; first by apply default_rel_ge_0.
-         apply Rplus_le_le_0_compat. nra. apply g_pos.
-    * nra.
-Qed.
-  
-
 Definition A1_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
   \col_i (A i i).
 
@@ -199,7 +140,8 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
   (** finitenes of b **) 
   (forall i, is_finite (fprec t) (femax t)
                           (b i ord0) = true) /\
-  @size_constraint t n.
+  @size_constraint t n /\
+  input_bound A x0 b.
 
 (** Use: lower case gamma **)
 
@@ -2348,6 +2290,5 @@ Qed.
 
 
 End WITH_NANS.
-
 
 
