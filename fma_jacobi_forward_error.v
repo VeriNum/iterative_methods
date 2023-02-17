@@ -1009,6 +1009,15 @@ induction k.
                      rho ^ k * f_error 0 b x0 x A +
                      (1 - rho ^ k) / (1 - rho) * d_mag) * 
               \sum_j (Rabs ( FT2R (A2_J A (inord i) j))))%Re.
+            ++ apply /RleP. rewrite RmultE.
+               rewrite big_distrr /=.
+               apply big_sum_ge_ex_abstract.
+               intros. rewrite -RmultE.
+               rewrite Rabs_mult. rewrite Rmult_comm.
+               apply Rmult_le_compat_r. apply Rabs_pos.
+               apply x_k_bound. apply IHk.
+            ++ apply Rle_refl.
+            ++ 
 
 
 
