@@ -337,48 +337,6 @@ assert (Rabs x = a \/(Rabs x < a)%Re).
 + apply Rabs_def2 in H0. nra.
 Qed.
 
-
-Definition forward_error_cond {ty} {n:nat} 
-  (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) :=
-  let rho := rho_def A b in
-  let d_mag := d_mag_def A b in
-   let A_real := FT2R_mat A in
-  (forall i, is_finite _ _ (A i i) = true) /\
-  (rho < 1)%Re /\
-  A_real \in unitmx /\
-  (forall i : 'I_n.+1,
-    is_finite (fprec ty) (femax ty)
-      (BDIV ty (Zconst ty 1) (A i i)) = true) /\
-  (forall i : 'I_n.+1, is_finite (fprec ty) (femax ty)
-                              (x0 i ord0) = true) /\
-  (forall i, is_finite (fprec ty) (femax ty)
-                        (A1_inv_J A i ord0) = true) /\
-  (forall i j, is_finite (fprec ty) (femax ty)
-                  (A2_J A i j) = true) /\ 
-  (forall i, is_finite (fprec ty) (femax ty)
-                          (b i ord0) = true).
-
-
-Lemma bound_1  {t: type} {n:nat}
-  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
-  let A_real := FT2R_mat A in
-  let b_real := FT2R_mat b in
-  let x:= A_real^-1 *m b_real in
-  let rho := rho_def A b in 
-  let d_mag := d_mag_def A b in 
-(Rabs (FT2R (A (inord m) (inord m))) *
- (rho ^ k * (1 + rho) *
-  (f_error 0 b x0 x A -
-   d_mag * / (1 - rho)) +
-  2 * d_mag * / (1 - rho) +
-  2 *
-  vec_inf_norm
-    (x_fix x (FT2R_mat b) (FT2R_mat A))) <
- (sqrt (fun_bnd t n.+1) - default_abs t) /
- (1 + default_rel t) /
- (1 + default_rel t))%Re.
-Admitted.
-
 Lemma res_xkp1_minus_xk  {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
   let A_real := FT2R_mat A in
@@ -388,7 +346,6 @@ Lemma res_xkp1_minus_xk  {t: type} {n:nat}
   let d_mag := d_mag_def A b in  
   (m < n.+1)%nat ->
   forward_error_cond A x0 b  ->
-  @size_constraint t n ->
   (Rabs (FT2R (A (inord m) (inord m))) *
    Rabs
      (FT2R
