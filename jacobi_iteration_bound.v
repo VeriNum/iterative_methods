@@ -194,6 +194,14 @@ Definition k_min {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                  (1 + delta) -
                  2 * d_mag / (1 - rho)))%Re)).
 
+Definition size_constraint {t} {n:nat}:=
+  (INR n.+1 <
+ ((fmax t - default_abs t) /
+  (1 + default_rel t) -
+  g1 t n.+1 (n.+1 - 1)%coq_nat - 1) /
+ (g t (n.+1 - 1)%coq_nat + 1))%Re /\
+ (INR n.+1 <=
+ fmax t / (1 + g t n.+1) / default_abs t - 1)%Re.
 
 Definition jacobi_preconditions_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
@@ -241,7 +249,8 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
                   (A2_J A i j) = true) /\
   (** finitenes of b **) 
   (forall i, is_finite (fprec t) (femax t)
-                          (b i ord0) = true).
+                          (b i ord0) = true) /\
+  @size_constraint t n.
 
 (** Use: lower case gamma **)
 
@@ -1655,14 +1664,7 @@ rewrite [in X in (Rabs ( _ + X) < _)%Re]/FT2R B2R_Bopp.
 fold (@FT2R t).
 Admitted.
 
-Definition size_constraint {t} {n:nat}:=
-  (INR n.+1 <
- ((fmax t - default_abs t) /
-  (1 + default_rel t) -
-  g1 t n.+1 (n.+1 - 1)%coq_nat - 1) /
- (g t (n.+1 - 1)%coq_nat + 1))%Re /\
- (INR n.+1 <=
- fmax t / (1 + g t n.+1) / default_abs t - 1)%Re.
+
 
 Lemma g1_constraint {t} {n:nat}:
   @size_constraint t n ->
