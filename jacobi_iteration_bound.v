@@ -472,6 +472,7 @@ Lemma bound_6 {t: type} {n:nat}
   let d_mag := d_mag_def A b in
   input_bound A x0 b  ->
   (rho < 1)%Re -> 
+  ((0 < f_error 0 b x0 x A - d_mag * / (1 - rho))%Re) ->
   (rho ^ k * (1 + rho) *
  ((f_error 0 b x0 x A) - d_mag * / (1 - rho)) +
  2 * d_mag * / (1 - rho) +
@@ -498,6 +499,9 @@ apply Rle_lt_trans with
              (FT2R_mat b) (FT2R_mat A)))%Re.
 + apply Rplus_le_compat_r.
   unfold d_mag, rho. apply Rplus_le_compat_r.
+  unfold x, A_real, b_real.
+  apply Rmult_le_compat_r. apply Rlt_le. apply H1.
+  
   
 
 
