@@ -3112,7 +3112,7 @@ split.
   - intros. apply finite_is_finite.
     apply residual_is_finite.
     unfold forward_error_cond. repeat split; try (by intros). apply Hrho.
-    apply size_cons.
+    apply size_cons. apply Hrho.
   - unfold BCMP.
     rewrite Bcompare_correct. 
     * rewrite Rcompare_Lt; first by [].
@@ -3322,7 +3322,7 @@ split.
           -- apply sqrt_pos.
     * apply residual_is_finite.
       unfold forward_error_cond. repeat split; try (by intros). apply Hrho.
-      apply size_cons.
+      apply size_cons. apply Hrho.
     * by unfold acc2. 
 Qed.
 
