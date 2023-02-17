@@ -1652,16 +1652,8 @@ Lemma residual_bound {t: type} {n:nat}
   let e_0 := f_error 0 b x0 x A in
   let resid := residual_math A x0 b in
   let v_l := (vec_to_list_float n.+1 (resid k)) in
-  (rho < 1)%Re ->
-  (FT2R_mat A \in unitmx) ->
-  (forall i : 'I_n.+1,
-          is_finite (fprec t) (femax t)
-            (BDIV t (Zconst t 1) (A i i)) = true) ->
-  (forall i : 'I_n.+1,
-      is_finite (fprec t) (femax t) (A i i) = true) ->
   (0 < f_error 0 b x0 x A - d_mag / (1 - rho))%Re ->
   forward_error_cond A x0 b ->
-  @size_constraint t n ->
   (Rabs (FT2R (norm2 (rev v_l))) <= 
     INR n.+1 * 
     (Rsqr (vec_inf_norm (FT2R_mat (A1_J A)) * 
@@ -1669,28 +1661,28 @@ Lemma residual_bound {t: type} {n:nat}
         * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat) *
       (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
 Proof.
-intros ? ? ? ? ? ? ? ? ? ? HinvA HfinvA HfA He0 Hcond size_cons.
+intros ? ? ? ? ? ? ? ? ?  He0 Hcond .
 eapply Rle_trans.
 + apply norm2_vec_inf_norm_rel.
   - intros.
-    pose proof (@residual_is_finite  t n A  b k Hcond size_cons H).
-    unfold norm2 in H1. 
+    pose proof (@residual_is_finite  t n A  b k Hcond He0).
+    unfold norm2 in H0. 
+    pose proof (@dotprod_finite_implies t).
+    specialize (H1 (
+               (vec_to_list_float n.+1
+                  (residual_math A x0 b k))) H0).
     pose proof (@dotprod_finite_implies t).
     specialize (H2 (
-               (vec_to_list_float n.+1
-                  (residual_math A x0 b k))) H1).
-    pose proof (@dotprod_finite_implies t).
-    specialize (H3 (
                      (vec_to_list_float n.+1
-                        (residual_math A x0 b k))) H1).
+                        (residual_math A x0 b k))) H0).
     remember (combine
                 (vec_to_list_float n.+1 (resid k))
                 (vec_to_list_float n.+1 (resid k))) as r_l.
-    apply in_rev  in H0.
+    apply in_rev  in H.
     assert (exists m, (m < length (rev r_l))%coq_nat /\
                       nth m (rev r_l) (Zconst t 0, Zconst t 0) = xy).
-    { by apply In_nth. } destruct H4 as [m [Hm Hnth]].
-    specialize (H3 (nth m (rev
+    { by apply In_nth. } destruct H3 as [m [Hm Hnth]].
+    specialize (H2 (nth m (rev
                             (vec_to_list_float n.+1
                                (residual_math A x0 b k))) (Zconst t 0))).
     assert (In
@@ -1706,7 +1698,7 @@ eapply Rle_trans.
       rewrite length_veclist . lia. rewrite Heqr_l in Hm.
       rewrite rev_length combine_length !length_veclist Nat.min_id in Hm.
       by rewrite !length_veclist.
-    } specialize (H3 H4). 
+    } specialize (H2 H3). 
     rewrite Heqr_l in Hnth.
     rewrite -combine_rev in Hnth; last by [].
     rewrite combine_nth in Hnth ; last by [].
@@ -1727,7 +1719,7 @@ eapply Rle_trans.
           apply pair_equal_spec in Hnth. 
           destruct Hnth as [Hnth1 Hnth2].
           by rewrite Hnth2.
-    } rewrite H5 H6. unfold resid. split; by apply H3.
+    } rewrite H4 H5. unfold resid. split; by apply H2.
   - by apply residual_is_finite .
   (** finiteness of residual and elements in the list **)
 + apply Rplus_le_compat_r. 
@@ -1740,7 +1732,6 @@ eapply Rle_trans.
     * Search (Rsqr _ <= Rsqr _)%Re.
       apply Rsqr_incr_1.
       ++ unfold resid, residual_math. 
-         Search diag_vector_mult.
          apply Rle_trans with
          (vec_inf_norm 
             (diag_matrix_vec_mult_R (FT2R_mat (A1_J A))
@@ -1765,16 +1756,16 @@ eapply Rle_trans.
                      is_finite (fprec t) (femax t)
                        (BMULT t xy.1 xy.2) = true).
             { intros.
-              pose proof (@residual_is_finite  t n A b k Hcond size_cons H).
-              unfold norm2 in H2.
+              pose proof (@residual_is_finite  t n A b k Hcond He0).
+              unfold norm2 in H1.
+              pose proof (@dotprod_finite_implies t).
+              specialize (H2 (
+                         (vec_to_list_float n.+1
+                            (residual_math A x0 b k))) H1).
               pose proof (@dotprod_finite_implies t).
               specialize (H3 (
-                         (vec_to_list_float n.+1
-                            (residual_math A x0 b k))) H2).
-              pose proof (@dotprod_finite_implies t).
-              specialize (H4 (
                               (vec_to_list_float n.+1
-                                 (residual_math A x0 b k))) H2).
+                                 (residual_math A x0 b k))) H1).
               remember (combine
                           (vec_to_list_float n.+1 (A1_J A))
                           (vec_to_list_float n.+1
