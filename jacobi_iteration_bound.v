@@ -885,15 +885,16 @@ Lemma residual_is_finite {t: type} {n:nat}
   let x0 := \col_(j < n.+1) (Zconst t 0) in 
   let resid := residual_math A x0 b in
   forward_error_cond A x0 b ->
-  @size_constraint t n ->
-  (rho_def A b < 1)%Re ->
   is_finite (fprec t) (femax t)
     (norm2
        (rev
           (vec_to_list_float n.+1 (resid k)))) = true.
 Proof.
-intros ? ? Hcond size_cons Hrho.
+intros ? ? Hcond .
 unfold norm2. apply dotprod_finite.
+rewrite rev_length length_veclist.
+apply g1_constraint. unfold forward_error_cond in Hcond.
+apply Hcond.
 repeat split.
 + apply in_rev in H.
   pose proof (@In_nth _ (rev
