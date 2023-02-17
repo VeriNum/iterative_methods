@@ -1664,6 +1664,11 @@ assert ((f_error k b x0 x A <=
 } clear H1.
 apply (x_k_bound (@inord n m)) in H2.
 apply (x_k_bound (@inord n m)) in H3.
+eapply Rle_lt_trans.
+apply Rplus_le_compat.
+apply H2. apply H3.
+rewrite -/x.
+rewrite -/rho -/d_mag.
 
 
 
