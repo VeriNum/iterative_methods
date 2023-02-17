@@ -852,7 +852,15 @@ Definition input_bound {t} {n:nat}
       g1 t n.+1 (n.+1 - 1)%coq_nat) <
      (bpow Zaux.radix2 (femax t) -
       default_abs t) / (1 + default_rel t) /
-     (1 + default_rel t))%Re).
+     (1 + default_rel t))%Re) /\
+  (1 * (1 + rho) *
+     ((f_error 0 b x0 x A) - d_mag * / (1 - rho)) +
+     2 * d_mag * / (1 - rho) +
+     2 *
+     vec_inf_norm
+       (x_fix x (FT2R_mat b) (FT2R_mat A)) <
+     (bpow Zaux.radix2 (femax t) -
+      default_abs t) / (1 + default_rel t))%Re.
 
 
 
