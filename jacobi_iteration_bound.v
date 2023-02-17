@@ -210,7 +210,7 @@ Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                  2 * d_mag / (1 - rho)))%Re)).
 
 (** input bound' **)
-Definition input_bound_compute {t} {n:nat} 
+Definition input_bound_Rcompute {t} {n:nat} 
   (A: 'M[ftype t]_n.+1) (x0 b: 'cV[ftype t]_n.+1):=
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -296,7 +296,7 @@ Admitted.
 
 
 (** Rcompute **)
-Definition jacobi_preconditions_compute {t: type} {n:nat}
+Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
   (* some property of A,b,accuracy holds such that 
     jacobi_n will indeed converge within k iterations to this accuracy, 
@@ -359,7 +359,7 @@ Definition jacobi_preconditions_compute {t: type} {n:nat}
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat): 
-  jacobi_preconditions_compute A b accuracy k ->
+  jacobi_preconditions_Rcompute A b accuracy k ->
   jacobi_preconditions_math A b accuracy k.
 Admitted.
 
