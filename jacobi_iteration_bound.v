@@ -338,6 +338,16 @@ Definition jacobi_preconditions_compute {t: type} {n:nat}
   (** constraint on bounds for input **)
   input_bound_compute A x0 b.
 
+
+Locate finite.
+Check finite.
+About finite.
+Search finite.
+Print rho_def.
+
+(** g  g1  rho d_mag : what do they mean intuitively **)
+
+(** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat): 
   jacobi_preconditions_compute A b accuracy k ->
