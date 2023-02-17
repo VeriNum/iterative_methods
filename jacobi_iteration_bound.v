@@ -1625,7 +1625,13 @@ Definition forward_error_cond {ty} {n:nat}
 
 Lemma no_overflow_xkp1_minus_xk {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
+   let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in 
    (m < n.+1)%coq_nat ->
+  forward_error_cond A x0 b ->
   (Rabs
    (FT2R
       (X_m_jacobi k.+1 x0 b A 
@@ -1636,6 +1642,60 @@ Lemma no_overflow_xkp1_minus_xk {t: type} {n:nat}
          (inord m) ord0)) <
  (bpow Zaux.radix2 (femax t) -
   default_abs t) / (1 + default_rel t))%Re.
+Proof.
+intros.
+eapply Rle_lt_trans. apply Rabs_triang.
+rewrite Rabs_Ropp.
+pose proof (@jacobi_forward_error_bound _ t n).
+assert ((forall i : 'I_n.+1,
+          is_finite (fprec t) 
+            (femax t)
+            (X_m_jacobi k.+1 x0 b A i ord0) =
+          true) /\
+         (f_error k.+1 b x0 x A <=
+          rho ^ k.+1 * f_error 0 b x0 x A +
+          (1 - rho ^ k.+1) / (1 - rho) * d_mag)%Re).
+{ unfold forward_error_cond in H0.
+  unfold rho_def in H0.
+  apply H1; try (intros; apply H0). 
+}
+assert ((forall i : 'I_n.+1,
+          is_finite (fprec t) 
+            (femax t)
+            (X_m_jacobi k x0 b A i ord0) =
+          true) /\
+         (f_error k b x0 x A <=
+          rho ^ k * f_error 0 b x0 x A +
+          (1 - rho ^ k) / (1 - rho) * d_mag)%Re).
+{ unfold forward_error_cond in H0.
+  unfold rho_def in H0.
+  apply H1; try (intros; apply H0). 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+(** x_fix x (FT2R_mat b) (FT2R_mat A)) **)
+assert (FT2R
+      (X_m_jacobi k.+1 x0 b A 
+         (inord m) ord0) +
+    -
+    FT2R
+      (X_m_jacobi k x0 b A 
+         (inord m) ord0)
+
+
+
+
+
 Admitted.
 
 
