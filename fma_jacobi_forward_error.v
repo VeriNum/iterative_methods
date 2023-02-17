@@ -699,6 +699,64 @@ Definition d_mag_def {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
                      matrix_inf_norm (A2_J_real A_real)) *
                     vec_inf_norm (x_fix x b_real A_real))%Re.
 
+Lemma d_mag_ge_0 {t: type} {n:nat} (A: 'M[ftype t]_n.+1) 
+  (b: 'cV[ftype t]_n.+1):
+  (0 <= d_mag_def A b)%Re.
+Proof.
+unfold d_mag_def.
+repeat apply Rplus_le_le_0_compat.
++ repeat try apply Rmult_le_pos; try repeat apply Rplus_le_le_0_compat.
+  - apply Rmult_le_pos; try apply g_pos.
+    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+  - apply default_rel_ge_0.
+  - apply Rmult_le_pos. 
+    apply /RleP. apply vec_norm_pd.
+    apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+  - apply default_abs_ge_0.
+  - apply /RleP. apply vec_norm_pd.
++ repeat try apply Rmult_le_pos.
+  - apply Rplus_le_le_0_compat. nra. apply g_pos.
+  - apply pos_INR.
+  - nra.
+  - apply bpow_ge_0.
+  - apply Rplus_le_le_0_compat. nra. apply g_pos.
+  - apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0. 
+  - apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
+    apply Rmult_le_pos; last by (apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0).
+    apply /RleP. apply vec_norm_pd.
++ apply g1_pos.
++ apply Rmult_le_pos; last by (apply /RleP; try apply vec_norm_pd).
+  apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
+  apply Rmult_le_pos; last by apply default_rel_ge_0.
+  apply /RleP. apply vec_norm_pd.
++ repeat apply Rmult_le_pos; last by (apply /RleP; try apply vec_norm_pd).
+  repeat apply Rplus_le_le_0_compat.
+  - repeat apply Rmult_le_pos.
+    * repeat apply Rplus_le_le_0_compat; last by apply default_rel_ge_0.
+      repeat apply Rmult_le_pos.
+      ++ apply Rplus_le_le_0_compat; last by apply g_pos.
+         apply Rplus_le_le_0_compat.
+         -- repeat apply Rmult_le_pos;last by apply g_pos.
+            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+            apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+         -- apply Rmult_le_pos; first by apply default_rel_ge_0.
+            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+      ++ apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+    * apply /RleP. apply vec_norm_pd.
+    * apply /RleP. apply matrix_norm_pd.
+  - repeat apply Rmult_le_pos; last by (apply /RleP; apply matrix_norm_pd).
+    repeat apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
+    repeat apply Rmult_le_pos; last by apply bpow_ge_0.
+    * apply Rplus_le_le_0_compat;last by apply g_pos.
+      apply Rplus_le_le_0_compat.
+      ++ repeat apply Rmult_le_pos;last by apply g_pos.
+         apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+         apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+      ++ apply Rmult_le_pos; first by apply default_rel_ge_0.
+         apply Rplus_le_le_0_compat. nra. apply g_pos.
+    * nra.
+Qed.
+  
 
 Lemma x_k_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k i:
@@ -951,7 +1009,8 @@ apply Rle_lt_trans with
       rewrite H. apply pow_incr.
       split. by apply rho_ge_0.
       apply Rlt_le. apply H0.
-  -
+  - apply Rmult_le_compat_r.
+    apply d_mag_ge_0.
 
 
 
