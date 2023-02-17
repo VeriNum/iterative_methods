@@ -1799,13 +1799,14 @@ Lemma is_finite_Bmult_res {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
   (m < n.+1)%coq_nat ->
   forward_error_cond A x0 b ->
+  @size_constraint t n ->
   is_finite (fprec t) (femax t)
              (BMULT t (A (inord m) (inord m))
                 ((X_m_jacobi k.+1 x0 b A -f
                   X_m_jacobi k x0 b A) 
                    (inord m) ord0)) = true.
 Proof.
-intros.
+intros ? ? size_cons.
 apply BMULT_no_overflow_is_finite.
 + unfold forward_error_cond in H0. apply H0.
 + rewrite mxE. apply Bplus_bminus_opp_implies.
@@ -1862,7 +1863,7 @@ apply BMULT_no_overflow_is_finite.
     try apply Rinv_0_lt_compat;
     try apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
     apply Rplus_lt_compat_r.
-    apply sqrt_fun_bnd_lt_fmax.
+    by apply sqrt_fun_bnd_lt_fmax.
 Qed.
 
 
@@ -1871,12 +1872,13 @@ Lemma residual_is_finite {t: type} {n:nat}
   let x0 := \col_(j < n.+1) (Zconst t 0) in 
   let resid := residual_math A x0 b in
   forward_error_cond A x0 b ->
+  @size_constraint t n ->
   is_finite (fprec t) (femax t)
     (norm2
        (rev
           (vec_to_list_float n.+1 (resid k)))) = true.
 Proof.
-intros ? ? Hcond.
+intros ? ? Hcond size_cons.
 unfold norm2. apply dotprod_finite.
 repeat split.
 + apply in_rev in H.
@@ -2000,7 +2002,7 @@ repeat split.
       try apply Rinv_0_lt_compat;
       try apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
       apply Rplus_lt_compat_r.
-      apply sqrt_fun_bnd_lt_fmax.
+      by apply sqrt_fun_bnd_lt_fmax.
     * pose proof (@jacobi_forward_error_bound _ t n).
       unfold forward_error_cond in Hcond.
       unfold rho_def in Hcond.
@@ -2292,10 +2294,11 @@ Lemma vec_succ_err {t: type} {n:nat}
               (BDIV t (Zconst t 1) (A i i)) = true) ->
   (forall i, is_finite (fprec t) (femax t) (A i i) = true) ->
   forward_error_cond A x0 b ->
+  @size_constraint t n ->
   (vec_inf_norm (FT2R_mat ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A))) <=
     (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))%Re.
 Proof.
-intros ? ? ? ? ? ?  ? Hrho HAinv HfinvA HfA Hcond.
+intros ? ? ? ? ? ?  ? Hrho HAinv HfinvA HfA Hcond size_cons.
 pose proof (@vec_float_sub_1 _ t n).
 specialize (H (X_m_jacobi k.+1 x0 b A) (X_m_jacobi k x0 b A)).
 assert (forall xy : ftype t * ftype t,
@@ -2313,7 +2316,7 @@ assert (forall xy : ftype t * ftype t,
       x_k+1 - x_k is finite
   **)
   intros. 
-  pose proof (@residual_is_finite  t n A b k Hcond).
+  pose proof (@residual_is_finite  t n A b k Hcond size_cons).
   unfold norm2 in H1. 
   pose proof (@dotprod_finite_implies t).
   specialize (H2 (
