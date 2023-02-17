@@ -1086,19 +1086,20 @@ apply Rle_lt_trans with
     * apply Rplus_le_compat_l.
       apply Rmult_le_compat_r. unfold f_error.
       apply /RleP. apply vec_norm_pd.
-
-
-
-
-
-
- admit.
+      assert ( 1%Re = (1 ^ k)%Re) by (rewrite pow1; nra).
+      rewrite H. apply pow_incr.
+      split. by apply rho_ge_0.
+      apply Rlt_le. apply H0.
+    * apply Rmult_le_compat_r.
+      apply d_mag_ge_0. apply Rmult_le_compat_r.
+      apply Rlt_le. apply Rinv_0_lt_compat.
+      apply Rlt_Rminus. apply H0.
+      apply Rcomplements.Rle_minus_l.
+      assert (forall a b:R, (0 <= b)%Re -> (a <= a + b)%Re).
+      { intros. nra. } apply H.
+      apply pow_le. by apply rho_ge_0.
 + apply bnd4.
-
-
-
-
- intros. apply H. Qed.
+Qed.
 
 
 Lemma bound_5 {ty} {n:nat} 
