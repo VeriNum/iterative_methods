@@ -416,7 +416,28 @@ Definition forward_error_cond {ty} {n:nat}
   (forall i, is_finite (fprec ty) (femax ty)
                           (b i ord0) = true).
 
-Lemma res_xkp1_minus_xk {t: type} {n:nat}
+
+Lemma bound_1  {t: type} {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in 
+(Rabs (FT2R (A (inord m) (inord m))) *
+ (rho ^ k * (1 + rho) *
+  (f_error 0 b x0 x A -
+   d_mag * / (1 - rho)) +
+  2 * d_mag * / (1 - rho) +
+  2 *
+  vec_inf_norm
+    (x_fix x (FT2R_mat b) (FT2R_mat A))) <
+ (sqrt (fun_bnd t n.+1) - default_abs t) /
+ (1 + default_rel t) /
+ (1 + default_rel t))%Re.
+Admitted.
+
+Lemma res_xkp1_minus_xk  {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -455,11 +476,10 @@ assert ((f_error k b x0 x A <=
           (1 - rho ^ k) / (1 - rho) * d_mag)%Re).
 { unfold forward_error_cond in H0.
   unfold rho_def in H0.
-  apply H2; try (intros; apply H0). 
+  apply H2; try (intros; apply H0). apply H1.
 } clear H2.
 apply (x_k_bound (@inord n m)) in H3.
 apply (x_k_bound (@inord n m)) in H4.
-eapply Rle_lt_trans.
 apply Rplus_le_compat.
 apply H3. apply H4.
 rewrite -/x.
@@ -496,11 +516,13 @@ assert ((rho ^ k.+1 * e_0 +
                       ((1 - rho ^ k) * d_mag) * / (1 - rho)))%Re).
   { assert (((rho ^ k.+1 * e_0 * (1 - rho)) * / (1-rho))%Re = 
                      ((rho ^k.+1 * e_0) * ((1 - rho) * / (1-rho)))%Re).
-    { nra. } rewrite H2. rewrite Rinv_r; last by nra.
+    { nra. } rewrite H2.
+    assert ((rho < 1)%Re) by apply H0.
+    rewrite Rinv_r; last by nra.
     rewrite Rmult_1_r.
     assert (((rho ^ k * e_0 * (1 - rho)) * / (1- rho))%Re = 
                      ( (rho^k * e_0) * ((1 - rho) * / (1- rho)))%Re).
-    { nra. } rewrite H5. rewrite Rinv_r; nra.
+    { nra. } rewrite H4. rewrite Rinv_r; nra.
   } rewrite H2. clear H2. nra.
 } 
 assert ((rho ^ k.+1 * e_0 +
@@ -513,7 +535,7 @@ assert ((rho ^ k.+1 * e_0 +
            (1 - rho ^ k.+1) / (1 - rho) * d_mag +
            rho ^ k * e_0 +
            (1 - rho ^ k) / (1 - rho) * d_mag)%Re) by nra.
-rewrite -H5. clear H5.
+rewrite -H3. clear H3.
 rewrite H2. clear H2.
 assert ((rho ^ k.+1 * (1 - rho) * e_0 +
                   (1 - rho ^ k.+1) * d_mag +
@@ -531,13 +553,13 @@ assert ((rho ^ k * (1 + rho) *
                     ((1 - rho) * e_0 - d_mag) * / (1 - rho))%Re =
                 (rho ^ k * (1 + rho) * 
                 (e_0 * ( (1 - rho) * / (1 - rho)) - d_mag * /(1 - rho)))%Re).
-{ nra. } rewrite H2. clear H2. rewrite Rinv_r; last by nra.
+{ nra. } rewrite H2. clear H2. 
+assert ((rho < 1)%Re) by apply H0.
+rewrite Rinv_r; last by nra.
 rewrite Rmult_1_r.
 rewrite Heqe_0.
- 
-
-
-Admitted.
+apply bound_1.
+Qed.
 
 
 
@@ -2322,5 +2344,6 @@ Qed.
 
 
 End WITH_NANS.
+
 
 
