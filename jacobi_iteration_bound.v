@@ -1313,11 +1313,11 @@ Lemma vec_succ_err {t: type} {n:nat}
               (BDIV t (Zconst t 1) (A i i)) = true) ->
   (forall i, is_finite (fprec t) (femax t) (A i i) = true) ->
   forward_error_cond A x0 b ->
-  @size_constraint t n ->
+  ((0 < f_error 0 b x0 x A - d_mag * / (1 - rho))%Re) ->
   (vec_inf_norm (FT2R_mat ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A))) <=
     (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))%Re.
 Proof.
-intros ? ? ? ? ? ?  ? Hrho HAinv HfinvA HfA Hcond size_cons.
+intros ? ? ? ? ? ?  ? Hrho HAinv HfinvA HfA Hcond Hf0.
 pose proof (@vec_float_sub_1 _ t n).
 specialize (H (X_m_jacobi k.+1 x0 b A) (X_m_jacobi k x0 b A)).
 assert (forall xy : ftype t * ftype t,
@@ -1335,7 +1335,7 @@ assert (forall xy : ftype t * ftype t,
       x_k+1 - x_k is finite
   **)
   intros. 
-  pose proof (@residual_is_finite  t n A b k Hcond size_cons Hrho).
+  pose proof (@residual_is_finite  t n A b k Hcond Hf0).
   unfold norm2 in H1. 
   pose proof (@dotprod_finite_implies t).
   specialize (H2 (
