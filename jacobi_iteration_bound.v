@@ -1647,30 +1647,22 @@ intros.
 eapply Rle_lt_trans. apply Rabs_triang.
 rewrite Rabs_Ropp.
 pose proof (@jacobi_forward_error_bound _ t n).
-assert ((forall i : 'I_n.+1,
-          is_finite (fprec t) 
-            (femax t)
-            (X_m_jacobi k.+1 x0 b A i ord0) =
-          true) /\
-         (f_error k.+1 b x0 x A <=
+assert ((f_error k.+1 b x0 x A <=
           rho ^ k.+1 * f_error 0 b x0 x A +
           (1 - rho ^ k.+1) / (1 - rho) * d_mag)%Re).
 { unfold forward_error_cond in H0.
   unfold rho_def in H0.
   apply H1; try (intros; apply H0). 
 }
-assert ((forall i : 'I_n.+1,
-          is_finite (fprec t) 
-            (femax t)
-            (X_m_jacobi k x0 b A i ord0) =
-          true) /\
-         (f_error k b x0 x A <=
+assert ((f_error k b x0 x A <=
           rho ^ k * f_error 0 b x0 x A +
           (1 - rho ^ k) / (1 - rho) * d_mag)%Re).
 { unfold forward_error_cond in H0.
   unfold rho_def in H0.
   apply H1; try (intros; apply H0). 
-}
+} clear H1.
+apply x_k_bound in H2.
+
 
 
 
