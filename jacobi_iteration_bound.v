@@ -1655,21 +1655,37 @@ rewrite [in X in (Rabs ( _ + X) < _)%Re]/FT2R B2R_Bopp.
 fold (@FT2R t).
 Admitted.
 
-Lemma g1_constraint {t} {n:nat}:
-  (g1 t (n.+1 + 1)%coq_nat n.+1 <= fmax t)%Re.
-Admitted.
-
-Lemma size_constraint {t} {n:nat}:
+Definition size_constraint {t} {n:nat}:=
   (INR n.+1 <
  ((fmax t - default_abs t) /
   (1 + default_rel t) -
   g1 t n.+1 (n.+1 - 1)%coq_nat - 1) /
- (g t (n.+1 - 1)%coq_nat + 1))%Re.
-Admitted.
+ (g t (n.+1 - 1)%coq_nat + 1))%Re /\
+ (INR n.+1 <=
+ fmax t / (1 + g t n.+1) / default_abs t - 1)%Re.
+
+Lemma g1_constraint {t} {n:nat}:
+  @size_constraint t n ->
+  (g1 t (n.+1 + 1)%coq_nat n.+1 <= fmax t)%Re.
+Proof.
+intro size_cons.
+unfold g1.
+apply Rdiv_le_right_elim.
+apply Rplus_lt_le_0_compat. nra. apply g_pos.
+apply Rdiv_le_right_elim.
+apply default_abs_gt_0.
+rewrite plus_INR. 
+replace (INR 1) with 1%Re by (simpl;nra).
+apply Rcomplements.Rle_minus_r.
+apply size_cons.
+Qed.
+
 
 Lemma fun_bnd_lt_fmax {t} {n:nat}:
+  @size_constraint t n ->
   (fun_bnd t n.+1 < bpow Zaux.radix2 (femax t))%Re.
 Proof.
+intro size_cons.
 unfold fun_bnd.
 apply Rle_lt_trans with 
 ((fmax t - default_abs t) / (1 + default_rel t) -
@@ -1678,7 +1694,7 @@ apply Rle_lt_trans with
     replace a with (a * 1)%Re by nra
   end. 
   apply Rmult_le_compat.
-  - rewrite Rmult_1_r. apply fun_bnd_pos_1. apply g1_constraint.
+  - rewrite Rmult_1_r. apply fun_bnd_pos_1. by apply g1_constraint.
   - apply Rlt_le. 
     replace (1 /  (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re with
     (/ (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re by nra.
@@ -1734,8 +1750,10 @@ Qed.
   
 
 Lemma fun_bnd_gt_1 {t} {n:nat}:
+  @size_constraint t n ->
   (1 < fun_bnd t n.+1)%Re.
 Proof.
+intros size_cons.
 unfold fun_bnd.
 replace (1 /  (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re with
 (/ (1 + INR n.+1 * (g t (n.+1 - 1)%coq_nat + 1)))%Re by nra.
@@ -1759,17 +1777,19 @@ by (intros; nra).
 apply H0.
 apply Rcomplements.Rlt_div_r.
 apply Rplus_le_lt_0_compat. apply g_pos. nra.
-apply size_constraint.
+apply size_cons.
 Qed.
 
 Lemma sqrt_fun_bnd_lt_fmax {t} {n:nat}:
+  @size_constraint t n ->
   (sqrt (fun_bnd t n.+1) <
         bpow Zaux.radix2 (femax t))%Re.
 Proof.
+intros.
 eapply Rlt_trans.
 apply sqrt_less_alt.
-+ apply fun_bnd_gt_1.
-+ apply fun_bnd_lt_fmax.
++ by apply fun_bnd_gt_1.
++ by apply fun_bnd_lt_fmax.
 Qed.
 
 
