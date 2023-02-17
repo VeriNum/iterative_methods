@@ -206,7 +206,61 @@ Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                  2 * d_mag / (1 - rho)))%Re)).
 
 
-
+Definition jacobi_preconditions_alt {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
+  (* some property of A,b,accuracy holds such that 
+    jacobi_n will indeed converge within k iterations to this accuracy, 
+   without ever overflowing *)
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in 
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def_alt A b in
+  let x0 := \col_(j < n.+1) (Zconst t 0) in
+  let R_def :=  (vec_inf_norm (A1_diag A_real) *
+                matrix_inf_norm (A2_J_real A_real))%Re in
+  let e_0 := (vec_inf_norm (FT2R_mat x0) + 
+              vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
+                (1 - R_def))%Re in
+  (** Finiteness of A **)
+  (forall i j, Binary.is_finite _ _ (A i j) = true) /\
+  (** constant for the contraction mapping **)
+  (0 < rho /\ rho < 1)%Re /\
+  (** Invertibility of A **)
+  A_real \in unitmx /\
+  (** Finiteness of the inverse of diagonal elements of A **)
+  (forall i : 'I_n.+1,
+    Binary.is_finite (fprec t) (femax t)
+      (BDIV t (Zconst t 1) (A i i)) = true) /\
+(** Constraint on Gamma **)
+  (FT2R (BMULT t accuracy accuracy) >
+     g1 t n.+1 (n.+1 - 1)%coq_nat +
+     INR n.+1 * (1 + g t n.+1) *
+     (g1 t n.+1 (n.+1 - 1)%coq_nat +
+      2 * (1 + g t n.+1) * (1 + default_rel t) *
+      vec_inf_norm (FT2R_mat (A1_J A)) *
+      d_mag_def A b * / (1 - rho_def A b))²)%Re /\
+  (** Gamma is finite **)
+  Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
+  (** constraint on k **)
+  (k_min A b accuracy < k)%coq_nat /\
+  (** lower bound on the initial error **)
+  (0 < f_error 0 b x0 x A - d_mag / (1 - rho))%Re /\
+  (** finiteness of x0 **)
+  (forall i : 'I_n.+1, is_finite (fprec t) (femax t)
+                              (x0 i ord0) = true) /\
+  (** finitenes of A1^{-} **)
+  (forall i, is_finite (fprec t) (femax t)
+                        (A1_inv_J A i ord0) = true) /\
+  (** finiteness of A2 **)
+  (forall i j, is_finite (fprec t) (femax t)
+                  (A2_J A i j) = true) /\
+  (** finitenes of b **) 
+  (forall i, is_finite (fprec t) (femax t)
+                          (b i ord0) = true) /\
+  (** constraint on the dimension **)
+  @size_constraint t n /\
+  (** constraint on bounds for input **)
+  input_bound A x0 b.
 
 
 
