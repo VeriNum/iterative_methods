@@ -432,7 +432,10 @@ repeat split.
   apply Rmult_le_compat_l. apply Rabs_pos.
   apply Rplus_le_compat.
   - apply Rplus_le_compat.
-    * 
+    * rewrite Rmult_1_l. apply Rmult_le_compat_l.
+      apply Rplus_le_le_0_compat. nra. by apply rho_ge_0.
+      
+      
 
 
 admit.
