@@ -346,6 +346,7 @@ Lemma res_xkp1_minus_xk  {t: type} {n:nat}
   let d_mag := d_mag_def A b in  
   (m < n.+1)%nat ->
   forward_error_cond A x0 b  ->
+  (0 < f_error 0 b x0 x A - d_mag * / (1 - rho))%Re ->
   (Rabs (FT2R (A (inord m) (inord m))) *
    Rabs
      (FT2R
@@ -368,19 +369,18 @@ assert ((f_error k.+1 b x0 x A <=
 { unfold forward_error_cond in H0.
   unfold rho_def in H0.
   apply H2; try (intros; apply H0). 
-  apply H1.
 }
 assert ((f_error k b x0 x A <=
           rho ^ k * f_error 0 b x0 x A +
           (1 - rho ^ k) / (1 - rho) * d_mag)%Re).
 { unfold forward_error_cond in H0.
   unfold rho_def in H0.
-  apply H2; try (intros; apply H0). apply H1.
-} clear H2.
+  apply H1; try (intros; apply H0). 
+} clear H1.
+apply (x_k_bound (@inord n m)) in H2.
 apply (x_k_bound (@inord n m)) in H3.
-apply (x_k_bound (@inord n m)) in H4.
 apply Rplus_le_compat.
-apply H3. apply H4.
+apply H2. apply H3.
 rewrite -/x.
 rewrite -/rho -/d_mag.
 assert ((vec_inf_norm
@@ -397,7 +397,7 @@ assert ((vec_inf_norm
           (1 - rho ^ k) / (1 - rho) * d_mag) + 
         2 * (vec_inf_norm
               (x_fix x (FT2R_mat b) (FT2R_mat A))))%Re).
-{ nra. } rewrite H2. clear H2.
+{ nra. } rewrite H1. clear H1.
 remember (f_error 0 b x0 x A) as e_0.
 assert ((rho ^ k.+1 * e_0 +
                      (1 - rho ^ k.+1) / (1 - rho) * d_mag +
@@ -415,14 +415,14 @@ assert ((rho ^ k.+1 * e_0 +
                       ((1 - rho ^ k) * d_mag) * / (1 - rho)))%Re).
   { assert (((rho ^ k.+1 * e_0 * (1 - rho)) * / (1-rho))%Re = 
                      ((rho ^k.+1 * e_0) * ((1 - rho) * / (1-rho)))%Re).
-    { nra. } rewrite H2.
+    { nra. } rewrite H1.
     assert ((rho < 1)%Re) by apply H0.
     rewrite Rinv_r; last by nra.
     rewrite Rmult_1_r.
     assert (((rho ^ k * e_0 * (1 - rho)) * / (1- rho))%Re = 
                      ( (rho^k * e_0) * ((1 - rho) * / (1- rho)))%Re).
-    { nra. } rewrite H4. rewrite Rinv_r; nra.
-  } rewrite H2. clear H2. nra.
+    { nra. } rewrite H3. rewrite Rinv_r; nra.
+  } rewrite H1. clear H1. nra.
 } 
 assert ((rho ^ k.+1 * e_0 +
           (1 - rho ^ k.+1) / (1 - rho) *
@@ -434,25 +434,25 @@ assert ((rho ^ k.+1 * e_0 +
            (1 - rho ^ k.+1) / (1 - rho) * d_mag +
            rho ^ k * e_0 +
            (1 - rho ^ k) / (1 - rho) * d_mag)%Re) by nra.
-rewrite -H3. clear H3.
-rewrite H2. clear H2.
+rewrite -H2. clear H2.
+rewrite H1. clear H1.
 assert ((rho ^ k.+1 * (1 - rho) * e_0 +
                   (1 - rho ^ k.+1) * d_mag +
                   rho ^ k * (1 - rho) * e_0 +
                   (1 - rho ^ k) * d_mag)%Re = 
                 (rho ^ k * (1+ rho) * (1 - rho) * e_0 + 
                   2* d_mag  - rho^k * (1 + rho) * d_mag)%Re).
-{ simpl. nra. } rewrite H2. clear H2.
+{ simpl. nra. } rewrite H1. clear H1.
 assert ((rho ^ k * (1 + rho) * (1 - rho) * e_0 +
                   2 * d_mag - rho ^ k * (1 + rho) * d_mag)%Re = 
                 ((rho ^ k * (1 + rho) * ((1-rho) * e_0 - d_mag)) + 2 * d_mag)%Re).
-{ nra. } rewrite H2. clear H2.
+{ nra. } rewrite H1. clear H1.
 rewrite Rmult_plus_distr_r.
 assert ((rho ^ k * (1 + rho) *
                     ((1 - rho) * e_0 - d_mag) * / (1 - rho))%Re =
                 (rho ^ k * (1 + rho) * 
                 (e_0 * ( (1 - rho) * / (1 - rho)) - d_mag * /(1 - rho)))%Re).
-{ nra. } rewrite H2. clear H2. 
+{ nra. } rewrite H1. clear H1. 
 assert ((rho < 1)%Re) by apply H0.
 rewrite Rinv_r; last by nra.
 rewrite Rmult_1_r.
