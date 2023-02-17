@@ -1119,6 +1119,30 @@ apply Rle_lt_trans with
 + apply bnd5.
 Qed.
 
+Definition forward_error_cond {ty} {n:nat} 
+  (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) :=
+  let rho := rho_def A b in
+  let d_mag := d_mag_def A b in
+   let A_real := FT2R_mat A in
+  (forall i, is_finite _ _ (A i i) = true) /\
+  (rho < 1)%Re /\
+  A_real \in unitmx /\
+  (forall i : 'I_n.+1,
+    is_finite (fprec ty) (femax ty)
+      (BDIV ty (Zconst ty 1) (A i i)) = true) /\
+  (forall i : 'I_n.+1, is_finite (fprec ty) (femax ty)
+                              (x0 i ord0) = true) /\
+  (forall i, is_finite (fprec ty) (femax ty)
+                        (A1_inv_J A i ord0) = true) /\
+  (forall i j, is_finite (fprec ty) (femax ty)
+                  (A2_J A i j) = true) /\ 
+  (forall i, is_finite (fprec ty) (femax ty)
+                          (b i ord0) = true) /\
+  @size_constraint ty n /\
+  input_bound A x0 b.
+
+
+
 
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
