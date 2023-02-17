@@ -276,9 +276,13 @@ Definition input_bound_compute {t} {n:nat}
       default_abs t) / (1 + default_rel t))%Re.
 
 
-
-
-
+Definition strict_diagonal_dominance {t} {n:nat} 
+  (A: 'M[ftype t]_n.+1):=
+    forall i, 
+     (Rabs (FT2R_mat A i i ) > 
+      \sum_(j < n.+1 | j != i) Rabs (FT2R_mat A i j))%Re.
+    
+  
 
 
 (** Rcompute **)
@@ -2498,3 +2502,5 @@ Qed.
 
 
 End WITH_NANS.
+
+
