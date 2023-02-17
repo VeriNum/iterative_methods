@@ -1010,19 +1010,16 @@ apply Rle_lt_trans with
       split. by apply rho_ge_0.
       apply Rlt_le. apply H0.
   - apply Rmult_le_compat_r.
-    apply d_mag_ge_0.
-
-
-
- admit.
+    apply d_mag_ge_0. apply Rmult_le_compat_r.
+    apply Rlt_le. apply Rinv_0_lt_compat.
+    apply Rlt_Rminus. apply H0.
+    apply Rcomplements.Rle_minus_l.
+    assert (forall a b:R, (0 <= b)%Re -> (a <= a + b)%Re).
+    { intros. nra. } apply H.
+    apply pow_le. by apply rho_ge_0.
 + apply bnd2.
+Qed.
 
-
-
-
-
-
-intros. apply H. Qed.
 
 
 Lemma bound_3 {ty} {n:nat} 
