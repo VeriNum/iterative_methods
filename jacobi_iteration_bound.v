@@ -1020,7 +1020,7 @@ repeat split.
       try apply Rinv_0_lt_compat;
       try apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
       apply Rplus_lt_compat_r.
-      by apply sqrt_fun_bnd_lt_fmax.
+      apply sqrt_fun_bnd_lt_fmax. apply Hcond.
     * pose proof (@jacobi_forward_error_bound _ t n).
       unfold forward_error_cond in Hcond.
       unfold rho_def in Hcond.
@@ -1108,8 +1108,9 @@ repeat split.
     apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
     unfold n0.
     rewrite [in X in (_ * (Rabs (_ + X)) < _)%Re]/FT2R B2R_Bopp.
-    fold (@FT2R t). apply bound_1.
+    fold (@FT2R t). apply res_xkp1_minus_xk.
     rewrite rev_length length_veclist in Hlenk. by apply /ssrnat.ltP.
+    apply Hcond. apply Hf0.
   - pose proof (@jacobi_forward_error_bound _ t n).
     unfold forward_error_cond in Hcond.
     unfold rho_def in Hcond.
