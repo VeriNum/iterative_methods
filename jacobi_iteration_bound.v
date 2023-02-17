@@ -365,9 +365,11 @@ res_k+1 = A_1 \otimes (x_k+1 \ominus x_k)
 x_k+1 = D^-1 \otimes (b \ominus (N \otimes x_k))
 **)
 
+(*
 Lemma g1_le_fmax {t: type} {n:nat} :
   (g1 t (n + 1)%coq_nat n <= fmax t)%Re.
 Admitted.
+*)
 
 (** finiteness of dot product **)
 Lemma dotprod_finite {t: type} (v : vector t):
@@ -1621,6 +1623,22 @@ Definition forward_error_cond {ty} {n:nat}
                           (b i ord0) = true).
 
 
+Lemma no_overflow_xkp1_minus_xk {t: type} {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
+   (m < n.+1)%coq_nat ->
+  (Rabs
+   (FT2R
+      (X_m_jacobi k.+1 x0 b A 
+         (inord m) ord0) +
+    -
+    FT2R
+      (X_m_jacobi k x0 b A 
+         (inord m) ord0)) <
+ (bpow Zaux.radix2 (femax t) -
+  default_abs t) / (1 + default_rel t))%Re.
+Admitted.
+
+
 Lemma is_finite_xkp1_minus_xk {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
    (m < n.+1)%coq_nat ->
@@ -1662,7 +1680,8 @@ apply Hd. apply Rcomplements.Rlt_div_r.
 apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
 rewrite [in X in (Rabs ( _ + X) < _)%Re]/FT2R B2R_Bopp.
 fold (@FT2R t).
-Admitted.
+by apply no_overflow_xkp1_minus_xk.
+Qed.
 
 
 
@@ -1939,12 +1958,8 @@ repeat split.
       apply Hd2.
       apply Rcomplements.Rlt_div_r.
       apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-    
-
-
-
-
- admit.
+      apply no_overflow_xkp1_minus_xk.
+      by rewrite rev_length length_veclist in Hlenk.
   - unfold Bmult_no_overflow. unfold rounded.
     pose proof (@generic_round_property t 
                 (FT2R (A (inord m) (inord m)) *
@@ -2102,7 +2117,7 @@ repeat split.
     unfold rho_def in Hcond.
     apply H4; try (intros; apply Hcond).
   - apply H3.
-Admitted.
+Qed.
 
 
 Require Import fma_dot_mat_model.
