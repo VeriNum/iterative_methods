@@ -610,9 +610,32 @@ intros. by rewrite Rabs_mult.
 Qed.
 
 
-Lemma g1_le_fmax {n:nat} {t : type} :
-  (g1 t (n + 1)%coq_nat n <=  fmax t)%Re.
-Admitted.
+Definition size_constraint {t} {n:nat}:=
+  (INR n.+1 <
+ ((fmax t - default_abs t) /
+  (1 + default_rel t) -
+  g1 t n.+1 (n.+1 - 1)%coq_nat - 1) /
+ (g t (n.+1 - 1)%coq_nat + 1))%Re /\
+ (INR n.+1 <=
+ fmax t / (1 + g t n.+1) / default_abs t - 1)%Re.
+
+
+Lemma g1_constraint {t} {n:nat}:
+  @size_constraint t n ->
+  (g1 t (n.+1 + 1)%coq_nat n.+1 <= fmax t)%Re.
+Proof.
+intro size_cons.
+unfold g1.
+apply Rdiv_le_right_elim.
+apply Rplus_lt_le_0_compat. nra. apply g_pos.
+apply Rdiv_le_right_elim.
+apply default_abs_gt_0.
+rewrite plus_INR. 
+replace (INR 1) with 1%Re by (simpl;nra).
+apply Rcomplements.Rle_minus_r.
+apply size_cons.
+Qed.
+
 
 Definition rho_def  {t: type} {n:nat} (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) :=
   let A_real := FT2R_mat A in
@@ -817,12 +840,13 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
                   (A2_J A i j) = true) -> 
   (forall i, is_finite (fprec ty) (femax ty)
                           (b i ord0) = true) ->
+  @size_constraint ty n ->
   (forall k:nat, 
    (forall i, is_finite _ _ (X_m_jacobi k x0 b A i ord0) = true) /\
    (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re).
 Proof.
 intro HAf. 
-intros ? ? ? ? ? ? ? ? ?   Hdivf ? Hx0 Ha1_inv HfA2 Hb k.
+intros ? ? ? ? ? ? ? ? ?   Hdivf ? Hx0 Ha1_inv HfA2 Hb size_cons k.
 assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re).
 { intros. by apply BDIV_FT2R_sep_zero. }
 induction k.
@@ -858,7 +882,7 @@ induction k.
       specialize (H2 (@fma_dot_prod_rel_holds _ _ _ n.+1 i (A2_J A) 
                           (\col_j X_m_jacobi k x0 b A j ord0))).
       assert ((g1 ty (n.+2 + 1)%coq_nat n.+2 <=  fmax ty)%Re).
-      { apply g1_le_fmax. } specialize (H2 H3).
+      { apply g1_constraint. } specialize (H2 H3).
       apply H2. intros.
       repeat split.
       + destruct x1. simpl. apply in_combine_l in H4.

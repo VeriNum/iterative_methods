@@ -195,14 +195,7 @@ Definition k_min {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                  (1 + delta) -
                  2 * d_mag / (1 - rho)))%Re)).
 
-Definition size_constraint {t} {n:nat}:=
-  (INR n.+1 <
- ((fmax t - default_abs t) /
-  (1 + default_rel t) -
-  g1 t n.+1 (n.+1 - 1)%coq_nat - 1) /
- (g t (n.+1 - 1)%coq_nat + 1))%Re /\
- (INR n.+1 <=
- fmax t / (1 + g t n.+1) / default_abs t - 1)%Re.
+
 
 Definition jacobi_preconditions_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
@@ -462,15 +455,6 @@ Admitted.
 
 
 
-Lemma Rabs_sum_in {n:nat} (f1 f2 : 'I_n.+1 -> R):
-  \sum_j (Rabs (f1 j) * Rabs (f2 j))%Re = 
-   \sum_j (Rabs (f1 j * f2 j))%Re.
-Proof.
-apply eq_big. by [].
-intros. by rewrite Rabs_mult.
-Qed.
-
-
 Definition forward_error_cond {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) :=
   let rho := rho_def A b in
@@ -673,23 +657,6 @@ fold (@FT2R t).
 by apply no_overflow_xkp1_minus_xk.
 Qed.
 
-
-
-Lemma g1_constraint {t} {n:nat}:
-  @size_constraint t n ->
-  (g1 t (n.+1 + 1)%coq_nat n.+1 <= fmax t)%Re.
-Proof.
-intro size_cons.
-unfold g1.
-apply Rdiv_le_right_elim.
-apply Rplus_lt_le_0_compat. nra. apply g_pos.
-apply Rdiv_le_right_elim.
-apply default_abs_gt_0.
-rewrite plus_INR. 
-replace (INR 1) with 1%Re by (simpl;nra).
-apply Rcomplements.Rle_minus_r.
-apply size_cons.
-Qed.
 
 
 Lemma fun_bnd_lt_fmax {t} {n:nat}:
