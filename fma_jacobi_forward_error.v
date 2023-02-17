@@ -901,10 +901,7 @@ induction k.
       specialize (H2 (@fma_dot_prod_rel_holds _ _ _ n.+1 i (A2_J A) 
                           (\col_j X_m_jacobi k x0 b A j ord0))).
       assert ((g1 ty (n.+2 + 1)%coq_nat n.+2 <=  fmax ty)%Re).
-      { Print g1_constraint.
-
-
-apply g1_constraint. apply size_cons. } specialize (H2 H3).
+      { by apply g1_constraint_Sn. } specialize (H2 H3).
       apply H2. intros.
       repeat split.
       + destruct x1. simpl. apply in_combine_l in H4.
