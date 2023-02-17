@@ -281,8 +281,12 @@ Definition strict_diagonal_dominance {t} {n:nat}
     forall i, 
      (Rabs (FT2R_mat A i i ) > 
       \sum_(j < n.+1 | j != i) Rabs (FT2R_mat A i j))%Re.
-    
-  
+ 
+Lemma diagonal_dominance_implies_invertibility {t} {n:nat} 
+  (A: 'M[ftype t]_n.+1):
+  strict_diagonal_dominance A ->
+  (FT2R_mat A) \in unitmx.
+Admitted.
 
 
 (** Rcompute **)
