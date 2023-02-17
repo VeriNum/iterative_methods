@@ -1865,14 +1865,13 @@ eapply Rle_trans.
                         (X_m_jacobi k.+1 x0 b A -f
                          X_m_jacobi k x0 b A)) * 
                    g t n.+1 + g1 t n.+1 (n.+1 - 1))).
-           { by apply /RleP. } apply reverse_triang_ineq in H2.
+           { by apply /RleP. } apply reverse_triang_ineq in H1.
            match goal with |-context[(_ <= ?a + ?b + ?c)%Re]=>
             replace (a + b + c)%Re with (a + (b + c))%Re by nra
            end.
            assert (forall x y z:R,  (x - y <= z)%Re -> (x <= y + z)%Re).
-           { intros. nra. } apply H3.  by apply /RleP. 
-        -- Search diag_matrix_vec_mult_R.
-           (** vec_inf_norm_diag_matrix_vec_mult_R **)
+           { intros. nra. } apply H2.  by apply /RleP. 
+        -- (** vec_inf_norm_diag_matrix_vec_mult_R **)
            eapply Rle_trans. 
            ** repeat apply Rplus_le_compat_r.
               apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R.
@@ -1894,7 +1893,7 @@ eapply Rle_trans.
                             (X_m_jacobi k.+1 x0 b A -f
                              X_m_jacobi k x0 b A)) * ( 1 + g t n.+1) + 
                        g1 t n.+1 (n.+1 - 1)%coq_nat)%Re).
-             { nra. } rewrite H0.
+             { nra. } rewrite H.
              apply Rplus_le_compat_r. apply Rmult_le_compat_r.
              +++ apply Rplus_le_le_0_compat; try nra; try apply g_pos.
              +++ apply Rmult_le_compat_l. 
@@ -1912,7 +1911,8 @@ eapply Rle_trans.
                +++ repeat apply Rmult_le_pos.
                    --- nra.
                    --- apply d_mag_ge_0.
-                   --- apply Rlt_le. apply Rinv_0_lt_compat. nra.
+                   --- apply Rlt_le. apply Rinv_0_lt_compat.
+                       apply Rlt_Rminus. apply Hcond.
             ** apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
             ** apply Rplus_le_le_0_compat. nra. apply g_pos.
          -- apply g1_pos.
