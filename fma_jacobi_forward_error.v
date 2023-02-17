@@ -615,6 +615,52 @@ Lemma g1_le_fmax {n:nat} {t : type} :
 Admitted.
 
 
+Lemma x_k_bound {ty} {n:nat} 
+  (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k i:
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+   let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
+   let delta := default_rel ty in
+   let rho := ((((1 + g ty n.+1) * (1 + delta) *
+                  g ty n.+1 + delta * (1 + g ty n.+1) +
+                  g ty n.+1) * (1 + delta) + delta) * R +
+                (((1 + g ty n.+1) * (1 + delta) *
+                  g ty n.+1 + delta * (1 + g ty n.+1) +
+                  g ty n.+1) * default_abs ty +
+                 default_abs ty) *
+                matrix_inf_norm (A2_J_real A_real) + R)%Re in
+   let d_mag := ((g ty n.+1 * (1 + delta) + delta) *
+                    ((vec_inf_norm (A1_diag A_real) *
+                      (1 + delta) + default_abs ty) *
+                     vec_inf_norm b_real) +
+                    (1 + g ty n.+1) * g1 ty n.+1 (n.+1 - 1) *
+                    (1 + delta) *
+                    (vec_inf_norm (A1_diag A_real) *
+                     (1 + delta) + default_abs ty) +
+                    g1 ty n.+1 (n.+1 - 1) +
+                    (vec_inf_norm (A1_diag A_real) * delta +
+                     default_abs ty) * vec_inf_norm b_real +
+                    ((((1 + g ty n.+1) * (1 + delta) *
+                       g ty n.+1 + delta * (1 + g ty n.+1) +
+                       g ty n.+1) * (1 + delta) + delta) * R +
+                     (((1 + g ty n.+1) * (1 + delta) *
+                       g ty n.+1 + delta * (1 + g ty n.+1) +
+                       g ty n.+1) * default_abs ty +
+                      default_abs ty) *
+                     matrix_inf_norm (A2_J_real A_real)) *
+                    vec_inf_norm (x_fix x b_real A_real))%Re in
+
+   (f_error k b x0 x A <=
+       rho ^ k * f_error 0 b x0 x A +
+       (1 - rho ^ k) / (1 - rho) * d_mag)%Re ->
+    (Rabs (FT2R (X_m_jacobi k x0 b A i ord0)) <= 1)%Re.
+Proof.
+intros.
+
+
+
+
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
@@ -1073,6 +1119,12 @@ induction k.
         (** This gives us information about conditions in terms of 
             conditions on input
         **)
+        
+
+
+
+
+
         admit.
    - apply Hb.
    - rewrite is_finite_Bopp. rewrite mxE. apply H2.
