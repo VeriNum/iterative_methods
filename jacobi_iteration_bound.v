@@ -386,7 +386,19 @@ repeat split.
           (FT2R_mat (A1_J A)) *
         d_mag_def_alt A b *
         / (1 - rho_def A b))²)%Re.
-  - admit.
+  - apply Rplus_le_compat_l. apply Rmult_le_compat_l.
+    apply Rmult_le_pos. apply pos_INR.
+    apply Rplus_le_le_0_compat. nra. apply g_pos.
+    apply Rsqr_incr_1.
+    * admit.
+    *
+    
+
+
+
+
+
+admit.
   - apply Rgt_lt. apply HG1. 
 
 
