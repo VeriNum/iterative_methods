@@ -2024,12 +2024,15 @@ split.
       ++ pose proof (@residual_bound t n A b (k_min A b acc).+1).
          rewrite Heqx Heqd_mag Heqrho in He0. specialize (H1 He0).
          assert (forward_error_cond A (\col__ Zconst t 0) b ).
-         { unfold forward_error_cond. repeat split; try by intros.
+         { unfold forward_error_cond. repeat split; try by intros; try by (intros; apply Hinp).
            + rewrite Heqrho in Hrho. apply Hrho.
            + apply size_cons.
            + apply size_cons.
-           + intros. apply Hinp.
-           +
+         } specialize (H1 H2).
+
+
+
+ apply H1.
 
          assert ((rho_def A b < 1)%Re).
          { rewrite Heqrho in Hrho. apply Hrho. } 
