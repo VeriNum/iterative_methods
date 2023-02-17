@@ -166,6 +166,48 @@ Lemma x_bound_exists {t} {n:nat}
     (1 - R))%Re.
 Admitted.
 
+Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
+  (b : 'cV[ftype t]_n.+1) (acc : ftype t):
+  let x0 := \col_(j < n.+1) (Zconst t 0) in
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= mulmx (A_real^-1) b_real in
+  let R :=  (vec_inf_norm (A1_diag A_real) *
+                matrix_inf_norm (A2_J_real A_real))%Re in
+  (@f_error _ _ _ 0 b x0 x A  <=
+    vec_inf_norm (FT2R_mat x0) + 
+    vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
+      (1 - R))%Re. 
+
+
+Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
+  (b : 'cV[ftype t]_n.+1) (acc : ftype t) :=
+  let rho := rho_def A b in
+  let d_mag := d_mag_def_alt A b in
+  let x0 := \col_(j < n.+1) (Zconst t 0) in
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= mulmx (A_real^-1) b_real in
+  let e_0 := @f_error _ _ _ 0 b x0 x A in
+  let Gamma := FT2R (BMULT t acc acc) in
+  let delta := default_rel t in
+  Z.to_nat (Zceil (Rlog (1 / rho)%Re 
+             ((e_0 - d_mag / (1 - rho)) * (1 + rho) /
+                ((sqrt
+                    ((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) /
+                     INR n.+1 / (1 + g t n.+1)) -
+                  g1 t n.+1 (n.+1 - 1)%coq_nat) /
+                 (1 + g t n.+1) /
+                 vec_inf_norm (FT2R_mat (A1_J A)) /
+                 (1 + delta) -
+                 2 * d_mag / (1 - rho)))%Re)).
+
+
+
+
+
+
+
 
 
 
