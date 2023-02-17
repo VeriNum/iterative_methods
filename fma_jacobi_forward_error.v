@@ -1109,7 +1109,8 @@ Lemma bound_5 {ty} {n:nat}
   let x:= A_real^-1 *m b_real in
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in 
-  input_bound A x0 b k ->
+  input_bound_alt A x0 b  ->
+  (rho < 1)%Re ->
   (Rabs (FT2R (A1_inv_J A (inord i) ord0)) *
    (Rabs (FT2R (b (inord i) ord0)) +
     (1 + g ty n.+1) *
@@ -1123,7 +1124,36 @@ Lemma bound_5 {ty} {n:nat}
    (bpow Zaux.radix2 (femax ty) -
     default_abs ty) / (1 + default_rel ty) /
    (1 + default_rel ty))%Re.
-Proof. intros. apply H. Qed.
+Proof. 
+intros.
+unfold input_bound_alt in H.
+destruct H as [_ [_ [_ [_ bnd5]]]].
+apply Rle_lt_trans with
+(Rabs(FT2R (A1_inv_J A (inord i) ord0)) *
+        (Rabs (FT2R (b (inord i) ord0)) +
+         (1 + g ty n.+1) *
+         ((vec_inf_norm
+             (x_fix
+                ((FT2R_mat A)^-1 *m 
+                 FT2R_mat b) 
+                (FT2R_mat b) 
+                (FT2R_mat A)) +
+           1 *
+           f_error 0 b x0
+             ((FT2R_mat A)^-1 *m 
+              FT2R_mat b) A +
+           1 / (1 - rho_def A b) *
+           d_mag_def A b) *
+          (\sum_j
+              Rabs
+                (FT2R (A2_J A (inord i) j)))) +
+         g1 ty n.+1 (n.+1 - 1)%coq_nat))%Re.
+
+
+
+
+
+intros. apply H. Qed.
 
 
 (** State the forward error theorem **)
