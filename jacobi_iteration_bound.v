@@ -346,7 +346,8 @@ repeat apply Rplus_le_le_0_compat.
       ++ apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
     * apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
       apply /RleP. apply vec_norm_pd.
-    * apply R
+    * apply Rlt_le. apply Rinv_0_lt_compat. 
+      apply Rlt_Rminus.  apply default_rel_ub_strict.
     * apply /RleP. apply matrix_norm_pd.
   - repeat apply Rmult_le_pos; last by (apply /RleP; apply matrix_norm_pd).
     repeat apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
