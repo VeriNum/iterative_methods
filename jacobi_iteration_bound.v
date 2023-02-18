@@ -90,7 +90,8 @@ Lemma x_bound_exists {t} {n:nat}
                       matrix_inf_norm (A2_real))%Re in *)
   (R_def < 1)%Re ->
    (vec_inf_norm x1 <= 
-      (vec_inf_norm (A1_inv_real) * vec_inf_norm (b_real)) / (1 - R_def))%Re.
+      (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
+        vec_inf_norm (b_real)) / (1 - R_def))%Re.
 Admitted.
 
 Lemma matrix_norm_A2_rel {t: type} {n:nat}
@@ -335,7 +336,8 @@ apply Rplus_le_compat.
          apply default_rel_ge_0.
          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
   - apply /RleP. apply vec_norm_pd.
-  -
+  - admit.
+  - apply x_bound_exists.
 
 
 
