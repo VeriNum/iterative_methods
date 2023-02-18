@@ -163,8 +163,8 @@ Lemma x_bound_exists {t} {n:nat}
                 matrix_inf_norm (FT2R_mat (A2_J A)))%Re in
   (R_def < 1)%Re ->
  (vec_inf_norm x1 <= 
-    vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
-    (1 - R_def))%Re.
+    (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+        vec_inf_norm (FT2R_mat b)) / (1 - R_def))%Re.
 Admitted.
 
 Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
@@ -178,7 +178,8 @@ Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   (R_def < 1)%Re ->
   (@f_error _ _ _ 0 b x0 x A  <=
     vec_inf_norm (FT2R_mat x0) + 
-    vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
+    (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+        vec_inf_norm (FT2R_mat b)) /
       (1 - R_def))%Re. 
 Admitted.
 
@@ -218,12 +219,13 @@ Definition input_bound_Rcompute {t} {n:nat}
   let R_def :=  (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
                 matrix_inf_norm (FT2R_mat (A2_J A)))%Re in
   let x_bound :=  
-  (vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
-    (1 - R_def))%Re in 
+  ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+        vec_inf_norm (FT2R_mat b)) / (1 - R_def))%Re in 
   let rho := rho_def A b in 
   let d_mag := d_mag_def_alt A b in
   let e_0 := (vec_inf_norm (FT2R_mat x0) + 
-              vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
+              (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+                       vec_inf_norm (FT2R_mat b)) /
                 (1 - R_def))%Re in
   (forall i,
     (Rabs (FT2R (A i i)) *
@@ -365,7 +367,14 @@ apply Rplus_le_compat.
   - admit.
   - apply /RleP. apply vec_norm_pd.
   - admit.
-  - admit.
+  - eapply Rle_trans. apply x_bound_exists.
+    * admit.
+    * apply Rmult_le_compat_l.
+
+
+
+
+admit.
 Admitted.
 
 
