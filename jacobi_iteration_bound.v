@@ -170,8 +170,8 @@ Close Scope Z_scope.
 Lemma vec_norm_A1_rel {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1)
 (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
-(Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
+       (BDIV t (Zconst t 1) (A i i)) = true)
+(Ha : forall i j, is_finite (fprec t)  (femax t) (A i j) = true):
 (vec_inf_norm (A1_diag (FT2R_mat A))  <=
  (vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t) )%Re.
 Proof.
@@ -192,7 +192,7 @@ apply bigmax_le.
   - rewrite seq_equiv. rewrite nth_mkseq;
     last by rewrite size_map size_enum_ord in H.
     rewrite !mxE.
-    pose proof (@Binv_accurate _ t (A (inord i) (inord i)) (Hinv i) (Ha i) ).
+    pose proof (@Binv_accurate _ t (A (inord i) (inord i)) (Hinv (@inord n i)) (Ha (@inord n i) (@inord n i)) ).
     destruct H0 as [d [e [Hde [Hd [He H0]]]]].
     rewrite H0.
     assert (e = (- - e)%Re). 
@@ -220,8 +220,8 @@ Qed.
 Lemma matrix_vec_norm_A1_diag_mult_A {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
-(Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
+       (BDIV t (Zconst t 1) (A i i)) = true)
+(Ha : forall i j, is_finite (fprec t)  (femax t) (A i j) = true):
   (vec_inf_norm (A1_diag (FT2R_mat A)) *
      matrix_inf_norm
        (A2_J_real (FT2R_mat A)) <=
@@ -242,7 +242,7 @@ Qed.
 Lemma rho_def_le_alt {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
+       (BDIV t (Zconst t 1) (A i i)) = true)
 (Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
   (rho_def A b <= rho_def_alt A b)%Re.
 Proof.
@@ -3200,4 +3200,3 @@ Qed.
 
 
 End WITH_NANS.
-
