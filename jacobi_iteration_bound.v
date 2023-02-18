@@ -403,10 +403,14 @@ Lemma input_bound_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re -> 
+  (0 < f_error 0 b (\col__ Zconst t 0)
+         ((FT2R_mat A)^-1 *m  FT2R_mat b) A -
+          d_mag_def A b *
+       / (1 - rho_def A b))%Re ->
   input_bound_Rcompute A (\col__ Zconst t 0) b ->
   input_bound A (\col__ Zconst t 0) b .
 Proof.
-intros ? Hrho ? .
+intros ? Hrho He0 ? .
 repeat split.
 + intros. unfold input_bound_Rcompute in H.
   destruct H as [bnd1 _ ].
@@ -415,7 +419,10 @@ repeat split.
   apply Rmult_le_compat_l. apply Rabs_pos.
   apply Rplus_le_compat.
   - rewrite !Rmult_1_l. apply Rplus_le_compat.
-    * 
+    * apply Rmult_le_compat.
+      apply Rplus_le_le_0_compat. nra. by apply rho_ge_0.
+      apply Rlt_le. apply He0.
+      
 
 
 
