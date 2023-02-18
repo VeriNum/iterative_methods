@@ -658,13 +658,9 @@ repeat split.
          =>
          Zcomplements.Zlength r =
          Zcomplements.Zlength A) A) in HAA.
-      
-
-
-
-
-
-admit . } rewrite H3 in HjA. by apply /ssrnat.ltP.
+      specialize (HAA i [] HiA). 
+      by apply invariants.Zlength_eq.
+    } rewrite H3 in HjA. by apply /ssrnat.ltP.
    by apply /ssrnat.ltP.
 + apply Forall_nth. intros.
   unfold invert_diagmatrix. 
@@ -693,68 +689,8 @@ admit . } rewrite H3 in HjA. by apply /ssrnat.ltP.
     * by apply /ssrnat.ltP.
 + apply finite_is_finite.
   apply bmult_overflow_implies in Hfacc. by destruct Hfacc .
-Admitted.
+Qed.
   
-
-
-
-
-
-
-
-
-
-
-Lemma jacobi_iteration_bound_corollaries:
-  forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
-   jacobi_preconditions A b acc k ->
-   matrix_cols A (matrix_rows A) /\
-   Forall (Forall finite) A /\
-   Forall finite (invert_diagmatrix (diag_of_matrix A)) /\
-   Forall finite b /\ finite acc.
-Proof. 
-intros. unfold jacobi_preconditions in H.
-destruct H as [HAA [HlenA [HeqAb H]]].
-remember (length A).-1 as n.
-unfold jacobi_preconditions_Rcompute in H.
-destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]].
-repeat split.
-+ apply HAA.
-+ apply Forall_nth. intros.
-  apply Forall_nth. intros.
-  specialize (Hfa (@inord n i) (@inord n i0)).
-  apply finite_is_finite. rewrite !mxE in Hfa.
-  rewrite !inordK in Hfa.
-  - admit.
-  - rewrite Heqn prednK. by apply /ssrnat.ltP. by apply /ssrnat.ltP.
-  - rewrite Heqn prednK.
-    assert (length (nth i A d) = length A).
-    { admit . } rewrite H1 in H0. by apply /ssrnat.ltP.
-   by apply /ssrnat.ltP.
-+ apply Forall_nth. intros.
-  unfold invert_diagmatrix. 
-  rewrite (nth_map_inrange (Zconst t 0)).
-  - specialize (Hfdiv (@inord n i)).
-    rewrite !mxE in Hfdiv. unfold diag_of_matrix.
-    rewrite nth_map_seq.
-    * unfold matrix_index. rewrite inordK in Hfdiv.
-      ++ apply finite_is_finite. apply Hfdiv.
-      ++ rewrite Heqn prednK. rewrite !map_length seq_length /matrix_rows_nat in H.
-         by apply /ssrnat.ltP. by apply /ssrnat.ltP.
-    * unfold matrix_rows_nat. 
-      by rewrite !map_length seq_length /matrix_rows_nat in H.
-  - rewrite !map_length seq_length.
-    by rewrite !map_length seq_length in H.
-+ apply Forall_nth. intros.
-  specialize (Hfb (@inord n i)).
-  rewrite mxE in Hfb. rewrite inordK in Hfb.
-  - admit.
-  - rewrite Heqn prednK.
-    * rewrite HeqAb. by apply /ssrnat.ltP.
-    * by apply /ssrnat.ltP.
-+ apply finite_is_finite.
-  apply bmult_overflow_implies in Hfacc. by destruct Hfacc .
-Admitted.
   
 (** finiteness of dot product **)
 Lemma dotprod_finite {t: type} (v : vector t)
