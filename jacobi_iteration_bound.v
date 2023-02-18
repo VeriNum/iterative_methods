@@ -215,7 +215,9 @@ apply Rplus_le_compat.
          rewrite [in X in (X <= _)%Re]H2.
          apply Rplus_le_compat; last by apply default_rel_ge_0.
          assert (forall x y:R, (1 <= x)%Re -> (1 <= y)%Re -> (1 <= x * y)%Re).
-         { intros. nra. } apply H3.
+         { intros. nra. } apply H3; last by apply default_rel_plus_1_ge_1.
+         rewrite [in X in (X <= _)%Re]H2.
+         apply Rplus_le_compat; try apply g_pos.
 
 
 
