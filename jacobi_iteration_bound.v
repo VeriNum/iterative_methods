@@ -249,17 +249,18 @@ Definition input_bound_Rcompute {t} {n:nat}
   (A: 'M[ftype t]_n.+1) (x0 b: 'cV[ftype t]_n.+1):=
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
-  let R_def :=  (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-                matrix_inf_norm (FT2R_mat (A2_J A)))%Re in
+  let A1_inv_real := FT2R_mat (A1_inv_J A) in 
+  let A2_real := FT2R_mat (A2_J A) in
+  let R_def :=  (vec_inf_norm (A1_inv_real) *
+                      matrix_inf_norm (A2_real))%Re in
   let x_bound :=  
-  ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-        vec_inf_norm (FT2R_mat b)) / (1 - R_def))%Re in 
-  let rho := rho_def A b in 
+  ((vec_inf_norm (A1_inv_real) *
+        vec_inf_norm (b_real)) / (1 - R_def))%Re in 
+  let rho := rho_def_alt A b in 
   let d_mag := d_mag_def_alt A b in
   let e_0 := (vec_inf_norm (FT2R_mat x0) + 
-              (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-                       vec_inf_norm (FT2R_mat b)) /
-                (1 - R_def))%Re in
+              (vec_inf_norm (A1_inv_real) *
+                       vec_inf_norm (b_real)) / (1 - R_def))%Re in
   (forall i,
     (Rabs (FT2R (A i i)) *
      (1 * (1 + rho) *
