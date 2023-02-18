@@ -475,7 +475,14 @@ repeat split.
       apply rho_def_le_alt. apply Hrho.
   - apply Rgt_lt. apply HG1. 
 + apply Hfacc.
-+ admit.
++ apply Nat.lt_trans with (k_min_alt A b accuracy); last by apply Hk.
+  unfold k_min, k_min_alt.
+  
+
+
+
+
+admit.
 + admit.
 + apply Hfx0.
 + apply Ha1_inv.
