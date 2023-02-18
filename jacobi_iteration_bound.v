@@ -102,7 +102,10 @@ Qed.
 
 
 Lemma vec_norm_A1_rel {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1):
+  (A: 'M[ftype t]_n.+1)
+(Hinv: forall i, is_finite (fprec t)  (femax t)
+       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
+(Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
 (vec_inf_norm (A1_diag (FT2R_mat A)) <=
  vec_inf_norm (FT2R_mat (A1_inv_J A)))%Re.
 Proof.
@@ -120,6 +123,14 @@ apply bigmax_le.
   - rewrite seq_equiv. rewrite nth_mkseq;
     last by rewrite size_map size_enum_ord in H.
     rewrite !mxE.
+    pose proof (@Binv_accurate _ t (A (inord i) (inord i)) (Hinv i) (Ha i) ).
+    
+    
+    
+
+
+
+
     admit.
   - apply /RleP.
     apply (@bigmaxr_ler _ 0%Re [seq Rabs
