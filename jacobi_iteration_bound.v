@@ -474,8 +474,23 @@ try (intros; apply Hfb); try (intros; by apply Hfdiv); try (intros; apply HfA2))
          apply rho_def_le_alt. apply Hrho.
          apply Rplus_le_lt_compat. nra.
          by apply Ropp_lt_contravar.
-    * admit. 
-    * admit.
+    * apply Rplus_le_le_0_compat. apply g1_pos.
+      repeat apply Rmult_le_pos. nra.
+      apply Rplus_le_le_0_compat. nra. apply g_pos.
+      apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+      apply /RleP. apply vec_norm_pd.
+      apply d_mag_ge_0.
+      apply Rlt_le, Rinv_0_lt_compat. 
+      apply Rlt_Rminus. eapply Rle_lt_trans.
+      apply rho_def_le_alt. apply Hrho.
+    * apply Rplus_le_le_0_compat. apply g1_pos.
+      repeat apply Rmult_le_pos. nra.
+      apply Rplus_le_le_0_compat. nra. apply g_pos.
+      apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+      apply /RleP. apply vec_norm_pd.
+      admit.
+      apply Rlt_le, Rinv_0_lt_compat. 
+      apply Rlt_Rminus. apply Hrho.
 + apply Hfacc.
 + admit.
 + admit.
