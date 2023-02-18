@@ -1050,7 +1050,16 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
       apply d_mag_def_alt_ge_0. apply Hrho.
       apply Rlt_le, Rinv_0_lt_compat. 
       apply Rlt_Rminus. apply Hrho.
-+ admit.
++ apply le_lt_trans with (k_min_alt A b accuracy); last by apply Hk.
+  
+  
+
+
+ Search (Z.to_nat _ <= Z.to_nat _)%coq_nat.
+
+
+
+admit.
 + admit.
 + intros. apply input_bound_compute_implies_math; try by []. apply Hrho. admit. 
 + intros. apply input_bound_compute_implies_math;try by []. apply Hrho. admit. 
