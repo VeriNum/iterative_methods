@@ -797,8 +797,8 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
 Lemma d_mag_rel_1 {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
-  (Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
+       (BDIV t (Zconst t 1) (A i i)) = true)
+  (Ha : forall i j, is_finite (fprec t)  (femax t) (A i j) = true):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re -> 
   (2 * d_mag_def A b *
@@ -831,8 +831,8 @@ Qed.
 Lemma d_mag_rel_2 {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
-  (Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
+       (BDIV t (Zconst t 1) (A i i)) = true)
+  (Ha : forall i j, is_finite (fprec t)  (femax t) (A i j) = true):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re -> 
   (1 / (1 - rho_def A b) *
@@ -871,9 +871,10 @@ Qed.
 
 
 Lemma input_bound_compute_implies_math {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)(Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
-  (Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
+  (Hinv: forall i, is_finite (fprec t)  (femax t)
+       (BDIV t (Zconst t 1) (A i i)) = true)
+  (Ha : forall i j, is_finite (fprec t)  (femax t) (A i j) = true):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re -> 
   (0 < f_error 0 b (\col__ Zconst t 0)
