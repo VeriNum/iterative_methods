@@ -462,7 +462,14 @@ try (intros; apply Hfb); try (intros; by apply Hfdiv); try (intros; apply HfA2))
          apply Rplus_le_le_0_compat. nra. apply g_pos.
          apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
          apply /RleP. apply vec_norm_pd.
-      ++
+      ++ assert ((rho_def A b = rho_def_alt A b)%Re \/
+                  (rho_def A b < rho_def_alt A b)%Re).
+         { pose proof (@rho_def_le_alt t n A b). nra. }
+         destruct H
+
+
+apply Rlt_le. apply Rinv_lt_contravar .
+         apply Rmult_lt_0_compat.
   
    
 
