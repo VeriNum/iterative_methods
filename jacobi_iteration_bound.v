@@ -306,13 +306,12 @@ apply Rplus_le_compat.
   - apply Rmult_le_compat_r. apply /RleP. apply vec_norm_pd.
     apply Rplus_le_compat_r. apply Rmult_le_compat_r.
     apply default_rel_ge_0. by apply vec_norm_A1_rel.
++ apply Rmult_le_compat. 
+  - apply Rplus_le_le_0_compat.
+    * apply Rmult_le_pos.
 
 
-
-
-
- admit.
-+ apply Rmult_le_compat.
+apply Rmult_le_compat.
   - admit.
   - apply /RleP. apply vec_norm_pd.
   - admit.
