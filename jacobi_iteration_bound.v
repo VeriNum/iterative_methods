@@ -92,6 +92,8 @@ Admitted.
 Lemma rho_def_le_alt {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
   (rho_def A b <= rho_def_alt A b)%Re.
+Proof.
+unfold rho_def, rho_def_alt.
 Admitted.
 
 (** relation between the non-computable and computable d_mag **)
@@ -189,6 +191,19 @@ Lemma rho_1_implies_rho_2 {t: type} {n:nat}
    (FT2R_mat (A1_inv_J A)) *
      matrix_inf_norm
        (FT2R_mat (A2_J A)) < 1)%Re.
+Proof.
+intros. eapply Rle_lt_trans; last by apply H.
+unfold rho_hat,rho_def_alt.
+assert ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+          matrix_inf_norm  (FT2R_mat (A2_J A)))%Re = 
+        (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+          matrix_inf_norm  (FT2R_mat (A2_J A)) + 0)%Re) by nra.
+rewrite [in X in (X <= _)%Re]H0.
+
+
+
+
+
 Admitted.
 
 
