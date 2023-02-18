@@ -87,6 +87,28 @@ Lemma x_bound_exists {t} {n:nat}
       (vec_inf_norm (A1_inv_real) * vec_inf_norm (b_real)) / (1 - R_def))%Re.
 Admitted.
 
+Lemma matrix_vec_norm_A1_diag_mult_A {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1):
+  (vec_inf_norm (A1_diag (FT2R_mat A)) *
+ matrix_inf_norm
+   (A2_J_real (FT2R_mat A)) <=
+ vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+ matrix_inf_norm (FT2R_mat (A2_J A)))%Re.
+Admitted.
+
+(**
+(matrix_inf_norm
+   (A2_J_real (FT2R_mat A)) <=
+ matrix_inf_norm (FT2R_mat (A2_J A)))%Re
+**)
+Lemma matrix_norm_A2_rel {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1):
+  (matrix_inf_norm
+   (A2_J_real (FT2R_mat A)) <=
+ matrix_inf_norm (FT2R_mat (A2_J A)))%Re.
+Admitted.
+
+
 
 (** relation between the non-computable and computable rho **)
 Lemma rho_def_le_alt {t: type} {n:nat}
@@ -107,12 +129,21 @@ apply Rplus_le_compat.
          -- apply Rmult_le_pos; first by apply default_rel_ge_0.
             apply Rplus_le_le_0_compat; try nra; try apply g_pos.
       ++ apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
-    * admit.
-
-
-
-
-Admitted.
+    * apply matrix_vec_norm_A1_diag_mult_A.
+  - apply Rmult_le_compat_l.
+    * repeat apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
+      apply Rmult_le_pos.
+      ++ apply Rplus_le_le_0_compat; last by apply g_pos.
+         apply Rplus_le_le_0_compat.
+         -- repeat apply Rmult_le_pos;last by apply g_pos.
+            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+            apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+         -- apply Rmult_le_pos; first by apply default_rel_ge_0.
+            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+      ++ apply default_abs_ge_0.
+    * apply matrix_norm_A2_rel.
++ apply matrix_vec_norm_A1_diag_mult_A.
+Qed.
 
 (** relation between the non-computable and computable d_mag **)
 Lemma d_mag_def_le_alt {t: type} {n:nat}
