@@ -93,36 +93,20 @@ Lemma matrix_norm_A2_rel {t: type} {n:nat}
    (A2_J_real (FT2R_mat A)) <=
  matrix_inf_norm (FT2R_mat (A2_J A)))%Re.
 Proof.
-unfold matrix_inf_norm.
-apply bigmax_le.
-+ by rewrite size_map size_enum_ord.
-+ intros.
-  rewrite seq_equiv. rewrite nth_mkseq;
-  last by rewrite size_map size_enum_ord in H.
-  apply Rle_trans with 
-  [seq row_sum (FT2R_mat (A2_J A)) i0
-      | i0 <- enum 'I_n.+1]`_i.
-  - rewrite seq_equiv. rewrite nth_mkseq;
-    last by rewrite size_map size_enum_ord in H.
-    unfold row_sum.
-    apply /RleP.
+assert (A2_J_real (FT2R_mat A) = 
+        FT2R_mat (A2_J A)).
+{ apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+  case: (x == y :> nat); simpl; nra.
+} rewrite H; nra.
+Qed.
 
 
-
-
-
-
-admit.
-  - apply /RleP.
-    apply (@bigmaxr_ler _ 0%Re [seq row_sum (FT2R_mat (A2_J A)) i0
-                                  | i0 <- enum 'I_n.+1] i).
-    rewrite size_map size_enum_ord.
-    by rewrite size_map size_enum_ord in H.
-
-
-
-
+Lemma vec_norm_A1_rel {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1):
+(vec_inf_norm (A1_diag (FT2R_mat A)) <=
+ vec_inf_norm (FT2R_mat (A1_inv_J A)))%Re.
 Admitted.
+
 
 Lemma matrix_vec_norm_A1_diag_mult_A {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1):
@@ -135,11 +119,9 @@ Proof.
 apply Rmult_le_compat.
 + apply /RleP. apply vec_norm_pd.
 + apply /RleP. apply matrix_norm_pd.
-+ admit.
++ apply vec_norm_A1_rel .
 + apply matrix_norm_A2_rel.
-Admitted.
-
-
+Qed.
 
 
 
