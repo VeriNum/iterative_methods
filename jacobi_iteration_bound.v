@@ -243,7 +243,7 @@ Lemma rho_def_le_alt {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
        (BDIV t (Zconst t 1) (A i i)) = true)
-(Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
+(Ha : forall i j, is_finite (fprec t)  (femax t) (A  i j) = true):
   (rho_def A b <= rho_def_alt A b)%Re.
 Proof.
 unfold rho_def, rho_def_alt.
@@ -350,8 +350,8 @@ Qed.
 Lemma d_mag_def_le_alt {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
-(Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
+       (BDIV t (Zconst t 1) (A i i)) = true)
+(Ha : forall i j, is_finite (fprec t)  (femax t) (A i j) = true):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re ->
   (d_mag_def A b <= d_mag_def_alt A b)%Re.
