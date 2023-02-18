@@ -143,18 +143,31 @@ apply Rlt_gt. apply Rinv_0_lt_compat. apply bpow_gt_0.
 apply Rlt_gt. apply Rinv_0_lt_compat. apply bpow_gt_0.
 Qed.
 
+Lemma default_rel_ub_strict t :
+(default_rel t < 1)%Re.
+Proof.
+unfold default_rel.
+pose proof bpow_gt_0 Zaux.radix2 (fprec t).
+rewrite !bpow_plus.
+rewrite <- !Rmult_assoc.
+rewrite Rmult_comm.
+rewrite <- !Rmult_assoc.
+replace (bpow Zaux.radix2 1 * / 2)%Re with 1%Re; [|simpl;nra].
+rewrite !bpow_opp !Rcomplements.Rlt_div_r. 
+field_simplify; try nra.
+replace 1%Re with  (bpow Zaux.radix2 0).
+apply bpow_lt.
 
 
 
 
-eapply Rle_trans; [| apply Rmult_le_compat ;[ | | apply bpow_fprec_lb | apply bpow_femax_lb  ]]; try nra.
-apply Rlt_gt. 
-replace (/ bpow Zaux.radix2 (femax t)) with (1 / bpow Zaux.radix2 (femax t)) by nra.
-apply Rdiv_lt_0_compat; try nra.
+pose proof fprec_gt_0 t; lia.
+simpl; auto.
 apply Rlt_gt;
 replace (/ bpow Zaux.radix2 (fprec t)) with (1 / bpow Zaux.radix2 (fprec t)) by nra;
 apply Rdiv_lt_0_compat; try nra.
 Qed.
+
 
 
 Lemma vec_norm_A1_rel {t: type} {n:nat}
@@ -172,13 +185,12 @@ apply bigmax_le.
   rewrite seq_equiv. rewrite nth_mkseq;
   last by rewrite size_map size_enum_ord in H.
   rewrite mxE.
-  apply Rcomplements.Rle_div_r.
-  apply Rlt_le_trans
+  apply Rcomplements.Rle_div_r. apply Rlt_Rminus.
+  apply default_abs_ub_strict.
 
 
 
-
- apply Rcomplements.Rle_minus_l.
+  apply Rcomplements.Rle_minus_l.
   apply Rle_trans with
   [seq Rabs
           (FT2R_mat (A1_inv_J A) i0 0)
