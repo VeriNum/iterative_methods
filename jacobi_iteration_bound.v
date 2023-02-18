@@ -208,7 +208,7 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
 
 (** relation between non-computable and computable defn of e_o in reals **)
 Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
-  (b : 'cV[ftype t]_n.+1) (acc : ftype t):
+  (b : 'cV[ftype t]_n.+1):
   let x0 := \col_(j < n.+1) (Zconst t 0) in
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -422,7 +422,9 @@ repeat split.
     * apply Rmult_le_compat.
       apply Rplus_le_le_0_compat. nra. by apply rho_ge_0.
       apply Rlt_le. apply He0.
-      
+      apply Rplus_le_compat_l. apply rho_def_le_alt.
+      apply Rplus_le_compat. 
+      apply f_error0_bnd . admit.
 
 
 
