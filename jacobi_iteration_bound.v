@@ -120,8 +120,10 @@ Admitted.
 
 Lemma d_mag_def_alt_ge_0 {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+   (rho_def_alt A b < 1)%Re ->
    (0 <= d_mag_def_alt A b)%Re.
 Proof.
+intro Hrho.
 unfold d_mag_def_alt.
 repeat apply Rplus_le_le_0_compat.
 + repeat try apply Rmult_le_pos; try repeat apply Rplus_le_le_0_compat.
@@ -174,15 +176,9 @@ repeat apply Rplus_le_le_0_compat.
       ++ apply Rmult_le_pos; first by apply default_rel_ge_0.
          apply Rplus_le_le_0_compat. nra. apply g_pos.
     * nra.
-  - 
-
-
-
-
-
-
-
-Admitted.
+  - apply Rlt_le. apply Rinv_0_lt_compat.
+    apply Rlt_Rminus. apply Hrho.
+Qed.
 
 
 Lemma rho_1_implies_rho_2 {t: type} {n:nat}
