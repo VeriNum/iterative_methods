@@ -454,8 +454,11 @@ repeat apply Rplus_le_le_0_compat.
   - apply Rmult_le_pos; try apply g_pos.
     apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
   - apply default_rel_ge_0.
-  - apply Rmult_le_pos. 
+  - repeat apply Rmult_le_pos.
+    apply Rplus_le_le_0_compat; last by apply default_abs_ge_0. 
     apply /RleP. apply vec_norm_pd.
+    apply Rlt_le. apply Rinv_0_lt_compat. apply Rlt_Rminus.
+    apply default_rel_ub_strict.
     apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
   - apply default_abs_ge_0.
   - apply /RleP. apply vec_norm_pd.
@@ -468,12 +471,20 @@ repeat apply Rplus_le_le_0_compat.
   - apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0. 
   - apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
     apply Rmult_le_pos; last by (apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0).
+    repeat apply Rmult_le_pos.
+    apply Rplus_le_le_0_compat; last by apply default_abs_ge_0. 
     apply /RleP. apply vec_norm_pd.
+    apply Rlt_le. apply Rinv_0_lt_compat. apply Rlt_Rminus.
+    apply default_rel_ub_strict.
 + apply g1_pos.
 + apply Rmult_le_pos; last by (apply /RleP; try apply vec_norm_pd).
   apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
   apply Rmult_le_pos; last by apply default_rel_ge_0.
-  apply /RleP. apply vec_norm_pd.
+  repeat apply Rmult_le_pos.
+    apply Rplus_le_le_0_compat; last by apply default_abs_ge_0. 
+    apply /RleP. apply vec_norm_pd.
+    apply Rlt_le. apply Rinv_0_lt_compat. apply Rlt_Rminus.
+    apply default_rel_ub_strict.
 + repeat apply Rmult_le_pos; try by (apply /RleP; try apply vec_norm_pd).
   repeat apply Rplus_le_le_0_compat.
   - repeat apply Rmult_le_pos.
@@ -503,7 +514,14 @@ repeat apply Rplus_le_le_0_compat.
       ++ apply Rmult_le_pos; first by apply default_rel_ge_0.
          apply Rplus_le_le_0_compat. nra. apply g_pos.
     * nra.
-  - apply Rlt_le. apply Rinv_0_lt_compat.
+  - apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
+    apply /RleP. apply vec_norm_pd.
+  - apply Rlt_le. apply Rinv_0_lt_compat. 
+    apply Rlt_Rminus.  apply default_rel_ub_strict.
+  - 
+
+
+apply Rlt_le. apply Rinv_0_lt_compat.
     apply Rlt_Rminus. apply Hrho.
 Qed.
 
