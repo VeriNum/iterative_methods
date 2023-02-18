@@ -29,7 +29,8 @@ Definition rho_def_alt  {t: type} {n:nat} (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]
   let b_real := FT2R_mat b in
   let A1_inv_real := FT2R_mat (A1_inv_J A) in 
   let A2_real := FT2R_mat (A2_J A) in   
-  let R := (vec_inf_norm (A1_inv_real) * matrix_inf_norm (A2_real))%Re in
+  let R := (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
+              matrix_inf_norm (A2_real))%Re in
   let delta := default_rel t in
   ((((1 + g t n.+1) * (1 + delta) *
                   g t n.+1 + delta * (1 + g t n.+1) +
@@ -216,17 +217,21 @@ apply bigmax_le.
 Qed.
 
 Lemma matrix_vec_norm_A1_diag_mult_A {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1):
+  (A: 'M[ftype t]_n.+1)
+  (Hinv: forall i, is_finite (fprec t)  (femax t)
+       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
+(Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
   (vec_inf_norm (A1_diag (FT2R_mat A)) *
- matrix_inf_norm
-   (A2_J_real (FT2R_mat A)) <=
- vec_inf_norm (FT2R_mat (A1_inv_J A)) *
- matrix_inf_norm (FT2R_mat (A2_J A)))%Re.
+     matrix_inf_norm
+       (A2_J_real (FT2R_mat A)) <=
+  (vec_inf_norm (FT2R_mat (A1_inv_J A)) +
+      default_abs t) / (1 - default_rel t) *
+      matrix_inf_norm (FT2R_mat (A2_J A)))%Re.
 Proof.
 apply Rmult_le_compat.
 + apply /RleP. apply vec_norm_pd.
 + apply /RleP. apply matrix_norm_pd.
-+ apply vec_norm_A1_rel .
++ by apply vec_norm_A1_rel .
 + apply matrix_norm_A2_rel.
 Qed.
 
@@ -3086,3 +3091,4 @@ Qed.
 
 
 End WITH_NANS.
+
