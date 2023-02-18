@@ -156,15 +156,10 @@ replace (bpow Zaux.radix2 1 * / 2)%Re with 1%Re; [|simpl;nra].
 rewrite !bpow_opp !Rcomplements.Rlt_div_r. 
 field_simplify; try nra.
 replace 1%Re with  (bpow Zaux.radix2 0).
-apply bpow_lt.
-
-
-
-
-pose proof fprec_gt_0 t; lia.
+apply bpow_lt. apply fprec_gt_0.
 simpl; auto.
 apply Rlt_gt;
-replace (/ bpow Zaux.radix2 (fprec t)) with (1 / bpow Zaux.radix2 (fprec t)) by nra;
+replace (/ bpow Zaux.radix2 (fprec t))%Re with (1 / bpow Zaux.radix2 (fprec t))%Re by nra;
 apply Rdiv_lt_0_compat; try nra.
 Qed.
 
@@ -186,7 +181,7 @@ apply bigmax_le.
   last by rewrite size_map size_enum_ord in H.
   rewrite mxE.
   apply Rcomplements.Rle_div_r. apply Rlt_Rminus.
-  apply default_abs_ub_strict.
+  apply default_rel_ub_strict.
 
 
 
