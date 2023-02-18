@@ -351,7 +351,9 @@ apply Rplus_le_compat.
          apply default_rel_ge_0.
          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
      ++ by apply matrix_vec_norm_A1_diag_mult_A.
-   *
+   * apply Rmult_le_compat; try (apply /RleP; apply matrix_norm_pd); 
+     try apply matrix_norm_A2_rel.
+       
 
 
 
