@@ -1052,6 +1052,8 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
       apply Rlt_Rminus. apply Hrho.
 + apply le_lt_trans with (k_min_alt A b accuracy); last by apply Hk.
   apply sublist.Z_to_nat_monotone.
+  apply Zceil_le.
+  unfold Rlog.
   
 
 
