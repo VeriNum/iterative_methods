@@ -336,8 +336,16 @@ apply Rplus_le_compat.
          apply default_rel_ge_0.
          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
   - apply /RleP. apply vec_norm_pd.
-  - admit.
-  - apply x_bound_exists. 
+  - apply Rplus_le_compat.
+    * apply Rmult_le_compat_l.
+
+
+
+
+
+
+admit.
+  - apply x_bound_exists. admit.
 
 
 
