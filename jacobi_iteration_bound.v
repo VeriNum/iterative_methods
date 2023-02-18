@@ -633,6 +633,17 @@ Qed.
 
 (** Replace Gamma with tau_squared  **)
 
+Local Open Scope Z_scope.
+Lemma dummy (x:Z):
+  (x < 0)%Z ->
+  Z.to_nat x = 0%nat.
+Proof.
+intros.
+by apply sublist.Z2Nat_neg.
+Qed.
+
+
+
 Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   (b : 'cV[ftype t]_n.+1) (acc : ftype t) :=
   let rho := rho_def_alt A b in
