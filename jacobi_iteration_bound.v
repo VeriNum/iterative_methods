@@ -585,65 +585,6 @@ repeat split.
 *)
 Admitted.
 
-(*
-Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
-  (* some property of A,b,accuracy holds such that 
-    jacobi_n will indeed converge within k iterations to this accuracy, 
-   without ever overflowing *)
-  let A_real := FT2R_mat A in
-  let b_real := FT2R_mat b in 
-  let rho := rho_def A b in 
-  let d_mag := d_mag_def_alt A b in
-  let x0 := \col_(j < n.+1) (Zconst t 0) in
-  let R_def :=  (vec_inf_norm (A1_diag A_real) *
-                matrix_inf_norm (A2_J_real A_real))%Re in
-  let e_0 := (vec_inf_norm (FT2R_mat x0) + 
-              vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
-                (1 - R_def))%Re in
-  (** Finiteness of A **)
-  (forall i j, Binary.is_finite _ _ (A i j) = true) /\ 
-  (** contraction constant **)
-  (0< rho_def_alt A b /\ rho_def_alt A b < 1)%Re /\
-  (** diagonal dominance of A **)
-  strict_diagonal_dominance A /\
-  (** Finiteness of the inverse of diagonal elements of A **)
-  (forall i : 'I_n.+1,
-    Binary.is_finite (fprec t) (femax t)
-      (BDIV t (Zconst t 1) (A i i)) = true) /\
-  (** Constraint on Gamma **)
-  (FT2R (BMULT t accuracy accuracy) >
-     g1 t n.+1 (n.+1 - 1)%coq_nat +
-     INR n.+1 * (1 + g t n.+1) *
-     (g1 t n.+1 (n.+1 - 1)%coq_nat +
-      2 * (1 + g t n.+1) * (1 + default_rel t) *
-      vec_inf_norm (FT2R_mat (A1_J A)) *
-      d_mag_def_alt A b * / (1 - rho_def A b))²)%Re /\
-  (** Gamma is finite **)
-  Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
-  (** constraint on k **)
-  (k_min_alt A b accuracy < k)%coq_nat /\
-  (** lower bound on the initial error **)
-  (0 < e_0 - d_mag / (1 - rho))%Re /\
-  (** finiteness of x0 **)
-  (forall i : 'I_n.+1, is_finite (fprec t) (femax t)
-                              (x0 i ord0) = true) /\
-  (** finiteness of A2 **)
-  (forall i j, is_finite (fprec t) (femax t)
-                  (A2_J A i j) = true) /\
-  (** finitenes of b **) 
-  (forall i, is_finite (fprec t) (femax t)
-                          (b i ord0) = true) /\
-  (** constraint on the dimension **)
-  @size_constraint t n /\
-  (** constraint on bounds for input **)
-  input_bound_Rcompute A x0 b.
-
-*)
-
-
-
-
 Definition jacobi_preconditions {t: type}
   (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
   (* some property of A,b,accuracy holds such that 
@@ -652,62 +593,11 @@ Definition jacobi_preconditions {t: type}
     matrix_cols A (matrix_rows A) /\
     (0 < length A)%coq_nat /\
     (length A = length b) /\
-    let n := (length A).-1 in 
+    let n := (length A).-1 in
     let A_v := @matrix_inj t A n.+1 n.+1 in
-    let b_v := @vector_inj t b n.+1 in 
-    let A_real := FT2R_mat A_v in
-    let b_real := FT2R_mat b_v in 
-    let rho := rho_def A_v b_v in 
-    let d_mag := d_mag_def_alt A_v b_v in
-    let x0 := \col_(j < n.+1) (Zconst t 0) in
-    let R_def :=  (vec_inf_norm (A1_diag A_real) *
-                  matrix_inf_norm (A2_J_real A_real))%Re in
-    let e_0 := (vec_inf_norm (FT2R_mat x0) + 
-                vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
-                  (1 - R_def))%Re in
-    (** Finiteness of A **)
-    (forall i j, Binary.is_finite _ _ (A i j) = true) /\ 
-    (** contraction constant **)
-    (0< rho_def_alt A b /\ rho_def_alt A b < 1)%Re /\
-    (** diagonal dominance of A **)
-    strict_diagonal_dominance A /\
-    (** Finiteness of the inverse of diagonal elements of A **)
-    (forall i : 'I_n.+1,
-      Binary.is_finite (fprec t) (femax t)
-        (BDIV t (Zconst t 1) (A i i)) = true) /\
-    (** Constraint on Gamma **)
-    (FT2R (BMULT t accuracy accuracy) >
-       g1 t n.+1 (n.+1 - 1)%coq_nat +
-       INR n.+1 * (1 + g t n.+1) *
-       (g1 t n.+1 (n.+1 - 1)%coq_nat +
-        2 * (1 + g t n.+1) * (1 + default_rel t) *
-        vec_inf_norm (FT2R_mat (A1_J A)) *
-        d_mag_def_alt A b * / (1 - rho_def A b))²)%Re /\
-    (** Gamma is finite **)
-    Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
-    (** constraint on k **)
-    (k_min_alt A b accuracy < k)%coq_nat /\
-    (** lower bound on the initial error **)
-    (0 < e_0 - d_mag / (1 - rho))%Re /\
-    (** finiteness of x0 **)
-    (forall i : 'I_n.+1, is_finite (fprec t) (femax t)
-                                (x0 i ord0) = true) /\
-    (** finiteness of A2 **)
-    (forall i j, is_finite (fprec t) (femax t)
-                    (A2_J A i j) = true) /\
-    (** finitenes of b **) 
-    (forall i, is_finite (fprec t) (femax t)
-                            (b i ord0) = true) /\
-    (** constraint on the dimension **)
-    @size_constraint t n /\
-    (** constraint on bounds for input **)
-    input_bound_Rcompute A x0 b.
+    let b_v := @vector_inj t b n.+1 in  
+    jacobi_preconditions_Rcompute A_v b_v accuracy k.
 
-
-
-
-
-   False.
 
 Lemma jacobi_iteration_bound_monotone:
   forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k k': nat),
