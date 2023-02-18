@@ -415,7 +415,14 @@ repeat split.
   apply Rmult_le_compat_l. apply Rabs_pos.
   apply Rplus_le_compat.
   - rewrite !Rmult_1_l. apply Rplus_le_compat.
-    * admit.
+    * 
+
+
+
+
+
+
+admit.
     * apply Rmult_le_compat.
       apply Rmult_le_pos. nra. apply d_mag_ge_0.
       apply Rlt_le, Rinv_0_lt_compat. 
@@ -434,12 +441,6 @@ repeat split.
          apply rho_def_le_alt. apply Hrho.
          apply Rplus_le_lt_compat. nra.
          by apply Ropp_lt_contravar.
-  - 
-
-
-
-
- admit.
   - apply Rmult_le_compat_l. nra.
     apply x_bound_exists. admit.
 + admit.
