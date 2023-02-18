@@ -370,11 +370,13 @@ apply Rplus_le_compat.
   - eapply Rle_trans. apply x_bound_exists.
     * admit.
     * apply Rmult_le_compat_l.
-
-
-
-
-admit.
+      ++ apply Rmult_le_pos; (apply /RleP; apply vec_norm_pd).
+      ++ apply Rlt_le. apply  Rinv_lt_contravar.
+         ** apply Rmult_lt_0_compat. apply Rlt_Rminus.
+            admit.
+            apply Rlt_Rminus. admit.
+         ** apply Rplus_le_lt_compat. nra.
+            apply Ropp_lt_contravar. admit.
 Admitted.
 
 
