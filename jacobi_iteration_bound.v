@@ -412,7 +412,7 @@ Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
 Proof.
 intros.
 unfold jacobi_preconditions_Rcompute in H.
-destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [Ha1_inv [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]]].
+destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]].
 unfold jacobi_preconditions_math.
 repeat split.
 + apply Hfa.
@@ -475,7 +475,7 @@ repeat split.
   unfold k_min, k_min_alt. admit.
 + admit.
 + apply Hfx0.
-+ apply Ha1_inv.
++ intros. rewrite mxE. apply Hfdiv.
 + apply HfA2.
 + apply Hfb.
 + apply size_cons.
