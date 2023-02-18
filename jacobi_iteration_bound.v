@@ -450,7 +450,8 @@ repeat split.
   - apply Rmult_le_compat_l. nra.
     apply x_bound_exists. admit.
 + admit.
-+ admit.
++ intros. unfold input_bound_Rcompute in H.
+  destruct H as [_ [_ [bnd3 _]]]. apply bnd3.
 + admit.
 + admit.
 + admit.
