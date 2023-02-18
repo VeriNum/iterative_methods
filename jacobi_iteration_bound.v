@@ -1051,11 +1051,8 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
       apply Rlt_le, Rinv_0_lt_compat. 
       apply Rlt_Rminus. apply Hrho.
 + apply le_lt_trans with (k_min_alt A b accuracy); last by apply Hk.
+  apply sublist.Z_to_nat_monotone.
   
-  
-
-
- Search (Z.to_nat _ <= Z.to_nat _)%coq_nat.
 
 
 
