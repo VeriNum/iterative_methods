@@ -276,6 +276,69 @@ apply Rplus_le_compat.
 + by apply matrix_vec_norm_A1_diag_mult_A.
 Qed.
 
+
+Lemma rho_1_implies_rho_2 {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  let rho_hat := rho_def_alt A b in 
+  (rho_hat < 1)%Re ->
+  (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
+     matrix_inf_norm
+       (FT2R_mat (A2_J A)) < 1)%Re.
+Proof.
+intros. eapply Rle_lt_trans; last by apply H.
+unfold rho_hat,rho_def_alt.
+match goal with |-context[(_ <= ?a + ?c + ?b)%Re]=>
+ replace (a + c + b)%Re with ((a + b) + c)%Re by nra
+end.
+assert ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+          matrix_inf_norm  (FT2R_mat (A2_J A)))%Re = 
+        (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+          matrix_inf_norm  (FT2R_mat (A2_J A)) + 0)%Re) by nra.
+rewrite [in X in (X <= _)%Re]H0.
+apply Rplus_le_compat.
++ assert (forall a b:R, (a * b + b = (1 + a)* b)%Re).
+  { intros. nra. } rewrite H1.
+  assert ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+                 matrix_inf_norm  (FT2R_mat (A2_J A)))%Re  =
+              (1 * (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+                      matrix_inf_norm  (FT2R_mat (A2_J A))))%Re).
+  { nra. } rewrite [in X in (X <= _)%Re]H2.
+  apply Rmult_le_compat_r.
+  - apply Rmult_le_pos.
+    apply /RleP. apply vec_norm_pd.
+    apply /RleP. apply matrix_norm_pd.
+  - assert ((0 <= (((1 + g t n.+1) *
+                 (1 + default_rel t) * 
+                 g t n.+1 +
+                 default_rel t * (1 + g t n.+1) +
+                 g t n.+1) * (1 + default_rel t) +
+                default_rel t))%Re).
+    { apply Rplus_le_le_0_compat; last by apply default_rel_ge_0.
+      apply Rmult_le_pos.
+      + apply Rplus_le_le_0_compat; last by apply g_pos.
+        apply Rplus_le_le_0_compat.
+        - repeat apply Rmult_le_pos.
+          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+          apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+          apply g_pos.
+        - apply Rmult_le_pos. apply default_rel_ge_0.
+          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+      + apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+    }  nra.
++ repeat apply Rmult_le_pos; last by (apply /RleP; apply matrix_norm_pd).
+  apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
+  apply Rmult_le_pos; last by apply  default_abs_ge_0.
+  apply Rplus_le_le_0_compat; try by apply g_pos.
+  apply Rplus_le_le_0_compat.
+  - repeat apply Rmult_le_pos; last by apply g_pos.
+    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+  - apply Rmult_le_pos; first by apply default_rel_ge_0.
+    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+Qed.
+
+
+
 (** relation between the non-computable and computable d_mag **)
 Lemma d_mag_def_le_alt {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
@@ -369,24 +432,6 @@ apply Rplus_le_compat.
 
 
 
-
-
-_compat.
-  - admit.
-  - apply /RleP. apply vec_norm_pd.
-  - admit.
-  - eapply Rle_trans. apply x_bound_exists.
-    * admit.
-    * apply Rmult_le_compat_l.
-      ++ apply Rmult_le_pos; (apply /RleP; apply vec_norm_pd).
-      ++ apply Rlt_le. apply  Rinv_lt_contravar.
-         ** apply Rmult_lt_0_compat. apply Rlt_Rminus.
-            admit.
-            apply Rlt_Rminus. admit.
-         ** apply Rplus_le_lt_compat. nra.
-            apply Ropp_lt_contravar. admit.
-Admitted.
-
 Lemma d_mag_def_alt_ge_0 {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
    (rho_def_alt A b < 1)%Re ->
@@ -453,66 +498,6 @@ repeat apply Rplus_le_le_0_compat.
 Qed.
 
 
-Lemma rho_1_implies_rho_2 {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
-  let rho_hat := rho_def_alt A b in 
-  (rho_hat < 1)%Re ->
-  (vec_inf_norm
-   (FT2R_mat (A1_inv_J A)) *
-     matrix_inf_norm
-       (FT2R_mat (A2_J A)) < 1)%Re.
-Proof.
-intros. eapply Rle_lt_trans; last by apply H.
-unfold rho_hat,rho_def_alt.
-match goal with |-context[(_ <= ?a + ?c + ?b)%Re]=>
- replace (a + c + b)%Re with ((a + b) + c)%Re by nra
-end.
-assert ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-          matrix_inf_norm  (FT2R_mat (A2_J A)))%Re = 
-        (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-          matrix_inf_norm  (FT2R_mat (A2_J A)) + 0)%Re) by nra.
-rewrite [in X in (X <= _)%Re]H0.
-apply Rplus_le_compat.
-+ assert (forall a b:R, (a * b + b = (1 + a)* b)%Re).
-  { intros. nra. } rewrite H1.
-  assert ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-                 matrix_inf_norm  (FT2R_mat (A2_J A)))%Re  =
-              (1 * (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-                      matrix_inf_norm  (FT2R_mat (A2_J A))))%Re).
-  { nra. } rewrite [in X in (X <= _)%Re]H2.
-  apply Rmult_le_compat_r.
-  - apply Rmult_le_pos.
-    apply /RleP. apply vec_norm_pd.
-    apply /RleP. apply matrix_norm_pd.
-  - assert ((0 <= (((1 + g t n.+1) *
-                 (1 + default_rel t) * 
-                 g t n.+1 +
-                 default_rel t * (1 + g t n.+1) +
-                 g t n.+1) * (1 + default_rel t) +
-                default_rel t))%Re).
-    { apply Rplus_le_le_0_compat; last by apply default_rel_ge_0.
-      apply Rmult_le_pos.
-      + apply Rplus_le_le_0_compat; last by apply g_pos.
-        apply Rplus_le_le_0_compat.
-        - repeat apply Rmult_le_pos.
-          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-          apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
-          apply g_pos.
-        - apply Rmult_le_pos. apply default_rel_ge_0.
-          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-      + apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
-    }  nra.
-+ repeat apply Rmult_le_pos; last by (apply /RleP; apply matrix_norm_pd).
-  apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
-  apply Rmult_le_pos; last by apply  default_abs_ge_0.
-  apply Rplus_le_le_0_compat; try by apply g_pos.
-  apply Rplus_le_le_0_compat.
-  - repeat apply Rmult_le_pos; last by apply g_pos.
-    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
-  - apply Rmult_le_pos; first by apply default_rel_ge_0.
-    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-Qed.
 
 Definition A1_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
   \col_i (A i i).
