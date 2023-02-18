@@ -454,7 +454,16 @@ repeat split.
   destruct H as [_ [_ [bnd3 _]]]. apply bnd3.
 + admit.
 + admit.
-+ admit.
++ intros. unfold input_bound_Rcompute in H.
+  destruct H as [_[_[_[_[_ bnd6]]]]].
+  eapply Rle_lt_trans; last by apply bnd6.
+  rewrite !Rmult_1_l. 
+
+
+
+
+
+admit.
 Admitted.
  
 
