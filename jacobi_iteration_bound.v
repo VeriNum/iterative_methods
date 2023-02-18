@@ -113,7 +113,7 @@ Lemma vec_norm_A1_rel {t: type} {n:nat}
        (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
 (Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
 (vec_inf_norm (A1_diag (FT2R_mat A)) <=
- vec_inf_norm (FT2R_mat (A1_inv_J A)))%Re.
+ vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t )%Re.
 Proof.
 unfold vec_inf_norm.
 apply bigmax_le.
@@ -121,7 +121,7 @@ apply bigmax_le.
 + intros.
   rewrite seq_equiv. rewrite nth_mkseq;
   last by rewrite size_map size_enum_ord in H.
-  rewrite mxE.
+  rewrite mxE. apply Rcomplements.Rle_minus_l.
   apply Rle_trans with
   [seq Rabs
           (FT2R_mat (A1_inv_J A) i0 0)
@@ -132,7 +132,11 @@ apply bigmax_le.
     pose proof (@Binv_accurate _ t (A (inord i) (inord i)) (Hinv i) (Ha i) ).
     destruct H0 as [d [e [Hde [Hd [He H0]]]]].
     rewrite H0.
-    
+    assert (e = (- - e)%Re). 
+    { symmetry. apply Ropp_involutive. } rewrite H1.
+    eapply Rle_trans; last by apply Rabs_triang_inv.
+    rewrite Rabs_Ropp.
+    apply Rplus_le_compat.
     
     
 
