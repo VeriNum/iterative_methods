@@ -100,6 +100,12 @@ assert (A2_J_real (FT2R_mat A) =
 } rewrite H; nra.
 Qed.
 
+(**
+Try: 
+(vec_inf_norm (A1_diag (FT2R_mat A)) <=
+ vec_inf_norm (FT2R_mat (A1_inv_J A)) + Rabs e)%Re.
+**)
+
 
 Lemma vec_norm_A1_rel {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1)
@@ -124,6 +130,8 @@ apply bigmax_le.
     last by rewrite size_map size_enum_ord in H.
     rewrite !mxE.
     pose proof (@Binv_accurate _ t (A (inord i) (inord i)) (Hinv i) (Ha i) ).
+    destruct H0 as [d [e [Hde [Hd [He H0]]]]].
+    rewrite H0.
     
     
     
