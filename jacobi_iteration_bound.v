@@ -10,12 +10,14 @@ Require Import norm_compat.
 Require Import Coq.Lists.List. Import ListNotations.
 Set Bullet Behavior "Strict Subproofs".
 
-Require Import fma_floating_point_model lemmas.
+Require Import lemmas.
 Require Import fma_dot_acc fma_matrix_vec_mult.
 From Flocq Require Import Binary.
 Require Import finite_lemmas_additional.
 Require Import fma_jacobi_forward_error.
 Require Import float_acc_lems.
+Require Import vec_sum_inf_norm_rel.
+Require Import fma_dot_mat_model.
 
 Section WITH_NANS.
 
@@ -738,8 +740,7 @@ Definition residual_math {t}  {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):=
   diag_vector_mult (A1_J A) 
     ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A)).
-  
-Print diag_vector_mult.
+
 
 Lemma A1_equiv {t: type} :
  forall (A: matrix t) (x : nat),
@@ -750,9 +751,6 @@ Proof.
 intros. 
 by rewrite  /diag_of_matrix nth_map_seq ?/matrix_index ?/matrix_rows_nat.
 Qed.
-
-Require Import float_acc_lems.
-
 
 Lemma Rabs_def3 : forall x a:R, (Rabs x <= a)%Re -> 
   (x <= a /\ - a <= x)%Re.
@@ -1554,7 +1552,7 @@ repeat split.
 Qed.
 
 
-Require Import fma_dot_mat_model.
+
 
 Lemma vector_residual_equiv {t: type} :
  forall (A: matrix t) (b x0: vector t) (k:nat),
@@ -1689,7 +1687,7 @@ unfold resid, jacobi_residual.
     } rewrite H2. apply /ssrnat.ltP. apply ltn_ord.
 Qed.
 
-Require Import vec_sum_inf_norm_rel fma_jacobi_forward_error.
+
 
 Lemma add_vec_distr_5 {n:nat}:
   forall a b c d: 'cV[R]_n,
@@ -1725,8 +1723,7 @@ induction v.
   - by rewrite -H.
   - by specialize (IHv Hd H).
 Qed.
-  
-Require Import float_acc_lems.
+ 
 
 Lemma vec_succ_err {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) :
@@ -2742,5 +2739,3 @@ Qed.
 
 
 End WITH_NANS.
-
-
