@@ -477,12 +477,32 @@ repeat split.
       apply x_bound_exists. admit.
       rewrite !Rmult_1_l.
       apply f_error0_bnd . admit.
-    * apply Rplus
-
-
-
-
- admit.
+    * apply Rmult_le_compat.
+      apply Rlt_le.
+      replace (1 / (1 - rho_def A b))%Re with 
+            (/ (1 - rho_def A b))%Re by nra. 
+      apply Rinv_0_lt_compat. 
+      apply Rlt_Rminus. eapply Rle_lt_trans.
+      apply rho_def_le_alt. apply Hrho.
+      apply d_mag_ge_0.
+      assert ((rho_def A b = rho_def_alt A b)%Re \/
+                  (rho_def A b < rho_def_alt A b)%Re).
+      { pose proof (@rho_def_le_alt t n A b). nra. }
+      destruct H. 
+      rewrite H; nra.
+      apply Rlt_le. 
+      replace (1 / (1 - rho_def A b))%Re with 
+            (/ (1 - rho_def A b))%Re by nra.
+      replace (1 / (1 - rho_def_alt A b))%Re with 
+            (/ (1 - rho_def_alt A b))%Re by nra.
+      apply Rinv_lt_contravar .
+      apply Rmult_lt_0_compat.
+      apply Rlt_Rminus. apply Hrho.
+      apply Rlt_Rminus. eapply Rle_lt_trans.
+      apply rho_def_le_alt. apply Hrho.
+      apply Rplus_le_lt_compat. nra.
+      by apply Ropp_lt_contravar.
+      apply d_mag_def_le_alt.
 + intros. unfold input_bound_Rcompute in H.
   destruct H as [_[_[_[_[bnd5 _]]]]].
   eapply Rle_lt_trans; last by apply bnd5.
