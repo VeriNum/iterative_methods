@@ -352,8 +352,11 @@ Lemma d_mag_def_le_alt {t: type} {n:nat}
   (Hinv: forall i, is_finite (fprec t)  (femax t)
        (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
 (Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
+  let rho_hat := rho_def_alt A b in 
+  (rho_hat < 1)%Re ->
   (d_mag_def A b <= d_mag_def_alt A b)%Re.
 Proof.
+intros ? Hrho.
 unfold d_mag_def, d_mag_def_alt.
 apply Rplus_le_compat.
 + apply Rplus_le_compat.
@@ -434,8 +437,8 @@ apply Rplus_le_compat.
          apply Rmult_le_pos.
          apply default_rel_ge_0.
          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-  - apply x_bound_exists. admit.
-
+  - apply x_bound_exists. by apply rho_1_implies_rho_2 with b .
+Qed.
 
 
 
