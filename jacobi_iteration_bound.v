@@ -465,17 +465,17 @@ try (intros; apply Hfb); try (intros; by apply Hfdiv); try (intros; apply HfA2))
       ++ assert ((rho_def A b = rho_def_alt A b)%Re \/
                   (rho_def A b < rho_def_alt A b)%Re).
          { pose proof (@rho_def_le_alt t n A b). nra. }
-         destruct H
-
-
-apply Rlt_le. apply Rinv_lt_contravar .
+         destruct H. 
+         rewrite H; nra.
+         apply Rlt_le. apply Rinv_lt_contravar .
          apply Rmult_lt_0_compat.
-  
-   
-
-
-
-admit.
+         apply Rlt_Rminus. apply Hrho.
+         apply Rlt_Rminus. eapply Rle_lt_trans.
+         apply rho_def_le_alt. apply Hrho.
+         apply Rplus_le_lt_compat. nra.
+         by apply Ropp_lt_contravar.
+    * admit. 
+    * admit.
 + apply Hfacc.
 + admit.
 + admit.
