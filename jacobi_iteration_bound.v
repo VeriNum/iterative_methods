@@ -271,8 +271,7 @@ Definition input_bound_Rcompute {t} {n:nat}
   (forall i,
     (Rabs (FT2R (A i i)) *
      (1 * (1 + rho) *
-      (e_0 -
-       d_mag * / (1 - rho)) +
+      (e_0 - 0) +
       2 * d_mag * / (1 - rho) +
       2 *
       x_bound ) <
