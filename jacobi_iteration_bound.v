@@ -239,7 +239,10 @@ Qed.
 
 (** relation between the non-computable and computable rho **)
 Lemma rho_def_le_alt {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
+  (Hinv: forall i, is_finite (fprec t)  (femax t)
+       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
+(Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
   (rho_def A b <= rho_def_alt A b)%Re.
 Proof.
 unfold rho_def, rho_def_alt.
@@ -256,7 +259,7 @@ apply Rplus_le_compat.
          -- apply Rmult_le_pos; first by apply default_rel_ge_0.
             apply Rplus_le_le_0_compat; try nra; try apply g_pos.
       ++ apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
-    * apply matrix_vec_norm_A1_diag_mult_A.
+    * by apply matrix_vec_norm_A1_diag_mult_A.
   - apply Rmult_le_compat_l.
     * repeat apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
       apply Rmult_le_pos.
@@ -269,7 +272,7 @@ apply Rplus_le_compat.
             apply Rplus_le_le_0_compat; try nra; try apply g_pos.
       ++ apply default_abs_ge_0.
     * apply matrix_norm_A2_rel.
-+ apply matrix_vec_norm_A1_diag_mult_A.
++ by apply matrix_vec_norm_A1_diag_mult_A.
 Qed.
 
 (** relation between the non-computable and computable d_mag **)
