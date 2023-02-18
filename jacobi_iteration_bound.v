@@ -871,7 +871,9 @@ Qed.
 
 
 Lemma input_bound_compute_implies_math {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)(Hinv: forall i, is_finite (fprec t)  (femax t)
+       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
+  (Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re -> 
   (0 < f_error 0 b (\col__ Zconst t 0)
@@ -893,14 +895,14 @@ repeat split.
     * apply Rmult_le_compat.
       apply Rplus_le_le_0_compat. nra. by apply rho_ge_0.
       apply Rlt_le. apply He0.
-      apply Rplus_le_compat_l. apply rho_def_le_alt.
+      apply Rplus_le_compat_l. by apply rho_def_le_alt.
       apply Rplus_le_compat. 
       apply f_error0_bnd . by apply rho_1_implies_rho_2 with b.
       apply Ropp_le_contravar.
       apply Rmult_le_pos. apply d_mag_ge_0.
       apply Rlt_le, Rinv_0_lt_compat. 
       apply Rlt_Rminus. eapply Rle_lt_trans.
-      apply rho_def_le_alt. apply Hrho.
+      by apply rho_def_le_alt. apply Hrho.
     * by apply d_mag_rel_1.
   - apply Rmult_le_compat_l. nra.
     apply x_bound_exists. by apply rho_1_implies_rho_2 with b.
@@ -955,14 +957,14 @@ repeat split.
     * apply Rmult_le_compat.
       apply Rplus_le_le_0_compat. nra. by apply rho_ge_0.
       apply Rlt_le. apply He0.
-      apply Rplus_le_compat_l. apply rho_def_le_alt.
+      apply Rplus_le_compat_l. by apply rho_def_le_alt.
       apply Rplus_le_compat. 
       apply f_error0_bnd . by apply rho_1_implies_rho_2 with b.
       apply Ropp_le_contravar.
       apply Rmult_le_pos. apply d_mag_ge_0.
       apply Rlt_le, Rinv_0_lt_compat. 
       apply Rlt_Rminus. eapply Rle_lt_trans.
-      apply rho_def_le_alt. apply Hrho.
+      by apply rho_def_le_alt. apply Hrho.
     * by apply d_mag_rel_1.
   - apply Rmult_le_compat_l. nra.
     apply x_bound_exists. by apply rho_1_implies_rho_2 with b.
