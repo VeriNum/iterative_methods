@@ -106,14 +106,50 @@ Try:
  vec_inf_norm (FT2R_mat (A1_inv_J A)) + Rabs e)%Re.
 **)
 
+Local Open Scope Z_scope.
+Lemma default_abs_ub_strict t :
+(default_abs t < 1)%Re.
+Proof.
+unfold default_abs.
+pose proof bpow_gt_0 Zaux.radix2 (femax t).
+pose proof bpow_gt_0 Zaux.radix2 (fprec t).
+replace (3 - femax t - fprec t)%Z with (3 +- femax t +- fprec t)%Z by lia.
+rewrite !bpow_plus.
+rewrite <- !Rmult_assoc.
+replace (/ 2 * bpow Zaux.radix2 3)%Re with 4%Re; [|simpl;nra].
+rewrite !bpow_opp !Rcomplements.Rlt_div_r. 
+field_simplify; try nra.
+
+
+
+
+admit.
+nra. 
+apply Rlt_gt. apply Rinv_0_lt_compat. apply bpow_gt_0.
+apply Rlt_gt. apply Rinv_0_lt_compat. apply bpow_gt_0.
+
+
+
+
+
+
+eapply Rle_trans; [| apply Rmult_le_compat ;[ | | apply bpow_fprec_lb | apply bpow_femax_lb  ]]; try nra.
+apply Rlt_gt. 
+replace (/ bpow Zaux.radix2 (femax t)) with (1 / bpow Zaux.radix2 (femax t)) by nra.
+apply Rdiv_lt_0_compat; try nra.
+apply Rlt_gt;
+replace (/ bpow Zaux.radix2 (fprec t)) with (1 / bpow Zaux.radix2 (fprec t)) by nra;
+apply Rdiv_lt_0_compat; try nra.
+Qed.
+
 
 Lemma vec_norm_A1_rel {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1)
 (Hinv: forall i, is_finite (fprec t)  (femax t)
        (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
 (Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
-(vec_inf_norm (A1_diag (FT2R_mat A)) <=
- vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t )%Re.
+(vec_inf_norm (A1_diag (FT2R_mat A))  <=
+ (vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t) )%Re.
 Proof.
 unfold vec_inf_norm.
 apply bigmax_le.
@@ -121,7 +157,14 @@ apply bigmax_le.
 + intros.
   rewrite seq_equiv. rewrite nth_mkseq;
   last by rewrite size_map size_enum_ord in H.
-  rewrite mxE. apply Rcomplements.Rle_minus_l.
+  rewrite mxE.
+  apply Rcomplements.Rle_div_r.
+  apply Rlt_le_trans
+
+
+
+
+ apply Rcomplements.Rle_minus_l.
   apply Rle_trans with
   [seq Rabs
           (FT2R_mat (A1_inv_J A) i0 0)
@@ -396,7 +439,10 @@ Definition k_min {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                  (1 + delta) -
                  2 * d_mag / (1 - rho)))%Re)).
 
+Zceil x  < Zceil y
+0 <= x
 
+0 < e_o - ||d|| / (1-rho)
 
 Definition jacobi_preconditions_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
