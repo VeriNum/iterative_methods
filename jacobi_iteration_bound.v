@@ -426,6 +426,46 @@ apply Rplus_le_lt_compat. nra.
 by apply Ropp_lt_contravar.
 Qed.
 
+
+Lemma d_mag_rel_2 {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  let rho_hat := rho_def_alt A b in 
+  (rho_hat < 1)%Re -> 
+  (1 / (1 - rho_def A b) *
+     d_mag_def A b <=
+     1 / (1 - rho_def_alt A b) *
+     d_mag_def_alt A b)%Re.
+Proof.
+intros ? Hrho.
+apply Rmult_le_compat.
+apply Rlt_le.
+replace (1 / (1 - rho_def A b))%Re with 
+            (/ (1 - rho_def A b))%Re by nra. 
+apply Rinv_0_lt_compat. 
+apply Rlt_Rminus. eapply Rle_lt_trans.
+      apply rho_def_le_alt. apply Hrho.
+      apply d_mag_ge_0.
+      assert ((rho_def A b = rho_def_alt A b)%Re \/
+                  (rho_def A b < rho_def_alt A b)%Re).
+      { pose proof (@rho_def_le_alt t n A b). nra. }
+      destruct H. 
+      rewrite H; nra.
+      apply Rlt_le. 
+      replace (1 / (1 - rho_def A b))%Re with 
+            (/ (1 - rho_def A b))%Re by nra.
+      replace (1 / (1 - rho_def_alt A b))%Re with 
+            (/ (1 - rho_def_alt A b))%Re by nra.
+      apply Rinv_lt_contravar .
+      apply Rmult_lt_0_compat.
+      apply Rlt_Rminus. apply Hrho.
+      apply Rlt_Rminus. eapply Rle_lt_trans.
+      apply rho_def_le_alt. apply Hrho.
+      apply Rplus_le_lt_compat. nra.
+      by apply Ropp_lt_contravar.
+      apply d_mag_def_le_alt.
+Qed.
+
+
 Lemma input_bound_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
   let rho_hat := rho_def_alt A b in 
@@ -460,7 +500,39 @@ repeat split.
     * by apply d_mag_rel_1.
   - apply Rmult_le_compat_l. nra.
     apply x_bound_exists. admit.
-+ admit.
++ destruct H as [_[bnd2 _]].
+  eapply Rle_lt_trans; last by apply bnd2.
+  apply Rplus_le_compat.
+  - apply Rplus_le_compat.
+    apply x_bound_exists. admit.
+    rewrite !Rmult_1_l.
+    apply f_error0_bnd . admit.
+  - apply Rmult_le_compat.
+      apply Rlt_le.
+      replace (1 / (1 - rho_def A b))%Re with 
+            (/ (1 - rho_def A b))%Re by nra. 
+      apply Rinv_0_lt_compat. 
+      apply Rlt_Rminus. eapply Rle_lt_trans.
+      apply rho_def_le_alt. apply Hrho.
+      apply d_mag_ge_0.
+      assert ((rho_def A b = rho_def_alt A b)%Re \/
+                  (rho_def A b < rho_def_alt A b)%Re).
+      { pose proof (@rho_def_le_alt t n A b). nra. }
+      destruct H. 
+      rewrite H; nra.
+      apply Rlt_le. 
+      replace (1 / (1 - rho_def A b))%Re with 
+            (/ (1 - rho_def A b))%Re by nra.
+      replace (1 / (1 - rho_def_alt A b))%Re with 
+            (/ (1 - rho_def_alt A b))%Re by nra.
+      apply Rinv_lt_contravar .
+      apply Rmult_lt_0_compat.
+      apply Rlt_Rminus. apply Hrho.
+      apply Rlt_Rminus. eapply Rle_lt_trans.
+      apply rho_def_le_alt. apply Hrho.
+      apply Rplus_le_lt_compat. nra.
+      by apply Ropp_lt_contravar.
+      apply d_mag_def_le_alt.
 + intros. unfold input_bound_Rcompute in H.
   destruct H as [_ [_ [bnd3 _]]]. apply bnd3.
 + intros. unfold input_bound_Rcompute in H.
