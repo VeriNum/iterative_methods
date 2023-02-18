@@ -470,6 +470,12 @@ repeat split.
   apply Rmult_le_compat_l. apply Rabs_pos.
   apply Rplus_le_compat_r.
   apply Rplus_le_compat_l.
+  apply Rmult_le_compat_l. 
+  apply Rplus_le_le_0_compat. nra. apply g_pos.
+  apply Rmult_le_compat_r.
+  - apply /RleP. apply big_ge_0_ex_abstract.
+    intros. apply /RleP. apply Rabs_pos.
+  - apply Rplus_le_compat.
 
 
 
