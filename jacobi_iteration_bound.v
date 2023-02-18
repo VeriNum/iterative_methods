@@ -72,7 +72,7 @@ Definition d_mag_def_alt {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
                       default_abs t) *
                      matrix_inf_norm (A2_real)) *
                      ( ((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
-                       vec_inf_norm b_real * (/ (1 - rho_def_alt A b))))%Re.
+                       vec_inf_norm b_real * (/ (1 - R))))%Re.
 
 (** bound for ||x|| **)
 Lemma x_bound_exists {t} {n:nat}
@@ -337,7 +337,7 @@ apply Rplus_le_compat.
          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
   - apply /RleP. apply vec_norm_pd.
   - admit.
-  - apply x_bound_exists.
+  - apply x_bound_exists. 
 
 
 
