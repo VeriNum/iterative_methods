@@ -199,11 +199,23 @@ assert ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
         (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
           matrix_inf_norm  (FT2R_mat (A2_J A)) + 0)%Re) by nra.
 rewrite [in X in (X <= _)%Re]H0.
-
-
-
-
-
+apply Rplus_le_compat.
++ rewrite [in X in (X <= _)%Re]H0.
+  - apply Rplus_le_compat.
+    * admit.
+    * repeat apply Rmult_le_pos; last by (apply /RleP; apply matrix_norm_pd).
+      apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
+      apply Rmult_le_pos; last by apply  default_abs_ge_0.
+      apply Rplus_le_le_0_compat; try by apply g_pos.
+      apply Rplus_le_le_0_compat.
+      ++ repeat apply Rmult_le_pos; last by apply g_pos.
+         apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+         apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+      ++ apply Rmult_le_pos; first by apply default_rel_ge_0.
+         apply Rplus_le_le_0_compat; try nra; try apply g_pos.
++ apply Rmult_le_pos.
+  apply /RleP. apply vec_norm_pd.
+  apply /RleP. apply matrix_norm_pd.
 Admitted.
 
 
