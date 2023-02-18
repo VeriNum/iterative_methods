@@ -214,12 +214,27 @@ apply Rplus_le_compat.
   - apply Rmult_le_pos.
     apply /RleP. apply vec_norm_pd.
     apply /RleP. apply matrix_norm_pd.
-  - 
+  - assert ((0 <= (((1 + g t n.+1) *
+                 (1 + default_rel t) * 
+                 g t n.+1 +
+                 default_rel t * (1 + g t n.+1) +
+                 g t n.+1) * (1 + default_rel t) +
+                default_rel t))%Re).
+    { apply Rplus_le_le_0_compat; last by apply default_rel_ge_0.
+      apply Rmult_le_pos.
+      + apply Rplus_le_le_0_compat; last by apply g_pos.
+        apply Rplus_le_le_0_compat.
+        - repeat apply Rmult_le_pos.
+          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+          apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+          apply g_pos.
+        -
 
 
 
-  
-admit.
+
+
+ admit. } nra.
 + repeat apply Rmult_le_pos; last by (apply /RleP; apply matrix_norm_pd).
   apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
   apply Rmult_le_pos; last by apply  default_abs_ge_0.
