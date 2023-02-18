@@ -317,7 +317,9 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
               vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
                 (1 - R_def))%Re in
   (** Finiteness of A **)
-  (forall i j, Binary.is_finite _ _ (A i j) = true) /\
+  (forall i j, Binary.is_finite _ _ (A i j) = true) /\ 
+  (** contraction constant **)
+  (rho_def A b < 1)%Re /\
   (** diagonal dominance of A **)
   strict_diagonal_dominance A /\
   (** Finiteness of the inverse of diagonal elements of A **)
