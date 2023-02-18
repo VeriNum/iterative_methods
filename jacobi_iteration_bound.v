@@ -445,7 +445,8 @@ repeat split.
     * apply Rplus_le_compat_l. apply Rmult_le_compat_r.
       apply Rlt_le. apply Rinv_0_lt_compat. 
       apply Rlt_Rminus.
-      by apply diagonal_dominance_implies_rho_lt_1.
+      apply Rle_lt_trans with (rho_def_alt A b).
+      apply rho_def_le_alt. apply Hrho.
       apply Rmult_le_compat_l.
       ++ repeat apply Rmult_le_pos. nra.
          apply Rplus_le_le_0_compat. nra. apply g_pos.
@@ -460,7 +461,8 @@ repeat split.
       apply d_mag_ge_0.
       apply Rlt_le. apply Rinv_0_lt_compat. 
       apply Rlt_Rminus.
-      by apply diagonal_dominance_implies_rho_lt_1.
+      apply Rle_lt_trans with (rho_def_alt A b).
+      apply rho_def_le_alt. apply Hrho.
     * apply Rplus_le_le_0_compat. apply g1_pos.
       repeat apply Rmult_le_pos. nra.
       apply Rplus_le_le_0_compat. nra. apply g_pos.
@@ -469,7 +471,8 @@ repeat split.
       admit.
       apply Rlt_le. apply Rinv_0_lt_compat. 
       apply Rlt_Rminus.
-      by apply diagonal_dominance_implies_rho_lt_1.
+      apply Rle_lt_trans with (rho_def_alt A b).
+      apply rho_def_le_alt. apply Hrho.
   - apply Rgt_lt. apply HG1. 
 + apply Hfacc.
 + admit.
@@ -495,7 +498,8 @@ repeat split.
     * apply Rmult_le_compat_r.
       apply Rlt_le. apply Rinv_0_lt_compat. 
       apply Rlt_Rminus.
-      by apply diagonal_dominance_implies_rho_lt_1.
+      apply Rle_lt_trans with (rho_def_alt A b).
+      apply rho_def_le_alt. apply Hrho.
       apply Rmult_le_compat_l. nra.
       admit.
   - apply Rmult_le_compat_l. nra.
@@ -514,7 +518,8 @@ repeat split.
             (/ (1 - rho_def A b))%Re by nra.
     apply Rinv_0_lt_compat. 
     apply Rlt_Rminus.
-    by apply diagonal_dominance_implies_rho_lt_1.
+    apply Rle_lt_trans with (rho_def_alt A b).
+    apply rho_def_le_alt. apply Hrho.
     admit.
 + apply Hinp.
 + intros.
@@ -538,7 +543,8 @@ repeat split.
             (/ (1 - rho_def A b))%Re by nra.
     apply Rinv_0_lt_compat. 
     apply Rlt_Rminus.
-    by apply diagonal_dominance_implies_rho_lt_1.
+    apply Rle_lt_trans with (rho_def_alt A b).
+    apply rho_def_le_alt. apply Hrho.
     admit.
 + intros.
   destruct Hinp as [_ [_ [_ [_ [bnd5 _]]]]].
@@ -562,7 +568,8 @@ repeat split.
             (/ (1 - rho_def A b))%Re by nra.
     apply Rinv_0_lt_compat. 
     apply Rlt_Rminus.
-    by apply diagonal_dominance_implies_rho_lt_1.
+    apply Rle_lt_trans with (rho_def_alt A b).
+    apply rho_def_le_alt. apply Hrho.
     admit.
 + intros.
   destruct Hinp as [_ [_ [_ [_ [_ bnd6]]]]].
@@ -581,7 +588,8 @@ repeat split.
               (/ (1 - rho_def A b))%Re by nra.
       apply Rinv_0_lt_compat. 
       apply Rlt_Rminus.
-      by apply diagonal_dominance_implies_rho_lt_1.
+      apply Rle_lt_trans with (rho_def_alt A b).
+      apply rho_def_le_alt. apply Hrho.
       apply Rmult_le_compat_l. nra. 
       admit.
   - apply Rmult_le_compat_l. nra.
