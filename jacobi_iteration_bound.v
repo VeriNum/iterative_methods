@@ -478,37 +478,13 @@ repeat split.
       apply Rplus_le_compat. 
       apply f_error0_bnd . admit.
       apply Ropp_le_contravar.
-      apply Rmult_le_compat. apply d_mag_def_alt_ge_0.
+      apply Rmult_le_pos. apply d_mag_ge_0.
       apply Rlt_le, Rinv_0_lt_compat. 
-      apply Rlt_Rminus. apply Hrho. 
-      apply d_mag_def_le_alt.
-      assert ((rho_def A b = rho_def_alt A b)%Re \/
-                        (rho_def A b < rho_def_alt A b)%Re).
-      { pose proof (@rho_def_le_alt t n A b). nra. }
-      destruct H. 
-      rewrite H; nra.
-      apply Rlt_le. apply Rinv_lt_contravar .
-      apply Rmult_lt_0_compat.
-      apply Rlt_Rminus. apply Hrho.
       apply Rlt_Rminus. eapply Rle_lt_trans.
       apply rho_def_le_alt. apply Hrho.
-      apply Rplus_le_lt_compat. nra.
-      by apply Ropp_lt_contravar.
-
-
-
-
-
-admit.
     * by apply d_mag_rel_1.
   - apply Rmult_le_compat_l. nra.
     apply x_bound_exists. admit.
-
-
-
-
-
-admit.
 Admitted.
  
 
