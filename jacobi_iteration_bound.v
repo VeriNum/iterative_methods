@@ -94,6 +94,24 @@ Lemma rho_def_le_alt {t: type} {n:nat}
   (rho_def A b <= rho_def_alt A b)%Re.
 Proof.
 unfold rho_def, rho_def_alt.
+apply Rplus_le_compat.
++ apply Rplus_le_compat.
+  - apply Rmult_le_compat_l.
+    * repeat apply Rplus_le_le_0_compat; last by apply default_rel_ge_0.
+      repeat apply Rmult_le_pos.
+      ++ apply Rplus_le_le_0_compat; last by apply g_pos.
+         apply Rplus_le_le_0_compat.
+         -- repeat apply Rmult_le_pos;last by apply g_pos.
+            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+            apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+         -- apply Rmult_le_pos; first by apply default_rel_ge_0.
+            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+      ++ apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+    * admit.
+
+
+
+
 Admitted.
 
 (** relation between the non-computable and computable d_mag **)
