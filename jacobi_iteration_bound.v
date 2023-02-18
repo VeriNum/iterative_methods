@@ -202,7 +202,16 @@ rewrite [in X in (X <= _)%Re]H0.
 apply Rplus_le_compat.
 + rewrite [in X in (X <= _)%Re]H0.
   - apply Rplus_le_compat.
-    * 
+    * assert ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+                 matrix_inf_norm  (FT2R_mat (A2_J A)))%Re  =
+              (1 * (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+                      matrix_inf_norm  (FT2R_mat (A2_J A))))%Re).
+      { nra. } rewrite [in X in (X <= _)%Re]H1.
+      apply Rmult_le_compat_r.
+      ++ apply Rmult_le_pos.
+          apply /RleP. apply vec_norm_pd.
+          apply /RleP. apply matrix_norm_pd.
+      ++ 
 
 
 
