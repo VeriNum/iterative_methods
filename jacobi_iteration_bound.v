@@ -652,14 +652,8 @@ repeat split.
   - apply Hfa.
   - rewrite Heqn prednK. by apply /ssrnat.ltP. by apply /ssrnat.ltP.
   - rewrite Heqn prednK.
-    
-
-
-
-
-
-    assert (length (nth i A d) = length A).
-    { admit . } rewrite H1 in H0. by apply /ssrnat.ltP.
+    assert (length (nth i A []) = length A).
+    { admit . } rewrite H3 in HjA. by apply /ssrnat.ltP.
    by apply /ssrnat.ltP.
 + apply Forall_nth. intros.
   unfold invert_diagmatrix. 
@@ -675,10 +669,14 @@ repeat split.
       by rewrite !map_length seq_length /matrix_rows_nat in H.
   - rewrite !map_length seq_length.
     by rewrite !map_length seq_length in H.
-+ apply Forall_nth. intros.
++ apply Forall_forall. intros.
+  pose proof (@In_nth _ b x (Zconst t 0)).
+  specialize (H0 H). destruct H0 as [i [Hjb H0]].
+  rewrite -H0.
+  apply finite_is_finite.
   specialize (Hfb (@inord n i)).
   rewrite mxE in Hfb. rewrite inordK in Hfb.
-  - admit.
+  - apply Hfb.
   - rewrite Heqn prednK.
     * rewrite HeqAb. by apply /ssrnat.ltP.
     * by apply /ssrnat.ltP.
