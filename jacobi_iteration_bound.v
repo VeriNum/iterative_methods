@@ -446,7 +446,13 @@ try (intros; apply Hfb); try (intros; by apply Hfdiv); try (intros; apply HfA2))
   apply Rplus_le_compat_l. apply Rmult_le_compat_l.
   - apply Rmult_le_pos. apply pos_INR. 
     apply Rplus_le_le_0_compat. nra. apply g_pos.
-  - 
+  - apply  Rsqr_incr_1.
+    * apply Rplus_le_compat_l.
+      apply Rmult_le_compat.
+      ++ repeat apply Rmult_le_pos. nra.
+         apply Rplus_le_le_0_compat. nra. apply g_pos.
+         
+   
 
 
 
