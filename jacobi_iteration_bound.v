@@ -53,15 +53,15 @@ Definition d_mag_def_alt {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
             matrix_inf_norm (A2_real))%Re in
   let delta := default_rel t in
   ((g t n.+1 * (1 + delta) + delta) *
-                    ((vec_inf_norm (A1_inv_real) *
+                    (( ((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
                       (1 + delta) + default_abs t) *
                      vec_inf_norm b_real) +
                     (1 + g t n.+1) * g1 t n.+1 (n.+1 - 1) *
                     (1 + delta) *
-                    (vec_inf_norm (A1_inv_real) *
+                    (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
                      (1 + delta) + default_abs t) +
                     g1 t n.+1 (n.+1 - 1) +
-                    (vec_inf_norm (A1_inv_real) * delta +
+                    (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * delta +
                      default_abs t) * vec_inf_norm b_real +
                     ((((1 + g t n.+1) * (1 + delta) *
                        g t n.+1 + delta * (1 + g t n.+1) +
