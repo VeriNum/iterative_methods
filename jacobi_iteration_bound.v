@@ -228,13 +228,10 @@ apply Rplus_le_compat.
           apply Rplus_le_le_0_compat; try nra; try apply g_pos.
           apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
           apply g_pos.
-        -
-
-
-
-
-
- admit. } nra.
+        - apply Rmult_le_pos. apply default_rel_ge_0.
+          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+      + apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+    }  nra.
 + repeat apply Rmult_le_pos; last by (apply /RleP; apply matrix_norm_pd).
   apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
   apply Rmult_le_pos; last by apply  default_abs_ge_0.
@@ -245,50 +242,7 @@ apply Rplus_le_compat.
     apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
   - apply Rmult_le_pos; first by apply default_rel_ge_0.
     apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-Admitted.
-
-
-
-rewrite [in X in (X <= _)%Re]H0.
-  - apply Rplus_le_compat.
-    * assert ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-                 matrix_inf_norm  (FT2R_mat (A2_J A)))%Re  =
-              (1 * (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-                      matrix_inf_norm  (FT2R_mat (A2_J A))))%Re).
-      { nra. } rewrite [in X in (X <= _)%Re]H1.
-      apply Rmult_le_compat_r.
-      ++ apply Rmult_le_pos.
-          apply /RleP. apply vec_norm_pd.
-          apply /RleP. apply matrix_norm_pd.
-      ++ assert (1%Re = (1 + 0)%Re) by nra.
-         rewrite [in X in (X <= _)%Re]H2.
-         apply Rplus_le_compat; last by apply default_rel_ge_0.
-         assert (forall x y:R, (1 <= x)%Re -> (1 <= y)%Re -> (1 <= x * y)%Re).
-         { intros. nra. } apply H3; last by apply default_rel_plus_1_ge_1.
-         rewrite [in X in (X <= _)%Re]H2.
-         apply Rplus_le_compat; try apply g_pos.
-         rewrite [in X in (X <= _)%Re]H2.
-         apply Rplus_le_compat.
-
-
-
-
-admit.
-    * repeat apply Rmult_le_pos; last by (apply /RleP; apply matrix_norm_pd).
-      apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
-      apply Rmult_le_pos; last by apply  default_abs_ge_0.
-      apply Rplus_le_le_0_compat; try by apply g_pos.
-      apply Rplus_le_le_0_compat.
-      ++ repeat apply Rmult_le_pos; last by apply g_pos.
-         apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-         apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
-      ++ apply Rmult_le_pos; first by apply default_rel_ge_0.
-         apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-+ apply Rmult_le_pos.
-  apply /RleP. apply vec_norm_pd.
-  apply /RleP. apply matrix_norm_pd.
-Admitted.
-
+Qed.
 
 Definition A1_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
   \col_i (A i i).
