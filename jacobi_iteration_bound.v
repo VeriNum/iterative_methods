@@ -118,6 +118,11 @@ apply Rplus_le_compat.
             apply Ropp_lt_contravar. admit.
 Admitted.
 
+Lemma d_mag_def_alt_ge_0 {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+   (0 <= d_mag_def_alt A b)%Re.
+Admitted.
+
 
 Definition A1_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
   \col_i (A i i).
@@ -488,7 +493,7 @@ try (intros; apply Hfb); try (intros; by apply Hfdiv); try (intros; apply HfA2))
       apply Rplus_le_le_0_compat. nra. apply g_pos.
       apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
       apply /RleP. apply vec_norm_pd.
-      admit.
+      apply d_mag_def_alt_ge_0.
       apply Rlt_le, Rinv_0_lt_compat. 
       apply Rlt_Rminus. apply Hrho.
 + apply Hfacc.
