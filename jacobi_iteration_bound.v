@@ -287,15 +287,21 @@ unfold d_mag_def, d_mag_def_alt.
 apply Rplus_le_compat.
 + apply Rplus_le_compat.
   - apply Rplus_le_compat_r. apply Rplus_le_compat.
-    * admit.
+    *
+
+
+
+
+
+ admit.
     * apply Rmult_le_compat_l.
       ++ repeat apply Rmult_le_pos; try nra; try apply bpow_ge_0; try apply pos_INR.
          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
          apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
-
-
-admit.
+      ++ apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+         apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+         by apply vec_norm_A1_rel.
   - apply Rmult_le_compat_r. apply /RleP. apply vec_norm_pd.
     apply Rplus_le_compat_r. apply Rmult_le_compat_r.
     apply default_rel_ge_0. by apply vec_norm_A1_rel.
