@@ -31,7 +31,7 @@ Definition d_mag_def_alt {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
   (b: 'cV[ftype t]_n.+1) :=
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in  
-  let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
+  let R := (vec_inf_norm (FT2R_mat (A1_inv_J A)) * matrix_inf_norm (FT2R_mat (A2_J A)))%Re in
   let delta := default_rel t in
   ((g t n.+1 * (1 + delta) + delta) *
                     ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
@@ -51,7 +51,7 @@ Definition d_mag_def_alt {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
                        g t n.+1 + delta * (1 + g t n.+1) +
                        g t n.+1) * default_abs t +
                       default_abs t) *
-                     matrix_inf_norm (A2_J_real A_real)) *
+                     matrix_inf_norm (FT2R_mat (A2_J A))) *
                      (vec_inf_norm (FT2R_mat (A1_inv_J A)) * 
                        vec_inf_norm b_real * (/ (1 - rho_def A b))))%Re.
 
@@ -299,6 +299,34 @@ Lemma diagonal_dominance_implies_rho_lt_1 {t} {n:nat}
   (rho_def A b < 1)%Re.
 Admitted.
 *)
+
+Definition rho_def_alt  {t: type} {n:nat} (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) :=
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let A1_inv_real := FT2R_mat (A1_inv_J A) in 
+  let A2_real := FT2R_mat (A2_J A) in   
+  let R := (vec_inf_norm (A1_inv_real) * matrix_inf_norm (A2_real))%Re in
+  let delta := default_rel t in
+  ((((1 + g t n.+1) * (1 + delta) *
+                  g t n.+1 + delta * (1 + g t n.+1) +
+                  g t n.+1) * (1 + delta) + delta) * R +
+                (((1 + g t n.+1) * (1 + delta) *
+                  g t n.+1 + delta * (1 + g t n.+1) +
+                  g t n.+1) * default_abs t +
+                 default_abs t) *
+                matrix_inf_norm (A2_real) + R)%Re.
+
+
+Lemma rho_gt_0 {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  (0 < rho_def A b)%Re.
+Proof.
+unfold rho_def.
+(** rho = a * ||A_1^{-1} || ||A_2|| 
+
+
+
+
 
 (** Rcompute **)
 Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
