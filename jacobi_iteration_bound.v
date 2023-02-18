@@ -354,6 +354,31 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
 
 
 (** g  g1  rho d_mag : what do they mean intuitively **)
+Lemma d_mag_def_le_alt {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  (d_mag_def A b <= d_mag_def_alt A b)%Re.
+Proof.
+unfold d_mag_def, d_mag_def_alt.
+apply Rplus_le_compat_l.
+apply Rmult_le_compat_l.
++ admit.
++ apply x_bound_exists.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
