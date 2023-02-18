@@ -981,7 +981,27 @@ repeat split.
   - apply Rmult_le_compat_l. nra.
     apply x_bound_exists. by apply rho_1_implies_rho_2 with b.
 Qed.
- 
+
+(*
+Lemma Rdiv_rel:
+  forall (a b c d:R),
+  (c <= d)%Re ->
+  (a <= b)%Re ->
+  (0 < c)%Re -> (0 < d)%Re ->
+  (a / c <= b / d)%Re.
+Proof.
+intros.
+assert ( (d * a <= c * b)%Re). 
+{ apply Rmult_le_compat. 
+*)
+
+Lemma ln_rho_rel {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+(/ ln (1 / rho_def A b) <=
+ / ln (1 / rho_def_alt A b))%Re.
+Proof.
+intros. apply Rlt_le.
+
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat): 
@@ -1053,7 +1073,7 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
 + apply le_lt_trans with (k_min_alt A b accuracy); last by apply Hk.
   apply sublist.Z_to_nat_monotone.
   apply Zceil_le.
-  unfold Rlog. 
+  unfold Rlog. apply Rmult_le_compat.
 
   
 
