@@ -2623,7 +2623,7 @@ split.
 Qed.
 
 
-Lemma jacobi_iteration_bound_lowlevel {t: type} :
+Lemma jacobi_iteration_bound_lowlevel' {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
   let n := (length A).-1 in
   let A' := @matrix_inj _ A n.+1 n.+1 in
@@ -2712,6 +2712,32 @@ split.
     { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
       by rewrite nth_repeat.
     } by rewrite H9. 
+Qed.
+
+
+
+
+Lemma jacobi_iteration_bound_lowlevel {t: type} :
+ forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
+   jacobi_preconditions A b acc k ->
+   let acc2 := BMULT t acc acc in
+   let x0 := (repeat  (Zconst t 0) (length b)) in
+   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+   finite acc2 /\ 
+   exists j,
+    (j <= k)%nat /\
+    let y :=  jacobi_n A b x0 j in
+    let r2 := norm2 (resid y) in
+    (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
+    BCMP t Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
+Proof. 
+intros.
+unfold jacobi_preconditions in H.
+destruct H as [HAA [HlenA [HeqAb H]]].
+apply jacobi_iteration_bound_lowlevel'.
++ by apply jacobi_precond_compute_implies_math .
++ apply HeqAb. 
++ apply HlenA.
 Qed.
 
 
