@@ -288,8 +288,17 @@ Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   (R_def < 1)%Re ->
   (@f_error _ _ _ 0 b x0 x A  <=
     vec_inf_norm (FT2R_mat x0) + 
-    (vec_inf_norm (A1_inv_real) * vec_inf_norm (b_real)) / (1 - R_def))%Re. 
-Admitted.
+    (vec_inf_norm (A1_inv_real) * vec_inf_norm (b_real)) / (1 - R_def))%Re.
+Proof.
+intros. 
+unfold f_error.
+eapply Rle_trans. apply /RleP. apply triang_ineq .
+rewrite -vec_inf_norm_opp.
+assert (X_m_jacobi 0 x0 b A = x0).
+{ by simpl. } rewrite H0. rewrite -RplusE.
+apply Rplus_le_compat_l.
+apply x_bound_exists. apply H.
+Qed.
 
 (** Replace Gamma with tau_squared  **)
 
