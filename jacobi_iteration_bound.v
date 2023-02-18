@@ -308,13 +308,11 @@ apply Rplus_le_compat.
                         matrix_inf_norm (FT2R_mat (A2_J A))))%Re).
   { nra. } rewrite [in X in (X <= _)%Re]H2.
   apply Rmult_le_compat_r.
-  - apply Rmult_le_pos.
-    
-
-
-
-
+  - repeat apply Rmult_le_pos.
+    apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
     apply /RleP. apply vec_norm_pd.
+    apply Rlt_le. apply Rinv_0_lt_compat. apply Rlt_Rminus.
+    apply default_rel_ub_strict.
     apply /RleP. apply matrix_norm_pd.
   - assert ((0 <= (((1 + g t n.+1) *
                  (1 + default_rel t) * 
