@@ -277,16 +277,22 @@ Qed.
 
 (** relation between the non-computable and computable d_mag **)
 Lemma d_mag_def_le_alt {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
+  (Hinv: forall i, is_finite (fprec t)  (femax t)
+       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
+(Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
   (d_mag_def A b <= d_mag_def_alt A b)%Re.
 Proof.
 unfold d_mag_def, d_mag_def_alt.
 apply Rplus_le_compat.
 + apply Rplus_le_compat.
-  - admit.
+  - 
+
+
+admit.
   - apply Rmult_le_compat_r. apply /RleP. apply vec_norm_pd.
     apply Rplus_le_compat_r. apply Rmult_le_compat_r.
-    apply default_rel_ge_0.
+    apply default_rel_ge_0. by apply vec_norm_A1_rel.
 
 
 
