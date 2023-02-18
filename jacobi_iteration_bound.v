@@ -117,9 +117,6 @@ apply Rplus_le_compat.
 Admitted.
 
 
-
-
-
 Definition A1_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
   \col_i (A i i).
 
@@ -202,45 +199,38 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
 
 (** Use: lower case gamma **)
 
-(** Statement for bound on ||x|| **)
-
-Print f_error.
-Print rho_def.
-
-
-
+(** relation between non-computable and computable defn of e_o in reals **)
 Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   (b : 'cV[ftype t]_n.+1) (acc : ftype t):
   let x0 := \col_(j < n.+1) (Zconst t 0) in
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x:= mulmx (A_real^-1) b_real in
-  let R_def :=  (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-                matrix_inf_norm (FT2R_mat (A2_J A)))%Re in
+  let A1_inv_real := FT2R_mat (A1_inv_J A) in 
+  let A2_real := FT2R_mat (A2_J A) in
+  let R_def :=  (vec_inf_norm (A1_inv_real) *
+                    matrix_inf_norm (A2_real))%Re in
   (R_def < 1)%Re ->
   (@f_error _ _ _ 0 b x0 x A  <=
     vec_inf_norm (FT2R_mat x0) + 
-    (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-        vec_inf_norm (FT2R_mat b)) /
-      (1 - R_def))%Re. 
+    (vec_inf_norm (A1_inv_real) * vec_inf_norm (b_real)) / (1 - R_def))%Re. 
 Admitted.
 
 (** Replace Gamma with tau_squared  **)
 
-Print rho_def.
 Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   (b : 'cV[ftype t]_n.+1) (acc : ftype t) :=
-  let rho := rho_def A b in
+  let rho := rho_def_alt A b in
   let d_mag := d_mag_def_alt A b in
   let x0 := \col_(j < n.+1) (Zconst t 0) in
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
-  let R_def :=  (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-                matrix_inf_norm (FT2R_mat (A2_J A)))%Re in
+  let A1_inv_real := FT2R_mat (A1_inv_J A) in 
+  let A2_real := FT2R_mat (A2_J A) in
+  let R_def :=  (vec_inf_norm (A1_inv_real) *
+                      matrix_inf_norm (A2_real))%Re in
   let e_0 := (vec_inf_norm (FT2R_mat x0) + 
-              (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-                  vec_inf_norm (FT2R_mat b)) /
-                (1 - R_def))%Re in
+              (vec_inf_norm (A1_inv_real) * vec_inf_norm (b_real)) / (1 - R_def))%Re in
   let Gamma := FT2R (BMULT t acc acc) in
   let delta := default_rel t in
   Z.to_nat (Zceil (Rlog (1 / rho)%Re 
