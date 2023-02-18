@@ -102,7 +102,10 @@ apply bigmax_le.
   apply Rle_trans with 
   [seq row_sum (FT2R_mat (A2_J A)) i0
       | i0 <- enum 'I_n.+1]`_i.
-  - 
+  - rewrite seq_equiv. rewrite nth_mkseq;
+    last by rewrite size_map size_enum_ord in H.
+    unfold row_sum.
+    apply /RleP.
 
 
 
