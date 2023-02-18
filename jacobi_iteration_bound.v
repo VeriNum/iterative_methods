@@ -396,7 +396,35 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
 
 
 (** g  g1  rho d_mag : what do they mean intuitively **)
-
+Lemma d_mag_rel_1 {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  let rho_hat := rho_def_alt A b in 
+  (rho_hat < 1)%Re -> 
+  (2 * d_mag_def A b *
+   / (1 - rho_def A b) <=
+   2 * d_mag_def_alt A b *
+   / (1 - rho_def_alt A b))%Re.
+Proof.
+intros ? Hrho.
+apply Rmult_le_compat.
+apply Rmult_le_pos. nra. apply d_mag_ge_0.
+apply Rlt_le, Rinv_0_lt_compat. 
+apply Rlt_Rminus. eapply Rle_lt_trans.
+apply rho_def_le_alt. apply Hrho.
+apply Rmult_le_compat_l. nra. apply d_mag_def_le_alt.
+assert ((rho_def A b = rho_def_alt A b)%Re \/
+                  (rho_def A b < rho_def_alt A b)%Re).
+{ pose proof (@rho_def_le_alt t n A b). nra. }
+destruct H. 
+rewrite H; nra.
+apply Rlt_le. apply Rinv_lt_contravar .
+apply Rmult_lt_0_compat.
+apply Rlt_Rminus. apply Hrho.
+apply Rlt_Rminus. eapply Rle_lt_trans.
+apply rho_def_le_alt. apply Hrho.
+apply Rplus_le_lt_compat. nra.
+by apply Ropp_lt_contravar.
+Qed.
 
 Lemma input_bound_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
@@ -458,6 +486,35 @@ repeat split.
   destruct H as [_[_[_[_[_ bnd6]]]]].
   eapply Rle_lt_trans; last by apply bnd6.
   rewrite !Rmult_1_l. 
+  apply Rplus_le_compat.
+  - apply Rplus_le_compat.
+    * admit.
+    * apply Rmult_le_compat.
+      apply Rmult_le_pos. nra. apply d_mag_ge_0.
+      apply Rlt_le, Rinv_0_lt_compat. 
+      apply Rlt_Rminus. eapply Rle_lt_trans.
+      apply rho_def_le_alt. apply Hrho.
+      apply Rmult_le_compat_l. nra. apply d_mag_def_le_alt.
+      assert ((rho_def A b = rho_def_alt A b)%Re \/
+                  (rho_def A b < rho_def_alt A b)%Re).
+         { pose proof (@rho_def_le_alt t n A b). nra. }
+         destruct H. 
+         rewrite H; nra.
+         apply Rlt_le. apply Rinv_lt_contravar .
+         apply Rmult_lt_0_compat.
+         apply Rlt_Rminus. apply Hrho.
+         apply Rlt_Rminus. eapply Rle_lt_trans.
+         apply rho_def_le_alt. apply Hrho.
+         apply Rplus_le_lt_compat. nra.
+         by apply Ropp_lt_contravar.
+
+
+
+
+
+admit.
+  - apply Rmult_le_compat_l. nra.
+    apply x_bound_exists. admit.
 
 
 
