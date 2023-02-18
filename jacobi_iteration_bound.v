@@ -203,7 +203,11 @@ assert ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
           matrix_inf_norm  (FT2R_mat (A2_J A)) + 0)%Re) by nra.
 rewrite [in X in (X <= _)%Re]H0.
 apply Rplus_le_compat.
-+ admit.
++ Search (_ = _ * _ + _ * _ )%Re.
+  assert (forall a b:R, (a * b + b = (1 + a)* b)%Re).
+  { intros. nra. } rewrite H1.
+  
+admit.
 + repeat apply Rmult_le_pos; last by (apply /RleP; apply matrix_norm_pd).
   apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
   apply Rmult_le_pos; last by apply  default_abs_ge_0.
