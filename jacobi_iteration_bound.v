@@ -434,9 +434,15 @@ Proof.
 intros.
 unfold jacobi_preconditions_Rcompute in H.
 destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]].
-repeat split; try apply size_cons; try by (apply input_bound_compute_implies_math; try apply Hrho); try apply Hfacc;
-try (intros; apply Hfb); try by (intros; apply Hfdiv).
-
+repeat (split; try apply size_cons; try by (apply input_bound_compute_implies_math; try apply Hrho); try apply Hfacc;
+try (intros; apply Hfb); try (intros; by apply Hfdiv); try (intros; apply HfA2)).
++ apply Hfa.
++ admit.
++ apply Rle_lt_trans with (rho_def_alt A b).
+  apply rho_def_le_alt. apply Hrho.
++ by apply diagonal_dominance_implies_invertibility.
++ apply Hfdiv.
++
 
  .
 .
