@@ -105,6 +105,19 @@ Lemma vec_norm_A1_rel {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1):
 (vec_inf_norm (A1_diag (FT2R_mat A)) <=
  vec_inf_norm (FT2R_mat (A1_inv_J A)))%Re.
+Proof.
+unfold vec_inf_norm.
+apply bigmax_le.
++ by rewrite size_map size_enum_ord.
++ intros.
+  rewrite seq_equiv. rewrite nth_mkseq;
+  last by rewrite size_map size_enum_ord in H.
+  rewrite mxE.
+  apply Rle_trans with
+  
+
+
+
 Admitted.
 
 
