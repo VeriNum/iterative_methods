@@ -291,12 +291,14 @@ Lemma diagonal_dominance_implies_invertibility {t} {n:nat}
   (FT2R_mat A) \in unitmx.
 Admitted.
 
+(*** We might not need this ***)
+(*
 Lemma diagonal_dominance_implies_rho_lt_1 {t} {n:nat} 
   (A: 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1):
   strict_diagonal_dominance A ->
   (rho_def A b < 1)%Re.
 Admitted.
-
+*)
 
 (** Rcompute **)
 Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
