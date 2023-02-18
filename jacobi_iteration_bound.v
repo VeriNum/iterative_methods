@@ -523,7 +523,6 @@ repeat apply Rplus_le_le_0_compat.
 Qed.
 
 
-
 Definition A1_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
   \col_i (A i i).
 
@@ -550,10 +549,6 @@ Definition k_min {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                  (1 + delta) -
                  2 * d_mag / (1 - rho)))%Re)).
 
-Zceil x  < Zceil y
-0 <= x
-
-0 < e_o - ||d|| / (1-rho)
 
 Definition jacobi_preconditions_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
@@ -618,12 +613,13 @@ Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let x:= mulmx (A_real^-1) b_real in
   let A1_inv_real := FT2R_mat (A1_inv_J A) in 
   let A2_real := FT2R_mat (A2_J A) in
-  let R_def :=  (vec_inf_norm (A1_inv_real) *
+  let R_def :=  (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
                     matrix_inf_norm (A2_real))%Re in
   (R_def < 1)%Re ->
   (@f_error _ _ _ 0 b x0 x A  <=
     vec_inf_norm (FT2R_mat x0) + 
-    (vec_inf_norm (A1_inv_real) * vec_inf_norm (b_real)) / (1 - R_def))%Re.
+    (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t))
+        * vec_inf_norm (b_real)) / (1 - R_def))%Re.
 Proof.
 intros. 
 unfold f_error.
@@ -646,10 +642,11 @@ Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let b_real := FT2R_mat b in
   let A1_inv_real := FT2R_mat (A1_inv_J A) in 
   let A2_real := FT2R_mat (A2_J A) in
-  let R_def :=  (vec_inf_norm (A1_inv_real) *
+  let R_def :=  (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
                       matrix_inf_norm (A2_real))%Re in
   let e_0 := (vec_inf_norm (FT2R_mat x0) + 
-              (vec_inf_norm (A1_inv_real) * vec_inf_norm (b_real)) / (1 - R_def))%Re in
+              (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t))
+                  * vec_inf_norm (b_real)) / (1 - R_def))%Re in
   let Gamma := FT2R (BMULT t acc acc) in
   let delta := default_rel t in
   Z.to_nat (Zceil (Rlog (1 / rho)%Re 
@@ -659,7 +656,7 @@ Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                      INR n.+1 / (1 + g t n.+1)) -
                   g1 t n.+1 (n.+1 - 1)%coq_nat) /
                  (1 + g t n.+1) /
-                 vec_inf_norm (FT2R_mat (A1_J A)) /
+                 ((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) /
                  (1 + delta) -
                  2 * d_mag / (1 - rho)))%Re)).
 
@@ -670,15 +667,15 @@ Definition input_bound_Rcompute {t} {n:nat}
   let b_real := FT2R_mat b in
   let A1_inv_real := FT2R_mat (A1_inv_J A) in 
   let A2_real := FT2R_mat (A2_J A) in
-  let R_def :=  (vec_inf_norm (A1_inv_real) *
+  let R_def :=  (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
                       matrix_inf_norm (A2_real))%Re in
   let x_bound :=  
-  ((vec_inf_norm (A1_inv_real) *
+  ((((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
         vec_inf_norm (b_real)) / (1 - R_def))%Re in 
   let rho := rho_def_alt A b in 
   let d_mag := d_mag_def_alt A b in
   let e_0 := (vec_inf_norm (FT2R_mat x0) + 
-              (vec_inf_norm (A1_inv_real) *
+              (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
                        vec_inf_norm (b_real)) / (1 - R_def))%Re in
   (forall i,
     (Rabs (FT2R (A i i)) *
