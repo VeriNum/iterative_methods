@@ -92,6 +92,18 @@ Lemma matrix_norm_A2_rel {t: type} {n:nat}
   (matrix_inf_norm
    (A2_J_real (FT2R_mat A)) <=
  matrix_inf_norm (FT2R_mat (A2_J A)))%Re.
+Proof.
+unfold matrix_inf_norm.
+apply bigmax_le.
++ by rewrite size_map size_enum_ord.
++ intros.
+  rewrite seq_equiv. rewrite nth_mkseq;
+  last by rewrite size_map size_enum_ord in H.
+  
+
+
+
+
 Admitted.
 
 Lemma matrix_vec_norm_A1_diag_mult_A {t: type} {n:nat}
