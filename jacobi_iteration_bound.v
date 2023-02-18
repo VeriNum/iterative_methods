@@ -518,11 +518,8 @@ repeat apply Rplus_le_le_0_compat.
     apply /RleP. apply vec_norm_pd.
   - apply Rlt_le. apply Rinv_0_lt_compat. 
     apply Rlt_Rminus.  apply default_rel_ub_strict.
-  - 
-
-
-apply Rlt_le. apply Rinv_0_lt_compat.
-    apply Rlt_Rminus. apply Hrho.
+  - apply Rlt_le. apply Rinv_0_lt_compat.
+    apply Rlt_Rminus. by apply rho_1_implies_rho_2 with b.
 Qed.
 
 
