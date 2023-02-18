@@ -282,17 +282,12 @@ Definition input_bound_Rcompute {t} {n:nat}
   (forall i,
     (Rabs (FT2R (A i i)) *
      (1 * (1 + rho) *
-      (e_0 - 0) +
-      2 * d_mag * / (1 - rho) +
-      2 *
-      x_bound ) <
+      (e_0 - 0) + 2 * d_mag * / (1 - rho) + 2 * x_bound ) <
      (sqrt (fun_bnd t n.+1) - default_abs t) /
      (1 + default_rel t) /
      (1 + default_rel t))%Re) /\ 
   (x_bound +
-       1 *
-       e_0 +
-       1 / (1 - rho) *
+       1 * e_0 + 1 / (1 - rho) *
        d_mag < sqrt (fun_bnd t n.+1))%Re /\
   (forall i j, 
       (Rabs (FT2R (A2_J A i j )) <
@@ -300,9 +295,7 @@ Definition input_bound_Rcompute {t} {n:nat}
   (forall i,
      (Rabs (FT2R (b i ord0)) +
      (1 + g t n.+1) *
-     (( x_bound +
-       1 * e_0 +
-       1 / (1 - rho) * d_mag) *
+     (( x_bound + 1 * e_0 + 1 / (1 - rho) * d_mag) *
       (\sum_j
           Rabs (FT2R (A2_J A i j)))) +
      g1 t n.+1 (n.+1 - 1)%coq_nat <
@@ -312,9 +305,7 @@ Definition input_bound_Rcompute {t} {n:nat}
     (Rabs (FT2R (A1_inv_J A (inord i) ord0)) *
      (Rabs (FT2R (b (inord i) ord0)) +
       (1 + g t n.+1) *
-      (( x_bound +
-        1 * e_0 +
-        1 / (1 - rho) * d_mag) *
+      (( x_bound + 1 * e_0 + 1 / (1 - rho) * d_mag) *
        (\sum_j
            Rabs (FT2R (A2_J A (inord i) j)))) +
       g1 t n.+1 (n.+1 - 1)%coq_nat) <
@@ -322,10 +313,8 @@ Definition input_bound_Rcompute {t} {n:nat}
       default_abs t) / (1 + default_rel t) /
      (1 + default_rel t))%Re) /\
   (1 * (1 + rho) *
-     (e_0 - 0) +
-     2 * d_mag * / (1 - rho) +
-     2 *
-     x_bound <
+     (e_0 - 0) + 2 * d_mag * / (1 - rho) +
+     2 * x_bound <
      (bpow Zaux.radix2 (femax t) -
       default_abs t) / (1 + default_rel t))%Re.
 
