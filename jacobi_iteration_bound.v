@@ -452,7 +452,7 @@ repeat split.
          apply Rplus_le_le_0_compat. nra. apply g_pos.
          apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
          apply /RleP. apply vec_norm_pd.
-      ++ admit.
+      ++ apply d_mag_def_le_alt.
     * apply Rplus_le_le_0_compat. apply g1_pos.
       repeat apply Rmult_le_pos. nra.
       apply Rplus_le_le_0_compat. nra. apply g_pos.
@@ -501,7 +501,7 @@ repeat split.
       apply Rle_lt_trans with (rho_def_alt A b).
       apply rho_def_le_alt. apply Hrho.
       apply Rmult_le_compat_l. nra.
-      admit.
+      apply d_mag_def_le_alt.
   - apply Rmult_le_compat_l. nra.
     apply x_bound_exists. admit.
 + unfold input_bound_Rcompute in Hinp.
@@ -520,7 +520,7 @@ repeat split.
     apply Rlt_Rminus.
     apply Rle_lt_trans with (rho_def_alt A b).
     apply rho_def_le_alt. apply Hrho.
-    admit.
+    apply d_mag_def_le_alt.
 + apply Hinp.
 + intros.
   destruct Hinp as [_ [_ [_ [bnd4 _]]]].
@@ -545,7 +545,7 @@ repeat split.
     apply Rlt_Rminus.
     apply Rle_lt_trans with (rho_def_alt A b).
     apply rho_def_le_alt. apply Hrho.
-    admit.
+    apply d_mag_def_le_alt.
 + intros.
   destruct Hinp as [_ [_ [_ [_ [bnd5 _]]]]].
   specialize (bnd5 i).
@@ -570,7 +570,7 @@ repeat split.
     apply Rlt_Rminus.
     apply Rle_lt_trans with (rho_def_alt A b).
     apply rho_def_le_alt. apply Hrho.
-    admit.
+    apply d_mag_def_le_alt.
 + intros.
   destruct Hinp as [_ [_ [_ [_ [_ bnd6]]]]].
   eapply Rle_lt_trans; last by apply bnd6.
@@ -591,7 +591,7 @@ repeat split.
       apply Rle_lt_trans with (rho_def_alt A b).
       apply rho_def_le_alt. apply Hrho.
       apply Rmult_le_compat_l. nra. 
-      admit.
+      apply d_mag_def_le_alt.
   - apply Rmult_le_compat_l. nra.
     apply x_bound_exists. admit.
 Admitted.
