@@ -463,7 +463,15 @@ repeat split.
 + admit.
 + intros. unfold input_bound_Rcompute in H.
   destruct H as [_ [_ [bnd3 _]]]. apply bnd3.
-+ admit.
++ intros. unfold input_bound_Rcompute in H.
+  destruct H as [_[_[_[bnd4 _]]]].
+  eapply Rle_lt_trans; last by apply bnd4.
+  apply Rplus_le_compat_r. apply Rplus_le_compat_l.
+
+
+
+
+ admit.
 + intros. unfold input_bound_Rcompute in H.
   destruct H as [_[_[_[_[bnd5 _]]]]].
   eapply Rle_lt_trans; last by apply bnd5.
