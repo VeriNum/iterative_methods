@@ -997,6 +997,9 @@ assert ( (d * a <= c * b)%Re).
 
 Lemma ln_rho_rel {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  (0 < rho_def_alt A b)%Re ->
+  (rho_def_alt A b < 1)%Re ->
+  (0 < rho_def A b)%Re ->
 (/ ln (1 / rho_def A b) <=
  / ln (1 / rho_def_alt A b))%Re.
 Proof.
@@ -1006,7 +1009,16 @@ apply Rinv_lt_contravar.
   - rewrite -ln_1. apply ln_increasing. nra.
     replace (1 / rho_def_alt A b)%Re with (/ rho_def_alt A b)%Re by nra.
     replace 1%Re with (/1)%Re by nra.
-  
+    apply Rinv_lt_contravar.
+    rewrite Rmult_1_r. apply H. apply H0.
+  - rewrite -ln_1. apply ln_increasing. nra.
+    replace (1 / rho_def A b)%Re with (/ rho_def A b)%Re by nra.
+    replace 1%Re with (/1)%Re by nra.
+    apply Rinv_lt_contravar.
+    rewrite Rmult_1_r. apply H1. admit.
++ apply ln_increasing. admit.
+  admit.
+Admitted.
 
 
 
@@ -1079,10 +1091,32 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
       apply d_mag_def_alt_ge_0. apply Hrho.
       apply Rlt_le, Rinv_0_lt_compat. 
       apply Rlt_Rminus. apply Hrho.
-+ apply le_lt_trans with (k_min_alt A b accuracy); last by apply Hk.
++ (** split to 
+    (ln
+   ((f_error 0 b (\col__ Zconst t 0)
+       ((FT2R_mat A)^-1 *m FT2R_mat b)
+       A -
+     d_mag_def A b / (1 - rho_def A b)) *
+    (1 + rho_def A b) /
+    ((sqrt
+        ((FT2R
+            (BMULT t accuracy accuracy) -
+          g1 t n.+1 (n.+1 - 1)%coq_nat) /
+         INR n.+1 / (1 + g t n.+1)) -
+      g1 t n.+1 (n.+1 - 1)%coq_nat) /
+     (1 + g t n.+1) /
+     vec_inf_norm (FT2R_mat (A1_J A)) /
+     (1 + default_rel t) -
+     2 * d_mag_def A b /
+     (1 - rho_def A b))) < 0 \/ 0 <= _.... **)
+
+
+
+
+ apply le_lt_trans with (k_min_alt A b accuracy); last by apply Hk.
   apply sublist.Z_to_nat_monotone.
   apply Zceil_le.
-  unfold Rlog. apply Rmult_le_compat.
+  unfold Rlog. apply Rmult_le_compat. try by apply ln_rho_rel .
 
   
 
