@@ -286,7 +286,9 @@ Proof.
 unfold d_mag_def, d_mag_def_alt.
 apply Rplus_le_compat.
 + apply Rplus_le_compat.
-  - 
+  - apply Rplus_le_compat_r. apply Rplus_le_compat.
+    * admit.
+    *
 
 
 admit.
