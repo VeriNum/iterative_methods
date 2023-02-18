@@ -311,7 +311,7 @@ Definition input_bound_Rcompute {t} {n:nat}
       default_abs t) / (1 + default_rel t) /
      (1 + default_rel t))%Re) /\
   (1 * (1 + rho) *
-     (e_0 - d_mag * / (1 - rho)) +
+     (e_0 - 0) +
      2 * d_mag * / (1 - rho) +
      2 *
      x_bound <
@@ -471,7 +471,32 @@ repeat split.
   rewrite !Rmult_1_l. 
   apply Rplus_le_compat.
   - apply Rplus_le_compat.
-    * 
+    * apply Rmult_le_compat.
+      apply Rplus_le_le_0_compat. nra. by apply rho_ge_0.
+      apply Rlt_le. apply He0.
+      apply Rplus_le_compat_l. apply rho_def_le_alt.
+      apply Rplus_le_compat. 
+      apply f_error0_bnd . admit.
+      apply Ropp_le_contravar.
+      apply Rmult_le_compat. apply d_mag_def_alt_ge_0.
+      apply Rlt_le, Rinv_0_lt_compat. 
+      apply Rlt_Rminus. apply Hrho. 
+      apply d_mag_def_le_alt.
+      assert ((rho_def A b = rho_def_alt A b)%Re \/
+                        (rho_def A b < rho_def_alt A b)%Re).
+      { pose proof (@rho_def_le_alt t n A b). nra. }
+      destruct H. 
+      rewrite H; nra.
+      apply Rlt_le. apply Rinv_lt_contravar .
+      apply Rmult_lt_0_compat.
+      apply Rlt_Rminus. apply Hrho.
+      apply Rlt_Rminus. eapply Rle_lt_trans.
+      apply rho_def_le_alt. apply Hrho.
+      apply Rplus_le_lt_compat. nra.
+      by apply Ropp_lt_contravar.
+
+
+
 
 
 admit.
