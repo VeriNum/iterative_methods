@@ -352,12 +352,18 @@ apply Rplus_le_compat.
          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
      ++ by apply matrix_vec_norm_A1_diag_mult_A.
    * apply Rmult_le_compat; try (apply /RleP; apply matrix_norm_pd); 
-     try apply matrix_norm_A2_rel.
-       
-
-
-
-admit.
+     try apply matrix_norm_A2_rel; try nra.
+     apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
+     apply Rmult_le_pos; last by apply default_abs_ge_0.
+     apply Rplus_le_le_0_compat; last by apply g_pos.
+     apply Rplus_le_le_0_compat.
+     repeat apply Rmult_le_pos.
+            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+            apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+            apply g_pos.
+         apply Rmult_le_pos.
+         apply default_rel_ge_0.
+         apply Rplus_le_le_0_compat; try nra; try apply g_pos.
   - apply x_bound_exists. admit.
 
 
