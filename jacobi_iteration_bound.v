@@ -442,7 +442,15 @@ try (intros; apply Hfb); try (intros; by apply Hfdiv); try (intros; apply HfA2))
   apply rho_def_le_alt. apply Hrho.
 + by apply diagonal_dominance_implies_invertibility.
 + apply Hfdiv.
-+
++ admit.
++ apply Hfacc.
++ admit.
++ admit.
++ intros. apply Hfx0.
++ intros. by rewrite mxE.
++ intros. apply HfA2.
++ intros. apply Hfb.
+Admitted.
 
  .
 .
