@@ -87,6 +87,13 @@ Lemma x_bound_exists {t} {n:nat}
       (vec_inf_norm (A1_inv_real) * vec_inf_norm (b_real)) / (1 - R_def))%Re.
 Admitted.
 
+Lemma matrix_norm_A2_rel {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1):
+  (matrix_inf_norm
+   (A2_J_real (FT2R_mat A)) <=
+ matrix_inf_norm (FT2R_mat (A2_J A)))%Re.
+Admitted.
+
 Lemma matrix_vec_norm_A1_diag_mult_A {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1):
   (vec_inf_norm (A1_diag (FT2R_mat A)) *
@@ -94,19 +101,15 @@ Lemma matrix_vec_norm_A1_diag_mult_A {t: type} {n:nat}
    (A2_J_real (FT2R_mat A)) <=
  vec_inf_norm (FT2R_mat (A1_inv_J A)) *
  matrix_inf_norm (FT2R_mat (A2_J A)))%Re.
+Proof.
+apply Rmult_le_compat.
++ apply /RleP. apply vec_norm_pd.
++ apply /RleP. apply matrix_norm_pd.
++ admit.
++ apply matrix_norm_A2_rel.
 Admitted.
 
-(**
-(matrix_inf_norm
-   (A2_J_real (FT2R_mat A)) <=
- matrix_inf_norm (FT2R_mat (A2_J A)))%Re
-**)
-Lemma matrix_norm_A2_rel {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1):
-  (matrix_inf_norm
-   (A2_J_real (FT2R_mat A)) <=
- matrix_inf_norm (FT2R_mat (A2_J A)))%Re.
-Admitted.
+
 
 
 
