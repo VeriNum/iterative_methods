@@ -119,7 +119,15 @@ rewrite <- !Rmult_assoc.
 replace (/ 2 * bpow Zaux.radix2 3)%Re with 4%Re; [|simpl;nra].
 rewrite !bpow_opp !Rcomplements.Rlt_div_r. 
 field_simplify; try nra.
+assert ( (4 < (/ / bpow Zaux.radix2 (fprec t)) *(/
+                / bpow Zaux.radix2 (femax t)))%Re ->
+        (2 <
+           1 / / bpow Zaux.radix2 (fprec t) /
+           / bpow Zaux.radix2 (femax t) / 2)%Re).
+{ intros. nra. } apply H1. repeat (rewrite Rinv_involutive; try nra).
 
+  
+  
 
 
 
