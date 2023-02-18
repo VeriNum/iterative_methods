@@ -202,7 +202,12 @@ rewrite [in X in (X <= _)%Re]H0.
 apply Rplus_le_compat.
 + rewrite [in X in (X <= _)%Re]H0.
   - apply Rplus_le_compat.
-    * admit.
+    * 
+
+
+
+
+admit.
     * repeat apply Rmult_le_pos; last by (apply /RleP; apply matrix_norm_pd).
       apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
       apply Rmult_le_pos; last by apply  default_abs_ge_0.
