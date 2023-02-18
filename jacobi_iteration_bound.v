@@ -424,13 +424,11 @@ repeat split.
       apply Rplus_le_compat_l. apply rho_def_le_alt.
       apply Rplus_le_compat. 
       apply f_error0_bnd . admit.
-
-
-
-
-
-
-admit.
+      apply Ropp_le_contravar.
+      apply Rmult_le_pos. apply d_mag_ge_0.
+      apply Rlt_le, Rinv_0_lt_compat. 
+      apply Rlt_Rminus. eapply Rle_lt_trans.
+      apply rho_def_le_alt. apply Hrho.
     * apply Rmult_le_compat.
       apply Rmult_le_pos. nra. apply d_mag_ge_0.
       apply Rlt_le, Rinv_0_lt_compat. 
