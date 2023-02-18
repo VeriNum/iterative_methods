@@ -394,14 +394,22 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
 (** g  g1  rho d_mag : what do they mean intuitively **)
 
 
+Lemma input_bound_compute_implies_math {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  input_bound_Rcompute A (\col__ Zconst t 0) b ->
+  input_bound A (\col__ Zconst t 0) b .
+Proof.
+intros.
+
+
+
+
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat): 
   jacobi_preconditions_Rcompute A b accuracy k ->
   jacobi_preconditions_math A b accuracy k.
 Proof.
-admit.
-(*
 intros.
 unfold jacobi_preconditions_Rcompute in H.
 destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]].
