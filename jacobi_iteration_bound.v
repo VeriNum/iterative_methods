@@ -434,8 +434,12 @@ Proof.
 intros.
 unfold jacobi_preconditions_Rcompute in H.
 destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]].
-unfold jacobi_preconditions_math.
-repeat split.
+repeat split; try apply size_cons; try by (apply input_bound_compute_implies_math; try apply Hrho); try apply Hfacc;
+try (intros; apply Hfb); try by (intros; apply Hfdiv).
+
+
+ .
+.
 + apply Hfa.
 + admit.
 + apply Rle_lt_trans with (rho_def_alt A b).
