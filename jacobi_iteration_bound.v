@@ -396,13 +396,34 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
 
 Lemma input_bound_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  let rho_hat := rho_def_alt A b in 
+  (rho_hat < 1)%Re -> 
   input_bound_Rcompute A (\col__ Zconst t 0) b ->
   input_bound A (\col__ Zconst t 0) b .
 Proof.
-intros.
+intros ? Hrho ? .
+repeat split.
++ intros. unfold input_bound_Rcompute in H.
+  destruct H as [bnd1 _ ].
+  specialize (bnd1 i).
+  eapply Rle_lt_trans; last by apply bnd1.
+  apply Rmult_le_compat_l. apply Rabs_pos.
+  apply Rplus_le_compat.
+  - 
 
 
 
+
+ admit.
+  - apply Rmult_le_compat_l. nra.
+    apply x_bound_exists. admit.
++ admit.
++ admit.
++ admit.
++ admit.
++ admit.
+Admitted.
+ 
 
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
