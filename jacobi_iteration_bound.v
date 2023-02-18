@@ -344,7 +344,7 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (forall i : 'I_n.+1,
     Binary.is_finite (fprec t) (femax t)
       (BDIV t (Zconst t 1) (A i i)) = true) /\
-(** Constraint on Gamma **)
+  (** Constraint on Gamma **)
   (FT2R (BMULT t accuracy accuracy) >
      g1 t n.+1 (n.+1 - 1)%coq_nat +
      INR n.+1 * (1 + g t n.+1) *
@@ -361,9 +361,6 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (** finiteness of x0 **)
   (forall i : 'I_n.+1, is_finite (fprec t) (femax t)
                               (x0 i ord0) = true) /\
-  (** finitenes of A1^{-} **)
-  (forall i, is_finite (fprec t) (femax t)
-                        (A1_inv_J A i ord0) = true) /\
   (** finiteness of A2 **)
   (forall i j, is_finite (fprec t) (femax t)
                   (A2_J A i j) = true) /\
@@ -374,7 +371,6 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   @size_constraint t n /\
   (** constraint on bounds for input **)
   input_bound_Rcompute A x0 b.
-
 
 
 (** g  g1  rho d_mag : what do they mean intuitively **)
@@ -476,13 +472,7 @@ repeat split.
   - apply Rgt_lt. apply HG1. 
 + apply Hfacc.
 + apply Nat.lt_trans with (k_min_alt A b accuracy); last by apply Hk.
-  unfold k_min, k_min_alt.
-  
-
-
-
-
-admit.
+  unfold k_min, k_min_alt. admit.
 + admit.
 + apply Hfx0.
 + apply Ha1_inv.
