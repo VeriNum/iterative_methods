@@ -163,7 +163,7 @@ replace (/ bpow Zaux.radix2 (fprec t))%Re with (1 / bpow Zaux.radix2 (fprec t))%
 apply Rdiv_lt_0_compat; try nra.
 Qed.
 
-
+Close Scope Z_scope.
 
 Lemma vec_norm_A1_rel {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1)
@@ -182,9 +182,6 @@ apply bigmax_le.
   rewrite mxE.
   apply Rcomplements.Rle_div_r. apply Rlt_Rminus.
   apply default_rel_ub_strict.
-
-
-
   apply Rcomplements.Rle_minus_l.
   apply Rle_trans with
   [seq Rabs
@@ -202,27 +199,21 @@ apply bigmax_le.
     rewrite Rabs_Ropp.
     apply Rplus_le_compat.
     rewrite Rabs_mult. rewrite real_const_1.
-    assert (
-
-
-    admit.
-    apply Ropp_le_contravar.
-    apply He.
-    
-    
-    
-
-
-
-
-    admit.
+    apply Rmult_le_compat_l. apply Rabs_pos.
+    assert (d = (- - d)%Re). 
+    { symmetry. apply Ropp_involutive. } rewrite H2.
+    eapply Rle_trans; try apply Rabs_triang_inv.
+    rewrite Rabs_Ropp. rewrite Rabs_R1.
+    apply Rplus_le_compat_l. 
+    apply Ropp_le_contravar. apply Hd.
+    apply Ropp_le_contravar. apply He.
   - apply /RleP.
     apply (@bigmaxr_ler _ 0%Re [seq Rabs
                                    (FT2R_mat (A1_inv_J A) i0 0)
                                | i0 <- enum 'I_n.+1] i).
     rewrite size_map size_enum_ord.
     by rewrite size_map size_enum_ord in H.
-Admitted.
+Qed.
 
 
 Lemma vec_norm_A1_rel {t: type} {n:nat}
