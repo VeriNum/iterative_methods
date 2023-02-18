@@ -399,6 +399,8 @@ Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
   jacobi_preconditions_Rcompute A b accuracy k ->
   jacobi_preconditions_math A b accuracy k.
 Proof.
+admit.
+(*
 intros.
 unfold jacobi_preconditions_Rcompute in H.
 destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]].
@@ -458,7 +460,7 @@ repeat split.
       apply Rlt_Rminus.
       apply Rle_lt_trans with (rho_def_alt A b).
       apply rho_def_le_alt. apply Hrho.
-  - apply Rgt_lt. apply HG1. 
+  - apply Rgt_lt. admit. 
 + apply Hfacc.
 + apply Nat.lt_trans with (k_min_alt A b accuracy); last by apply Hk.
   unfold k_min, k_min_alt. admit.
@@ -580,6 +582,7 @@ repeat split.
       apply d_mag_def_le_alt.
   - apply Rmult_le_compat_l. nra.
     apply x_bound_exists. admit.
+*)
 Admitted.
 
 (*
