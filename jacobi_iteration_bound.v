@@ -71,7 +71,7 @@ Definition d_mag_def_alt {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
                        g t n.+1) * default_abs t +
                       default_abs t) *
                      matrix_inf_norm (A2_real)) *
-                     (vec_inf_norm (A1_inv_real) * 
+                     ( ((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
                        vec_inf_norm b_real * (/ (1 - rho_def_alt A b))))%Re.
 
 (** bound for ||x|| **)
@@ -282,7 +282,17 @@ Lemma d_mag_def_le_alt {t: type} {n:nat}
 Proof.
 unfold d_mag_def, d_mag_def_alt.
 apply Rplus_le_compat.
-+ admit.
++ apply Rplus_le_compat.
+  - admit.
+  - apply Rmult_le_compat_r. apply /RleP. apply vec_norm_pd.
+    apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+    apply default_rel_ge_0.
+
+
+
+
+
+ admit.
 + apply Rmult_le_compat.
   - admit.
   - apply /RleP. apply vec_norm_pd.
