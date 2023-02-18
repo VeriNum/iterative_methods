@@ -640,14 +640,29 @@ repeat split.
 + apply Forall_nth. intros.
   apply Forall_nth. intros.
   specialize (Hfa (@inord n i) (@inord n i0)).
-  apply finite_is_finite. rewrite !mxE in HfA.
-  rewrite !inordK in HfA.
+  apply finite_is_finite. rewrite !mxE in Hfa.
+  rewrite !inordK in Hfa.
   - admit.
-  - rewrite prednK. by apply /ssrnat.ltP. by apply /ssrnat.ltP.
-  - rewrite prednK.
+  - rewrite Heqn prednK. by apply /ssrnat.ltP. by apply /ssrnat.ltP.
+  - rewrite Heqn prednK.
     assert (length (nth i A d) = length A).
     { admit . } rewrite H1 in H0. by apply /ssrnat.ltP.
    by apply /ssrnat.ltP.
++ apply Forall_nth. intros.
+  unfold invert_diagmatrix. 
+  rewrite (nth_map_inrange (Zconst t 0)).
+  - specialize (Hfdiv (@inord n i)).
+    rewrite !mxE in Hfdiv. unfold diag_of_matrix.
+    rewrite nth_map_seq.
+    * unfold matrix_index. rewrite inordK in Hfdiv.
+      ++ apply finite_is_finite. apply Hfdiv.
+      ++ rewrite Heqn prednK. rewrite !map_length seq_length /matrix_rows_nat in H.
+         by apply /ssrnat.ltP. by apply /ssrnat.ltP.
+    * unfold matrix_rows_nat. 
+      by rewrite !map_length seq_length /matrix_rows_nat in H.
+  - rewrite !map_length seq_length.
+    by rewrite !map_length seq_length in H.
++
 
 
 
