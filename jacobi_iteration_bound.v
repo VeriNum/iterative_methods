@@ -106,6 +106,15 @@ Try:
  vec_inf_norm (FT2R_mat (A1_inv_J A)) + Rabs e)%Re.
 **)
 
+Lemma bpow_fprec_lb_strict t : 
+(2 < bpow Zaux.radix2 (fprec t))%Re.
+Proof. 
+pose proof fprec_gt_one t.
+eapply Rle_lt_trans with (bpow Zaux.radix2 1).
+unfold bpow; simpl; nra.
+apply bpow_lt; lia.
+Qed.
+
 Local Open Scope Z_scope.
 Lemma default_abs_ub_strict t :
 (default_abs t < 1)%Re.
@@ -119,23 +128,20 @@ rewrite <- !Rmult_assoc.
 replace (/ 2 * bpow Zaux.radix2 3)%Re with 4%Re; [|simpl;nra].
 rewrite !bpow_opp !Rcomplements.Rlt_div_r. 
 field_simplify; try nra.
-assert ( (4 < (/ / bpow Zaux.radix2 (fprec t)) *(/
+assert ( (2 * 2 < (/ / bpow Zaux.radix2 (fprec t)) *(/
                 / bpow Zaux.radix2 (femax t)))%Re ->
         (2 <
            1 / / bpow Zaux.radix2 (fprec t) /
            / bpow Zaux.radix2 (femax t) / 2)%Re).
 { intros. nra. } apply H1. repeat (rewrite Rinv_involutive; try nra).
-
-  
-  
-
-
-
-admit.
+apply Rmult_lt_compat; try nra.
+apply bpow_fprec_lb_strict.
+apply Rlt_le_trans with 4%Re.
+nra. apply bpow_femax_lb.
 nra. 
 apply Rlt_gt. apply Rinv_0_lt_compat. apply bpow_gt_0.
 apply Rlt_gt. apply Rinv_0_lt_compat. apply bpow_gt_0.
-
+Qed.
 
 
 
