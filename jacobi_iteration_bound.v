@@ -114,10 +114,19 @@ apply bigmax_le.
   last by rewrite size_map size_enum_ord in H.
   rewrite mxE.
   apply Rle_trans with
-  
-
-
-
+  [seq Rabs
+          (FT2R_mat (A1_inv_J A) i0 0)
+      | i0 <- enum 'I_n.+1]`_i.
+  - rewrite seq_equiv. rewrite nth_mkseq;
+    last by rewrite size_map size_enum_ord in H.
+    rewrite !mxE.
+    admit.
+  - apply /RleP.
+    apply (@bigmaxr_ler _ 0%Re [seq Rabs
+                                   (FT2R_mat (A1_inv_J A) i0 0)
+                               | i0 <- enum 'I_n.+1] i).
+    rewrite size_map size_enum_ord.
+    by rewrite size_map size_enum_ord in H.
 Admitted.
 
 
