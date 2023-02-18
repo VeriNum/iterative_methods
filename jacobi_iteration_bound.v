@@ -287,8 +287,11 @@ unfold d_mag_def, d_mag_def_alt.
 apply Rplus_le_compat.
 + apply Rplus_le_compat.
   - apply Rplus_le_compat_r. apply Rplus_le_compat.
-    *
-
+    * apply Rmult_le_compat_l.
+      ++ apply Rplus_le_le_0_compat; try apply default_rel_ge_0.
+         apply Rmult_le_pos. apply g_pos.
+         apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+      ++
 
 
 
