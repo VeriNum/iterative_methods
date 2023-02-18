@@ -317,16 +317,6 @@ Definition rho_def_alt  {t: type} {n:nat} (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]
                 matrix_inf_norm (A2_real) + R)%Re.
 
 
-Lemma rho_gt_0 {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
-  (0 < rho_def A b)%Re.
-Proof.
-unfold rho_def.
-(** rho = a * ||A_1^{-1} || ||A_2|| 
-
-
-
-
 
 (** Rcompute **)
 Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
@@ -347,7 +337,7 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (** Finiteness of A **)
   (forall i j, Binary.is_finite _ _ (A i j) = true) /\ 
   (** contraction constant **)
-  (rho_def A b < 1)%Re /\
+  (0< rho_def_alt A b /\ rho_def_alt A b < 1)%Re /\
   (** diagonal dominance of A **)
   strict_diagonal_dominance A /\
   (** Finiteness of the inverse of diagonal elements of A **)
@@ -412,6 +402,12 @@ apply Rplus_le_compat.
 Admitted.
 
 
+Lemma rho_def_le_alt {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  (rho_def A b <= rho_def_alt A b)%Re.
+Admitted.
+
+
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat): 
@@ -420,12 +416,13 @@ Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
 Proof.
 intros.
 unfold jacobi_preconditions_Rcompute in H.
-destruct H as [Hfa [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [Ha1_inv [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]].
+destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [Ha1_inv [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]]].
 unfold jacobi_preconditions_math.
 repeat split.
 + apply Hfa.
 + admit.
-+ by apply diagonal_dominance_implies_rho_lt_1.
++ apply Rle_lt_trans with (rho_def_alt A b).
+  apply rho_def_le_alt. apply Hrho.
 + by apply diagonal_dominance_implies_invertibility.
 + apply Hfdiv.
 + apply Rlt_gt.
