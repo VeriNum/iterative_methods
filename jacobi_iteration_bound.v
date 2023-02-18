@@ -653,7 +653,18 @@ repeat split.
   - rewrite Heqn prednK. by apply /ssrnat.ltP. by apply /ssrnat.ltP.
   - rewrite Heqn prednK.
     assert (length (nth i A []) = length A).
-    { admit . } rewrite H3 in HjA. by apply /ssrnat.ltP.
+    { unfold matrix_cols, matrix_rows in HAA.
+      rewrite (@Forall_nth _ (fun r : seq.seq (ftype t)
+         =>
+         Zcomplements.Zlength r =
+         Zcomplements.Zlength A) A) in HAA.
+      
+
+
+
+
+
+admit . } rewrite H3 in HjA. by apply /ssrnat.ltP.
    by apply /ssrnat.ltP.
 + apply Forall_nth. intros.
   unfold invert_diagmatrix. 
