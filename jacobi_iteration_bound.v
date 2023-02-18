@@ -124,6 +124,17 @@ Lemma d_mag_def_alt_ge_0 {t: type} {n:nat}
 Admitted.
 
 
+Lemma rho_1_implies_rho_2 {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  let rho_hat := rho_def_alt A b in 
+  (rho_hat < 1)%Re ->
+  (vec_inf_norm
+   (FT2R_mat (A1_inv_J A)) *
+     matrix_inf_norm
+       (FT2R_mat (A2_J A)) < 1)%Re.
+Admitted.
+
+
 Definition A1_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
   \col_i (A i i).
 
@@ -491,7 +502,7 @@ repeat split.
       apply Rlt_le. apply He0.
       apply Rplus_le_compat_l. apply rho_def_le_alt.
       apply Rplus_le_compat. 
-      apply f_error0_bnd . admit.
+      apply f_error0_bnd . by apply rho_1_implies_rho_2 with b.
       apply Ropp_le_contravar.
       apply Rmult_le_pos. apply d_mag_ge_0.
       apply Rlt_le, Rinv_0_lt_compat. 
@@ -499,14 +510,14 @@ repeat split.
       apply rho_def_le_alt. apply Hrho.
     * by apply d_mag_rel_1.
   - apply Rmult_le_compat_l. nra.
-    apply x_bound_exists. admit.
+    apply x_bound_exists. by apply rho_1_implies_rho_2 with b.
 + destruct H as [_[bnd2 _]].
   eapply Rle_lt_trans; last by apply bnd2.
   apply Rplus_le_compat.
   - apply Rplus_le_compat.
-    apply x_bound_exists. admit.
+    apply x_bound_exists. by apply rho_1_implies_rho_2 with b.
     rewrite !Rmult_1_l.
-    apply f_error0_bnd . admit.
+    apply f_error0_bnd . by apply rho_1_implies_rho_2 with b.
   - by apply d_mag_rel_2 .
 + intros. unfold input_bound_Rcompute in H.
   destruct H as [_ [_ [bnd3 _]]]. apply bnd3.
@@ -521,9 +532,9 @@ repeat split.
     intros. apply /RleP. apply Rabs_pos.
   - apply Rplus_le_compat.
     * apply Rplus_le_compat.
-      apply x_bound_exists. admit.
+      apply x_bound_exists. by apply rho_1_implies_rho_2 with b.
       rewrite !Rmult_1_l.
-      apply f_error0_bnd . admit.
+      apply f_error0_bnd . by apply rho_1_implies_rho_2 with b.
     * by apply d_mag_rel_2 .
 + intros. unfold input_bound_Rcompute in H.
   destruct H as [_[_[_[_[bnd5 _]]]]].
@@ -538,9 +549,9 @@ repeat split.
     intros. apply /RleP. apply Rabs_pos.
   - apply Rplus_le_compat.
     * apply Rplus_le_compat.
-      apply x_bound_exists. admit.
+      apply x_bound_exists. by apply rho_1_implies_rho_2 with b.
       rewrite !Rmult_1_l.
-      apply f_error0_bnd . admit.
+      apply f_error0_bnd . by apply rho_1_implies_rho_2 with b.
     * by apply d_mag_rel_2 .
 + intros. unfold input_bound_Rcompute in H.
   destruct H as [_[_[_[_[_ bnd6]]]]].
@@ -553,7 +564,7 @@ repeat split.
       apply Rlt_le. apply He0.
       apply Rplus_le_compat_l. apply rho_def_le_alt.
       apply Rplus_le_compat. 
-      apply f_error0_bnd . admit.
+      apply f_error0_bnd . by apply rho_1_implies_rho_2 with b.
       apply Ropp_le_contravar.
       apply Rmult_le_pos. apply d_mag_ge_0.
       apply Rlt_le, Rinv_0_lt_compat. 
@@ -561,10 +572,9 @@ repeat split.
       apply rho_def_le_alt. apply Hrho.
     * by apply d_mag_rel_1.
   - apply Rmult_le_compat_l. nra.
-    apply x_bound_exists. admit.
-Admitted.
+    apply x_bound_exists. by apply rho_1_implies_rho_2 with b.
+Qed.
  
-
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat): 
