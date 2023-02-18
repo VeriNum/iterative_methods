@@ -194,13 +194,31 @@ Lemma rho_1_implies_rho_2 {t: type} {n:nat}
 Proof.
 intros. eapply Rle_lt_trans; last by apply H.
 unfold rho_hat,rho_def_alt.
+match goal with |-context[(_ <= ?a + ?c + ?b)%Re]=>
+ replace (a + c + b)%Re with ((a + b) + c)%Re by nra
+end.
 assert ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
           matrix_inf_norm  (FT2R_mat (A2_J A)))%Re = 
         (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
           matrix_inf_norm  (FT2R_mat (A2_J A)) + 0)%Re) by nra.
 rewrite [in X in (X <= _)%Re]H0.
 apply Rplus_le_compat.
-+ rewrite [in X in (X <= _)%Re]H0.
++ admit.
++ repeat apply Rmult_le_pos; last by (apply /RleP; apply matrix_norm_pd).
+  apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
+  apply Rmult_le_pos; last by apply  default_abs_ge_0.
+  apply Rplus_le_le_0_compat; try by apply g_pos.
+  apply Rplus_le_le_0_compat.
+  - repeat apply Rmult_le_pos; last by apply g_pos.
+    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+  - apply Rmult_le_pos; first by apply default_rel_ge_0.
+    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+Admitted.
+
+
+
+rewrite [in X in (X <= _)%Re]H0.
   - apply Rplus_le_compat.
     * assert ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
                  matrix_inf_norm  (FT2R_mat (A2_J A)))%Re  =
@@ -218,6 +236,8 @@ apply Rplus_le_compat.
          { intros. nra. } apply H3; last by apply default_rel_plus_1_ge_1.
          rewrite [in X in (X <= _)%Re]H2.
          apply Rplus_le_compat; try apply g_pos.
+         rewrite [in X in (X <= _)%Re]H2.
+         apply Rplus_le_compat.
 
 
 
