@@ -473,7 +473,11 @@ repeat split.
   - apply /RleP. apply big_ge_0_ex_abstract.
     intros. apply /RleP. apply Rabs_pos.
   - apply Rplus_le_compat.
-    
+    * apply Rplus_le_compat.
+      apply x_bound_exists. admit.
+      rewrite !Rmult_1_l.
+      apply f_error0_bnd . admit.
+    * apply Rplus
 
 
 
