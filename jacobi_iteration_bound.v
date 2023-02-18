@@ -137,6 +137,14 @@ apply bigmax_le.
     eapply Rle_trans; last by apply Rabs_triang_inv.
     rewrite Rabs_Ropp.
     apply Rplus_le_compat.
+    rewrite Rabs_mult. rewrite real_const_1.
+    assert (
+
+
+    admit.
+    apply Ropp_le_contravar.
+    apply He.
+    
     
     
 
@@ -152,6 +160,15 @@ apply bigmax_le.
     by rewrite size_map size_enum_ord in H.
 Admitted.
 
+
+Lemma vec_norm_A1_rel {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1)
+(Hinv: forall i, is_finite (fprec t)  (femax t)
+       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
+(Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
+(vec_inf_norm (A1_diag (FT2R_mat A)) <=
+ vec_inf_norm (FT2R_mat (A1_inv_J A)) )%Re.
+Admitted.
 
 Lemma matrix_vec_norm_A1_diag_mult_A {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1):
