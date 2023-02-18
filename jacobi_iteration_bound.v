@@ -1001,6 +1001,15 @@ Lemma ln_rho_rel {t: type} {n:nat}
  / ln (1 / rho_def_alt A b))%Re.
 Proof.
 intros. apply Rlt_le.
+apply Rinv_lt_contravar.
++ apply Rmult_lt_0_compat.
+  - rewrite -ln_1. apply ln_increasing. nra.
+    replace (1 / rho_def_alt A b)%Re with (/ rho_def_alt A b)%Re by nra.
+    replace 1%Re with (/1)%Re by nra.
+  
+
+
+
 
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
