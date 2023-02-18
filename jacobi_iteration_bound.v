@@ -313,13 +313,21 @@ apply Rplus_le_compat.
          apply Rmult_le_pos; last by
          (apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0).
          apply Rplus_le_le_0_compat; last by apply g_pos.
-          
+         apply Rplus_le_le_0_compat.
+         -- repeat apply Rmult_le_pos.
+            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+            apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+            apply g_pos.
+         -- apply Rmult_le_pos; first by apply default_rel_ge_0.
+            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+      ++
 
-         apply Rmult_le_pos;last by
-         (apply Rplus_le_le_0_compat; try nra; try apply g_pos).
 
 
-apply Rmult_le_compat.
+
+
+
+_compat.
   - admit.
   - apply /RleP. apply vec_norm_pd.
   - admit.
