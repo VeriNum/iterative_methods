@@ -47,7 +47,9 @@ Definition d_mag_def_alt {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
   let b_real := FT2R_mat b in 
   let A1_inv_real := FT2R_mat (A1_inv_J A) in 
   let A2_real := FT2R_mat (A2_J A) in  
-  let R := (vec_inf_norm (A1_inv_real) * matrix_inf_norm (A2_real))%Re in
+  (*let R := (vec_inf_norm (A1_inv_real) * matrix_inf_norm (A2_real))%Re in *)
+  let R := (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
+            matrix_inf_norm (A2_real))%Re in
   let delta := default_rel t in
   ((g t n.+1 * (1 + delta) + delta) *
                     ((vec_inf_norm (A1_inv_real) *
@@ -80,8 +82,11 @@ Lemma x_bound_exists {t} {n:nat}
   let x1 := x_fix x b_real A_real in
   let A1_inv_real := FT2R_mat (A1_inv_J A) in 
   let A2_real := FT2R_mat (A2_J A) in
+  let R_def := (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
+                     matrix_inf_norm (A2_real))%Re in
+(*
   let R_def :=  (vec_inf_norm (A1_inv_real) *
-                      matrix_inf_norm (A2_real))%Re in
+                      matrix_inf_norm (A2_real))%Re in *)
   (R_def < 1)%Re ->
    (vec_inf_norm x1 <= 
       (vec_inf_norm (A1_inv_real) * vec_inf_norm (b_real)) / (1 - R_def))%Re.
@@ -100,11 +105,6 @@ assert (A2_J_real (FT2R_mat A) =
 } rewrite H; nra.
 Qed.
 
-(**
-Try: 
-(vec_inf_norm (A1_diag (FT2R_mat A)) <=
- vec_inf_norm (FT2R_mat (A1_inv_J A)) + Rabs e)%Re.
-**)
 
 Lemma bpow_fprec_lb_strict t : 
 (2 < bpow Zaux.radix2 (fprec t))%Re.
@@ -214,16 +214,6 @@ apply bigmax_le.
     rewrite size_map size_enum_ord.
     by rewrite size_map size_enum_ord in H.
 Qed.
-
-
-Lemma vec_norm_A1_rel {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1)
-(Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
-(Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
-(vec_inf_norm (A1_diag (FT2R_mat A)) <=
- vec_inf_norm (FT2R_mat (A1_inv_J A)) )%Re.
-Admitted.
 
 Lemma matrix_vec_norm_A1_diag_mult_A {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1):
