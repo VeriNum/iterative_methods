@@ -684,7 +684,7 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
       apply Rplus_le_le_0_compat. nra. apply g_pos.
       apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
       apply /RleP. apply vec_norm_pd.
-      apply d_mag_def_alt_ge_0.
+      apply d_mag_def_alt_ge_0. apply Hrho.
       apply Rlt_le, Rinv_0_lt_compat. 
       apply Rlt_Rminus. apply Hrho.
 + admit.
