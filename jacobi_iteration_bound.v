@@ -69,6 +69,55 @@ Definition d_mag_def_alt {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
                      (vec_inf_norm (A1_inv_real) * 
                        vec_inf_norm b_real * (/ (1 - rho_def_alt A b))))%Re.
 
+(** bound for ||x|| **)
+Lemma x_bound_exists {t} {n:nat}
+  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x := A_real^-1 *m b_real in
+  let x1 := x_fix x b_real A_real in
+  let A1_inv_real := FT2R_mat (A1_inv_J A) in 
+  let A2_real := FT2R_mat (A2_J A) in
+  let R_def :=  (vec_inf_norm (A1_inv_real) *
+                      matrix_inf_norm (A2_real))%Re in
+  (R_def < 1)%Re ->
+   (vec_inf_norm x1 <= 
+      (vec_inf_norm (A1_inv_real) * vec_inf_norm (b_real)) / (1 - R_def))%Re.
+Admitted.
+
+
+(** relation between the non-computable and computable rho **)
+Lemma rho_def_le_alt {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  (rho_def A b <= rho_def_alt A b)%Re.
+Admitted.
+
+(** relation between the non-computable and computable d_mag **)
+Lemma d_mag_def_le_alt {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  (d_mag_def A b <= d_mag_def_alt A b)%Re.
+Proof.
+unfold d_mag_def, d_mag_def_alt.
+apply Rplus_le_compat.
++ admit.
++ apply Rmult_le_compat.
+  - admit.
+  - apply /RleP. apply vec_norm_pd.
+  - admit.
+  - eapply Rle_trans. apply x_bound_exists.
+    * admit.
+    * apply Rmult_le_compat_l.
+      ++ apply Rmult_le_pos; (apply /RleP; apply vec_norm_pd).
+      ++ apply Rlt_le. apply  Rinv_lt_contravar.
+         ** apply Rmult_lt_0_compat. apply Rlt_Rminus.
+            admit.
+            apply Rlt_Rminus. admit.
+         ** apply Rplus_le_lt_compat. nra.
+            apply Ropp_lt_contravar. admit.
+Admitted.
+
+
+
 
 
 Definition A1_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
@@ -159,19 +208,6 @@ Print f_error.
 Print rho_def.
 
 
-Lemma x_bound_exists {t} {n:nat}
-  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
-  let A_real := FT2R_mat A in
-  let b_real := FT2R_mat b in
-  let x := A_real^-1 *m b_real in
-  let x1 := x_fix x b_real A_real in
-  let R_def :=  (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-                matrix_inf_norm (FT2R_mat (A2_J A)))%Re in
-  (R_def < 1)%Re ->
- (vec_inf_norm x1 <= 
-    (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-        vec_inf_norm (FT2R_mat b)) / (1 - R_def))%Re.
-Admitted.
 
 Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   (b : 'cV[ftype t]_n.+1) (acc : ftype t):
@@ -364,34 +400,6 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
 
 
 (** g  g1  rho d_mag : what do they mean intuitively **)
-Lemma d_mag_def_le_alt {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
-  (d_mag_def A b <= d_mag_def_alt A b)%Re.
-Proof.
-unfold d_mag_def, d_mag_def_alt.
-apply Rplus_le_compat.
-+ admit.
-+ apply Rmult_le_compat.
-  - admit.
-  - apply /RleP. apply vec_norm_pd.
-  - admit.
-  - eapply Rle_trans. apply x_bound_exists.
-    * admit.
-    * apply Rmult_le_compat_l.
-      ++ apply Rmult_le_pos; (apply /RleP; apply vec_norm_pd).
-      ++ apply Rlt_le. apply  Rinv_lt_contravar.
-         ** apply Rmult_lt_0_compat. apply Rlt_Rminus.
-            admit.
-            apply Rlt_Rminus. admit.
-         ** apply Rplus_le_lt_compat. nra.
-            apply Ropp_lt_contravar. admit.
-Admitted.
-
-
-Lemma rho_def_le_alt {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
-  (rho_def A b <= rho_def_alt A b)%Re.
-Admitted.
 
 
 (** Refactoring definitions to make them readable and beautiful **)
