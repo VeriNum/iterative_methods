@@ -346,11 +346,10 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   let d_mag := d_mag_def_alt A b in
   let x0 := \col_(j < n.+1) (Zconst t 0) in
   let R_def :=  (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-                matrix_inf_norm (FT2R_mat (A2_J A)))%Re in
+                   matrix_inf_norm (FT2R_mat (A2_J A)))%Re in
   let e_0 := (vec_inf_norm (FT2R_mat x0) + 
                 (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-                    vec_inf_norm (FT2R_mat b)) /
-                  (1 - R_def))%Re in
+                    vec_inf_norm (FT2R_mat b)) / (1 - R_def))%Re in
   (** Finiteness of A **)
   (forall i j, Binary.is_finite _ _ (A i j) = true) /\ 
   (** contraction constant **)
@@ -368,7 +367,7 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
      (g1 t n.+1 (n.+1 - 1)%coq_nat +
       2 * (1 + g t n.+1) * (1 + default_rel t) *
       vec_inf_norm (FT2R_mat (A1_J A)) *
-      d_mag_def_alt A b * / (1 - rho_hat))²)%Re /\
+      d_mag * / (1 - rho_hat))²)%Re /\
   (** Gamma is finite **)
   Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
   (** constraint on k **)
@@ -601,6 +600,136 @@ Definition jacobi_preconditions {t: type}
 
 Lemma jacobi_iteration_bound_monotone:
   forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k k': nat),
+   (k <= k')%nat ->
+   jacobi_preconditions A b acc k ->
+   jacobi_preconditions A b acc k'.
+Proof.
+intros.
+unfold jacobi_preconditions in H0.
+unfold jacobi_preconditions.
+destruct H0 as [HAA [HlenA [HeqAb H0]]].
+split. apply HAA. split. apply HlenA. split. apply HeqAb.
+repeat split; try apply H0.
+apply /ssrnat.ltP.
+rewrite leq_eqVlt  in H.
+assert (k == k' \/ (k < k')%nat).
+{ by apply /orP. } destruct H1.
++ assert (k = k'). { by apply /eqP. } rewrite -H2.
+  apply /ssrnat.ltP. by apply H0.
++ apply ltn_trans with k.
+  apply /ssrnat.ltP. by apply H0.
+  by []. 
+Qed.
+
+
+Lemma jacobi_iteration_bound_corollaries:
+  forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
+   jacobi_preconditions A b acc k ->
+   matrix_cols A (matrix_rows A) /\
+   Forall (Forall finite) A /\
+   Forall finite (invert_diagmatrix (diag_of_matrix A)) /\
+   Forall finite b /\ finite acc.
+Proof. 
+intros. unfold jacobi_preconditions in H.
+destruct H as [HAA [HlenA [HeqAb H]]].
+remember (length A).-1 as n.
+unfold jacobi_preconditions_Rcompute in H.
+destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]].
+repeat split.
++ apply HAA.
++ apply Forall_nth. intros.
+  apply Forall_nth. intros.
+  specialize (Hfa (@inord n i) (@inord n i0)).
+  apply finite_is_finite. rewrite !mxE in HfA.
+  rewrite !inordK in HfA.
+  - admit.
+  - rewrite prednK. by apply /ssrnat.ltP. by apply /ssrnat.ltP.
+  - rewrite prednK.
+    assert (length (nth i A d) = length A).
+    { admit . } rewrite H1 in H0. by apply /ssrnat.ltP.
+   by apply /ssrnat.ltP.
+
+
+
+
+
+
+
+destruct H as [Hla [Hlab [HfA [Hxneq0 [Hrho [HAinv [Hinvf [Hsolf [HcG1 [HcG2 Hk]]]]]]]]]].
+repeat split.
++ unfold matrix_cols, matrix_rows. simpl.
+  apply Forall_forall.
+  intros.
+  admit.
++ apply Forall_nth. intros.
+  apply Forall_nth. intros.
+  specialize (HfA (@inord (length A).-1 i) (@inord (length A).-1 i0)).
+  apply finite_is_finite. rewrite !mxE in HfA.
+  rewrite !inordK in HfA.
+  - admit.
+  - rewrite prednK. by apply /ssrnat.ltP. by apply /ssrnat.ltP.
+  - rewrite prednK.
+    assert (length (nth i A d) = length A).
+    { admit . } rewrite H1 in H0. by apply /ssrnat.ltP.
+   by apply /ssrnat.ltP.
++ apply Forall_nth. intros.
+  unfold invert_diagmatrix. 
+  rewrite (nth_map_inrange (Zconst t 0)).
+  - specialize (Hinvf (@inord (length A).-1 i)).
+    rewrite !mxE in Hinvf. unfold diag_of_matrix.
+    rewrite nth_map_seq.
+    * unfold matrix_index. rewrite inordK in Hinvf.
+      ++ apply finite_is_finite. apply Hinvf.
+      ++ rewrite prednK. rewrite !map_length seq_length /matrix_rows_nat in H.
+         by apply /ssrnat.ltP. by apply /ssrnat.ltP.
+    * unfold matrix_rows_nat. 
+      by rewrite !map_length seq_length /matrix_rows_nat in H.
+  - rewrite !map_length seq_length.
+    by rewrite !map_length seq_length in H.
++ specialize (Hsolf k.+1).
+  apply Forall_nth. intros.
+  specialize (Hsolf (@inord (length A).-1 i)).
+  apply finite_is_finite.  
+  remember (length A).-1 as m. clear Hk HcG2 HcG1.
+  rewrite mxE in Hsolf.
+  rewrite !nth_vec_to_list_float in Hsolf.
+  rewrite inord_val in Hsolf. 
+  apply bmult_overflow_implies in Hsolf.
+  destruct Hsolf as [Hsolf1 Hsolf2].
+  unfold sub_mat in Hsolf2. rewrite !mxE in Hsolf2.
+  apply Bminus_bplus_opp_implies  in Hsolf2.
+  apply bplus_overflow_implies in Hsolf2.
+  destruct Hsolf2 as [Hsolf21 Hsfolf22].
+  rewrite inordK in Hsolf21.
+  -  admit. (** apply Hsolf21 **)
+  - rewrite Heqm. rewrite prednK; try by apply /ssrnat.ltP.
+    rewrite Hlab. by apply /ssrnat.ltP.
+  - rewrite inordK;
+    (try rewrite Heqm;try rewrite prednK; try by apply /ssrnat.ltP;
+     try rewrite Hlab;try  by apply /ssrnat.ltP); try by apply /ssrnat.ltP.
+  - rewrite inordK;
+    (try rewrite Heqm;try rewrite prednK; try by apply /ssrnat.ltP;
+     try rewrite Hlab;try  by apply /ssrnat.ltP); try by apply /ssrnat.ltP.
++ apply finite_is_finite.
+  apply bmult_overflow_implies in HcG2. by destruct HcG2.
+Admitted.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(*
+Lemma jacobi_iteration_bound_monotone:
+  forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k k': nat),
   let n := (length A).-1 in
   let A' := @matrix_inj _ A n.+1 n.+1 in
   let b' := @vector_inj _ b n.+1 in
@@ -622,7 +751,7 @@ assert (k == k' \/ (k < k')%nat).
   apply /ssrnat.ltP. by apply H0.
   by []. 
 Qed.
-
+*)
 
 
 (*
