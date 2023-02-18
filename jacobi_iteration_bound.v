@@ -986,7 +986,7 @@ try apply Hrho; try apply Hfacc; try (intros; apply Hfx0);
 try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
 + admit.
 + apply Rle_lt_trans with (rho_def_alt A b).
-  apply rho_def_le_alt. apply Hrho.
+  by apply rho_def_le_alt. apply Hrho.
 + by apply diagonal_dominance_implies_invertibility.
 + apply Rgt_lt. eapply Rle_lt_trans; try apply HG1.
   apply Rplus_le_compat_l. apply Rmult_le_compat_l.
@@ -1002,22 +1002,24 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
          apply d_mag_ge_0.
       ++ apply Rlt_le, Rinv_0_lt_compat. 
          apply Rlt_Rminus. eapply Rle_lt_trans.
-         apply rho_def_le_alt. apply Hrho.
-      ++ apply Rmult_le_compat_l; last by apply d_mag_def_le_alt.
+         by apply rho_def_le_alt. apply Hrho.
+      ++ apply Rmult_le_compat_l.  
          repeat apply Rmult_le_pos. nra.
          apply Rplus_le_le_0_compat. nra. apply g_pos.
          apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
          apply /RleP. apply vec_norm_pd.
+         apply d_mag_def_le_alt. intros. apply Hfdiv.
+         intros. apply Hfa. apply Hrho.
       ++ assert ((rho_def A b = rho_def_alt A b)%Re \/
                   (rho_def A b < rho_def_alt A b)%Re).
-         { pose proof (@rho_def_le_alt t n A b). nra. }
+         { pose proof (@rho_def_le_alt t n A b Hfdiv Hfa). nra. }
          destruct H. 
          rewrite H; nra.
          apply Rlt_le. apply Rinv_lt_contravar .
          apply Rmult_lt_0_compat.
          apply Rlt_Rminus. apply Hrho.
          apply Rlt_Rminus. eapply Rle_lt_trans.
-         apply rho_def_le_alt. apply Hrho.
+         by apply rho_def_le_alt. apply Hrho.
          apply Rplus_le_lt_compat. nra.
          by apply Ropp_lt_contravar.
     * apply Rplus_le_le_0_compat. apply g1_pos.
@@ -1028,7 +1030,7 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
       apply d_mag_ge_0.
       apply Rlt_le, Rinv_0_lt_compat. 
       apply Rlt_Rminus. eapply Rle_lt_trans.
-      apply rho_def_le_alt. apply Hrho.
+      by apply rho_def_le_alt. apply Hrho.
     * apply Rplus_le_le_0_compat. apply g1_pos.
       repeat apply Rmult_le_pos. nra.
       apply Rplus_le_le_0_compat. nra. apply g_pos.
@@ -1039,12 +1041,12 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
       apply Rlt_Rminus. apply Hrho.
 + admit.
 + admit.
-+ intros. apply input_bound_compute_implies_math. apply Hrho. admit. apply Hinp.
-+ intros. apply input_bound_compute_implies_math. apply Hrho. admit. apply Hinp.
++ intros. apply input_bound_compute_implies_math; try by []. apply Hrho. admit. 
++ intros. apply input_bound_compute_implies_math;try by []. apply Hrho. admit. 
 + intros. apply Hinp.
-+ apply input_bound_compute_implies_math. apply Hrho. admit. apply Hinp.
-+ intros. apply input_bound_compute_implies_math. apply Hrho. admit. apply Hinp.
-+ intros. apply input_bound_compute_implies_math. apply Hrho. admit. apply Hinp.
++ apply input_bound_compute_implies_math; try by []. apply Hrho. admit. 
++ intros. apply input_bound_compute_implies_math; try by []. apply Hrho. admit. 
++ intros. apply input_bound_compute_implies_math; try by []. apply Hrho. admit. 
 Admitted.
 
 
