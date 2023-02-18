@@ -34,15 +34,15 @@ Definition d_mag_def_alt {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
   let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
   let delta := default_rel t in
   ((g t n.+1 * (1 + delta) + delta) *
-                    ((vec_inf_norm (A1_diag A_real) *
+                    ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
                       (1 + delta) + default_abs t) *
                      vec_inf_norm b_real) +
                     (1 + g t n.+1) * g1 t n.+1 (n.+1 - 1) *
                     (1 + delta) *
-                    (vec_inf_norm (A1_diag A_real) *
+                    (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
                      (1 + delta) + default_abs t) +
                     g1 t n.+1 (n.+1 - 1) +
-                    (vec_inf_norm (A1_diag A_real) * delta +
+                    (vec_inf_norm (FT2R_mat (A1_inv_J A)) * delta +
                      default_abs t) * vec_inf_norm b_real +
                     ((((1 + g t n.+1) * (1 + delta) *
                        g t n.+1 + delta * (1 + g t n.+1) +
@@ -52,7 +52,7 @@ Definition d_mag_def_alt {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
                        g t n.+1) * default_abs t +
                       default_abs t) *
                      matrix_inf_norm (A2_J_real A_real)) *
-                     (vec_inf_norm (A1_diag A_real) * 
+                     (vec_inf_norm (FT2R_mat (A1_inv_J A)) * 
                        vec_inf_norm b_real * (/ (1 - rho_def A b))))%Re.
 
 (** x = A_1^{-1} (b - A_2 x) 
@@ -159,8 +159,8 @@ Lemma x_bound_exists {t} {n:nat}
   let b_real := FT2R_mat b in
   let x := A_real^-1 *m b_real in
   let x1 := x_fix x b_real A_real in
-  let R_def :=  (vec_inf_norm (A1_diag A_real) *
-                matrix_inf_norm (A2_J_real A_real))%Re in
+  let R_def :=  (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+                matrix_inf_norm (FT2R_mat (A2_J A)))%Re in
   (R_def < 1)%Re ->
  (vec_inf_norm x1 <= 
     vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
@@ -173,8 +173,8 @@ Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x:= mulmx (A_real^-1) b_real in
-  let R_def :=  (vec_inf_norm (A1_diag A_real) *
-                matrix_inf_norm (A2_J_real A_real))%Re in
+  let R_def :=  (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+                matrix_inf_norm (FT2R_mat (A2_J A)))%Re in
   (R_def < 1)%Re ->
   (@f_error _ _ _ 0 b x0 x A  <=
     vec_inf_norm (FT2R_mat x0) + 
@@ -215,8 +215,8 @@ Definition input_bound_Rcompute {t} {n:nat}
   (A: 'M[ftype t]_n.+1) (x0 b: 'cV[ftype t]_n.+1):=
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
-  let R_def :=  (vec_inf_norm (A1_diag A_real) *
-                matrix_inf_norm (A2_J_real A_real))%Re in
+  let R_def :=  (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+                matrix_inf_norm (FT2R_mat (A2_J A)))%Re in
   let x_bound :=  
   (vec_inf_norm (diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) b_real) /
     (1 - R_def))%Re in 
@@ -359,25 +359,14 @@ Lemma d_mag_def_le_alt {t: type} {n:nat}
   (d_mag_def A b <= d_mag_def_alt A b)%Re.
 Proof.
 unfold d_mag_def, d_mag_def_alt.
-apply Rplus_le_compat_l.
-apply Rmult_le_compat_l.
+apply Rplus_le_compat.
 + admit.
-+ apply x_bound_exists.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
++ apply Rmult_le_compat.
+  - admit.
+  - apply /RleP. apply vec_norm_pd.
+  - admit.
+  - admit.
+Admitted.
 
 
 (** Refactoring definitions to make them readable and beautiful **)
