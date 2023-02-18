@@ -211,7 +211,11 @@ apply Rplus_le_compat.
       ++ apply Rmult_le_pos.
           apply /RleP. apply vec_norm_pd.
           apply /RleP. apply matrix_norm_pd.
-      ++ 
+      ++ assert (1%Re = (1 + 0)%Re) by nra.
+         rewrite [in X in (X <= _)%Re]H2.
+         apply Rplus_le_compat; last by apply default_rel_ge_0.
+         assert (forall x y:R, (1 <= x)%Re -> (1 <= y)%Re -> (1 <= x * y)%Re).
+         { intros. nra. } apply H3.
 
 
 
