@@ -749,10 +749,10 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   let rho_hat := rho_def_alt A b in 
   let d_mag := d_mag_def_alt A b in
   let x0 := \col_(j < n.+1) (Zconst t 0) in
-  let R_def :=  (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+  let R_def :=  (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
                    matrix_inf_norm (FT2R_mat (A2_J A)))%Re in
   let e_0 := (vec_inf_norm (FT2R_mat x0) + 
-                (vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+                (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
                     vec_inf_norm (FT2R_mat b)) / (1 - R_def))%Re in
   (** Finiteness of A **)
   (forall i j, Binary.is_finite _ _ (A i j) = true) /\ 
@@ -795,7 +795,10 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
 
 (** g  g1  rho d_mag : what do they mean intuitively **)
 Lemma d_mag_rel_1 {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
+  (Hinv: forall i, is_finite (fprec t)  (femax t)
+       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
+  (Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re -> 
   (2 * d_mag_def A b *
@@ -808,18 +811,18 @@ apply Rmult_le_compat.
 apply Rmult_le_pos. nra. apply d_mag_ge_0.
 apply Rlt_le, Rinv_0_lt_compat. 
 apply Rlt_Rminus. eapply Rle_lt_trans.
-apply rho_def_le_alt. apply Hrho.
-apply Rmult_le_compat_l. nra. apply d_mag_def_le_alt.
+apply rho_def_le_alt; try by []. apply Hrho.
+apply Rmult_le_compat_l. nra. by apply d_mag_def_le_alt.
 assert ((rho_def A b = rho_def_alt A b)%Re \/
                   (rho_def A b < rho_def_alt A b)%Re).
-{ pose proof (@rho_def_le_alt t n A b). nra. }
+{ pose proof (@rho_def_le_alt t n A b Hinv Ha).  nra. }
 destruct H. 
 rewrite H; nra.
 apply Rlt_le. apply Rinv_lt_contravar .
 apply Rmult_lt_0_compat.
 apply Rlt_Rminus. apply Hrho.
 apply Rlt_Rminus. eapply Rle_lt_trans.
-apply rho_def_le_alt. apply Hrho.
+by apply rho_def_le_alt. apply Hrho.
 apply Rplus_le_lt_compat. nra.
 by apply Ropp_lt_contravar.
 Qed.
