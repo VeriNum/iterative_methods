@@ -506,14 +506,6 @@ repeat split.
       apply Rplus_le_lt_compat. nra.
       by apply Ropp_lt_contravar.
       apply d_mag_def_le_alt.
-
-
-
-
-
-
-
-admit.
 + intros. unfold input_bound_Rcompute in H.
   destruct H as [_[_[_[_[_ bnd6]]]]].
   eapply Rle_lt_trans; last by apply bnd6.
