@@ -829,7 +829,10 @@ Qed.
 
 
 Lemma d_mag_rel_2 {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
+  (Hinv: forall i, is_finite (fprec t)  (femax t)
+       (BDIV t (Zconst t 1) (A (inord i) (inord i))) = true)
+  (Ha : forall i, is_finite (fprec t)  (femax t) (A (inord i) (inord i)) = true):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re -> 
   (1 / (1 - rho_def A b) *
@@ -844,11 +847,11 @@ replace (1 / (1 - rho_def A b))%Re with
             (/ (1 - rho_def A b))%Re by nra. 
 apply Rinv_0_lt_compat. 
 apply Rlt_Rminus. eapply Rle_lt_trans.
-apply rho_def_le_alt. apply Hrho.
+by apply rho_def_le_alt. apply Hrho.
 apply d_mag_ge_0.
 assert ((rho_def A b = rho_def_alt A b)%Re \/
                   (rho_def A b < rho_def_alt A b)%Re).
-{ pose proof (@rho_def_le_alt t n A b). nra. }
+{ pose proof (@rho_def_le_alt t n A b Hinv Ha). nra. }
 destruct H. 
 rewrite H; nra.
 apply Rlt_le. 
@@ -860,10 +863,10 @@ apply Rinv_lt_contravar .
 apply Rmult_lt_0_compat.
 apply Rlt_Rminus. apply Hrho.
 apply Rlt_Rminus. eapply Rle_lt_trans.
-apply rho_def_le_alt. apply Hrho.
+by apply rho_def_le_alt. apply Hrho.
 apply Rplus_le_lt_compat. nra.
 by apply Ropp_lt_contravar.
-apply d_mag_def_le_alt.
+by apply d_mag_def_le_alt.
 Qed.
 
 
