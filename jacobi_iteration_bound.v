@@ -803,20 +803,24 @@ Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let R_def :=  (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
                     matrix_inf_norm (A2_real))%Re in
   (R_def < 1)%Re ->
+  (d_mag_def_alt A b / (1 - rho_def_alt A b) <
+       f_error 0 b x0 x  A)%Re /\
   (@f_error _ _ _ 0 b x0 x A  <=
     vec_inf_norm (FT2R_mat x0) + 
     (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t))
         * vec_inf_norm (b_real)) / (1 - R_def))%Re.
 Proof.
 intros. 
-unfold f_error.
-eapply Rle_trans. apply /RleP. apply triang_ineq .
-rewrite -vec_inf_norm_opp.
-assert (X_m_jacobi 0 x0 b A = x0).
-{ by simpl. } rewrite H0. rewrite -RplusE.
-apply Rplus_le_compat_l.
-apply x_bound_exists. apply H.
-Qed.
+split.
++ admit.
++ unfold f_error.
+  eapply Rle_trans. apply /RleP. apply triang_ineq .
+  rewrite -vec_inf_norm_opp.
+  assert (X_m_jacobi 0 x0 b A = x0).
+  { by simpl. } rewrite H0. rewrite -RplusE.
+  apply Rplus_le_compat_l.
+  apply x_bound_exists. apply H.
+Admitted.
 
 (** Replace Gamma with tau_squared  **)
 
@@ -1520,16 +1524,35 @@ assert (Hf_ge: (0 <
       apply Rle_lt_trans with (rho_def_alt A b).
       by apply rho_def_le_alt. apply Hrho.
     - apply d_mag_def_le_alt. apply Hfdiv. apply Hfa. apply Hrho.
-    - 
+    - assert ((rho_def A b = rho_def_alt A b)%Re \/
+                  (rho_def A b < rho_def_alt A b)%Re).
+      { pose proof (@rho_def_le_alt t n A b Hfdiv Hfa). nra. }
+      destruct H. 
+      rewrite H; nra.
+      apply Rlt_le. 
+      replace (1 / (1 - rho_def A b))%Re with 
+                  (/ (1 - rho_def A b))%Re by nra.
+      replace (1 / (1 - rho_def_alt A b))%Re with 
+                  (/ (1 - rho_def_alt A b))%Re by nra.
+      apply Rinv_lt_contravar .
+      apply Rmult_lt_0_compat.
+      apply Rlt_Rminus. apply Hrho.
+      apply Rlt_Rminus. eapply Rle_lt_trans.
+      by apply rho_def_le_alt. apply Hrho.
+      apply Rplus_le_lt_compat. nra.
+      by apply Ropp_lt_contravar.
+  + unfold f_error.
+    assert (FT2R_mat (X_m_jacobi 0 (\col__ Zconst t 0) b A) = 0).
+    { apply matrixP. unfold eqrel. intros. rewrite !mxE. simpl. reflexivity. }
+    rewrite H.
     
 
 
 
-Search ( _ / _ <= _ / _)%Re.
 
 
-
- by admit.
+ admit.
+}
 repeat split; try apply size_cons; try apply Hfa; try apply Hfdiv;
 try apply Hrho; try apply Hfacc; try (intros; apply Hfx0);
 try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
