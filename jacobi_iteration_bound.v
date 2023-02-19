@@ -652,10 +652,10 @@ Qed.
 
 Lemma d_mag_alt_gt_0 {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
-  (*(0 < matrix_inf_norm (A2_J_real (FT2R_mat A)))%Re -> *)
+  (rho_def_alt A b < 1)%Re ->
   (0 < d_mag_def_alt A b)%Re .
 Proof.
-intros.
+intro Hrho.
 unfold d_mag_def_alt.
 apply Rplus_lt_le_0_compat.
 + apply Rplus_lt_le_0_compat.
@@ -726,6 +726,14 @@ apply Rplus_lt_le_0_compat.
          -- apply Rmult_le_pos; first by apply default_rel_ge_0.
             apply Rplus_le_le_0_compat; try nra; try apply g_pos.
   - apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
+    apply /RleP. apply vec_norm_pd.
+  - apply Rlt_le, Rinv_0_lt_compat.
+    apply Rlt_Rminus. apply default_rel_ub_strict.
+  - apply /RleP. apply vec_norm_pd.
+  - apply Rlt_le. apply Rinv_0_lt_compat.
+    apply Rlt_Rminus.
+    apply rho_1_implies_rho_2  with b. apply Hrho.
+Qed.
 
 
 
