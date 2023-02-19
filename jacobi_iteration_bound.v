@@ -563,7 +563,16 @@ apply Rplus_le_lt_0_compat.
 + admit.
 + apply Rmult_lt_0_compat; last by apply H.
   apply Rplus_le_lt_0_compat; last by apply default_abs_gt_0.
-  apply Rmult_le_pos.
+  apply Rmult_le_pos; last by apply default_abs_ge_0.
+  apply Rplus_le_le_0_compat; last by apply g_pos.
+  apply Rplus_le_le_0_compat.
+  - repeat apply Rmult_le_pos.
+    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+    apply g_pos.
+  - apply Rmult_le_pos. apply default_rel_ge_0.   
+    apply Rplus_le_le_0_compat; try nra; try by apply g_pos.
+Admitted.
   
   
 
