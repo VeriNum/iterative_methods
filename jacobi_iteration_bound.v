@@ -1059,14 +1059,6 @@ apply Rinv_lt_contravar.
 Qed.
   
 
-
-
-
-
-
-
-
-
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat): 
@@ -1173,13 +1165,15 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
   - unfold k_min. rewrite Coqlib.Z_to_nat_neg.
     admit.
     apply Zceil_glb. unfold Rlog. apply Rcomplements.Rmult_le_0_r.
-    nra. admit.
+    nra. apply ln_rho_inv_ge_0. apply Hfdiv. apply Hfa. apply Hrho. 
+    admit.
   - apply le_lt_trans with (k_min_alt A b accuracy); last by apply Hk.
     apply sublist.Z_to_nat_monotone.
     apply Zceil_le.
     unfold Rlog. apply Rmult_le_compat. try by apply ln_rho_rel .
     * apply H.
-    *
+    * apply ln_rho_inv_ge_0. apply Hfdiv. apply Hfa. apply Hrho. 
+      admit.
 
   
 
