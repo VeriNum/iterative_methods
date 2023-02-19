@@ -3833,20 +3833,19 @@ destruct H0.
          -- remember (length A).-1 as n.
             assert ( length (resid (jacobi_n A b x0 0)) = n.+1).
             { admit. } rewrite H3. apply g1_constraint_Sn. apply H.
-         --
-    
-
-
-pos vector_residual_equiv.
-      
-
-
-
-
-
-
-
-admit.
+         -- intros. admit.
+      ++ unfold BCMP.
+         rewrite Bcompare_correct.
+         -- rewrite Rcompare_Lt; first by [].
+            change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
+            remember (FT2R acc2) as Gamma.
+            admit.
+         -- unfold norm2. apply dotprod_finite.
+            ** remember (length A).-1 as n.
+               assert ( length (resid (jacobi_n A b x0 0)) = n.+1).
+               { admit. } rewrite H1. apply g1_constraint_Sn. apply H.
+            ** intros. admit.
+         -- unfold acc2. apply H.
 - apply jacobi_iteration_bound_lowlevel'.
   + by apply jacobi_precond_compute_implies_math .
   + apply HeqAb. 
