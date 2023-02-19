@@ -1514,7 +1514,14 @@ assert (Hf_ge: (0 <
 { apply Rlt_Rminus.
   apply Rle_lt_trans with 
   (d_mag_def_alt A b / (1 - rho_def_alt A b))%Re.
-  +
+  + apply Rmult_le_compat.
+    - apply d_mag_ge_0.
+    - apply Rlt_le, Rinv_0_lt_compat. apply Rlt_Rminus.
+      apply Rle_trans with (rho_def_alt A b).
+
+
+
+Search ( _ / _ <= _ / _)%Re.
 
 
 
