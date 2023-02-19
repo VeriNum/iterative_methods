@@ -3905,42 +3905,13 @@ destruct H0.
                               (vector_inj
                                  (resid
                                     (jacobi_n A b x0 0)) n.+1)))))).
-             {
-
-
-
-
-
-
-
-
-FT2R (norm2 (rev (vec_to_list_float n.+1 (resid (k_min A b acc).+1)))) = 
-             Rabs (FT2R (norm2 (rev (vec_to_list_float n.+1 (resid (k_min A b acc).+1)))))).
              { rewrite Rabs_right. nra. by apply Rle_ge. }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            admit.
+             rewrite H9. clear H9.
+             eapply Rle_lt_trans.
+             apply norm2_vec_inf_norm_rel.
+             ** intros. admit.
+             ** admit.
+             ** admit. (** x_1 - x_0 **)
          -- unfold norm2. apply dotprod_finite.
             ** remember (length A).-1 as n.
                assert ( length (resid (jacobi_n A b x0 0)) = n.+1).
@@ -3951,7 +3922,7 @@ FT2R (norm2 (rev (vec_to_list_float n.+1 (resid (k_min A b acc).+1)))) =
   + by apply jacobi_precond_compute_implies_math .
   + apply HeqAb. 
   + apply HlenA.
-Qed.
+Admitted.
 
 
 End WITH_NANS.
