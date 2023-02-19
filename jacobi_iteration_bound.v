@@ -3789,6 +3789,28 @@ split.
     } by rewrite H9. 
 Qed.
 
+
+(**
+H9 : In xy
+       (combine
+          (vec_to_list_float n.+1
+             (vector_inj
+                (resid
+                   (jacobi_n A b x0 0))
+                n.+1))
+          (vec_to_list_float n.+1
+             (vector_inj
+                (resid
+                   (jacobi_n A b x0 0))
+                n.+1)))
+______________________________________(1/1)
+is_finite (fprec t) (femax t) xy.1 =
+true /\
+is_finite (fprec t) (femax t) xy.2 =
+true
+***)
+
+
 Lemma finite_residual_0 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -3940,7 +3962,22 @@ destruct H0.
                 pose proof (@vec_norm_diag _ t n  (A1_J A')
                             (X_m_jacobi 1 x0' b' A' -f
                                 X_m_jacobi 0 x0' b' A')).
-
+                assert (forall xy : ftype t * ftype t,
+                          In xy
+                            (combine
+                               (vec_to_list_float n.+1
+                                  (A1_J A'))
+                               (vec_to_list_float n.+1
+                                  (X_m_jacobi 1 x0' b' A' -f
+                                   X_m_jacobi 0 x0' b' A'))) ->
+                          is_finite (fprec t) (femax t) xy.1 =
+                          true /\
+                          is_finite (fprec t) (femax t) xy.2 =
+                          true /\
+                          is_finite (fprec t) (femax t)
+                            (BMULT t xy.1 xy.2) = true) by admit.
+               specialize (H9 H10).
+               admit.
 
 
 
