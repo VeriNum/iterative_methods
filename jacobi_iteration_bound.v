@@ -3510,7 +3510,23 @@ split.
                   (e_0 - d_mag / (1 - 0)))%Re = 0%Re).
          { rewrite pow_ne_zero; last by lia. nra. }
          rewrite H2. rewrite  Rplus_0_l.
-         rewrite H1 in HG. apply HG.
+         rewrite H1 in HG. rewrite HeqGamma. unfold acc2.
+         assert ((INR n.+1 *
+                   ((vec_inf_norm (FT2R_mat (A1_J A)) *
+                     (2 * d_mag / (1 - 0) *
+                      (1 + default_rel t)) *
+                     (1 + g t n.+1) +
+                     g1 t n.+1 (n.+1 - 1)%coq_nat)² *
+                    (1 + g t n.+1)) +
+                   g1 t n.+1 (n.+1 - 1)%coq_nat)%Re = 
+                (g1 t n.+1 (n.+1 - 1)%coq_nat +
+                  INR n.+1 * (1 + g t n.+1) *
+                  (g1 t n.+1 (n.+1 - 1)%coq_nat +
+                   2 * (1 + g t n.+1) *
+                   (1 + default_rel t) *
+                   vec_inf_norm (FT2R_mat (A1_J A)) *
+                   d_mag * / (1 - 0))²)%Re). 
+         { 
 
 
 
