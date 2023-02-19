@@ -1517,7 +1517,11 @@ assert (Hf_ge: (0 <
   + apply Rmult_le_compat.
     - apply d_mag_ge_0.
     - apply Rlt_le, Rinv_0_lt_compat. apply Rlt_Rminus.
-      apply Rle_trans with (rho_def_alt A b).
+      apply Rle_lt_trans with (rho_def_alt A b).
+      by apply rho_def_le_alt. apply Hrho.
+    - apply d_mag_def_le_alt. apply Hfdiv. apply Hfa. apply Hrho.
+    - 
+    
 
 
 
