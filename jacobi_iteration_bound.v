@@ -592,6 +592,53 @@ apply Rplus_le_lt_0_compat.
     apply Rplus_le_le_0_compat; try nra; try by apply g_pos.
 Qed.
   
+Lemma rho_alt_gt_0 {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  (0 < matrix_inf_norm (A2_J_real (FT2R_mat A)))%Re ->
+  (0 < rho_def_alt A b)%Re.
+Proof.
+intros.
+unfold rho_def_alt.
+match goal with |-context[(_ < ?a + ?c + ?b)%Re]=>
+ replace (a + c + b)%Re with ((a + b) + c)%Re by nra
+end.
+apply Rplus_le_lt_0_compat.
++ apply Rplus_le_le_0_compat. 
+  - apply Rmult_le_pos.
+    * apply Rplus_le_le_0_compat; last by apply default_rel_ge_0.
+      apply Rmult_le_pos; last by 
+      (apply Rplus_le_le_0_compat; try nra; try by apply default_rel_ge_0).
+      apply Rplus_le_le_0_compat; last by apply g_pos.
+      apply Rplus_le_le_0_compat.
+      ++ repeat apply Rmult_le_pos.
+        apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+        apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+        apply g_pos.
+      ++ apply Rmult_le_pos. apply default_rel_ge_0.   
+        apply Rplus_le_le_0_compat; try nra; try by apply g_pos.
+    * apply Rmult_le_pos.
+      apply /RleP. admit.
+      apply /RleP. apply matrix_norm_pd.
+  - apply Rmult_le_pos.
+    apply /RleP. admit.
+    apply /RleP. apply matrix_norm_pd.
++ apply Rmult_lt_0_compat. 
+  apply Rplus_le_lt_0_compat; last by apply default_abs_gt_0.
+  apply Rmult_le_pos; last by apply default_abs_ge_0.
+  apply Rplus_le_le_0_compat; last by apply g_pos.
+  apply Rplus_le_le_0_compat.
+  - repeat apply Rmult_le_pos.
+    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+    apply g_pos.
+  - apply Rmult_le_pos. apply default_rel_ge_0.   
+    apply Rplus_le_le_0_compat; try nra; try by apply g_pos.
+  - assert (FT2R_mat (A2_J A) = A2_J_real (FT2R_mat A)).
+    { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+      case: (x == y:> nat); simpl; nra.
+    } rewrite H0. apply H.
+Qed.
+
 
 Definition jacobi_preconditions_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
