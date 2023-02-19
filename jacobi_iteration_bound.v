@@ -664,7 +664,7 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
   (** Finiteness of A **)
   (forall i j, Binary.is_finite _ _ (A i j) = true) /\
   (** constant for the contraction mapping **)
-  (0 < rho /\ rho < 1)%Re /\
+  ((0 < matrix_inf_norm (A2_J_real (FT2R_mat A)))%Re /\ rho < 1)%Re /\
   (** Invertibility of A **)
   A_real \in unitmx /\
   (** Finiteness of the inverse of diagonal elements of A **)
@@ -858,7 +858,7 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (** Finiteness of A **)
   (forall i j, Binary.is_finite _ _ (A i j) = true) /\ 
   (** contraction constant **)
-  (0< rho_hat /\ rho_hat < 1)%Re /\
+  ((0 < matrix_inf_norm (A2_J_real (FT2R_mat A)))%Re /\ rho_hat < 1)%Re /\
   (** diagonal dominance of A **)
   strict_diagonal_dominance A /\
   (** Finiteness of the inverse of diagonal elements of A **)
@@ -1358,7 +1358,8 @@ intros.
 unfold jacobi_preconditions_Rcompute in H.
 destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]].
 unfold jacobi_preconditions_math.
-assert (Hrho_Re: (0 < rho_def A b)%Re) by admit.
+assert (Hrho_Re: (0 < rho_def A b)%Re).
+{ apply rho_gt_0. apply Hrho. }
 assert (HG_re: (FT2R (BMULT t accuracy accuracy) >
                  g1 t n.+1 (n.+1 - 1)%coq_nat +
                  INR n.+1 * (1 + g t n.+1) *
@@ -1426,7 +1427,6 @@ assert (Hf_ge: (0 <
 repeat split; try apply size_cons; try apply Hfa; try apply Hfdiv;
 try apply Hrho; try apply Hfacc; try (intros; apply Hfx0);
 try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
-+ apply Hrho_Re.
 + apply Rle_lt_trans with (rho_def_alt A b).
   by apply rho_def_le_alt. apply Hrho.
 + by apply diagonal_dominance_implies_invertibility.
@@ -1508,7 +1508,8 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
             apply Rplus_le_compat_l.
             apply Ropp_le_contravar. apply d_mag_rel_1.
             apply Hfdiv. apply Hfa. apply Hrho.
-    * apply ln_rho_rel. apply Hfdiv. apply Hfa. apply Hrho.
+    * apply ln_rho_rel. apply Hfdiv. apply Hfa. 
+      apply rho_alt_gt_0. apply Hrho.
       apply Hrho. nra.
 + lia.
 + apply Hf_ge.
