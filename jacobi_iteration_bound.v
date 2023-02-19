@@ -3819,7 +3819,25 @@ assert (rho_def
            (vector_inj b (length A).-1.+1))%Re).
 { admit. }
 destruct H0.
-- admit.
+- split.
+  + unfold acc2. apply finite_is_finite. apply H.
+  + exists 0%nat.
+    split.
+    * apply /ssrnat.leP. lia.
+    * intros. split.
+      ++ intros. rewrite leqn0 in H1.
+         assert (i = 0)%nat. { by apply /eqP. }
+         rewrite H2.
+         
+      
+
+
+
+
+
+
+
+admit.
 - apply jacobi_iteration_bound_lowlevel'.
   + by apply jacobi_precond_compute_implies_math .
   + apply HeqAb. 
