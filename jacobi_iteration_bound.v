@@ -1000,11 +1000,7 @@ intros.
 pose proof (@rho_def_le_alt t n A b Hinv Ha).
 assert (rho_def A b = rho_def_alt A b \/
         (rho_def A b < rho_def_alt A b)%Re) by nra.
-
-
-
-
-
+destruct H3. rewrite H3. nra.
 apply Rlt_le.
 apply Rinv_lt_contravar.
 + apply Rmult_lt_0_compat.
@@ -1018,12 +1014,18 @@ apply Rinv_lt_contravar.
     replace 1%Re with (/1)%Re by nra.
     apply Rinv_lt_contravar.
     rewrite Rmult_1_r. apply H1. 
-    apply Rle_lt_trans with (rho_def_alt A b).
-    by apply rho_def_le_alt.
+    apply Rlt_trans with (rho_def_alt A b).
+    apply H3.
     apply H0.
-+ apply ln_increasing. admit.
-  admit.
-Admitted.
++ apply ln_increasing. 
+  replace (1 / rho_def_alt A b)%Re with (/ rho_def_alt A b)%Re by nra.
+  apply Rinv_0_lt_compat. apply H.
+  replace (1 / rho_def_alt A b)%Re with (/ rho_def_alt A b)%Re by nra.
+  replace (1 / rho_def A b)%Re with (/ rho_def A b)%Re by nra.
+  apply Rinv_lt_contravar. 
+  by apply Rmult_lt_0_compat.
+  apply H3.
+Qed.
 
 (*
 rho_def_le_alt {t: type} {n:nat}
