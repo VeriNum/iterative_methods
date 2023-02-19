@@ -1301,35 +1301,15 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
          -- admit.
          -- assert ((0 <= rho_def A b)%Re). { by apply rho_ge_0. }
             nra.
-         -- apply Rinv_0_lt_compat. admit.
-            (*apply Rplus_lt_0_compat. 
-            ** apply Rdiv_lt_0_compat; last by 
-               (apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0).
-               apply Rdiv_lt_0_compat.
-               +++ apply Rdiv_lt_0_compat; last by 
-                   (apply Rplus_lt_le_0_compat; try nra; try apply g_pos).
-                   admit.
-               +++ apply vec_norm_strong_not_0. intros. rewrite !mxE.
-                   assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
-                    { intros. by apply BDIV_FT2R_sep_zero. } apply Hneq.
-             ** admit. *)
+         -- apply Rinv_0_lt_compat. apply tau_sqr_rel.
+            apply Hfdiv. apply Hfa. apply Hrho. admit.
       ++ apply Rmult_le_compat.
          -- apply Rmult_le_pos; last by 
             (apply Rplus_le_le_0_compat; try nra; try apply rho_ge_0).
             admit.
          -- apply Rlt_le.
-            apply Rinv_0_lt_compat. admit.
-            (*apply Rplus_lt_0_compat.
-            ** apply Rdiv_lt_0_compat; last by 
-               (apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0).
-               apply Rdiv_lt_0_compat.
-               +++ apply Rdiv_lt_0_compat; last by 
-                   (apply Rplus_lt_le_0_compat; try nra; try apply g_pos).
-                   admit.
-               +++ apply vec_norm_strong_not_0. intros. rewrite !mxE.
-                   assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
-                    { intros. by apply BDIV_FT2R_sep_zero. } apply Hneq.
-             ** admit. *)
+            apply Rinv_0_lt_compat. apply tau_sqr_rel.
+            apply Hfdiv. apply Hfa. apply Hrho. admit.
          -- apply Rmult_le_compat.
             ** admit.
             ** apply Rplus_le_le_0_compat; try nra; by try apply rho_ge_0.
