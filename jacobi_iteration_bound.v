@@ -1192,7 +1192,27 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
          -- admit.
          -- assert ((0 <= rho_def A b)%Re). { by apply rho_ge_0. }
             nra.
-         -- apply Rinv_0_lt_compat.
+         -- apply Rinv_0_lt_compat. 
+            apply Rplus_lt_0_compat. 
+            ** apply Rdiv_lt_0_compat.
+
+
+admit.
+            (** remove (0 <
+ -
+ (2 * d_mag_def A b /
+  (1 - rho_def A b)))%Re**)
+            
+
+
+ apply Rdiv_lt_0_compat.
+            Search (0 < _ / _)%Re.
+
+
+
+
+
+apply Rmult_lt_0_compat.
 
 
 
