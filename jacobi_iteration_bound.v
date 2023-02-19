@@ -3867,6 +3867,60 @@ destruct H0.
                       vector_inj (resid (jacobi_n A b x0 0)) n.+1).
             { apply /matrixP. unfold eqrel. intros. by rewrite !mxE. } 
             rewrite H7. 
+            assert ((FT2R
+                     (norm2
+                        (rev
+                           (vec_to_list_float n.+1
+                              (vector_inj (resid (jacobi_n A b x0 0)) n.+1)))) < 0)%Re \/
+                    (0 <= FT2R
+                           (norm2
+                              (rev
+                                 (vec_to_list_float n.+1
+                                    (vector_inj (resid (jacobi_n A b x0 0)) n.+1)))))%Re).
+
+
+
+                          (resid (k_min A b acc).+1)))) < 0)%Re \/             
+               (0 <= FT2R
+                 (norm2
+                    (rev
+                       (vec_to_list_float n.+1
+                          (resid (k_min A b acc).+1)))))%Re).
+            { nra. } destruct H.
+            apply Rlt_le_trans with 0%Re.
+            nra. apply Rle_trans with 
+            (g1 t n.+1 (n.+1 - 1)%coq_nat +
+            INR n.+1 * (1 + g t n.+1) *
+            (g1 t n.+1 (n.+1 - 1)%coq_nat +
+             2 * (1 + g t n.+1) *
+             (1 + default_rel t) *
+             vec_inf_norm (FT2R_mat (A1_J A)) *
+             d_mag_def A b * / (1 - rho_def A b))²)%Re.
+              apply Rplus_le_le_0_compat; first by apply g1_pos.
+                apply Rmult_le_pos. apply Rmult_le_pos. apply pos_INR.
+                apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+                apply Rle_0_sqr.
+             rewrite HeqGamma. unfold acc2. nra.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
