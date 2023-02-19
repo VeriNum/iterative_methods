@@ -633,17 +633,6 @@ Qed.
 
 (** Replace Gamma with tau_squared  **)
 
-(*
-Local Open Scope Z_scope.
-Lemma dummy (x:Z):
-  (x <= 0)%Z ->
-  Z.to_nat x = 0%nat.
-Proof.
-intros.
-by apply Coqlib.Z_to_nat_neg.
-Qed.
-*)
-
 
 Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   (b : 'cV[ftype t]_n.+1) (acc : ftype t) :=
@@ -997,14 +986,26 @@ assert ( (d * a <= c * b)%Re).
 *)
 
 Lemma ln_rho_rel {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
+  (Hinv: forall i, is_finite (fprec t)  (femax t)
+       (BDIV t (Zconst t 1) (A i i)) = true)
+  (Ha : forall i j, is_finite (fprec t)  (femax t) (A  i j) = true):
   (0 < rho_def_alt A b)%Re ->
   (rho_def_alt A b < 1)%Re ->
   (0 < rho_def A b)%Re ->
 (/ ln (1 / rho_def A b) <=
  / ln (1 / rho_def_alt A b))%Re.
 Proof.
-intros. apply Rlt_le.
+intros. 
+pose proof (@rho_def_le_alt t n A b Hinv Ha).
+assert (rho_def A b = rho_def_alt A b \/
+        (rho_def A b < rho_def_alt A b)%Re) by nra.
+
+
+
+
+
+apply Rlt_le.
 apply Rinv_lt_contravar.
 + apply Rmult_lt_0_compat.
   - rewrite -ln_1. apply ln_increasing. nra.
@@ -1016,14 +1017,29 @@ apply Rinv_lt_contravar.
     replace (1 / rho_def A b)%Re with (/ rho_def A b)%Re by nra.
     replace 1%Re with (/1)%Re by nra.
     apply Rinv_lt_contravar.
-    rewrite Rmult_1_r. apply H1. admit.
+    rewrite Rmult_1_r. apply H1. 
+    apply Rle_lt_trans with (rho_def_alt A b).
+    by apply rho_def_le_alt.
+    apply H0.
 + apply ln_increasing. admit.
   admit.
 Admitted.
 
+(*
+rho_def_le_alt {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
+  (Hinv: forall i, is_finite (fprec t)  (femax t)
+       (BDIV t (Zconst t 1) (A i i)) = true)
+(Ha : forall i j, is_finite (fprec t)  (femax t) (A  i j) = true):
+  
+*)
+
 
 Lemma ln_rho_inv_ge_0 {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
+  (Hinv: forall i, is_finite (fprec t)  (femax t)
+       (BDIV t (Zconst t 1) (A i i)) = true)
+  (Ha : forall i j, is_finite (fprec t)  (femax t) (A  i j) = true):
   ( rho_def_alt A b < 1)%Re ->
   (0 < rho_def A b)%Re ->
   (0 <= / ln (1 / rho_def A b))%Re.
@@ -1035,7 +1051,11 @@ replace (1 / rho_def A b)%Re with (/ rho_def A b)%Re by nra.
 replace 1%Re with (/1)%Re by nra.
 apply Rinv_lt_contravar.
 + by rewrite Rmult_1_r.
-+
++ apply Rle_lt_trans with (rho_def_alt A b).
+  by apply rho_def_le_alt.
+  apply H.
+Qed.
+  
 
 
 
