@@ -1070,6 +1070,21 @@ destruct H1.
 Qed.
 
 
+Lemma vec_norm_strong_not_0 {n:nat} (v: 'cV[R]_n.+1):
+  (forall i, v i ord0 <> 0%Re) ->
+  (0 < vec_inf_norm v)%Re.
+Proof.
+intros.
+unfold vec_inf_norm.
+apply Rlt_le_trans with 
+[seq Rabs (v i 0) | i <- enum 'I_n.+1]`_0.
++ rewrite seq_equiv. rewrite nth_mkseq; last by [].
+  specialize (H (@inord n 0)). by apply Rabs_pos_lt.
++ apply /RleP.
+  apply (@bigmaxr_ler _ 0%Re [seq Rabs (v i 0) | i <- enum 'I_n.+1] 0).
+  by rewrite size_map size_enum_ord.
+Qed.
+
 
 
 (** Refactoring definitions to make them readable and beautiful **)
@@ -1200,7 +1215,11 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
                +++ apply Rdiv_lt_0_compat; last by 
                    (apply Rplus_lt_le_0_compat; try nra; try apply g_pos).
                    admit.
-               +++
+               +++ apply vec_norm_strong_not_0. intros. rewrite !mxE.
+                   assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
+                    { intros. by apply BDIV_FT2R_sep_zero. } apply Hneq.
+             ** admit.
+      ++
 
 
 admit.
@@ -2625,21 +2644,6 @@ Qed.
 
 
 
-
-Lemma vec_norm_strong_not_0 {n:nat} (v: 'cV[R]_n.+1):
-  (forall i, v i ord0 <> 0%Re) ->
-  (0 < vec_inf_norm v)%Re.
-Proof.
-intros.
-unfold vec_inf_norm.
-apply Rlt_le_trans with 
-[seq Rabs (v i 0) | i <- enum 'I_n.+1]`_0.
-+ rewrite seq_equiv. rewrite nth_mkseq; last by [].
-  specialize (H (@inord n 0)). by apply Rabs_pos_lt.
-+ apply /RleP.
-  apply (@bigmaxr_ler _ 0%Re [seq Rabs (v i 0) | i <- enum 'I_n.+1] 0).
-  by rewrite size_map size_enum_ord.
-Qed.
 
 
 Lemma Gamma_constraint {t}  {n:nat} 
