@@ -1436,7 +1436,15 @@ intros. apply Rlt_Rminus. repeat apply Rdiv_lt_right.
   - apply sqrt_pos.
 Qed.
 
-
+Lemma sub0l_vec:
+  forall (n:nat) (v: 'cV[R]_n.+1),
+  0 - v = - v.
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE.
+rewrite -RminusE -!RoppE. 
+rewrite Rminus_0_l. nra.
+Qed.
 
 
 (** Refactoring definitions to make them readable and beautiful **)
@@ -1545,6 +1553,7 @@ assert (Hf_ge: (0 <
     assert (FT2R_mat (X_m_jacobi 0 (\col__ Zconst t 0) b A) = 0).
     { apply matrixP. unfold eqrel. intros. rewrite !mxE. simpl. reflexivity. }
     rewrite H.
+   
     
 
 
