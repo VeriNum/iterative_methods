@@ -3809,35 +3809,15 @@ Proof.
 intros.
 unfold jacobi_preconditions in H.
 destruct H as [HAA [HlenA [HeqAb H]]].
-destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [Hfx0 [HfA1_inv [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]]].
-remember (length A).-1 as n.
-remember (@matrix_inj _ A n.+1 n.+1) as A'.
-remember (@vector_inj _ b n.+1) as b'.
-split.
-+ unfold acc2. by apply finite_is_finite.
-+ 
-
-
-
-
-exists (k_min A b acc).+1. 
-  repeat split.
-  - apply /ssrnat.ltP. apply Hk.
-  - intros. apply finite_is_finite.
-    apply residual_is_finite.
-    unfold forward_error_cond. 
-    repeat split; try (by intros); try apply Hrho; try apply Hinp; try apply Hrho; try apply size_cons.
-    apply He0.
-
-
-
-
-apply jacobi_precond_compute_implies_math .
-
-
-
-
-
+assert (rho_def
+           (matrix_inj A (length A).-1.+1
+              (length A).-1.+1)
+           (vector_inj b (length A).-1.+1) = 0%Re \/
+        (0 < rho_def
+           (matrix_inj A (length A).-1.+1
+              (length A).-1.+1)
+           (vector_inj b (length A).-1.+1))%Re).
+{ admit. }
 
 
 
