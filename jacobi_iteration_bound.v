@@ -1159,12 +1159,11 @@ intros. apply Rlt_Rminus. repeat apply Rdiv_lt_right.
      apply Rle_lt_trans with (rho_def_alt A b).
       by apply rho_def_le_alt.
       apply H.
-   *
-
-
-
-admit.
+   * apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+   * apply /RleP. apply vec_norm_pd.
+   * apply Rplus_le_le_0_compat; try nra; try apply g_pos.
   - apply sqrt_pos.
+Admitted.
 
 
 
