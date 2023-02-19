@@ -1100,6 +1100,8 @@ Qed.
  (1 - rho_def A b))%Re
 **)
 
+
+
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat): 
@@ -1260,19 +1262,10 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
                    apply Rlt_Rminus. eapply Rle_lt_trans; last by apply Hrho.
                    by apply rho_def_le_alt.
             ** apply Rplus_le_compat_l. by apply rho_def_le_alt.
-         -- apply Rlt_le. apply Rinv_lt_contravar.
-            ** apply Rmult_lt_0_compat; admit.
-            ** apply Rplus_le_lt_compat.
-               +++ apply Rmult_lt_compat_r.
-
-
-
-
-
-
-admit.
-               +++ apply Ropp_le_contravar. apply d_mag_rel_1.
-                   apply Hfdiv. apply Hfa. apply Hrho.
+         -- apply Rinv_le. admit.
+            apply Rplus_le_compat_l.
+            apply Ropp_le_contravar. apply d_mag_rel_1.
+            apply Hfdiv. apply Hfa. apply Hrho.
     * apply ln_rho_rel. apply Hfdiv. apply Hfa. apply Hrho.
       apply Hrho. admit.
 
