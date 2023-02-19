@@ -3845,7 +3845,21 @@ destruct H0.
             change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
             remember (FT2R acc2) as Gamma.
             pose proof (@vector_residual_equiv t A b x0 0%nat).
-
+            assert (length b = length A) by (symmetry; apply HeqAb).
+            assert (length x0 = length A).
+            { unfold x0. by rewrite !repeat_length. }
+            assert ((0 < length A)%coq_nat) by apply HlenA.
+            specialize (H1 H2 H3 H4).
+            pose proof (@v_equiv t).
+            remember (length A).-1 as n.
+            specialize (H5 (resid (jacobi_n A b x0 0)) n).
+            assert (length (resid (jacobi_n A b x0 0)) = n.+1).
+            { repeat rewrite /matrix_vector_mult !map_length combine_length.
+              rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+              rewrite !seq_length /matrix_rows_nat -HeqAb !Nat.min_id.
+              rewrite Heqn prednK. by []. by apply /ssrnat.ltP.
+              by []. by rewrite /x0 repeat_length.
+            }
 
 
 
