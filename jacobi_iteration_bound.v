@@ -3421,6 +3421,300 @@ assert ((p < 0)%Re \/ (0 <= p)%Re).
   by apply Zceil_le.
 Qed.
  
+Lemma jacobi_iteration_bound {t: type} {n : nat} :
+ forall (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (acc: ftype t) (k: nat),
+   jacobi_preconditions_math A b acc k -> 
+   let acc2 := BMULT t acc acc in
+   let x0 := \col_(j < n.+1) (Zconst t 0) in
+   let resid := residual_math A x0 b in
+   finite acc2 /\ 
+   exists j,
+    (j <= k)%nat /\
+    (forall i, (i <= j)%nat -> finite (norm2 (rev (vec_to_list_float n.+1 (resid i))))) /\
+    BCMP t Lt false (norm2 (rev (vec_to_list_float n.+1 (resid j)))) acc2 = false.
+    (** rev (_ ) fits perfectly well with norm2_vec_inf_norm_rel **)
+Proof.
+intros.
+unfold jacobi_preconditions_math in H.
+destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [Hfx0 [HfA1_inv [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]]].
+split.
++ unfold acc2. by apply finite_is_finite.
++ exists (k_min A b acc).+1. 
+  repeat split.
+  - apply /ssrnat.ltP. apply Hk.
+  - intros. apply finite_is_finite.
+    apply residual_is_finite.
+    unfold forward_error_cond. 
+    repeat split; try (by intros); try apply Hrho; try apply Hinp; try apply Hrho; try apply size_cons.
+    apply He0.
+  - unfold BCMP.
+    rewrite Bcompare_correct. 
+    * rewrite Rcompare_Lt; first by [].
+      change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
+      remember (FT2R acc2) as Gamma.
+      assert ((FT2R
+                 (norm2
+                    (rev
+                       (vec_to_list_float n.+1
+                          (resid (k_min A b acc).+1)))) < 0)%Re \/             
+               (0 <= FT2R
+                 (norm2
+                    (rev
+                       (vec_to_list_float n.+1
+                          (resid (k_min A b acc).+1)))))%Re).
+      { nra. } destruct H.
+      apply Rlt_le_trans with 0%Re.
+      nra. apply Rle_trans with 
+      (g1 t n.+1 (n.+1 - 1)%coq_nat +
+      INR n.+1 * (1 + g t n.+1) *
+      (g1 t n.+1 (n.+1 - 1)%coq_nat +
+       2 * (1 + g t n.+1) *
+       (1 + default_rel t) *
+       vec_inf_norm (FT2R_mat (A1_J A)) *
+       d_mag_def A b * / (1 - rho_def A b))²)%Re.
+        apply Rplus_le_le_0_compat; first by apply g1_pos.
+          apply Rmult_le_pos. apply Rmult_le_pos. apply pos_INR.
+          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+          apply Rle_0_sqr.
+       rewrite HeqGamma. unfold acc2. nra. 
+      assert (FT2R (norm2 (rev (vec_to_list_float n.+1 (resid (k_min A b acc).+1)))) = 
+              Rabs (FT2R (norm2 (rev (vec_to_list_float n.+1 (resid (k_min A b acc).+1)))))).
+      { rewrite Rabs_right. nra. by apply Rle_ge. } 
+      rewrite H0.
+      remember (rho_def A b) as rho.
+      remember (d_mag_def A b) as d_mag.
+      remember (mulmx ((FT2R_mat A)^-1) (FT2R_mat b)) as x.
+      remember (f_error 0 b x0 x A) as e_0.
+      apply Rle_lt_trans with
+      (INR n.+1 * 
+        (Rsqr (vec_inf_norm (FT2R_mat (A1_J A)) * 
+          ((rho ^ (k_min A b acc).+1 * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))
+            * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat) *
+          (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
+      ++ pose proof (@residual_bound t n A b (k_min A b acc).+1).
+         rewrite Heqx Heqd_mag Heqrho in He0. specialize (H1 He0).
+         assert (forward_error_cond A (\col__ Zconst t 0) b ).
+         { unfold forward_error_cond. repeat split; try by intros; try by (intros; apply Hinp).
+           + rewrite Heqrho in Hrho. apply Hrho.
+           + apply size_cons.
+           + apply size_cons.
+         } specialize (H1 H2).  unfold resid,x0. rewrite Heqe_0 Heqrho Heqd_mag Heqx.
+         unfold x0. apply H1. 
+      ++ assert (rho = 0%Re \/ (0 < rho)%Re).
+         { pose proof (@rho_ge_0 t n A b). simpl in H1.
+           rewrite Heqrho. unfold rho_def. nra.
+         } destruct H1.
+         (** case when rho = 0 **)
+         rewrite H1. 
+         assert ((0 ^ (k_min A b acc).+1 * (1 + 0) *
+                  (e_0 - d_mag / (1 - 0)))%Re = 0%Re).
+         { rewrite pow_ne_zero; last by lia. nra. }
+         rewrite H2. rewrite  Rplus_0_l.
+         rewrite H1 in HG. apply HG.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+apply Rcomplements.Rlt_minus_r.
+         rewrite Rmult_comm. 
+         apply Rcomplements.Rlt_div_r; 
+         first by (apply lt_0_INR; lia).
+         apply Rcomplements.Rlt_div_r;
+         first  by (apply Rplus_lt_le_0_compat; try nra; try apply g_pos).
+         assert (((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) / INR n.+1 /
+                    (1 + g t n.+1))%Re = 
+                  Rsqr (sqrt ((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) / INR n.+1 /
+                                  (1 + g t n.+1))%Re)).
+         { symmetry. apply Rsqr_sqrt. 
+           repeat apply Rmult_le_pos.
+           + apply Rle_0_minus.
+             apply Rle_trans with 
+             (g1 t n.+1 (n.+1 - 1)%coq_nat +
+                INR n.+1 * (1 + g t n.+1) *
+                (g1 t n.+1 (n.+1 - 1)%coq_nat +
+                 2 * (1 + g t n.+1) *
+                 (1 + default_rel t) *
+                 vec_inf_norm (FT2R_mat (A1_J A)) *
+                 d_mag * / (1 - rho))²)%Re.
+             - assert (( 0 <= INR n.+1 * (1 + g t n.+1) *
+                               (g1 t n.+1 (n.+1 - 1)%coq_nat +
+                                2 * (1 + g t n.+1) * (1 + default_rel t) *
+                                vec_inf_norm (FT2R_mat (A1_J A)) * d_mag *
+                                / (1 - rho))²)%Re).
+               { apply Rmult_le_pos; last by apply Rle_0_sqr.
+                 apply Rmult_le_pos. apply pos_INR.
+                 apply Rplus_le_le_0_compat. nra. apply g_pos.
+               } nra.
+             - apply Rlt_le. rewrite HeqGamma. by unfold acc2.
+           + apply Rlt_le. apply Rinv_0_lt_compat. apply lt_0_INR; lia.
+           + apply Rlt_le. apply Rinv_0_lt_compat. apply Rplus_lt_le_0_compat.
+             nra. apply g_pos.
+         } rewrite H1. 
+         apply Rsqr_incrst_1.
+         -- apply Rcomplements.Rlt_minus_r.
+            apply Rcomplements.Rlt_div_r;
+            first  by (apply Rplus_lt_le_0_compat; try nra; try apply g_pos).
+            rewrite Rmult_comm. apply Rcomplements.Rlt_div_r.
+            ** assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
+               { intros. by apply BDIV_FT2R_sep_zero. }
+               apply vec_norm_strong_not_0. intros. 
+               rewrite !mxE. apply Hneq.
+            ** apply Rcomplements.Rlt_div_r;
+               first  by (apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0).
+               apply Rcomplements.Rlt_minus_r.
+               apply Rcomplements.Rlt_div_r.
+               +++ apply Rlt_gt. rewrite Heqe_0. apply He0.
+               +++ apply Rcomplements.Rlt_div_r;
+                   first by (apply Rplus_lt_le_0_compat; try nra; try rewrite Heqrho; by apply rho_ge_0).
+                   assert ((rho ^ (k_min A b acc).+1)%Re = (/ / rho ^ (k_min A b acc).+1)%Re).
+                   { by rewrite Rinv_inv. }
+                   rewrite H2.
+                   match goal with |-context[(_ < ?x / ?y / ?z)%Re]=>
+                      replace (x / y / z)%Re with (/ ((y * z)  / x))%Re 
+                   end. 
+                   --- apply Rinv_lt_contravar.
+                       *** repeat apply Rmult_lt_0_compat.
+                           ++++ apply Rlt_gt.  rewrite Heqe_0. apply He0.
+                           ++++ apply Rplus_lt_le_0_compat. nra. rewrite Heqrho. by apply rho_ge_0.
+                           ++++ apply Rinv_0_lt_compat.
+                                rewrite HeqGamma. unfold acc2. 
+                                rewrite Heqd_mag Heqrho.
+                                apply Gamma_constraint. auto.
+                                rewrite Heqrho in Hrho. apply Hrho.
+                                intros.
+                                rewrite !mxE. by apply BDIV_FT2R_sep_zero.
+                                rewrite Heqrho Heqd_mag in HG. apply HG.
+                           ++++ apply Rinv_0_lt_compat.
+                                apply pow_lt. rewrite Heqrho. apply rho_gt_0. apply Hrho.
+                       *** rewrite -pow_inv.
+                           assert (((e_0 - d_mag / (1 - rho)) * (1 + rho) /
+                                     ((sqrt
+                                         ((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) /
+                                          INR n.+1 / (1 + g t n.+1)) -
+                                       g1 t n.+1 (n.+1 - 1)%coq_nat) / 
+                                      (1 + g t n.+1) /
+                                      vec_inf_norm (FT2R_mat (A1_J A)) /
+                                      (1 + default_rel t) - 2 * d_mag / (1 - rho)))%Re  =
+                                   Rpower (/rho)%Re 
+                                   ( Rlog (/rho)%Re 
+                                     ((e_0 - d_mag / (1 - rho)) * (1 + rho) /
+                                       ((sqrt
+                                           ((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) /
+                                            INR n.+1 / (1 + g t n.+1)) -
+                                         g1 t n.+1 (n.+1 - 1)%coq_nat) / 
+                                        (1 + g t n.+1) /
+                                        vec_inf_norm (FT2R_mat (A1_J A)) /
+                                        (1 + default_rel t) - 2 * d_mag / (1 - rho)))%Re)).
+                          { rewrite Rpower_Rlog. by []. 
+                            + assert ( (1 < /rho)%Re -> (/ rho )%Re <> 1%Re). { nra. }
+                              apply H3. replace 1%Re with (/1)%Re by nra.
+                               apply Rinv_lt_contravar. rewrite Rmult_1_r.
+                               rewrite Heqrho. apply rho_gt_0. apply Hrho.
+                               apply Hrho.  
+                            + apply Rinv_0_lt_compat. rewrite Heqrho. apply rho_gt_0. apply Hrho.
+                            + repeat apply Rmult_lt_0_compat.
+                              - apply Rlt_gt.  rewrite Heqe_0. apply He0.
+                              - apply Rplus_lt_le_0_compat. nra. rewrite Heqrho. by apply rho_ge_0.
+                              - apply Rinv_0_lt_compat.
+                                rewrite HeqGamma. unfold acc2. 
+                                rewrite Heqd_mag Heqrho.
+                                apply Gamma_constraint. auto.
+                                rewrite Heqrho in Hrho. apply Hrho.
+                                intros.
+                                rewrite !mxE. by apply BDIV_FT2R_sep_zero.
+                                rewrite Heqrho Heqd_mag in HG. apply HG.
+                          }
+                          rewrite H3.
+                          assert ( ((/ rho) ^ (k_min A b acc).+1)%Re = 
+                                   Rpower (/rho)%Re (INR (k_min A b acc).+1)).
+                          { rewrite Rpower_pow. nra.
+                            apply Rinv_0_lt_compat. rewrite Heqrho. apply rho_gt_0. apply Hrho.
+                          }
+                          rewrite H4. apply Rpower_lt .
+                          ++++ replace 1%Re with (/1)%Re by nra.
+                               apply Rinv_lt_contravar. rewrite Rmult_1_r.
+                               rewrite Heqrho. apply rho_gt_0. apply Hrho. 
+                               apply Hrho.
+                          ++++ apply Rle_lt_trans with (INR (k_min A b acc)).
+                               ---- unfold k_min.
+                                    rewrite  Heqrho Heqd_mag Heqe_0 HeqGamma /x0 Heqx  /acc2.
+                                     assert ((1 / rho_def A b)%Re = (/ rho_def A b)%Re). { nra. }
+                                     rewrite H5.
+                                    match goal with |-context[(?a <= INR (Z.to_nat (Zceil ?a )))%Re]=>
+                                      remember a as p
+                                    end. apply IZR_ceil_rel .
+                               ---- apply lt_INR. lia.
+                   --- rewrite Rinv_div. 
+                       match goal with |-context[( _ = ?a / ?b / ?c)%Re]=>
+                        replace (a / b / c)%Re with (a * (/b * /c))%Re by nra
+                       end. rewrite -Rinv_mult_distr.
+                       nra.  
+                       assert (forall x:R, (0 < x)%Re -> x <> 0%Re).
+                       { intros. nra. } apply H3. 
+                       rewrite Heqe_0. apply He0.
+                       assert (forall x:R, (0 <= x)%Re -> (1 + x)%Re <> 0%Re).
+                       { intros. nra. } apply H3. rewrite Heqrho. by apply rho_ge_0.
+          -- apply Rplus_le_le_0_compat; last by apply g1_pos.
+             repeat apply Rmult_le_pos.
+             ** apply /RleP. apply vec_norm_pd.
+             ** apply Rplus_le_le_0_compat.
+                +++ repeat apply Rmult_le_pos.
+                    --- rewrite Heqrho. by apply rho_ge_0.
+                    --- apply pow_le. rewrite Heqrho. by apply rho_ge_0.
+                    --- apply Rplus_le_le_0_compat. nra. rewrite Heqrho. by apply rho_ge_0.
+                    --- apply Rlt_le. rewrite Heqe_0. apply He0.
+                +++ repeat apply Rmult_le_pos ; try nra. rewrite Heqd_mag. apply d_mag_ge_0.
+                    apply Rlt_le. apply Rinv_0_lt_compat. 
+                    apply Rlt_Rminus. apply Hrho.
+             ** apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+             ** apply Rplus_le_le_0_compat. nra. apply g_pos.
+          -- apply sqrt_pos.
+    * apply residual_is_finite.
+      unfold forward_error_cond. repeat split; try (by intros); try by (intros; apply Hinp); try apply Hrho. 
+      ++  apply Hrho.
+      ++ apply size_cons.
+      ++ apply size_cons.
+      ++ apply He0.
+    * by unfold acc2. 
+Qed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 Lemma jacobi_iteration_bound {t: type} {n : nat} :
