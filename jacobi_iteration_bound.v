@@ -551,6 +551,7 @@ Definition k_min {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                  (1 + delta) -
                  2 * d_mag / (1 - rho)))%Re)).
 
+(*
 Lemma rho_gt_0 {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
   (0 < matrix_inf_norm (A2_J_real (FT2R_mat A)))%Re ->
@@ -593,7 +594,9 @@ apply Rplus_le_lt_0_compat.
   - apply Rmult_le_pos. apply default_rel_ge_0.   
     apply Rplus_le_le_0_compat; try nra; try by apply g_pos.
 Qed.
-  
+*)
+
+(*
 Lemma rho_alt_gt_0 {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
   (0 < matrix_inf_norm (A2_J_real (FT2R_mat A)))%Re ->
@@ -651,7 +654,7 @@ apply Rplus_le_lt_0_compat.
     } rewrite H0. apply H.
 Qed.
 
-
+*)
 Lemma d_mag_alt_gt_0 {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
   (rho_def_alt A b < 1)%Re ->
