@@ -651,7 +651,7 @@ Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let Gamma := FT2R (BMULT t acc acc) in
   let delta := default_rel t in
   Z.to_nat (Zceil (Rlog (1 / rho)%Re 
-             ((e_0 - d_mag / (1 - rho)) * (1 + rho) /
+             ((e_0 - 0) * (1 + rho) /
                 ((sqrt
                     ((Gamma - g1 t n.+1 (n.+1 - 1)%coq_nat) /
                      INR n.+1 / (1 + g t n.+1)) -
@@ -1253,6 +1253,9 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
             ** admit.
             ** apply Rplus_le_le_0_compat; try nra; by try apply rho_ge_0.
             ** apply Rplus_le_compat.
+               +++ apply f_error0_bnd. apply rho_1_implies_rho_2 with b.
+                   apply Hrho.
+               +++ 
 
 
 admit.
