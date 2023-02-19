@@ -3441,7 +3441,7 @@ split.
                    --- apply Rinv_lt_contravar.
                        *** repeat apply Rmult_lt_0_compat.
                            ++++ apply Rlt_gt.  rewrite Heqe_0. apply He0.
-                           ++++ nra.
+                           ++++ apply Rplus_lt_le_0_compat. nra. rewrite Heqrho. by apply rho_ge_0.
                            ++++ apply Rinv_0_lt_compat.
                                 rewrite HeqGamma. unfold acc2. 
                                 rewrite Heqd_mag Heqrho.
@@ -3451,7 +3451,7 @@ split.
                                 rewrite !mxE. by apply BDIV_FT2R_sep_zero.
                                 rewrite Heqrho Heqd_mag in HG. apply HG.
                            ++++ apply Rinv_0_lt_compat.
-                                apply pow_lt. apply Hrho.
+                                apply pow_lt. rewrite Heqrho. apply rho_gt_0. apply Hrho.
                        *** rewrite -pow_inv.
                            assert (((e_0 - d_mag / (1 - rho)) * (1 + rho) /
                                      ((sqrt
@@ -3475,8 +3475,9 @@ split.
                             + assert ( (1 < /rho)%Re -> (/ rho )%Re <> 1%Re). { nra. }
                               apply H3. replace 1%Re with (/1)%Re by nra.
                                apply Rinv_lt_contravar. rewrite Rmult_1_r.
-                               apply Hrho. apply Hrho.
-                            + apply Rinv_0_lt_compat. apply Hrho.
+                               rewrite Heqrho. apply rho_gt_0. apply Hrho.
+                               apply Hrho.  
+                            + apply Rinv_0_lt_compat. rewrite Heqrho. apply rho_gt_0. apply Hrho.
                             + repeat apply Rmult_lt_0_compat.
                               - apply Rlt_gt.  rewrite Heqe_0. apply He0.
                               - nra.
