@@ -1156,6 +1156,56 @@ intros. apply Rlt_Rminus. repeat apply Rdiv_lt_right.
 Qed.
 
 
+(**
+(0 <
+ (sqrt
+    ((FT2R
+        (BMULT t accuracy accuracy) -
+      g1 t n.+1 (n.+1 - 1)%coq_nat) /
+     INR n.+1 / (1 + g t n.+1)) -
+  g1 t n.+1 (n.+1 - 1)%coq_nat) /
+ (1 + g t n.+1) /
+ vec_inf_norm (FT2R_mat (A1_J A)) /
+ (1 + default_rel t) -
+ 2 * d_mag_def_alt A b /
+ (1 - rho_def_alt A b))%Re
+**)
+
+Lemma tau_sqr_rel_Rcompute {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t)
+  (Hinv: forall i, is_finite (fprec t)  (femax t)
+       (BDIV t (Zconst t 1) (A i i)) = true)
+  (Ha : forall i j, is_finite (fprec t)  (femax t) (A  i j) = true):
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in 
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in
+  ( rho_def_alt A b < 1)%Re -> 
+  (FT2R (BMULT t accuracy accuracy) >
+       g1 t n.+1 (n.+1 - 1)%coq_nat +
+       INR n.+1 * (1 + g t n.+1) *
+       (g1 t n.+1 (n.+1 - 1)%coq_nat +
+        2 * (1 + g t n.+1) *
+        (1 + default_rel t) *
+        vec_inf_norm
+          (FT2R_mat (A1_J A)) *
+        d_mag_def_alt A b *
+        / (1 - rho_def_alt A b))²)%Re ->
+  (0 <
+     (sqrt
+        ((FT2R
+            (BMULT t accuracy accuracy) -
+          g1 t n.+1 (n.+1 - 1)%coq_nat) /
+         INR n.+1 / (1 + g t n.+1)) -
+      g1 t n.+1 (n.+1 - 1)%coq_nat) /
+     (1 + g t n.+1) /
+     vec_inf_norm (FT2R_mat (A1_J A)) /
+     (1 + default_rel t) -
+     2 * d_mag_def_alt A b /
+     (1 - rho_def_alt A b))%Re.
+Proof.
+Admitted.
+
 
 
 
