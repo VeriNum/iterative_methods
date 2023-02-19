@@ -1456,6 +1456,9 @@ assert (k == k' \/ (k < k')%nat).
 + apply ltn_trans with k.
   apply /ssrnat.ltP. by apply H0.
   by []. 
++ apply lt_le_trans with k.
+  apply H0.
+  by apply /ssrnat.leP.
 Qed.
 
 Lemma jacobi_iteration_bound_corollaries:
