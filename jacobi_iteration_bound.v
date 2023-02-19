@@ -939,8 +939,6 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   let rho_hat := rho_def_alt A b in 
   let d_mag := d_mag_def_alt A b in
   let x0 := \col_(j < n.+1) (Zconst t 0) in
-  let R_def :=  (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
-                   matrix_inf_norm (FT2R_mat (A2_J A)))%Re in
   (** Finiteness of A **)
   (forall i j, Binary.is_finite _ _ (A i j) = true) /\ 
   (** contraction constant **)
