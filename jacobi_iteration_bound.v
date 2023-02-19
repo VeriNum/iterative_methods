@@ -753,7 +753,7 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
   (** Finiteness of A **)
   (forall i j, Binary.is_finite _ _ (A i j) = true) /\
   (** constant for the contraction mapping **)
-  ((0 < matrix_inf_norm (A2_J_real (FT2R_mat A)))%Re /\ rho < 1)%Re /\
+  (rho < 1)%Re /\
   (** Invertibility of A **)
   A_real \in unitmx /\
   (** Finiteness of the inverse of diagonal elements of A **)
@@ -942,7 +942,7 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (** Finiteness of A **)
   (forall i j, Binary.is_finite _ _ (A i j) = true) /\ 
   (** contraction constant **)
-  ((0 < matrix_inf_norm (A2_J_real (FT2R_mat A)))%Re /\ rho_hat < 1)%Re /\
+  ( rho_hat < 1)%Re /\
   (** diagonal dominance of A **)
   strict_diagonal_dominance A /\
   (** Finiteness of the inverse of diagonal elements of A **)
@@ -3500,7 +3500,7 @@ split.
            + apply size_cons.
          } specialize (H1 H2).  unfold resid,x0. rewrite Heqe_0 Heqrho Heqd_mag Heqx.
          unfold x0. apply H1. 
-      ++ assert (rho = 0%Re \/ (0 < rho)%Re).
+      ++ assert ((rho = 0%Re \/ (0 < rho)%Re)).
          { pose proof (@rho_ge_0 t n A b). simpl in H1.
            rewrite Heqrho. unfold rho_def. nra.
          } destruct H1.
@@ -3562,7 +3562,7 @@ split.
            + apply Rlt_le. apply Rinv_0_lt_compat. apply lt_0_INR; lia.
            + apply Rlt_le. apply Rinv_0_lt_compat. apply Rplus_lt_le_0_compat.
              nra. apply g_pos.
-         } rewrite H1. 
+         } rewrite H2. 
          apply Rsqr_incrst_1.
          -- apply Rcomplements.Rlt_minus_r.
             apply Rcomplements.Rlt_div_r;
@@ -3581,7 +3581,7 @@ split.
                    first by (apply Rplus_lt_le_0_compat; try nra; try rewrite Heqrho; by apply rho_ge_0).
                    assert ((rho ^ (k_min A b acc).+1)%Re = (/ / rho ^ (k_min A b acc).+1)%Re).
                    { by rewrite Rinv_inv. }
-                   rewrite H2.
+                   rewrite H3.
                    match goal with |-context[(_ < ?x / ?y / ?z)%Re]=>
                       replace (x / y / z)%Re with (/ ((y * z)  / x))%Re 
                    end. 
@@ -3620,7 +3620,7 @@ split.
                                         (1 + default_rel t) - 2 * d_mag / (1 - rho)))%Re)).
                           { rewrite Rpower_Rlog. by []. 
                             + assert ( (1 < /rho)%Re -> (/ rho )%Re <> 1%Re). { nra. }
-                              apply H3. replace 1%Re with (/1)%Re by nra.
+                              apply H4. replace 1%Re with (/1)%Re by nra.
                                apply Rinv_lt_contravar. rewrite Rmult_1_r.
                                rewrite Heqrho. apply rho_gt_0. apply Hrho.
                                apply Hrho.  
