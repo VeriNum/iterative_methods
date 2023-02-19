@@ -1085,7 +1085,20 @@ apply Rlt_le_trans with
   by rewrite size_map size_enum_ord.
 Qed.
 
-
+(**
+(0 <
+ (sqrt
+    ((FT2R
+        (BMULT t accuracy accuracy) -
+      g1 t n.+1 (n.+1 - 1)%coq_nat) /
+     INR n.+1 / (1 + g t n.+1)) -
+  g1 t n.+1 (n.+1 - 1)%coq_nat) /
+ (1 + g t n.+1) /
+ vec_inf_norm (FT2R_mat (A1_J A)) /
+ (1 + default_rel t) -
+ 2 * d_mag_def A b /
+ (1 - rho_def A b))%Re
+**)
 
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
@@ -1207,8 +1220,8 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
          -- admit.
          -- assert ((0 <= rho_def A b)%Re). { by apply rho_ge_0. }
             nra.
-         -- apply Rinv_0_lt_compat. 
-            apply Rplus_lt_0_compat. 
+         -- apply Rinv_0_lt_compat. admit.
+            (*apply Rplus_lt_0_compat. 
             ** apply Rdiv_lt_0_compat; last by 
                (apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0).
                apply Rdiv_lt_0_compat.
@@ -1218,8 +1231,27 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
                +++ apply vec_norm_strong_not_0. intros. rewrite !mxE.
                    assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
                     { intros. by apply BDIV_FT2R_sep_zero. } apply Hneq.
-             ** admit.
-      ++
+             ** admit. *)
+      ++ apply Rmult_le_compat.
+         -- apply Rmult_le_pos; last by 
+            (apply Rplus_le_le_0_compat; try nra; try apply rho_ge_0).
+            admit.
+         -- apply Rlt_le.
+            apply Rinv_0_lt_compat. admit.
+            (*apply Rplus_lt_0_compat.
+            ** apply Rdiv_lt_0_compat; last by 
+               (apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0).
+               apply Rdiv_lt_0_compat.
+               +++ apply Rdiv_lt_0_compat; last by 
+                   (apply Rplus_lt_le_0_compat; try nra; try apply g_pos).
+                   admit.
+               +++ apply vec_norm_strong_not_0. intros. rewrite !mxE.
+                   assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
+                    { intros. by apply BDIV_FT2R_sep_zero. } apply Hneq.
+             ** admit. *)
+         -- apply Rmult_le_compat.
+            ** admit.
+            **
 
 
 admit.
