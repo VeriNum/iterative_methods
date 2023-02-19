@@ -1262,7 +1262,7 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
             ** apply Rplus_le_compat_l. by apply rho_def_le_alt.
          -- apply Rlt_le. apply Rinv_lt_contravar.
             ** apply Rmult_lt_0_compat; admit.
-            ** apply Rplus_lt_le_compat.
+            ** apply Rplus_le_lt_compat.
                +++ apply Rmult_lt_compat_r.
 
 
