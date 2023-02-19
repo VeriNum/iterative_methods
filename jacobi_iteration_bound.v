@@ -3937,7 +3937,9 @@ destruct H0.
                 remember (vector_inj x0 n.+1) as x0'.
                 remember (vector_inj b n.+1) as b'.
                 remember (matrix_inj A n.+1 n.+1) as A'.
-                
+                pose proof (@vec_norm_diag _ t n  (A1_J A')
+                            (X_m_jacobi 1 x0' b' A' -f
+                                X_m_jacobi 0 x0' b' A')).
 
 
 
