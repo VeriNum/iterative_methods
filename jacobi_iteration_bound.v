@@ -941,9 +941,6 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   let x0 := \col_(j < n.+1) (Zconst t 0) in
   let R_def :=  (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
                    matrix_inf_norm (FT2R_mat (A2_J A)))%Re in
-  let e_0 := (vec_inf_norm (FT2R_mat x0) + 
-                (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
-                    vec_inf_norm (FT2R_mat b)) / (1 - R_def))%Re in
   (** Finiteness of A **)
   (forall i j, Binary.is_finite _ _ (A i j) = true) /\ 
   (** contraction constant **)
@@ -966,8 +963,6 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
   (** constraint on k **)
   ((k_min_alt A b accuracy < k)%coq_nat /\ (0 < k)%coq_nat) /\
-  (** lower bound on the initial error **)
-  (0 < e_0 - d_mag / (1 - rho_hat))%Re /\
   (** finiteness of x0 **)
   (forall i : 'I_n.+1, is_finite (fprec t) (femax t)
                               (x0 i ord0) = true) /\
@@ -1453,7 +1448,7 @@ Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
 Proof.
 intros.
 unfold jacobi_preconditions_Rcompute in H.
-destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]].
+destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]].
 unfold jacobi_preconditions_math.
 assert (Hrho_Re: (0 < rho_def A b)%Re).
 { apply rho_gt_0. apply Hrho. }
@@ -1704,7 +1699,7 @@ intros. unfold jacobi_preconditions in H.
 destruct H as [HAA [HlenA [HeqAb H]]].
 remember (length A).-1 as n.
 unfold jacobi_preconditions_Rcompute in H.
-destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]].
+destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]].
 repeat split.
 + apply HAA.
 + apply Forall_forall. intros. 
