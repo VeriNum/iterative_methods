@@ -696,9 +696,15 @@ apply Rplus_lt_le_0_compat.
     apply /RleP. apply vec_norm_pd.
     apply Rlt_le, Rinv_0_lt_compat.
     apply Rlt_Rminus. apply default_rel_ub_strict.
-+ 
-  
-
++ repeat apply Rmult_le_pos.
+  - apply Rplus_le_le_0_compat.
+    * apply Rmult_le_pos.
+      ++ apply Rplus_le_le_0_compat; try by apply default_rel_ge_0.
+         apply Rmult_le_pos; last by 
+         (apply Rplus_le_le_0_compat; try nra; try by apply default_rel_ge_0).
+         apply Rplus_le_le_0_compat; last by apply g_pos.
+         apply Rplus_le_le_0_compat.
+         --
 
 
 
