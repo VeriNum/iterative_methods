@@ -3859,7 +3859,14 @@ destruct H0.
               rewrite !seq_length /matrix_rows_nat -HeqAb !Nat.min_id.
               rewrite Heqn prednK. by []. by apply /ssrnat.ltP.
               by []. by rewrite /x0 repeat_length.
-            }
+            } specialize (H5 H6).
+            rewrite H5.
+            assert ((\col_j0 vector_inj
+                      (resid (jacobi_n A b x0 0))
+                      n.+1 j0 ord0) = 
+                      vector_inj (resid (jacobi_n A b x0 0)) n.+1).
+            { apply /matrixP. unfold eqrel. intros. by rewrite !mxE. } 
+            rewrite H7. 
 
 
 
