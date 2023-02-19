@@ -1199,6 +1199,8 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
                apply Rdiv_lt_0_compat.
                +++ apply Rdiv_lt_0_compat; last by 
                    (apply Rplus_lt_le_0_compat; try nra; try apply g_pos).
+                   admit.
+               +++
 
 
 admit.
