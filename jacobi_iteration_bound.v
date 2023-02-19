@@ -3790,13 +3790,28 @@ split.
 Qed.
 
 Lemma finite_residual_0 {t: type} :
- forall (A: matrix t) (b: vector t) (acc: ftype t),
+ forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  @size_constraint t (length A).-1 ->
   is_finite (fprec t) (femax t)
   (norm2 (resid (jacobi_n A b x0 0))) = true.
 Proof.
-
+intros.
+unfold norm2. apply dotprod_finite.
++ remember (length A).-1 as n.
+  assert ( length (resid (jacobi_n A b x0 0)) = n.+1).
+  { repeat rewrite /matrix_vector_mult !map_length combine_length.
+    rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+    rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
+    rewrite Heqn prednK. by []. by apply /ssrnat.ltP.
+    by []. by rewrite /x0 repeat_length.
+  } rewrite H2. apply g1_constraint_Sn. apply H1.
++ intros.
+  admit.
+Admitted.
 
 
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
@@ -3836,16 +3851,8 @@ destruct H0.
          assert (i = 0)%nat. { by apply /eqP. }
          rewrite H2.
          apply finite_is_finite.
-         unfold norm2. apply dotprod_finite.
-         -- remember (length A).-1 as n.
-            assert ( length (resid (jacobi_n A b x0 0)) = n.+1).
-            { repeat rewrite /matrix_vector_mult !map_length combine_length.
-              rewrite !map_length. unfold jacobi_n. rewrite iter_length.
-              rewrite !seq_length /matrix_rows_nat -HeqAb !Nat.min_id.
-              rewrite Heqn prednK. by []. by apply /ssrnat.ltP.
-              by []. by rewrite /x0 repeat_length.
-            } rewrite H3. apply g1_constraint_Sn. apply H.
-         -- intros. admit.
+         apply finite_residual_0. apply HlenA.
+         apply HeqAb. apply H.
       ++ unfold BCMP.
          rewrite Bcompare_correct.
          -- rewrite Rcompare_Lt; first by [].
@@ -3917,18 +3924,15 @@ destruct H0.
              eapply Rle_lt_trans.
              apply norm2_vec_inf_norm_rel.
              ** intros. admit.
-             ** admit.
+             ** rewrite  -H7 -H5. apply finite_residual_0.
+                apply HlenA. apply HeqAb. unfold size_constraint. 
+                destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+                unfold size_constraint in size_cons. by rewrite Heqn in size_cons.
              ** admit. (** x_1 - x_0 **)
-         -- unfold norm2. apply dotprod_finite.
-            ** remember (length A).-1 as n.
-               assert ( length (resid (jacobi_n A b x0 0)) = n.+1).
-               { repeat rewrite /matrix_vector_mult !map_length combine_length.
-                  rewrite !map_length. unfold jacobi_n. rewrite iter_length.
-                  rewrite !seq_length /matrix_rows_nat -HeqAb !Nat.min_id.
-                  rewrite Heqn prednK. by []. by apply /ssrnat.ltP.
-                  by []. by rewrite /x0 repeat_length.
-               } rewrite H1. apply g1_constraint_Sn. apply H.
-            ** intros. intros. admit.
+         -- apply finite_residual_0.
+            apply HlenA. apply HeqAb. unfold size_constraint. 
+            destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+            by unfold size_constraint in size_cons.
          -- unfold acc2. apply H.
 - apply jacobi_iteration_bound_lowlevel'.
   + by apply jacobi_precond_compute_implies_math .
