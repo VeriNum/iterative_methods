@@ -1091,7 +1091,50 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
       apply d_mag_def_alt_ge_0. apply Hrho.
       apply Rlt_le, Rinv_0_lt_compat. 
       apply Rlt_Rminus. apply Hrho.
-+ (** split to 
++ assert ((ln
+             ((f_error 0 b (\col__ Zconst t 0)
+                 ((FT2R_mat A)^-1 *m FT2R_mat b)
+                 A -
+               d_mag_def A b / (1 - rho_def A b)) *
+              (1 + rho_def A b) /
+              ((sqrt
+                  ((FT2R
+                      (BMULT t accuracy accuracy) -
+                    g1 t n.+1 (n.+1 - 1)%coq_nat) /
+                   INR n.+1 / (1 + g t n.+1)) -
+                g1 t n.+1 (n.+1 - 1)%coq_nat) /
+               (1 + g t n.+1) /
+               vec_inf_norm (FT2R_mat (A1_J A)) /
+               (1 + default_rel t) -
+               2 * d_mag_def A b /
+               (1 - rho_def A b))) < 0)%Re \/
+            (0 <= (ln
+                     ((f_error 0 b (\col__ Zconst t 0)
+                         ((FT2R_mat A)^-1 *m FT2R_mat b)
+                         A -
+                       d_mag_def A b / (1 - rho_def A b)) *
+                      (1 + rho_def A b) /
+                      ((sqrt
+                          ((FT2R
+                              (BMULT t accuracy accuracy) -
+                            g1 t n.+1 (n.+1 - 1)%coq_nat) /
+                           INR n.+1 / (1 + g t n.+1)) -
+                        g1 t n.+1 (n.+1 - 1)%coq_nat) /
+                       (1 + g t n.+1) /
+                       vec_inf_norm (FT2R_mat (A1_J A)) /
+                       (1 + default_rel t) -
+                       2 * d_mag_def A b /
+                       (1 - rho_def A b)))))%Re).
+  { nra. } destruct H.
+  - 
+
+
+
+
+
+
+
+(** split to 
     (ln
    ((f_error 0 b (\col__ Zconst t 0)
        ((FT2R_mat A)^-1 *m FT2R_mat b)
