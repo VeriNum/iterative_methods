@@ -89,6 +89,8 @@ Lemma x_bound_exists {t} {n:nat}
   let R_def :=  (vec_inf_norm (A1_inv_real) *
                       matrix_inf_norm (A2_real))%Re in *)
   (R_def < 1)%Re ->
+  (d_mag_def_alt A b / (1 - rho_def_alt A b) <
+       vec_inf_norm x1)%Re /\
    (vec_inf_norm x1 <= 
       (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
         vec_inf_norm (b_real)) / (1 - R_def))%Re.
@@ -803,24 +805,20 @@ Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let R_def :=  (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
                     matrix_inf_norm (A2_real))%Re in
   (R_def < 1)%Re ->
-  (d_mag_def_alt A b / (1 - rho_def_alt A b) <
-       f_error 0 b x0 x  A)%Re /\
   (@f_error _ _ _ 0 b x0 x A  <=
     vec_inf_norm (FT2R_mat x0) + 
     (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t))
         * vec_inf_norm (b_real)) / (1 - R_def))%Re.
 Proof.
 intros. 
-split.
-+ admit.
-+ unfold f_error.
+unfold f_error.
   eapply Rle_trans. apply /RleP. apply triang_ineq .
   rewrite -vec_inf_norm_opp.
   assert (X_m_jacobi 0 x0 b A = x0).
   { by simpl. } rewrite H0. rewrite -RplusE.
   apply Rplus_le_compat_l.
   apply x_bound_exists. apply H.
-Admitted.
+Qed.
 
 (** Replace Gamma with tau_squared  **)
 
@@ -1552,15 +1550,9 @@ assert (Hf_ge: (0 <
   + unfold f_error.
     assert (FT2R_mat (X_m_jacobi 0 (\col__ Zconst t 0) b A) = 0).
     { apply matrixP. unfold eqrel. intros. rewrite !mxE. simpl. reflexivity. }
-    rewrite H.
-   
-    
-
-
-
-
-
- admit.
+    rewrite H. rewrite sub0l_vec. rewrite -vec_inf_norm_opp.
+    apply x_bound_exists.
+    apply rho_1_implies_rho_2  with b. apply Hrho.
 }
 repeat split; try apply size_cons; try apply Hfa; try apply Hfdiv;
 try apply Hrho; try apply Hfacc; try (intros; apply Hfx0);
@@ -1657,7 +1649,7 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
 + apply input_bound_compute_implies_math; try by []. apply Hrho. 
 + intros. apply input_bound_compute_implies_math; try by []. apply Hrho. 
 + intros. apply input_bound_compute_implies_math; try by []. apply Hrho. 
-Admitted.
+Qed.
 
 
 Definition jacobi_preconditions {t: type}
