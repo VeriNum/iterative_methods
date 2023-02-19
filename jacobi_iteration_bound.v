@@ -3832,13 +3832,23 @@ destruct H0.
          unfold norm2. apply dotprod_finite.
          -- remember (length A).-1 as n.
             assert ( length (resid (jacobi_n A b x0 0)) = n.+1).
-            { admit. } rewrite H3. apply g1_constraint_Sn. apply H.
+            { repeat rewrite /matrix_vector_mult !map_length combine_length.
+              rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+              rewrite !seq_length /matrix_rows_nat -HeqAb !Nat.min_id.
+              rewrite Heqn prednK. by []. by apply /ssrnat.ltP.
+              by []. by rewrite /x0 repeat_length.
+            } rewrite H3. apply g1_constraint_Sn. apply H.
          -- intros. admit.
       ++ unfold BCMP.
          rewrite Bcompare_correct.
          -- rewrite Rcompare_Lt; first by [].
             change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
             remember (FT2R acc2) as Gamma.
+            pose proof (@vector_residual_equiv t A b x0 0%nat).
+
+
+
+
             admit.
          -- unfold norm2. apply dotprod_finite.
             ** remember (length A).-1 as n.
