@@ -650,6 +650,13 @@ apply Rplus_le_lt_0_compat.
 Qed.
 
 
+Lemma d_mag_alt_gt_0 {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
+  (0 < matrix_inf_norm (A2_J_real (FT2R_mat A)))%Re ->
+  (0 < d_mag_def_alt A b)%Re .
+
+
+
 Definition jacobi_preconditions_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
   (* some property of A,b,accuracy holds such that 
