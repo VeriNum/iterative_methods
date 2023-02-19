@@ -1157,14 +1157,10 @@ intros. apply Rlt_Rminus. repeat apply Rdiv_lt_right.
          assert (g1 t n.+1 (n.+1 - 1)%coq_nat = 
                   (g1 t n.+1 (n.+1 - 1)%coq_nat + 0)%Re) by nra.
          rewrite [in X in (X <= _)%Re]H1. apply Rplus_le_compat_l.
-         
-
-
-
-
-
-
-admit.
+         apply Rmult_le_pos.
+         -- apply Rmult_le_pos. apply pos_INR.
+            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+         -- apply Rle_0_sqr .
       ++ apply Rlt_le, Rinv_0_lt_compat. apply lt_0_INR. lia.
       ++ apply Rlt_le, Rinv_0_lt_compat.
          apply Rplus_lt_le_0_compat; try nra; try apply g_pos.
@@ -1179,7 +1175,7 @@ admit.
    * apply /RleP. apply vec_norm_pd.
    * apply Rplus_le_le_0_compat; try nra; try apply g_pos.
   - apply sqrt_pos.
-Admitted.
+Qed.
 
 
 
