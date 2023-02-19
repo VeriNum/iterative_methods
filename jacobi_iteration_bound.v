@@ -633,15 +633,16 @@ Qed.
 
 (** Replace Gamma with tau_squared  **)
 
+(*
 Local Open Scope Z_scope.
 Lemma dummy (x:Z):
-  (x < 0)%Z ->
+  (x <= 0)%Z ->
   Z.to_nat x = 0%nat.
 Proof.
 intros.
-by apply sublist.Z2Nat_neg.
+by apply Coqlib.Z_to_nat_neg.
 Qed.
-
+*)
 
 
 Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
@@ -1020,8 +1021,16 @@ apply Rinv_lt_contravar.
   admit.
 Admitted.
 
+(*
+Lemma Zceil_lt_0 (x:R):
+  (x < 0)%Re -> (Zceil x < 0)%Z.
+Proof.
+intros. 
+Search "Zceil".
 
 
+destruct x.
+*)
 
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
@@ -1107,7 +1116,7 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
                vec_inf_norm (FT2R_mat (A1_J A)) /
                (1 + default_rel t) -
                2 * d_mag_def A b /
-               (1 - rho_def A b))) < 0)%Re \/
+               (1 - rho_def A b))) <= 0)%Re \/
             (0 <= (ln
                      ((f_error 0 b (\col__ Zconst t 0)
                          ((FT2R_mat A)^-1 *m FT2R_mat b)
@@ -1126,7 +1135,13 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
                        2 * d_mag_def A b /
                        (1 - rho_def A b)))))%Re).
   { nra. } destruct H.
-  - 
+  - unfold k_min. rewrite Coqlib.Z_to_nat_neg.
+    admit.
+
+
+
+ last by .
+
 
 
 
