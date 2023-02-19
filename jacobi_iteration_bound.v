@@ -3828,7 +3828,16 @@ destruct H0.
       ++ intros. rewrite leqn0 in H1.
          assert (i = 0)%nat. { by apply /eqP. }
          rewrite H2.
-         
+         apply finite_is_finite.
+         unfold norm2. apply dotprod_finite.
+         -- remember (length A).-1 as n.
+            assert ( length (resid (jacobi_n A b x0 0)) = n.+1).
+            { admit. } rewrite H3. apply g1_constraint_Sn. apply H.
+         --
+    
+
+
+pos vector_residual_equiv.
       
 
 
