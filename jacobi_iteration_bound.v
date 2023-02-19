@@ -3933,7 +3933,21 @@ destruct H0.
                 apply HlenA. apply HeqAb. unfold size_constraint. 
                 destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
                 unfold size_constraint in size_cons. by rewrite Heqn in size_cons.
-             ** admit. (** x_1 - x_0 **)
+             ** rewrite H1. unfold residual_math.
+                remember (vector_inj x0 n.+1) as x0'.
+                remember (vector_inj b n.+1) as b'.
+                remember (matrix_inj A n.+1 n.+1) as A'.
+                
+
+
+
+
+
+
+
+
+
+admit. (** x_1 - x_0 **)
          -- apply finite_residual_0.
             apply HlenA. apply HeqAb. unfold size_constraint. 
             destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
