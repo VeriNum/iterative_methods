@@ -1194,7 +1194,11 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
             nra.
          -- apply Rinv_0_lt_compat. 
             apply Rplus_lt_0_compat. 
-            ** apply Rdiv_lt_0_compat.
+            ** apply Rdiv_lt_0_compat; last by 
+               (apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0).
+               apply Rdiv_lt_0_compat.
+               +++ apply Rdiv_lt_0_compat; last by 
+                   (apply Rplus_lt_le_0_compat; try nra; try apply g_pos).
 
 
 admit.
