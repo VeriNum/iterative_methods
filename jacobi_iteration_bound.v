@@ -1255,7 +1255,14 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
             ** apply Rplus_le_compat.
                +++ apply f_error0_bnd. apply rho_1_implies_rho_2 with b.
                    apply Hrho.
-               +++ 
+               +++ apply Ropp_le_contravar. apply Rmult_le_pos.
+                   apply d_mag_ge_0. apply Rlt_le, Rinv_0_lt_compat.
+                   apply Rlt_Rminus. eapply Rle_lt_trans; last by apply Hrho.
+                   by apply rho_def_le_alt.
+            ** apply Rplus_le_compat_l. by apply rho_def_le_alt.
+         -- 
+                   
+  
 
 
 admit.
