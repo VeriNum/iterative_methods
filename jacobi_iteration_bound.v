@@ -1251,7 +1251,8 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
              ** admit. *)
          -- apply Rmult_le_compat.
             ** admit.
-            **
+            ** apply Rplus_le_le_0_compat; try nra; by try apply rho_ge_0.
+            ** apply Rplus_le_compat.
 
 
 admit.
