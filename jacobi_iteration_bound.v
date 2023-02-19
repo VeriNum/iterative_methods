@@ -1204,7 +1204,61 @@ Lemma tau_sqr_rel_Rcompute {t: type} {n:nat}
      2 * d_mag_def_alt A b /
      (1 - rho_def_alt A b))%Re.
 Proof.
-Admitted.
+intros. apply Rlt_Rminus. repeat apply Rdiv_lt_right.
++ apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
++ apply vec_norm_strong_not_0 . intros. rewrite !mxE.
+  assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
+  { intros. by apply BDIV_FT2R_sep_zero. } apply Hneq.
++ apply Rplus_lt_le_0_compat; try nra; try apply g_pos.
++ apply Rcomplements.Rlt_minus_r.
+  apply  Rsqr_incrst_0.
+  - rewrite Rsqr_sqrt . 
+    * repeat apply Rdiv_lt_right.
+      apply Rplus_lt_le_0_compat; try nra; try apply g_pos.
+      apply lt_0_INR. lia.
+      apply Rcomplements.Rlt_minus_r. 
+      apply Rgt_lt. 
+      assert (((2 * d_mag_def_alt A b /
+                  (1 - rho_def_alt A b) *
+                  (1 + default_rel t) *
+                  vec_inf_norm (FT2R_mat (A1_J A)) *
+                  (1 + g t n.+1) +
+                  g1 t n.+1 (n.+1 - 1)%coq_nat)² *
+                 (1 + g t n.+1) * INR n.+1 +
+                 g1 t n.+1 (n.+1 - 1)%coq_nat)%Re = 
+                ((2 * d_mag_def_alt A b * /
+                  (1 - rho_def_alt A b) *
+                  (1 + default_rel t) *
+                  vec_inf_norm (FT2R_mat (A1_J A)) *
+                  (1 + g t n.+1) +
+                  g1 t n.+1 (n.+1 - 1)%coq_nat)² *
+                 (1 + g t n.+1) * INR n.+1 +
+                 g1 t n.+1 (n.+1 - 1)%coq_nat)%Re) by nra.
+      rewrite H1. clear H1.
+      eapply Rgt_ge_trans. apply H0. apply Rle_ge.
+      unfold Rsqr. nra.
+    * repeat apply Rmult_le_pos.
+      ++ apply Rlt_le. apply Rlt_Rminus.
+         eapply Rle_lt_trans; last by apply H0.
+         assert (g1 t n.+1 (n.+1 - 1)%coq_nat = 
+                  (g1 t n.+1 (n.+1 - 1)%coq_nat + 0)%Re) by nra.
+         rewrite [in X in (X <= _)%Re]H1. apply Rplus_le_compat_l.
+         apply Rmult_le_pos.
+         -- apply Rmult_le_pos. apply pos_INR.
+            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+         -- apply Rle_0_sqr .
+      ++ apply Rlt_le, Rinv_0_lt_compat. apply lt_0_INR. lia.
+      ++ apply Rlt_le, Rinv_0_lt_compat.
+         apply Rplus_lt_le_0_compat; try nra; try apply g_pos.
+ - apply Rplus_le_le_0_compat; last by apply g1_pos.
+   repeat apply Rmult_le_pos; try nra; try apply bpow_ge_0; try apply d_mag_ge_0.
+   * apply d_mag_def_alt_ge_0. apply H.
+   * apply Rlt_le, Rinv_0_lt_compat. apply Rlt_Rminus. apply H.
+   * apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+   * apply /RleP. apply vec_norm_pd.
+   * apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+  - apply sqrt_pos.
+Qed.
 
 
 
