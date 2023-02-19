@@ -582,7 +582,7 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
   (** Gamma is finite **)
   Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
   (** constraint on k **)
-  (k_min A b accuracy < k)%coq_nat /\
+  ((k_min A b accuracy < k)%coq_nat /\ (0 < k)%coq_nat) /\
   (** lower bound on the initial error **)
   (0 < f_error 0 b x0 x A - d_mag / (1 - rho))%Re /\
   (** finiteness of x0 **)
@@ -776,7 +776,7 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (** Gamma is finite **)
   Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
   (** constraint on k **)
-  (k_min_alt A b accuracy < k)%coq_nat /\
+  ((k_min_alt A b accuracy < k)%coq_nat /\ (0 < k)%coq_nat) /\
   (** lower bound on the initial error **)
   (0 < e_0 - d_mag / (1 - rho_hat))%Re /\
   (** finiteness of x0 **)
@@ -1367,7 +1367,7 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
                        (1 - rho_def A b)))))%Re).
   { nra. } destruct H.
   - unfold k_min. rewrite Coqlib.Z_to_nat_neg.
-    admit.
+    lia.
     apply Zceil_glb. unfold Rlog. apply Rcomplements.Rmult_le_0_r.
     nra. apply ln_rho_inv_ge_0. apply Hfdiv. apply Hfa. apply Hrho. 
     apply Hrho_Re.
@@ -1410,6 +1410,7 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
             apply Hfdiv. apply Hfa. apply Hrho.
     * apply ln_rho_rel. apply Hfdiv. apply Hfa. apply Hrho.
       apply Hrho. nra.
++ lia.
 + apply Hf_ge.
 + intros. apply input_bound_compute_implies_math; try by []. apply Hrho.  
 + intros. apply input_bound_compute_implies_math;try by []. apply Hrho. 
