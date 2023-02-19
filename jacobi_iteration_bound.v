@@ -652,7 +652,7 @@ Qed.
 
 Lemma d_mag_alt_gt_0 {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
-  (0 < matrix_inf_norm (A2_J_real (FT2R_mat A)))%Re ->
+  (*(0 < matrix_inf_norm (A2_J_real (FT2R_mat A)))%Re -> *)
   (0 < d_mag_def_alt A b)%Re .
 Proof.
 intros.
@@ -662,7 +662,13 @@ apply Rplus_lt_le_0_compat.
   - apply Rplus_lt_le_0_compat.
     * apply Rplus_le_lt_0_compat. 
       ++ admit.
-      ++
+      ++ repeat apply Rmult_lt_0_compat; try nra; try apply bpow_gt_0.
+         admit.
+         admit.
+         admit.
+         admit.
+         apply Rplus_le_lt_0_compat; last by apply default_abs_gt_0.
+         apply Rmult_le_pos.
 
 
 
@@ -3689,3 +3695,4 @@ Qed.
 
 
 End WITH_NANS.
+
