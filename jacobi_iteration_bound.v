@@ -554,7 +554,19 @@ Lemma rho_gt_0 {t: type} {n:nat}
   (0 < matrix_inf_norm (A2_J_real (FT2R_mat A)))%Re ->
   (0 < rho_def A b)%Re.
 Proof.
+intros.
 unfold rho_def.
+match goal with |-context[(_ < ?a + ?c + ?b)%Re]=>
+ replace (a + c + b)%Re with ((a + b) + c)%Re by nra
+end.
+apply Rplus_le_lt_0_compat.
++ admit.
++ apply Rmult_lt_0_compat; last by apply H.
+  apply Rplus_le_lt_0_compat; last by apply default_abs_gt_0.
+  apply Rmult_le_pos.
+  
+  
+
 
 
 
