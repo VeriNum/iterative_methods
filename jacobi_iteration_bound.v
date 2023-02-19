@@ -1059,6 +1059,19 @@ apply Rinv_lt_contravar.
 Qed.
   
 
+Lemma ln_incr (x y:R):
+  (0 < x)%Re -> (x <= y)%Re -> (ln x <= ln y)%Re.
+Proof.
+intros.
+assert (x = y \/ (x < y)%Re) by nra.
+destruct H1.
++ rewrite H1. nra.
++ apply Rlt_le. by apply ln_increasing.
+Qed.
+
+
+
+
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat): 
