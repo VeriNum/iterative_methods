@@ -3526,27 +3526,9 @@ split.
                    (1 + default_rel t) *
                    vec_inf_norm (FT2R_mat (A1_J A)) *
                    d_mag * / (1 - 0))²)%Re). 
-         { 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-apply Rcomplements.Rlt_minus_r.
+         { unfold Rsqr. nra. } rewrite H3. apply HG.
+         (** 0 < rho **)
+         apply Rcomplements.Rlt_minus_r.
          rewrite Rmult_comm. 
          apply Rcomplements.Rlt_div_r; 
          first by (apply lt_0_INR; lia).
