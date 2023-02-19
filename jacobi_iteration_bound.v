@@ -972,19 +972,6 @@ repeat split.
     apply x_bound_exists. by apply rho_1_implies_rho_2 with b.
 Qed.
 
-(*
-Lemma Rdiv_rel:
-  forall (a b c d:R),
-  (c <= d)%Re ->
-  (a <= b)%Re ->
-  (0 < c)%Re -> (0 < d)%Re ->
-  (a / c <= b / d)%Re.
-Proof.
-intros.
-assert ( (d * a <= c * b)%Re). 
-{ apply Rmult_le_compat. 
-*)
-
 Lemma ln_rho_rel {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
@@ -1026,15 +1013,6 @@ apply Rinv_lt_contravar.
   by apply Rmult_lt_0_compat.
   apply H3.
 Qed.
-
-(*
-rho_def_le_alt {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
-  (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A i i)) = true)
-(Ha : forall i j, is_finite (fprec t)  (femax t) (A  i j) = true):
-  
-*)
 
 
 Lemma ln_rho_inv_ge_0 {t: type} {n:nat}
