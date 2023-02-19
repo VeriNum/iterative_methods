@@ -3839,7 +3839,12 @@ assert (rho_def
            (matrix_inj A (length A).-1.+1
               (length A).-1.+1)
            (vector_inj b (length A).-1.+1))%Re).
-{ admit. }
+{ pose proof (@rho_ge_0 t (length A).-1 
+              (matrix_inj A (length A).-1.+1
+              (length A).-1.+1)
+              (vector_inj b (length A).-1.+1)).
+  simpl in H0. unfold rho_def. nra.
+}
 destruct H0.
 - split.
   + unfold acc2. apply finite_is_finite. apply H.
