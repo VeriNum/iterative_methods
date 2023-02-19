@@ -1510,7 +1510,15 @@ assert (HG_re: (FT2R (BMULT t accuracy accuracy) >
 assert (Hf_ge: (0 <
                  f_error 0 b (\col__ Zconst t 0)
                    ((FT2R_mat A)^-1 *m FT2R_mat b) A -
-                 d_mag_def A b / (1 - rho_def A b))%Re) by admit.
+                 d_mag_def A b / (1 - rho_def A b))%Re).
+{ apply Rlt_Rminus.
+  apply Rle_lt_trans with 
+  (d_mag_def_alt A b / (1 - rho_def_alt A b))%Re.
+  +
+
+
+
+ by admit.
 repeat split; try apply size_cons; try apply Hfa; try apply Hfdiv;
 try apply Hrho; try apply Hfacc; try (intros; apply Hfx0);
 try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
