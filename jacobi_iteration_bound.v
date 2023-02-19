@@ -1122,7 +1122,26 @@ intros. apply Rlt_Rminus. repeat apply Rdiv_lt_right.
 + apply vec_norm_strong_not_0 . intros. rewrite !mxE.
   assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
   { intros. by apply BDIV_FT2R_sep_zero. } apply Hneq.
-+
++ apply Rplus_lt_le_0_compat; try nra; try apply g_pos.
++ apply Rcomplements.Rlt_minus_r.
+  apply  Rsqr_incrst_0.
+  - rewrite Rsqr_sqrt . 
+    * repeat apply Rdiv_lt_right.
+      apply Rplus_lt_le_0_compat; try nra; try apply g_pos.
+      apply lt_0_INR. lia.
+      apply Rcomplements.Rlt_minus_r. 
+      apply Rgt_lt.
+
+
+
+
+ admit.
+  - 
+
+
+
+admit.
+  - apply sqrt_pos.
 
 
 
