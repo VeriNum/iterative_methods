@@ -1085,20 +1085,36 @@ apply Rlt_le_trans with
   by rewrite size_map size_enum_ord.
 Qed.
 
-(**
-(0 <
- (sqrt
-    ((FT2R
-        (BMULT t accuracy accuracy) -
-      g1 t n.+1 (n.+1 - 1)%coq_nat) /
-     INR n.+1 / (1 + g t n.+1)) -
-  g1 t n.+1 (n.+1 - 1)%coq_nat) /
- (1 + g t n.+1) /
- vec_inf_norm (FT2R_mat (A1_J A)) /
- (1 + default_rel t) -
- 2 * d_mag_def A b /
- (1 - rho_def A b))%Re
-**)
+
+
+
+Lemma tau_sqr_rel{t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t): 
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in 
+  let rho := rho_def A b in 
+  let d_mag := d_mag_def A b in
+ (FT2R (BMULT t accuracy accuracy) >
+     g1 t n.+1 (n.+1 - 1)%coq_nat +
+     INR n.+1 * (1 + g t n.+1) *
+     (g1 t n.+1 (n.+1 - 1)%coq_nat +
+      2 * (1 + g t n.+1) * (1 + default_rel t) *
+      vec_inf_norm (FT2R_mat (A1_J A)) *
+      d_mag * / (1 - rho))²)%Re -> 
+  (0 <
+   (sqrt
+      ((FT2R
+          (BMULT t accuracy accuracy) -
+        g1 t n.+1 (n.+1 - 1)%coq_nat) /
+       INR n.+1 / (1 + g t n.+1)) -
+    g1 t n.+1 (n.+1 - 1)%coq_nat) /
+   (1 + g t n.+1) /
+   vec_inf_norm (FT2R_mat (A1_J A)) /
+   (1 + default_rel t) -
+   2 * d_mag_def A b /
+   (1 - rho_def A b))%Re.
+Proof.
+
 
 
 
