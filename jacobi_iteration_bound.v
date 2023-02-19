@@ -1156,21 +1156,6 @@ intros. apply Rlt_Rminus. repeat apply Rdiv_lt_right.
 Qed.
 
 
-(**
-(0 <
- (sqrt
-    ((FT2R
-        (BMULT t accuracy accuracy) -
-      g1 t n.+1 (n.+1 - 1)%coq_nat) /
-     INR n.+1 / (1 + g t n.+1)) -
-  g1 t n.+1 (n.+1 - 1)%coq_nat) /
- (1 + g t n.+1) /
- vec_inf_norm (FT2R_mat (A1_J A)) /
- (1 + default_rel t) -
- 2 * d_mag_def_alt A b /
- (1 - rho_def_alt A b))%Re
-**)
-
 Lemma tau_sqr_rel_Rcompute {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
@@ -1403,7 +1388,8 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
                    apply Rlt_Rminus. eapply Rle_lt_trans; last by apply Hrho.
                    by apply rho_def_le_alt.
             ** apply Rplus_le_compat_l. by apply rho_def_le_alt.
-         -- apply Rinv_le. admit.
+         -- apply Rinv_le. apply tau_sqr_rel_Rcompute.
+            apply Hfdiv. apply Hfa. apply Hrho. apply HG1.
             apply Rplus_le_compat_l.
             apply Ropp_le_contravar. apply d_mag_rel_1.
             apply Hfdiv. apply Hfa. apply Hrho.
