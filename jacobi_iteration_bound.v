@@ -1319,6 +1319,10 @@ assert (HG_re: (FT2R (BMULT t accuracy accuracy) >
       apply Rlt_le, Rinv_0_lt_compat. 
       apply Rlt_Rminus. apply Hrho.
 }
+assert (Hf_ge: (0 <
+                 f_error 0 b (\col__ Zconst t 0)
+                   ((FT2R_mat A)^-1 *m FT2R_mat b) A -
+                 d_mag_def A b / (1 - rho_def A b))%Re) by admit.
 repeat split; try apply size_cons; try apply Hfa; try apply Hfdiv;
 try apply Hrho; try apply Hfacc; try (intros; apply Hfx0);
 try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
@@ -1366,30 +1370,30 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
     admit.
     apply Zceil_glb. unfold Rlog. apply Rcomplements.Rmult_le_0_r.
     nra. apply ln_rho_inv_ge_0. apply Hfdiv. apply Hfa. apply Hrho. 
-    admit.
+    apply Hrho_Re.
   - apply le_lt_trans with (k_min_alt A b accuracy); last by apply Hk.
     apply sublist.Z_to_nat_monotone.
     apply Zceil_le.
     unfold Rlog. apply Rmult_le_compat. try by apply ln_rho_rel .
     * apply H.
     * apply ln_rho_inv_ge_0. apply Hfdiv. apply Hfa. apply Hrho. 
-      admit.
+      apply Hrho_Re.
     * apply ln_incr.
       ++ repeat apply Rmult_lt_0_compat. 
-         -- admit.
+         -- apply Hf_ge.
          -- assert ((0 <= rho_def A b)%Re). { by apply rho_ge_0. }
             nra.
          -- apply Rinv_0_lt_compat. apply tau_sqr_rel.
-            apply Hfdiv. apply Hfa. apply Hrho. admit.
+            apply Hfdiv. apply Hfa. apply Hrho. apply HG_re.
       ++ apply Rmult_le_compat.
          -- apply Rmult_le_pos; last by 
             (apply Rplus_le_le_0_compat; try nra; try apply rho_ge_0).
-            admit.
+            nra.
          -- apply Rlt_le.
             apply Rinv_0_lt_compat. apply tau_sqr_rel.
-            apply Hfdiv. apply Hfa. apply Hrho. admit.
+            apply Hfdiv. apply Hfa. apply Hrho. apply HG_re.
          -- apply Rmult_le_compat.
-            ** admit.
+            ** nra.
             ** apply Rplus_le_le_0_compat; try nra; by try apply rho_ge_0.
             ** apply Rplus_le_compat.
                +++ apply f_error0_bnd. apply rho_1_implies_rho_2 with b.
@@ -1405,14 +1409,14 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
             apply Ropp_le_contravar. apply d_mag_rel_1.
             apply Hfdiv. apply Hfa. apply Hrho.
     * apply ln_rho_rel. apply Hfdiv. apply Hfa. apply Hrho.
-      apply Hrho. admit.
-+ admit.
-+ intros. apply input_bound_compute_implies_math; try by []. apply Hrho. admit. 
-+ intros. apply input_bound_compute_implies_math;try by []. apply Hrho. admit. 
+      apply Hrho. nra.
++ apply Hf_ge.
++ intros. apply input_bound_compute_implies_math; try by []. apply Hrho.  
++ intros. apply input_bound_compute_implies_math;try by []. apply Hrho. 
 + intros. apply Hinp.
-+ apply input_bound_compute_implies_math; try by []. apply Hrho. admit. 
-+ intros. apply input_bound_compute_implies_math; try by []. apply Hrho. admit. 
-+ intros. apply input_bound_compute_implies_math; try by []. apply Hrho. admit. 
++ apply input_bound_compute_implies_math; try by []. apply Hrho. 
++ intros. apply input_bound_compute_implies_math; try by []. apply Hrho. 
++ intros. apply input_bound_compute_implies_math; try by []. apply Hrho. 
 Admitted.
 
 
