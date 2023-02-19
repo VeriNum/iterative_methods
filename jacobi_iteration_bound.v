@@ -960,7 +960,7 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (** Gamma is finite **)
   Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
   (** constraint on k **)
-  ((k_min_alt A b accuracy < k)%coq_nat /\ (0 < k)%coq_nat) /\
+  (k_min_alt A b accuracy < k)%coq_nat /\
   (** finiteness of x0 **)
   (forall i : 'I_n.+1, is_finite (fprec t) (femax t)
                               (x0 i ord0) = true) /\
@@ -1590,7 +1590,8 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
                        (1 - rho_def A b)))))%Re).
   { nra. } destruct H.
   - unfold k_min. rewrite Coqlib.Z_to_nat_neg.
-    lia.
+    apply le_lt_trans with (k_min_alt A b accuracy); last by lia.
+    unfold k_min_alt. lia.
     apply Zceil_glb. unfold Rlog. apply Rcomplements.Rmult_le_0_r.
     nra. apply ln_rho_inv_ge_0. apply Hfdiv. apply Hfa. apply Hrho. 
     apply Hrho_Re.
@@ -1680,9 +1681,6 @@ assert (k == k' \/ (k < k')%nat).
 + apply ltn_trans with k.
   apply /ssrnat.ltP. by apply H0.
   by []. 
-+ apply lt_le_trans with k.
-  apply H0.
-  by apply /ssrnat.leP.
 Qed.
 
 Lemma jacobi_iteration_bound_corollaries:
