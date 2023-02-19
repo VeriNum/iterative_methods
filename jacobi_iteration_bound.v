@@ -1260,40 +1260,12 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
                    apply Rlt_Rminus. eapply Rle_lt_trans; last by apply Hrho.
                    by apply rho_def_le_alt.
             ** apply Rplus_le_compat_l. by apply rho_def_le_alt.
-         -- 
-                   
-  
-
-
-admit.
-            (** remove (0 <
- -
- (2 * d_mag_def A b /
-  (1 - rho_def A b)))%Re**)
-            
-
-
- apply Rdiv_lt_0_compat.
-            Search (0 < _ / _)%Re.
-
-
-
-
-
-apply Rmult_lt_0_compat.
-
-
-
-
-
-
-
-
-
-
-
-
-admit.
+         -- apply Rlt_le. apply Rinv_lt_contravar.
+            ** apply Rmult_lt_0_compat; admit.
+            ** apply Rplus_lt_le_compat.
+               +++ admit.
+               +++ apply Ropp_le_contravar. apply d_mag_rel_1.
+                   apply Hfdiv. apply Hfa. apply Hrho.
     * apply ln_rho_rel. apply Hfdiv. apply Hfa. apply Hrho.
       apply Hrho. admit.
 
