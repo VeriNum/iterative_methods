@@ -1130,12 +1130,28 @@ intros. apply Rlt_Rminus. repeat apply Rdiv_lt_right.
       apply Rplus_lt_le_0_compat; try nra; try apply g_pos.
       apply lt_0_INR. lia.
       apply Rcomplements.Rlt_minus_r. 
-      apply Rgt_lt.
+      apply Rgt_lt. unfold rho, d_mag in H. 
+      assert (((2 * d_mag_def A b /
+                  (1 - rho_def A b) *
+                  (1 + default_rel t) *
+                  vec_inf_norm (FT2R_mat (A1_J A)) *
+                  (1 + g t n.+1) +
+                  g1 t n.+1 (n.+1 - 1)%coq_nat)² *
+                 (1 + g t n.+1) * INR n.+1 +
+                 g1 t n.+1 (n.+1 - 1)%coq_nat)%Re = 
+                ((2 * d_mag_def A b * /
+                  (1 - rho_def A b) *
+                  (1 + default_rel t) *
+                  vec_inf_norm (FT2R_mat (A1_J A)) *
+                  (1 + g t n.+1) +
+                  g1 t n.+1 (n.+1 - 1)%coq_nat)² *
+                 (1 + g t n.+1) * INR n.+1 +
+                 g1 t n.+1 (n.+1 - 1)%coq_nat)%Re) by nra.
+      rewrite H0. clear H0.
+      eapply Rgt_ge_trans. apply H. apply Rle_ge.
+      unfold Rsqr. nra.
+    *
 
-
-
-
- admit.
   - 
 
 
