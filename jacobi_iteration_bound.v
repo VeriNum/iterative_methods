@@ -1444,7 +1444,7 @@ Qed.
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat)
-  (Hrho_gt_0: (0 < rho_def A b)%Re) :
+  (Hrho_gt_0: (0 < rho_def A b)%Re):
   jacobi_preconditions_Rcompute A b accuracy k ->
   jacobi_preconditions_math A b accuracy k.
 Proof.
