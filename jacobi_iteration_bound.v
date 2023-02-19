@@ -1258,14 +1258,16 @@ intros.
 unfold jacobi_preconditions_Rcompute in H.
 destruct H as [Hfa [Hrho [Hdom [Hfdiv [HG1 [Hfacc [Hk [He0 [Hfx0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]].
 unfold jacobi_preconditions_math.
-repeat split; try apply size_cons; try apply Hfa; try apply Hfdiv;
-try apply Hrho; try apply Hfacc; try (intros; apply Hfx0);
-try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
-+ admit.
-+ apply Rle_lt_trans with (rho_def_alt A b).
-  by apply rho_def_le_alt. apply Hrho.
-+ by apply diagonal_dominance_implies_invertibility.
-+ apply Rgt_lt. eapply Rle_lt_trans; try apply HG1.
+assert (Hrho_Re: (0 < rho_def A b)%Re) by admit.
+assert (HG_re: (FT2R (BMULT t accuracy accuracy) >
+                 g1 t n.+1 (n.+1 - 1)%coq_nat +
+                 INR n.+1 * (1 + g t n.+1) *
+                 (g1 t n.+1 (n.+1 - 1)%coq_nat +
+                  2 * (1 + g t n.+1) *
+                  (1 + default_rel t) *
+                  vec_inf_norm (FT2R_mat (A1_J A)) *
+                  d_mag_def A b * / (1 - rho_def A b))²)%Re).
+{ apply Rgt_lt. eapply Rle_lt_trans; try apply HG1.
   apply Rplus_le_compat_l. apply Rmult_le_compat_l.
   - apply Rmult_le_pos. apply pos_INR. 
     apply Rplus_le_le_0_compat. nra. apply g_pos.
@@ -1316,6 +1318,15 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
       apply d_mag_def_alt_ge_0. apply Hrho.
       apply Rlt_le, Rinv_0_lt_compat. 
       apply Rlt_Rminus. apply Hrho.
+}
+repeat split; try apply size_cons; try apply Hfa; try apply Hfdiv;
+try apply Hrho; try apply Hfacc; try (intros; apply Hfx0);
+try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
++ apply Hrho_Re.
++ apply Rle_lt_trans with (rho_def_alt A b).
+  by apply rho_def_le_alt. apply Hrho.
++ by apply diagonal_dominance_implies_invertibility.
++ apply HG_re.
 + assert ((ln
              ((f_error 0 b (\col__ Zconst t 0)
                  ((FT2R_mat A)^-1 *m FT2R_mat b)
@@ -1395,7 +1406,6 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
             apply Hfdiv. apply Hfa. apply Hrho.
     * apply ln_rho_rel. apply Hfdiv. apply Hfa. apply Hrho.
       apply Hrho. admit.
-
 + admit.
 + intros. apply input_bound_compute_implies_math; try by []. apply Hrho. admit. 
 + intros. apply input_bound_compute_implies_math;try by []. apply Hrho. admit. 
