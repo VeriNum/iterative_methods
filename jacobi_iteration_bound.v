@@ -3637,22 +3637,21 @@ split.
                                 rewrite !mxE. by apply BDIV_FT2R_sep_zero.
                                 rewrite Heqrho Heqd_mag in HG. apply HG.
                           }
-                          rewrite H3.
+                          rewrite H4.
                           assert ( ((/ rho) ^ (k_min A b acc).+1)%Re = 
                                    Rpower (/rho)%Re (INR (k_min A b acc).+1)).
                           { rewrite Rpower_pow. nra.
-                            apply Rinv_0_lt_compat. rewrite Heqrho. apply rho_gt_0. apply Hrho.
+                            apply Rinv_0_lt_compat. apply H1.
                           }
-                          rewrite H4. apply Rpower_lt .
+                          rewrite H5. apply Rpower_lt .
                           ++++ replace 1%Re with (/1)%Re by nra.
-                               apply Rinv_lt_contravar. rewrite Rmult_1_r.
-                               rewrite Heqrho. apply rho_gt_0. apply Hrho. 
+                               apply Rinv_lt_contravar. rewrite Rmult_1_r. apply H1. 
                                apply Hrho.
                           ++++ apply Rle_lt_trans with (INR (k_min A b acc)).
                                ---- unfold k_min.
                                     rewrite  Heqrho Heqd_mag Heqe_0 HeqGamma /x0 Heqx  /acc2.
                                      assert ((1 / rho_def A b)%Re = (/ rho_def A b)%Re). { nra. }
-                                     rewrite H5.
+                                     rewrite H6.
                                     match goal with |-context[(?a <= INR (Z.to_nat (Zceil ?a )))%Re]=>
                                       remember a as p
                                     end. apply IZR_ceil_rel .
