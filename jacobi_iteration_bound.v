@@ -3789,6 +3789,13 @@ split.
     } by rewrite H9. 
 Qed.
 
+Lemma finite_residual_0 {t: type} :
+ forall (A: matrix t) (b: vector t) (acc: ftype t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  is_finite (fprec t) (femax t)
+  (norm2 (resid (jacobi_n A b x0 0))) = true.
+Proof.
 
 
 
@@ -3915,8 +3922,13 @@ destruct H0.
          -- unfold norm2. apply dotprod_finite.
             ** remember (length A).-1 as n.
                assert ( length (resid (jacobi_n A b x0 0)) = n.+1).
-               { admit. } rewrite H1. apply g1_constraint_Sn. apply H.
-            ** intros. admit.
+               { repeat rewrite /matrix_vector_mult !map_length combine_length.
+                  rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+                  rewrite !seq_length /matrix_rows_nat -HeqAb !Nat.min_id.
+                  rewrite Heqn prednK. by []. by apply /ssrnat.ltP.
+                  by []. by rewrite /x0 repeat_length.
+               } rewrite H1. apply g1_constraint_Sn. apply H.
+            ** intros. intros. admit.
          -- unfold acc2. apply H.
 - apply jacobi_iteration_bound_lowlevel'.
   + by apply jacobi_precond_compute_implies_math .
