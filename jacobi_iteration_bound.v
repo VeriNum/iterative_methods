@@ -1022,14 +1022,8 @@ apply Rinv_lt_contravar.
 Admitted.
 
 (*
-Lemma Zceil_lt_0 (x:R):
-  (x < 0)%Re -> (Zceil x < 0)%Z.
-Proof.
-intros. 
-Search "Zceil".
-
-
-destruct x.
+Lemma 
+  (0 <= / ln (1 / rho_def A b))%Re
 *)
 
 (** Refactoring definitions to make them readable and beautiful **)
@@ -1137,44 +1131,14 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
   { nra. } destruct H.
   - unfold k_min. rewrite Coqlib.Z_to_nat_neg.
     admit.
-
-
-
- last by .
-
-
-
-
-
-
-
-
-(** split to 
-    (ln
-   ((f_error 0 b (\col__ Zconst t 0)
-       ((FT2R_mat A)^-1 *m FT2R_mat b)
-       A -
-     d_mag_def A b / (1 - rho_def A b)) *
-    (1 + rho_def A b) /
-    ((sqrt
-        ((FT2R
-            (BMULT t accuracy accuracy) -
-          g1 t n.+1 (n.+1 - 1)%coq_nat) /
-         INR n.+1 / (1 + g t n.+1)) -
-      g1 t n.+1 (n.+1 - 1)%coq_nat) /
-     (1 + g t n.+1) /
-     vec_inf_norm (FT2R_mat (A1_J A)) /
-     (1 + default_rel t) -
-     2 * d_mag_def A b /
-     (1 - rho_def A b))) < 0 \/ 0 <= _.... **)
-
-
-
-
- apply le_lt_trans with (k_min_alt A b accuracy); last by apply Hk.
-  apply sublist.Z_to_nat_monotone.
-  apply Zceil_le.
-  unfold Rlog. apply Rmult_le_compat. try by apply ln_rho_rel .
+    apply Zceil_glb. unfold Rlog. apply Rcomplements.Rmult_le_0_r.
+    nra. admit.
+  - apply le_lt_trans with (k_min_alt A b accuracy); last by apply Hk.
+    apply sublist.Z_to_nat_monotone.
+    apply Zceil_le.
+    unfold Rlog. apply Rmult_le_compat. try by apply ln_rho_rel .
+    * apply H.
+    *
 
   
 
