@@ -1097,6 +1097,7 @@ Lemma tau_sqr_rel{t: type} {n:nat}
   let b_real := FT2R_mat b in 
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
+  ( rho_def_alt A b < 1)%Re -> 
  (FT2R (BMULT t accuracy accuracy) >
      g1 t n.+1 (n.+1 - 1)%coq_nat +
      INR n.+1 * (1 + g t n.+1) *
@@ -1130,7 +1131,7 @@ intros. apply Rlt_Rminus. repeat apply Rdiv_lt_right.
       apply Rplus_lt_le_0_compat; try nra; try apply g_pos.
       apply lt_0_INR. lia.
       apply Rcomplements.Rlt_minus_r. 
-      apply Rgt_lt. unfold rho, d_mag in H. 
+      apply Rgt_lt. unfold rho, d_mag in H0. 
       assert (((2 * d_mag_def A b /
                   (1 - rho_def A b) *
                   (1 + default_rel t) *
@@ -1147,12 +1148,18 @@ intros. apply Rlt_Rminus. repeat apply Rdiv_lt_right.
                   g1 t n.+1 (n.+1 - 1)%coq_nat)² *
                  (1 + g t n.+1) * INR n.+1 +
                  g1 t n.+1 (n.+1 - 1)%coq_nat)%Re) by nra.
-      rewrite H0. clear H0.
-      eapply Rgt_ge_trans. apply H. apply Rle_ge.
+      rewrite H1. clear H1.
+      eapply Rgt_ge_trans. apply H0. apply Rle_ge.
       unfold Rsqr. nra.
-    *
-
-  - 
+    * admit.
+ - apply Rplus_le_le_0_compat; last by apply g1_pos.
+   repeat apply Rmult_le_pos; try nra; try apply bpow_ge_0; try apply d_mag_ge_0.
+   * apply Rlt_le, Rinv_0_lt_compat. 
+     apply Rlt_Rminus.
+     apply Rle_lt_trans with (rho_def_alt A b).
+      by apply rho_def_le_alt.
+      apply H.
+   *
 
 
 
