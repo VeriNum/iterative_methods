@@ -1187,7 +1187,12 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
     * apply H.
     * apply ln_rho_inv_ge_0. apply Hfdiv. apply Hfa. apply Hrho. 
       admit.
-    * 
+    * apply ln_incr.
+      ++ repeat apply Rmult_lt_0_compat. 
+         -- admit.
+         -- assert ((0 <= rho_def A b)%Re). { by apply rho_ge_0. }
+            nra.
+         -- apply Rinv_0_lt_compat.
 
 
 
