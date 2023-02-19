@@ -1024,9 +1024,26 @@ Admitted.
 
 Lemma ln_rho_inv_ge_0 {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
-  (0 < rho_def_alt A b)%Re ->
+  ( rho_def_alt A b < 1)%Re ->
+  (0 < rho_def A b)%Re ->
   (0 <= / ln (1 / rho_def A b))%Re.
 Proof.
+intros. apply Rlt_le. apply Rinv_0_lt_compat.
+rewrite -ln_1. apply ln_increasing.
+nra.
+replace (1 / rho_def A b)%Re with (/ rho_def A b)%Re by nra.
+replace 1%Re with (/1)%Re by nra.
+apply Rinv_lt_contravar.
++ by rewrite Rmult_1_r.
++
+
+
+
+
+
+
+
+
 
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
