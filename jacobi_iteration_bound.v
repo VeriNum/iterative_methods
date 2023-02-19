@@ -657,7 +657,7 @@ Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                      INR n.+1 / (1 + g t n.+1)) -
                   g1 t n.+1 (n.+1 - 1)%coq_nat) /
                  (1 + g t n.+1) /
-                 ((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) /
+                 vec_inf_norm (FT2R_mat (A1_J A)) /
                  (1 + delta) -
                  2 * d_mag / (1 - rho)))%Re)).
 
@@ -1263,7 +1263,14 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
          -- apply Rlt_le. apply Rinv_lt_contravar.
             ** apply Rmult_lt_0_compat; admit.
             ** apply Rplus_lt_le_compat.
-               +++ admit.
+               +++ apply Rmult_lt_compat_r.
+
+
+
+
+
+
+admit.
                +++ apply Ropp_le_contravar. apply d_mag_rel_1.
                    apply Hfdiv. apply Hfa. apply Hrho.
     * apply ln_rho_rel. apply Hfdiv. apply Hfa. apply Hrho.
