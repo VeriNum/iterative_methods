@@ -1174,12 +1174,23 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
     * apply H.
     * apply ln_rho_inv_ge_0. apply Hfdiv. apply Hfa. apply Hrho. 
       admit.
+    * 
 
-  
+
+
+
+
+
+
+
+
 
 
 
 admit.
+    * apply ln_rho_rel. apply Hfdiv. apply Hfa. apply Hrho.
+      apply Hrho. admit.
+
 + admit.
 + intros. apply input_bound_compute_implies_math; try by []. apply Hrho. admit. 
 + intros. apply input_bound_compute_implies_math;try by []. apply Hrho. admit. 
