@@ -3221,7 +3221,7 @@ split.
 + unfold acc2. by apply finite_is_finite.
 + exists (k_min A b acc).+1. 
   repeat split.
-  - by apply /ssrnat.ltP.
+  - apply /ssrnat.ltP. apply Hk.
   - intros. apply finite_is_finite.
     apply residual_is_finite.
     unfold forward_error_cond. 
