@@ -3818,15 +3818,12 @@ assert (rho_def
               (length A).-1.+1)
            (vector_inj b (length A).-1.+1))%Re).
 { admit. }
-
-
-
-
-
-apply jacobi_iteration_bound_lowlevel'.
-+ apply jacobi_precond_compute_implies_math .
-+ apply HeqAb. 
-+ apply HlenA.
+destruct H0.
+- admit.
+- apply jacobi_iteration_bound_lowlevel'.
+  + by apply jacobi_precond_compute_implies_math .
+  + apply HeqAb. 
+  + apply HlenA.
 Qed.
 
 
