@@ -1089,7 +1089,10 @@ Qed.
 
 
 Lemma tau_sqr_rel{t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t): 
+  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t)
+  (Hinv: forall i, is_finite (fprec t)  (femax t)
+       (BDIV t (Zconst t 1) (A i i)) = true)
+  (Ha : forall i j, is_finite (fprec t)  (femax t) (A  i j) = true):
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in 
   let rho := rho_def A b in 
@@ -1114,6 +1117,13 @@ Lemma tau_sqr_rel{t: type} {n:nat}
    2 * d_mag_def A b /
    (1 - rho_def A b))%Re.
 Proof.
+intros. apply Rlt_Rminus. repeat apply Rdiv_lt_right.
++ apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
++ apply vec_norm_strong_not_0 . intros. rewrite !mxE.
+  assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
+  { intros. by apply BDIV_FT2R_sep_zero. } apply Hneq.
++
+
 
 
 
