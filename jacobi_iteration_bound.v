@@ -4044,8 +4044,8 @@ destruct H0.
                  assert (forall a b c d :R, (a - b <= c + d)%Re -> (a <= b + c+d)%Re).
                  { intros. nra. } apply H12. eapply Rle_trans; last by (apply /RleP; apply H11).
                  rewrite -RminusE. apply Rplus_le_compat_l.
+                 apply Ropp_le_contravar.
                  
-  
                   
                  
 
