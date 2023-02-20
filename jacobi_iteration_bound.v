@@ -4069,8 +4069,26 @@ destruct H0.
                assert (X_m_jacobi 1 x0' b' A' = jacobi_iter x0' b' A'). { by simpl. }
                assert (X_m_jacobi 0 x0' b' A' = x0'). { by simpl. }
                rewrite H13 H14. unfold jacobi_iter.
-                  
-                 
+               clear H9 H10 H11 H12 H13 H14.
+               pose proof (@vec_float_sub _ t n 
+                            (diag_vector_mult (A1_inv_J A')
+                                (b' -f A2_J A' *f x0')) x0').
+               assert (forall xy : ftype t * ftype t,
+                          In xy
+                            (combine
+                               (vec_to_list_float n.+1
+                                  (diag_vector_mult
+                                     (A1_inv_J A')
+                                     (b' -f A2_J A' *f x0')))
+                               (vec_to_list_float n.+1 x0')) ->
+                          is_finite (fprec t) (femax t) xy.1 =
+                          true /\
+                          is_finite (fprec t) (femax t) xy.2 =
+                          true /\
+                          is_finite (fprec t) (femax t)
+                            (BPLUS t xy.1 (BOPP t xy.2)) =
+                          true)  by admit.
+               specialize (
 
 
 
