@@ -3867,6 +3867,7 @@ assert (rho_def
   simpl in H0. unfold rho_def. nra.
 }
 destruct H0.
+(*** || N || = 0 case. ***)
 - split.
   + unfold acc2. apply finite_is_finite. apply H.
   + exists 0%nat.
@@ -3932,26 +3933,12 @@ destruct H0.
                vec_inf_norm (FT2R_mat (A1_J A')) *
                d_mag_def_alt A' b' *
                / (1 - rho_def_alt A' b'))²)%Re.
-            ** 
-
-
-
-
-
-            apply Rle_trans with 
-            (g1 t n.+1 (n.+1 - 1)%coq_nat +
-            INR n.+1 * (1 + g t n.+1) *
-            (g1 t n.+1 (n.+1 - 1)%coq_nat +
-             2 * (1 + g t n.+1) *
-             (1 + default_rel t) *
-             vec_inf_norm (FT2R_mat (A1_J A')) *
-             d_mag_def A' b' * / (1 - rho_def A' b'))²)%Re.
-              apply Rplus_le_le_0_compat; first by apply g1_pos.
-                apply Rmult_le_pos. apply Rmult_le_pos. apply pos_INR.
-                apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-                apply Rle_0_sqr.
-             rewrite HeqGamma. unfold acc2. admit.
-             assert (FT2R (norm2 (rev
+            apply Rplus_le_le_0_compat; first by apply g1_pos.
+            apply Rmult_le_pos. apply Rmult_le_pos. apply pos_INR.
+            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+            apply Rle_0_sqr. 
+            rewrite HeqGamma. unfold acc2. nra.
+            assert (FT2R (norm2 (rev
                            (vec_to_list_float n.+1
                               (vector_inj
                                  (resid
@@ -4007,6 +3994,7 @@ admit. (** x_1 - x_0 **)
             destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
             by unfold size_constraint in size_cons.
          -- unfold acc2. apply H.
+(** 0 < || N || **)
 - apply jacobi_iteration_bound_lowlevel'.
   + by apply jacobi_precond_compute_implies_math .
   + apply HeqAb. 
