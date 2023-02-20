@@ -3810,6 +3810,35 @@ is_finite (fprec t) (femax t) xy.2 =
 true
 ***)
 
+Lemma finite_in{t: type}  :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  forall xy, 
+  In xy
+       (combine
+          (vec_to_list_float n.+1
+             (vector_inj
+                (resid
+                   (jacobi_n A b x0 0))
+                n.+1))
+          (vec_to_list_float n.+1
+             (vector_inj
+                (resid
+                   (jacobi_n A b x0 0))
+                n.+1))) ->
+  is_finite (fprec t) (femax t) xy.1 = true /\
+  is_finite (fprec t) (femax t) xy.2 = true.
+Proof.
+Admitted.
+
+
+
+
+
 Lemma finite_residual_0 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -3952,7 +3981,8 @@ destruct H0.
              rewrite H9. clear H9.
              eapply Rle_lt_trans.
              apply norm2_vec_inf_norm_rel.
-             ** intros. admit.
+             ** intros. apply finite_in with A b. apply HlenA. apply HeqAb.
+                unfold resid in H9. rewrite -Heqn. apply H9.
              ** rewrite  -H7 -H5. apply finite_residual_0.
                 apply HlenA. apply HeqAb. unfold size_constraint. 
                 destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
@@ -3977,7 +4007,12 @@ destruct H0.
                           is_finite (fprec t) (femax t) xy.2 =
                           true /\
                           is_finite (fprec t) (femax t)
-                            (BMULT t xy.1 xy.2) = true) by admit.
+                            (BMULT t xy.1 xy.2) = true).
+               { 
+
+
+
+ by admit.
                specialize (H9 H10).
                admit.
 
