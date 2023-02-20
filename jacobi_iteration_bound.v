@@ -4109,7 +4109,13 @@ destruct H0.
                apply Rplus_le_compat_r. apply Rmult_le_compat_r.
                apply Rplus_le_le_0_compat. nra. apply g_pos.
                apply Rmult_le_compat_l. apply /RleP. apply vec_norm_pd.
+               rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
+               eapply Rle_trans. 
+               assert (forall x y z :R, (x - y <= z)%Re -> (x <= y + z)%Re). { intros. nra. }
+               apply H11. apply /RleP. apply H9. rewrite -RplusE -RmultE.
+               apply Rplus_le_compat_r. eapply Rle_trans.
                
+  
   
 
 
