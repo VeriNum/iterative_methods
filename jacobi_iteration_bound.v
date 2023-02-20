@@ -4020,9 +4020,12 @@ destruct H0.
                                (X_m_jacobi 1 x0' b' A' -f
                                 X_m_jacobi 0 x0' b' A'))) * 
                          (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re).
-               { 
-
-
+               { rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
+                 assert (forall a b c d :R, (a - b <= c + d)%Re -> (a <= b + c+d)%Re).
+                 { intros. nra. } apply H11. eapply Rle_trans; last by apply H9.
+                 
+                  
+                 
 
 
 
