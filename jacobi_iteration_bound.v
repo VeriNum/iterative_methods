@@ -4065,7 +4065,10 @@ destruct H0.
                apply /RleP. apply vec_norm_pd.
                apply /RleP. apply vec_norm_pd.
                apply Rplus_le_le_0_compat. nra. apply g_pos.
-          
+               apply Rle_refl.
+               assert (X_m_jacobi 1 x0' b' A' = jacobi_iter x0' b' A'). { by simpl. }
+               assert (X_m_jacobi 0 x0' b' A' = x0'). { by simpl. }
+               rewrite H13 H14. unfold jacobi_iter.
                   
                  
 
