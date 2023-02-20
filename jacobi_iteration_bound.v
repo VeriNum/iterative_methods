@@ -4090,12 +4090,27 @@ destruct H0.
                           true)  by admit.
                specialize (H9 H10).
                apply reverse_triang_ineq in H9.
+               eapply Rle_lt_trans. apply Rplus_le_compat_r.
+               apply Rmult_le_compat_r.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
+               apply Rmult_le_compat_l. apply pos_INR.
+               apply Rle_trans with
+               (Rsqr (vec_inf_norm (FT2R_mat (A1_J A')) *
+                  ((vec_inf_norm
+                      (FT2R_mat
+                         (diag_vector_mult 
+                            (A1_inv_J A')
+                            (b' -f A2_J A' *f x0'))) +
+                    vec_inf_norm (FT2R_mat x0')) *
+                    (1 + default_rel t)) * 
+                  (1 + g t n.+1) +
+                  g1 t n.+1 (n.+1 - 1)%coq_nat)%Re).
+               apply Rsqr_incr_1.
 
 
 
 
-               admit.
-
+               
 
 
 
