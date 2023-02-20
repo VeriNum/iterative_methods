@@ -4088,7 +4088,19 @@ destruct H0.
                           is_finite (fprec t) (femax t)
                             (BPLUS t xy.1 (BOPP t xy.2)) =
                           true)  by admit.
-               specialize (
+               specialize (H9 H10).
+               assert ((vec_inf_norm
+                         (FT2R_mat
+                            (diag_vector_mult 
+                               (A1_inv_J A')
+                               (b' -f A2_J A' *f x0') -f x0')) <=
+                        (vec_inf_norm
+                          (FT2R_mat
+                             (diag_vector_mult 
+                                (A1_inv_J A')
+                                (b' -f A2_J A' *f x0'))) +
+                        vec_inf_norm (FT2R_mat x0')) * (1 + default_rel t))%Re).
+               { 
 
 
 
