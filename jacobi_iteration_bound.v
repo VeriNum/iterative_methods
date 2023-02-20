@@ -3426,7 +3426,9 @@ assert ((p < 0)%Re \/ (0 <= p)%Re).
   rewrite -H0.
   by apply Zceil_le.
 Qed.
- 
+
+Close Scope Z_scope.
+
 Lemma jacobi_iteration_bound {t: type} {n : nat} :
  forall (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (acc: ftype t) (k: nat),
    jacobi_preconditions_math A b acc k -> 
@@ -4011,6 +4013,24 @@ destruct H0.
                specialize (H9 H10).
                assert ((vec_inf_norm
                         (FT2R_mat
+                           (diag_vector_mult 
+                              (A1_J A')
+                              (X_m_jacobi 1 x0' b' A' -f
+                               X_m_jacobi 0 x0' b' A')) -
+                         diag_matrix_vec_mult_R
+                           (FT2R_mat (A1_J A'))
+                           (FT2R_mat
+                              (X_m_jacobi 1 x0' b' A' -f
+                               X_m_jacobi 0 x0' b' A'))) <=
+                      vec_inf_norm (FT2R_mat (A1_J A')) *
+                      vec_inf_norm
+                        (FT2R_mat
+                           (X_m_jacobi 1 x0' b' A' -f
+                            X_m_jacobi 0 x0' b' A')) *
+                      g t n.+1 + g1 t n.+1 (n.+1 - 1))). { by apply /RleP. }
+               apply reverse_triang_ineq in H11.
+               assert ((vec_inf_norm
+                        (FT2R_mat
                            (diag_vector_mult (A1_J A')
                               (X_m_jacobi 1 x0' b' A' -f
                                X_m_jacobi 0 x0' b' A'))) <=
@@ -4022,8 +4042,10 @@ destruct H0.
                          (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re).
                { rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
                  assert (forall a b c d :R, (a - b <= c + d)%Re -> (a <= b + c+d)%Re).
-                 { intros. nra. } apply H11. eapply Rle_trans; last by apply H9.
+                 { intros. nra. } apply H12. eapply Rle_trans; last by (apply /RleP; apply H11).
+                 rewrite -RminusE. apply Rplus_le_compat_l.
                  
+  
                   
                  
 
