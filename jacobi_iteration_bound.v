@@ -4048,7 +4048,21 @@ destruct H0.
                  apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R.
                } eapply Rle_lt_trans.
                apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
+               apply Rmult_le_compat_l. apply pos_INR.
+               apply Rle_trans with 
+               (Rsqr (vec_inf_norm (FT2R_mat (A1_J A')) *
+                       vec_inf_norm
+                         (FT2R_mat
+                            (X_m_jacobi 1 x0' b' A' -f
+                             X_m_jacobi 0 x0' b' A')) *
+                       (1 + g t n.+1) +
+                       g1 t n.+1 (n.+1 - 1)%coq_nat)).
+               apply Rsqr_incr_1. apply H12. 
+               apply /RleP. apply vec_norm_pd.
+               apply Rplus_le_le_0_compat; last by apply g1_pos.
                
+          
                   
                  
 
