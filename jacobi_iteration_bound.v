@@ -4117,7 +4117,17 @@ destruct H0.
                apply /RleP. apply triang_ineq. rewrite -vec_inf_norm_opp.
                rewrite -RplusE. apply Rle_refl.
                apply Rplus_le_le_0_compat; last by apply g1_pos.
-               apply Rmur
+               apply Rmult_le_pos; last by 
+               (apply Rplus_le_le_0_compat; try nra; try apply g_pos).
+               apply Rmult_le_pos; try (apply /RleP; apply vec_norm_pd).
+               apply Rplus_le_le_0_compat; last by apply g1_pos.
+               apply Rmult_le_pos; last by 
+               (apply Rplus_le_le_0_compat; try nra; try apply g_pos).
+               apply Rmult_le_pos; try (apply /RleP;apply vec_norm_pd).
+               apply Rmult_le_pos; last by 
+               (apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0).
+               apply Rplus_le_le_0_compat; try (apply /RleP; apply vec_norm_pd).
+  
    
   
 
