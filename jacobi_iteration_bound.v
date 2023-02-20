@@ -4061,7 +4061,10 @@ destruct H0.
                apply Rsqr_incr_1. apply H12. 
                apply /RleP. apply vec_norm_pd.
                apply Rplus_le_le_0_compat; last by apply g1_pos.
-               
+               repeat apply Rmult_le_pos.
+               apply /RleP. apply vec_norm_pd.
+               apply /RleP. apply vec_norm_pd.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
           
                   
                  
