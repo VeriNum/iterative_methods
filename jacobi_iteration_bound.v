@@ -4007,13 +4007,29 @@ destruct H0.
                           is_finite (fprec t) (femax t) xy.2 =
                           true /\
                           is_finite (fprec t) (femax t)
-                            (BMULT t xy.1 xy.2) = true).
+                            (BMULT t xy.1 xy.2) = true) by admit.
+               specialize (H9 H10).
+               assert ((vec_inf_norm
+                        (FT2R_mat
+                           (diag_vector_mult (A1_J A')
+                              (X_m_jacobi 1 x0' b' A' -f
+                               X_m_jacobi 0 x0' b' A'))) <=
+                        (vec_inf_norm (FT2R_mat (A1_J A')) *
+                          vec_inf_norm
+                            (FT2R_mat
+                               (X_m_jacobi 1 x0' b' A' -f
+                                X_m_jacobi 0 x0' b' A'))) * 
+                         (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re).
                { 
 
 
 
- by admit.
-               specialize (H9 H10).
+
+
+
+
+
+
                admit.
 
 
