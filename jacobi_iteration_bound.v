@@ -4114,8 +4114,11 @@ destruct H0.
                assert (forall x y z :R, (x - y <= z)%Re -> (x <= y + z)%Re). { intros. nra. }
                apply H11. apply /RleP. apply H9. rewrite -RplusE -RmultE.
                apply Rplus_le_compat_r. eapply Rle_trans.
-               
-  
+               apply /RleP. apply triang_ineq. rewrite -vec_inf_norm_opp.
+               rewrite -RplusE. apply Rle_refl.
+               apply Rplus_le_le_0_compat; last by apply g1_pos.
+               apply Rmur
+   
   
 
 
