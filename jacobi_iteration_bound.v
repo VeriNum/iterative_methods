@@ -4127,7 +4127,35 @@ destruct H0.
                apply Rmult_le_pos; last by 
                (apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0).
                apply Rplus_le_le_0_compat; try (apply /RleP; apply vec_norm_pd).
-  
+               apply Rsqr_incr_1.
+               apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
+               apply Rmult_le_compat_l. apply /RleP. apply vec_norm_pd.
+               apply Rmult_le_compat_r. 
+               apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+               apply Rplus_le_compat_r.
+               pose proof (@vec_norm_diag _ t n (A1_inv_J A') (b' -f A2_J A' *f x0')).
+               assert (forall xy : ftype t * ftype t,
+                         In xy
+                           (combine
+                              (vec_to_list_float n.+1
+                                 (A1_inv_J A'))
+                              (vec_to_list_float n.+1
+                                 (b' -f A2_J A' *f x0'))) ->
+                         is_finite (fprec t) (femax t) xy.1 =
+                         true /\
+                         is_finite (fprec t) (femax t) xy.2 =
+                         true /\
+                         is_finite (fprec t) (femax t)
+                           (BMULT t xy.1 xy.2) = true) by admit.
+               specialize (H11 H12).
+               apply Rle_trans with
+               (vec_inf_norm
+                     (FT2R_mat (A1_inv_J A')) *
+                   vec_inf_norm
+                     (FT2R_mat (b' -f A2_J A' *f x0')) *
+                   (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1))%Re.
+               
    
   
 
