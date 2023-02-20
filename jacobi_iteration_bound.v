@@ -4106,6 +4106,11 @@ destruct H0.
                   (1 + g t n.+1) +
                   g1 t n.+1 (n.+1 - 1)%coq_nat)%Re).
                apply Rsqr_incr_1.
+               apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
+               apply Rmult_le_compat_l. apply /RleP. apply vec_norm_pd.
+               
+  
 
 
 
