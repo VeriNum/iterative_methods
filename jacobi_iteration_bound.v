@@ -4045,7 +4045,10 @@ destruct H0.
                  { intros. nra. } apply H12. eapply Rle_trans; last by (apply /RleP; apply H11).
                  rewrite -RminusE. apply Rplus_le_compat_l.
                  apply Ropp_le_contravar.
-                 
+                 apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R.
+               } eapply Rle_lt_trans.
+               apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+               
                   
                  
 
