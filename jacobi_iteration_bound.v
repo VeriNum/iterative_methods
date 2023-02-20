@@ -3810,7 +3810,6 @@ is_finite (fprec t) (femax t) xy.2 =
 true
 ***)
 
-
 Lemma finite_residual_0 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -3919,10 +3918,26 @@ destruct H0.
                                  (vec_to_list_float n.+1
                                     (vector_inj (resid (jacobi_n A b x0 0)) n.+1)))))%Re).
             { nra. } destruct H8.
+            destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
             apply Rlt_le_trans with 0%Re.
             nra.
             remember (@matrix_inj _ A n.+1 n.+1) as A'.
             remember (@vector_inj _ b n.+1) as b'.
+            apply Rle_trans with 
+            ( g1 t n.+1 (n.+1 - 1)%coq_nat +
+              INR n.+1 * (1 + g t n.+1) *
+              (g1 t n.+1 (n.+1 - 1)%coq_nat +
+               2 * (1 + g t n.+1) *
+               (1 + default_rel t) *
+               vec_inf_norm (FT2R_mat (A1_J A')) *
+               d_mag_def_alt A' b' *
+               / (1 - rho_def_alt A' b'))²)%Re.
+            ** 
+
+
+
+
+
             apply Rle_trans with 
             (g1 t n.+1 (n.+1 - 1)%coq_nat +
             INR n.+1 * (1 + g t n.+1) *
