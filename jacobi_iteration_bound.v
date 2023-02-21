@@ -3894,12 +3894,13 @@ Proof.
 intros.
 unfold norm2 in H1.
 pose proof (@dotprod_finite_implies t).
+specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
+rewrite rev_involutive in H3.
+specialize (H3 H1).
 
 
 
-
-
-pose proof(@in_combine_
+Admitted.
 
 
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
