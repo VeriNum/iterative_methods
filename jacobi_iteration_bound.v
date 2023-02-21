@@ -4155,8 +4155,36 @@ destruct H0.
                    vec_inf_norm
                      (FT2R_mat (b' -f A2_J A' *f x0')) *
                    (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1))%Re.
-               
-   
+               rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
+               apply Rle_trans with 
+               (vec_inf_norm 
+                  (diag_matrix_vec_mult_R
+                      (FT2R_mat (A1_inv_J A'))
+                      (FT2R_mat
+                         (b' -f A2_J A' *f x0'))) + 
+                 vec_inf_norm (FT2R_mat (A1_inv_J A')) *
+                   vec_inf_norm
+                     (FT2R_mat (b' -f A2_J A' *f x0')) *
+                   g t n.+1 + g1 t n.+1 (n.+1 - 1))%Re.
+               assert (vec_inf_norm
+                           (FT2R_mat
+                              (diag_vector_mult
+                                 (A1_inv_J A')
+                                 (b' -f A2_J A' *f x0')) -
+                            diag_matrix_vec_mult_R
+                              (FT2R_mat (A1_inv_J A'))
+                              (FT2R_mat
+                                 (b' -f A2_J A' *f x0'))) <=
+                         vec_inf_norm
+                           (FT2R_mat (A1_inv_J A')) *
+                         vec_inf_norm
+                           (FT2R_mat
+                              (b' -f A2_J A' *f x0')) *
+                         g t n.+1 + g1 t n.+1 (n.+1 - 1)). { by apply /RleP. }
+               apply reverse_triang_ineq in H13.
+               assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
+               { intros. nra. } apply H14. apply /RleP. apply H13.
+                  
   
 
 
