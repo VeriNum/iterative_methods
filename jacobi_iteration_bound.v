@@ -4226,7 +4226,71 @@ destruct H0.
                apply H16 in H15. apply H15.
                apply Rplus_le_compat_r. eapply Rle_trans.
                apply /RleP. apply triang_ineq. rewrite -vec_inf_norm_opp. rewrite -RplusE. nra.
+               apply Rmult_le_compat_r.
+               apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+               apply Rplus_le_compat_l.
+               pose proof (@matrix_vec_mult_bound_corollary _ n t (A2_J A') x0').
+               assert (forall (xy : ftype t * ftype t)
+                           (i : 'I_n.+1),
+                         In xy
+                           (combine
+                              (vec_to_list_float n.+1
+                                 (\row_j A2_J A'
+                                          (inord i) j)^T)
+                              (vec_to_list_float n.+1
+                                 x0')) ->
+                         is_finite (fprec t) 
+                           (femax t) xy.1 = true /\
+                         is_finite (fprec t) 
+                           (femax t) xy.2 = true) by admit.
+              assert (forall i : nat,
+                       is_finite (fprec t) 
+                         (femax t)
+                         (let l1 :=
+                            vec_to_list_float n.+1
+                              (\row_j A2_J A'
+                                        (inord i) j)^T
+                            in
+                          let l2 :=
+                            vec_to_list_float n.+1
+                              (\col_j x0' j 0) in
+                          dotprod_r l1 l2) = true) by admit.
+              specialize (H15 H16 H17).
+              apply reverse_triang_ineq in H15.
+              apply Rle_trans with 
+              (matrix_inf_norm
+                    (FT2R_mat (A2_J A')) *
+                  vec_inf_norm (FT2R_mat x0') +
+                  matrix_inf_norm
+                    (FT2R_mat (A2_J A')) *
+                  vec_inf_norm (FT2R_mat x0') *
+                  g t n.+1 + g1 t n.+1 (n.+1 - 1))%Re.
+               apply Rle_trans with
+               ( vec_inf_norm
+                        (FT2R_mat (A2_J A') *m 
+                         FT2R_mat x0') + 
+                 matrix_inf_norm
+                    (FT2R_mat (A2_J A')) *
+                  vec_inf_norm (FT2R_mat x0') *
+                  g t n.+1 + g1 t n.+1 (n.+1 - 1))%Re.
+               assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
+               { intros. nra. } apply H18. apply /RleP. apply H15.
+               repeat apply Rplus_le_compat_r. apply /RleP. apply submult_prop.
+               assert ((matrix_inf_norm (FT2R_mat (A2_J A')) *
+                         vec_inf_norm (FT2R_mat x0') +
+                         matrix_inf_norm (FT2R_mat (A2_J A')) *
+                         vec_inf_norm (FT2R_mat x0') *
+                         g t n.+1 + g1 t n.+1 (n.+1 - 1))%Re =
+                       ((matrix_inf_norm (FT2R_mat (A2_J A')) *
+                         vec_inf_norm (FT2R_mat x0')) * (1 + g t n.+1 )+
+                        g1 t n.+1 (n.+1 - 1))%Re). { nra. } rewrite H18.
+               apply Rle_refl.
                
+
+
+
+apply /RleP. apply H15.
+                  
 
 
 
