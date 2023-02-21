@@ -4057,7 +4057,16 @@ destruct H0.
                           is_finite (fprec t) (femax t) xy.2 =
                           true /\
                           is_finite (fprec t) (femax t)
-                            (BMULT t xy.1 xy.2) = true) by admit.
+                            (BMULT t xy.1 xy.2) = true).
+                { intros.
+                  pose proof (@finite_implies_1 t A b HlenA HeqAb).
+                  pose proof (@finite_residual_0 t A b HlenA HeqAb).
+                  destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+                  rewrite Heqn in size_cons.
+                  specialize (H12 size_cons). specialize (H11 H12).
+                  apply H11. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
+                  apply H10.
+                }
                specialize (H9 H10).
                assert ((vec_inf_norm
                         (FT2R_mat
