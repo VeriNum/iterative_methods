@@ -3866,6 +3866,42 @@ unfold norm2. apply dotprod_finite.
 Admitted.
 
 
+
+Lemma finite_implies_1 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A':= (@matrix_inj _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ b n.+1) in
+  let x0' := (@vector_inj _ x0 n.+1) in
+  is_finite (fprec t) (femax t)
+  (norm2 (resid (jacobi_n A b x0 0))) = true ->
+(forall xy : ftype t * ftype t,
+             In xy (combine
+                        (vec_to_list_float n.+1
+                                  (A1_J A'))
+                        (vec_to_list_float n.+1
+                                  (X_m_jacobi 1 x0' b' A' -f
+                                   X_m_jacobi 0 x0' b' A'))) ->
+   is_finite (fprec t) (femax t) xy.1 = true /\
+   is_finite (fprec t) (femax t) xy.2 =  true /\
+   is_finite (fprec t) (femax t)
+                            (BMULT t xy.1 xy.2) = true).
+Proof.
+intros.
+unfold norm2 in H1.
+pose proof (@dotprod_finite_implies t).
+
+
+
+
+
+pose proof(@in_combine_
+
+
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
