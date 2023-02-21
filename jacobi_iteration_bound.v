@@ -2338,10 +2338,7 @@ apply BMULT_no_overflow_is_finite.
   apply Hd. apply Rcomplements.Rlt_div_r.
   apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
   rewrite Rabs_mult. rewrite mxE.
-  rewrite Bminus_bplus_opp_equiv; try rewrite ?is_finite_Bopp;
-  try (pose proof (@jacobi_forward_error_bound _ t n );
-        unfold forward_error_cond in H0;
-        unfold rho_def in H0; apply H2; try (intros; apply H0));
+  rewrite Bminus_bplus_opp_equiv;
   try by apply is_finite_xkp1_minus_xk.
     pose proof (@BPLUS_accurate' _ t).
     specialize (H2 (X_m_jacobi k.+1 x0 b A 
@@ -3845,6 +3842,192 @@ unfold norm2. apply dotprod_finite.
 Admitted.
 
 
+
+Lemma finite_implies_1 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A':= (@matrix_inj _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ b n.+1) in
+  let x0' := (@vector_inj _ x0 n.+1) in
+  is_finite (fprec t) (femax t)
+  (norm2 (resid (jacobi_n A b x0 0))) = true ->
+(forall xy : ftype t * ftype t,
+             In xy (combine
+                        (vec_to_list_float n.+1
+                                  (A1_J A'))
+                        (vec_to_list_float n.+1
+                                  (X_m_jacobi 1 x0' b' A' -f
+                                   X_m_jacobi 0 x0' b' A'))) ->
+   is_finite (fprec t) (femax t) xy.1 = true /\
+   is_finite (fprec t) (femax t) xy.2 =  true /\
+   is_finite (fprec t) (femax t)
+                            (BMULT xy.1 xy.2) = true).
+Proof.
+intros.
+unfold norm2 in H1.
+pose proof (@dotprod_finite_implies t).
+specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
+rewrite rev_involutive in H3.
+specialize (H3 H1). unfold resid in H3.
+unfold jacobi_residual, jacob_list_fun_model.jacobi_iter in H3.
+specialize (H3 (BMULT xy.1 xy.2)).
+assert (is_finite (fprec t) 
+            (femax t) (BMULT xy.1 xy.2) = true).
+{ apply H3.
+  
+  
+
+
+
+
+
+ admit. }
+repeat split; try apply H4; try (apply bmult_overflow_implies in H4; apply H4).
+Admitted.
+
+Lemma finite_implies_2 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A':= (@matrix_inj _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ b n.+1) in
+  let x0' := (@vector_inj _ x0 n.+1) in
+  is_finite (fprec t) (femax t)
+  (norm2 (resid (jacobi_n A b x0 0))) = true ->
+  (forall xy : ftype t * ftype t,
+            In xy
+                (combine
+                    (vec_to_list_float n.+1
+                        (diag_vector_mult
+                            (A1_inv_J A')
+                                 (b' -f A2_J A' *f x0')))
+                                  (vec_to_list_float n.+1 x0')) ->
+             is_finite (fprec t) (femax t) xy.1 = true /\
+             is_finite (fprec t) (femax t) xy.2 = true /\
+             is_finite (fprec t) (femax t)
+                            (BPLUS xy.1 (BOPP xy.2)) = true).
+Proof.
+Admitted.
+
+
+Lemma finite_implies_3 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A':= (@matrix_inj _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ b n.+1) in
+  let x0' := (@vector_inj _ x0 n.+1) in
+  is_finite (fprec t) (femax t)
+  (norm2 (resid (jacobi_n A b x0 0))) = true ->
+  (forall xy : ftype t * ftype t,
+                         In xy
+                           (combine
+                              (vec_to_list_float n.+1
+                                 (A1_inv_J A'))
+                              (vec_to_list_float n.+1
+                                 (b' -f A2_J A' *f x0'))) ->
+                         is_finite (fprec t) (femax t) xy.1 =
+                         true /\
+                         is_finite (fprec t) (femax t) xy.2 =
+                         true /\
+                         is_finite (fprec t) (femax t)
+                           (BMULT xy.1 xy.2) = true).
+Admitted.
+
+
+Lemma finite_implies_4 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A':= (@matrix_inj _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ b n.+1) in
+  let x0' := (@vector_inj _ x0 n.+1) in
+  is_finite (fprec t) (femax t)
+  (norm2 (resid (jacobi_n A b x0 0))) = true ->
+(forall xy : ftype t * ftype t,
+                           In xy
+                             (combine
+                                (vec_to_list_float n.+1 b')
+                                (vec_to_list_float n.+1
+                                   (A2_J A' *f x0'))) ->
+                           is_finite (fprec t) 
+                             (femax t) xy.1 = true /\
+                           is_finite (fprec t) 
+                             (femax t) xy.2 = true /\
+                           is_finite (fprec t) 
+                             (femax t)
+                             (BPLUS xy.1 (BOPP xy.2)) =
+                           true).
+Admitted.
+
+
+Lemma finite_implies_5 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A':= (@matrix_inj _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ b n.+1) in
+  let x0' := (@vector_inj _ x0 n.+1) in
+  is_finite (fprec t) (femax t)
+  (norm2 (resid (jacobi_n A b x0 0))) = true ->
+  (forall (xy : ftype t * ftype t)
+                           (i : 'I_n.+1),
+                         In xy
+                           (combine
+                              (vec_to_list_float n.+1
+                                 (\row_j A2_J A'
+                                          (inord i) j)^T)
+                              (vec_to_list_float n.+1
+                                 x0')) ->
+                         is_finite (fprec t) 
+                           (femax t) xy.1 = true /\
+                         is_finite (fprec t) 
+                           (femax t) xy.2 = true).
+Admitted.
+
+
+Lemma finite_implies_6 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A':= (@matrix_inj _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ b n.+1) in
+  let x0' := (@vector_inj _ x0 n.+1) in
+  is_finite (fprec t) (femax t)
+  (norm2 (resid (jacobi_n A b x0 0))) = true ->
+  (forall i : nat,
+                       is_finite (fprec t) 
+                         (femax t)
+                         (let l1 :=
+                            vec_to_list_float n.+1
+                              (\row_j A2_J A'
+                                        (inord i) j)^T
+                            in
+                          let l2 :=
+                            vec_to_list_float n.+1
+                              (\col_j x0' j 0) in
+                          dotprod_r l1 l2) = true) .
+Admitted.
+
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
@@ -3988,7 +4171,16 @@ destruct H0.
                           is_finite (fprec t) (femax t) xy.2 =
                           true /\
                           is_finite (fprec t) (femax t)
-                            (BMULT xy.1 xy.2) = true) by admit.
+                            (BMULT xy.1 xy.2) = true).
+                { intros.
+                  pose proof (@finite_implies_1 t A b HlenA HeqAb).
+                  pose proof (@finite_residual_0 t A b HlenA HeqAb).
+                  destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+                  rewrite Heqn in size_cons.
+                  specialize (H12 size_cons). specialize (H11 H12).
+                  apply H11. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
+                  apply H10.
+                }
                specialize (H9 H10).
                assert ((vec_inf_norm
                         (FT2R_mat
@@ -4066,7 +4258,16 @@ destruct H0.
                           true /\
                           is_finite (fprec t) (femax t)
                             (BPLUS xy.1 (BOPP xy.2)) =
-                          true)  by admit.
+                          true).
+               { intros.
+                  pose proof (@finite_implies_2 t A b HlenA HeqAb).
+                  pose proof (@finite_residual_0 t A b HlenA HeqAb).
+                  destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+                  rewrite Heqn in size_cons.
+                  specialize (H12 size_cons). specialize (H11 H12).
+                  apply H11. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
+                  apply H10.
+                }
                specialize (H9 H10).
                apply reverse_triang_ineq in H9.
                eapply Rle_lt_trans. apply Rplus_le_compat_r.
@@ -4126,7 +4327,16 @@ destruct H0.
                          is_finite (fprec t) (femax t) xy.2 =
                          true /\
                          is_finite (fprec t) (femax t)
-                           (BMULT xy.1 xy.2) = true) by admit.
+                           (BMULT xy.1 xy.2) = true).
+               { intros.
+                  pose proof (@finite_implies_3 t A b HlenA HeqAb).
+                  pose proof (@finite_residual_0 t A b HlenA HeqAb).
+                  destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+                  rewrite Heqn in size_cons.
+                  specialize (H14 size_cons). specialize (H13 H14).
+                  apply H13. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
+                  apply H12.
+               }
                specialize (H11 H12).
                apply Rle_trans with
                (vec_inf_norm
@@ -4134,26 +4344,190 @@ destruct H0.
                    vec_inf_norm
                      (FT2R_mat (b' -f A2_J A' *f x0')) *
                    (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1))%Re.
-               
-   
-  
-
-
-
-
-               
-
-
-
-
-
-
-
-admit. (** x_1 - x_0 **)
-admit.
-admit.
-admit.
-admit.
+               rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
+               apply Rle_trans with 
+               (vec_inf_norm 
+                  (diag_matrix_vec_mult_R
+                      (FT2R_mat (A1_inv_J A'))
+                      (FT2R_mat
+                         (b' -f A2_J A' *f x0'))) + 
+                 vec_inf_norm (FT2R_mat (A1_inv_J A')) *
+                   vec_inf_norm
+                     (FT2R_mat (b' -f A2_J A' *f x0')) *
+                   g t n.+1 + g1 t n.+1 (n.+1 - 1))%Re.
+               assert (vec_inf_norm
+                           (FT2R_mat
+                              (diag_vector_mult
+                                 (A1_inv_J A')
+                                 (b' -f A2_J A' *f x0')) -
+                            diag_matrix_vec_mult_R
+                              (FT2R_mat (A1_inv_J A'))
+                              (FT2R_mat
+                                 (b' -f A2_J A' *f x0'))) <=
+                         vec_inf_norm
+                           (FT2R_mat (A1_inv_J A')) *
+                         vec_inf_norm
+                           (FT2R_mat
+                              (b' -f A2_J A' *f x0')) *
+                         g t n.+1 + g1 t n.+1 (n.+1 - 1)). { by apply /RleP. }
+               apply reverse_triang_ineq in H13.
+               assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
+               { intros. nra. } apply H14. apply /RleP. apply H13.
+               repeat apply Rplus_le_compat_r. apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R.
+               apply Rplus_le_compat_r.
+               apply Rmult_le_compat_r.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
+               apply Rmult_le_compat_l. apply /RleP. apply vec_norm_pd.
+               pose proof (@vec_float_sub _ t n b' (A2_J A' *f x0')).
+               assert (forall xy : ftype t * ftype t,
+                           In xy
+                             (combine
+                                (vec_to_list_float n.+1 b')
+                                (vec_to_list_float n.+1
+                                   (A2_J A' *f x0'))) ->
+                           is_finite (fprec t) 
+                             (femax t) xy.1 = true /\
+                           is_finite (fprec t) 
+                             (femax t) xy.2 = true /\
+                           is_finite (fprec t) 
+                             (femax t)
+                             (BPLUS xy.1 (BOPP xy.2)) =
+                           true).
+               { intros.
+                  pose proof (@finite_implies_4 t A b HlenA HeqAb).
+                  pose proof (@finite_residual_0 t A b HlenA HeqAb).
+                  destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+                  rewrite Heqn in size_cons.
+                  specialize (H16 size_cons). specialize (H15 H16).
+                  apply H15. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
+                  apply H14.
+               }
+               specialize (H13 H14).
+               apply Rle_trans with
+               ((vec_inf_norm (FT2R_mat b') +
+                     vec_inf_norm
+                       (FT2R_mat (A2_J A' *f x0'))) *
+                   (1 + default_rel t))%Re.
+               rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
+               apply reverse_triang_ineq in H13. eapply Rle_trans.
+               assert ((vec_inf_norm
+                          (FT2R_mat
+                             (b' -f A2_J A' *f x0')) -
+                        vec_inf_norm
+                          (FT2R_mat b' -
+                           FT2R_mat (A2_J A' *f x0')) <=
+                        (vec_inf_norm (FT2R_mat b') +
+                         vec_inf_norm
+                           (FT2R_mat (A2_J A' *f x0'))) *
+                        default_rel t)%Re). { by apply /RleP. }
+               assert (forall a b c:R, (a - b <= c)%Re -> (a <= b +c)%Re). { intros. nra. }
+               apply H16 in H15. apply H15.
+               apply Rplus_le_compat_r. eapply Rle_trans.
+               apply /RleP. apply triang_ineq. rewrite -vec_inf_norm_opp. rewrite -RplusE. nra.
+               apply Rmult_le_compat_r.
+               apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+               apply Rplus_le_compat_l.
+               pose proof (@matrix_vec_mult_bound_corollary _ n t (A2_J A') x0').
+               assert (forall (xy : ftype t * ftype t)
+                           (i : 'I_n.+1),
+                         In xy
+                           (combine
+                              (vec_to_list_float n.+1
+                                 (\row_j A2_J A'
+                                          (inord i) j)^T)
+                              (vec_to_list_float n.+1
+                                 x0')) ->
+                         is_finite (fprec t) 
+                           (femax t) xy.1 = true /\
+                         is_finite (fprec t) 
+                           (femax t) xy.2 = true). 
+               { intros.
+                  pose proof (@finite_implies_5 t A b HlenA HeqAb).
+                  pose proof (@finite_residual_0 t A b HlenA HeqAb).
+                  destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+                  rewrite Heqn in size_cons.
+                  specialize (H18 size_cons). 
+                  rewrite -Heqn in H17. specialize (H17 H18 xy i).
+                  apply H17. rewrite HeqA' Heqx0' in H16.
+                  apply H16.
+              }
+              assert (forall i : nat,
+                       is_finite (fprec t) 
+                         (femax t)
+                         (let l1 :=
+                            vec_to_list_float n.+1
+                              (\row_j A2_J A'
+                                        (inord i) j)^T
+                            in
+                          let l2 :=
+                            vec_to_list_float n.+1
+                              (\col_j x0' j 0) in
+                          dotprod_r l1 l2) = true).
+              { intros.
+                  pose proof (@finite_implies_6 t A b HlenA HeqAb).
+                  pose proof (@finite_residual_0 t A b HlenA HeqAb).
+                  destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+                  rewrite Heqn in size_cons.
+                  specialize (H18 size_cons). 
+                  rewrite -Heqn in H17. specialize (H17 H18 i).
+                  rewrite HeqA' Heqx0'.
+                  apply H17.             
+              }
+              specialize (H15 H16 H17).
+              apply reverse_triang_ineq in H15.
+              apply Rle_trans with 
+              (matrix_inf_norm
+                    (FT2R_mat (A2_J A')) *
+                  vec_inf_norm (FT2R_mat x0') +
+                  matrix_inf_norm
+                    (FT2R_mat (A2_J A')) *
+                  vec_inf_norm (FT2R_mat x0') *
+                  g t n.+1 + g1 t n.+1 (n.+1 - 1))%Re.
+               apply Rle_trans with
+               ( vec_inf_norm
+                        (FT2R_mat (A2_J A') *m 
+                         FT2R_mat x0') + 
+                 matrix_inf_norm
+                    (FT2R_mat (A2_J A')) *
+                  vec_inf_norm (FT2R_mat x0') *
+                  g t n.+1 + g1 t n.+1 (n.+1 - 1))%Re.
+               assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
+               { intros. nra. } apply H18. apply /RleP. apply H15.
+               repeat apply Rplus_le_compat_r. apply /RleP. apply submult_prop.
+               assert ((matrix_inf_norm (FT2R_mat (A2_J A')) *
+                         vec_inf_norm (FT2R_mat x0') +
+                         matrix_inf_norm (FT2R_mat (A2_J A')) *
+                         vec_inf_norm (FT2R_mat x0') *
+                         g t n.+1 + g1 t n.+1 (n.+1 - 1))%Re =
+                       ((matrix_inf_norm (FT2R_mat (A2_J A')) *
+                         vec_inf_norm (FT2R_mat x0')) * (1 + g t n.+1 )+
+                        g1 t n.+1 (n.+1 - 1))%Re). { nra. } rewrite H18.
+               apply Rle_refl.
+               apply Rplus_le_le_0_compat;last by apply g1_pos.
+               repeat apply Rmult_le_pos.
+               apply /RleP. apply vec_norm_pd.
+               apply Rplus_le_le_0_compat; try (apply /RleP; apply vec_norm_pd).
+               apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
+               apply Rplus_le_le_0_compat; last by apply g1_pos.
+               repeat apply Rmult_le_pos.
+               apply /RleP. apply vec_norm_pd.
+               apply Rplus_le_le_0_compat;last by (apply /RleP; apply vec_norm_pd).
+               apply Rplus_le_le_0_compat;last by apply g1_pos.
+               repeat apply Rmult_le_pos.
+               apply /RleP. apply vec_norm_pd.
+               apply Rplus_le_le_0_compat. 
+               apply /RleP. apply vec_norm_pd.
+               apply Rplus_le_le_0_compat; last by apply g1_pos.
+               repeat apply Rmult_le_pos.
+               apply /RleP. apply matrix_norm_pd.
+               apply /RleP. apply vec_norm_pd.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
+               apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
+               apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
+               admit.
          -- apply finite_residual_0.
             apply HlenA. apply HeqAb. unfold size_constraint. 
             destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
