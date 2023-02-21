@@ -1,16 +1,13 @@
 (* This file contains lemmas regarding the accuracy of floating point 
   operations such as BPLUS, BFMA, and BMULT. *)
 
-Require Import vcfloat.VCFloat.
+Require Import vcfloat.VCFloat vcfloat.FPLib.
 From vcfloat Require Import IEEE754_extra.
 Require Import common op_defs.
 Require Import ZArith.
+Local Open Scope R.
 
 Section NAN.
-
-Lemma neg_zero_is_finite t:
-Binary.is_finite (fprec t) (femax t) neg_zero = true.
-Proof. simpl; auto. Qed.
 
 Definition fma_no_overflow (t: type) (x y z: R) : Prop :=
   (Rabs (rounded t  (x * y + z)) < Raux.bpow Zaux.radix2 (femax t))%R.
@@ -41,9 +38,9 @@ Qed.
 
 Lemma fma_accurate {NAN: Nans} : 
    forall (t: type) 
-             x (FINx: Binary.is_finite (fprec t) (femax t) x = true) 
-             y (FINy: Binary.is_finite (fprec t) (femax t) y = true) 
-             z (FINz: Binary.is_finite (fprec t) (femax t) z = true)
+             (x: ftype t) (FINx: finite x) 
+             y (FINy: finite y) 
+             z (FINz: finite z)
           (FIN: fma_no_overflow t (FT2R x) (FT2R y) (FT2R z)), 
   exists delta, exists epsilon,
    delta * epsilon = 0 /\
@@ -52,6 +49,9 @@ Lemma fma_accurate {NAN: Nans} :
    (FT2R (BFMA x y z) = (FT2R x * FT2R y + FT2R z) * (1+delta) + epsilon)%R.
 Proof.
 intros.
+rewrite finite_is_finite in FINx.
+rewrite finite_is_finite in FINy.
+rewrite finite_is_finite in FINz.
 pose proof (Binary.Bfma_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (fma_nan t)
                       BinarySingleNaN.mode_NE x y z FINx FINy FINz).
 change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
@@ -76,8 +76,8 @@ Lra.lra.
 Qed.
 
 Lemma is_finite_fma_no_overflow {NAN: Nans} (t : type) :
-  forall x y z
-  (HFINb : Binary.is_finite (fprec t) (femax t) (BFMA x y z) = true),
+  forall (x y z : ftype t)
+  (HFINb : finite (BFMA x y z)),
   fma_no_overflow t (FT2R x) (FT2R y) (FT2R z).
 Proof.
 intros.
@@ -85,14 +85,9 @@ red. set (ov:= bpow Zaux.radix2 (femax t)).
 pose proof Rle_or_lt ov (Rabs (rounded t (FT2R x * FT2R y + FT2R z)))  as Hor;
   destruct Hor; auto.
 apply Rlt_bool_false in H.
-assert (HFIN: Binary.is_finite (fprec t) (femax t) x = true /\
-  Binary.is_finite (fprec t) (femax t) y = true /\ 
-  Binary.is_finite (fprec t) (femax t) z = true).
-{ unfold BFMA in HFINb. 
-    destruct x; destruct y; destruct z; simpl in *; try discriminate; auto.
-    all: destruct s; destruct s0; destruct s1; simpl in *; try discriminate; auto. }
-destruct HFIN as (A & B & C).
+destruct (BFMA_finite_e _ _ _ HFINb) as (A & B & C).
 unfold rounded, FT2R, ov in H.
+rewrite finite_is_finite in *.
 pose proof (Binary.Bfma_correct  (fprec t) (femax t)  
     (fprec_gt_0 t) (fprec_lt_femax t) (fma_nan t) BinarySingleNaN.mode_NE x y z A B C) as
   H0.
@@ -103,7 +98,7 @@ Qed.
 
 Lemma fma_accurate' {NAN: Nans} : 
    forall (t: type) (x y z : ftype t)
-          (FIN: Binary.is_finite _ _ (BFMA x y z) = true), 
+          (FIN: finite (BFMA x y z)), 
   exists delta, exists epsilon,
    delta * epsilon = 0 /\
    Rabs delta <= default_rel t /\
@@ -111,16 +106,10 @@ Lemma fma_accurate' {NAN: Nans} :
    (FT2R (BFMA x y z) = (FT2R x * FT2R y + FT2R z) * (1+delta) + epsilon)%R.
 Proof.
 intros.
-assert (FIN2: Binary.is_finite (fprec t) (femax t) x = true /\
-        Binary.is_finite (fprec t) (femax t) y = true /\
-        Binary.is_finite (fprec t) (femax t) z = true).
-destruct x; destruct y; destruct z; simpl in *; try discriminate; auto;
-destruct s; destruct s0; destruct s1; try discriminate; auto.
-destruct FIN2 as (FINx & FINy & FINz).
+destruct (BFMA_finite_e _ _ _ FIN) as (A & B & C).
 apply fma_accurate; auto.
 apply is_finite_fma_no_overflow; auto.
 Qed.
-
 
 Lemma BMULT_accurate {NAN: Nans}: 
    forall (t: type) (x y: ftype t) (FIN: Bmult_no_overflow t (FT2R x) (FT2R y)), 
@@ -152,12 +141,13 @@ red in FIN. unfold rounded in FIN.
 Lra.lra.
 Qed.
 
-Lemma is_finite_BMULT_no_overflow {NAN: Nans} (t : type) :
+Lemma finite_BMULT_no_overflow {NAN: Nans} (t : type) :
   forall (x y : ftype t) 
-  (HFINb : Binary.is_finite (fprec t) (femax t) (BMULT x y) = true),
+  (HFINb :finite (BMULT x y)),
   Bmult_no_overflow t (FT2R x) (FT2R y).
 Proof.
 intros.
+rewrite finite_is_finite in HFINb.
 pose proof Rle_or_lt (bpow Zaux.radix2 (femax t)) 
   (Rabs (rounded t (FT2R x * FT2R y)))  as Hor;
   destruct Hor; auto.
@@ -176,7 +166,7 @@ Qed.
 Lemma BMULT_accurate' {NAN: Nans}: 
   forall (t: type) 
   (x y : ftype t) 
-  (FIN: Binary.is_finite _ _ (BMULT x y) = true), 
+  (FIN: finite (BMULT x y)), 
   exists delta, exists epsilon,
    delta * epsilon = 0 /\
    Rabs delta <= default_rel t /\
@@ -184,7 +174,7 @@ Lemma BMULT_accurate' {NAN: Nans}:
    (FT2R (BMULT x y) = (FT2R x * FT2R y) * (1+delta) + epsilon)%R.
 Proof.
 intros. 
-pose proof BMULT_accurate t x y (is_finite_BMULT_no_overflow t x y FIN); auto.
+pose proof BMULT_accurate t x y (finite_BMULT_no_overflow t x y FIN); auto.
 Qed.
 
 
@@ -195,22 +185,23 @@ Definition Bplus_no_overflow (t: type) (x y: R) : Prop :=
                  BinarySingleNaN.mode_NE)  (x + y )) < Raux.bpow Zaux.radix2 (femax t))%R.
 
 Lemma BPLUS_neg_zero {NAN: Nans} (t : type) (a : ftype t) :
-  Binary.is_finite _ _ a = true ->
+  finite a ->
   BPLUS a neg_zero = a.
 Proof.
-destruct a; unfold neg_zero; simpl; try discriminate; auto.
+destruct a; try contradiction; unfold neg_zero; simpl; auto.
 destruct s; auto.
 Qed.
 
 Lemma BPLUS_accurate {NAN: Nans} (t : type) :
- forall      x (FINx: Binary.is_finite (fprec t) (femax t) x = true) 
-             y (FINy: Binary.is_finite (fprec t) (femax t) y = true) 
+ forall   (x: ftype t) (FINx: finite x) 
+             y (FINy: finite y) 
           (FIN: Bplus_no_overflow t (FT2R x) (FT2R y)), 
   exists delta, 
    Rabs delta <= default_rel t /\
    (FT2R (BPLUS x y ) = (FT2R x + FT2R y) * (1+delta))%R.
 Proof.
-intros. 
+intros.
+rewrite finite_is_finite in FINx, FINy. 
 pose proof (Binary.Bplus_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan t)
                       BinarySingleNaN.mode_NE x y FINx FINy).
 change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
@@ -257,25 +248,29 @@ red in FIN.
 Lra.lra.
 Qed.
 
+Lemma BPLUS_finite_e {NAN: Nans} (t : type) :
+  forall (x y : ftype t)
+  (FIN: finite (BPLUS x y)), 
+  finite x /\ finite y.
+Proof.
+intros.
+destruct x,y; try contradiction; simpl; auto.
+destruct s,s0; simpl in FIN; auto.
+Qed.
 
-
-Lemma is_finite_sum_no_overflow {NAN: Nans} (t : type) :
-  forall x y
-  (HFINb : Binary.is_finite (fprec t) (femax t) (BPLUS x y) = true),
+Lemma finite_sum_no_overflow {NAN: Nans} (t : type) :
+  forall (x y: ftype t)
+  (HFINb : finite (BPLUS x y)),
   Bplus_no_overflow t (FT2R x) (FT2R y).
 Proof.
 intros.
+ destruct (BPLUS_finite_e _ _ _ HFINb) as [A B].
+rewrite finite_is_finite in HFINb.
 pose proof Rle_or_lt (bpow Zaux.radix2 (femax t)) (Rabs (rounded t (FT2R x + FT2R y)))  as Hor;
   destruct Hor; auto.
 apply Rlt_bool_false in H.
-assert (HFIN: Binary.is_finite (fprec t) (femax t) x = true /\
-  Binary.is_finite (fprec t) (femax t) y = true).
-{ unfold BPLUS, BINOP in HFINb. 
-    destruct x; destruct y; simpl in *; try discriminate; auto.
-    destruct s; destruct s0; simpl in *; try discriminate; auto.
-}
-destruct HFIN as (A & B).
 unfold rounded, FT2R in H.
+rewrite finite_is_finite in *.
 pose proof (Binary.Bplus_correct  (fprec t) (femax t)  
     (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan t) BinarySingleNaN.mode_NE x y A B) as
   H0;
@@ -289,26 +284,22 @@ Qed.
 
 Lemma BPLUS_accurate' {NAN: Nans} (t : type) :
   forall (x y : ftype t)
-  (FIN: Binary.is_finite _ _ (BPLUS x y) = true), 
+  (FIN: finite (BPLUS x y)), 
   exists delta, 
    Rabs delta <= default_rel t /\
    (FT2R (BPLUS x y ) = (FT2R x + FT2R y) * (1+delta))%R.
 Proof.
 intros.
-assert (A: Binary.is_finite (fprec t) (femax t) x = true /\
-  Binary.is_finite (fprec t) (femax t) y = true).
-{ destruct x; destruct y; simpl; try discriminate; auto; 
-  destruct s; destruct s0; simpl; try discriminate; auto. }
-destruct A as (A & B).
-pose proof BPLUS_accurate t x A y B (is_finite_sum_no_overflow t x y FIN); 
-  auto.
+destruct (BPLUS_finite_e _ _ _ FIN) as [A B].
+apply BPLUS_accurate; auto.
+apply finite_sum_no_overflow; auto.
 Qed.
 
 Lemma BDIV_sep_zero' {NAN: Nans} (t : type) :
   forall (f1 f2 : ftype t)
-  (Hfin: Binary.is_finite _ _ (BDIV f1 f2) = true)
+  (Hfin: finite (BDIV f1 f2))
   (Hfin1: Binary.is_finite_strict _ _ f1 = true)
-  (Hfin2: Binary.is_finite _ _ f2 = true),
+  (Hfin2: finite f2),
   Binary.is_finite_strict _ _ f2 = true.
 Proof.
 intros ? ?;
@@ -365,8 +356,8 @@ Qed.
 
 Lemma BDIV_sep_zero1 {NAN: Nans} (t : type) :
   forall (f1 : ftype t)
-  (Hfin: Binary.is_finite _ _ (BDIV (Zconst t 1) f1) = true)
-  (Hfin1: Binary.is_finite _ _ f1 = true),
+  (Hfin: finite (BDIV (Zconst t 1) f1))
+  (Hfin1: finite f1),
   f1 <> (Zconst t 0).
 Proof.
 intros. intros HF.
@@ -376,8 +367,8 @@ Qed.
 
 Lemma BDIV_sep_zero2 {NAN: Nans} (t : type) :
   forall (f1 : ftype t)
-  (Hfin: Binary.is_finite _ _ (BDIV (Zconst t 1) f1) = true)
-  (Hfin1: Binary.is_finite _ _ f1 = true),
+  (Hfin: finite (BDIV (Zconst t 1) f1))
+  (Hfin1: finite f1),
   f1 <> (neg_zero).
 Proof.
 intros. intros HF.
@@ -387,32 +378,32 @@ Qed.
 
 Lemma BDIV_FT2R_sep_zero {NAN: Nans} (t : type) :
   forall (f1 : ftype t)
-  (Hfin: Binary.is_finite _ _ (BDIV (Zconst t 1) f1) = true)
-  (Hfin1: Binary.is_finite _ _ f1 = true),
+  (Hfin: finite (BDIV (Zconst t 1) f1))
+  (Hfin1: finite f1),
   FT2R f1 <> 0.
 Proof.
 intros. intros HF.
 pose proof BDIV_sep_zero1 t f1 Hfin Hfin1 as H0.
 pose proof BDIV_sep_zero2 t f1 Hfin Hfin1 as H1.
-pose proof Binary.B2R_Bsign_inj (fprec t) (femax t) f1 neg_zero Hfin1 (neg_zero_is_finite t) as HA.
-assert (HFIN : Binary.is_finite (fprec t) (femax t) (Zconst t 0) = true) by (
-  set (y:= Zconst t 0) in *; hnf in y; subst y; simpl; auto).
-pose proof Binary.B2R_Bsign_inj (fprec t) (femax t) f1 (Zconst t 0) Hfin1 HFIN as HB; clear HFIN.
-pose proof BDIV_sep_zero' t (Zconst t 1) f1 Hfin (Bone_strict_finite t) Hfin1 as HFIN.
-set (y:= Zconst t 0) in *; hnf in y; subst y.
+pose proof BDIV_sep_zero' t (Zconst t 1) f1 Hfin (Bone_strict_finite t) Hfin1 as HFINx.
+rewrite finite_is_finite in Hfin.
+rewrite finite_is_finite in Hfin1.
+pose proof Binary.B2R_Bsign_inj (fprec t) (femax t) f1 neg_zero Hfin1 (eq_refl _) as HA.
+pose proof Binary.B2R_Bsign_inj (fprec t) (femax t) f1 (Zconst t 0) Hfin1 (eq_refl _) as HB.
 destruct f1; try discriminate; auto.
 destruct s; try discriminate; auto.
 Qed. 
 
 Lemma is_finite_fma_no_overflow' {NAN: Nans} (t : type) :
-  forall x y z
-  (Hfinx: Binary.is_finite (fprec t) (femax t) x = true)
-  (Hfiny: Binary.is_finite (fprec t) (femax t) y = true)
-  (Hfinz: Binary.is_finite (fprec t) (femax t) z = true)
+  forall (x y z: ftype t)
+  (Hfinx: finite x)
+  (Hfiny: finite y)
+  (Hfinz: finite z)
   (Hov : fma_no_overflow t (FT2R x) (FT2R y) (FT2R z)),
- Binary.is_finite (fprec t) (femax t) (BFMA x y z) = true.
+ finite (BFMA x y z).
 Proof.
 intros.
+rewrite finite_is_finite in Hfinx, Hfiny, Hfinz|-*.
 pose proof (Binary.Bfma_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (fma_nan t)
                       BinarySingleNaN.mode_NE x y z Hfinx Hfiny Hfinz).
 unfold fma_no_overflow, FT2R, rounded in Hov;
@@ -421,19 +412,13 @@ cbv zeta in H.
 rewrite Hov in H; simpl in H; destruct H as (_ & B & _); simpl; auto.
 Qed.
 
-
-Lemma BMFA_finite_e {NAN: Nans} {t: type}:
- forall (a u f : ftype t)
- (Hfin : Binary.is_finite _ _ (BFMA a f u) = true),
- Binary.is_finite _ _ a = true  /\ 
- Binary.is_finite _ _ f = true /\ 
- Binary.is_finite _ _ u = true.
+Lemma finite_BOPP: forall {NAN: Nans} (t: type) (x: ftype t),
+   finite (BOPP x) <-> finite x.
 Proof.
 intros.
-destruct a,f,u; inversion Hfin; clear Hfin; subst; 
- try solve [split; [ | split]; simpl; auto; constructor; auto].
-all: try solve [destruct s,s0,s1; discriminate].
+unfold BOPP.
+rewrite !finite_is_finite, Binary.is_finite_Bopp.
+tauto.
 Qed.
-
 
 End NAN.

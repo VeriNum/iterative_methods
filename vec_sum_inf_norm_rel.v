@@ -5,7 +5,7 @@ From mathcomp.analysis Require Import Rstruct.
 Import List ListNotations.
 
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
-                            Float_notations Automate.
+                            Float_notations Automate FPLib.
 
 Require Import fma_floating_point_model inf_norm_properties.
 
@@ -71,17 +71,15 @@ Lemma finite_bminus {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1) i:
       (combine 
          (vec_to_list_float n.+1 v1)
          (vec_to_list_float n.+1 v2)) ->
-   (is_finite (fprec ty) (femax ty) xy.1 = true /\
-    is_finite (fprec ty) (femax ty) xy.2 = true /\ 
+   (finite xy.1 /\finite xy.2 /\ 
     (Rabs (FT2R (fst (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re /\
      (Rabs (FT2R (snd (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re) ->
-  is_finite (fprec ty) (femax ty)
-  (BPLUS (v1 (inord i) 0) (BOPP (v2 (inord i) 0))) = true.
+  finite (BPLUS (v1 (inord i) 0) (BOPP (v2 (inord i) 0))).
 Proof.
 intros ? Hin Hfin.
-apply Bplus_no_ov_is_finite .
+apply Bplus_no_ov_finite .
   - apply Hfin.
-  - rewrite is_finite_Bopp. apply Hfin.
+  - rewrite finite_BOPP. apply Hfin.
   - unfold Bplus_no_overflow. 
     pose proof (generic_round_property ty (FT2R (v1 (inord i) 0) +  FT2R (BOPP  (v2 (inord i) 0)))).
     destruct H as [d [e [Hpr [Hdf [Hde H]]]]].
@@ -216,10 +214,7 @@ Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
       (combine 
          (vec_to_list_float n.+1 v1)
          (vec_to_list_float n.+1 v2)) ->
-    is_finite (fprec ty) (femax ty) xy.1 = true /\
-    is_finite (fprec ty) (femax ty) xy.2 = true /\ 
-    is_finite (fprec ty) (femax ty)
-        (BPLUS xy.1 (BOPP xy.2)) = true) ->
+         finite xy.1 /\finite xy.2 /\ finite (BPLUS xy.1 (BOPP xy.2))) ->
   vec_inf_norm (FT2R_mat (v1 -f v2) - (FT2R_mat v1 - FT2R_mat v2)) <= 
   (vec_inf_norm (FT2R_mat v1) + vec_inf_norm (FT2R_mat v2)) * (default_rel ty) .
 Proof.
@@ -301,10 +296,7 @@ Lemma vec_float_sub_1 {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
       (combine 
          (vec_to_list_float n.+1 v1)
          (vec_to_list_float n.+1 v2)) ->
-    is_finite (fprec ty) (femax ty) xy.1 = true /\
-    is_finite (fprec ty) (femax ty) xy.2 = true /\ 
-    is_finite (fprec ty) (femax ty)
-        (BPLUS xy.1 (BOPP xy.2)) = true) ->
+    finite xy.1 /\ finite xy.2 /\ finite (BPLUS xy.1 (BOPP xy.2))) ->
   vec_inf_norm (FT2R_mat (v1 -f v2) - (FT2R_mat v1 - FT2R_mat v2)) <= 
   (vec_inf_norm (FT2R_mat v1 - FT2R_mat v2)) * (default_rel ty) .
 Proof.

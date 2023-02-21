@@ -1,7 +1,7 @@
 (* The main theorem in this file is "finite_fma_from_bounded". It states that under
 some restrictions on the elements of the vectors, an fma dot product will never overflow *)
 
-Require Import vcfloat.VCFloat.
+Require Import vcfloat.VCFloat vcfloat.FPLib.
 Require Import List.
 Import ListNotations.
 Require Import common op_defs dotprod_model sum_model.
@@ -158,12 +158,10 @@ Lemma finite_fma_from_bounded :
   (fp : ftype t) 
   (Hfp: fma_dot_prod_rel (List.combine v1 v2) fp)
   (Hn : g1 t (S  (length (List.combine v1 v2)) + 1) (S (length (List.combine v1 v2))) <= fmax t),
-  (forall x, In x (List.combine v1 v2) -> 
-    Binary.is_finite _ _ (fst x) = true /\ 
-    Binary.is_finite _ _ (snd x) = true /\ 
+  (forall x, In x (List.combine v1 v2) -> finite (fst x) /\ finite (snd x) /\ 
     Rabs (FT2R (fst x)) < sqrt  (fun_bnd t (length (List.combine v1 v2))) /\
     Rabs (FT2R (snd x)) < sqrt  (fun_bnd t (length (List.combine v1 v2))))-> 
-  Binary.is_finite _ _ fp = true. 
+  finite fp. 
 Proof.
 intros ? ? ? .
 induction (List.combine v1 v2).
@@ -174,15 +172,13 @@ assert (Hn' : g1 t (S (length l) + 1) (S (length l)) <= fmax t).
   replace (length l) with (n-1)%nat by lia.
   replace (S(n-1))%nat with (S n - 1)%nat by lia; apply g1n_le_g1Sn; lia. }
 assert (Hin: forall x : (ftype t * ftype t),
-       In x l -> Binary.is_finite _ _ (fst x) = true /\
-       Binary.is_finite _ _ (snd x) = true /\
+       In x l -> finite (fst x) /\ finite (snd x) /\
        Rabs (FT2R (fst x)) < sqrt (fun_bnd t (length l)) /\
        Rabs (FT2R (snd x)) < sqrt (fun_bnd t (length l))).
   { intros. repeat split; [apply H; simpl; auto | apply H; simpl; auto  | | ]. 
     eapply Rlt_le_trans; [apply H; simpl; auto | apply sqrt_le_1_alt; apply fun_bnd_le; auto  ].
     eapply Rlt_le_trans; [apply H; simpl; auto | apply sqrt_le_1_alt; apply fun_bnd_le; auto ]. }
-assert (Hfina : Binary.is_finite (fprec t) (femax t) (fst a) = true /\
-        Binary.is_finite (fprec t) (femax t) (snd a) = true) by
+assert (Hfina :finite (fst a) /\finite (snd a)) by
   (split; apply H; simpl; auto); destruct Hfina as (Hfina1 & Hfina2).
 specialize (IHl s H3 Hn' Hin). 
 apply is_finite_fma_no_overflow'; auto. 
