@@ -14,7 +14,7 @@ Require Import floatlib.
 Section WITHNANS.
 Context {NANS: Nans}. 
 
-Definition sum ty (a b : ftype ty) : ftype ty := BPLUS ty a b.
+Definition sum ty (a b : ftype ty) : ftype ty := BPLUS a b.
 
 Definition list_to_vec_float {ty} {n:nat} 
 (l : list (ftype ty)): 'cV[ftype ty]_n := 
@@ -130,12 +130,12 @@ Definition mulmx_float {ty} {m n p : nat}
 
 Definition opp_mat {ty} {m n: nat} (A : 'M[ftype ty]_(m.+1, n.+1)) 
   : 'M[ftype ty]_(m.+1, n.+1) :=
-  \matrix_(i,j) (BOPP ty (A i j)). 
+  \matrix_(i,j) (BOPP (A i j)). 
 
 
 Definition sub_mat {ty} {m n: nat} (A B : 'M[ftype ty]_(m.+1, n.+1)) 
   : 'M[ftype ty]_(m.+1, n.+1) :=
-  \matrix_(i,j) (BMINUS ty (A i j) (B i j)). 
+  \matrix_(i,j) (BMINUS (A i j) (B i j)). 
 
 
 Notation "A +f B" := (addmx_float A B) (at level 80).
@@ -145,8 +145,7 @@ Notation "A -f B" := (sub_mat A B) (at level 80).
 
 
 Definition A1_inv_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
-  \col_i (BDIV ty (Zconst ty 1) (A i i)).
-
+  \col_i (BDIV (Zconst ty 1) (A i i)).
 
 Definition A2_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1): 
   'M[ftype ty]_n.+1 :=
@@ -156,7 +155,7 @@ Definition A2_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
 
 Definition diag_vector_mult {ty} {n:nat} (v1 v2: 'cV[ftype ty]_n.+1)
   : 'cV[ftype ty]_n.+1 :=
-  \col_i (BMULT ty (nth (n.+1.-1 -i) (vec_to_list_float n.+1 v1) (Zconst ty 0))
+  \col_i (BMULT (nth (n.+1.-1 -i) (vec_to_list_float n.+1 v1) (Zconst ty 0))
             (nth (n.+1.-1 - i) (vec_to_list_float n.+1 v2) (Zconst ty 0))).
 
 Definition jacobi_iter {ty} {n:nat} x0 b (A: 'M[ftype ty]_n.+1) : 

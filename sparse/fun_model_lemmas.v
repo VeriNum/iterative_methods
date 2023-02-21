@@ -34,8 +34,8 @@ Lemma Znth_jacobi_iter {NAN: Nans}{t}:
   0 <= i < matrix_rows A2 ->
   feq y (dotprod (Znth i A2) x) ->
   feq (Znth i (jacobi_iter A1 A2 b x))
-     (BMULT t (BDIV t (Zconst t 1) (Znth i A1))
-         (BMINUS t (Znth i b) y)).
+     (BMULT (BDIV (Zconst t 1) (Znth i A1))
+         (BMINUS (Znth i b) y)).
 Proof.
 intros. unfold matrix_rows in *.
  unfold jacobi_iter, diagmatrix_vector_mult, vector_sub, map2,
@@ -213,10 +213,10 @@ replace  (Binary.is_finite (fprec t) (femax t) (norm2 (residual z')))
 destruct (Binary.is_finite _ _ _) eqn:?H.
 simpl.
 apply finite_is_finite in H4.
-replace (BCMP t Lt false (norm2 (residual z')) acc) 
-     with (BCMP t Lt false (norm2 (residual z)) acc)
+replace (BCMP Lt false (norm2 (residual z')) acc) 
+     with (BCMP Lt false (norm2 (residual z)) acc)
   by (apply BCMP_mor; auto; apply strict_feq_i1; auto).
-destruct (BCMP _ _ _ _ _).
+destruct (BCMP _ _ _ _).
 apply IHn; auto.
 simpl; auto.
 simpl.
@@ -313,8 +313,8 @@ revert A1 y H H0 H1; induction x; destruct A1,y; intros; inv H; inv H0; inv H1;
   constructor; auto.
 -
 clear - H4.
-assert (finite (BMINUS t f0 a))
-  by (destruct f, (BMINUS t f0 a); try contradiction H4; simpl; auto).
+assert (finite (BMINUS f0 a))
+  by (destruct f, (BMINUS f0 a); try contradiction H4; simpl; auto).
 clear H4.
 destruct f0,a; try destruct s; try destruct s0; try contradiction H; simpl; auto.
 -
@@ -435,7 +435,7 @@ Import PlaceHolder. (* FIXME: When the proofs in
 Lemma jacobi_n_jacobi {NAN: Nans} {t: type}:
   forall A b acc k, 
    jacobi_preconditions A b acc k ->
-  let acc2 := BMULT t acc acc in
+  let acc2 := BMULT acc acc in
   let x0 := (repeat  (Zconst t 0) (length b)) in
   exists j, (j<=k)%nat /\ snd (jacobi A b x0 acc2 (S k)) = jacobi_n A b x0 j.
 Proof.
@@ -453,10 +453,10 @@ fold acc2 in FINacc2,H3.
 clearbody acc2. clear acc.
 clearbody f. clearbody resid.
 clearbody x0.
-set (P x := BCMP t Lt false (norm2 (resid x)) acc2 = false).
+set (P x := BCMP Lt false (norm2 (resid x)) acc2 = false).
 assert (forall x, Decidable.decidable (P x)).
 clear.
-intros. subst P. simpl. destruct (BCMP _ _ _ _ _); [right|left]; auto.
+intros. subst P. simpl. destruct (BCMP _ _ _ _); [right|left]; auto.
 destruct (min_iter f P H1 x0 j) as [i [? [? ?]]].
 red.
 apply H3.

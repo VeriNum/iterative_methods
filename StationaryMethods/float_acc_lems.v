@@ -123,12 +123,12 @@ Qed.
 
 
 Lemma BMULT_accurate {NAN: Nans}: 
-   forall (t: type) x y (FIN: Bmult_no_overflow t (FT2R x) (FT2R y)), 
+   forall (t: type) (x y: ftype t) (FIN: Bmult_no_overflow t (FT2R x) (FT2R y)), 
   exists delta, exists epsilon,
    delta * epsilon = 0 /\
    Rabs delta <= default_rel t /\
    Rabs epsilon <= default_abs t /\ 
-   (FT2R (BMULT t x y) = (FT2R x * FT2R y) * (1+delta) + epsilon)%R.
+   (FT2R (BMULT x y) = (FT2R x * FT2R y) * (1+delta) + epsilon)%R.
 Proof.
 intros.
 pose proof (Binary.Bmult_correct (fprec t) (femax t) (fprec_gt_0 t) (fprec_lt_femax t) 
@@ -154,7 +154,7 @@ Qed.
 
 Lemma is_finite_BMULT_no_overflow {NAN: Nans} (t : type) :
   forall (x y : ftype t) 
-  (HFINb : Binary.is_finite (fprec t) (femax t) (BMULT t x y) = true),
+  (HFINb : Binary.is_finite (fprec t) (femax t) (BMULT x y) = true),
   Bmult_no_overflow t (FT2R x) (FT2R y).
 Proof.
 intros.
@@ -176,12 +176,12 @@ Qed.
 Lemma BMULT_accurate' {NAN: Nans}: 
   forall (t: type) 
   (x y : ftype t) 
-  (FIN: Binary.is_finite _ _ (BMULT t x y) = true), 
+  (FIN: Binary.is_finite _ _ (BMULT x y) = true), 
   exists delta, exists epsilon,
    delta * epsilon = 0 /\
    Rabs delta <= default_rel t /\
    Rabs epsilon <= default_abs t /\ 
-   (FT2R (BMULT t x y) = (FT2R x * FT2R y) * (1+delta) + epsilon)%R.
+   (FT2R (BMULT x y) = (FT2R x * FT2R y) * (1+delta) + epsilon)%R.
 Proof.
 intros. 
 pose proof BMULT_accurate t x y (is_finite_BMULT_no_overflow t x y FIN); auto.
@@ -196,7 +196,7 @@ Definition Bplus_no_overflow (t: type) (x y: R) : Prop :=
 
 Lemma BPLUS_neg_zero {NAN: Nans} (t : type) (a : ftype t) :
   Binary.is_finite _ _ a = true ->
-  BPLUS t a neg_zero = a.
+  BPLUS a neg_zero = a.
 Proof.
 destruct a; unfold neg_zero; simpl; try discriminate; auto.
 destruct s; auto.
@@ -208,7 +208,7 @@ Lemma BPLUS_accurate {NAN: Nans} (t : type) :
           (FIN: Bplus_no_overflow t (FT2R x) (FT2R y)), 
   exists delta, 
    Rabs delta <= default_rel t /\
-   (FT2R (BPLUS t x y ) = (FT2R x + FT2R y) * (1+delta))%R.
+   (FT2R (BPLUS x y ) = (FT2R x + FT2R y) * (1+delta))%R.
 Proof.
 intros. 
 pose proof (Binary.Bplus_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan t)
@@ -261,7 +261,7 @@ Qed.
 
 Lemma is_finite_sum_no_overflow {NAN: Nans} (t : type) :
   forall x y
-  (HFINb : Binary.is_finite (fprec t) (femax t) (BPLUS t x y) = true),
+  (HFINb : Binary.is_finite (fprec t) (femax t) (BPLUS x y) = true),
   Bplus_no_overflow t (FT2R x) (FT2R y).
 Proof.
 intros.
@@ -288,11 +288,11 @@ simpl; try discriminate.
 Qed.
 
 Lemma BPLUS_accurate' {NAN: Nans} (t : type) :
-  forall x y 
-  (FIN: Binary.is_finite _ _ (BPLUS t x y) = true), 
+  forall (x y : ftype t)
+  (FIN: Binary.is_finite _ _ (BPLUS x y) = true), 
   exists delta, 
    Rabs delta <= default_rel t /\
-   (FT2R (BPLUS t x y ) = (FT2R x + FT2R y) * (1+delta))%R.
+   (FT2R (BPLUS x y ) = (FT2R x + FT2R y) * (1+delta))%R.
 Proof.
 intros.
 assert (A: Binary.is_finite (fprec t) (femax t) x = true /\
@@ -306,7 +306,7 @@ Qed.
 
 Lemma BDIV_sep_zero' {NAN: Nans} (t : type) :
   forall (f1 f2 : ftype t)
-  (Hfin: Binary.is_finite _ _ (BDIV t f1 f2) = true)
+  (Hfin: Binary.is_finite _ _ (BDIV f1 f2) = true)
   (Hfin1: Binary.is_finite_strict _ _ f1 = true)
   (Hfin2: Binary.is_finite _ _ f2 = true),
   Binary.is_finite_strict _ _ f2 = true.
@@ -365,7 +365,7 @@ Qed.
 
 Lemma BDIV_sep_zero1 {NAN: Nans} (t : type) :
   forall (f1 : ftype t)
-  (Hfin: Binary.is_finite _ _ (BDIV t (Zconst t 1) f1) = true)
+  (Hfin: Binary.is_finite _ _ (BDIV (Zconst t 1) f1) = true)
   (Hfin1: Binary.is_finite _ _ f1 = true),
   f1 <> (Zconst t 0).
 Proof.
@@ -376,7 +376,7 @@ Qed.
 
 Lemma BDIV_sep_zero2 {NAN: Nans} (t : type) :
   forall (f1 : ftype t)
-  (Hfin: Binary.is_finite _ _ (BDIV t (Zconst t 1) f1) = true)
+  (Hfin: Binary.is_finite _ _ (BDIV (Zconst t 1) f1) = true)
   (Hfin1: Binary.is_finite _ _ f1 = true),
   f1 <> (neg_zero).
 Proof.
@@ -387,7 +387,7 @@ Qed.
 
 Lemma BDIV_FT2R_sep_zero {NAN: Nans} (t : type) :
   forall (f1 : ftype t)
-  (Hfin: Binary.is_finite _ _ (BDIV t (Zconst t 1) f1) = true)
+  (Hfin: Binary.is_finite _ _ (BDIV (Zconst t 1) f1) = true)
   (Hfin1: Binary.is_finite _ _ f1 = true),
   FT2R f1 <> 0.
 Proof.

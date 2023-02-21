@@ -60,7 +60,7 @@ forward_for_simple_bound N
    assert (LENiter := Zlength_jacobi_iter A1 A2 b x ltac:(lia) ltac:(lia) ltac:(lia)).
    assert (LENresid := Zlength_jacobi_residual A1 A2 b x ltac:(lia) ltac:(lia) ltac:(lia)).
    change (Binary.Bfma _ _ _ _ _ _ ?x ?y ?z) with (BFMA x y z).
-   Exists (y ++ [BDIV _ (Zconst _ 1) (Znth i A1) * (Znth i b - y')]%F64).
+   Exists (y ++ [BDIV (Zconst _ 1) (Znth i A1) * (Znth i b - y')]%F64).
    EExists.
    entailer!.
  + 

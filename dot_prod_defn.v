@@ -12,7 +12,7 @@ Set Bullet Behavior "Strict Subproofs".
 Section WITHNANS.
 Context {NANS: Nans}. 
 
-Definition sum ty (a b : ftype ty) : ftype ty := BPLUS ty a b.
+Definition sum ty (a b : ftype ty) : ftype ty := BPLUS a b.
 
 
 Fixpoint sum_fixF ty (L1: list (ftype ty)) : ftype ty :=
@@ -71,7 +71,7 @@ Definition sum_expr {ty} (a b : ftype ty) := ltac :( let e' :=
 
 
 (*** Product***)
-Definition prod ty (a b : ftype ty) : ftype ty := BMULT ty a b.
+Definition prod ty (a b : ftype ty) : ftype ty := BMULT a b.
 
 
 Definition bmap_list_prod {ty} (n: nat) : list varinfo := 

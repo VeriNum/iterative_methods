@@ -24,16 +24,16 @@ Import jacob_list_fun_model.Experiment.
 
 Lemma A1_invert_equiv {ty} (A : matrix ty) i: 
   (i < length A)%coq_nat ->
-  nth i
+  nth i 
      (invert_diagmatrix (diag_of_matrix A))
      (Zconst ty 1) =
-  BDIV ty (Zconst ty 1)
+  BDIV (Zconst ty 1)
      (nth i (nth i A []) (Zconst ty 0)).
 Proof.
 intros.
 assert (nth i (invert_diagmatrix (diag_of_matrix A))
             (Zconst ty 1) = 
-        BDIV ty (Zconst ty 1) (nth i (diag_of_matrix A) (Zconst ty 1))).
+        BDIV (Zconst ty 1) (nth i (diag_of_matrix A) (Zconst ty 1))).
 { rewrite (nth_map_inrange (Zconst ty 1)); try by [].
   by rewrite /diag_of_matrix map_length seq_length /matrix_rows_nat .
 } rewrite H0.
@@ -224,7 +224,7 @@ induction n.
                    (vector_sub b
                       (matrix_vector_mult (remove_diag A) x_n))
                    (Zconst ty 0) = 
-               BMINUS ty (nth i b (Zconst ty 0))
+               BMINUS (nth i b (Zconst ty 0))
                     (nth i  (matrix_vector_mult (remove_diag A)
                             x_n) (Zconst ty 0))).
            { unfold vector_sub, map2, uncurry. 

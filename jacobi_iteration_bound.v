@@ -172,7 +172,7 @@ Close Scope Z_scope.
 Lemma vec_norm_A1_rel {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1)
 (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A i i)) = true)
+       (BDIV (Zconst t 1) (A i i)) = true)
 (Ha : forall i j, is_finite (fprec t)  (femax t) (A i j) = true):
 (vec_inf_norm (A1_diag (FT2R_mat A))  <=
  (vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t) )%Re.
@@ -222,7 +222,7 @@ Qed.
 Lemma matrix_vec_norm_A1_diag_mult_A {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A i i)) = true)
+       (BDIV (Zconst t 1) (A i i)) = true)
 (Ha : forall i j, is_finite (fprec t)  (femax t) (A i j) = true):
   (vec_inf_norm (A1_diag (FT2R_mat A)) *
      matrix_inf_norm
@@ -244,7 +244,7 @@ Qed.
 Lemma rho_def_le_alt {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A i i)) = true)
+       (BDIV (Zconst t 1) (A i i)) = true)
 (Ha : forall i j, is_finite (fprec t)  (femax t) (A  i j) = true):
   (rho_def A b <= rho_def_alt A b)%Re.
 Proof.
@@ -352,7 +352,7 @@ Qed.
 Lemma d_mag_def_le_alt {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A i i)) = true)
+       (BDIV (Zconst t 1) (A i i)) = true)
 (Ha : forall i j, is_finite (fprec t)  (femax t) (A i j) = true):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re ->
@@ -538,7 +538,7 @@ Definition k_min {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let b_real := FT2R_mat b in
   let x:= mulmx (A_real^-1) b_real in
   let e_0 := @f_error _ _ _ 0 b x0 x A in
-  let Gamma := FT2R (BMULT t acc acc) in
+  let Gamma := FT2R (BMULT acc acc) in
   let delta := default_rel t in
   Z.to_nat (Zceil (Rlog (1 / rho)%Re 
              ((e_0 - d_mag / (1 - rho)) * (1 + rho) /
@@ -762,9 +762,9 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
   (** Finiteness of the inverse of diagonal elements of A **)
   (forall i : 'I_n.+1,
     Binary.is_finite (fprec t) (femax t)
-      (BDIV t (Zconst t 1) (A i i)) = true) /\
+      (BDIV (Zconst t 1) (A i i)) = true) /\
 (** Constraint on Gamma **)
-  (FT2R (BMULT t accuracy accuracy) >
+  (FT2R (BMULT accuracy accuracy) >
      g1 t n.+1 (n.+1 - 1)%coq_nat +
      INR n.+1 * (1 + g t n.+1) *
      (g1 t n.+1 (n.+1 - 1)%coq_nat +
@@ -772,7 +772,7 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
       vec_inf_norm (FT2R_mat (A1_J A)) *
       d_mag_def A b * / (1 - rho_def A b))²)%Re /\
   (** Gamma is finite **)
-  Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
+  Binary.is_finite _ _ (BMULT accuracy accuracy) = true /\
   (** constraint on k **)
   ((k_min A b accuracy < k)%coq_nat /\ (0 < k)%coq_nat) /\
   (** lower bound on the initial error **)
@@ -840,7 +840,7 @@ Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let e_0 := (vec_inf_norm (FT2R_mat x0) + 
               (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t))
                   * vec_inf_norm (b_real)) / (1 - R_def))%Re in
-  let Gamma := FT2R (BMULT t acc acc) in
+  let Gamma := FT2R (BMULT acc acc) in
   let delta := default_rel t in
   Z.to_nat (Zceil (Rlog (1 / rho)%Re 
              ((e_0 - 0) * (1 + rho) /
@@ -951,9 +951,9 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (** Finiteness of the inverse of diagonal elements of A **)
   (forall i : 'I_n.+1,
     Binary.is_finite (fprec t) (femax t)
-      (BDIV t (Zconst t 1) (A i i)) = true) /\
+      (BDIV (Zconst t 1) (A i i)) = true) /\
   (** Constraint on Gamma **)
-  (FT2R (BMULT t accuracy accuracy) >
+  (FT2R (BMULT accuracy accuracy) >
      g1 t n.+1 (n.+1 - 1)%coq_nat +
      INR n.+1 * (1 + g t n.+1) *
      (g1 t n.+1 (n.+1 - 1)%coq_nat +
@@ -961,7 +961,7 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
       vec_inf_norm (FT2R_mat (A1_J A)) *
       d_mag * / (1 - rho_hat))²)%Re /\
   (** Gamma is finite **)
-  Binary.is_finite _ _ (BMULT t accuracy accuracy) = true /\
+  Binary.is_finite _ _ (BMULT accuracy accuracy) = true /\
   (** constraint on k **)
   (k_min_alt A b accuracy < k)%coq_nat /\
   (** finiteness of x0 **)
@@ -983,7 +983,7 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
 Lemma d_mag_rel_1 {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A i i)) = true)
+       (BDIV (Zconst t 1) (A i i)) = true)
   (Ha : forall i j, is_finite (fprec t)  (femax t) (A i j) = true):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re -> 
@@ -1017,7 +1017,7 @@ Qed.
 Lemma d_mag_rel_2 {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A i i)) = true)
+       (BDIV (Zconst t 1) (A i i)) = true)
   (Ha : forall i j, is_finite (fprec t)  (femax t) (A i j) = true):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re -> 
@@ -1059,7 +1059,7 @@ Qed.
 Lemma input_bound_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A i i)) = true)
+       (BDIV (Zconst t 1) (A i i)) = true)
   (Ha : forall i j, is_finite (fprec t)  (femax t) (A i j) = true):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re -> 
@@ -1160,7 +1160,7 @@ Qed.
 Lemma ln_rho_rel {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A i i)) = true)
+       (BDIV (Zconst t 1) (A i i)) = true)
   (Ha : forall i j, is_finite (fprec t)  (femax t) (A  i j) = true):
   (0 < rho_def_alt A b)%Re ->
   (rho_def_alt A b < 1)%Re ->
@@ -1203,7 +1203,7 @@ Qed.
 Lemma ln_rho_inv_ge_0 {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A i i)) = true)
+       (BDIV (Zconst t 1) (A i i)) = true)
   (Ha : forall i j, is_finite (fprec t)  (femax t) (A  i j) = true):
   ( rho_def_alt A b < 1)%Re ->
   (0 < rho_def A b)%Re ->
@@ -1254,14 +1254,14 @@ Qed.
 Lemma tau_sqr_rel{t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A i i)) = true)
+       (BDIV (Zconst t 1) (A i i)) = true)
   (Ha : forall i j, is_finite (fprec t)  (femax t) (A  i j) = true):
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in 
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
   ( rho_def_alt A b < 1)%Re -> 
- (FT2R (BMULT t accuracy accuracy) >
+ (FT2R (BMULT accuracy accuracy) >
      g1 t n.+1 (n.+1 - 1)%coq_nat +
      INR n.+1 * (1 + g t n.+1) *
      (g1 t n.+1 (n.+1 - 1)%coq_nat +
@@ -1271,7 +1271,7 @@ Lemma tau_sqr_rel{t: type} {n:nat}
   (0 <
    (sqrt
       ((FT2R
-          (BMULT t accuracy accuracy) -
+          (BMULT accuracy accuracy) -
         g1 t n.+1 (n.+1 - 1)%coq_nat) /
        INR n.+1 / (1 + g t n.+1)) -
     g1 t n.+1 (n.+1 - 1)%coq_nat) /
@@ -1344,14 +1344,14 @@ Qed.
 Lemma tau_sqr_rel_Rcompute {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t)
   (Hinv: forall i, is_finite (fprec t)  (femax t)
-       (BDIV t (Zconst t 1) (A i i)) = true)
+       (BDIV (Zconst t 1) (A i i)) = true)
   (Ha : forall i j, is_finite (fprec t)  (femax t) (A  i j) = true):
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in 
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
   ( rho_def_alt A b < 1)%Re -> 
-  (FT2R (BMULT t accuracy accuracy) >
+  (FT2R (BMULT accuracy accuracy) >
        g1 t n.+1 (n.+1 - 1)%coq_nat +
        INR n.+1 * (1 + g t n.+1) *
        (g1 t n.+1 (n.+1 - 1)%coq_nat +
@@ -1364,7 +1364,7 @@ Lemma tau_sqr_rel_Rcompute {t: type} {n:nat}
   (0 <
      (sqrt
         ((FT2R
-            (BMULT t accuracy accuracy) -
+            (BMULT accuracy accuracy) -
           g1 t n.+1 (n.+1 - 1)%coq_nat) /
          INR n.+1 / (1 + g t n.+1)) -
       g1 t n.+1 (n.+1 - 1)%coq_nat) /
@@ -1455,7 +1455,7 @@ unfold jacobi_preconditions_math.
 (*assert (Hrho_Re: (0 < rho_def A b)%Re).
 { apply rho_gt_0. apply Hrho. }
 *)
-assert (HG_re: (FT2R (BMULT t accuracy accuracy) >
+assert (HG_re: (FT2R (BMULT accuracy accuracy) >
                  g1 t n.+1 (n.+1 - 1)%coq_nat +
                  INR n.+1 * (1 + g t n.+1) *
                  (g1 t n.+1 (n.+1 - 1)%coq_nat +
@@ -1567,7 +1567,7 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
               (1 + rho_def A b) /
               ((sqrt
                   ((FT2R
-                      (BMULT t accuracy accuracy) -
+                      (BMULT accuracy accuracy) -
                     g1 t n.+1 (n.+1 - 1)%coq_nat) /
                    INR n.+1 / (1 + g t n.+1)) -
                 g1 t n.+1 (n.+1 - 1)%coq_nat) /
@@ -1584,7 +1584,7 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
                       (1 + rho_def A b) /
                       ((sqrt
                           ((FT2R
-                              (BMULT t accuracy accuracy) -
+                              (BMULT accuracy accuracy) -
                             g1 t n.+1 (n.+1 - 1)%coq_nat) /
                            INR n.+1 / (1 + g t n.+1)) -
                         g1 t n.+1 (n.+1 - 1)%coq_nat) /
@@ -2144,10 +2144,10 @@ Lemma is_finite_xkp1_minus_xk {t: type} {n:nat}
   forward_error_cond A x0 b ->
   ((0 < f_error 0 b x0 x A - d_mag * / (1 - rho))%Re) ->
   is_finite (fprec t) (femax t)
-               (BPLUS t
+               (BPLUS
                   (X_m_jacobi k.+1 x0 b A
                      (inord m) ord0)
-                  (BOPP t
+                  (BOPP
                      (X_m_jacobi k x0 b A
                         (inord m) ord0))) = true.
 Proof.
@@ -2162,7 +2162,7 @@ pose proof (@generic_round_property t
                (X_m_jacobi k.+1 x0 b A 
                   (inord m) ord0) +
              FT2R
-               (BOPP t
+               (BOPP
                   (X_m_jacobi k x0 b A 
                     (inord m) ord0)))).
 destruct H0 as [d [e [Hde [Hd [He H0]]]]].
@@ -2308,7 +2308,7 @@ Lemma is_finite_Bmult_res {t: type} {n:nat}
   forward_error_cond A x0 b ->
   ((0 < f_error 0 b x0 x A - d_mag * / (1 - rho))%Re) ->
   is_finite (fprec t) (femax t)
-             (BMULT t (A (inord m) (inord m))
+             (BMULT (A (inord m) (inord m))
                 ((X_m_jacobi k.+1 x0 b A -f
                   X_m_jacobi k x0 b A) 
                    (inord m) ord0)) = true.
@@ -2346,7 +2346,7 @@ apply BMULT_no_overflow_is_finite.
     pose proof (@BPLUS_accurate' _ t).
     specialize (H2 (X_m_jacobi k.+1 x0 b A 
                       (inord m) ord0)
-                    (BOPP t
+                    (BOPP
                       (X_m_jacobi k x0 b A 
                          (inord m) ord0))).
     specialize (H2 (is_finite_xkp1_minus_xk _ _ _ _ _ H H0 Hf0)).
@@ -2438,7 +2438,7 @@ repeat split.
                          (X_m_jacobi k.+1 x0 b A
                             (inord m) ord0) +
                        FT2R
-                         (BOPP t
+                         (BOPP
                             (X_m_jacobi k x0 b A
                                (inord m) ord0)))).
       destruct H1 as [d2 [e2 [Hde2 [Hd2 [He2 H1]]]]].
@@ -2477,10 +2477,10 @@ repeat split.
     apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
     rewrite Rabs_mult.
     assert (is_finite (fprec t) (femax t)
-               (BPLUS t
+               (BPLUS
                   (X_m_jacobi k.+1 x0 b A
                      (inord m) ord0)
-                  (BOPP t
+                  (BOPP
                      (X_m_jacobi k x0 b A
                         (inord m) ord0))) = true).
     { apply is_finite_xkp1_minus_xk; try by [].
@@ -2490,7 +2490,7 @@ repeat split.
     * pose proof (@BPLUS_accurate' _ t).
       specialize (H3 (X_m_jacobi k.+1 x0 b A 
                           (inord m) ord0) 
-                      (BOPP t
+                      (BOPP
                           (X_m_jacobi k x0 b A 
                              (inord m) ord0)) H2).
       destruct H3 as [d4 [Hd4 H3]].
@@ -2515,15 +2515,6 @@ repeat split.
       try apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
       apply Rplus_lt_compat_r.
       apply sqrt_fun_bnd_lt_fmax. apply Hcond.
-    * pose proof (@jacobi_forward_error_bound _ t n).
-      unfold forward_error_cond in Hcond.
-      unfold rho_def in Hcond.
-      apply H3; try (intros; apply Hcond).
-    * rewrite is_finite_Bopp.
-      pose proof (@jacobi_forward_error_bound _ t n).
-      unfold forward_error_cond in Hcond.
-      unfold rho_def in Hcond.
-      apply H3; try (intros; apply Hcond).
     * apply H2.
 + rewrite !rev_length  length_veclist.
   rewrite rev_involutive in H.
@@ -2553,7 +2544,7 @@ repeat split.
                  ((X_m_jacobi k.+1 x0 b A -f
                     X_m_jacobi k x0 b A) (inord m) ord0)).
   assert (is_finite (fprec t) (femax t)
-             (BMULT t (A (inord m) (inord m))
+             (BMULT (A (inord m) (inord m))
                 ((X_m_jacobi k.+1 x0 b A -f
                   X_m_jacobi k x0 b A) 
                    (inord m) ord0)) = true).
@@ -2575,10 +2566,10 @@ repeat split.
   apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
   rewrite Rabs_mult. rewrite mxE.
   assert (is_finite (fprec t) (femax t)
-               (BPLUS t
+               (BPLUS
                   (X_m_jacobi k.+1 x0 b A
                      (inord m) ord0)
-                  (BOPP t
+                  (BOPP
                      (X_m_jacobi k x0 b A
                         (inord m) ord0))) = true).
   { apply is_finite_xkp1_minus_xk; try by [].
@@ -2588,7 +2579,7 @@ repeat split.
   - pose proof (@BPLUS_accurate' _ t).
     specialize (H4 (X_m_jacobi k.+1 x0 b A 
                         (inord m) ord0)
-                   (BOPP t
+                   (BOPP
                       (X_m_jacobi k x0 b A 
                          (inord m) ord0))).
     specialize (H4 H3).
@@ -2605,20 +2596,8 @@ repeat split.
     fold (@FT2R t). apply res_xkp1_minus_xk.
     rewrite rev_length length_veclist in Hlenk. by apply /ssrnat.ltP.
     apply Hcond. apply Hf0.
-  - pose proof (@jacobi_forward_error_bound _ t n).
-    unfold forward_error_cond in Hcond.
-    unfold rho_def in Hcond.
-    apply H4; try (intros; apply Hcond).
-  - rewrite is_finite_Bopp.
-    pose proof (@jacobi_forward_error_bound _ t n).
-    unfold forward_error_cond in Hcond.
-    unfold rho_def in Hcond.
-    apply H4; try (intros; apply Hcond).
   - apply H3.
 Qed.
-
-
-
 
 Lemma vector_residual_equiv {t: type} :
  forall (A: matrix t) (b x0: vector t) (k:nat),
@@ -2663,7 +2642,7 @@ unfold resid, jacobi_residual.
                            (diag_of_matrix A)
                            (remove_diag A) b
                            (jacobi_n A b x0 k)) 
-                        (Zconst t 0) = BMULT t (A1_inv_J A' (inord x) ord0)
+                        (Zconst t 0) = BMULT (A1_inv_J A' (inord x) ord0)
                     ((b' -f
                       A2_J A' *f X_m_jacobi k x0' b' A')
                        (inord x) ord0)).
@@ -2818,7 +2797,7 @@ assert (forall xy : ftype t * ftype t,
              is_finite (fprec t) (femax t) xy.1 = true /\
              is_finite (fprec t) (femax t) xy.2 = true /\
              is_finite (fprec t) (femax t)
-               (BPLUS t xy.1 (BOPP t xy.2)) = true).
+               (BPLUS xy.1 (BOPP xy.2)) = true).
 { (** if the  residual is finite then 
       x_k+1 - x_k is finite
   **)
@@ -2968,7 +2947,7 @@ apply Rle_trans with
       { apply Hcond. }
       assert (forall i : 'I_n.+1,
               is_finite (fprec t) (femax t)
-                (BDIV t (Zconst t 1) (A i i)) = true) by apply Hcond.
+                (BDIV (Zconst t 1) (A i i)) = true) by apply Hcond.
       unfold forward_error_cond in Hcond.
       unfold rho_def in Hcond. specialize (H5 _  Hcond).
      assert ((f_error k.+1 b x0 x A <= rho^k.+1 * (f_error 0 b x0 x A) + 
@@ -3038,7 +3017,7 @@ Lemma Gamma_constraint {t}  {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) (acc : ftype t) :
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
-  let Gamma := FT2R (BMULT t acc acc) in 
+  let Gamma := FT2R (BMULT acc acc) in 
   (rho < 1)%Re ->
   (forall i : 'I_n.+1, FT2R_mat (A1_J A) i ord0 <> 0%Re) ->
   (Gamma > g1 t n.+1 (n.+1 - 1)%coq_nat + 
@@ -3232,7 +3211,7 @@ eapply Rle_trans.
                      is_finite (fprec t) (femax t) xy.1 = true /\
                      is_finite (fprec t) (femax t) xy.2 = true /\
                      is_finite (fprec t) (femax t)
-                       (BMULT t xy.1 xy.2) = true).
+                       (BMULT xy.1 xy.2) = true).
             { intros.
               pose proof (@residual_is_finite  t n A b k Hcond He0).
               unfold norm2 in H1.
@@ -3432,14 +3411,14 @@ Close Scope Z_scope.
 Lemma jacobi_iteration_bound {t: type} {n : nat} :
  forall (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (acc: ftype t) (k: nat),
    jacobi_preconditions_math A b acc k -> 
-   let acc2 := BMULT t acc acc in
+   let acc2 := BMULT acc acc in
    let x0 := \col_(j < n.+1) (Zconst t 0) in
    let resid := residual_math A x0 b in
    finite acc2 /\ 
    exists j,
     (j <= k)%nat /\
     (forall i, (i <= j)%nat -> finite (norm2 (rev (vec_to_list_float n.+1 (resid i))))) /\
-    BCMP t Lt false (norm2 (rev (vec_to_list_float n.+1 (resid j)))) acc2 = false.
+    BCMP Lt false (norm2 (rev (vec_to_list_float n.+1 (resid j)))) acc2 = false.
     (** rev (_ ) fits perfectly well with norm2_vec_inf_norm_rel **)
 Proof.
 intros.
@@ -3708,7 +3687,7 @@ Lemma jacobi_iteration_bound_lowlevel' {t: type} :
    jacobi_preconditions_math A' b' acc k ->
    length A = length b ->
    (0 < length A)%coq_nat ->
-   let acc2 := BMULT t acc acc in
+   let acc2 := BMULT acc acc in
    let x0 := (repeat  (Zconst t 0) (length b)) in
    let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
    finite acc2 /\ 
@@ -3717,7 +3696,7 @@ Lemma jacobi_iteration_bound_lowlevel' {t: type} :
     let y :=  jacobi_n A b x0 j in
     let r2 := norm2 (resid y) in
     (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
-    BCMP t Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
+    BCMP Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
 Proof.
 intros.
 pose proof (@jacobi_iteration_bound t (length A).-1).
@@ -3869,7 +3848,7 @@ Admitted.
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
-   let acc2 := BMULT t acc acc in
+   let acc2 := BMULT acc acc in
    let x0 := (repeat  (Zconst t 0) (length b)) in
    let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
    finite acc2 /\ 
@@ -3878,8 +3857,8 @@ Lemma jacobi_iteration_bound_lowlevel {t: type} :
     let y :=  jacobi_n A b x0 j in
     let r2 := norm2 (resid y) in
     (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
-    BCMP t Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
-Proof. 
+    BCMP Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
+Proof.  
 intros.
 unfold jacobi_preconditions in H.
 destruct H as [HAA [HlenA [HeqAb H]]].
@@ -4009,7 +3988,7 @@ destruct H0.
                           is_finite (fprec t) (femax t) xy.2 =
                           true /\
                           is_finite (fprec t) (femax t)
-                            (BMULT t xy.1 xy.2) = true) by admit.
+                            (BMULT xy.1 xy.2) = true) by admit.
                specialize (H9 H10).
                assert ((vec_inf_norm
                         (FT2R_mat
@@ -4086,7 +4065,7 @@ destruct H0.
                           is_finite (fprec t) (femax t) xy.2 =
                           true /\
                           is_finite (fprec t) (femax t)
-                            (BPLUS t xy.1 (BOPP t xy.2)) =
+                            (BPLUS xy.1 (BOPP xy.2)) =
                           true)  by admit.
                specialize (H9 H10).
                apply reverse_triang_ineq in H9.
@@ -4147,7 +4126,7 @@ destruct H0.
                          is_finite (fprec t) (femax t) xy.2 =
                          true /\
                          is_finite (fprec t) (femax t)
-                           (BMULT t xy.1 xy.2) = true) by admit.
+                           (BMULT xy.1 xy.2) = true) by admit.
                specialize (H11 H12).
                apply Rle_trans with
                (vec_inf_norm
@@ -4171,6 +4150,10 @@ destruct H0.
 
 
 admit. (** x_1 - x_0 **)
+admit.
+admit.
+admit.
+admit.
          -- apply finite_residual_0.
             apply HlenA. apply HeqAb. unfold size_constraint. 
             destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 

@@ -8,7 +8,7 @@ Section NAN.
 
 (* vanilla dot-product *)
 Definition dotprod {NAN: Nans} (t: type) (v1 v2: list (ftype t)) : ftype t :=
-  fold_left (fun s x12 => BPLUS t (BMULT t (fst x12) (snd x12)) s) 
+  fold_left (fun s x12 => BPLUS (BMULT (fst x12) (snd x12)) s) 
                 (List.combine v1 v2) neg_zero.
 
 Inductive dot_prod_rel {NAN: Nans} {t : type} : 
@@ -16,7 +16,7 @@ Inductive dot_prod_rel {NAN: Nans} {t : type} :
 | dot_prod_rel_nil  : dot_prod_rel  nil (neg_zero )
 | dot_prod_rel_cons : forall l (xy : ftype t * ftype t) s,
     dot_prod_rel  l s ->
-    dot_prod_rel  (xy::l) (BPLUS t (BMULT t (fst xy) (snd xy)) s).
+    dot_prod_rel  (xy::l) (BPLUS (BMULT (fst xy) (snd xy)) s).
 
 Lemma fdot_prod_rel_fold_right {NAN: Nans} t :
 forall (v1 v2: list (ftype t)), 

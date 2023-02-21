@@ -92,7 +92,7 @@ Qed.
 
 Definition opp_mat {ty} {m n: nat} (A : 'M[ftype ty]_(m.+1, n.+1)) 
   : 'M[ftype ty]_(m.+1, n.+1) :=
-  \matrix_(i,j) (BOPP ty (A i j)). 
+  \matrix_(i,j) (BOPP (A i j)). 
 
 
 Notation "A +f B" := (addmx_float A B) (at level 80).

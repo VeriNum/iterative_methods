@@ -368,7 +368,7 @@ Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
          (vec_to_list_float n.+1 v2)) ->
     is_finite (fprec ty) (femax ty) xy.1 = true /\
     is_finite (fprec ty) (femax ty) xy.2 = true /\
-    is_finite (fprec ty) (femax ty) (BMULT ty xy.1 xy.2) = true) ->
+    is_finite (fprec ty) (femax ty) (BMULT xy.1 xy.2) = true) ->
   (vec_inf_norm (FT2R_mat (diag_vector_mult v1 v2) - 
                 diag_matrix_vec_mult_R (FT2R_mat v1) (FT2R_mat v2)) <=
   (vec_inf_norm (FT2R_mat v1) * vec_inf_norm (FT2R_mat v2)) * 
@@ -504,7 +504,7 @@ Qed.
 
 (*** Lemma for error bound on the inverse ***)
 Lemma inverse_mat_norm_bound {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
-  (forall i, is_finite _ _ (BDIV ty (Zconst ty 1) (A i i )) = true) ->
+  (forall i, is_finite _ _ (BDIV (Zconst ty 1) (A i i )) = true) ->
   (forall i, is_finite _ _ (A i i) = true) ->
   let A_real := FT2R_mat A in
   (vec_inf_norm (FT2R_mat (A1_inv_J A) - A1_diag A_real) <=
@@ -1137,7 +1137,7 @@ Definition forward_error_cond {ty} {n:nat}
   A_real \in unitmx /\
   (forall i : 'I_n.+1,
     is_finite (fprec ty) (femax ty)
-      (BDIV ty (Zconst ty 1) (A i i)) = true) /\
+      (BDIV (Zconst ty 1) (A i i)) = true) /\
   (forall i : 'I_n.+1, is_finite (fprec ty) (femax ty)
                               (x0 i ord0) = true) /\
   (forall i, is_finite (fprec ty) (femax ty)
@@ -1285,7 +1285,7 @@ induction k.
         - rewrite rev_length in H51. apply H51.
     }
     assert (is_finite (fprec ty) (femax ty)
-            (BMINUS ty (b (inord i) ord0)
+            (BMINUS (b (inord i) ord0)
                ((A2_J A *f X_m_jacobi k x0 b A)
                   (inord i) ord0)) = true).
     { apply Bplus_bminus_opp_implies.
@@ -1296,7 +1296,7 @@ induction k.
           pose proof (@generic_round_property ty).
           specialize (H3 (FT2R (b (inord i) ord0) +
                              FT2R
-                               (BOPP ty
+                               (BOPP
                                   ((A2_J A *f
                                     X_m_jacobi k x0 b A)
                                      (inord i) ord0)))%Re).
@@ -1461,12 +1461,12 @@ induction k.
       rewrite Rabs_mult. rewrite [in X in (_ * X < _)%Re]mxE. 
       rewrite Bminus_bplus_opp_equiv.
       pose proof (@BPLUS_accurate' _ ty).
-      specialize (H5 (b (inord i) ord0) (BOPP ty
+      specialize (H5 (b (inord i) ord0) (BOPP 
             ((A2_J A *f X_m_jacobi k x0 b A)
                           (inord i) ord0))).
       assert (is_finite (fprec ty) (femax ty)
-               (BPLUS ty (b (inord i) ord0)
-                  (BOPP ty
+               (BPLUS (b (inord i) ord0)
+                  (BOPP
                      ((A2_J A *f
                        X_m_jacobi k x0 b A)
                         (inord i) ord0))) = true).
@@ -1610,8 +1610,6 @@ induction k.
                apply x_k_bound. apply IHk.
             ++ apply Rle_refl.
             ++ by apply bound_5.
-   - apply Hb.
-   - rewrite is_finite_Bopp. rewrite mxE. apply H2.
    - by apply Bminus_bplus_opp_implies .
  }
   split.
@@ -2244,7 +2242,7 @@ induction k.
                                   +++++  pose proof (@inverse_mat_norm_bound ty n A ).
                                          assert (forall i : 'I_n.+1,
                                                             is_finite (fprec ty) (femax ty)
-                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
+                                                              (BDIV (Zconst ty 1) (A i i)) = true) by apply Hdivf.
                                          assert (forall i : 'I_n.+1,
                                                               is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
                                          by specialize (H4 H5 H6).
@@ -2261,7 +2259,7 @@ induction k.
                          pose proof (@inverse_mat_norm_bound ty n A ).
                          assert (forall i : 'I_n.+1,
                                   is_finite (fprec ty) (femax ty)
-                                    (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
+                                    (BDIV (Zconst ty 1) (A i i)) = true) by apply Hdivf.
                          assert (forall i : 'I_n.+1,
                                     is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
                          specialize (H4 H5 H6).
@@ -2292,7 +2290,7 @@ induction k.
                                                    pose proof (@inverse_mat_norm_bound ty n A ).
                                                    assert (forall i : 'I_n.+1,
                                                             is_finite (fprec ty) (femax ty)
-                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
+                                                              (BDIV (Zconst ty 1) (A i i)) = true) by apply Hdivf.
                                                    assert (forall i : 'I_n.+1,
                                                               is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
                                                    specialize (H5 H6 H7).
@@ -2316,7 +2314,7 @@ induction k.
                                                pose proof (@inverse_mat_norm_bound ty n A ).
                                                    assert (forall i : 'I_n.+1,
                                                             is_finite (fprec ty) (femax ty)
-                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
+                                                              (BDIV (Zconst ty 1) (A i i)) = true) by apply Hdivf.
                                                    assert (forall i : 'I_n.+1,
                                                               is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
                                                    specialize (H5 H6 H7).
@@ -2339,7 +2337,7 @@ induction k.
                                                pose proof (@inverse_mat_norm_bound ty n A ).
                                                    assert (forall i : 'I_n.+1,
                                                             is_finite (fprec ty) (femax ty)
-                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
+                                                              (BDIV (Zconst ty 1) (A i i)) = true) by apply Hdivf.
                                                    assert (forall i : 'I_n.+1,
                                                               is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
                                                    specialize (H5 H6 H7).
