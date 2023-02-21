@@ -4285,6 +4285,12 @@ destruct H0.
                          vec_inf_norm (FT2R_mat x0')) * (1 + g t n.+1 )+
                         g1 t n.+1 (n.+1 - 1))%Re). { nra. } rewrite H18.
                apply Rle_refl.
+               apply Rplus_le_le_0_compat;last by apply g1_pos.
+               repeat apply Rmult_le_pos.
+               apply /RleP. apply vec_norm_pd.
+               apply Rplus_le_le_0_compat; try (apply /RleP; apply vec_norm_pd).
+               apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
                
 
 
