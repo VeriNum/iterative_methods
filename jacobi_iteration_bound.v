@@ -4291,26 +4291,25 @@ destruct H0.
                apply Rplus_le_le_0_compat; try (apply /RleP; apply vec_norm_pd).
                apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
                apply Rplus_le_le_0_compat. nra. apply g_pos.
-               
-
-
-
-apply /RleP. apply H15.
-                  
-
-
-
-
-
-               
-
-
-
-
-
-
-
-admit. (** x_1 - x_0 **)
+               apply Rplus_le_le_0_compat; last by apply g1_pos.
+               repeat apply Rmult_le_pos.
+               apply /RleP. apply vec_norm_pd.
+               apply Rplus_le_le_0_compat;last by (apply /RleP; apply vec_norm_pd).
+               apply Rplus_le_le_0_compat;last by apply g1_pos.
+               repeat apply Rmult_le_pos.
+               apply /RleP. apply vec_norm_pd.
+               apply Rplus_le_le_0_compat. 
+               apply /RleP. apply vec_norm_pd.
+               apply Rplus_le_le_0_compat; last by apply g1_pos.
+               repeat apply Rmult_le_pos.
+               apply /RleP. apply matrix_norm_pd.
+               apply /RleP. apply vec_norm_pd.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
+               apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
+               apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
+               admit.
          -- apply finite_residual_0.
             apply HlenA. apply HeqAb. unfold size_constraint. 
             destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
