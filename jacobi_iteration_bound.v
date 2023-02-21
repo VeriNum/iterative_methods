@@ -4184,8 +4184,50 @@ destruct H0.
                apply reverse_triang_ineq in H13.
                assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
                { intros. nra. } apply H14. apply /RleP. apply H13.
-                  
-  
+               repeat apply Rplus_le_compat_r. apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R.
+               apply Rplus_le_compat_r.
+               apply Rmult_le_compat_r.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
+               apply Rmult_le_compat_l. apply /RleP. apply vec_norm_pd.
+               pose proof (@vec_float_sub _ t n b' (A2_J A' *f x0')).
+               assert (forall xy : ftype t * ftype t,
+                           In xy
+                             (combine
+                                (vec_to_list_float n.+1 b')
+                                (vec_to_list_float n.+1
+                                   (A2_J A' *f x0'))) ->
+                           is_finite (fprec t) 
+                             (femax t) xy.1 = true /\
+                           is_finite (fprec t) 
+                             (femax t) xy.2 = true /\
+                           is_finite (fprec t) 
+                             (femax t)
+                             (BPLUS t xy.1 (BOPP t xy.2)) =
+                           true) by admit.
+               specialize (H13 H14).
+               apply Rle_trans with
+               ((vec_inf_norm (FT2R_mat b') +
+                     vec_inf_norm
+                       (FT2R_mat (A2_J A' *f x0'))) *
+                   (1 + default_rel t))%Re.
+               rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
+               apply reverse_triang_ineq in H13. eapply Rle_trans.
+               assert ((vec_inf_norm
+                          (FT2R_mat
+                             (b' -f A2_J A' *f x0')) -
+                        vec_inf_norm
+                          (FT2R_mat b' -
+                           FT2R_mat (A2_J A' *f x0')) <=
+                        (vec_inf_norm (FT2R_mat b') +
+                         vec_inf_norm
+                           (FT2R_mat (A2_J A' *f x0'))) *
+                        default_rel t)%Re). { by apply /RleP. }
+               assert (forall a b c:R, (a - b <= c)%Re -> (a <= b +c)%Re). { intros. nra. }
+               apply H16 in H15. apply H15.
+               apply Rplus_le_compat_r. eapply Rle_trans.
+               apply /RleP. apply triang_ineq. rewrite -vec_inf_norm_opp. rewrite -RplusE. nra.
+               
+
 
 
 
