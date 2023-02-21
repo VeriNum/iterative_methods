@@ -3901,14 +3901,16 @@ unfold jacobi_residual, jacob_list_fun_model.jacobi_iter in H3.
 specialize (H3 (BMULT t xy.1 xy.2)).
 assert (is_finite (fprec t) 
             (femax t) (BMULT t xy.1 xy.2) = true).
-{ apply H3. admit. }
-repeat split; try apply H4.
-+ 
+{ apply H3.
+  
+  
 
 
 
 
 
+ admit. }
+repeat split; try apply H4; try (apply bmult_overflow_implies in H4; apply H4).
 Admitted.
 
 
