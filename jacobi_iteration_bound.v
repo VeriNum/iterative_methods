@@ -3938,10 +3938,64 @@ Lemma finite_implies_2 {t: type} :
              is_finite (fprec t) (femax t)
                             (BPLUS t xy.1 (BOPP t xy.2)) = true).
 Proof.
+Admitted.
 
 
+Lemma finite_implies_3 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A':= (@matrix_inj _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ b n.+1) in
+  let x0' := (@vector_inj _ x0 n.+1) in
+  is_finite (fprec t) (femax t)
+  (norm2 (resid (jacobi_n A b x0 0))) = true ->
+  (forall xy : ftype t * ftype t,
+                         In xy
+                           (combine
+                              (vec_to_list_float n.+1
+                                 (A1_inv_J A'))
+                              (vec_to_list_float n.+1
+                                 (b' -f A2_J A' *f x0'))) ->
+                         is_finite (fprec t) (femax t) xy.1 =
+                         true /\
+                         is_finite (fprec t) (femax t) xy.2 =
+                         true /\
+                         is_finite (fprec t) (femax t)
+                           (BMULT t xy.1 xy.2) = true).
+Admitted.
 
 
+Lemma finite_implies_4 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A':= (@matrix_inj _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ b n.+1) in
+  let x0' := (@vector_inj _ x0 n.+1) in
+  is_finite (fprec t) (femax t)
+  (norm2 (resid (jacobi_n A b x0 0))) = true ->
+(forall xy : ftype t * ftype t,
+                           In xy
+                             (combine
+                                (vec_to_list_float n.+1 b')
+                                (vec_to_list_float n.+1
+                                   (A2_J A' *f x0'))) ->
+                           is_finite (fprec t) 
+                             (femax t) xy.1 = true /\
+                           is_finite (fprec t) 
+                             (femax t) xy.2 = true /\
+                           is_finite (fprec t) 
+                             (femax t)
+                             (BPLUS t xy.1 (BOPP t xy.2)) =
+                           true).
+Admitted.
 
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
@@ -4173,7 +4227,16 @@ destruct H0.
                           true /\
                           is_finite (fprec t) (femax t)
                             (BPLUS t xy.1 (BOPP t xy.2)) =
-                          true)  by admit.
+                          true).
+               { intros.
+                  pose proof (@finite_implies_2 t A b HlenA HeqAb).
+                  pose proof (@finite_residual_0 t A b HlenA HeqAb).
+                  destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+                  rewrite Heqn in size_cons.
+                  specialize (H12 size_cons). specialize (H11 H12).
+                  apply H11. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
+                  apply H10.
+                }
                specialize (H9 H10).
                apply reverse_triang_ineq in H9.
                eapply Rle_lt_trans. apply Rplus_le_compat_r.
@@ -4233,7 +4296,16 @@ destruct H0.
                          is_finite (fprec t) (femax t) xy.2 =
                          true /\
                          is_finite (fprec t) (femax t)
-                           (BMULT t xy.1 xy.2) = true) by admit.
+                           (BMULT t xy.1 xy.2) = true).
+               { intros.
+                  pose proof (@finite_implies_3 t A b HlenA HeqAb).
+                  pose proof (@finite_residual_0 t A b HlenA HeqAb).
+                  destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+                  rewrite Heqn in size_cons.
+                  specialize (H14 size_cons). specialize (H13 H14).
+                  apply H13. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
+                  apply H12.
+               }
                specialize (H11 H12).
                apply Rle_trans with
                (vec_inf_norm
@@ -4289,7 +4361,16 @@ destruct H0.
                            is_finite (fprec t) 
                              (femax t)
                              (BPLUS t xy.1 (BOPP t xy.2)) =
-                           true) by admit.
+                           true).
+               { intros.
+                  pose proof (@finite_implies_4 t A b HlenA HeqAb).
+                  pose proof (@finite_residual_0 t A b HlenA HeqAb).
+                  destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+                  rewrite Heqn in size_cons.
+                  specialize (H16 size_cons). specialize (H15 H16).
+                  apply H15. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
+                  apply H14.
+               }
                specialize (H13 H14).
                apply Rle_trans with
                ((vec_inf_norm (FT2R_mat b') +
