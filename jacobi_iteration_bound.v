@@ -4025,6 +4025,33 @@ Lemma finite_implies_5 {t: type} :
                            (femax t) xy.2 = true).
 Admitted.
 
+
+Lemma finite_implies_6 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A':= (@matrix_inj _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ b n.+1) in
+  let x0' := (@vector_inj _ x0 n.+1) in
+  is_finite (fprec t) (femax t)
+  (norm2 (resid (jacobi_n A b x0 0))) = true ->
+  (forall i : nat,
+                       is_finite (fprec t) 
+                         (femax t)
+                         (let l1 :=
+                            vec_to_list_float n.+1
+                              (\row_j A2_J A'
+                                        (inord i) j)^T
+                            in
+                          let l2 :=
+                            vec_to_list_float n.+1
+                              (\col_j x0' j 0) in
+                          dotprod_r l1 l2) = true) .
+Admitted.
+
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
@@ -4459,7 +4486,17 @@ destruct H0.
                           let l2 :=
                             vec_to_list_float n.+1
                               (\col_j x0' j 0) in
-                          dotprod_r l1 l2) = true) by admit.
+                          dotprod_r l1 l2) = true).
+              { intros.
+                  pose proof (@finite_implies_6 t A b HlenA HeqAb).
+                  pose proof (@finite_residual_0 t A b HlenA HeqAb).
+                  destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+                  rewrite Heqn in size_cons.
+                  specialize (H18 size_cons). 
+                  rewrite -Heqn in H17. specialize (H17 H18 i).
+                  rewrite HeqA' Heqx0'.
+                  apply H17.             
+              }
               specialize (H15 H16 H17).
               apply reverse_triang_ineq in H15.
               apply Rle_trans with 
