@@ -3792,25 +3792,6 @@ split.
 Qed.
 
 
-(**
-H9 : In xy
-       (combine
-          (vec_to_list_float n.+1
-             (vector_inj
-                (resid
-                   (jacobi_n A b x0 0))
-                n.+1))
-          (vec_to_list_float n.+1
-             (vector_inj
-                (resid
-                   (jacobi_n A b x0 0))
-                n.+1)))
-______________________________________(1/1)
-is_finite (fprec t) (femax t) xy.1 =
-true /\
-is_finite (fprec t) (femax t) xy.2 =
-true
-***)
 
 Lemma finite_in{t: type}  :
  forall (A: matrix t) (b: vector t),
@@ -3836,7 +3817,6 @@ Lemma finite_in{t: type}  :
   is_finite (fprec t) (femax t) xy.2 = true.
 Proof.
 Admitted.
-
 
 
 
@@ -3938,6 +3918,36 @@ Lemma finite_implies_2 {t: type} :
              is_finite (fprec t) (femax t)
                             (BPLUS t xy.1 (BOPP t xy.2)) = true).
 Proof.
+intros.
+unfold norm2 in H1.
+pose proof (@dotprod_finite_implies t).
+specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
+rewrite rev_involutive in H3.
+specialize (H3 H1). 
+pose proof (@v_equiv t (resid (jacobi_n A b x0 0)) n).
+assert (length (resid (jacobi_n A b x0 0)) = n.+1).
+{ repeat rewrite /matrix_vector_mult !map_length combine_length.
+  rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+  rewrite !seq_length /matrix_rows_nat -H0 !Nat.min_id.
+  rewrite /n prednK. by []. by apply /ssrnat.ltP.
+  by []. by rewrite /x0 repeat_length.
+} specialize (H4 H5).
+
+rewrite v_equiv in H3.
+
+
+
+
+unfold resid in H3.
+
+
+
+
+
+unfold jacobi_residual, jacob_list_fun_model.jacobi_iter in H3.
+unfold diagmatrix_vector_mult, map2, uncurry in H3.
+rewrite nth_map_inrange in H3.
+
 Admitted.
 
 
