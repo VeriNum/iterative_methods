@@ -11,13 +11,13 @@ Context {NANS: Nans}.
 Definition diagmatrix t := list (ftype t).
 
 Definition invert_diagmatrix {t} (v: diagmatrix t) : diagmatrix t :=
-   map (BDIV t (Zconst t 1)) v.
+   map (BDIV (Zconst t 1)) v.
 
 Definition diagmatrix_vector_mult {t}: diagmatrix t -> vector t -> vector t :=
-  map2 (BMULT t).
+  map2 BMULT.
 
 Definition diagmatrix_matrix_mult {t} (v: diagmatrix t) (m: matrix t) : matrix t :=
-  map2 (fun d => map (BMULT t d)) v m.
+  map2 (fun d => map (BMULT d)) v m.
   
 Definition diag_of_matrix {t: type} (m: matrix t) : diagmatrix t :=
   map (fun i => matrix_index m i i) (seq 0 (matrix_rows_nat m)).
@@ -38,7 +38,7 @@ Definition jacobi_residual {t: type} (A1: diagmatrix t) (A2: matrix t) (b: vecto
 
 
 Definition going {t} (s acc: ftype t) := 
-   andb (Binary.is_finite (fprec t) (femax t) s) (BCMP _ Lt false s acc).
+   andb (Binary.is_finite (fprec t) (femax t) s) (BCMP Lt false s acc).
 
 
 Fixpoint iter_stop {t} {A} (norm2: A -> ftype t) (residual: A -> A) (f : A -> A) (n:nat) (acc: ftype t) (x:A) :=
@@ -100,7 +100,7 @@ Proof. intros. contradiction. Qed.
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
-   let acc2 := BMULT t acc acc in
+   let acc2 := BMULT acc acc in
    let x0 := (repeat  (Zconst t 0) (length b)) in
    let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
    finite acc2 /\ 
@@ -109,7 +109,7 @@ Lemma jacobi_iteration_bound_lowlevel {t: type} :
     let y :=  jacobi_n A b x0 j in
     let r2 := norm2 (resid y) in
     (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
-    BCMP t Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
+    BCMP Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
 Proof. intros. contradiction. Qed.
 
 End WITH_NANS.

@@ -16,6 +16,7 @@ fma_floating_point_model.v
 fma_real_func_model.v
 finite_lemmas_additional.v
 norm_compat.v
+fma_jacobi_forward_error.v
 jacobi_iteration_bound.v
 
 StationaryMethods/common.v

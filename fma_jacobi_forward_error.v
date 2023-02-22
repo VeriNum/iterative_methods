@@ -366,9 +366,7 @@ Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
       (combine
          (vec_to_list_float n.+1  v1)
          (vec_to_list_float n.+1 v2)) ->
-    is_finite (fprec ty) (femax ty) xy.1 = true /\
-    is_finite (fprec ty) (femax ty) xy.2 = true /\
-    is_finite (fprec ty) (femax ty) (BMULT ty xy.1 xy.2) = true) ->
+    finite xy.1 /\finite xy.2 /\ finite (BMULT xy.1 xy.2)) ->
   (vec_inf_norm (FT2R_mat (diag_vector_mult v1 v2) - 
                 diag_matrix_vec_mult_R (FT2R_mat v1) (FT2R_mat v2)) <=
   (vec_inf_norm (FT2R_mat v1) * vec_inf_norm (FT2R_mat v2)) * 
@@ -394,7 +392,7 @@ apply bigmax_le.
           (nth (n.+1.-1 - @inord n i)
              (vec_to_list_float n.+1 v2)
              (Zconst ty 0)))). 
-  { apply is_finite_BMULT_no_overflow.  rewrite !nth_vec_to_list_float.
+  { apply finite_BMULT_no_overflow.  rewrite !nth_vec_to_list_float.
     + rewrite inord_val.
       specialize (H ((v1 (inord i) ord0), (v2 (inord i) ord0))).
       assert (In
@@ -504,8 +502,8 @@ Qed.
 
 (*** Lemma for error bound on the inverse ***)
 Lemma inverse_mat_norm_bound {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
-  (forall i, is_finite _ _ (BDIV ty (Zconst ty 1) (A i i )) = true) ->
-  (forall i, is_finite _ _ (A i i) = true) ->
+  (forall i, finite (BDIV (Zconst ty 1) (A i i ))) ->
+  (forall i, finite (A i i)) ->
   let A_real := FT2R_mat A in
   (vec_inf_norm (FT2R_mat (A1_inv_J A) - A1_diag A_real) <=
     vec_inf_norm (A1_diag A_real) * (default_rel ty) + (default_abs ty))%Re.
@@ -575,10 +573,8 @@ induction l; simpl; intros; auto.
 Qed.
 
 Lemma dotprod_finite_implies {ty} (v: list (ftype ty * ftype ty)):
-  is_finite _ _ (dotprod_r (fst (List.split v)) (snd (List.split v))) = true ->
-  (forall a, In a v ->
-             is_finite _ _ (fst a) = true /\
-             is_finite _ _ (snd a) = true).
+  finite (dotprod_r (fst (List.split v)) (snd (List.split v))) ->
+  (forall a, In a v ->finite (fst a) /\ finite (snd a)).
 Proof.
 intros.
 induction v.
@@ -588,7 +584,7 @@ induction v.
   assert ((List.split (a0 :: v)).2 = (a0.2 :: (List.split v).2)).
   { apply list_split_r. } rewrite H1 H2 in H.
   unfold dotprod_r in H.  simpl in H.
-  apply bfma_overflow_implies in H.
+  apply BFMA_finite_e in H.
   destruct H0.
   - rewrite -H0. split; try apply H.
   - unfold dotprod_r in IHv.
@@ -1132,20 +1128,14 @@ Definition forward_error_cond {ty} {n:nat}
   let rho := rho_def A b in
   let d_mag := d_mag_def A b in
    let A_real := FT2R_mat A in
-  (forall i, is_finite _ _ (A i i) = true) /\
+  (forall i, finite (A i i)) /\
   (rho < 1)%Re /\
   A_real \in unitmx /\
-  (forall i : 'I_n.+1,
-    is_finite (fprec ty) (femax ty)
-      (BDIV ty (Zconst ty 1) (A i i)) = true) /\
-  (forall i : 'I_n.+1, is_finite (fprec ty) (femax ty)
-                              (x0 i ord0) = true) /\
-  (forall i, is_finite (fprec ty) (femax ty)
-                        (A1_inv_J A i ord0) = true) /\
-  (forall i j, is_finite (fprec ty) (femax ty)
-                  (A2_J A i j) = true) /\ 
-  (forall i, is_finite (fprec ty) (femax ty)
-                          (b i ord0) = true) /\
+  (forall i : 'I_n.+1, finite (BDIV (Zconst ty 1) (A i i))) /\
+  (forall i : 'I_n.+1, finite (x0 i ord0)) /\
+  (forall i, finite  (A1_inv_J A i ord0)) /\
+  (forall i j, finite (A2_J A i j)) /\ 
+  (forall i, finite (b i ord0)) /\
   @size_constraint ty n /\
   input_bound A x0 b.
 
@@ -1188,7 +1178,7 @@ Theorem jacobi_forward_error_bound_aux {ty} {n:nat}
   forall x0: 'cV[ftype ty]_n.+1,
   forward_error_cond A x0 b ->
   (forall k:nat, 
-   (forall i, is_finite _ _ (X_m_jacobi k x0 b A i ord0) = true) /\
+   (forall i, finite (X_m_jacobi k x0 b A i ord0)) /\
    (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re).
 Proof.
 intros ? ? ? ? ? ? ? ? Hcond.
@@ -1200,13 +1190,12 @@ induction k.
 + split; simpl; try nra.
   intros. apply Hx0. 
 + assert (Hfin: (forall i : 'I_n.+1,
-                 is_finite (fprec ty) (femax ty)
-                   (X_m_jacobi k.+1 x0 b A i ord0) =  true)).
+                 finite (X_m_jacobi k.+1 x0 b A i ord0))).
   { intros. simpl.
     unfold jacobi_iter.
     rewrite mxE.
     rewrite nth_vec_to_list_float; last by apply ltn_ord.
-    assert (is_finite (fprec ty) (femax ty)
+    assert (finite 
               (let l1 :=
                  vec_to_list_float n.+1
                    (\row_j A2_J A (inord i) j)^T in
@@ -1214,7 +1203,7 @@ induction k.
                  vec_to_list_float n.+1
                    (\col_j X_m_jacobi k x0 b A j
                              ord0) in
-               dotprod_r l1 l2) = true).
+               dotprod_r l1 l2)).
     { pose proof (@finite_fma_from_bounded _ ty).
       specialize (H2 (vec_to_list_float n.+1
                          (\row_j A2_J A (inord i) j)^T)
@@ -1284,19 +1273,19 @@ induction k.
         - rewrite rev_length length_veclist in H51. by apply /ssrnat.ltP. 
         - rewrite rev_length in H51. apply H51.
     }
-    assert (is_finite (fprec ty) (femax ty)
-            (BMINUS ty (b (inord i) ord0)
+    assert (finite 
+            (BMINUS (b (inord i) ord0)
                ((A2_J A *f X_m_jacobi k x0 b A)
-                  (inord i) ord0)) = true).
+                  (inord i) ord0))).
     { apply Bplus_bminus_opp_implies.
       apply BPLUS_no_overflow_is_finite.
         + apply Hb.
-        + rewrite is_finite_Bopp. rewrite mxE. apply H2.
+        + rewrite finite_BOPP. rewrite mxE. apply H2.
         + unfold Bplus_no_overflow. 
           pose proof (@generic_round_property ty).
           specialize (H3 (FT2R (b (inord i) ord0) +
                              FT2R
-                               (BOPP ty
+                               (BOPP
                                   ((A2_J A *f
                                     X_m_jacobi k x0 b A)
                                      (inord i) ord0)))%Re).
@@ -1461,15 +1450,15 @@ induction k.
       rewrite Rabs_mult. rewrite [in X in (_ * X < _)%Re]mxE. 
       rewrite Bminus_bplus_opp_equiv.
       pose proof (@BPLUS_accurate' _ ty).
-      specialize (H5 (b (inord i) ord0) (BOPP ty
+      specialize (H5 (b (inord i) ord0) (BOPP 
             ((A2_J A *f X_m_jacobi k x0 b A)
                           (inord i) ord0))).
-      assert (is_finite (fprec ty) (femax ty)
-               (BPLUS ty (b (inord i) ord0)
-                  (BOPP ty
+      assert (finite
+               (BPLUS (b (inord i) ord0)
+                  (BOPP
                      ((A2_J A *f
                        X_m_jacobi k x0 b A)
-                        (inord i) ord0))) = true).
+                        (inord i) ord0)))).
       { by apply Bminus_bplus_opp_implies . }
       specialize (H5 H6).
       destruct H5 as [d1 [Hd1 H5]].
@@ -1610,8 +1599,6 @@ induction k.
                apply x_k_bound. apply IHk.
             ++ apply Rle_refl.
             ++ by apply bound_5.
-   - apply Hb.
-   - rewrite is_finite_Bopp. rewrite mxE. apply H2.
    - by apply Bminus_bplus_opp_implies .
  }
   split.
@@ -1767,8 +1754,8 @@ induction k.
                                  specialize (Hfin (@inord n j)).
                                  rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
                                  rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                                 apply bmult_overflow_implies in Hfin; try apply Hfin.
-                                 apply bmult_overflow_implies in Hfin; try apply Hfin.
+                                 apply BMULT_finite_e in Hfin; try apply Hfin.
+                                 apply BMULT_finite_e in Hfin; try apply Hfin.
                                  by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
                                  by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
                                  rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
@@ -1802,13 +1789,14 @@ induction k.
                                    specialize (Hfin (@inord n j)).
                                    rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
                                    rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                                   apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                   apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
                                    rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                   apply bplus_overflow_implies in Hfin2; try apply Hfin2.
-                                   apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                   apply BPLUS_finite_e in Hfin2; try apply Hfin2.
+                                   apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
                                    rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                   apply bplus_overflow_implies in Hfin2. rewrite is_finite_Bopp in Hfin2.  try apply Hfin2.
-                                   apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                   apply BPLUS_finite_e in Hfin2. 
+                                   rewrite finite_BOPP in Hfin2.  try apply Hfin2.
+                                   apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
                                    rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
                                    try apply Hfin2.
                                    by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
@@ -1853,10 +1841,10 @@ induction k.
                                         rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                                        apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                        apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
                                         rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                        apply bplus_overflow_implies in Hfin2; try apply Hfin2.
-                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
+                                        apply BPLUS_finite_e in Hfin2; try apply Hfin2.
+                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
                                         rewrite mxE in Hfin22.  
                                         pose proof (@dotprod_finite_implies ty).
                                         specialize (H6 (combine  (vec_to_list_float n.+1
@@ -1883,10 +1871,10 @@ induction k.
                                         by rewrite !length_veclist.
 
 
-                                        apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                        apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
                                         rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                        apply bplus_overflow_implies in Hfin2; try apply Hfin2.
-                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
+                                        apply BPLUS_finite_e in Hfin2; try apply Hfin2.
+                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
                                         rewrite mxE in Hfin22.  
                                         pose proof (@dotprod_finite_implies ty).
                                         specialize (H6 (combine  (vec_to_list_float n.+1
@@ -1917,10 +1905,10 @@ induction k.
                                         rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                                        apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                        apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
                                         rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                        apply bplus_overflow_implies in Hfin2; try apply Hfin2.
-                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
+                                        apply BPLUS_finite_e in Hfin2; try apply Hfin2.
+                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
                                         by rewrite mxE in Hfin22.
                                        
                                       }
@@ -1991,13 +1979,13 @@ induction k.
                                    specialize (Hfin (@inord n j)).
                                    rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
                                    rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                                   apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                   apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
                                    rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                   apply bplus_overflow_implies in Hfin2; try apply Hfin2.
-                                   apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                   apply BPLUS_finite_e in Hfin2; try apply Hfin2.
+                                   apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
                                    rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                   apply bplus_overflow_implies in Hfin2. rewrite is_finite_Bopp in Hfin2.  try apply Hfin2.
-                                   apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                   apply BPLUS_finite_e in Hfin2. rewrite finite_BOPP in Hfin2.  try apply Hfin2.
+                                   apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
                                    rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
                                    try apply Hfin2.
                                    by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
@@ -2016,10 +2004,10 @@ induction k.
                     rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                     rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                     rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                    apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                    apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
                     rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                    apply bplus_overflow_implies in Hfin2; try apply Hfin2.
-                    destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
+                    apply BPLUS_finite_e in Hfin2; try apply Hfin2.
+                    destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
                     rewrite mxE in Hfin22.  
                     pose proof (@dotprod_finite_implies ty).
                     specialize (H6 (combine  (vec_to_list_float n.+1
@@ -2046,10 +2034,10 @@ induction k.
                      by rewrite !length_veclist.
 
 
-                     apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                     apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
                      rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                     apply bplus_overflow_implies in Hfin2; try apply Hfin2.
-                     destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
+                     apply BPLUS_finite_e in Hfin2; try apply Hfin2.
+                     destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
                      rewrite mxE in Hfin22.  
                      pose proof (@dotprod_finite_implies ty).
                      specialize (H6 (combine  (vec_to_list_float n.+1
@@ -2080,10 +2068,10 @@ induction k.
                      rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                      rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                      rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                     apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                     apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
                      rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                     apply bplus_overflow_implies in Hfin2; try apply Hfin2.
-                     destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
+                     apply BPLUS_finite_e in Hfin2; try apply Hfin2.
+                     destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
                      by rewrite mxE in Hfin22.
             *** eapply Rle_trans.
                 ++++ apply Rplus_le_compat_r. apply Rplus_le_compat_r. apply Rplus_le_compat_l.
@@ -2106,10 +2094,10 @@ induction k.
                                         rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                                        apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                        apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
                                         rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                        apply bplus_overflow_implies in Hfin2; try apply Hfin2.
-                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
+                                        apply BPLUS_finite_e in Hfin2; try apply Hfin2.
+                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
                                         rewrite mxE in Hfin22.  
                                         pose proof (@dotprod_finite_implies ty).
                                         specialize (H5 (combine  (vec_to_list_float n.+1
@@ -2136,10 +2124,10 @@ induction k.
                                         by rewrite !length_veclist.
 
 
-                                        apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                        apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
                                         rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                        apply bplus_overflow_implies in Hfin2; try apply Hfin2.
-                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
+                                        apply BPLUS_finite_e in Hfin2; try apply Hfin2.
+                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
                                         rewrite mxE in Hfin22.  
                                         pose proof (@dotprod_finite_implies ty).
                                         specialize (H5 (combine  (vec_to_list_float n.+1
@@ -2170,10 +2158,10 @@ induction k.
                                         rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                                        apply bmult_overflow_implies in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                        apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
                                         rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                        apply bplus_overflow_implies in Hfin2; try apply Hfin2.
-                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite is_finite_Bopp in Hfin22.
+                                        apply BPLUS_finite_e in Hfin2; try apply Hfin2.
+                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
                                         by rewrite mxE in Hfin22.
                            }
                             apply Rle_trans with
@@ -2242,11 +2230,8 @@ induction k.
                                   +++++ apply /RleP. apply vec_norm_pd.
                                   +++++ apply /RleP. apply vec_norm_pd.
                                   +++++  pose proof (@inverse_mat_norm_bound ty n A ).
-                                         assert (forall i : 'I_n.+1,
-                                                            is_finite (fprec ty) (femax ty)
-                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
-                                         assert (forall i : 'I_n.+1,
-                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
+                                         assert (forall i : 'I_n.+1, finite (BDIV (Zconst ty 1) (A i i))) by apply Hdivf.
+                                         assert (forall i : 'I_n.+1, finite (A i i)) by apply HAf.
                                          by specialize (H4 H5 H6).
                                   +++++  apply Rle_trans with
                                         (vec_inf_norm (FT2R_mat b) + vec_inf_norm (-(A2_J_real (FT2R_mat A) *m 
@@ -2259,11 +2244,8 @@ induction k.
                                 default_abs ty)%Re).
                        { rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
                          pose proof (@inverse_mat_norm_bound ty n A ).
-                         assert (forall i : 'I_n.+1,
-                                  is_finite (fprec ty) (femax ty)
-                                    (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
-                         assert (forall i : 'I_n.+1,
-                                    is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
+                         assert (forall i : 'I_n.+1, finite (BDIV (Zconst ty 1) (A i i))) by apply Hdivf.
+                         assert (forall i : 'I_n.+1, finite (A i i)) by apply HAf.
                          specialize (H4 H5 H6).
                          assert ((vec_inf_norm
                                       (FT2R_mat (A1_inv_J A) -
@@ -2290,11 +2272,8 @@ induction k.
                                                    nra. apply g_pos.
                                              ***** apply Rmult_le_compat_r. apply /RleP. apply matrix_norm_pd.
                                                    pose proof (@inverse_mat_norm_bound ty n A ).
-                                                   assert (forall i : 'I_n.+1,
-                                                            is_finite (fprec ty) (femax ty)
-                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
-                                                   assert (forall i : 'I_n.+1,
-                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
+                                                   assert (forall i : 'I_n.+1, finite (BDIV (Zconst ty 1) (A i i))) by apply Hdivf.
+                                                   assert (forall i : 'I_n.+1, finite (A i i)) by apply HAf.
                                                    specialize (H5 H6 H7).
                                                    assert ((vec_inf_norm
                                                                 (FT2R_mat (A1_inv_J A) -
@@ -2315,10 +2294,8 @@ induction k.
                                                apply Rmult_le_compat_r. apply /RleP. apply vec_norm_pd.
                                                pose proof (@inverse_mat_norm_bound ty n A ).
                                                    assert (forall i : 'I_n.+1,
-                                                            is_finite (fprec ty) (femax ty)
-                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
-                                                   assert (forall i : 'I_n.+1,
-                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
+                                                            finite (BDIV (Zconst ty 1) (A i i)) ) by apply Hdivf.
+                                                   assert (forall i : 'I_n.+1, finite (A i i)) by apply HAf.
                                                    specialize (H5 H6 H7).
                                                    assert ((vec_inf_norm
                                                                 (FT2R_mat (A1_inv_J A) -
@@ -2337,11 +2314,8 @@ induction k.
                                                apply Rplus_le_le_0_compat. nra. apply g_pos.
                                                apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
                                                pose proof (@inverse_mat_norm_bound ty n A ).
-                                                   assert (forall i : 'I_n.+1,
-                                                            is_finite (fprec ty) (femax ty)
-                                                              (BDIV ty (Zconst ty 1) (A i i)) = true) by apply Hdivf.
-                                                   assert (forall i : 'I_n.+1,
-                                                              is_finite (fprec ty) (femax ty) (A i i) = true) by apply HAf.
+                                                   assert (forall i : 'I_n.+1, finite (BDIV (Zconst ty 1) (A i i))) by apply Hdivf.
+                                                   assert (forall i : 'I_n.+1, finite (A i i)) by apply HAf.
                                                    specialize (H5 H6 H7).
                                                    assert ((vec_inf_norm
                                                                 (FT2R_mat (A1_inv_J A) -
@@ -2562,7 +2536,7 @@ Theorem jacobi_forward_error_bound {ty} {n:nat}
   forall x0: 'cV[ftype ty]_n.+1,
   forward_error_cond A x0 b ->
   (forall k:nat, 
-   (forall i, is_finite _ _ (X_m_jacobi k x0 b A i ord0) = true) /\
+   (forall i, finite (X_m_jacobi k x0 b A i ord0)) /\
    (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re).
 Proof.
 intros.

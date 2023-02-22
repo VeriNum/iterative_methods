@@ -95,7 +95,7 @@ Definition jacobi2_highspec :=
  POST [ tdouble ]
    EX y: vector Tdouble, EX s: ftype Tdouble,
     PROP(feq s (norm2 (jacobi_residual (diag_of_matrix A) (remove_diag A) b y));
-             BCMP _ Lt true s acc = true)
+             BCMP Lt true s acc = true)
     RETURN(Vfloat s)
     SEP (mem_mgr gv;
            data_at shA1 (tarray tdouble (matrix_rows A)) (map Vfloat (diag_of_matrix A)) A1p;
