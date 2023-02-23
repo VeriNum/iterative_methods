@@ -2,7 +2,7 @@
   the fused muliply add dot product of two floating point lists; 
   the functional model for the fma dot product is defined in dotprod_model.v.*)
 
-Require Import vcfloat.VCFloat.
+Require Import vcfloat.VCFloat vcfloat.FPLib.
 Require Import List.
 Import ListNotations.
 Require Import common op_defs dotprod_model sum_model float_acc_lems list_lemmas.
@@ -22,7 +22,7 @@ Lemma fma_dotprod_forward_error:
   (Hfp: fma_dot_prod_rel (List.combine v1 v2) fp)
   (Hrp: R_dot_prod_rel (List.combine (map FT2R v1) (map FT2R v2)) rp)
   (Hra: R_dot_prod_rel (List.combine (map Rabs (map FT2R v1))  (map Rabs (map FT2R v2)) ) rp_abs)
-  (Hfin: Binary.is_finite (fprec t) (femax t) fp = true),
+  (Hfin: finite fp),
   Rabs (FT2R fp - rp) <=  g t (length v1) * Rabs rp_abs + g1 t (length v1) (length v1 - 1).
 Proof.
 intros ? ? ? ?.
@@ -77,7 +77,7 @@ simpl in Hrp; auto.
 (* non-empty l *)
 intros; inversion Hfp;
 inversion Hrp; inversion Hra; subst.
-(destruct (BMFA_finite_e _ _ _ Hfin) as (A & B & C)).
+(destruct (BFMA_finite_e _ _ _ Hfin) as (A & B & C)).
 (* IHl *)
 specialize (IHl Hlen s s0 s1 H3 H7 H11 C).
 pose proof (fma_accurate' t (fst a) (snd a) s Hfin) as Hplus.
@@ -154,10 +154,8 @@ Lemma fma_dotprod_forward_error_2:
   forall (t: type) (v1 v2: list (ftype t))
   (Hlen1: (1 <= length v1)%nat)
   (Hlen2: length v1 = length v2)
-  (Hin: (forall xy, In xy (List.combine v1 v2) ->
-      Binary.is_finite (fprec t) (femax t) (fst xy) = true /\
-      Binary.is_finite _ _ (snd xy) = true))
-  (Hfin: Binary.is_finite _ _ (fma_dotprod t v1 v2) = true),
+  (Hin: (forall xy, In xy (List.combine v1 v2) ->  finite (fst xy) /\  finite (snd xy)))
+  (Hfin: finite (fma_dotprod t v1 v2)),
   let prods := map (uncurry Rmult) (List.combine (map FT2R v1) (map FT2R v2)) in
   let abs_prods := map (uncurry Rmult) (List.combine (map Rabs (map FT2R v1)) (map Rabs (map FT2R v2))) in  
   Rabs (FT2R (fma_dotprod t v1 v2) - sum_fold prods) <= g t (length v1) * sum_fold abs_prods + g1 t (length v1) (length v1 - 1).
@@ -210,21 +208,10 @@ revert r2 H1; induction r1; intros; destruct r2; simpl; intros; inversion H1; cl
 f_equal; auto.
 Qed.
 
-Lemma BMFA_finite_e {t: type}:
- forall a u f : ftype t,
- Binary.is_finite _ _ (BFMA a f u) = true ->
- Binary.is_finite _ _ a = true  /\ Binary.is_finite _ _ f = true /\ Binary.is_finite _ _ u = true.
-Proof.
-intros.
-destruct a,f,u; inversion H; clear H; subst; 
- try solve [split; [ | split]; simpl; auto; constructor; auto].
-all: try solve [destruct s,s0,s1; discriminate].
-Qed.
-
 Lemma fma_dotprod_forward_error_3:
   forall (t: type) (v1 v2: list (ftype t))
   (Hlen2: length v1 = length v2)
-  (Hfin: Binary.is_finite _ _ (fma_dotprod t v1 v2) = true),
+  (Hfin: finite (fma_dotprod t v1 v2)),
   let prods := map (uncurry Rmult) (List.combine (map FT2R v1) (map FT2R v2)) in
   let abs_prods := map (uncurry Rmult) (List.combine (map Rabs (map FT2R v1)) (map Rabs (map FT2R v2))) in  
   Rabs (FT2R (fma_dotprod t v1 v2) - sum_fold prods) <= g t (length v1) * sum_fold abs_prods + g1 t (length v1) (length v1 - 1).
@@ -250,7 +237,7 @@ set (al := combine _ _) in *.
 clearbody al. clear - Hfin.
 induction al; simpl in *. tauto.
 intros.
-apply BMFA_finite_e in Hfin.
+apply BFMA_finite_e in Hfin.
 destruct Hfin as [? [? ?]].
 rewrite in_app_iff in H.
 destruct H.
@@ -268,10 +255,8 @@ Lemma fma_dotprod_mixed_error:
   (fp : ftype t) (rp : R)
   (Hfp: fma_dot_prod_rel (List.combine v1 v2) fp)
   (Hrp: R_dot_prod_rel (List.combine (map FT2R v1) (map FT2R v2)) rp)
-  (Hin: (forall xy, In xy (List.combine v1 v2) ->
-      Binary.is_finite (fprec t) (femax t) (fst xy) = true /\
-      Binary.is_finite _ _ (snd xy) = true))
-  (Hfin: Binary.is_finite (fprec t) (femax t) fp = true),
+  (Hin: (forall xy, In xy (List.combine v1 v2) -> finite (fst xy) /\  finite(snd xy)))
+  (Hfin: finite fp),
   exists (u : list R) (eta : R),
     length u = length v2 /\
     R_dot_prod_rel (List.combine u (map FT2R v2)) (FT2R fp - eta) /\
@@ -316,13 +301,11 @@ eapply Rle_trans; [apply He|]. unfold g1, g; simpl; nra.
  (* apply IH *)
 pose proof (length_not_empty v1 H) as Hlen3.
 assert (HIN : (forall xy : ftype t * ftype t,
-  In xy (combine v1 v2) ->
-  Binary.is_finite (fprec t) (femax t) (fst xy) = true /\
-  Binary.is_finite (fprec t) (femax t) (snd xy) = true)).
+  In xy (combine v1 v2) ->finite (fst xy) /\finite (snd xy))).
   { intros. assert (HIN: In xy (combine (f :: v1) (a :: v2))) by (simpl; auto);
   specialize (Hin xy HIN); auto. }  
 inversion Hfp; inversion Hrp; subst.
-assert (HFIN: Binary.is_finite (fprec t) (femax t) s = true).
+assert (HFIN: finite s).
   { revert Hfin; simpl.
   assert (HIN' : In (f, a) (combine (f :: v1) (a :: v2))) by (simpl; auto).
   specialize (Hin (f,a) HIN'). destruct Hin as (A & B).

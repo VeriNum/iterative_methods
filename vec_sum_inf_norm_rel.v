@@ -4,9 +4,8 @@ From mathcomp Require Import all_ssreflect ssralg ssrnat all_algebra seq matrix.
 From mathcomp.analysis Require Import Rstruct.
 Import List ListNotations.
 
-
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
-                            Float_notations Automate.
+                            Float_notations Automate FPLib.
 
 Require Import fma_floating_point_model inf_norm_properties.
 
@@ -19,7 +18,6 @@ Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 Require Import lemmas fma_is_finite finite_lemmas_additional.
 Require Import Coq.ZArith.BinInt.
-
 
 Open Scope ring_scope.
 
@@ -73,25 +71,23 @@ Lemma finite_bminus {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1) i:
       (combine 
          (vec_to_list_float n.+1 v1)
          (vec_to_list_float n.+1 v2)) ->
-   (is_finite (fprec ty) (femax ty) xy.1 = true /\
-    is_finite (fprec ty) (femax ty) xy.2 = true /\ 
+   (finite xy.1 /\finite xy.2 /\ 
     (Rabs (FT2R (fst (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re /\
      (Rabs (FT2R (snd (xy))) <= (F' ty /2) / (INR n.+1 * (1 + default_rel ty)^n.+1))%Re) ->
-  is_finite (fprec ty) (femax ty)
-  (BPLUS ty (v1 (inord i) 0) (BOPP ty (v2 (inord i) 0))) = true.
+  finite (BPLUS (v1 (inord i) 0) (BOPP (v2 (inord i) 0))).
 Proof.
 intros ? Hin Hfin.
-apply Bplus_no_ov_is_finite .
+apply Bplus_no_ov_finite .
   - apply Hfin.
-  - rewrite is_finite_Bopp. apply Hfin.
+  - rewrite finite_BOPP. apply Hfin.
   - unfold Bplus_no_overflow. 
-    pose proof (generic_round_property ty (FT2R (v1 (inord i) 0) +  FT2R (BOPP ty (v2 (inord i) 0)))).
+    pose proof (generic_round_property ty (FT2R (v1 (inord i) 0) +  FT2R (BOPP  (v2 (inord i) 0)))).
     destruct H as [d [e [Hpr [Hdf [Hde H]]]]].
     rewrite H.
     destruct Hfin as [Hf1 [Hf2 [Ha1 Ha2]]].
     apply Rle_lt_trans with 
     (Rabs ((FT2R (v1 (inord i) ord0) +
-              FT2R (BOPP ty (v2 (inord i) ord0))) *  (1 + d)) + 
+              FT2R (BOPP (v2 (inord i) ord0))) *  (1 + d)) + 
     (Rabs e))%Re.
     * apply Rabs_triang.
     * rewrite Rabs_mult.
@@ -218,10 +214,7 @@ Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
       (combine 
          (vec_to_list_float n.+1 v1)
          (vec_to_list_float n.+1 v2)) ->
-    is_finite (fprec ty) (femax ty) xy.1 = true /\
-    is_finite (fprec ty) (femax ty) xy.2 = true /\ 
-    is_finite (fprec ty) (femax ty)
-        (BPLUS ty xy.1 (BOPP ty xy.2)) = true) ->
+         finite xy.1 /\finite xy.2 /\ finite (BPLUS xy.1 (BOPP xy.2))) ->
   vec_inf_norm (FT2R_mat (v1 -f v2) - (FT2R_mat v1 - FT2R_mat v2)) <= 
   (vec_inf_norm (FT2R_mat v1) + vec_inf_norm (FT2R_mat v2)) * (default_rel ty) .
 Proof.
@@ -253,11 +246,11 @@ assert (Hin: In (v1 (inord i) ord0, v2 (inord i) ord0)
 } specialize (Hfin Hin).
 rewrite Bminus_bplus_opp_equiv.
 + assert ((FT2R (v1 (inord i) ord0) -  FT2R (v2 (inord i) ord0))%Re = 
-          (FT2R (v1 (inord i) ord0) +  FT2R (BOPP ty (v2 (inord i) ord0)))%Re ).
+          (FT2R (v1 (inord i) ord0) +  FT2R (BOPP (v2 (inord i) ord0)))%Re ).
   { unfold FT2R. rewrite B2R_Bopp. nra. }
   rewrite H0.
   apply Rle_trans with 
-  ((Rabs (FT2R (v1 (inord i) ord0)) + Rabs (FT2R (BOPP ty (v2 (inord i) ord0)))) * (default_rel ty))%Re.
+  ((Rabs (FT2R (v1 (inord i) ord0)) + Rabs (FT2R (BOPP (v2 (inord i) ord0)))) * (default_rel ty))%Re.
   - apply BPLUS_error_le_rel.
     apply Hfin. 
   - apply Rle_trans with
@@ -294,8 +287,6 @@ rewrite Bminus_bplus_opp_equiv.
                by rewrite size_map size_enum_ord in H.
     * apply Rle_refl.
 + apply Hfin.
-+ rewrite is_finite_Bopp. apply Hfin.
-+ by apply Hfin. 
 Qed.
 
 
@@ -305,10 +296,7 @@ Lemma vec_float_sub_1 {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
       (combine 
          (vec_to_list_float n.+1 v1)
          (vec_to_list_float n.+1 v2)) ->
-    is_finite (fprec ty) (femax ty) xy.1 = true /\
-    is_finite (fprec ty) (femax ty) xy.2 = true /\ 
-    is_finite (fprec ty) (femax ty)
-        (BPLUS ty xy.1 (BOPP ty xy.2)) = true) ->
+    finite xy.1 /\ finite xy.2 /\ finite (BPLUS xy.1 (BOPP xy.2))) ->
   vec_inf_norm (FT2R_mat (v1 -f v2) - (FT2R_mat v1 - FT2R_mat v2)) <= 
   (vec_inf_norm (FT2R_mat v1 - FT2R_mat v2)) * (default_rel ty) .
 Proof.
@@ -340,11 +328,11 @@ assert (Hin: In (v1 (inord i) ord0, v2 (inord i) ord0)
 } specialize (Hfin Hin).
 rewrite Bminus_bplus_opp_equiv.
 + assert ((FT2R (v1 (inord i) ord0) -  FT2R (v2 (inord i) ord0))%Re = 
-          (FT2R (v1 (inord i) ord0) +  FT2R (BOPP ty (v2 (inord i) ord0)))%Re ).
+          (FT2R (v1 (inord i) ord0) +  FT2R (BOPP (v2 (inord i) ord0)))%Re ).
   { unfold FT2R. rewrite B2R_Bopp. nra. }
   rewrite H0.
   apply Rle_trans with 
-  (Rabs (FT2R (v1 (inord i) ord0) + (FT2R (BOPP ty (v2 (inord i) ord0)))) * (default_rel ty))%Re.
+  (Rabs (FT2R (v1 (inord i) ord0) + (FT2R (BOPP (v2 (inord i) ord0)))) * (default_rel ty))%Re.
   - apply BPLUS_error_le_rel'.
     apply Hfin.
   - apply Rmult_le_compat_r.
@@ -357,7 +345,7 @@ rewrite Bminus_bplus_opp_equiv.
       ++ rewrite seq_equiv. rewrite nth_mkseq;
          last by rewrite size_map size_enum_ord in H.
          rewrite !mxE. rewrite -RminusE.
-         assert (FT2R (BOPP ty (v2 (inord i) ord0)) = 
+         assert (FT2R (BOPP (v2 (inord i) ord0)) = 
                   (- (FT2R (v2 (inord i) ord0)))%Re).
          { unfold FT2R. rewrite B2R_Bopp. nra. }
          rewrite H1. apply Rle_refl.
@@ -369,8 +357,6 @@ rewrite Bminus_bplus_opp_equiv.
          rewrite size_map size_enum_ord.
          by rewrite size_map size_enum_ord in H.
 + apply Hfin.
-+ rewrite is_finite_Bopp. apply Hfin.
-+ by apply Hfin. 
 Qed.
 
 
