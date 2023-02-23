@@ -3932,6 +3932,23 @@ assert (length (resid (jacobi_n A b x0 0)) = n.+1).
   rewrite /n prednK. by []. by apply /ssrnat.ltP.
   by []. by rewrite /x0 repeat_length.
 } specialize (H4 H5).
+rewrite H4 in H3.
+
+
+
+
+
+
+pose proof (@In_nth _ _ (combine
+          (vec_to_list_float n.+1
+             (diag_vector_mult
+                (A1_inv_J A')
+                (b' -f A2_J A' *f x0')))
+          (vec_to_list_float n.+1 x0')) xy (Zconst t 0)).
+
+
+
+
 
 rewrite v_equiv in H3.
 
