@@ -3901,6 +3901,62 @@ Lemma finite_implies_2 {t: type} :
              finite xy.2 /\
              finite (BPLUS xy.1 (BOPP xy.2)) ).
 Proof.
+intros.
+unfold norm2 in H1.
+pose proof (@dotprod_finite_implies t).
+specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
+rewrite rev_involutive in H3.
+specialize (H3 H1). apply in_rev in H2.
+pose proof (@In_nth _ (rev
+                        (combine
+                           (vec_to_list_float n.+1
+                              (diag_vector_mult
+                                 (A1_inv_J A')
+                                 (b' -f
+                                  A2_J A' *f x0')))
+                           (vec_to_list_float n.+1
+                              x0'))) xy (Zconst t 0, Zconst t 0)).
+specialize (H4 H2).
+destruct H4 as [k [Hlen Hnth]].
+assert (Hrlen: length (resid (jacobi_n A b x0 0)) = n.+1).
+{ repeat rewrite /matrix_vector_mult !map_length combine_length.
+    rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+    rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
+    rewrite /n prednK. by []. by apply /ssrnat.ltP.
+    by []. by rewrite /x0 repeat_length.
+}
+rewrite rev_length combine_length !length_veclist Nat.min_id in Hlen.
+specialize (H3 (BMULT
+                  (nth (n.+1.-1 - @inord n k)
+                     (vec_to_list_float n.+1 (A1_J A'))
+                     (Zconst t 0))
+                  (nth (n.+1.-1 - @inord n k)
+                     (vec_to_list_float n.+1
+                        (X_m_jacobi 1 x0' b' A' -f
+                         X_m_jacobi 0 x0' b' A'))
+                     (Zconst t 0)))).
+assert (In
+             (BMULT
+                (nth (n.+1.-1 - @inord n k)
+                   (vec_to_list_float n.+1
+                      (A1_J A')) 
+                   (Zconst t 0))
+                (nth (n.+1.-1 - @inord n k)
+                   (vec_to_list_float n.+1
+                      (X_m_jacobi 1 x0' b' A' -f
+                       X_m_jacobi 0 x0' b' A'))
+                   (Zconst t 0)))
+             (rev (resid (jacobi_n A b x0 0)))) by admit.
+specialize (H3 H4).
+apply BMULT_finite_e in H3.
+destruct H3 as [H31 H32].
+rewrite 
+
+
+ 
+
+
+
 Admitted.
 
 
