@@ -3817,26 +3817,55 @@ unfold norm2 in H1.
 pose proof (@dotprod_finite_implies t).
 specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
 rewrite rev_involutive in H3.
-specialize (H3 H1). 
+specialize (H3 H1).
+
+(* 
 pose proof (@In_nth _ (combine
                         (vec_to_list_float n.+1
                            (A1_J A'))
                         (vec_to_list_float n.+1
                            (X_m_jacobi 1 x0' b' A' -f
                             X_m_jacobi 0 x0' b' A'))) xy (Zconst t 1, Zconst t 0)).
+specialize (H4 H2).
+destruct H4 as [k [Hlen Hnth]].
+specialize (H3 
 
+*)
 
-
-
-
-
-
-
-unfold resid in H3.
-unfold jacobi_residual, jacob_list_fun_model.jacobi_iter in H3.
 specialize (H3 (BMULT xy.1 xy.2)).
 assert (finite (BMULT xy.1 xy.2)).
 { apply H3.
+  pose proof (@In_nth _ (combine
+                        (vec_to_list_float n.+1
+                           (A1_J A'))
+                        (vec_to_list_float n.+1
+                           (X_m_jacobi 1 x0' b' A' -f
+                            X_m_jacobi 0 x0' b' A'))) xy (Zconst t 1, Zconst t 0)).
+  specialize (H4 H2).
+  destruct H4 as [k [Hlen Hnth]].
+  assert (BMULT xy.1 xy.2 = 
+          nth k (resid (jacobi_n A b x0 0)) (Zconst t 0)).
+  { assert (resid (jacobi_n A b x0 0) = 
+             rev (vec_to_list_float n.+1
+                (\col_j0 vector_inj (resid (jacobi_n A b x0 0)) n.+1 j0 ord0))).
+    { apply v_equiv.
+      repeat rewrite /matrix_vector_mult !map_length combine_length.
+      rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+      rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
+      rewrite /n prednK. by []. by apply /ssrnat.ltP.
+      by []. by rewrite /x0 repeat_length.  
+    } rewrite H4. 
+    rewrite rev_nth.
+
+
+
+
+  rewrite in_rev.
+  apply rev_involutive.
+
+  pose proof (@v_equiv t).
+  
+  
   
   
 
