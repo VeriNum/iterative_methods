@@ -3834,13 +3834,13 @@ specialize (H3
 
 specialize (H3 (BMULT xy.1 xy.2)).
 assert (finite (BMULT xy.1 xy.2)).
-{ apply H3.
-  pose proof (@In_nth _ (combine
+{ apply H3. apply in_rev in H2.
+  pose proof (@In_nth _ (rev (combine
                         (vec_to_list_float n.+1
                            (A1_J A'))
                         (vec_to_list_float n.+1
                            (X_m_jacobi 1 x0' b' A' -f
-                            X_m_jacobi 0 x0' b' A'))) xy (Zconst t 1, Zconst t 0)).
+                            X_m_jacobi 0 x0' b' A')))) xy (Zconst t 0, Zconst t 0)).
   specialize (H4 H2).
   destruct H4 as [k [Hlen Hnth]].
   assert (BMULT xy.1 xy.2 = 
@@ -3855,7 +3855,26 @@ assert (finite (BMULT xy.1 xy.2)).
       rewrite /n prednK. by []. by apply /ssrnat.ltP.
       by []. by rewrite /x0 repeat_length.  
     } rewrite H4. 
-    rewrite rev_nth.
+    rewrite rev_nth. rewrite length_veclist.
+    assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
+    rewrite H5.
+    assert ( (\col_j0 vector_inj
+                (resid
+                   (jacobi_n A b x0 0))
+                n.+1 j0 ord0) = 
+                @vector_inj _  (resid (jacobi_n A b x0 0)) n.+1).
+    {  apply matrixP. unfold eqrel. intros. by rewrite !mxE. }
+    rewrite H6. rewrite vector_residual_equiv; try by [].
+    rewrite -/n. rewrite nth_vec_to_list_float.
+    rewrite mxE. rewrite -/A' -/b' -/x0'.
+    destruct xy. rewrite rev_combine in Hnth.
+    rewrite combine_nth in Hnth.
+    rewrite [in LHS]/=. rewrite !rev_nth !length_veclist in Hnth.
+    rewrite !H5 in Hnth.
+    assert (f = nth (n.+1.-1 - k)%coq_nat
+                    (vec_to_list_float n.+1
+                       (A1_J A')) (Zconst t 0)).
+    { auto.
 
 
 
