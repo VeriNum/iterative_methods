@@ -3817,7 +3817,22 @@ unfold norm2 in H1.
 pose proof (@dotprod_finite_implies t).
 specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
 rewrite rev_involutive in H3.
-specialize (H3 H1). unfold resid in H3.
+specialize (H3 H1). 
+pose proof (@In_nth _ (combine
+                        (vec_to_list_float n.+1
+                           (A1_J A'))
+                        (vec_to_list_float n.+1
+                           (X_m_jacobi 1 x0' b' A' -f
+                            X_m_jacobi 0 x0' b' A'))) xy (Zconst t 1, Zconst t 0)).
+
+
+
+
+
+
+
+
+unfold resid in H3.
 unfold jacobi_residual, jacob_list_fun_model.jacobi_iter in H3.
 specialize (H3 (BMULT xy.1 xy.2)).
 assert (finite (BMULT xy.1 xy.2)).
