@@ -3818,20 +3818,13 @@ pose proof (@dotprod_finite_implies t).
 specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
 rewrite rev_involutive in H3.
 specialize (H3 H1).
-
-(* 
-pose proof (@In_nth _ (combine
-                        (vec_to_list_float n.+1
-                           (A1_J A'))
-                        (vec_to_list_float n.+1
-                           (X_m_jacobi 1 x0' b' A' -f
-                            X_m_jacobi 0 x0' b' A'))) xy (Zconst t 1, Zconst t 0)).
-specialize (H4 H2).
-destruct H4 as [k [Hlen Hnth]].
-specialize (H3 
-
-*)
-
+assert (Hrlen: length (resid (jacobi_n A b x0 0)) = n.+1).
+{ repeat rewrite /matrix_vector_mult !map_length combine_length.
+    rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+    rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
+    rewrite /n prednK. by []. by apply /ssrnat.ltP.
+    by []. by rewrite /x0 repeat_length.
+}
 specialize (H3 (BMULT xy.1 xy.2)).
 assert (finite (BMULT xy.1 xy.2)).
 { apply H3. apply in_rev in H2.
@@ -3843,17 +3836,13 @@ assert (finite (BMULT xy.1 xy.2)).
                             X_m_jacobi 0 x0' b' A')))) xy (Zconst t 0, Zconst t 0)).
   specialize (H4 H2).
   destruct H4 as [k [Hlen Hnth]].
+  rewrite rev_length combine_length !length_veclist Nat.min_id in Hlen.
   assert (BMULT xy.1 xy.2 = 
           nth k (resid (jacobi_n A b x0 0)) (Zconst t 0)).
   { assert (resid (jacobi_n A b x0 0) = 
              rev (vec_to_list_float n.+1
                 (\col_j0 vector_inj (resid (jacobi_n A b x0 0)) n.+1 j0 ord0))).
-    { apply v_equiv.
-      repeat rewrite /matrix_vector_mult !map_length combine_length.
-      rewrite !map_length. unfold jacobi_n. rewrite iter_length.
-      rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
-      rewrite /n prednK. by []. by apply /ssrnat.ltP.
-      by []. by rewrite /x0 repeat_length.  
+    { apply v_equiv. by rewrite Hrlen.  
     } rewrite H4. 
     rewrite rev_nth. rewrite length_veclist.
     assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
@@ -3870,31 +3859,24 @@ assert (finite (BMULT xy.1 xy.2)).
     destruct xy. rewrite rev_combine in Hnth.
     rewrite combine_nth in Hnth.
     rewrite [in LHS]/=. rewrite !rev_nth !length_veclist in Hnth.
-    rewrite !H5 in Hnth.
-    assert (f = nth (n.+1.-1 - k)%coq_nat
-                    (vec_to_list_float n.+1
-                       (A1_J A')) (Zconst t 0)).
-    { auto.
-
-
-
-
-  rewrite in_rev.
-  apply rev_involutive.
-
-  pose proof (@v_equiv t).
-  
-  
-  
-  
-
-
-
-
-
- admit. }
+    rewrite !H5 in Hnth. apply inject_pair_iff in Hnth.
+    destruct Hnth as [Hnth1 Hnth2]. 
+    rewrite -Hnth1 -Hnth2.
+    rewrite inordK; try by apply Hlen.  by [].
+    apply /ssrnat.ltP. apply Hlen.
+    apply Hlen.
+    apply Hlen.
+    by rewrite !rev_length !length_veclist.
+    by rewrite !length_veclist.
+    apply /ssrnat.ltP. apply Hlen.
+    unfold x0. by rewrite repeat_length.
+    by rewrite length_veclist.
+  }rewrite H4.
+  rewrite in_rev. rewrite rev_involutive.
+  apply nth_In. rewrite Hrlen. apply Hlen.
+}
 repeat split; try apply H4; try (apply BMULT_finite_e in H4; apply H4).
-Admitted.
+Qed.
 
 Lemma finite_implies_2 {t: type} :
  forall (A: matrix t) (b: vector t),
