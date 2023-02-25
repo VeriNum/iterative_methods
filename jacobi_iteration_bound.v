@@ -4140,6 +4140,16 @@ assert (In
 }
 specialize (H3 H4).
 apply BMULT_finite_e in H3.
+destruct H3 as [_ H3].
+rewrite inordK in H3.
+rewrite nth_vec_to_list_float in H3.
+rewrite mxE in H3.
+apply Bminus_bplus_opp_implies in H3.
+apply BPLUS_finite_e in H3.
+destruct H3 as [H3 _]. rewrite mxE in H3.
+rewrite inordK in H3.
+
+
 
 
 
