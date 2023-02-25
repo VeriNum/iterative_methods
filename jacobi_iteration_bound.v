@@ -4345,6 +4345,119 @@ Lemma finite_implies_5 {t: type} :
                                  x0')) ->
                          finite xy.1 /\
                          finite xy.2).
+Proof.
+intros.
+intros.
+unfold norm2 in H1.
+pose proof (@dotprod_finite_implies t).
+specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
+rewrite rev_involutive in H3.
+specialize (H3 H1). apply in_rev in H2.
+pose proof (@In_nth _ (rev
+                (combine
+                   (vec_to_list_float n.+1
+                      (\row_j A2_J A'
+                               (inord i) j)^T)
+                   (vec_to_list_float n.+1
+                      x0'))) xy (Zconst t 0, Zconst t 0)).
+specialize (H4 H2).
+destruct H4 as [k [Hlen Hnth]].
+assert (Hrlen: length (resid (jacobi_n A b x0 0)) = n.+1).
+{ repeat rewrite /matrix_vector_mult !map_length combine_length.
+    rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+    rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
+    rewrite /n prednK. by []. by apply /ssrnat.ltP.
+    by []. by rewrite /x0 repeat_length.
+}
+rewrite rev_length combine_length !length_veclist Nat.min_id in Hlen.
+specialize (H3 (BMULT
+                  (nth (n.+1.-1 - @inord n k)
+                     (vec_to_list_float n.+1 (A1_J A'))
+                     (Zconst t 0))
+                  (nth (n.+1.-1 - @inord n k)
+                     (vec_to_list_float n.+1
+                        (X_m_jacobi 1 x0' b' A' -f
+                         X_m_jacobi 0 x0' b' A'))
+                     (Zconst t 0)))).
+assert (In
+             (BMULT
+                (nth (n.+1.-1 - @inord n k)
+                   (vec_to_list_float n.+1
+                      (A1_J A')) 
+                   (Zconst t 0))
+                (nth (n.+1.-1 - @inord n k)
+                   (vec_to_list_float n.+1
+                      (X_m_jacobi 1 x0' b' A' -f
+                       X_m_jacobi 0 x0' b' A'))
+                   (Zconst t 0)))
+             (rev (resid (jacobi_n A b x0 0)))).
+{ rewrite inordK.
+  assert ((BMULT
+           (nth (n.+1.-1 - k)
+              (vec_to_list_float n.+1
+                 (A1_J A')) (Zconst t 0))
+           (nth (n.+1.-1 - k)
+              (vec_to_list_float n.+1
+                 (X_m_jacobi 1 x0' b' A' -f
+                  X_m_jacobi 0 x0' b' A'))
+              (Zconst t 0))) = 
+          nth k (resid (jacobi_n A b x0 0)) (Zconst t 0)).
+  { assert (resid (jacobi_n A b x0 0) = 
+             rev (vec_to_list_float n.+1
+                (\col_j0 vector_inj (resid (jacobi_n A b x0 0)) n.+1 j0 ord0))).
+    { apply v_equiv. by rewrite Hrlen.  
+    } rewrite H4. 
+    rewrite rev_nth. rewrite length_veclist.
+    assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
+    rewrite H5.
+    assert ( (\col_j0 vector_inj
+                (resid
+                   (jacobi_n A b x0 0))
+                n.+1 j0 ord0) = 
+                @vector_inj _  (resid (jacobi_n A b x0 0)) n.+1).
+    {  apply matrixP. unfold eqrel. intros. by rewrite !mxE. }
+    rewrite H6. rewrite vector_residual_equiv; try by [].
+    rewrite -/n. rewrite -/A' -/b' -/x0'.
+    unfold residual_math. rewrite [in RHS]nth_vec_to_list_float.
+    rewrite mxE. rewrite inordK. by [].
+    by apply /ssrnat.ltP.
+    by apply /ssrnat.ltP.
+    by rewrite repeat_length. 
+    by rewrite length_veclist.
+  } rewrite H4. rewrite in_rev.
+  rewrite rev_involutive.
+  apply nth_In. by rewrite Hrlen.
+  by apply /ssrnat.ltP.
+}
+specialize (H3 H4).
+rewrite rev_nth in Hnth.
+rewrite combine_length !length_veclist Nat.min_id in Hnth.
+apply BMULT_finite_e in H3.
+destruct H3 as [_ H3].
+rewrite nth_vec_to_list_float in H3.
+rewrite mxE in H3.
+apply Bminus_bplus_opp_implies in H3.
+apply BPLUS_finite_e  in H3.
+destruct H3 as [H3 _].
+rewrite mxE in H3.
+apply BMULT_finite_e in H3.
+destruct H3 as [_ H3].
+rewrite inord_val in H3.
+rewrite inordK in H3.
+rewrite nth_vec_to_list_float in H3.
+rewrite mxE in H3.
+apply Bminus_bplus_opp_implies in H3.
+apply BPLUS_finite_e  in H3.
+destruct H3 as [_ H3].
+apply finite_is_finite in H3.
+rewrite is_finite_Bopp in H3.
+rewrite mxE in H3.
+
+
+
+
+
+
 Admitted.
 
 
