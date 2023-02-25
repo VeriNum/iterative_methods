@@ -4496,7 +4496,7 @@ Lemma finite_implies_6 {t: type} :
   let b' := (@vector_inj _ b n.+1) in
   let x0' := (@vector_inj _ x0 n.+1) in
   finite (norm2 (resid (jacobi_n A b x0 0))) ->
-  (forall i : nat, (i < n.+1)%nat ->
+  (forall i : 'I_n.+1,
                        finite 
                          (let l1 :=
                             vec_to_list_float n.+1
@@ -4511,9 +4511,9 @@ Proof.
 intros.
 unfold norm2 in H1.
 pose proof (@dotprod_finite_implies t).
-specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
-rewrite rev_involutive in H3.
-specialize (H3 H1). 
+specialize (H2 (rev (resid (jacobi_n A b x0 0)))).
+rewrite rev_involutive in H2.
+specialize (H2 H1). 
 assert (Hrlen: length (resid (jacobi_n A b x0 0)) = n.+1).
 { repeat rewrite /matrix_vector_mult !map_length combine_length.
     rewrite !map_length. unfold jacobi_n. rewrite iter_length.
@@ -4521,7 +4521,7 @@ assert (Hrlen: length (resid (jacobi_n A b x0 0)) = n.+1).
     rewrite /n prednK. by []. by apply /ssrnat.ltP.
     by []. by rewrite /x0 repeat_length.
 }
-specialize (H3 (BMULT
+specialize (H2 (BMULT
                   (nth (n.+1.-1 - i)
                      (vec_to_list_float n.+1 (A1_J A'))
                      (Zconst t 0))
@@ -4556,52 +4556,52 @@ assert (In
              rev (vec_to_list_float n.+1
                 (\col_j0 vector_inj (resid (jacobi_n A b x0 0)) n.+1 j0 ord0))).
     { apply v_equiv. by rewrite Hrlen.  
-    } rewrite H4. 
+    } rewrite H3. 
     rewrite rev_nth. rewrite length_veclist.
     assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat) by lia.
-    rewrite H5.
+    rewrite H4.
     assert ( (\col_j0 vector_inj
                 (resid
                    (jacobi_n A b x0 0))
                 n.+1 j0 ord0) = 
                 @vector_inj _  (resid (jacobi_n A b x0 0)) n.+1).
     {  apply matrixP. unfold eqrel. intros. by rewrite !mxE. }
-    rewrite H6. rewrite vector_residual_equiv; try by [].
+    rewrite H5. rewrite vector_residual_equiv; try by [].
     rewrite -/n. rewrite -/A' -/b' -/x0'.
     unfold residual_math. rewrite [in RHS]nth_vec_to_list_float.
-    rewrite mxE. rewrite inordK. by []. apply H2.
-    apply H2.
+    rewrite mxE. rewrite inordK. by []. apply ltn_ord.
+    apply ltn_ord.
     by rewrite repeat_length. 
-    rewrite length_veclist. apply /ssrnat.ltP. apply H2.
-  } rewrite H4. rewrite in_rev.
+    rewrite length_veclist. apply /ssrnat.ltP. apply ltn_ord.
+  } rewrite H3. rewrite in_rev.
   rewrite rev_involutive.
   apply nth_In. rewrite Hrlen.
-  apply /ssrnat.ltP. apply H2.
+  apply /ssrnat.ltP. apply ltn_ord.
 }
-specialize (H3 H4).
-apply BMULT_finite_e in H3.
-destruct H3 as [_ H3].
-rewrite nth_vec_to_list_float in H3.
-rewrite mxE in H3.
-apply Bminus_bplus_opp_implies in H3.
-apply BPLUS_finite_e in H3.
-destruct H3 as [H3 _].
-rewrite mxE in H3.
-apply BMULT_finite_e in H3.
-destruct H3 as [_ H3].
-rewrite nth_vec_to_list_float in H3.
-rewrite mxE in H3.
-apply Bminus_bplus_opp_implies in H3.
-apply BPLUS_finite_e in H3.
-destruct H3 as [_ H3].
-rewrite inord_val in H3.
-rewrite mxE in H3.
-apply finite_is_finite in H3. 
-rewrite is_finite_Bopp in H3.
+specialize (H2 H3).
+apply BMULT_finite_e in H2.
+destruct H2 as [_ H2].
+rewrite nth_vec_to_list_float in H2.
+rewrite mxE in H2.
+apply Bminus_bplus_opp_implies in H2.
+apply BPLUS_finite_e in H2.
+destruct H2 as [H2 _].
+rewrite mxE in H2.
+apply BMULT_finite_e in H2.
+destruct H2 as [_ H2].
+rewrite nth_vec_to_list_float in H2.
+rewrite mxE in H2.
+apply Bminus_bplus_opp_implies in H2.
+apply BPLUS_finite_e in H2.
+destruct H2 as [_ H2].
+rewrite inord_val in H2.
+rewrite mxE in H2.
+apply finite_is_finite in H2. 
+rewrite is_finite_Bopp in H2.
 apply finite_is_finite.
-apply H3.
-rewrite inordK; apply H2.
 apply H2.
+rewrite inordK; apply ltn_ord.
+apply ltn_ord.
 Qed.
 
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
@@ -5007,7 +5007,7 @@ destruct H0.
                   apply H17. rewrite HeqA' Heqx0' in H16.
                   apply H16.
               }
-              assert (forall i : nat,
+              assert (forall i : 'I_n.+1,
                        finite 
                          (let l1 :=
                             vec_to_list_float n.+1
