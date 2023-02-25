@@ -4068,7 +4068,7 @@ pose proof (@In_nth _ (rev
                          (vec_to_list_float n.+1
                             (A1_inv_J A'))
                          (vec_to_list_float n.+1
-                            (b' -f A2_J A' *f x0')))) xy (Zconst t 1, Zconst t 0)).
+                            (b' -f A2_J A' *f x0')))) xy (Zconst t 0, Zconst t 0)).
 specialize (H4 H2).
 destruct H4 as [k [Hlen Hnth]].
 assert (Hrlen: length (resid (jacobi_n A b x0 0)) = n.+1).
@@ -4148,13 +4148,26 @@ apply Bminus_bplus_opp_implies in H3.
 apply BPLUS_finite_e in H3.
 destruct H3 as [H3 _]. rewrite mxE in H3.
 rewrite inordK in H3.
-
-
-
-
-
-
-Admitted.
+destruct xy .
+rewrite rev_nth combine_length !length_veclist Nat.min_id in Hnth.
+assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
+rewrite H5 in Hnth.
+rewrite combine_nth in Hnth.
+apply inject_pair_iff in Hnth.
+simpl.
+destruct Hnth as [Hnth1 Hnth2].
+rewrite -Hnth1 -Hnth2.
+repeat split; try apply H3.
+apply BMULT_finite_e in H3.
+apply H3.
+apply BMULT_finite_e in H3.
+apply H3.
+by rewrite !length_veclist.
+apply Hlen.
+by apply /ssrnat.ltP.
+by apply /ssrnat.ltP.
+by apply /ssrnat.ltP.
+Qed.
 
 
 Lemma finite_implies_4 {t: type} :
