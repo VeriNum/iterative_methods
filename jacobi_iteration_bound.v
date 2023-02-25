@@ -3949,10 +3949,29 @@ assert (In
              (rev (resid (jacobi_n A b x0 0)))) by admit.
 specialize (H3 H4).
 apply BMULT_finite_e in H3.
-destruct H3 as [H31 H32].
-rewrite 
-
-
+destruct H3 as [H31 H32]. rewrite inordK in H32.
+rewrite nth_vec_to_list_float in H32.
+rewrite mxE in H32.
+apply Bminus_bplus_opp_implies in H32.
+destruct xy.
+rewrite rev_nth combine_length !length_veclist Nat.min_id in Hnth.
+assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
+rewrite H3 in Hnth.
+rewrite combine_nth in Hnth.
+apply inject_pair_iff in Hnth.
+simpl.
+destruct Hnth as [Hnth1 Hnth2].
+assert (X_m_jacobi 1 x0' b' A' (inord k) ord0 = 
+        nth (n.+1.-1 - k)%coq_nat
+          (vec_to_list_float n.+1
+             (diag_vector_mult
+                (A1_inv_J A')
+                (b' -f A2_J A' *f x0')))
+          (Zconst t 0)).
+{ rewrite mxE. rewrite [in RHS]nth_vec_to_list_float.
+  rewrite mxE. by [].
+  by apply /ssrnat.ltP.
+} rewrite -H5 in Hnth1.
  
 
 
