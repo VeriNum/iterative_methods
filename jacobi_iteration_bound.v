@@ -4371,44 +4371,43 @@ assert (Hrlen: length (resid (jacobi_n A b x0 0)) = n.+1).
 }
 rewrite rev_length combine_length !length_veclist Nat.min_id in Hlen.
 specialize (H3 (BMULT
-                  (nth (n.+1.-1 - @inord n k)
+                  (nth (n.+1.-1 - i)
                      (vec_to_list_float n.+1 (A1_J A'))
                      (Zconst t 0))
-                  (nth (n.+1.-1 - @inord n k)
+                  (nth (n.+1.-1 - i)
                      (vec_to_list_float n.+1
                         (X_m_jacobi 1 x0' b' A' -f
                          X_m_jacobi 0 x0' b' A'))
                      (Zconst t 0)))).
 assert (In
              (BMULT
-                (nth (n.+1.-1 - @inord n k)
+                (nth (n.+1.-1 - i)
                    (vec_to_list_float n.+1
                       (A1_J A')) 
                    (Zconst t 0))
-                (nth (n.+1.-1 - @inord n k)
+                (nth (n.+1.-1 - i)
                    (vec_to_list_float n.+1
                       (X_m_jacobi 1 x0' b' A' -f
                        X_m_jacobi 0 x0' b' A'))
                    (Zconst t 0)))
              (rev (resid (jacobi_n A b x0 0)))).
-{ rewrite inordK.
-  assert ((BMULT
-           (nth (n.+1.-1 - k)
+{ assert ((BMULT
+           (nth (n.+1.-1 - i)
               (vec_to_list_float n.+1
                  (A1_J A')) (Zconst t 0))
-           (nth (n.+1.-1 - k)
+           (nth (n.+1.-1 - i)
               (vec_to_list_float n.+1
                  (X_m_jacobi 1 x0' b' A' -f
                   X_m_jacobi 0 x0' b' A'))
               (Zconst t 0))) = 
-          nth k (resid (jacobi_n A b x0 0)) (Zconst t 0)).
+          nth i (resid (jacobi_n A b x0 0)) (Zconst t 0)).
   { assert (resid (jacobi_n A b x0 0) = 
              rev (vec_to_list_float n.+1
                 (\col_j0 vector_inj (resid (jacobi_n A b x0 0)) n.+1 j0 ord0))).
     { apply v_equiv. by rewrite Hrlen.  
     } rewrite H4. 
     rewrite rev_nth. rewrite length_veclist.
-    assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
+    assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat) by lia.
     rewrite H5.
     assert ( (\col_j0 vector_inj
                 (resid
@@ -4419,15 +4418,14 @@ assert (In
     rewrite H6. rewrite vector_residual_equiv; try by [].
     rewrite -/n. rewrite -/A' -/b' -/x0'.
     unfold residual_math. rewrite [in RHS]nth_vec_to_list_float.
-    rewrite mxE. rewrite inordK. by [].
-    by apply /ssrnat.ltP.
-    by apply /ssrnat.ltP.
+    rewrite mxE. rewrite inordK. by []. apply ltn_ord.
+    apply ltn_ord.
     by rewrite repeat_length. 
-    by rewrite length_veclist.
+    rewrite length_veclist. apply /ssrnat.ltP. apply ltn_ord.
   } rewrite H4. rewrite in_rev.
   rewrite rev_involutive.
-  apply nth_In. by rewrite Hrlen.
-  by apply /ssrnat.ltP.
+  apply nth_In. rewrite Hrlen.
+  apply /ssrnat.ltP. apply ltn_ord.
 }
 specialize (H3 H4).
 rewrite rev_nth in Hnth.
@@ -4443,7 +4441,6 @@ rewrite mxE in H3.
 apply BMULT_finite_e in H3.
 destruct H3 as [_ H3].
 rewrite inord_val in H3.
-rewrite inordK in H3.
 rewrite nth_vec_to_list_float in H3.
 rewrite mxE in H3.
 apply Bminus_bplus_opp_implies in H3.
@@ -4452,7 +4449,36 @@ destruct H3 as [_ H3].
 apply finite_is_finite in H3.
 rewrite is_finite_Bopp in H3.
 rewrite mxE in H3.
-
+pose proof (@fma_jacobi_forward_error.dotprod_finite_implies _ t).
+specialize (H5 (combine (vec_to_list_float n.+1
+                           (\row_j A2_J A' (inord i) j)^T)
+                        (vec_to_list_float n.+1
+                            (\col_j x0' j ord0)))).
+rewrite finite_is_finite in H5.
+rewrite combine_split  in H5.
+assert ((vec_to_list_float n.+1
+             (\row_j A2_J A' 
+                       (inord i) j)^T,
+           vec_to_list_float n.+1
+             (\col_j x0' j ord0)).1 = 
+        vec_to_list_float n.+1
+             (\row_j A2_J A' 
+                       (inord i) j)^T) by auto.
+assert ((vec_to_list_float n.+1
+             (\row_j A2_J A' 
+                       (inord i) j)^T,
+           vec_to_list_float n.+1
+             (\col_j x0' j ord0)).2 = 
+          vec_to_list_float n.+1
+             (\col_j x0' j ord0)) by auto.
+rewrite H6 H7 in H5. clear H6 H7.
+specialize (H5 H3).
+specialize (H5 xy).
+assert ((\col_j x0' j ord0) = x0').
+{ apply matrixP. unfold eqrel. intros. by rewrite !mxE. }
+rewrite H6 in H5. apply in_rev in H2.
+specialize (H5 H2).
+apply H5.
 
 
 
