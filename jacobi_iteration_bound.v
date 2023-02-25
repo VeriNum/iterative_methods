@@ -4347,7 +4347,6 @@ Lemma finite_implies_5 {t: type} :
                          finite xy.2).
 Proof.
 intros.
-intros.
 unfold norm2 in H1.
 pose proof (@dotprod_finite_implies t).
 specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
@@ -4497,7 +4496,7 @@ Lemma finite_implies_6 {t: type} :
   let b' := (@vector_inj _ b n.+1) in
   let x0' := (@vector_inj _ x0 n.+1) in
   finite (norm2 (resid (jacobi_n A b x0 0))) ->
-  (forall i : nat,
+  (forall i : nat, (i < n.+1)%nat ->
                        finite 
                          (let l1 :=
                             vec_to_list_float n.+1
@@ -4508,6 +4507,83 @@ Lemma finite_implies_6 {t: type} :
                             vec_to_list_float n.+1
                               (\col_j x0' j 0) in
                           dotprod_r l1 l2)) .
+Proof.
+intros.
+unfold norm2 in H1.
+pose proof (@dotprod_finite_implies t).
+specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
+rewrite rev_involutive in H3.
+specialize (H3 H1). 
+assert (Hrlen: length (resid (jacobi_n A b x0 0)) = n.+1).
+{ repeat rewrite /matrix_vector_mult !map_length combine_length.
+    rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+    rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
+    rewrite /n prednK. by []. by apply /ssrnat.ltP.
+    by []. by rewrite /x0 repeat_length.
+}
+specialize (H3 (BMULT
+                  (nth (n.+1.-1 - i)
+                     (vec_to_list_float n.+1 (A1_J A'))
+                     (Zconst t 0))
+                  (nth (n.+1.-1 - i)
+                     (vec_to_list_float n.+1
+                        (X_m_jacobi 1 x0' b' A' -f
+                         X_m_jacobi 0 x0' b' A'))
+                     (Zconst t 0)))).
+assert (In
+             (BMULT
+                (nth (n.+1.-1 - i)
+                   (vec_to_list_float n.+1
+                      (A1_J A')) 
+                   (Zconst t 0))
+                (nth (n.+1.-1 - i)
+                   (vec_to_list_float n.+1
+                      (X_m_jacobi 1 x0' b' A' -f
+                       X_m_jacobi 0 x0' b' A'))
+                   (Zconst t 0)))
+             (rev (resid (jacobi_n A b x0 0)))).
+{ assert ((BMULT
+           (nth (n.+1.-1 - i)
+              (vec_to_list_float n.+1
+                 (A1_J A')) (Zconst t 0))
+           (nth (n.+1.-1 - i)
+              (vec_to_list_float n.+1
+                 (X_m_jacobi 1 x0' b' A' -f
+                  X_m_jacobi 0 x0' b' A'))
+              (Zconst t 0))) = 
+          nth i (resid (jacobi_n A b x0 0)) (Zconst t 0)).
+  { assert (resid (jacobi_n A b x0 0) = 
+             rev (vec_to_list_float n.+1
+                (\col_j0 vector_inj (resid (jacobi_n A b x0 0)) n.+1 j0 ord0))).
+    { apply v_equiv. by rewrite Hrlen.  
+    } rewrite H4. 
+    rewrite rev_nth. rewrite length_veclist.
+    assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat) by lia.
+    rewrite H5.
+    assert ( (\col_j0 vector_inj
+                (resid
+                   (jacobi_n A b x0 0))
+                n.+1 j0 ord0) = 
+                @vector_inj _  (resid (jacobi_n A b x0 0)) n.+1).
+    {  apply matrixP. unfold eqrel. intros. by rewrite !mxE. }
+    rewrite H6. rewrite vector_residual_equiv; try by [].
+    rewrite -/n. rewrite -/A' -/b' -/x0'.
+    unfold residual_math. rewrite [in RHS]nth_vec_to_list_float.
+    rewrite mxE. rewrite inordK. by []. apply H2.
+    apply H2.
+    by rewrite repeat_length. 
+    rewrite length_veclist. apply /ssrnat.ltP. apply H2.
+  } rewrite H4. rewrite in_rev.
+  rewrite rev_involutive.
+  apply nth_In. rewrite Hrlen.
+  apply /ssrnat.ltP. apply H2.
+}
+specialize (H3 H4).
+
+
+
+
+
 Admitted.
 
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
