@@ -4579,12 +4579,30 @@ assert (In
   apply /ssrnat.ltP. apply H2.
 }
 specialize (H3 H4).
-
-
-
-
-
-Admitted.
+apply BMULT_finite_e in H3.
+destruct H3 as [_ H3].
+rewrite nth_vec_to_list_float in H3.
+rewrite mxE in H3.
+apply Bminus_bplus_opp_implies in H3.
+apply BPLUS_finite_e in H3.
+destruct H3 as [H3 _].
+rewrite mxE in H3.
+apply BMULT_finite_e in H3.
+destruct H3 as [_ H3].
+rewrite nth_vec_to_list_float in H3.
+rewrite mxE in H3.
+apply Bminus_bplus_opp_implies in H3.
+apply BPLUS_finite_e in H3.
+destruct H3 as [_ H3].
+rewrite inord_val in H3.
+rewrite mxE in H3.
+apply finite_is_finite in H3. 
+rewrite is_finite_Bopp in H3.
+apply finite_is_finite.
+apply H3.
+rewrite inordK; apply H2.
+apply H2.
+Qed.
 
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
