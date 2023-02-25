@@ -3972,10 +3972,27 @@ assert (X_m_jacobi 1 x0' b' A' (inord k) ord0 =
   rewrite mxE. by [].
   by apply /ssrnat.ltP.
 } rewrite -H5 in Hnth1.
- 
-
-
-
+assert (X_m_jacobi 0 x0' b' A' (inord k) ord0 = 
+        nth (n.+1.-1 - k)%coq_nat
+          (vec_to_list_float n.+1 x0')
+          (Zconst t 0)).
+{ rewrite mxE. rewrite [in RHS]nth_vec_to_list_float.
+  rewrite mxE. by [].
+  by apply /ssrnat.ltP.
+} rewrite -H6 in Hnth2.
+rewrite -Hnth1 -Hnth2.
+repeat split; try apply H32.
+apply BPLUS_finite_e in H32.
+apply H32.
+apply BPLUS_finite_e in H32.
+destruct H32 as [_ H32].
+apply finite_is_finite in H32.
+rewrite is_finite_Bopp in H32.
+by apply finite_is_finite.
+by rewrite !length_veclist.
+apply Hlen.
+by apply /ssrnat.ltP.
+by apply /ssrnat.ltP.
 Admitted.
 
 
