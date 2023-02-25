@@ -4287,12 +4287,40 @@ rewrite inordK in H3.
 rewrite nth_vec_to_list_float in H3.
 rewrite mxE in H3.
 apply Bminus_bplus_opp_implies in H3.
+rewrite rev_nth in Hnth.
+rewrite combine_length !length_veclist Nat.min_id in Hnth.
+rewrite combine_nth in Hnth.
+assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
+rewrite H5 in Hnth.
+destruct xy .
+simpl.
+apply inject_pair_iff in Hnth.
+simpl.
+destruct Hnth as [Hnth1 Hnth2].
+rewrite -Hnth1 -Hnth2.
+repeat split; try apply H3.
 apply BPLUS_finite_e in H3.
 destruct H3 as [H31 H32].
-
-
-
-Admitted.
+rewrite nth_vec_to_list_float.
+apply H31.
+by apply /ssrnat.ltP.
+rewrite nth_vec_to_list_float.
+apply BPLUS_finite_e in H3.
+destruct H3 as [H31 H32].
+apply finite_is_finite .
+apply finite_is_finite in H32.
+by rewrite is_finite_Bopp in H32.
+by apply /ssrnat.ltP.
+rewrite !nth_vec_to_list_float.
+apply H3.
+by apply /ssrnat.ltP.
+by apply /ssrnat.ltP.
+by rewrite !length_veclist.
+by rewrite combine_length !length_veclist Nat.min_id.
+by apply /ssrnat.ltP.
+by apply /ssrnat.ltP.
+rewrite inordK; by apply /ssrnat.ltP.
+Qed.
 
 
 Lemma finite_implies_5 {t: type} :
