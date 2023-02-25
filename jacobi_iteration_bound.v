@@ -3946,7 +3946,45 @@ assert (In
                       (X_m_jacobi 1 x0' b' A' -f
                        X_m_jacobi 0 x0' b' A'))
                    (Zconst t 0)))
-             (rev (resid (jacobi_n A b x0 0)))) by admit.
+             (rev (resid (jacobi_n A b x0 0)))).
+{ rewrite inordK.
+  assert ((BMULT
+           (nth (n.+1.-1 - k)
+              (vec_to_list_float n.+1
+                 (A1_J A')) (Zconst t 0))
+           (nth (n.+1.-1 - k)
+              (vec_to_list_float n.+1
+                 (X_m_jacobi 1 x0' b' A' -f
+                  X_m_jacobi 0 x0' b' A'))
+              (Zconst t 0))) = 
+          nth k (resid (jacobi_n A b x0 0)) (Zconst t 0)).
+  { assert (resid (jacobi_n A b x0 0) = 
+             rev (vec_to_list_float n.+1
+                (\col_j0 vector_inj (resid (jacobi_n A b x0 0)) n.+1 j0 ord0))).
+    { apply v_equiv. by rewrite Hrlen.  
+    } rewrite H4. 
+    rewrite rev_nth. rewrite length_veclist.
+    assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
+    rewrite H5.
+    assert ( (\col_j0 vector_inj
+                (resid
+                   (jacobi_n A b x0 0))
+                n.+1 j0 ord0) = 
+                @vector_inj _  (resid (jacobi_n A b x0 0)) n.+1).
+    {  apply matrixP. unfold eqrel. intros. by rewrite !mxE. }
+    rewrite H6. rewrite vector_residual_equiv; try by [].
+    rewrite -/n. rewrite -/A' -/b' -/x0'.
+    unfold residual_math. rewrite [in RHS]nth_vec_to_list_float.
+    rewrite mxE. rewrite inordK. by [].
+    by apply /ssrnat.ltP.
+    by apply /ssrnat.ltP.
+    by rewrite repeat_length. 
+    by rewrite length_veclist.
+  } rewrite H4. rewrite in_rev.
+  rewrite rev_involutive.
+  apply nth_In. by rewrite Hrlen.
+  by apply /ssrnat.ltP.
+}
 specialize (H3 H4).
 apply BMULT_finite_e in H3.
 destruct H3 as [H31 H32]. rewrite inordK in H32.
@@ -3993,7 +4031,7 @@ by rewrite !length_veclist.
 apply Hlen.
 by apply /ssrnat.ltP.
 by apply /ssrnat.ltP.
-Admitted.
+Qed.
 
 
 Lemma finite_implies_3 {t: type} :
