@@ -167,7 +167,7 @@ Lemma matrix_vec_mult_bound {n:nat} {ty}:
             (\row_j A (inord i) j)^T)
          (vec_to_list_float n.+1 v)) ->
     finite xy.1 /\finite xy.2) ->
-  (forall i,
+  (forall (i : 'I_n.+1),
     finite  (let l1 := vec_to_list_float n.+1 (\row_j A (inord i) j)^T in
          let l2 := vec_to_list_float n.+1 (\col_j v j 0) in
          dotprod_r l1 l2)) ->
@@ -448,7 +448,7 @@ Lemma matrix_vec_mult_bound_corollary {n:nat} {ty}:
             (\row_j A (inord i) j)^T)
          (vec_to_list_float n.+1 v)) ->
     finite xy.1 /\  finite xy.2) ->
-  (forall i,
+  (forall (i : 'I_n.+1),
     finite
         (let l1 := vec_to_list_float n.+1 (\row_j A (inord i) j)^T in
          let l2 := vec_to_list_float n.+1 (\col_j v j 0) in
