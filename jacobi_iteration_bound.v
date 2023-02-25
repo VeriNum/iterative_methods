@@ -4479,12 +4479,11 @@ assert ((\col_j x0' j ord0) = x0').
 rewrite H6 in H5. apply in_rev in H2.
 specialize (H5 H2).
 apply H5.
-
-
-
-
-
-Admitted.
+by rewrite !length_veclist.
+apply ltn_ord.
+apply ltn_ord.
+by rewrite combine_length !length_veclist Nat.min_id.
+Qed.
 
 
 Lemma finite_implies_6 {t: type} :
