@@ -3697,6 +3697,16 @@ apply dotprod_finite.
   rewrite length_veclist in Hnth.
   assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
   rewrite H5 in Hnth.
+  pose proof (@vector_residual_equiv t A b x0 0%nat).
+  assert (length b = length A). { by rewrite -H0. }
+  specialize (H6 H7). clear H7.
+  assert ( length x0 = length A ).
+  { by rewrite repeat_length. } specialize (H6 H7). clear H7.
+  specialize (H6 H). unfold resid in Hnth. rewrite -Heqn in H6.
+  rewrite H6 in Hnth.
+  remember (matrix_inj A n.+1 n.+1) as A'.
+  remember (vector_inj x0 n.+1) as x0'.
+  remember  (vector_inj b n.+1) as b'.
   
   
   
