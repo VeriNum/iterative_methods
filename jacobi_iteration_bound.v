@@ -3771,7 +3771,13 @@ apply dotprod_finite.
     apply Hd1. rewrite -Rmult_assoc.
     apply Rcomplements.Rlt_div_r.
     apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
-    
+    assert (X_m_jacobi 0 x0' b' A' 
+                  (inord k) ord0 = x0' (inord k) ord0).
+    { by simpl. } rewrite H10. clear H10.
+    eapply Rle_lt_trans. apply Rmult_le_compat_l.
+    apply Rabs_pos. apply Rabs_triang.
+    rewrite Rabs_Ropp.
+  
 
 
     
