@@ -3789,6 +3789,16 @@ apply dotprod_finite.
                           (inord k) ord0) H8).
     destruct H9 as [d2 [e2 [Hde2 [Hd2 [He2 H9]]]]].
     rewrite H9.
+    eapply Rle_lt_trans. apply Rmult_le_compat_l.
+    apply Rabs_pos.
+    apply Rplus_le_compat_r.
+    eapply Rle_trans. apply Rabs_triang.
+    apply Rplus_le_compat; last by apply He2.
+    rewrite Rabs_mult. 
+    apply Rmult_le_compat. apply Rabs_pos.
+    apply Rabs_pos. 
+    rewrite Rabs_mult.
+    apply Rmult_le_compat_l. apply Rabs_pos.
     
     
   
