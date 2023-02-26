@@ -3858,6 +3858,27 @@ apply dotprod_finite.
     pose proof (@R_dot_prod_rel_abs_holds n t n.+1 k (A2_J A')
                     (\col_j x0' j ord0)).
     rewrite -sum_fold_mathcomp_equiv in H12.
+    assert (\sum_(j < n.+1)
+              (FT2R_abs (FT2R_mat (A2_J A'))
+                (inord k)
+                (widen_ord (m:=n.+1)
+                   (leqnn n.+1) j) *
+              FT2R_abs
+                (FT2R_mat
+                   (\col_j0 x0' j0 ord0))
+                (widen_ord (m:=n.+1)
+                   (leqnn n.+1) j) ord0)%Re = 
+            \sum_j
+              (Rabs
+                 (FT2R (A2_J A' (inord k) j)) *
+               Rabs (FT2R (x0' j ord0)))%Re).
+    { apply eq_big. by []. intros. 
+      assert (widen_ord (m:=n.+1) (leqnn n.+1) i = i).
+      { unfold widen_ord. 
+        apply val_inj. by simpl.
+      } rewrite H14. by rewrite !mxE.
+    } rewrite H13 in H12. specialize (H11 H12).
+    clear H12 H13.
     
     
 
