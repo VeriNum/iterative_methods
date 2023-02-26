@@ -3760,7 +3760,10 @@ apply dotprod_finite.
     destruct H9 as [d1 [Hd1 H9]].
     rewrite H9.
     rewrite [in X in (_ * Rabs ((_ + X) * _) * _ + _ < _)%Re]/FT2R B2R_Bopp.
-    fold (@FT2R t).
+    fold (@FT2R t). apply Rcomplements.Rlt_minus_r.
+    apply Rcomplements.Rlt_div_r.
+    apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
+    
 
     
     
