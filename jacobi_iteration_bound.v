@@ -3825,6 +3825,15 @@ apply dotprod_finite.
     rewrite !length_veclist in H11.
     assert (n.+1 = n.+1) by lia.
     specialize (H11 H12). clear H12.
+    specialize (H11 (dotprod_r 
+                      (vec_to_list_float n.+1
+                        (\row_j A2_J A' (inord k) j)^T)
+                      (vec_to_list_float n.+1
+                            (\col_j x0' j ord0)))).
+    specialize (H11 (\sum_j (FT2R (A2_J A' (inord k) j) * FT2R (x0' j ord0))%Re)).
+    specialize (H11 (\sum_j (Rabs (FT2R (A2_J A' (inord k) j)) * Rabs (FT2R (x0' j ord0)))%Re)).
+    
+  
     
 
 
