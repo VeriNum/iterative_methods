@@ -3879,6 +3879,12 @@ apply dotprod_finite.
       } rewrite H14. by rewrite !mxE.
     } rewrite H13 in H12. specialize (H11 H12).
     clear H12 H13.
+    apply BPLUS_finite_e in H8.
+    destruct H8 as [_ H8].
+    apply finite_is_finite in H8.
+    rewrite is_finite_Bopp in H8.
+    rewrite finite_is_finite in H11.
+    rewrite mxE in H8. specialize (H11 H8).
     
     
 
