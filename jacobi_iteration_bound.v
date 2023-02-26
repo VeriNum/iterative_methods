@@ -3707,16 +3707,15 @@ apply dotprod_finite.
   remember (matrix_inj A n.+1 n.+1) as A'.
   remember (vector_inj x0 n.+1) as x0'.
   remember  (vector_inj b n.+1) as b'.
-  
-  
-  
-  
-  
+  rewrite nth_vec_to_list_float in Hnth.
+  rewrite mxE in Hnth. rewrite -Hnth.
+  split.
+  - admit.
+  - intros. unfold n0. rewrite rev_length. rewrite H2.
+    admit.
+  - rewrite H2 in Hlen. by apply /ssrnat.ltP.
+  - rewrite H2 in Hlen. by rewrite length_veclist.
 
-
-
-
-  admit.
 Admitted.
 
 
