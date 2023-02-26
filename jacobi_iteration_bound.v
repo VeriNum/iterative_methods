@@ -3832,8 +3832,32 @@ apply dotprod_finite.
                             (\col_j x0' j ord0)))).
     specialize (H11 (\sum_j (FT2R (A2_J A' (inord k) j) * FT2R (x0' j ord0))%Re)).
     specialize (H11 (\sum_j (Rabs (FT2R (A2_J A' (inord k) j)) * Rabs (FT2R (x0' j ord0)))%Re)).
+    pose proof (@fma_dot_prod_rel_holds _ n t n.+1 k (A2_J A')
+                    (\col_j x0' j ord0)). 
+    specialize (H11 H12). clear H12.
+    pose proof (@R_dot_prod_rel_holds n t n.+1 k (leqnn n.+1) (A2_J A')
+                    (\col_j x0' j ord0)).
+    assert (\sum_j
+            (FT2R (A2_J A' (inord k) j) *
+             FT2R (x0' j ord0))%Re = 
+           \sum_(j < n.+1)
+            (FT2R_mat (A2_J A') 
+              (inord k)
+              (widen_ord (m:=n.+1)
+                 (leqnn n.+1) j) *
+              FT2R_mat (\col_j0 x0' j0 ord0)
+                (widen_ord (m:=n.+1)
+                   (leqnn n.+1) j) ord0)%Re).
+    { apply eq_big. by []. intros. 
+      assert ((widen_ord (m:=n.+1) (leqnn n.+1) i) = i).
+      { unfold widen_ord. 
+        apply val_inj. by simpl.
+      } rewrite H14. by rewrite !mxE.
+    } rewrite -H13 in H12. specialize (H11 H12).
+    clear H12 H13.
+    pose proof (@R_dot_prod_rel_abs_holds n t n.+1 k (A2_J A')
+                    (\col_j x0' j ord0)).
     
-  
     
 
 
