@@ -3783,6 +3783,13 @@ apply dotprod_finite.
     destruct H8 as [H8 _].
     rewrite mxE in H8.
     rewrite !nth_vec_to_list_float in H8.
+    pose proof (@BMULT_accurate' _ t). rewrite inord_val in H8.
+    specialize (H9 (A1_inv_J A' (inord k) ord0)
+                    ((b' -f A2_J A' *f x0') 
+                          (inord k) ord0) H8).
+    destruct H9 as [d2 [e2 [Hde2 [Hd2 [He2 H9]]]]].
+    rewrite H9.
+    
     
   
 
