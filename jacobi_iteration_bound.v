@@ -3885,7 +3885,25 @@ apply dotprod_finite.
     rewrite is_finite_Bopp in H8.
     rewrite finite_is_finite in H11.
     rewrite mxE in H8. specialize (H11 H8).
-    
+    apply Rle_trans with 
+    (Rabs
+         (\sum_j
+             (Rabs
+                (FT2R (A2_J A' (inord k) j)) *
+              Rabs (FT2R (x0' j ord0)))%Re) *
+     (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
+    rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
+    apply Rle_trans with 
+    (Rabs
+         (\sum_j
+             ((FT2R (A2_J A' (inord k) j)) *
+               (FT2R (x0' j ord0)))%Re) +
+       Rabs
+         (\sum_j
+             (Rabs (FT2R (A2_J A' (inord k) j)) *
+              Rabs (FT2R (x0' j ord0)))%Re) *
+       g t n.+1 + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
+     
     
 
 
