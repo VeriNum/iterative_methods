@@ -3809,7 +3809,10 @@ apply dotprod_finite.
                     (BOPP
                       ((A2_J A' *f x0') 
                          (inord k) ord0)) H8).
-    
+    destruct H10 as [d3 [Hd3 H10]].
+    rewrite H10. clear H10. rewrite Rabs_mult.
+    apply Rmult_le_compat; try apply Rabs_pos.
+    rewrite [in X in (Rabs (_ + X) <= _)%Re]/FT2R B2R_Bopp.
   
     
   
