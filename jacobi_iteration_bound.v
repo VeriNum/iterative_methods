@@ -3684,11 +3684,20 @@ assert ( length (resid (jacobi_n A b x0 0)) = n.+1).
 }
 apply dotprod_finite.
 + rewrite H2. apply g1_constraint_Sn. apply H1.
-+ intros.
-  pose proof (@In_nth _ (rev (resid (jacobi_n A b x0 0))) xy (Zconst t 0) H3 ).
++ intros. apply in_rev in H3.
+  pose proof (@In_nth _ (resid (jacobi_n A b x0 0)) xy (Zconst t 0) H3 ).
   destruct H4 as [k [Hlen Hnth]].
-  rewrite rev_nth in Hnth.
   pose proof (@v_equiv  t (resid (jacobi_n A b x0 0)) n H2).
+  assert ((\col_j0 vector_inj
+                     (resid (jacobi_n A b x0 0)) n.+1 j0  ord0) = 
+           vector_inj (resid (jacobi_n A b x0 0)) n.+1).
+  { apply matrixP. unfold eqrel. intros. by rewrite !mxE. }
+  rewrite H5 in H4. clear H5.
+  rewrite H4 in Hnth. rewrite rev_nth in Hnth.
+  rewrite length_veclist in Hnth.
+  assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
+  rewrite H5 in Hnth.
+  
   
   
   
