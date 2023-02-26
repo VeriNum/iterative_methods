@@ -3857,6 +3857,7 @@ apply dotprod_finite.
     clear H12 H13.
     pose proof (@R_dot_prod_rel_abs_holds n t n.+1 k (A2_J A')
                     (\col_j x0' j ord0)).
+    rewrite -sum_fold_mathcomp_equiv in H12.
     
     
 
