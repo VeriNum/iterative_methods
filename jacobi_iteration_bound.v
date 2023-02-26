@@ -3757,7 +3757,10 @@ apply dotprod_finite.
                   (BOPP
                     (X_m_jacobi 0 x0' b' A'
                        (inord k) ord0)) H8).
-    
+    destruct H9 as [d1 [Hd1 H9]].
+    rewrite H9.
+    rewrite [in X in (_ * Rabs ((_ + X) * _) * _ + _ < _)%Re]/FT2R B2R_Bopp.
+    fold (@FT2R t).
 
     
     
