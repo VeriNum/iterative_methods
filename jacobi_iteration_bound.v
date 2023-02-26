@@ -3907,8 +3907,10 @@ apply dotprod_finite.
      { intros. nra. } apply H12.
      eapply Rle_trans. apply Rabs_triang_inv.
      nra. repeat apply Rplus_le_compat_r.
+     rewrite [in X in (_ <= X)%Re]sum_abs_eq.
+     rewrite Rabs_sum_in. apply /RleP. apply Rabs_ineq.
+     intros. apply Rmult_le_pos; apply Rabs_pos.
      
-    
 
 
 
