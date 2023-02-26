@@ -3799,7 +3799,18 @@ apply dotprod_finite.
     apply Rabs_pos. 
     rewrite Rabs_mult.
     apply Rmult_le_compat_l. apply Rabs_pos.
+    apply BMULT_finite_e in H8.
+    destruct H8 as [_ H8].
+    rewrite mxE in H8. rewrite mxE.
+    apply Bminus_bplus_opp_implies in H8.
+    rewrite Bminus_bplus_opp_equiv; last by apply H8.
+    pose proof (@BPLUS_accurate' _ t).
+    specialize (H10 (b' (inord k) ord0)
+                    (BOPP
+                      ((A2_J A' *f x0') 
+                         (inord k) ord0)) H8).
     
+  
     
   
 
