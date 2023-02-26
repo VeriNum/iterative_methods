@@ -546,109 +546,7 @@ Definition k_min {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                  (1 + delta) -
                  2 * d_mag / (1 - rho)))%Re)).
 
-(*
-Lemma rho_gt_0 {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
-  (0 < matrix_inf_norm (A2_J_real (FT2R_mat A)))%Re ->
-  (0 < rho_def A b)%Re.
-Proof.
-intros.
-unfold rho_def.
-match goal with |-context[(_ < ?a + ?c + ?b)%Re]=>
- replace (a + c + b)%Re with ((a + b) + c)%Re by nra
-end.
-apply Rplus_le_lt_0_compat.
-+ apply Rplus_le_le_0_compat. 
-  - apply Rmult_le_pos.
-    * apply Rplus_le_le_0_compat; last by apply default_rel_ge_0.
-      apply Rmult_le_pos; last by 
-      (apply Rplus_le_le_0_compat; try nra; try by apply default_rel_ge_0).
-      apply Rplus_le_le_0_compat; last by apply g_pos.
-      apply Rplus_le_le_0_compat.
-      ++ repeat apply Rmult_le_pos.
-        apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-        apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
-        apply g_pos.
-      ++ apply Rmult_le_pos. apply default_rel_ge_0.   
-        apply Rplus_le_le_0_compat; try nra; try by apply g_pos.
-    * apply Rmult_le_pos.
-      apply /RleP. apply vec_norm_pd.
-      apply /RleP. apply matrix_norm_pd.
-  - apply Rmult_le_pos.
-    apply /RleP. apply vec_norm_pd.
-    apply /RleP. apply matrix_norm_pd.
-+ apply Rmult_lt_0_compat; last by apply H.
-  apply Rplus_le_lt_0_compat; last by apply default_abs_gt_0.
-  apply Rmult_le_pos; last by apply default_abs_ge_0.
-  apply Rplus_le_le_0_compat; last by apply g_pos.
-  apply Rplus_le_le_0_compat.
-  - repeat apply Rmult_le_pos.
-    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
-    apply g_pos.
-  - apply Rmult_le_pos. apply default_rel_ge_0.   
-    apply Rplus_le_le_0_compat; try nra; try by apply g_pos.
-Qed.
-*)
 
-(*
-Lemma rho_alt_gt_0 {t: type} {n:nat}
-  (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
-  (0 < matrix_inf_norm (A2_J_real (FT2R_mat A)))%Re ->
-  (0 < rho_def_alt A b)%Re.
-Proof.
-intros.
-unfold rho_def_alt.
-match goal with |-context[(_ < ?a + ?c + ?b)%Re]=>
- replace (a + c + b)%Re with ((a + b) + c)%Re by nra
-end.
-apply Rplus_le_lt_0_compat.
-+ apply Rplus_le_le_0_compat. 
-  - apply Rmult_le_pos.
-    * apply Rplus_le_le_0_compat; last by apply default_rel_ge_0.
-      apply Rmult_le_pos; last by 
-      (apply Rplus_le_le_0_compat; try nra; try by apply default_rel_ge_0).
-      apply Rplus_le_le_0_compat; last by apply g_pos.
-      apply Rplus_le_le_0_compat.
-      ++ repeat apply Rmult_le_pos.
-        apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-        apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
-        apply g_pos.
-      ++ apply Rmult_le_pos. apply default_rel_ge_0.   
-        apply Rplus_le_le_0_compat; try nra; try by apply g_pos.
-    * apply Rmult_le_pos.
-      apply Rmult_le_pos.
-      ++ apply Rplus_le_le_0_compat.
-        apply /RleP. apply vec_norm_pd.
-        apply default_abs_ge_0.
-      ++ apply Rlt_le, Rinv_0_lt_compat.
-        apply Rlt_Rminus. apply default_rel_ub_strict.
-      ++ apply /RleP. apply matrix_norm_pd.
-  - apply Rmult_le_pos.
-    apply Rmult_le_pos.
-    * apply Rplus_le_le_0_compat.
-      apply /RleP. apply vec_norm_pd.
-      apply default_abs_ge_0.
-    * apply Rlt_le, Rinv_0_lt_compat.
-      apply Rlt_Rminus. apply default_rel_ub_strict.
-    * apply /RleP. apply matrix_norm_pd.
-+ apply Rmult_lt_0_compat. 
-  apply Rplus_le_lt_0_compat; last by apply default_abs_gt_0.
-  apply Rmult_le_pos; last by apply default_abs_ge_0.
-  apply Rplus_le_le_0_compat; last by apply g_pos.
-  apply Rplus_le_le_0_compat.
-  - repeat apply Rmult_le_pos.
-    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
-    apply g_pos.
-  - apply Rmult_le_pos. apply default_rel_ge_0.   
-    apply Rplus_le_le_0_compat; try nra; try by apply g_pos.
-  - assert (FT2R_mat (A2_J A) = A2_J_real (FT2R_mat A)).
-    { apply matrixP. unfold eqrel. intros. rewrite !mxE.
-      case: (x == y:> nat); simpl; nra.
-    } rewrite H0. apply H.
-Qed.
-*)
 Lemma d_mag_alt_gt_0 {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
   (rho_def_alt A b < 1)%Re ->
@@ -3775,16 +3673,30 @@ Lemma finite_residual_0 {t: type} :
   finite (norm2 (resid (jacobi_n A b x0 0))).
 Proof.
 intros.
-unfold norm2. apply dotprod_finite.
-+ remember (length A).-1 as n.
-  assert ( length (resid (jacobi_n A b x0 0)) = n.+1).
-  { repeat rewrite /matrix_vector_mult !map_length combine_length.
+unfold norm2. 
+remember (length A).-1 as n.
+assert ( length (resid (jacobi_n A b x0 0)) = n.+1).
+{ repeat rewrite /matrix_vector_mult !map_length combine_length.
     rewrite !map_length. unfold jacobi_n. rewrite iter_length.
     rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
     rewrite Heqn prednK. by []. by apply /ssrnat.ltP.
     by []. by rewrite /x0 repeat_length.
-  } rewrite H2. apply g1_constraint_Sn. apply H1.
+}
+apply dotprod_finite.
++ rewrite H2. apply g1_constraint_Sn. apply H1.
 + intros.
+  pose proof (@In_nth _ (rev (resid (jacobi_n A b x0 0))) xy (Zconst t 0) H3 ).
+  destruct H4 as [k [Hlen Hnth]].
+  rewrite rev_nth in Hnth.
+  pose proof (@v_equiv  t (resid (jacobi_n A b x0 0)) n H2).
+  
+  
+  
+  
+
+
+
+
   admit.
 Admitted.
 
