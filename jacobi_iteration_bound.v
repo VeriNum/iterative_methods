@@ -3763,7 +3763,16 @@ apply dotprod_finite.
     fold (@FT2R t). apply Rcomplements.Rlt_minus_r.
     apply Rcomplements.Rlt_div_r.
     apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
+    rewrite Rabs_mult.  
+    eapply Rle_lt_trans.   apply Rmult_le_compat_l.
+    apply Rabs_pos. apply Rmult_le_compat_l.
+    apply Rabs_pos. eapply Rle_trans.
+    apply Rabs_triang. rewrite Rabs_R1. apply Rplus_le_compat_l.
+    apply Hd1. rewrite -Rmult_assoc.
+    apply Rcomplements.Rlt_div_r.
+    apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
     
+
 
     
     
