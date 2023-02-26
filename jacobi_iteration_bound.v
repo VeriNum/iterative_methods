@@ -3743,7 +3743,24 @@ apply dotprod_finite.
     apply Rmult_le_compat_l. apply Rabs_pos.
     eapply Rle_trans. apply Rabs_triang.
     rewrite Rabs_R1. apply Rplus_le_compat_l.
-    apply Hd.
+    apply Hd. rewrite Rabs_mult.
+    rewrite mxE. rewrite mxE.
+    apply BMULT_finite_e in H8.
+    destruct H8 as [_ H8].
+    rewrite nth_vec_to_list_float in H8.
+    rewrite mxE in H8.
+    rewrite Bminus_bplus_opp_equiv.
+    apply Bminus_bplus_opp_implies in H8.
+    pose proof (@BPLUS_accurate' _ t).
+    specialize (H9 (X_m_jacobi 1 x0' b' A' 
+                      (inord k) ord0)
+                  (BOPP
+                    (X_m_jacobi 0 x0' b' A'
+                       (inord k) ord0)) H8).
+    
+
+    
+    
     
   
 
