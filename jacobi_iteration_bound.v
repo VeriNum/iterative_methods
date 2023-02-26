@@ -3816,21 +3816,28 @@ apply dotprod_finite.
     assert (forall x: ftype t, FT2R (BOPP x) = (- FT2R x)%Re).
     { intros. unfold FT2R. by rewrite B2R_Bopp. }
     rewrite H10. rewrite Rabs_Ropp.
-  
-
-
-    
-    
-    
-  
-
-
-
-
-admit.
+    apply Rplus_le_compat_l. rewrite mxE.
+    admit.
+    eapply Rle_trans. apply Rabs_triang.
+    rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd3.
+    eapply Rle_trans. apply Rabs_triang.
+    rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd2.
+    admit.
+    rewrite H2 in Hlen.
+    rewrite inordK; (try by apply /ssrnat.ltP) .
+    rewrite H2 in Hlen.
+    rewrite inordK; (try by apply /ssrnat.ltP) .
+    rewrite H2 in Hlen.
+    rewrite inordK; (try by apply /ssrnat.ltP) .
+    rewrite H2 in Hlen.
+    rewrite inordK; (try by apply /ssrnat.ltP) .
+    by apply Bminus_bplus_opp_implies.
+    rewrite H2 in Hlen. by apply /ssrnat.ltP .
+    rewrite H2 in Hlen. by apply /ssrnat.ltP .
+    rewrite H2 in Hlen. by apply /ssrnat.ltP .
+    rewrite H2 in Hlen. by apply /ssrnat.ltP .
   - rewrite H2 in Hlen. by apply /ssrnat.ltP.
   - rewrite H2 in Hlen. by rewrite length_veclist.
-
 Admitted.
 
 
