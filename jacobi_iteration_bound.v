@@ -3817,6 +3817,23 @@ apply dotprod_finite.
     { intros. unfold FT2R. by rewrite B2R_Bopp. }
     rewrite H10. rewrite Rabs_Ropp.
     apply Rplus_le_compat_l. rewrite mxE.
+    pose proof (@fma_dotprod_forward_error _ t).
+    specialize (H11 (vec_to_list_float n.+1
+                        (\row_j A2_J A' (inord k) j)^T)
+                    (vec_to_list_float n.+1
+                            (\col_j x0' j ord0))).
+    rewrite !length_veclist in H11.
+    assert (n.+1 = n.+1) by lia.
+    specialize (H11 H12). clear H12.
+    
+
+
+
+
+
+
+
+
     admit.
     eapply Rle_trans. apply Rabs_triang.
     rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd3.
