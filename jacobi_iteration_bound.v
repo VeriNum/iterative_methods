@@ -3733,6 +3733,17 @@ apply dotprod_finite.
                        X_m_jacobi 0 x0' b' A'))
                    (Zconst t 0)))) by admit.
     specialize (H7 H8).
+    destruct H7 as [d [e [Hde [Hd [He H7]]]]].
+    rewrite H7.
+    rewrite !nth_vec_to_list_float.
+    eapply Rle_lt_trans. apply Rabs_triang.
+    eapply Rle_lt_trans. apply Rplus_le_compat_l. 
+    apply He. rewrite Rabs_mult.
+    eapply Rle_lt_trans. apply Rplus_le_compat_r.
+    apply Rmult_le_compat_l. apply Rabs_pos.
+    eapply Rle_trans. apply Rabs_triang.
+    rewrite Rabs_R1. apply Rplus_le_compat_l.
+    apply Hd.
     
   
 
