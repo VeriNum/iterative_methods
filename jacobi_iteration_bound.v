@@ -3812,9 +3812,10 @@ apply dotprod_finite.
     destruct H10 as [d3 [Hd3 H10]].
     rewrite H10. clear H10. rewrite Rabs_mult.
     apply Rmult_le_compat; try apply Rabs_pos.
-    rewrite [in X in (Rabs (_ + X) <= _)%Re]/FT2R B2R_Bopp.
-  
-    
+    eapply Rle_trans. apply Rabs_triang.
+    assert (forall x: ftype t, FT2R (BOPP x) = (- FT2R x)%Re).
+    { intros. unfold FT2R. by rewrite B2R_Bopp. }
+    rewrite H10. rewrite Rabs_Ropp.
   
 
 
