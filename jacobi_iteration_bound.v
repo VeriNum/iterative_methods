@@ -3776,7 +3776,14 @@ apply dotprod_finite.
     { by simpl. } rewrite H10. clear H10.
     eapply Rle_lt_trans. apply Rmult_le_compat_l.
     apply Rabs_pos. apply Rabs_triang.
-    rewrite Rabs_Ropp.
+    rewrite Rabs_Ropp. rewrite mxE.
+    rewrite !nth_vec_to_list_float. rewrite inord_val.
+    clear H9.
+    apply BPLUS_finite_e in H8.
+    destruct H8 as [H8 _].
+    rewrite mxE in H8.
+    rewrite !nth_vec_to_list_float in H8.
+    
   
 
 
