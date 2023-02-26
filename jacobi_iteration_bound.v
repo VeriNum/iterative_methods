@@ -3712,7 +3712,34 @@ apply dotprod_finite.
   split.
   - admit.
   - intros. unfold n0. rewrite rev_length. rewrite H2.
-    admit.
+    pose proof (@BMULT_accurate' _ t).
+    rewrite inordK.
+    specialize (H7 (nth (n.+1.-1 - k)
+                    (vec_to_list_float n.+1
+                       (A1_J A')) (Zconst t 0))
+                   (nth (n.+1.-1 - k)
+                      (vec_to_list_float n.+1
+                         (X_m_jacobi 1 x0' b' A' -f
+                          X_m_jacobi 0 x0' b' A'))
+                      (Zconst t 0))).
+    assert (finite
+             (BMULT
+                (nth (n.+1.-1 - k)
+                   (vec_to_list_float n.+1
+                      (A1_J A')) (Zconst t 0))
+                (nth (n.+1.-1 - k)
+                   (vec_to_list_float n.+1
+                      (X_m_jacobi 1 x0' b' A' -f
+                       X_m_jacobi 0 x0' b' A'))
+                   (Zconst t 0)))) by admit.
+    specialize (H7 H8).
+    
+  
+
+
+
+
+admit.
   - rewrite H2 in Hlen. by apply /ssrnat.ltP.
   - rewrite H2 in Hlen. by rewrite length_veclist.
 
