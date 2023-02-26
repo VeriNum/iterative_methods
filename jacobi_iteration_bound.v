@@ -3903,6 +3903,10 @@ apply dotprod_finite.
              (Rabs (FT2R (A2_J A' (inord k) j)) *
               Rabs (FT2R (x0' j ord0)))%Re) *
        g t n.+1 + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
+     assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
+     { intros. nra. } apply H12.
+     eapply Rle_trans. apply Rabs_triang_inv.
+     nra. repeat apply Rplus_le_compat_r.
      
     
 
