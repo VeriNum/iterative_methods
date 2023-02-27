@@ -3714,19 +3714,15 @@ specialize (H3 H4 H5 H). clear H4 H5.
 rewrite H3. rewrite -/n.
 remember (matrix_inj A n.+1 n.+1) as A'.
 remember (vector_inj x0 n.+1) as x0'.
-remember (vector_inj b n.+1) as b'.
-
-
-
-
- 
-
-
-
-
-
-
-Admitted.
+remember (vector_inj b n.+1) as b'. rewrite H2.
+rewrite !nth_vec_to_list_float.
+rewrite mxE. 
+split; 
+(rewrite HeqA' Heqx0' Heqb' /n; by apply  finite_residual_0_mult).
+by apply /ssrnat.ltP.
+by rewrite !length_veclist.
+by rewrite combine_length !length_veclist Nat.min_id.
+Qed.
 
 
 Lemma finite_residual_0 {t: type} :
