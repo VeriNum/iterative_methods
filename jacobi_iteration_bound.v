@@ -3683,8 +3683,8 @@ Lemma finite_in{t: type}  :
                 n.+1))) ->
   finite xy.1 /\ finite xy.2.
 Proof.
-intros.
-pose proof (@In_nth _ (combine
+intros. apply in_rev in H1.
+pose proof (@In_nth _ (rev (combine
                         (vec_to_list_float n.+1
                            (vector_inj
                               (resid
@@ -3694,10 +3694,32 @@ pose proof (@In_nth _ (combine
                            (vector_inj
                               (resid
                                  (jacobi_n A b x0 0))
-                              n.+1))) xy (Zconst t 0, Zconst t 0)).
+                              n.+1)))) xy (Zconst t 0, Zconst t 0)).
 specialize (H2 H1).
 destruct H2 as [k [Hlen Hnth]].
-rewrite combine_length !length_veclist Nat.min_id in Hlen.
+rewrite rev_length combine_length !length_veclist Nat.min_id in Hlen.
+rewrite rev_nth in Hnth.
+rewrite combine_length !length_veclist Nat.min_id in Hnth.
+assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
+rewrite combine_nth in Hnth.
+destruct xy . simpl. 
+apply inject_pair_iff in Hnth.
+destruct Hnth as [Hnth1 Hnth2].
+rewrite -Hnth1 -Hnth2.
+pose proof (@vector_residual_equiv t A b x0 0%nat).
+assert (length b = length A). { by []. }
+assert (length x0 = length A).
+{ by rewrite repeat_length. }
+specialize (H3 H4 H5 H). clear H4 H5.
+rewrite H3. rewrite -/n.
+remember (matrix_inj A n.+1 n.+1) as A'.
+remember (vector_inj x0 n.+1) as x0'.
+remember (vector_inj b n.+1) as b'.
+
+
+
+
+ 
 
 
 
