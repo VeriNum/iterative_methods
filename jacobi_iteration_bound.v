@@ -3674,7 +3674,24 @@ apply BMULT_no_overflow_is_finite.
     simpl. admit.
   - admit.
 + unfold Bmult_no_overflow.
-
+  pose proof (@generic_round_property t (FT2R
+         (nth (n.+1.-1 - k)
+            (vec_to_list_float n.+1
+               (A1_J A')) (Zconst t 0)) *
+       FT2R
+         (nth (n.+1.-1 - k)
+            (vec_to_list_float n.+1
+               (X_m_jacobi 1 x0' b' A' -f
+                X_m_jacobi 0 x0' b' A'))
+            (Zconst t 0)))).
+  destruct H2 as [d [e [Hde [Hd [He H2]]]]].
+  unfold rounded.
+  rewrite H2.
+  eapply Rle_lt_trans. apply Rabs_triang.
+  eapply Rle_lt_trans. apply Rplus_le_compat_l. apply He.
+  apply Rcomplements.Rlt_minus_r.
+  
+  
 
 
  admit.
