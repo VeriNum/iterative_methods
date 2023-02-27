@@ -3690,7 +3690,14 @@ apply BMULT_no_overflow_is_finite.
   eapply Rle_lt_trans. apply Rabs_triang.
   eapply Rle_lt_trans. apply Rplus_le_compat_l. apply He.
   apply Rcomplements.Rlt_minus_r.
-  
+  rewrite Rabs_mult.
+  rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
+  eapply Rle_lt_trans. apply Rmult_le_compat_l.
+  apply Rabs_pos. 
+  eapply Rle_trans. apply Rabs_triang.
+  rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd.
+  apply Rcomplements.Rlt_div_r.
+  apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
   
 
 
