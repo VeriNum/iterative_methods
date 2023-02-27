@@ -3772,7 +3772,7 @@ apply dotprod_finite.
   rewrite nth_vec_to_list_float in Hnth.
   rewrite mxE in Hnth. rewrite -Hnth.
   split.
-  - admit.
+  - rewrite HeqA' Heqx0' Heqb' Heqn; by apply  finite_residual_0_mult.
   - intros. unfold n0. rewrite rev_length. rewrite H2.
     pose proof (@BMULT_accurate' _ t).
     rewrite inordK.
@@ -3793,7 +3793,8 @@ apply dotprod_finite.
                    (vec_to_list_float n.+1
                       (X_m_jacobi 1 x0' b' A' -f
                        X_m_jacobi 0 x0' b' A'))
-                   (Zconst t 0)))) by admit.
+                   (Zconst t 0)))).
+    { rewrite HeqA' Heqx0' Heqb' Heqn; by apply  finite_residual_0_mult. }
     specialize (H7 H8).
     destruct H7 as [d [e [Hde [Hd [He H7]]]]].
     rewrite H7.
