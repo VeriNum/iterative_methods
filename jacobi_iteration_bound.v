@@ -3621,23 +3621,6 @@ split.
 Qed.
 
 
-(**
-H9 : In xy
-       (combine
-          (vec_to_list_float n.+1
-             (vector_inj
-                (resid
-                   (jacobi_n A b x0 0))
-                n.+1))
-          (vec_to_list_float n.+1
-             (vector_inj
-                (resid
-                   (jacobi_n A b x0 0))
-                n.+1)))
-______________________________________(1/1)
-finite xy.1 /\ finite xy.2 
-***)
-
 Lemma finite_residual_0_mult {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -3671,7 +3654,17 @@ apply BMULT_no_overflow_is_finite.
   - rewrite mxE.
     apply BMULT_no_overflow_is_finite. rewrite inordK; last by apply /ssrnat.ltP.
     rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
-  
+    * admit.
+    * rewrite inordK; last by apply /ssrnat.ltP.
+      rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
+      rewrite mxE.
+      apply Bplus_bminus_opp_implies.
+      apply Bplus_no_ov_finite.
+      ++ admit.
+      ++ apply finite_is_finite. rewrite is_finite_Bopp.
+         rewrite mxE. admit.
+      ++ unfold Bplus_no_overflow . admit.
+    * unfold Bmult_no_overflow.
 
 
 
