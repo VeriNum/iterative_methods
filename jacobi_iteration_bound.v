@@ -3649,6 +3649,7 @@ Lemma finite_residual_0_mult {t: type} :
   let b' := @vector_inj _ b n.+1 in
   let x0' := @vector_inj _ x0 n.+1 in
   forall k,
+  (k < n.+1)%coq_nat ->
   finite (BMULT
                 (nth (n.+1.-1 - k)
                    (vec_to_list_float n.+1
@@ -3658,6 +3659,32 @@ Lemma finite_residual_0_mult {t: type} :
                       (X_m_jacobi 1 x0' b' A' -f
                        X_m_jacobi 0 x0' b' A'))
                    (Zconst t 0))).
+Proof.
+intros.
+apply BMULT_no_overflow_is_finite.
++ rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
+  admit.
++ rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
+  rewrite mxE.
+  apply Bplus_bminus_opp_implies.
+  apply Bplus_no_ov_finite.
+  - rewrite mxE.
+    apply BMULT_no_overflow_is_finite. rewrite inordK; last by apply /ssrnat.ltP.
+    rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
+  
+
+
+
+
+ admit.
+  - apply finite_is_finite. rewrite is_finite_Bopp. 
+    simpl. admit.
+  - admit.
++ unfold Bmult_no_overflow.
+
+
+
+ admit.
 Admitted.
 
 
