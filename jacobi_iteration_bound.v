@@ -3698,6 +3698,11 @@ apply BMULT_no_overflow_is_finite.
   rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd.
   apply Rcomplements.Rlt_div_r.
   apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
+  rewrite Rabs_mult.
+  rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
+  rewrite mxE. 
+  rewrite [in X in (_ * X < _)%Re]mxE.
+  
   
 
 
