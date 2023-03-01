@@ -3702,6 +3702,32 @@ apply BMULT_no_overflow_is_finite.
   rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
   rewrite mxE. 
   rewrite [in X in (_ * X < _)%Re]mxE.
+  rewrite Bminus_bplus_opp_equiv.
+  - pose proof (@BPLUS_accurate' _ t).
+    specialize (H3 (X_m_jacobi 1 x0' b' A'
+                        (inord k) ord0)
+                    (BOPP
+                        (X_m_jacobi 0 x0' b' A'
+                           (inord k) ord0))).
+    assert (finite
+             (BPLUS
+                (X_m_jacobi 1 x0' b' A'
+                   (inord k) ord0)
+                (BOPP
+                   (X_m_jacobi 0 x0' b' A'
+                      (inord k) ord0)))) by admit.
+    specialize (H3 H4).
+    destruct H3 as [d1 [Hd1 H3]].
+    rewrite H3. clear H3. rewrite Rabs_mult.
+    rewrite -Rmult_assoc.
+    eapply Rle_lt_trans.
+    apply Rmult_le_compat_l.
+    apply Rmult_le_pos; apply Rabs_pos.
+    eapply Rle_trans. apply Rabs_triang.
+    rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd1.
+    
+    
+  
   
   
 
