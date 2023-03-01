@@ -3621,6 +3621,30 @@ split.
 Qed.
 
 
+Lemma finite_residual_0_proj2 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  forall k,
+  (k < n.+1)%coq_nat ->
+  finite
+  (nth (n.+1.-1 - k)
+     (vec_to_list_float n.+1
+        (X_m_jacobi 1 x0' b' A' -f
+         X_m_jacobi 0 x0' b' A'))
+     (Zconst t 0)).
+Proof.
+intros.
+rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
+rewrite mxE.
+
+
 Lemma finite_residual_0_mult {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -3715,7 +3739,17 @@ apply BMULT_no_overflow_is_finite.
                    (inord k) ord0)
                 (BOPP
                    (X_m_jacobi 0 x0' b' A'
-                      (inord k) ord0)))) by admit.
+                      (inord k) ord0)))).
+    { apply Bplus_no_ov_finite.
+      + rewrite mxE.
+        
+
+
+
+ 
+
+
+ by admit.
     specialize (H3 H4).
     destruct H3 as [d1 [Hd1 H3]].
     rewrite H3. clear H3. rewrite Rabs_mult.
