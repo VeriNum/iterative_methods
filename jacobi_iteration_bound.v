@@ -3768,22 +3768,14 @@ apply Rle_trans with
               Rabs (FT2R (x0' j ord0)))%Re) *
        g t n.+1 + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
 assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
-{ intros. nra. } apply H7.
-     eapply Rle_trans. apply Rabs_triang_inv.
-     nra. repeat apply Rplus_le_compat_r.
-     rewrite [in X in (_ <= X)%Re]sum_abs_eq.
-     rewrite Rabs_sum_in. apply /RleP. apply Rabs_ineq.
-     intros. apply Rmult_le_pos; apply Rabs_pos.
-     rewrite sum_abs_eq. apply Rle_refl.
-     intros. apply Rmult_le_pos; apply Rabs_pos.
-    eapply Rle_trans. apply Rabs_triang.
-
-
-
-
-
-
-admit.
+{ intros. nra. } apply H5.
+eapply Rle_trans. apply Rabs_triang_inv.
+nra. repeat apply Rplus_le_compat_r.
+rewrite [in X in (_ <= X)%Re]sum_abs_eq.
+rewrite Rabs_sum_in. apply /RleP. apply Rabs_ineq.
+intros. apply Rmult_le_pos; apply Rabs_pos.
+rewrite sum_abs_eq. apply Rle_refl.
+intros. apply Rmult_le_pos; apply Rabs_pos.
 eapply Rle_trans. apply Rabs_triang.
 rewrite Rabs_R1. apply Rplus_le_compat_l.
 apply Hd.
@@ -3802,6 +3794,7 @@ Lemma finite_residual_0_aux2 {t: type} :
   let x0' := @vector_inj _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat ->
+  finite (b' (inord k) ord0) ->
   finite
     (nth (n.+1.-1 - @inord n k)
        (vec_to_list_float n.+1
@@ -3813,15 +3806,16 @@ rewrite  nth_vec_to_list_float; last (rewrite inordK; by apply /ssrnat.ltP).
 rewrite mxE.
 apply Bplus_bminus_opp_implies.
 apply Bplus_no_ov_finite.
-+ admit.
++ by rewrite inord_val. 
 + rewrite inord_val.
   apply finite_is_finite. rewrite is_finite_Bopp.
   rewrite mxE. by apply finite_residual_0_aux1.
-+ 
++ apply no_overflow_0_aux1; try by [].
+  rewrite -/n. rewrite inordK; try by apply /ssrnat.ltP.
+  apply H1.
+Qed.
     
   
-
-
 Lemma finite_residual_0_aux1 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
