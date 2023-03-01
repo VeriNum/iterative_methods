@@ -3754,7 +3754,33 @@ apply BMULT_no_overflow_is_finite.
     eapply Rle_trans. apply Rabs_triang.
     apply Rplus_le_compat; last by apply He2. 
     rewrite Rabs_mult. apply Rmult_le_compat; try apply Rabs_pos.
-    apply Ra
+    rewrite Rabs_mult. rewrite nth_vec_to_list_float.
+    rewrite inord_val. apply Rmult_le_compat_l; try apply Rabs_pos.
+    rewrite nth_vec_to_list_float.
+    rewrite inord_val. rewrite mxE.
+    clear H3. apply BMULT_finite_e in H4.
+    destruct H4 as [_ H4].  rewrite nth_vec_to_list_float in H4.
+    rewrite inord_val in H4. rewrite mxE in H4.
+    apply Bminus_bplus_opp_implies in H4.
+    rewrite Bminus_bplus_opp_equiv; try apply H4.
+    pose proof (@BPLUS_accurate' _ t).
+    specialize (H3 (b' (inord k) ord0) 
+                   (BOPP
+                      ((A2_J A' *f x0')
+                         (inord k) ord0)) H4).
+    destruct H3 as [d3 [Hd3 H3]].
+    rewrite H3. rewrite Rabs_mult.
+    apply Rmult_le_compat; try apply Rabs_pos.
+    admit.
+    eapply Rle_trans. apply Rabs_triang.
+    rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd3.
+    rewrite inordK; (by apply /ssrnat.ltP).
+    rewrite inordK; (by apply /ssrnat.ltP).
+    rewrite inordK; (by apply /ssrnat.ltP).
+    eapply Rle_trans. apply Rabs_triang.
+    rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd2.
+    
+  
 
     
 
