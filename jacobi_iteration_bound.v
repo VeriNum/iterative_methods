@@ -3732,6 +3732,7 @@ apply BMULT_no_overflow_is_finite.
     apply Rabs_triang. apply Rplus_le_compat_l.
     assert (forall x: ftype t, FT2R (BOPP x) = (- FT2R x)%Re).
     { intros. by rewrite /FT2R B2R_Bopp. } rewrite H3.
+    rewrite Rabs_Ropp. simpl. apply Rle_refl.
     
     
   
