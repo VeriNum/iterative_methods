@@ -3632,6 +3632,82 @@ Lemma finite_residual_0_aux1 {t: type} :
   let b' := @vector_inj _ b n.+1 in
   let x0' := @vector_inj _ x0 n.+1 in
   forall k,
+  (k < n.+1)%coq_nat -> 
+  is_finite (fprec t) (femax t)
+    (let l1 :=
+       vec_to_list_float n.+1
+         (\row_j A2_J A' (inord k) j)^T in
+     let l2 :=
+       vec_to_list_float n.+1
+         (\col_j x0' j ord0) in
+     dotprod_r l1 l2) = true.
+Admitted.
+
+Lemma no_overflow_0_aux1 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  forall k,
+  (k < n.+1)%coq_nat ->
+  Bplus_no_overflow t
+  (FT2R (b' (@inord n k) ord0))
+  (FT2R
+     (BOPP
+        ((A2_J A' *f x0')
+           (@inord n k) ord0))).
+Proof.
+intros.
+
+
+Lemma finite_residual_0_aux2 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  forall k,
+  (k < n.+1)%coq_nat ->
+  finite
+    (nth (n.+1.-1 - @inord n k)
+       (vec_to_list_float n.+1
+          (b' -f A2_J A' *f x0'))
+        (Zconst t 0)).
+Proof.
+intros.
+rewrite  nth_vec_to_list_float; last (rewrite inordK; by apply /ssrnat.ltP).
+rewrite mxE.
+apply Bplus_bminus_opp_implies.
+apply Bplus_no_ov_finite.
++ admit.
++ rewrite inord_val.
+  apply finite_is_finite. rewrite is_finite_Bopp.
+  rewrite mxE. by apply finite_residual_0_aux1.
++ 
+    
+  
+
+
+Lemma finite_residual_0_aux1 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  forall k,
   (k < n.+1)%coq_nat ->
   finite
     (BMULT
@@ -3644,7 +3720,9 @@ Lemma finite_residual_0_aux1 {t: type} :
           (Zconst t 0))).
 Proof.
 intros.
-
+apply BMULT_no_overflow_is_finite.
++ admit.
++ 
 
 
 
