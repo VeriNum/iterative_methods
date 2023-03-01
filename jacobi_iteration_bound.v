@@ -3733,7 +3733,32 @@ apply BMULT_no_overflow_is_finite.
     assert (forall x: ftype t, FT2R (BOPP x) = (- FT2R x)%Re).
     { intros. by rewrite /FT2R B2R_Bopp. } rewrite H3.
     rewrite Rabs_Ropp. simpl. apply Rle_refl.
+    eapply Rle_lt_trans. apply Rmult_le_compat_l.
+    apply Rabs_pos.
+    apply Rplus_le_compat_r.
+    rewrite mxE.
+    apply BPLUS_finite_e in H4.
+    destruct H4 as [H4 _].
+    rewrite mxE in H4.
+    pose proof(@BMULT_accurate' _ t). 
+    specialize (H3 (nth (n.+1.-1 - @inord n k)
+                      (vec_to_list_float n.+1
+                         (A1_inv_J A'))
+                      (Zconst t 0))
+                    (nth (n.+1.-1 - @inord n k)
+                        (vec_to_list_float n.+1
+                           (b' -f A2_J A' *f x0'))
+                        (Zconst t 0)) H4).
+    destruct H3 as [d2 [e2 [Hde2 [Hd2 [He2 H3]]]]].
+    rewrite H3.
+    eapply Rle_trans. apply Rabs_triang.
+    apply Rplus_le_compat; last by apply He2. 
+    rewrite Rabs_mult. apply Rmult_le_compat; try apply Rabs_pos.
+    apply Ra
+
     
+
+  
     
   
   
