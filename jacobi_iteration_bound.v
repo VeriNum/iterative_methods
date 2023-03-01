@@ -3960,14 +3960,11 @@ apply BMULT_no_overflow_is_finite.
                       (inord k) ord0)))).
     { apply Bplus_no_ov_finite.
       + rewrite mxE.
-        
-
-
-
- 
-
-
- by admit.
+        by apply finite_residual_0_aux3.
+      + simpl. apply finite_is_finite. rewrite is_finite_Bopp.
+        by apply finite_is_finite.
+      + admit.
+    }
     specialize (H3 H4).
     destruct H3 as [d1 [Hd1 H3]].
     rewrite H3. clear H3. rewrite Rabs_mult.
