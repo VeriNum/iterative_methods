@@ -3621,7 +3621,34 @@ split.
 Qed.
 
 
-Lemma finite_residual_0_proj2 {t: type} :
+Lemma finite_residual_0_aux1 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  forall k,
+  (k < n.+1)%coq_nat ->
+  finite
+    (BMULT
+       (nth (n.+1.-1 - @inord n k)
+          (vec_to_list_float n.+1
+             (A1_inv_J A')) (Zconst t 0))
+       (nth (n.+1.-1 - @inord n k)
+          (vec_to_list_float n.+1
+             (b' -f A2_J A' *f x0'))
+          (Zconst t 0))).
+Proof.
+intros.
+
+
+
+
+Lemma finite_residual_0_aux2 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -3643,6 +3670,9 @@ Proof.
 intros.
 rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
 rewrite mxE.
+apply Bplus_bminus_opp_implies.
+apply Bplus_no_ov_finite.
++ rewrite mxE.
 
 
 Lemma finite_residual_0_mult {t: type} :
