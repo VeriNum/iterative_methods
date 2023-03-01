@@ -3725,6 +3725,13 @@ apply BMULT_no_overflow_is_finite.
     apply Rmult_le_pos; apply Rabs_pos.
     eapply Rle_trans. apply Rabs_triang.
     rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd1.
+    apply Rcomplements.Rlt_div_r.
+    apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
+    eapply Rle_lt_trans. apply Rmult_le_compat_l.
+    apply Rabs_pos. eapply Rle_trans.
+    apply Rabs_triang. apply Rplus_le_compat_l.
+    assert (forall x: ftype t, FT2R (BOPP x) = (- FT2R x)%Re).
+    { intros. by rewrite /FT2R B2R_Bopp. } rewrite H3.
     
     
   
