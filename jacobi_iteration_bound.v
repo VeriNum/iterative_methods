@@ -3910,36 +3910,11 @@ Lemma finite_residual_0_mult {t: type} :
                        X_m_jacobi 0 x0' b' A'))
                    (Zconst t 0))).
 Proof.
-intros.
+intros ? ? ? ? ? ? ? ? ? ? ? ? HfA HdivA Hfb Hfx0.
 apply BMULT_no_overflow_is_finite.
 + rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
   by rewrite mxE.
-+ rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
-  rewrite mxE.
-  apply Bplus_bminus_opp_implies.
-  apply Bplus_no_ov_finite.
-  - rewrite mxE.
-    apply BMULT_no_overflow_is_finite. rewrite inordK; last by apply /ssrnat.ltP.
-    rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
-    * admit.
-    * rewrite inordK; last by apply /ssrnat.ltP.
-      rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
-      rewrite mxE.
-      apply Bplus_bminus_opp_implies.
-      apply Bplus_no_ov_finite.
-      ++ admit.
-      ++ apply finite_is_finite. rewrite is_finite_Bopp.
-         rewrite mxE. admit.
-      ++ unfold Bplus_no_overflow . admit.
-    * unfold Bmult_no_overflow.
-
-
-
-
- admit.
-  - apply finite_is_finite. rewrite is_finite_Bopp. 
-    simpl. admit.
-  - admit.
++ by apply finite_residual_0_aux4.
 + unfold Bmult_no_overflow.
   pose proof (@generic_round_property t (FT2R
          (nth (n.+1.-1 - k)
