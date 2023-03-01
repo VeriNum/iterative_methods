@@ -3816,7 +3816,7 @@ apply Bplus_no_ov_finite.
 Qed.
     
   
-Lemma finite_residual_0_aux1 {t: type} :
+Lemma finite_residual_0_aux3 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -3828,6 +3828,8 @@ Lemma finite_residual_0_aux1 {t: type} :
   let x0' := @vector_inj _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat ->
+  finite (A1_inv_J A' (inord k) ord0) ->
+  finite (b' (inord k) ord0) ->
   finite
     (BMULT
        (nth (n.+1.-1 - @inord n k)
@@ -3840,12 +3842,15 @@ Lemma finite_residual_0_aux1 {t: type} :
 Proof.
 intros.
 apply BMULT_no_overflow_is_finite.
++ rewrite  nth_vec_to_list_float; last (rewrite inordK; by apply /ssrnat.ltP).
+  by rewrite inord_val.
++ apply finite_residual_0_aux2; try by [].
 + admit.
-+ 
+Admitted.
 
 
 
-Lemma finite_residual_0_aux2 {t: type} :
+Lemma finite_residual_0_aux4 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -3857,6 +3862,9 @@ Lemma finite_residual_0_aux2 {t: type} :
   let x0' := @vector_inj _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat ->
+  finite (A1_inv_J A' (inord k) ord0) ->
+  finite (b' (inord k) ord0) ->
+  finite (x0' (inord k) ord0)  ->
   finite
   (nth (n.+1.-1 - k)
      (vec_to_list_float n.+1
@@ -3870,7 +3878,11 @@ rewrite mxE.
 apply Bplus_bminus_opp_implies.
 apply Bplus_no_ov_finite.
 + rewrite mxE.
-
+  by apply finite_residual_0_aux3.
++ apply finite_is_finite. rewrite is_finite_Bopp.
+  simpl. by apply finite_is_finite.
++ admit.
+Admitted.
 
 Lemma finite_residual_0_mult {t: type} :
  forall (A: matrix t) (b: vector t),
@@ -3884,6 +3896,10 @@ Lemma finite_residual_0_mult {t: type} :
   let x0' := @vector_inj _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat ->
+  finite (A' (inord k) (inord k)) ->
+  finite (A1_inv_J A' (inord k) ord0) ->
+  finite (b' (inord k) ord0) ->
+  finite (x0' (inord k) ord0)  ->
   finite (BMULT
                 (nth (n.+1.-1 - k)
                    (vec_to_list_float n.+1
@@ -3897,7 +3913,7 @@ Proof.
 intros.
 apply BMULT_no_overflow_is_finite.
 + rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
-  admit.
+  by rewrite mxE.
 + rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
   rewrite mxE.
   apply Bplus_bminus_opp_implies.
