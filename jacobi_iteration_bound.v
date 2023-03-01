@@ -3662,7 +3662,16 @@ Lemma no_overflow_0_aux1 {t: type} :
         ((A2_J A' *f x0')
            (@inord n k) ord0))).
 Proof.
-intros.
+intros. 
+unfold Bplus_no_overflow.
+pose proof (@generic_round_property t).
+specialize (H2 (FT2R (b' (inord k) ord0) +
+                   FT2R
+                     (BOPP
+                        ((A2_J A' *f x0') 
+                           (inord k) ord0)))%Re ).
+destruct H2 as [d [e [Hde [Hd [He H2]]]]].
+rewrite H2.
 
 
 Lemma finite_residual_0_aux2 {t: type} :
