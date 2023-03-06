@@ -3964,6 +3964,20 @@ Lemma no_overflow_x1_minus_x0 {t: type} :
   let x0' := @vector_inj _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat ->
+  @size_constraint t n ->
+  (forall x : ftype t * ftype t,
+    In x
+      (combine
+         (vec_to_list_float n.+1
+            (\row_j A2_J A' (inord k) j)^T)
+         (vec_to_list_float n.+1
+            (\col_j x0' j ord0))) ->
+    finite x.1 /\
+    finite x.2 /\
+    (Rabs (FT2R x.1) < sqrt (fun_bnd t n.+1))%Re /\
+    (Rabs (FT2R x.2) < sqrt (fun_bnd t n.+1))%Re) ->
+  finite (A1_inv_J A' (inord k) ord0) ->
+  finite (b' (inord k) ord0) ->
   Bplus_no_overflow t
   (FT2R
      (X_m_jacobi 1 x0' b' A' 
@@ -3973,7 +3987,7 @@ Lemma no_overflow_x1_minus_x0 {t: type} :
         (X_m_jacobi 0 x0' b' A' 
            (inord k) ord0))).
 Proof.
-intros.
+intros ? ? ? ? ? ? ? ? ? ? ? ? size_cons fbnd HfA1_inv Hfb.
 unfold Bplus_no_overflow.
 pose proof (@generic_round_property t 
             (FT2R
@@ -4007,7 +4021,8 @@ specialize (H3 (nth (n.+1.-1 - @inord n k)
                 (vec_to_list_float n.+1
                    (b' -f A2_J A' *f x0'))
                 (Zconst t 0))).
-assert (
+pose proof (@finite_residual_0_aux3 t A b H H0 k H1 size_cons fbnd HfA1_inv Hfb). 
+specialize (H3 H4). rewrite -/n -/A' -/b' -/x0' in H4.
 
 
 
