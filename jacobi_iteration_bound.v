@@ -3894,7 +3894,15 @@ rewrite Rabs_R1. apply Rplus_le_compat_l.
 apply Hd. 
 apply Rcomplements.Rlt_div_r.
 apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
-
+eapply Rle_lt_trans. eapply Rle_trans.
+apply Rabs_triang. apply Rplus_le_compat.
+admit.
+simpl.
+assert (forall x: ftype t, FT2R (BOPP x) = (- FT2R x)%Re).
+{ intros. unfold FT2R. by rewrite B2R_Bopp. }
+rewrite H3. rewrite Rabs_Ropp. apply Rle_refl.
+admit.
+Admitted.
 
 
 
