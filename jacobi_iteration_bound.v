@@ -3656,7 +3656,21 @@ Definition input_bound_at_N_0 {t: type}
             g1 t n.+1 (n.+1 - 1)%coq_nat)) *
           (1 + default_rel t)) <
          (bpow Zaux.radix2 (femax t) -
-          default_abs t) / (1 + default_rel t))%Re).
+          default_abs t) / (1 + default_rel t))%Re) /\
+  (forall i,
+    (Rabs (FT2R (A1_inv_J A' i ord0)) *
+       ((Rabs (FT2R (b' i ord0)) +
+         ((\sum_j
+              (Rabs
+                 (FT2R (A2_J A' i j)) *
+               Rabs (FT2R (x0' j ord0)))%Re) *
+          (1 + g t n.+1) +
+          g1 t n.+1 (n.+1 - 1)%coq_nat)) *
+        (1 + default_rel t)) *
+       (1 + default_rel t) + default_abs t +
+       Rabs (FT2R (x0' i ord0)) <
+       (bpow Zaux.radix2 (femax t) -
+        default_abs t) / (1 + default_rel t))%Re).
 
 
 
@@ -4142,17 +4156,9 @@ Lemma finite_residual_0_aux3 {t: type} :
   forall k,
   (k < n.+1)%coq_nat ->
   @size_constraint t n ->
-  (forall x : ftype t * ftype t,
-    In x
-      (combine
-         (vec_to_list_float n.+1
-            (\row_j A2_J A' (inord k) j)^T)
-         (vec_to_list_float n.+1
-            (\col_j x0' j ord0))) ->
-    finite x.1 /\
-    finite x.2 /\
-    (Rabs (FT2R x.1) < sqrt (fun_bnd t n.+1))%Re /\
-    (Rabs (FT2R x.2) < sqrt (fun_bnd t n.+1))%Re) ->
+  (forall i j, finite (A2_J A' i j)) ->
+  (forall i, finite (x0' i ord0)) ->
+  @input_bound_at_N_0 t A b ->
   finite (A1_inv_J A' (inord k) ord0) ->
   finite (b' (inord k) ord0) ->
   finite
@@ -4187,17 +4193,9 @@ Lemma no_overflow_x1_minus_x0 {t: type} :
   forall k,
   (k < n.+1)%coq_nat ->
   @size_constraint t n ->
-  (forall x : ftype t * ftype t,
-    In x
-      (combine
-         (vec_to_list_float n.+1
-            (\row_j A2_J A' (inord k) j)^T)
-         (vec_to_list_float n.+1
-            (\col_j x0' j ord0))) ->
-    finite x.1 /\
-    finite x.2 /\
-    (Rabs (FT2R x.1) < sqrt (fun_bnd t n.+1))%Re /\
-    (Rabs (FT2R x.2) < sqrt (fun_bnd t n.+1))%Re) ->
+  (forall i j, finite (A2_J A' i j)) ->
+  (forall i, finite (x0' i ord0)) ->
+  @input_bound_at_N_0 t A b ->
   finite (A1_inv_J A' (inord k) ord0) ->
   finite (b' (inord k) ord0) ->
   Bplus_no_overflow t
@@ -4209,7 +4207,7 @@ Lemma no_overflow_x1_minus_x0 {t: type} :
         (X_m_jacobi 0 x0' b' A' 
            (inord k) ord0))).
 Proof.
-intros ? ? ? ? ? ? ? ? ? ? ? ? size_cons fbnd HfA1_inv Hfb.
+intros ? ? ? ? ? ? ? ? ? ? ? ? size_cons HfA2 Hfx0 Hinp HfA1_inv Hfb.
 unfold Bplus_no_overflow.
 pose proof (@generic_round_property t 
             (FT2R
@@ -4243,7 +4241,7 @@ specialize (H3 (nth (n.+1.-1 - @inord n k)
                 (vec_to_list_float n.+1
                    (b' -f A2_J A' *f x0'))
                 (Zconst t 0))).
-pose proof (@finite_residual_0_aux3 t A b H H0 k H1 size_cons fbnd HfA1_inv Hfb). 
+pose proof (@finite_residual_0_aux3 t A b H H0 k H1 size_cons HfA2 Hfx0 Hinp HfA1_inv Hfb). 
 specialize (H3 H4). rewrite -/n -/A' -/b' -/x0' in H4.
 destruct H3 as [d1 [e1 [Hde1 [Hd1 [He1 H3]]]]].
 rewrite H3.
@@ -4382,8 +4380,8 @@ simpl.
 assert (forall x: ftype t, FT2R (BOPP x) = (- FT2R x)%Re).
 { intros. unfold FT2R. by rewrite B2R_Bopp. }
 rewrite H3. rewrite Rabs_Ropp. apply Rle_refl.
-admit.
-Admitted.
+apply Hinp.
+Qed.
 
 
 Lemma finite_residual_0_aux4 {t: type} :
