@@ -3620,6 +3620,33 @@ split.
     } by rewrite H9. 
 Qed.
 
+(***
+finite (A2_J A' (inord k) (inord p)) /\
+finite (x0' (inord p) ord0) /\
+(Rabs
+   (FT2R (A2_J A' (inord k) (inord p))) <
+ sqrt (fun_bnd t n.+1))%Re /\
+(Rabs (FT2R (x0' (inord p) ord0)) <
+ sqrt (fun_bnd t n.+1))%Re
+**)
+
+Definition input_bound_at_N_0 {t: type} 
+  (A: matrix t) (b: vector t) :=
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  (forall i j, 
+    (Rabs (FT2R (A2_J A' i j)) <
+          sqrt (fun_bnd t n.+1))%Re) /\
+  (forall i,
+    (Rabs (FT2R (x0' i ord0)) <
+            sqrt (fun_bnd t n.+1))%Re).
+
+
+
 
 Lemma bound_each_elem_A2_x0 {t: type} :
  forall (A: matrix t) (b: vector t),
@@ -3663,7 +3690,7 @@ rewrite mxE in Hnth.
 destruct x.
 apply inject_pair_iff in Hnth.
 destruct Hnth as [Hnth1 Hnth2].
-simpl. 
+simpl. rewrite -Hnth1 -Hnth2.
 
 
 
