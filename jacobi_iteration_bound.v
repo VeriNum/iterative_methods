@@ -3687,6 +3687,18 @@ Lemma no_overflow_0_aux1 {t: type} :
   let x0' := @vector_inj _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat ->
+  @size_constraint t n ->
+  (forall x : ftype t * ftype t,
+    In x
+      (combine
+         (vec_to_list_float n.+1
+            (\row_j A2_J A' (inord k) j)^T)
+         (vec_to_list_float n.+1
+            (\col_j x0' j ord0))) ->
+    finite x.1 /\
+    finite x.2 /\
+    (Rabs (FT2R x.1) < sqrt (fun_bnd t n.+1))%Re /\
+    (Rabs (FT2R x.2) < sqrt (fun_bnd t n.+1))%Re) ->
   Bplus_no_overflow t
   (FT2R (b' (@inord n k) ord0))
   (FT2R
@@ -3694,7 +3706,7 @@ Lemma no_overflow_0_aux1 {t: type} :
         ((A2_J A' *f x0')
            (@inord n k) ord0))).
 Proof.
-intros. 
+intros ? ? ? ? ? ? ? ? ? ? ? ? size_cons fbnd. 
 unfold Bplus_no_overflow.
 pose proof (@generic_round_property t).
 specialize (H2 (FT2R (b' (inord k) ord0) +
@@ -3779,7 +3791,7 @@ assert (\sum_(j < n.+1)
 } rewrite H6 in H5. specialize (H4 H5).
 clear H5 H6.
 rewrite finite_is_finite in H4.
-pose proof (@finite_residual_0_aux1 t A b H H0 k H1).
+pose proof (@finite_residual_0_aux1 t A b H H0 k H1 size_cons fbnd).
 specialize (H4 H5). clear H5.
 apply Rle_trans with 
     (Rabs
@@ -3838,6 +3850,55 @@ Bplus_no_overflow t
         (X_m_jacobi 0 x0' b' A' 
            (inord k) ord0)))
 ****)
+Lemma no_overflow_x1_minus_x0 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  forall k,
+  (k < n.+1)%coq_nat ->
+  Bplus_no_overflow t
+  (FT2R
+     (X_m_jacobi 1 x0' b' A' 
+        (inord k) ord0))
+  (FT2R
+     (BOPP
+        (X_m_jacobi 0 x0' b' A' 
+           (inord k) ord0))).
+Proof.
+intros.
+unfold Bplus_no_overflow.
+pose proof (@generic_round_property t 
+            (FT2R
+                 (X_m_jacobi 1 x0' b' A' 
+                    (inord k) ord0) +
+               FT2R
+                 (BOPP
+                    (X_m_jacobi 0 x0' b' A'
+                       (inord k) ord0)))%Re ).
+destruct H2 as [d [e [Hde [Hd [He H2]]]]].
+rewrite H2.
+eapply Rle_lt_trans. apply Rabs_triang.
+eapply Rle_lt_trans. apply Rplus_le_compat_l.
+apply He.
+apply Rcomplements.Rlt_minus_r.
+eapply Rle_lt_trans. rewrite Rabs_mult.
+apply Rmult_le_compat_l. apply Rabs_pos.
+eapply Rle_trans. apply Rabs_triang.
+rewrite Rabs_R1. apply Rplus_le_compat_l.
+apply Hd. 
+apply Rcomplements.Rlt_div_r.
+apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
+
+
+
+
+
 
 
 Lemma finite_residual_0_aux2 {t: type} :
