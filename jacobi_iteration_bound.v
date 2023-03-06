@@ -3633,6 +3633,18 @@ Lemma finite_residual_0_aux1 {t: type} :
   let x0' := @vector_inj _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat -> 
+  @size_constraint t n ->
+  (forall x : ftype t * ftype t,
+    In x
+      (combine
+         (vec_to_list_float n.+1
+            (\row_j A2_J A' (inord k) j)^T)
+         (vec_to_list_float n.+1
+            (\col_j x0' j ord0))) ->
+    finite x.1 /\
+    finite x.2 /\
+    (Rabs (FT2R x.1) < sqrt (fun_bnd t n.+1))%Re /\
+    (Rabs (FT2R x.2) < sqrt (fun_bnd t n.+1))%Re) ->
   is_finite (fprec t) (femax t)
     (let l1 :=
        vec_to_list_float n.+1
@@ -3644,23 +3656,24 @@ Lemma finite_residual_0_aux1 {t: type} :
 Proof.
 intros.
 pose proof (@finite_fma_from_bounded _ t).
-specialize (H2 (vec_to_list_float n.+1
+specialize (H4 (vec_to_list_float n.+1
                         (\row_j A2_J A' (inord k) j)^T)
                     (vec_to_list_float n.+1
                             (\col_j x0' j ord0))).
-specialize (H2 (dotprod_r 
+specialize (H4 (dotprod_r 
                       (vec_to_list_float n.+1
                         (\row_j A2_J A' (inord k) j)^T)
                       (vec_to_list_float n.+1
                             (\col_j x0' j ord0)))).
 pose proof (@fma_dot_prod_rel_holds _ n t n.+1 k (A2_J A')
                     (\col_j x0' j ord0)).
-specialize (H2 H3). clear H3.
-rewrite combine_length !length_veclist Nat.min_id in H2.
+specialize (H4 H5). clear H5.
+rewrite combine_length !length_veclist Nat.min_id in H4.
 apply finite_is_finite.
-apply H2.
-
-Admitted.
+apply H4.
++ by apply g1_constraint_Sn. 
++ by [].
+Qed.
 
 Lemma no_overflow_0_aux1 {t: type} :
  forall (A: matrix t) (b: vector t),
