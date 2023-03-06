@@ -3641,6 +3641,25 @@ Lemma finite_residual_0_aux1 {t: type} :
        vec_to_list_float n.+1
          (\col_j x0' j ord0) in
      dotprod_r l1 l2) = true.
+Proof.
+intros.
+pose proof (@finite_fma_from_bounded _ t).
+specialize (H2 (vec_to_list_float n.+1
+                        (\row_j A2_J A' (inord k) j)^T)
+                    (vec_to_list_float n.+1
+                            (\col_j x0' j ord0))).
+specialize (H2 (dotprod_r 
+                      (vec_to_list_float n.+1
+                        (\row_j A2_J A' (inord k) j)^T)
+                      (vec_to_list_float n.+1
+                            (\col_j x0' j ord0)))).
+pose proof (@fma_dot_prod_rel_holds _ n t n.+1 k (A2_J A')
+                    (\col_j x0' j ord0)).
+specialize (H2 H3). clear H3.
+rewrite combine_length !length_veclist Nat.min_id in H2.
+apply finite_is_finite.
+apply H2.
+
 Admitted.
 
 Lemma no_overflow_0_aux1 {t: type} :
@@ -3780,6 +3799,32 @@ eapply Rle_trans. apply Rabs_triang.
 rewrite Rabs_R1. apply Rplus_le_compat_l.
 apply Hd.
 Admitted. 
+
+(***
+Bmult_no_overflow t
+  (FT2R
+     (nth (n.+1.-1 - inord k)
+        (vec_to_list_float n.+1
+           (A1_inv_J A')) (Zconst t 0)))
+  (FT2R
+     (nth (n.+1.-1 - inord k)
+        (vec_to_list_float n.+1
+           (b' -f A2_J A' *f x0'))
+        (Zconst t 0)))
+
+***)
+
+
+(***
+Bplus_no_overflow t
+  (FT2R
+     (X_m_jacobi 1 x0' b' A' 
+        (inord k) ord0))
+  (FT2R
+     (BOPP
+        (X_m_jacobi 0 x0' b' A' 
+           (inord k) ord0)))
+****)
 
 
 Lemma finite_residual_0_aux2 {t: type} :
