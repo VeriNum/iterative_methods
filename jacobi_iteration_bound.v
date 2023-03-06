@@ -3945,13 +3945,6 @@ apply BMULT_no_overflow_is_finite.
 Admitted.
 
 
-
-
-
-
-
-
-
 Lemma no_overflow_x1_minus_x0 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -4164,78 +4157,6 @@ admit.
 Admitted.
 
 
-
-
-
-
-Lemma finite_residual_0_aux2 {t: type} :
- forall (A: matrix t) (b: vector t),
-  let x0 := (repeat  (Zconst t 0) (length b)) in
-  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
-  (0 < length A)%coq_nat ->
-  length A = length b ->
-  let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
-  forall k,
-  (k < n.+1)%coq_nat ->
-  finite (b' (inord k) ord0) ->
-  finite
-    (nth (n.+1.-1 - @inord n k)
-       (vec_to_list_float n.+1
-          (b' -f A2_J A' *f x0'))
-        (Zconst t 0)).
-Proof.
-intros.
-rewrite  nth_vec_to_list_float; last (rewrite inordK; by apply /ssrnat.ltP).
-rewrite mxE.
-apply Bplus_bminus_opp_implies.
-apply Bplus_no_ov_finite.
-+ by rewrite inord_val. 
-+ rewrite inord_val.
-  apply finite_is_finite. rewrite is_finite_Bopp.
-  rewrite mxE. by apply finite_residual_0_aux1.
-+ apply no_overflow_0_aux1; try by [].
-  rewrite -/n. rewrite inordK; try by apply /ssrnat.ltP.
-  apply H1.
-Qed.
-    
-  
-Lemma finite_residual_0_aux3 {t: type} :
- forall (A: matrix t) (b: vector t),
-  let x0 := (repeat  (Zconst t 0) (length b)) in
-  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
-  (0 < length A)%coq_nat ->
-  length A = length b ->
-  let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
-  forall k,
-  (k < n.+1)%coq_nat ->
-  finite (A1_inv_J A' (inord k) ord0) ->
-  finite (b' (inord k) ord0) ->
-  finite
-    (BMULT
-       (nth (n.+1.-1 - @inord n k)
-          (vec_to_list_float n.+1
-             (A1_inv_J A')) (Zconst t 0))
-       (nth (n.+1.-1 - @inord n k)
-          (vec_to_list_float n.+1
-             (b' -f A2_J A' *f x0'))
-          (Zconst t 0))).
-Proof.
-intros.
-apply BMULT_no_overflow_is_finite.
-+ rewrite  nth_vec_to_list_float; last (rewrite inordK; by apply /ssrnat.ltP).
-  by rewrite inord_val.
-+ apply finite_residual_0_aux2; try by [].
-+ admit.
-Admitted.
-
-
-
 Lemma finite_residual_0_aux4 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -4248,6 +4169,18 @@ Lemma finite_residual_0_aux4 {t: type} :
   let x0' := @vector_inj _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat ->
+  @size_constraint t n ->
+  (forall x : ftype t * ftype t,
+    In x
+      (combine
+         (vec_to_list_float n.+1
+            (\row_j A2_J A' (inord k) j)^T)
+         (vec_to_list_float n.+1
+            (\col_j x0' j ord0))) ->
+    finite x.1 /\
+    finite x.2 /\
+    (Rabs (FT2R x.1) < sqrt (fun_bnd t n.+1))%Re /\
+    (Rabs (FT2R x.2) < sqrt (fun_bnd t n.+1))%Re) ->
   finite (A1_inv_J A' (inord k) ord0) ->
   finite (b' (inord k) ord0) ->
   finite (x0' (inord k) ord0)  ->
@@ -4267,8 +4200,8 @@ apply Bplus_no_ov_finite.
   by apply finite_residual_0_aux3.
 + apply finite_is_finite. rewrite is_finite_Bopp.
   simpl. by apply finite_is_finite.
-+ admit.
-Admitted.
++ by apply no_overflow_x1_minus_x0.
+Qed.
 
 Lemma finite_residual_0_mult {t: type} :
  forall (A: matrix t) (b: vector t),
@@ -4282,6 +4215,18 @@ Lemma finite_residual_0_mult {t: type} :
   let x0' := @vector_inj _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat ->
+  @size_constraint t n ->
+  (forall x : ftype t * ftype t,
+    In x
+      (combine
+         (vec_to_list_float n.+1
+            (\row_j A2_J A' (inord k) j)^T)
+         (vec_to_list_float n.+1
+            (\col_j x0' j ord0))) ->
+    finite x.1 /\
+    finite x.2 /\
+    (Rabs (FT2R x.1) < sqrt (fun_bnd t n.+1))%Re /\
+    (Rabs (FT2R x.2) < sqrt (fun_bnd t n.+1))%Re) ->
   finite (A' (inord k) (inord k)) ->
   finite (A1_inv_J A' (inord k) ord0) ->
   finite (b' (inord k) ord0) ->
@@ -4296,7 +4241,7 @@ Lemma finite_residual_0_mult {t: type} :
                        X_m_jacobi 0 x0' b' A'))
                    (Zconst t 0))).
 Proof.
-intros ? ? ? ? ? ? ? ? ? ? ? ? HfA HdivA Hfb Hfx0.
+intros ? ? ? ? ? ? ? ? ? ? ? ? size_cons fbnd HfA HdivA Hfb Hfx0.
 apply BMULT_no_overflow_is_finite.
 + rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
   by rewrite mxE.
