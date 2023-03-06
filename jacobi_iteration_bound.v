@@ -3620,16 +3620,6 @@ split.
     } by rewrite H9. 
 Qed.
 
-(***
-finite (A2_J A' (inord k) (inord p)) /\
-finite (x0' (inord p) ord0) /\
-(Rabs
-   (FT2R (A2_J A' (inord k) (inord p))) <
- sqrt (fun_bnd t n.+1))%Re /\
-(Rabs (FT2R (x0' (inord p) ord0)) <
- sqrt (fun_bnd t n.+1))%Re
-**)
-
 Definition input_bound_at_N_0 {t: type} 
   (A: matrix t) (b: vector t) :=
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -3660,6 +3650,9 @@ Lemma bound_each_elem_A2_x0 {t: type} :
   let x0' := @vector_inj _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat -> 
+  (forall i j, finite (A2_J A' i j)) ->
+  (forall i, finite (x0' i ord0)) ->
+  @input_bound_at_N_0 t A b ->
   (forall x : ftype t * ftype t,
       In x
         (combine
@@ -3672,18 +3665,18 @@ Lemma bound_each_elem_A2_x0 {t: type} :
       (Rabs (FT2R x.1) < sqrt (fun_bnd t n.+1))%Re /\
       (Rabs (FT2R x.2) < sqrt (fun_bnd t n.+1))%Re).
 Proof.
-intros. apply in_rev in H2.
+intros. apply in_rev in H5.
 pose proof (@In_nth _ (rev (combine
           (vec_to_list_float n.+1
              (\row_j A2_J A' (inord k) j)^T)
           (vec_to_list_float n.+1
-             (\col_j x0' j ord0)))) x (Zconst t 0, Zconst t 0) H2).
-destruct H3 as [p [Hlenp Hnth]].
+             (\col_j x0' j ord0)))) x (Zconst t 0, Zconst t 0) H5).
+destruct H6 as [p [Hlenp Hnth]].
 rewrite rev_length combine_length !length_veclist Nat.min_id in Hlenp.
 rewrite rev_nth in Hnth.
 rewrite combine_length !length_veclist Nat.min_id in Hnth.
 assert ((n.+1 - p.+1)%coq_nat = (n.+1.-1 - p)%coq_nat) by lia.
-rewrite H3 in Hnth. rewrite combine_nth in Hnth.
+rewrite H6 in Hnth. rewrite combine_nth in Hnth.
 rewrite !nth_vec_to_list_float in Hnth.
 rewrite mxE in Hnth. rewrite mxE in Hnth.
 rewrite mxE in Hnth.
@@ -3691,12 +3684,13 @@ destruct x.
 apply inject_pair_iff in Hnth.
 destruct Hnth as [Hnth1 Hnth2].
 simpl. rewrite -Hnth1 -Hnth2.
+repeat split; try apply H2; try apply H3; try apply H4.
+by apply /ssrnat.ltP.
+by apply /ssrnat.ltP.
+by rewrite !length_veclist.
+by rewrite combine_length !length_veclist Nat.min_id.
+Qed.
 
-
-
-
- repeat split.
-+ rewrite -
 
 
 
