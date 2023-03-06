@@ -4701,6 +4701,16 @@ Lemma finite_in{t: type}  :
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  @size_constraint t n ->
+  (forall i j, finite (A2_J A' i j)) ->
+  (forall i, finite (x0' i ord0)) ->
+  @input_bound_at_N_0 t A b ->
+  (forall i, finite (A' i i)) ->
+  (forall i, finite (A1_inv_J A' i ord0)) ->
+  (forall i, finite (b' i ord0)) ->
   forall xy, 
   In xy
        (combine
@@ -4716,7 +4726,8 @@ Lemma finite_in{t: type}  :
                 n.+1))) ->
   finite xy.1 /\ finite xy.2.
 Proof.
-intros. apply in_rev in H1.
+intros ? ? ? ? ? ? ? ? ? ? size_cons HfA2 Hfx0 Hinp HfA HfA1_inv Hfb ? ?. 
+apply in_rev in H1.
 pose proof (@In_nth _ (rev (combine
                         (vec_to_list_float n.+1
                            (vector_inj
@@ -4745,13 +4756,15 @@ assert (length x0 = length A).
 { by rewrite repeat_length. }
 specialize (H3 H4 H5 H). clear H4 H5.
 rewrite H3. rewrite -/n.
-remember (matrix_inj A n.+1 n.+1) as A'.
-remember (vector_inj x0 n.+1) as x0'.
-remember (vector_inj b n.+1) as b'. rewrite H2.
+rewrite H2.
 rewrite !nth_vec_to_list_float.
 rewrite mxE. 
-split; 
-(rewrite HeqA' Heqx0' Heqb' /n; by apply  finite_residual_0_mult).
+split;
+(apply  finite_residual_0_mult; try by [];
+  rewrite -/n;rewrite inordK; try by apply /ssrnat.ltP; try apply Hlen;
+  try apply Hlen).
+apply Hlen.
+apply Hlen.
 by apply /ssrnat.ltP.
 by rewrite !length_veclist.
 by rewrite combine_length !length_veclist Nat.min_id.
