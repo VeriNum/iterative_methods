@@ -3644,7 +3644,20 @@ Definition input_bound_at_N_0 {t: type}
          g1 t n.+1 (n.+1 - 1)%coq_nat)) *
        (1 + default_rel t) <
        bpow Zaux.radix2 (femax t) -
-       default_abs t)%Re).
+       default_abs t)%Re) /\
+  (forall i,
+      (Rabs (FT2R (A1_inv_J A' i ord0)) *
+         ((Rabs (FT2R (b' i ord0)) +
+           ((\sum_j
+                (Rabs
+                   (FT2R (A2_J A' i j)) *
+                 Rabs (FT2R (x0' j ord0)))%Re) *
+            (1 + g t n.+1) +
+            g1 t n.+1 (n.+1 - 1)%coq_nat)) *
+          (1 + default_rel t)) <
+         (bpow Zaux.radix2 (femax t) -
+          default_abs t) / (1 + default_rel t))%Re).
+
 
 
 
@@ -3896,22 +3909,6 @@ apply Hd.
 apply Hinp.
 Qed.
 
-
-
-(***
-Bmult_no_overflow t
-  (FT2R
-     (nth (n.+1.-1 - inord k)
-        (vec_to_list_float n.+1
-           (A1_inv_J A')) (Zconst t 0)))
-  (FT2R
-     (nth (n.+1.-1 - inord k)
-        (vec_to_list_float n.+1
-           (b' -f A2_J A' *f x0'))
-        (Zconst t 0)))
-
-***)
-
 Lemma finite_residual_0_aux2 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -3925,17 +3922,9 @@ Lemma finite_residual_0_aux2 {t: type} :
   forall k,
   (k < n.+1)%coq_nat ->
   @size_constraint t n ->
-  (forall x : ftype t * ftype t,
-    In x
-      (combine
-         (vec_to_list_float n.+1
-            (\row_j A2_J A' (inord k) j)^T)
-         (vec_to_list_float n.+1
-            (\col_j x0' j ord0))) ->
-    finite x.1 /\
-    finite x.2 /\
-    (Rabs (FT2R x.1) < sqrt (fun_bnd t n.+1))%Re /\
-    (Rabs (FT2R x.2) < sqrt (fun_bnd t n.+1))%Re) ->
+  (forall i j, finite (A2_J A' i j)) ->
+  (forall i, finite (x0' i ord0)) ->
+  @input_bound_at_N_0 t A b ->
   finite (b' (inord k) ord0) ->
   finite
     (nth (n.+1.-1 - @inord n k)
@@ -3955,8 +3944,6 @@ apply Bplus_no_ov_finite.
 + apply no_overflow_0_aux1; try by [].
   rewrite -/n. rewrite inordK; try by apply /ssrnat.ltP.
   by apply H1. 
-  rewrite -/n -/A' -/b' -/x0'. intros. apply H3.
-  by rewrite inord_val in H5.
 Qed.
     
 
@@ -3975,17 +3962,9 @@ Lemma no_overflow_Bmult_A1_inv_b_minus {t: type} :
   forall k,
   (k < n.+1)%coq_nat ->
   @size_constraint t n ->
-  (forall x : ftype t * ftype t,
-    In x
-      (combine
-         (vec_to_list_float n.+1
-            (\row_j A2_J A' (inord k) j)^T)
-         (vec_to_list_float n.+1
-            (\col_j x0' j ord0))) ->
-    finite x.1 /\
-    finite x.2 /\
-    (Rabs (FT2R x.1) < sqrt (fun_bnd t n.+1))%Re /\
-    (Rabs (FT2R x.2) < sqrt (fun_bnd t n.+1))%Re) ->
+  (forall i j, finite (A2_J A' i j)) ->
+  (forall i, finite (x0' i ord0)) ->
+  @input_bound_at_N_0 t A b ->
   finite (b' (inord k) ord0) ->
   Bmult_no_overflow t
   (FT2R
@@ -3998,7 +3977,7 @@ Lemma no_overflow_Bmult_A1_inv_b_minus {t: type} :
            (b' -f A2_J A' *f x0'))
         (Zconst t 0))).
 Proof.
-intros.
+intros ? ? ? ? ? ? ? ? ? ? ? ? ? HfA2 Hfx0 ? ?.
 unfold Bmult_no_overflow. unfold rounded.
 pose proof (@generic_round_property t).
 specialize (H5 (FT2R
@@ -4028,7 +4007,7 @@ rewrite !nth_vec_to_list_float. rewrite inord_val.
 eapply Rle_lt_trans. apply Rmult_le_compat_l. apply Rabs_pos.
 rewrite mxE.
 pose proof (@finite_residual_0_aux2 t).
-specialize (H6 A b H H0 k H1 H2 H3 H4).
+specialize (H6 A b H H0 k H1 H2 HfA2 Hfx0 H3 H4).
 rewrite -/n -/A' -/b' -/x0' in H6.
 rewrite nth_vec_to_list_float in H6. rewrite inord_val mxE in H6.
 apply Bminus_bplus_opp_implies in H6.
@@ -4144,10 +4123,10 @@ assert (forall x: ftype t, FT2R (BOPP x) = (- FT2R x)%Re).
 eapply Rle_trans. apply Rabs_triang.
 rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd2.
 rewrite inordK; (by apply /ssrnat.ltP).
-admit.
+apply H3.
 rewrite inordK; (by apply /ssrnat.ltP).
 rewrite inordK; (by apply /ssrnat.ltP).
-Admitted.
+Qed.
 
 
 Lemma finite_residual_0_aux3 {t: type} :
