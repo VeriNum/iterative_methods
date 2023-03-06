@@ -4068,22 +4068,13 @@ assert (forall x: ftype t, FT2R (BOPP x) = (- FT2R x)%Re).
      intros. apply Rmult_le_pos; apply Rabs_pos.
      rewrite sum_abs_eq. apply Rle_refl.
      intros. apply Rmult_le_pos; apply Rabs_pos.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+eapply Rle_trans. apply Rabs_triang.
+rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd2.
+rewrite inordK; (by apply /ssrnat.ltP).
+admit.
+rewrite inordK; (by apply /ssrnat.ltP).
+rewrite inordK; (by apply /ssrnat.ltP).
+Admitted.
 
 
 Lemma finite_residual_0_aux3 {t: type} :
@@ -4127,8 +4118,8 @@ apply BMULT_no_overflow_is_finite.
 + rewrite  nth_vec_to_list_float; last (rewrite inordK; by apply /ssrnat.ltP).
   by rewrite inord_val.
 + apply finite_residual_0_aux2; try by [].
-+ admit.
-Admitted.
++ by apply no_overflow_Bmult_A1_inv_b_minus.
+Qed.
 
 
 Lemma no_overflow_x1_minus_x0 {t: type} :
@@ -4480,7 +4471,7 @@ apply BMULT_no_overflow_is_finite.
         by apply finite_residual_0_aux3.
       + simpl. apply finite_is_finite. rewrite is_finite_Bopp.
         by apply finite_is_finite.
-      + admit.
+      + by apply no_overflow_x1_minus_x0.
     }
     specialize (H3 H4).
     destruct H3 as [d1 [Hd1 H3]].
@@ -4644,19 +4635,13 @@ apply BMULT_no_overflow_is_finite.
     rewrite inordK; (by apply /ssrnat.ltP).
     eapply Rle_trans. apply Rabs_triang.
     rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd2.
-    
-  
-
-    
-
-  
-    
-  
-  
-  
-
-
- admit.
+    admit.
+  - apply Bplus_no_ov_finite.
+    * rewrite mxE.
+      by apply finite_residual_0_aux3.
+    * simpl. apply finite_is_finite. rewrite is_finite_Bopp.
+      by apply finite_is_finite.
+    * by apply no_overflow_x1_minus_x0.
 Admitted.
 
 
