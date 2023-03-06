@@ -3838,18 +3838,70 @@ Bmult_no_overflow t
         (Zconst t 0)))
 
 ***)
+Lemma no_overflow_Bmult_A1_inv_b_minus {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  forall k,
+  (k < n.+1)%coq_nat ->
+  @size_constraint t n ->
+  (forall x : ftype t * ftype t,
+    In x
+      (combine
+         (vec_to_list_float n.+1
+            (\row_j A2_J A' (inord k) j)^T)
+         (vec_to_list_float n.+1
+            (\col_j x0' j ord0))) ->
+    finite x.1 /\
+    finite x.2 /\
+    (Rabs (FT2R x.1) < sqrt (fun_bnd t n.+1))%Re /\
+    (Rabs (FT2R x.2) < sqrt (fun_bnd t n.+1))%Re) ->
+  finite (A1_inv_J A' (inord k) ord0) ->
+  finite (b' (inord k) ord0) ->
+  Bmult_no_overflow t
+  (FT2R
+     (nth (n.+1.-1 - @inord n k)
+        (vec_to_list_float n.+1
+           (A1_inv_J A')) (Zconst t 0)))
+  (FT2R
+     (nth (n.+1.-1 - @inord n k)
+        (vec_to_list_float n.+1
+           (b' -f A2_J A' *f x0'))
+        (Zconst t 0))).
+Proof.
+intros.
+unfold Bmult_no_overflow. unfold rounded.
+pose proof (@generic_round_property t).
+specialize (H6 (FT2R
+                 (nth (n.+1.-1 - @inord n k)
+                    (vec_to_list_float n.+1
+                       (A1_inv_J A')) 
+                    (Zconst t 0)) *
+               FT2R
+                 (nth (n.+1.-1 - @inord n k)
+                    (vec_to_list_float n.+1
+                       (b' -f A2_J A' *f x0'))
+                    (Zconst t 0)))%Re ).
+destruct H6 as [d [e [Hde [Hd [He H6]]]]].
+rewrite H6.
 
 
-(***
-Bplus_no_overflow t
-  (FT2R
-     (X_m_jacobi 1 x0' b' A' 
-        (inord k) ord0))
-  (FT2R
-     (BOPP
-        (X_m_jacobi 0 x0' b' A' 
-           (inord k) ord0)))
-****)
+
+
+
+
+
+
+
+
+
+
 Lemma finite_residual_0_aux2 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
