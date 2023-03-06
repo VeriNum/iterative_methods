@@ -3621,6 +3621,60 @@ split.
 Qed.
 
 
+Lemma bound_each_elem_A2_x0 {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  forall k,
+  (k < n.+1)%coq_nat -> 
+  (forall x : ftype t * ftype t,
+      In x
+        (combine
+           (vec_to_list_float n.+1
+              (\row_j A2_J A' (inord k) j)^T)
+           (vec_to_list_float n.+1
+              (\col_j x0' j ord0))) ->
+      finite x.1 /\
+      finite x.2 /\
+      (Rabs (FT2R x.1) < sqrt (fun_bnd t n.+1))%Re /\
+      (Rabs (FT2R x.2) < sqrt (fun_bnd t n.+1))%Re).
+Proof.
+intros. apply in_rev in H2.
+pose proof (@In_nth _ (rev (combine
+          (vec_to_list_float n.+1
+             (\row_j A2_J A' (inord k) j)^T)
+          (vec_to_list_float n.+1
+             (\col_j x0' j ord0)))) x (Zconst t 0, Zconst t 0) H2).
+destruct H3 as [p [Hlenp Hnth]].
+rewrite rev_length combine_length !length_veclist Nat.min_id in Hlenp.
+rewrite rev_nth in Hnth.
+rewrite combine_length !length_veclist Nat.min_id in Hnth.
+assert ((n.+1 - p.+1)%coq_nat = (n.+1.-1 - p)%coq_nat) by lia.
+rewrite H3 in Hnth. rewrite combine_nth in Hnth.
+rewrite !nth_vec_to_list_float in Hnth.
+rewrite mxE in Hnth. rewrite mxE in Hnth.
+rewrite mxE in Hnth.
+destruct x.
+apply inject_pair_iff in Hnth.
+destruct Hnth as [Hnth1 Hnth2].
+simpl. 
+
+
+
+
+ repeat split.
++ rewrite -
+
+
+
+
+
 Lemma finite_residual_0_aux1 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
