@@ -4023,8 +4023,15 @@ specialize (H3 (nth (n.+1.-1 - @inord n k)
                 (Zconst t 0))).
 pose proof (@finite_residual_0_aux3 t A b H H0 k H1 size_cons fbnd HfA1_inv Hfb). 
 specialize (H3 H4). rewrite -/n -/A' -/b' -/x0' in H4.
-
-
+destruct H3 as [d1 [e1 [Hde1 [Hd1 [He1 H3]]]]].
+rewrite H3.
+rewrite !nth_vec_to_list_float.
+rewrite inord_val.
+eapply Rle_trans. apply Rabs_triang.
+apply Rplus_le_compat.
+rewrite Rabs_mult.
+apply Rmult_le_compat; try apply Rabs_pos.
+rewrite Rabs_mult. apply Rmult_le_compat_l. apply Rabs_pos.
 
 
 
@@ -4032,6 +4039,12 @@ specialize (H3 H4). rewrite -/n -/A' -/b' -/x0' in H4.
 
 
 admit.
+eapply Rle_trans.
+apply Rabs_triang.
+rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd1.
+apply He1.
+rewrite inordK; (by apply /ssrnat.ltP).
+rewrite inordK; (by apply /ssrnat.ltP).
 simpl.
 assert (forall x: ftype t, FT2R (BOPP x) = (- FT2R x)%Re).
 { intros. unfold FT2R. by rewrite B2R_Bopp. }
