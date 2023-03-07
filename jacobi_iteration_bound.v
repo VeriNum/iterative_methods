@@ -6111,7 +6111,15 @@ destruct H0.
                  { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                    by rewrite nth_repeat.
                  } intros. rewrite H10. apply H.
-                 admit.
+                 apply input_bound_at_N_0_equiv.
+                 rewrite -Heqn.
+                 assert (vector_inj
+                           (repeat (Zconst t 0) (length b)) n.+1 =
+                         \col_(j < n.+1) (Zconst t 0)).
+                 { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                   by rewrite nth_repeat.
+                 } rewrite H10.
+                 apply H.
                  rewrite -Heqn.
                  intros. apply H. rewrite -Heqn. intros. rewrite mxE. apply H.
                  rewrite -Heqn.
@@ -6550,7 +6558,14 @@ destruct H0.
                apply Rplus_le_le_0_compat. nra. apply g_pos.
                apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
                apply Rplus_le_le_0_compat. nra. apply g_pos.
-               admit.
+               destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+               destruct HG as [_ HG].
+               assert (vector_inj
+                           (repeat (Zconst t 0) (length b)) n.+1 =
+                         \col_(j < n.+1) (Zconst t 0)).
+                { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                  by rewrite nth_repeat.
+                } rewrite Heqx0' /x0. rewrite H. rewrite HeqGamma. apply HG.
          -- rewrite <- finite_is_finite. apply finite_residual_0.
             apply HlenA. apply HeqAb. unfold size_constraint. 
             destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
@@ -6580,7 +6595,7 @@ destruct H0.
   + by apply jacobi_precond_compute_implies_math .
   + apply HeqAb. 
   + apply HlenA.
-Admitted.
+Qed.
 
 
 End WITH_NANS.
