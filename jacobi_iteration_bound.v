@@ -5038,9 +5038,7 @@ apply dotprod_finite.
     rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd3.
     eapply Rle_trans. apply Rabs_triang.
     rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd2.
-    unfold  input_bound_at_N_0 in Hinp.
-
-admit.
+    apply Hinp.
     rewrite H2 in Hlen.
     rewrite inordK; (try by apply /ssrnat.ltP) .
     rewrite H2 in Hlen.
@@ -5056,7 +5054,7 @@ admit.
     rewrite H2 in Hlen. by apply /ssrnat.ltP .
   - rewrite H2 in Hlen. by apply /ssrnat.ltP.
   - rewrite H2 in Hlen. by rewrite length_veclist.
-Admitted.
+Qed.
 
 
 
