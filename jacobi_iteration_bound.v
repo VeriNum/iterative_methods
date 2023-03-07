@@ -5923,11 +5923,8 @@ destruct H0.
          { apply matrixP. unfold eqrel. intros. rewrite !mxE.
            by rewrite nth_repeat.
          } rewrite H3. apply H.
-
-
-
-
- admit. admit. admit. admit. 
+         admit.
+         intros. apply H. intros. rewrite mxE. apply H.
       ++ unfold BCMP.
          rewrite Bcompare_correct.
          -- rewrite Rcompare_Lt; first by [].
@@ -6001,11 +5998,38 @@ destruct H0.
              eapply Rle_lt_trans.
              apply norm2_vec_inf_norm_rel.
              ** intros. apply finite_in with A b. apply HlenA. apply HeqAb.
-                unfold resid in H9. rewrite -Heqn. apply H9.
+                unfold resid in H9. rewrite -Heqn. apply H. 
+                rewrite -Heqn. apply H.
+                rewrite -Heqn.
+                 assert (vector_inj
+                           (repeat (Zconst t 0) (length b)) n.+1 =
+                         \col_(j < n.+1) (Zconst t 0)).
+                 { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                   by rewrite nth_repeat.
+                 } intros. rewrite H10. apply H.
+                 admit.
+                 rewrite -Heqn.
+                 intros. apply H. rewrite -Heqn. intros. rewrite mxE. apply H.
+                 rewrite -Heqn.
+                 intros. apply H. rewrite -Heqn.
+                 apply H9.
              ** rewrite  -H7 -H5. apply finite_residual_0.
                 apply HlenA. apply HeqAb. unfold size_constraint. 
                 destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
                 unfold size_constraint in size_cons. by rewrite Heqn in size_cons.
+                rewrite -Heqn. apply H.
+                rewrite -Heqn.
+                 assert (vector_inj
+                           (repeat (Zconst t 0) (length b)) n.+1 =
+                         \col_(j < n.+1) (Zconst t 0)).
+                 { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                   by rewrite nth_repeat.
+                 } intros. rewrite H9. apply H.
+                 admit.
+                 rewrite -Heqn.
+                 intros. apply H. rewrite -Heqn. intros. rewrite mxE. apply H.
+                 rewrite -Heqn.
+                 intros. apply H. 
              ** rewrite H1. unfold residual_math.
                 remember (vector_inj x0 n.+1) as x0'.
                 remember (vector_inj b n.+1) as b'.
