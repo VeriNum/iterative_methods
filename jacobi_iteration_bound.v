@@ -6442,7 +6442,9 @@ destruct H0.
               by rewrite nth_repeat.
             } rewrite H1. apply H.
             admit.
-            
+            intros. apply H.
+            intros. rewrite mxE. apply H.
+            intros. apply H.
          -- rewrite <- finite_is_finite. apply H.
 (** 0 < || N || **)
 - apply jacobi_iteration_bound_lowlevel'.
