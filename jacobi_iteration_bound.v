@@ -3685,12 +3685,8 @@ Definition input_bound_at_N_0 {t: type}
          (1 + default_rel t)) *
         (1 + default_rel t) + default_abs t +
         Rabs (FT2R (x0' i ord0))) <
-       (bpow Zaux.radix2 (femax t) -
-        default_abs t) / (1 + default_rel t) /
-       (1 + default_rel t))%Re).
-
-
-
+        (sqrt (fun_bnd t n.+1) - default_abs t) /
+            (1 + default_rel t) / (1 + default_rel t))%Re).
 
 
 Lemma bound_each_elem_A2_x0 {t: type} :
@@ -3745,10 +3741,6 @@ by apply /ssrnat.ltP.
 by rewrite !length_veclist.
 by rewrite combine_length !length_veclist Nat.min_id.
 Qed.
-
-
-
-
 
 
 Lemma finite_residual_0_aux1 {t: type} :
@@ -4684,7 +4676,17 @@ apply BMULT_no_overflow_is_finite.
     rewrite inordK; (by apply /ssrnat.ltP).
     eapply Rle_trans. apply Rabs_triang.
     rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd2.
+    apply Rlt_trans with
+    ((sqrt (fun_bnd t n.+1) - default_abs t) /
+            (1 + default_rel t) / (1 + default_rel t))%Re.
     apply fbnd.
+    apply Rmult_lt_compat_r.
+    apply Rinv_0_lt_compat.
+    apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
+    apply Rmult_lt_compat_r.
+    apply Rinv_0_lt_compat.
+    apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
+    apply Rplus_lt_compat_r. by apply sqrt_fun_bnd_lt_fmax.
   - apply Bplus_no_ov_finite.
     * rewrite mxE.
       by apply finite_residual_0_aux3.
@@ -5036,7 +5038,7 @@ apply dotprod_finite.
     rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd3.
     eapply Rle_trans. apply Rabs_triang.
     rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd2.
-    apply Hinp.
+    unfold  input_bound_at_N_0 in Hinp.
 
 admit.
     rewrite H2 in Hlen.
