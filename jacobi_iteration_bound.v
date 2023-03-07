@@ -4777,17 +4777,26 @@ Lemma finite_residual_0 {t: type} :
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
   @size_constraint t (length A).-1 ->
+  (forall i j, finite (A2_J A' i j)) ->
+  (forall i, finite (x0' i ord0)) ->
+  @input_bound_at_N_0 t A b ->
+  (forall i, finite (A' i i)) ->
+  (forall i, finite (A1_inv_J A' i ord0)) ->
+  (forall i, finite (b' i ord0)) ->
   finite (norm2 (resid (jacobi_n A b x0 0))).
 Proof.
-intros.
+intros ? ? ? ? ? ? ? ? ? ? ? HfA2 Hfx0 Hinp HfA HfA1_inv Hfb.
 unfold norm2. 
-remember (length A).-1 as n.
 assert ( length (resid (jacobi_n A b x0 0)) = n.+1).
 { repeat rewrite /matrix_vector_mult !map_length combine_length.
     rewrite !map_length. unfold jacobi_n. rewrite iter_length.
     rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
-    rewrite Heqn prednK. by []. by apply /ssrnat.ltP.
+    rewrite -/n prednK. by []. by apply /ssrnat.ltP.
     by []. by rewrite /x0 repeat_length.
 }
 apply dotprod_finite.
@@ -4810,15 +4819,15 @@ apply dotprod_finite.
   specialize (H6 H7). clear H7.
   assert ( length x0 = length A ).
   { by rewrite repeat_length. } specialize (H6 H7). clear H7.
-  specialize (H6 H). unfold resid in Hnth. rewrite -Heqn in H6.
+  specialize (H6 H). unfold resid in Hnth. rewrite -/n in H6.
   rewrite H6 in Hnth.
-  remember (matrix_inj A n.+1 n.+1) as A'.
-  remember (vector_inj x0 n.+1) as x0'.
-  remember  (vector_inj b n.+1) as b'.
   rewrite nth_vec_to_list_float in Hnth.
   rewrite mxE in Hnth. rewrite -Hnth.
   split.
-  - rewrite HeqA' Heqx0' Heqb' Heqn; by apply  finite_residual_0_mult.
+  - apply  finite_residual_0_mult; try by [].
+    rewrite -/n. rewrite H2 in Hlen.
+    rewrite inordK; try by apply /ssrnat.ltP.
+    apply Hlen.
   - intros. unfold n0. rewrite rev_length. rewrite H2.
     pose proof (@BMULT_accurate' _ t).
     rewrite inordK.
@@ -4840,7 +4849,9 @@ apply dotprod_finite.
                       (X_m_jacobi 1 x0' b' A' -f
                        X_m_jacobi 0 x0' b' A'))
                    (Zconst t 0)))).
-    { rewrite HeqA' Heqx0' Heqb' Heqn; by apply  finite_residual_0_mult. }
+    { apply  finite_residual_0_mult; try by [].
+      rewrite -/n. by rewrite H2 in Hlen.
+    }
     specialize (H7 H8).
     destruct H7 as [d [e [Hde [Hd [He H7]]]]].
     rewrite H7.
@@ -4857,7 +4868,7 @@ apply dotprod_finite.
     apply BMULT_finite_e in H8.
     destruct H8 as [_ H8].
     rewrite nth_vec_to_list_float in H8.
-    rewrite mxE in H8.
+    rewrite mxE in H8. rewrite mxE.
     rewrite Bminus_bplus_opp_equiv.
     apply Bminus_bplus_opp_implies in H8.
     pose proof (@BPLUS_accurate' _ t).
