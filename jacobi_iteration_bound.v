@@ -3707,9 +3707,7 @@ split.
 Qed.
 
 Definition input_bound_at_N_0 {t: type} 
-  (A: matrix t) (b: vector t) :=
-  let x0 := (repeat  (Zconst t 0) (length b)) in
-  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (A: matrix t) (x0 b: vector t) :=
   let n := (length A).-1 in
   let A' := @matrix_inj _ A n.+1 n.+1 in
   let b' := @vector_inj _ b n.+1 in
@@ -3775,6 +3773,24 @@ Definition input_bound_at_N_0 {t: type}
             (1 + default_rel t) / (1 + default_rel t))%Re).
 
 
+(*
+Lemma input_bound_at_N_0_equiv {t: type} 
+  (A: matrix t) (x0 b: vector t) :
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  input_bound_at_N_0_Rcompute A' x0' b' ->
+  input_bound_at_N_0 A x0 b. 
+Proof.
+intros. apply H.
+unfold inp ut_bound_at_N_0.
+unfold input_bound_at_N_0_Rcompute in H.
+apply H.
+*)
+
+  
+
 Lemma bound_each_elem_A2_x0 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -3789,7 +3805,7 @@ Lemma bound_each_elem_A2_x0 {t: type} :
   (k < n.+1)%coq_nat -> 
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  @input_bound_at_N_0 t A b ->
+  input_bound_at_N_0 A x0 b ->
   (forall x : ftype t * ftype t,
       In x
         (combine
@@ -3844,7 +3860,7 @@ Lemma finite_residual_0_aux1 {t: type} :
   @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  @input_bound_at_N_0 t A b ->
+  input_bound_at_N_0 A x0 b ->
   is_finite (fprec t) (femax t)
     (let l1 :=
        vec_to_list_float n.+1
@@ -3890,7 +3906,7 @@ Lemma no_overflow_0_aux1 {t: type} :
   @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  @input_bound_at_N_0 t A b ->
+  input_bound_at_N_0 A x0 b ->
   Bplus_no_overflow t
   (FT2R (b' (@inord n k) ord0))
   (FT2R
@@ -4033,7 +4049,7 @@ Lemma finite_residual_0_aux2 {t: type} :
   @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  @input_bound_at_N_0 t A b ->
+  input_bound_at_N_0 A x0 b ->
   finite (b' (inord k) ord0) ->
   finite
     (nth (n.+1.-1 - @inord n k)
@@ -4055,9 +4071,6 @@ apply Bplus_no_ov_finite.
   by apply H1. 
 Qed.
     
-
-
-
 Lemma no_overflow_Bmult_A1_inv_b_minus {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -4073,7 +4086,7 @@ Lemma no_overflow_Bmult_A1_inv_b_minus {t: type} :
   @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  @input_bound_at_N_0 t A b ->
+  input_bound_at_N_0 A x0 b ->
   finite (b' (inord k) ord0) ->
   Bmult_no_overflow t
   (FT2R
