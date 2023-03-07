@@ -4864,11 +4864,11 @@ apply dotprod_finite.
     eapply Rle_trans. apply Rabs_triang.
     rewrite Rabs_R1. apply Rplus_le_compat_l.
     apply Hd. rewrite Rabs_mult.
-    rewrite mxE. rewrite mxE.
+    rewrite mxE. rewrite [in X in ( _ * X * _ + _ < _)%Re]mxE.
     apply BMULT_finite_e in H8.
     destruct H8 as [_ H8].
     rewrite nth_vec_to_list_float in H8.
-    rewrite mxE in H8. rewrite mxE.
+    rewrite mxE in H8. 
     rewrite Bminus_bplus_opp_equiv.
     apply Bminus_bplus_opp_implies in H8.
     pose proof (@BPLUS_accurate' _ t).
@@ -4896,7 +4896,7 @@ apply dotprod_finite.
     { by simpl. } rewrite H10. clear H10.
     eapply Rle_lt_trans. apply Rmult_le_compat_l.
     apply Rabs_pos. apply Rabs_triang.
-    rewrite Rabs_Ropp. rewrite mxE.
+    rewrite Rabs_Ropp. rewrite [in X in (_ * (X  + _) < _)%Re]mxE.
     rewrite !nth_vec_to_list_float. rewrite inord_val.
     clear H9.
     apply BPLUS_finite_e in H8.
@@ -5036,7 +5036,9 @@ apply dotprod_finite.
     rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd3.
     eapply Rle_trans. apply Rabs_triang.
     rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd2.
-    admit.
+    apply Hinp.
+
+admit.
     rewrite H2 in Hlen.
     rewrite inordK; (try by apply /ssrnat.ltP) .
     rewrite H2 in Hlen.
