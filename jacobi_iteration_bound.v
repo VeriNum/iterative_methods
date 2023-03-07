@@ -816,6 +816,94 @@ Lemma diagonal_dominance_implies_rho_lt_1 {t} {n:nat}
   (rho_def A b < 1)%Re.
 Admitted.
 *)
+(**
+(INR n.+1 *
+ (vec_inf_norm (FT2R_mat (A1_J A')) *
+  ((vec_inf_norm (FT2R_mat (A1_inv_J A')) *
+    ((vec_inf_norm (FT2R_mat b') +
+      (matrix_inf_norm
+         (FT2R_mat (A2_J A')) *
+       vec_inf_norm (FT2R_mat x0') *
+       (1 + g t n.+1) +
+       g1 t n.+1 (n.+1 - 1))) *
+     (1 + default_rel t)) * 
+    (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1) +
+    vec_inf_norm (FT2R_mat x0')) *
+   (1 + default_rel t)) * (1 + g t n.+1) +
+  g1 t n.+1 (n.+1 - 1)%coq_nat)² *
+ (1 + g t n.+1) +
+ g1 t n.+1 (n.+1 - 1)%coq_nat < Gamma)%Re
+input_bound_at_N_0 A b
+***)
+
+Definition input_bound_at_N_0 {t: type} 
+  (A: matrix t) (b: vector t) :=
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  (forall i j, 
+    (Rabs (FT2R (A2_J A' i j)) <
+          sqrt (fun_bnd t n.+1))%Re) /\
+  (forall i,
+    (Rabs (FT2R (x0' i ord0)) <
+            sqrt (fun_bnd t n.+1))%Re) /\
+  (forall i,
+    ((Rabs (FT2R (b' i ord0)) +
+        ((\sum_j
+             (Rabs
+                (FT2R (A2_J A' i j)) *
+              Rabs (FT2R (x0' j ord0)))%Re) *
+         (1 + g t n.+1) +
+         g1 t n.+1 (n.+1 - 1)%coq_nat)) *
+       (1 + default_rel t) <
+       bpow Zaux.radix2 (femax t) -
+       default_abs t)%Re) /\
+  (forall i,
+      (Rabs (FT2R (A1_inv_J A' i ord0)) *
+         ((Rabs (FT2R (b' i ord0)) +
+           ((\sum_j
+                (Rabs
+                   (FT2R (A2_J A' i j)) *
+                 Rabs (FT2R (x0' j ord0)))%Re) *
+            (1 + g t n.+1) +
+            g1 t n.+1 (n.+1 - 1)%coq_nat)) *
+          (1 + default_rel t)) <
+         (bpow Zaux.radix2 (femax t) -
+          default_abs t) / (1 + default_rel t))%Re) /\
+  (forall i,
+    (Rabs (FT2R (A1_inv_J A' i ord0)) *
+       ((Rabs (FT2R (b' i ord0)) +
+         ((\sum_j
+              (Rabs
+                 (FT2R (A2_J A' i j)) *
+               Rabs (FT2R (x0' j ord0)))%Re) *
+          (1 + g t n.+1) +
+          g1 t n.+1 (n.+1 - 1)%coq_nat)) *
+        (1 + default_rel t)) *
+       (1 + default_rel t) + default_abs t +
+       Rabs (FT2R (x0' i ord0)) <
+       (bpow Zaux.radix2 (femax t) -
+        default_abs t) / (1 + default_rel t))%Re) /\
+  (forall i,
+      (Rabs (FT2R (A' i i)) *
+       (Rabs
+          (FT2R (A1_inv_J A' i ord0)) *
+        ((Rabs (FT2R (b' i ord0)) +
+          ((\sum_j
+               (Rabs
+                  (FT2R (A2_J A' i j)) *
+                Rabs (FT2R (x0' j ord0)))%Re) *
+           (1 + g t n.+1) +
+           g1 t n.+1 (n.+1 - 1)%coq_nat)) *
+         (1 + default_rel t)) *
+        (1 + default_rel t) + default_abs t +
+        Rabs (FT2R (x0' i ord0))) <
+        (sqrt (fun_bnd t n.+1) - default_abs t) /
+            (1 + default_rel t) / (1 + default_rel t))%Re).
+
 
 (** Rcompute **)
 Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
@@ -838,13 +926,29 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (forall i : 'I_n.+1,
     finite (BDIV (Zconst t 1) (A i i))) /\
   (** Constraint on Gamma **)
-  (FT2R (BMULT accuracy accuracy) >
+  ((FT2R (BMULT accuracy accuracy) >
      g1 t n.+1 (n.+1 - 1)%coq_nat +
      INR n.+1 * (1 + g t n.+1) *
      (g1 t n.+1 (n.+1 - 1)%coq_nat +
       2 * (1 + g t n.+1) * (1 + default_rel t) *
       vec_inf_norm (FT2R_mat (A1_J A)) *
       d_mag * / (1 - rho_hat))²)%Re /\
+    (INR n.+1 *
+     (vec_inf_norm (FT2R_mat (A1_J A)) *
+      ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+        ((vec_inf_norm (FT2R_mat b) +
+          (matrix_inf_norm
+             (FT2R_mat (A2_J A)) *
+           vec_inf_norm (FT2R_mat x0) *
+           (1 + g t n.+1) +
+           g1 t n.+1 (n.+1 - 1))) *
+         (1 + default_rel t)) * 
+        (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1) +
+        vec_inf_norm (FT2R_mat x0)) *
+       (1 + default_rel t)) * (1 + g t n.+1) +
+      g1 t n.+1 (n.+1 - 1)%coq_nat)² *
+     (1 + g t n.+1) +
+     g1 t n.+1 (n.+1 - 1)%coq_nat < FT2R (BMULT accuracy accuracy))%Re) /\
   (** Gamma is finite **)
   finite (BMULT accuracy accuracy) /\
   (** constraint on k **)
@@ -858,7 +962,7 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (** constraint on the dimension **)
   @size_constraint t n /\
   (** constraint on bounds for input **)
-  input_bound_Rcompute A x0 b.
+  input_bound_Rcompute A x0 b .
 
 
 (** g  g1  rho d_mag : what do they mean intuitively **)
