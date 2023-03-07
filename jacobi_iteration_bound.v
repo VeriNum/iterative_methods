@@ -5914,8 +5914,20 @@ destruct H0.
       ++ intros. rewrite leqn0 in H1.
          assert (i = 0)%nat. { by apply /eqP. }
          rewrite H2.
-         apply finite_residual_0. apply HlenA.
-         apply HeqAb. apply H.
+         apply finite_residual_0; try by apply H. apply HlenA.
+         apply HeqAb. intros. 
+         remember ((length A).-1) as n.
+         assert (vector_inj
+                   (repeat (Zconst t 0) (length b)) n.+1 =
+                 \col_(j < n.+1) (Zconst t 0)).
+         { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+           by rewrite nth_repeat.
+         } rewrite H3. apply H.
+
+
+
+
+ admit. admit. admit. admit. 
       ++ unfold BCMP.
          rewrite Bcompare_correct.
          -- rewrite Rcompare_Lt; first by [].
