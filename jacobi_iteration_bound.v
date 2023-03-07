@@ -3773,7 +3773,7 @@ Definition input_bound_at_N_0 {t: type}
             (1 + default_rel t) / (1 + default_rel t))%Re).
 
 
-(*
+
 Lemma input_bound_at_N_0_equiv {t: type} 
   (A: matrix t) (x0 b: vector t) :
   let n := (length A).-1 in
@@ -3784,10 +3784,7 @@ Lemma input_bound_at_N_0_equiv {t: type}
   input_bound_at_N_0 A x0 b. 
 Proof.
 intros. apply H.
-unfold inp ut_bound_at_N_0.
-unfold input_bound_at_N_0_Rcompute in H.
-apply H.
-*)
+Qed.
 
   
 
@@ -6022,7 +6019,15 @@ destruct H0.
          { apply matrixP. unfold eqrel. intros. rewrite !mxE.
            by rewrite nth_repeat.
          } rewrite H3. apply H.
-         admit.
+         apply input_bound_at_N_0_equiv.
+         remember ((length A).-1) as n.
+         assert (vector_inj
+                   (repeat (Zconst t 0) (length b)) n.+1 =
+                 \col_(j < n.+1) (Zconst t 0)).
+         { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+           by rewrite nth_repeat.
+         } rewrite H3.
+         apply H.
          intros. apply H. intros. rewrite mxE. apply H.
       ++ unfold BCMP.
          rewrite Bcompare_correct.
@@ -6124,7 +6129,15 @@ destruct H0.
                  { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                    by rewrite nth_repeat.
                  } intros. rewrite H9. apply H.
-                 admit.
+                 apply input_bound_at_N_0_equiv.
+                 rewrite -Heqn.
+                 assert (vector_inj
+                           (repeat (Zconst t 0) (length b)) n.+1 =
+                         \col_(j < n.+1) (Zconst t 0)).
+                 { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                   by rewrite nth_repeat.
+                 } rewrite H9.
+                 apply H.
                  rewrite -Heqn.
                  intros. apply H. rewrite -Heqn. intros. rewrite mxE. apply H.
                  rewrite -Heqn.
@@ -6165,7 +6178,17 @@ destruct H0.
                                      (vector_inj b (length A).-1.+1 i
                                         ord0))).
                   { rewrite -Heqn. intros. apply H. }
-                  assert (Hinpl : input_bound_at_N_0 A b) by admit.
+                  assert (Hinpl : input_bound_at_N_0 A x0 b).
+                  { apply input_bound_at_N_0_equiv.
+                     rewrite -Heqn.
+                     assert (vector_inj
+                               (repeat (Zconst t 0) (length b)) n.+1 =
+                             \col_(j < n.+1) (Zconst t 0)).
+                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                       by rewrite nth_repeat.
+                     } rewrite H9.
+                     apply H.
+                  }
                 rewrite H1. unfold residual_math.
                 remember (vector_inj x0 n.+1) as x0'.
                 remember (vector_inj b n.+1) as b'.
@@ -6540,7 +6563,14 @@ destruct H0.
             { apply matrixP. unfold eqrel. intros. rewrite !mxE.
               by rewrite nth_repeat.
             } rewrite H1. apply H.
-            admit.
+            apply input_bound_at_N_0_equiv.
+            assert (vector_inj
+                           (repeat (Zconst t 0) (length b)) (length A).-1.+1 =
+                         \col_(j < (length A).-1.+1) (Zconst t 0)).
+            { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+              by rewrite nth_repeat.
+            } rewrite H1.
+            apply H.
             intros. apply H.
             intros. rewrite mxE. apply H.
             intros. apply H.
