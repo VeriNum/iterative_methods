@@ -816,91 +816,66 @@ Lemma diagonal_dominance_implies_rho_lt_1 {t} {n:nat}
   (rho_def A b < 1)%Re.
 Admitted.
 *)
-(**
-(INR n.+1 *
- (vec_inf_norm (FT2R_mat (A1_J A')) *
-  ((vec_inf_norm (FT2R_mat (A1_inv_J A')) *
-    ((vec_inf_norm (FT2R_mat b') +
-      (matrix_inf_norm
-         (FT2R_mat (A2_J A')) *
-       vec_inf_norm (FT2R_mat x0') *
-       (1 + g t n.+1) +
-       g1 t n.+1 (n.+1 - 1))) *
-     (1 + default_rel t)) * 
-    (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1) +
-    vec_inf_norm (FT2R_mat x0')) *
-   (1 + default_rel t)) * (1 + g t n.+1) +
-  g1 t n.+1 (n.+1 - 1)%coq_nat)² *
- (1 + g t n.+1) +
- g1 t n.+1 (n.+1 - 1)%coq_nat < Gamma)%Re
-input_bound_at_N_0 A b
-***)
 
-Definition input_bound_at_N_0 {t: type} 
-  (A: matrix t) (b: vector t) :=
-  let x0 := (repeat  (Zconst t 0) (length b)) in
-  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
-  let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
+Definition input_bound_at_N_0_Rcompute {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (x0 b: 'cV[ftype t]_n.+1) :=
   (forall i j, 
-    (Rabs (FT2R (A2_J A' i j)) <
+    (Rabs (FT2R (A2_J A i j)) <
           sqrt (fun_bnd t n.+1))%Re) /\
   (forall i,
-    (Rabs (FT2R (x0' i ord0)) <
+    (Rabs (FT2R (x0 i ord0)) <
             sqrt (fun_bnd t n.+1))%Re) /\
   (forall i,
-    ((Rabs (FT2R (b' i ord0)) +
+    ((Rabs (FT2R (b i ord0)) +
         ((\sum_j
              (Rabs
-                (FT2R (A2_J A' i j)) *
-              Rabs (FT2R (x0' j ord0)))%Re) *
+                (FT2R (A2_J A i j)) *
+              Rabs (FT2R (x0 j ord0)))%Re) *
          (1 + g t n.+1) +
          g1 t n.+1 (n.+1 - 1)%coq_nat)) *
        (1 + default_rel t) <
        bpow Zaux.radix2 (femax t) -
        default_abs t)%Re) /\
   (forall i,
-      (Rabs (FT2R (A1_inv_J A' i ord0)) *
-         ((Rabs (FT2R (b' i ord0)) +
+      (Rabs (FT2R (A1_inv_J A i ord0)) *
+         ((Rabs (FT2R (b i ord0)) +
            ((\sum_j
                 (Rabs
-                   (FT2R (A2_J A' i j)) *
-                 Rabs (FT2R (x0' j ord0)))%Re) *
+                   (FT2R (A2_J A i j)) *
+                 Rabs (FT2R (x0 j ord0)))%Re) *
             (1 + g t n.+1) +
             g1 t n.+1 (n.+1 - 1)%coq_nat)) *
           (1 + default_rel t)) <
          (bpow Zaux.radix2 (femax t) -
           default_abs t) / (1 + default_rel t))%Re) /\
   (forall i,
-    (Rabs (FT2R (A1_inv_J A' i ord0)) *
-       ((Rabs (FT2R (b' i ord0)) +
+    (Rabs (FT2R (A1_inv_J A i ord0)) *
+       ((Rabs (FT2R (b i ord0)) +
          ((\sum_j
               (Rabs
-                 (FT2R (A2_J A' i j)) *
-               Rabs (FT2R (x0' j ord0)))%Re) *
+                 (FT2R (A2_J A i j)) *
+               Rabs (FT2R (x0 j ord0)))%Re) *
           (1 + g t n.+1) +
           g1 t n.+1 (n.+1 - 1)%coq_nat)) *
         (1 + default_rel t)) *
        (1 + default_rel t) + default_abs t +
-       Rabs (FT2R (x0' i ord0)) <
+       Rabs (FT2R (x0 i ord0)) <
        (bpow Zaux.radix2 (femax t) -
         default_abs t) / (1 + default_rel t))%Re) /\
   (forall i,
-      (Rabs (FT2R (A' i i)) *
+      (Rabs (FT2R (A i i)) *
        (Rabs
-          (FT2R (A1_inv_J A' i ord0)) *
-        ((Rabs (FT2R (b' i ord0)) +
+          (FT2R (A1_inv_J A i ord0)) *
+        ((Rabs (FT2R (b i ord0)) +
           ((\sum_j
                (Rabs
-                  (FT2R (A2_J A' i j)) *
-                Rabs (FT2R (x0' j ord0)))%Re) *
+                  (FT2R (A2_J A i j)) *
+                Rabs (FT2R (x0 j ord0)))%Re) *
            (1 + g t n.+1) +
            g1 t n.+1 (n.+1 - 1)%coq_nat)) *
          (1 + default_rel t)) *
         (1 + default_rel t) + default_abs t +
-        Rabs (FT2R (x0' i ord0))) <
+        Rabs (FT2R (x0 i ord0))) <
         (sqrt (fun_bnd t n.+1) - default_abs t) /
             (1 + default_rel t) / (1 + default_rel t))%Re).
 
@@ -962,7 +937,7 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (** constraint on the dimension **)
   @size_constraint t n /\
   (** constraint on bounds for input **)
-  input_bound_Rcompute A x0 b .
+  input_bound_Rcompute A x0 b /\ input_bound_at_N_0_Rcompute A x0 b.
 
 
 (** g  g1  rho d_mag : what do they mean intuitively **)
