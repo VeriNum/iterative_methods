@@ -6591,10 +6591,22 @@ destruct H0.
             intros. apply H.
          -- rewrite <- finite_is_finite. apply H.
 (** 0 < || N || **)
-- apply jacobi_iteration_bound_lowlevel'.
-  + by apply jacobi_precond_compute_implies_math .
-  + apply HeqAb. 
-  + apply HlenA.
+- remember (length A).-1 as n.
+  remember (@matrix_inj _ A n.+1 n.+1) as A'.
+  remember (@vector_inj _ b n.+1) as b'.  
+  remember (FT2R_mat A') as A_real.
+  remember (FT2R_mat b') as b_real.
+  remember (A_real^-1 *m b_real) as x.
+  assert ((d_mag_def_alt A' b' / (1 - rho_def_alt A' b') <
+               vec_inf_norm (x_fix x b_real A_real))%Re \/
+          (vec_inf_norm (x_fix x b_real A_real) <= 
+            (d_mag_def_alt A' b' / (1 - rho_def_alt A' b')))%Re).
+  { nra. } destruct H1.
+  * apply jacobi_iteration_bound_lowlevel'.
+    ++ by apply jacobi_precond_compute_implies_math .
+    ++ apply HeqAb. 
+    ++ apply HlenA.
+  * admit.
 Qed.
 
 
