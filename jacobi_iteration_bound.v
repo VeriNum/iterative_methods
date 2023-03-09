@@ -48,7 +48,6 @@ Definition d_mag_def_alt {t: type} {n:nat} (A: 'M[ftype t]_n.+1)
   let b_real := FT2R_mat b in 
   let A1_inv_real := FT2R_mat (A1_inv_J A) in 
   let A2_real := FT2R_mat (A2_J A) in  
-  (*let R := (vec_inf_norm (A1_inv_real) * matrix_inf_norm (A2_real))%Re in *)
   let R := (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
             matrix_inf_norm (A2_real))%Re in
   let delta := default_rel t in
@@ -85,12 +84,7 @@ Lemma x_bound_exists {t} {n:nat}
   let A2_real := FT2R_mat (A2_J A) in
   let R_def := (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
                      matrix_inf_norm (A2_real))%Re in
-(*
-  let R_def :=  (vec_inf_norm (A1_inv_real) *
-                      matrix_inf_norm (A2_real))%Re in *)
   (R_def < 1)%Re ->
-  (d_mag_def_alt A b / (1 - rho_def_alt A b) <
-       vec_inf_norm x1)%Re /\
    (vec_inf_norm x1 <= 
       (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
         vec_inf_norm (b_real)) / (1 - R_def))%Re.
@@ -1398,7 +1392,10 @@ Qed.
 (** Refactoring definitions to make them readable and beautiful **)
 Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat)
-  (Hrho_gt_0: (0 < rho_def A b)%Re):
+  (Hrho_gt_0: (0 < rho_def A b)%Re)
+  (Hx_lb: (d_mag_def_alt A b / (1 - rho_def_alt A b) <
+              vec_inf_norm (x_fix ((FT2R_mat A)^-1 *m (FT2R_mat b))
+                                  (FT2R_mat b) (FT2R_mat A)))%Re) :
   jacobi_preconditions_Rcompute A b accuracy k ->
   jacobi_preconditions_math A b accuracy k.
 Proof.
@@ -1505,8 +1502,7 @@ assert (Hf_ge: (0 <
     assert (FT2R_mat (X_m_jacobi 0 (\col__ Zconst t 0) b A) = 0).
     { apply matrixP. unfold eqrel. intros. rewrite !mxE. simpl. reflexivity. }
     rewrite H. rewrite sub0l_vec. rewrite -vec_inf_norm_opp.
-    apply x_bound_exists.
-    apply rho_1_implies_rho_2  with b. apply Hrho.
+    apply Hx_lb.
 }
 repeat split; try apply size_cons; try apply Hfa; try apply Hfdiv;
 try apply Hrho; try apply Hfacc; try (intros; apply Hfx0);
@@ -6603,11 +6599,15 @@ destruct H0.
             (d_mag_def_alt A' b' / (1 - rho_def_alt A' b')))%Re).
   { nra. } destruct H1.
   * apply jacobi_iteration_bound_lowlevel'.
-    ++ by apply jacobi_precond_compute_implies_math .
+    ++ apply jacobi_precond_compute_implies_math.
+       rewrite HeqA' Heqb' Heqn in H0. apply H0.
+       rewrite -Heqn -HeqA' -Heqb' -HeqA_real -Heqb_real -Heqx.
+       apply H1. 
+       rewrite -Heqn -HeqA' -Heqb'. apply H.
     ++ apply HeqAb. 
     ++ apply HlenA.
   * admit.
-Qed.
+Admitted.
 
 
 End WITH_NANS.
