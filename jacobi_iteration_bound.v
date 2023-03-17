@@ -6391,18 +6391,18 @@ destruct H0.
                      rewrite -Heqn.
                      intros. rewrite -?Heqb' -?HeqA'. apply H. rewrite -Heqn.
                      apply H10.
-                 ** rewrite  -H7 -H5. apply finite_residual_0.
+                 *** rewrite  -H8 -H6. apply finite_residual_0.
                     apply HlenA. apply HeqAb. unfold size_constraint. 
                     destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
                     unfold size_constraint in size_cons. by rewrite Heqn in size_cons.
-                    rewrite -Heqn. apply H.
+                    rewrite -Heqn. rewrite -?Heqb' -?HeqA'. apply H.
                     rewrite -Heqn.
                      assert (vector_inj
                                (repeat (Zconst t 0) (length b)) n.+1 =
                              \col_(j < n.+1) (Zconst t 0)).
                      { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                        by rewrite nth_repeat.
-                     } intros. rewrite H9. apply H.
+                     } intros. rewrite -?Heqb' -?HeqA'. rewrite H10. apply H.
                      apply input_bound_at_N_0_equiv.
                      rewrite -Heqn.
                      assert (vector_inj
@@ -6410,18 +6410,18 @@ destruct H0.
                              \col_(j < n.+1) (Zconst t 0)).
                      { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                        by rewrite nth_repeat.
-                     } rewrite H9.
+                     } rewrite -?Heqb' -?HeqA'. rewrite H10.
                      apply H.
                      rewrite -Heqn.
-                     intros. apply H. rewrite -Heqn. intros. rewrite mxE. apply H.
+                     intros. rewrite -?Heqb' -?HeqA'. apply H. rewrite -Heqn. intros. rewrite mxE. rewrite -?Heqb' -?HeqA'. apply H.
                      rewrite -Heqn.
-                     intros. apply H. 
-                 ** assert (HfA2l :  (forall i j : 'I_(length A).-1.+1,
+                     intros. rewrite -?Heqb' -?HeqA'. apply H. 
+                 *** assert (HfA2l :  (forall i j : 'I_(length A).-1.+1,
                                          finite
                                            (A2_J
                                               (matrix_inj A (length A).-1.+1
                                                  (length A).-1.+1) i j))).
-                      { rewrite -Heqn. intros. apply H. }
+                      { rewrite -Heqn. intros. rewrite -?Heqb' -?HeqA'. apply H. }
                       assert (Hfx0l : (forall i : 'I_(length A).-1.+1,
                                        finite
                                          (vector_inj
@@ -6434,24 +6434,24 @@ destruct H0.
                              \col_(j < n.+1) (Zconst t 0)).
                          { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                            by rewrite nth_repeat.
-                         } rewrite H9. apply H.
+                         } rewrite H10. rewrite -?Heqb' -?HeqA'. apply H.
                       } 
                       assert (HfAl : (forall i : 'I_(length A).-1.+1,
                                        finite
                                          (matrix_inj A (length A).-1.+1
                                             (length A).-1.+1 i i))).
-                      { rewrite -Heqn. intros. apply H. }
+                      { rewrite -Heqn. intros. rewrite -?Heqb' -?HeqA'. apply H. }
                       assert (HfA1_invl: (forall i : 'I_(length A).-1.+1,
                                            finite
                                              (A1_inv_J
                                                 (matrix_inj A (length A).-1.+1
                                                    (length A).-1.+1) i ord0))).
-                      { rewrite -Heqn. intros. rewrite mxE. apply H. }
+                      { rewrite -Heqn. intros. rewrite -?Heqb' -?HeqA'.  rewrite mxE. apply H. }
                       assert (Hfbl : (forall i : 'I_(length A).-1.+1,
                                        finite
                                          (vector_inj b (length A).-1.+1 i
                                             ord0))).
-                      { rewrite -Heqn. intros. apply H. }
+                      { rewrite -Heqn. intros. rewrite -?Heqb' -?HeqA'. apply H. }
                       assert (Hinpl : input_bound_at_N_0 A x0 b).
                       { apply input_bound_at_N_0_equiv.
                          rewrite -Heqn.
@@ -6460,13 +6460,11 @@ destruct H0.
                                  \col_(j < n.+1) (Zconst t 0)).
                          { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                            by rewrite nth_repeat.
-                         } rewrite H9.
-                         apply H.
-                      }
-                    rewrite H1. unfold residual_math.
+                         } rewrite H10.
+                         rewrite -?Heqb' -?HeqA'. apply H.
+                      } unfold resid.  rewrite Heqn. 
+                    rewrite H2. unfold residual_math.
                     remember (vector_inj x0 n.+1) as x0'.
-                    remember (vector_inj b n.+1) as b'.
-                    remember (matrix_inj A n.+1 n.+1) as A'.
                     pose proof (@vec_norm_diag _ t n  (A1_J A')
                                 (X_m_jacobi 1 x0' b' A' -f
                                     X_m_jacobi 0 x0' b' A')).
@@ -6485,12 +6483,12 @@ destruct H0.
                       pose proof (@finite_residual_0 t A b HlenA HeqAb).
                       destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
                       rewrite Heqn in size_cons.
-                      specialize (H12 size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl).
-                      specialize (H11 H12).
-                      apply H11. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
-                      apply H10. 
+                      specialize (H13 size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl).
+                      specialize (H12 H13).
+                      apply H12. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
+                      apply H11. 
                     }
-                   specialize (H9 H10).
+                   specialize (H10 H11).
                    assert ((vec_inf_norm
                             (FT2R_mat
                                (diag_vector_mult 
@@ -6508,7 +6506,7 @@ destruct H0.
                                (X_m_jacobi 1 x0' b' A' -f
                                 X_m_jacobi 0 x0' b' A')) *
                           g t n.+1 + g1 t n.+1 (n.+1 - 1))). { by apply /RleP. }
-                   apply reverse_triang_ineq in H11.
+                   apply reverse_triang_ineq in H12.
                    assert ((vec_inf_norm
                             (FT2R_mat
                                (diag_vector_mult (A1_J A')
@@ -6522,7 +6520,7 @@ destruct H0.
                              (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re).
                    { rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
                      assert (forall a b c d :R, (a - b <= c + d)%Re -> (a <= b + c+d)%Re).
-                     { intros. nra. } apply H12. eapply Rle_trans; last by (apply /RleP; apply H11).
+                     { intros. nra. } apply H13. eapply Rle_trans; last by (apply /RleP; apply H12).
                      rewrite -RminusE. apply Rplus_le_compat_l.
                      apply Ropp_le_contravar.
                      apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R.
@@ -6538,7 +6536,7 @@ destruct H0.
                                  X_m_jacobi 0 x0' b' A')) *
                            (1 + g t n.+1) +
                            g1 t n.+1 (n.+1 - 1)%coq_nat)).
-                   apply Rsqr_incr_1. apply H12. 
+                   apply Rsqr_incr_1. rewrite -?Heqn -?Heqb' -?HeqA' -?Heqx0'. apply H13. 
                    apply /RleP. apply vec_norm_pd.
                    apply Rplus_le_le_0_compat; last by apply g1_pos.
                    repeat apply Rmult_le_pos.
@@ -6548,8 +6546,8 @@ destruct H0.
                    apply Rle_refl.
                    assert (X_m_jacobi 1 x0' b' A' = jacobi_iter x0' b' A'). { by simpl. }
                    assert (X_m_jacobi 0 x0' b' A' = x0'). { by simpl. }
-                   rewrite H13 H14. unfold jacobi_iter.
-                   clear H9 H10 H11 H12 H13 H14.
+                   rewrite H14 H15. unfold jacobi_iter.
+                   clear H10 H11 H12 H13 H14 H15.
                    pose proof (@vec_float_sub _ t n 
                                 (diag_vector_mult (A1_inv_J A')
                                     (b' -f A2_J A' *f x0')) x0').
@@ -6569,13 +6567,13 @@ destruct H0.
                       pose proof (@finite_residual_0 t A b HlenA HeqAb).
                       destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
                       rewrite Heqn in size_cons.
-                      specialize (H12 size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl).
-                      specialize (H11 H12).
-                      apply H11. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
-                      apply H10.
+                      specialize (H13 size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl).
+                      specialize (H12 H13).
+                      apply H12. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
+                      apply H11.
                     }
-                   specialize (H9 H10).
-                   apply reverse_triang_ineq in H9.
+                   specialize (H10 H11).
+                   apply reverse_triang_ineq in H10.
                    eapply Rle_lt_trans. apply Rplus_le_compat_r.
                    apply Rmult_le_compat_r.
                    apply Rplus_le_le_0_compat. nra. apply g_pos.
@@ -6598,7 +6596,7 @@ destruct H0.
                    rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
                    eapply Rle_trans. 
                    assert (forall x y z :R, (x - y <= z)%Re -> (x <= y + z)%Re). { intros. nra. }
-                   apply H11. apply /RleP. apply H9. rewrite -RplusE -RmultE.
+                   apply H12. apply /RleP. apply H10. rewrite -RplusE -RmultE.
                    apply Rplus_le_compat_r. eapply Rle_trans.
                    apply /RleP. apply triang_ineq. rewrite -vec_inf_norm_opp.
                    rewrite -RplusE. apply Rle_refl.
@@ -6636,12 +6634,12 @@ destruct H0.
                       pose proof (@finite_residual_0 t A b HlenA HeqAb).
                       destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
                       rewrite Heqn in size_cons.
-                      specialize (H14 size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl).
-                      specialize (H13 H14).
-                      apply H13. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
-                      apply H12. 
+                      specialize (H15 size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl).
+                      specialize (H14 H15).
+                      apply H14. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
+                      apply H13. 
                    }
-                   specialize (H11 H12).
+                   specialize (H12 H13).
                    apply Rle_trans with
                    (vec_inf_norm
                          (FT2R_mat (A1_inv_J A')) *
@@ -6674,9 +6672,9 @@ destruct H0.
                                (FT2R_mat
                                   (b' -f A2_J A' *f x0')) *
                              g t n.+1 + g1 t n.+1 (n.+1 - 1)). { by apply /RleP. }
-                   apply reverse_triang_ineq in H13.
+                   apply reverse_triang_ineq in H14.
                    assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
-                   { intros. nra. } apply H14. apply /RleP. apply H13.
+                   { intros. nra. } apply H15. apply /RleP. apply H14.
                    repeat apply Rplus_le_compat_r. apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R.
                    apply Rplus_le_compat_r.
                    apply Rmult_le_compat_r.
@@ -6697,10 +6695,10 @@ destruct H0.
                       pose proof (@finite_residual_0 t A b HlenA HeqAb).
                       destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
                       rewrite Heqn in size_cons.
-                      specialize (H16 size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl).
-                      specialize (H15 H16).
-                      apply H15. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
-                      apply H14. 
+                      specialize (H17 size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl).
+                      specialize (H16 H17).
+                      apply H16. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
+                      apply H15. 
                    }
                    specialize (H13 H14).
                    apply Rle_trans with
