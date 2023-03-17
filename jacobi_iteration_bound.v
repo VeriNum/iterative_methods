@@ -6834,32 +6834,27 @@ destruct H0.
                 apply HlenA. apply HeqAb. unfold size_constraint. 
                 destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
                 rewrite -Heqn. by unfold size_constraint in size_cons.
-                intros. apply H.
-                intros.
+                rewrite -?Heqn -?HeqA' -?Heqb'. intros.  apply H.
+                rewrite -?Heqn -?HeqA' -?Heqb'. intros.
                 assert (vector_inj
-                               (repeat (Zconst t 0) (length b)) (length A).-1.+1 =
-                             \col_(j < (length A).-1.+1) (Zconst t 0)).
+                               (repeat (Zconst t 0) (length b)) n.+1 =
+                             \col_(j < n.+1) (Zconst t 0)).
                 { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                   by rewrite nth_repeat.
-                } rewrite H1. apply H.
+                }  rewrite H2.  apply H.
                 apply input_bound_at_N_0_equiv.
                 assert (vector_inj
                                (repeat (Zconst t 0) (length b)) (length A).-1.+1 =
                              \col_(j < (length A).-1.+1) (Zconst t 0)).
                 { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                   by rewrite nth_repeat.
-                } rewrite H1.
+                }  rewrite H2. rewrite -?Heqn -?HeqA' -?Heqb'.
                 apply H.
-                intros. apply H.
-                intros. rewrite mxE. apply H.
-                intros. apply H.
+                rewrite -?Heqn -?HeqA' -?Heqb'. intros. apply H.
+                rewrite -?Heqn -?HeqA' -?Heqb'. intros. rewrite mxE. apply H.
+                rewrite -?Heqn -?HeqA' -?Heqb'. intros. apply H.
              -- rewrite <- finite_is_finite. apply H.
-
-
-
-
-admit.
-Admitted.
+Qed.
 
 
 End WITH_NANS.
