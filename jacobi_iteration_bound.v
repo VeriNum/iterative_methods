@@ -6295,7 +6295,7 @@ destruct H0.
                      \col_(j < n.+1) (Zconst t 0)).
              { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                by rewrite nth_repeat.
-             } rewrite -Heqn. rewrite H4.
+             } rewrite -Heqn. rewrite H4. rewrite -HeqA' -Heqb'.
              apply H.
              intros. apply H. intros. rewrite mxE. apply H.
           ++ unfold BCMP.
