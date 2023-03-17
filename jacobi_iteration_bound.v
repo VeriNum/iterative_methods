@@ -6700,14 +6700,14 @@ destruct H0.
                       apply H16. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
                       apply H15. 
                    }
-                   specialize (H13 H14).
+                   specialize (H14 H15).
                    apply Rle_trans with
                    ((vec_inf_norm (FT2R_mat b') +
                          vec_inf_norm
                            (FT2R_mat (A2_J A' *f x0'))) *
                        (1 + default_rel t))%Re.
                    rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
-                   apply reverse_triang_ineq in H13. eapply Rle_trans.
+                   apply reverse_triang_ineq in H14. eapply Rle_trans.
                    assert ((vec_inf_norm
                               (FT2R_mat
                                  (b' -f A2_J A' *f x0')) -
@@ -6719,7 +6719,7 @@ destruct H0.
                                (FT2R_mat (A2_J A' *f x0'))) *
                             default_rel t)%Re). { by apply /RleP. }
                    assert (forall a b c:R, (a - b <= c)%Re -> (a <= b +c)%Re). { intros. nra. }
-                   apply H16 in H15. apply H15.
+                   apply H17 in H16. apply H16.
                    apply Rplus_le_compat_r. eapply Rle_trans.
                    apply /RleP. apply triang_ineq. rewrite -vec_inf_norm_opp. rewrite -RplusE. nra.
                    apply Rmult_le_compat_r.
@@ -6741,10 +6741,10 @@ destruct H0.
                       pose proof (@finite_residual_0 t A b HlenA HeqAb).
                       destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
                       rewrite Heqn in size_cons.
-                      specialize (H18 size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl). 
-                      rewrite -Heqn in H17. specialize (H17 H18 xy i).
-                      apply H17. rewrite HeqA' Heqx0' in H16.
-                      apply H16.
+                      specialize (H19 size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl). 
+                      rewrite -Heqn in H18. specialize (H18 H19 xy i).
+                      apply H18. rewrite HeqA' Heqx0' in H17.
+                      apply H17.
                   }
                   assert (forall i : 'I_n.+1,
                            finite 
@@ -6762,14 +6762,14 @@ destruct H0.
                       pose proof (@finite_residual_0 t A b HlenA HeqAb).
                       destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
                       rewrite Heqn in size_cons.
-                      specialize (H18 size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl). 
-                      rewrite -Heqn in H17.
-                      specialize (H17 H18 i).
+                      specialize (H19 size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl). 
+                      rewrite -Heqn in H18.
+                      specialize (H18 H19 i).
                       rewrite HeqA' Heqx0'.
-                      apply H17.         
+                      apply H18.         
                   }
-                  specialize (H15 H16 H17).
-                  apply reverse_triang_ineq in H15.
+                  specialize (H16 H17 H18).
+                  apply reverse_triang_ineq in H16.
                   apply Rle_trans with 
                   (matrix_inf_norm
                         (FT2R_mat (A2_J A')) *
@@ -6787,7 +6787,7 @@ destruct H0.
                       vec_inf_norm (FT2R_mat x0') *
                       g t n.+1 + g1 t n.+1 (n.+1 - 1))%Re.
                    assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
-                   { intros. nra. } apply H18. apply /RleP. apply H15.
+                   { intros. nra. } apply H19. apply /RleP. apply H16.
                    repeat apply Rplus_le_compat_r. apply /RleP. apply submult_prop.
                    assert ((matrix_inf_norm (FT2R_mat (A2_J A')) *
                              vec_inf_norm (FT2R_mat x0') +
@@ -6796,7 +6796,7 @@ destruct H0.
                              g t n.+1 + g1 t n.+1 (n.+1 - 1))%Re =
                            ((matrix_inf_norm (FT2R_mat (A2_J A')) *
                              vec_inf_norm (FT2R_mat x0')) * (1 + g t n.+1 )+
-                            g1 t n.+1 (n.+1 - 1))%Re). { nra. } rewrite H18.
+                            g1 t n.+1 (n.+1 - 1))%Re). { nra. } rewrite H19.
                    apply Rle_refl.
                    apply Rplus_le_le_0_compat;last by apply g1_pos.
                    repeat apply Rmult_le_pos.
@@ -6829,11 +6829,11 @@ destruct H0.
                              \col_(j < n.+1) (Zconst t 0)).
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                       by rewrite nth_repeat.
-                    } rewrite Heqx0' /x0. rewrite H. rewrite HeqGamma. apply HG.
+                    } rewrite Heqx0' /x0. rewrite H. rewrite HeqGamma. rewrite -Heqn. apply HG.
              -- rewrite <- finite_is_finite. apply finite_residual_0.
                 apply HlenA. apply HeqAb. unfold size_constraint. 
                 destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
-                by unfold size_constraint in size_cons.
+                rewrite -Heqn. by unfold size_constraint in size_cons.
                 intros. apply H.
                 intros.
                 assert (vector_inj
