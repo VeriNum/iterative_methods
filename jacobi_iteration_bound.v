@@ -6298,7 +6298,7 @@ destruct H0.
              } rewrite -Heqn. rewrite H4. rewrite -HeqA' -Heqb'.
              apply H.
              intros. apply H. intros. rewrite mxE. apply H.
-          ++ unfold BCMP.
+          +++ unfold BCMP.
              rewrite Bcompare_correct.
              -- rewrite Rcompare_Lt; first by [].
                 change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
@@ -6308,10 +6308,9 @@ destruct H0.
                 assert (length x0 = length A).
                 { unfold x0. by rewrite !repeat_length. }
                 assert ((0 < length A)%coq_nat) by apply HlenA.
-                specialize (H1 H2 H3 H4).
+                specialize (H2 H3 H4 H5).
                 pose proof (@v_equiv t).
-                remember (length A).-1 as n.
-                specialize (H5 (resid (jacobi_n A b x0 0)) n).
+                specialize (H6 (resid (jacobi_n A b x0 0)) n).
                 assert (length (resid (jacobi_n A b x0 0)) = n.+1).
                 { repeat rewrite /matrix_vector_mult !map_length combine_length.
                   rewrite !map_length. unfold jacobi_n. rewrite iter_length.
