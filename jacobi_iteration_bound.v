@@ -1155,8 +1155,6 @@ assert (Hf_ge: (0 <
       apply Rlt_le. 
       replace (1 / (1 - rho_def A b))%Re with 
                   (/ (1 - rho_def A b))%Re by nra.
-      replace (1 / (1 - rho_def_alt A b))%Re with 
-                  (/ (1 - rho_def_alt A b))%Re by nra.
       apply Rinv_lt_contravar .
       apply Rmult_lt_0_compat.
       apply Rlt_Rminus. apply Hrho.

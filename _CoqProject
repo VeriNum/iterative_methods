@@ -23,6 +23,7 @@ norm_compat.v
 fma_matrix_vec_mult.v
 vec_sum_inf_norm_rel.v
 fma_jacobi_forward_error.v
+jacobi_preconditions.v
 jacobi_iteration_bound.v
 
 
