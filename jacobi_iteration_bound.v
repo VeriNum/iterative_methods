@@ -6281,22 +6281,21 @@ destruct H0.
           +++ intros. rewrite leqn0 in H2.
              assert (i = 0)%nat. { by apply /eqP. }
              rewrite H3.
-             apply finite_residual_0; try by apply H. apply HlenA.
+             apply finite_residual_0; try rewrite -Heqn; try rewrite -HeqA'; try rewrite -Heqb'; try by apply H. apply HlenA.
              apply HeqAb. intros. 
              assert (vector_inj
                        (repeat (Zconst t 0) (length b)) n.+1 =
                      \col_(j < n.+1) (Zconst t 0)).
              { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                by rewrite nth_repeat.
-             } rewrite H3. apply H.
+             } rewrite H4. apply H.
              apply input_bound_at_N_0_equiv.
-             remember ((length A).-1) as n.
              assert (vector_inj
                        (repeat (Zconst t 0) (length b)) n.+1 =
                      \col_(j < n.+1) (Zconst t 0)).
              { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                by rewrite nth_repeat.
-             } rewrite H3.
+             } rewrite -Heqn. rewrite H4.
              apply H.
              intros. apply H. intros. rewrite mxE. apply H.
           ++ unfold BCMP.
