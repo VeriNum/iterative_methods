@@ -5736,6 +5736,8 @@ destruct H0.
       { assert ((0 <= k)%nat). by [].
         rewrite leq_eqVlt in H1. 
         assert ((0%nat == k) \/ (0 < k)%nat). by apply /orP.
+        destruct H2; try (right; by apply H2). rewrite eq_sym in H2. left. by apply /eqP.
+      }
 
 
 
