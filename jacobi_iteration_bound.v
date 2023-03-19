@@ -5651,7 +5651,11 @@ apply Rplus_eq_R0 in H.
                   default_abs t) * 0)%Re). 
   { nra. } rewrite H in Hrho1.
   apply Rmult_eq_reg_l in Hrho1.
-  apply Hrho1.
+  assert (FT2R_mat (A2_J A)= A2_J_real (FT2R_mat A)).
+  { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+    case: (x == y :> nat); by simpl.
+  } rewrite H0. apply Hrho1.
+  
   
 
 
