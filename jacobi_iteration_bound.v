@@ -5750,7 +5750,12 @@ apply dotprod_finite.
   - rewrite -/n -/A' -/b' -/x0'.
     assert ((X_m_jacobi 2 x0' b' A' -f
               X_m_jacobi 1 x0' b' A') = \col_j (Zconst t 0)).
-    {
+    { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+      rewrite !nth_vec_to_list_float.
+      rewrite !mxE.
+      assert (\row_j (A2_J A' (inord x) j) = \row_j (Zconst t 0)).
+      { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+        
 
 
 
