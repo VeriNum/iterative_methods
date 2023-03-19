@@ -5655,6 +5655,18 @@ apply Rplus_eq_R0 in H.
   { apply matrixP. unfold eqrel. intros. rewrite !mxE.
     case: (x == y :> nat); by simpl.
   } rewrite H0. apply Hrho1.
+  assert (forall x:R, (0 < x)%Re -> x <> 0%Re).
+  { intros. nra. } apply H0.
+  apply Rplus_le_lt_0_compat; last by apply default_abs_gt_0.
+  apply Rmult_le_pos; last by apply default_abs_ge_0.
+  apply Rplus_le_le_0_compat; last by apply g_pos.
+  apply Rplus_le_le_0_compat.
+  repeat apply Rmult_le_pos; try by apply g_pos.
+  apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+  apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+  apply Rmult_le_pos; first by apply default_rel_ge_0.
+  apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+  
   
   
 
