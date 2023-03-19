@@ -5700,9 +5700,14 @@ Lemma bigmaxr_eq_0 s:
   (forall i, nth i s 0%Re = 0%Re).
 Proof.
 intros.
-induction s.
+elim: s i H => [ |a s IHs] i H .
 + rewrite /nth /=. by destruct i.
-+ 
++ simpl. destruct i.
+  - admit.
+  - specialize (IHs i). apply IHs.
+    admit.
+Admitted.
+  
 
 
 
