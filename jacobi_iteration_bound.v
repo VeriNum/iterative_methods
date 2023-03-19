@@ -5714,7 +5714,19 @@ Lemma finite_residual_i {t: type} :
   forall i,
   finite (norm2 (resid (jacobi_n A b x0 i))).
 Proof.
-
+intros ? ? ? ? ? ? ? ? ? ? ? HfA2 Hfx0 Hinp HfA HfA1_inv Hfb HN0 i.
+unfold norm2. 
+assert ( length (resid (jacobi_n A b x0 i)) = n.+1).
+{ repeat rewrite /matrix_vector_mult !map_length combine_length.
+    rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+    rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
+    rewrite -/n prednK. by []. by apply /ssrnat.ltP.
+    by []. by rewrite /x0 repeat_length.
+}
+apply dotprod_finite.
++ rewrite H2. apply g1_constraint_Sn. apply H1.
++ intros.
+  
 
 
 
