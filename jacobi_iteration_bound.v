@@ -1081,7 +1081,7 @@ assert (HG_re: (FT2R (BMULT accuracy accuracy) >
                   vec_inf_norm (FT2R_mat (A1_J A)) *
                   d_mag_def A b * / (1 - rho_def A b))²)%Re).
 { apply Rgt_lt. 
-  destruct HG1 as [HG1 _].
+  (*destruct HG1 as [HG1 _]. *)
   eapply Rle_lt_trans; try apply HG1.
   apply Rplus_le_compat_l. apply Rmult_le_compat_l.
   - apply Rmult_le_pos. apply pos_INR. 
@@ -5739,7 +5739,16 @@ apply dotprod_finite.
   assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
   rewrite H5 in Hnth.
   pose proof (@vector_residual_equiv t A b x0 i).
-
+  assert (length b = length A). { by rewrite -H0. }
+  specialize (H6 H7). clear H7.
+  assert ( length x0 = length A ).
+  { by rewrite repeat_length. } specialize (H6 H7). clear H7.
+  specialize (H6 H). unfold resid in Hnth. rewrite -/n in H6.
+  rewrite H6 in Hnth.
+  rewrite nth_vec_to_list_float in Hnth.
+  rewrite mxE in Hnth. rewrite -Hnth.
+  split.
+  - 
 
 
 Admitted.
