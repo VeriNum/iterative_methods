@@ -5642,6 +5642,17 @@ apply Rplus_eq_R0 in H.
 + destruct H as [Hrho1 Hrho2].
   rewrite Hrho2 in Hrho1. rewrite Rmult_0_r in Hrho1.
   rewrite Rplus_0_l in Hrho1.
+  assert (0%Re = ((((1 + g t n.+1) *
+                   (1 + default_rel t) *
+                   g t n.+1 +
+                   default_rel t *
+                   (1 + g t n.+1) + 
+                   g t n.+1) * default_abs t +
+                  default_abs t) * 0)%Re). 
+  { nra. } rewrite H in Hrho1.
+  apply Rmult_eq_reg_l in Hrho1.
+  apply Hrho1.
+  
 
 
 
