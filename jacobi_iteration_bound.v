@@ -5670,23 +5670,30 @@ apply Rplus_eq_R0 in H.
   - repeat apply Rmult_le_pos; try (apply /RleP; apply vec_norm_pd);
     try (apply /RleP; apply matrix_norm_pd).
     apply Rplus_le_le_0_compat; last by apply default_rel_ge_0.
-    
-    
-
-
-
-
- admit.
+    repeat apply Rmult_le_pos; last by 
+    (apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0).
+    apply Rplus_le_le_0_compat; try apply g_pos.
+    apply Rplus_le_le_0_compat.
+    repeat apply Rmult_le_pos; try by apply g_pos.
+    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+    apply Rmult_le_pos; first by apply default_rel_ge_0.
+    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+  - repeat apply Rmult_le_pos; 
+    try (apply /RleP; apply matrix_norm_pd).
+    apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
+    apply Rmult_le_pos; last by apply default_abs_ge_0.
+    apply Rplus_le_le_0_compat; try apply g_pos.
+    apply Rplus_le_le_0_compat.
+    repeat apply Rmult_le_pos; try by apply g_pos.
+    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+    apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+    apply Rmult_le_pos; first by apply default_rel_ge_0.
+    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
 + apply Rmult_le_pos.
   apply /RleP; apply vec_norm_pd.
   apply /RleP; apply matrix_norm_pd.
-  
-
-
-
-
-
-Admitted.
+Qed.
 
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
