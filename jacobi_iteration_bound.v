@@ -5695,6 +5695,17 @@ Qed.
 
 Print nth.
 
+
+Lemma bigmaxr_cons_0 a s:
+  bigmaxr 0%Re (a :: s) = 0%Re ->
+  a = 0%Re /\ bigmaxr 0%Re s = 0%Re.
+Proof.
+intros.
+
+
+
+
+
 Lemma bigmaxr_eq_0 s:
   bigmaxr 0%Re s = 0%Re ->
   (forall i, nth i s 0%Re = 0%Re).
