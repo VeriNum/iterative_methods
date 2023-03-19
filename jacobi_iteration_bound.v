@@ -5693,11 +5693,32 @@ apply Rplus_eq_R0 in H.
   apply /RleP; apply matrix_norm_pd.
 Qed.
 
+Print nth.
+
+Lemma bigmaxr_eq_0 s:
+  bigmaxr 0%Re s = 0%Re ->
+  (forall i, nth i s 0%Re = 0%Re).
+Proof.
+intros.
+induction s.
++ rewrite /nth /=. by destruct i.
++ 
+
+
+
+
 
 Lemma matrix_inf_norm_0_implies {n:nat}:
   forall (A : 'M[R]_n.+1),  
   matrix_inf_norm A = 0%Re ->
   (forall i j, A i j = 0%Re).
+Proof.
+intros.
+unfold matrix_inf_norm in H.
+
+
+
+
 Admitted.
 
 Lemma finite_residual_1 {t: type} :
