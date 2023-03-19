@@ -5635,6 +5635,17 @@ Lemma rho_0_implies_N_eq_0 {t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1):
   rho_def A b = 0%Re ->
   matrix_inf_norm (FT2R_mat (A2_J A)) = 0%Re.
+Proof.
+intros.
+unfold rho_def in H.
+apply Rplus_eq_R0 in H.
++ destruct H as [Hrho1 Hrho2].
+  
+
+
+
+
+
 Admitted.
 
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
