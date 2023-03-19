@@ -5695,12 +5695,23 @@ Qed.
 
 Print nth.
 
-
-Lemma bigmaxr_cons_0 a s:
+Lemma bigmaxr_cons_0 (a:R) s :
   bigmaxr 0%Re (a :: s) = 0%Re ->
   a = 0%Re /\ bigmaxr 0%Re s = 0%Re.
 Proof.
 intros.
+assert (s = [::] \/ s != [::]).
+{ destruct s.
+  + by left.
+  + by right.
+} destruct H0.
++ rewrite H0 in H. rewrite H0. 
+  rewrite bigmaxr_un in H. rewrite bigmaxr_nil .
+  nra.
++ apply (s_destruct 0%Re) in H0.
+  rewrite H0 in H. rewrite bigmaxr_cons in H.
+  rewrite -H0 in H. 
+  
 
 
 
