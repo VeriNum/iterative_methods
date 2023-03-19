@@ -5693,7 +5693,7 @@ apply Rplus_eq_R0 in H.
   apply /RleP; apply matrix_norm_pd.
 Qed.
 
-Lemma finite_residual_i {t: type} :
+Lemma finite_residual_1 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -5711,34 +5711,33 @@ Lemma finite_residual_i {t: type} :
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
   matrix_inf_norm (FT2R_mat (A2_J A')) = 0%Re ->
-  forall i,
-  finite (norm2 (resid (jacobi_n A b x0 i))).
+  finite (norm2 (resid (jacobi_n A b x0 1%nat))).
 Proof.
-intros ? ? ? ? ? ? ? ? ? ? ? HfA2 Hfx0 Hinp HfA HfA1_inv Hfb HN0 i.
+intros ? ? ? ? ? ? ? ? ? ? ? HfA2 Hfx0 Hinp HfA HfA1_inv Hfb HN0.
 unfold norm2. 
-assert ( length (resid (jacobi_n A b x0 i)) = n.+1).
+assert ( length (resid (jacobi_n A b x0 1%nat)) = n.+1).
 { repeat rewrite /matrix_vector_mult !map_length combine_length.
-    rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+    rewrite !map_length. unfold jacobi_n. (*rewrite iter_length. *)
     rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
     rewrite -/n prednK. by []. by apply /ssrnat.ltP.
-    by []. by rewrite /x0 repeat_length.
+    (*by []. by rewrite /x0 repeat_length. *)
 }
 apply dotprod_finite.
 + rewrite H2. apply g1_constraint_Sn. apply H1.
 + intros. apply in_rev in H3.
-  pose proof (@In_nth _ (resid (jacobi_n A b x0 i)) xy (Zconst t 0) H3 ).
+  pose proof (@In_nth _ (resid (jacobi_n A b x0 1%nat)) xy (Zconst t 0) H3 ).
   destruct H4 as [k [Hlen Hnth]].
-  pose proof (@v_equiv  t (resid (jacobi_n A b x0 i)) n H2).
+  pose proof (@v_equiv  t (resid (jacobi_n A b x0 1%nat)) n H2).
   assert ((\col_j0 vector_inj
-                     (resid (jacobi_n A b x0 i)) n.+1 j0  ord0) = 
-           vector_inj (resid (jacobi_n A b x0 i)) n.+1).
+                     (resid (jacobi_n A b x0 1%nat)) n.+1 j0  ord0) = 
+           vector_inj (resid (jacobi_n A b x0 1%nat)) n.+1).
   { apply matrixP. unfold eqrel. intros. by rewrite !mxE. }
   rewrite H5 in H4. clear H5.
   rewrite H4 in Hnth. rewrite rev_nth in Hnth.
   rewrite length_veclist in Hnth.
   assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
   rewrite H5 in Hnth.
-  pose proof (@vector_residual_equiv t A b x0 i).
+  pose proof (@vector_residual_equiv t A b x0 1%nat).
   assert (length b = length A). { by rewrite -H0. }
   specialize (H6 H7). clear H7.
   assert ( length x0 = length A ).
@@ -5748,7 +5747,7 @@ apply dotprod_finite.
   rewrite nth_vec_to_list_float in Hnth.
   rewrite mxE in Hnth. rewrite -Hnth.
   split.
-  - 
+  - rewrite -/n -/A' -/b' -/x0'. 
 
 
 Admitted.
