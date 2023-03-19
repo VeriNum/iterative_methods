@@ -5737,7 +5737,15 @@ destruct H0.
         rewrite leq_eqVlt in H1. 
         assert ((0%nat == k) \/ (0 < k)%nat). by apply /orP.
         destruct H2; try (right; by apply H2). rewrite eq_sym in H2. left. by apply /eqP.
-      }
+      } destruct H1.
+      ++ destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+         rewrite H1 in Hk. 
+         assert ((k_min_alt
+                    (matrix_inj A (length A).-1.+1
+                       (length A).-1.+1)
+                    (vector_inj b (length A).-1.+1)
+                    acc < 0)%nat). by apply /ssrnat.ltP.
+         by rewrite ltn0 in H.
 
 
 
