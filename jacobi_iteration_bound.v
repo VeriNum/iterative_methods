@@ -5693,6 +5693,13 @@ apply Rplus_eq_R0 in H.
   apply /RleP; apply matrix_norm_pd.
 Qed.
 
+
+Lemma matrix_inf_norm_0_implies {n:nat}:
+  forall (A : 'M[R]_n.+1),  
+  matrix_inf_norm A = 0%Re ->
+  (forall i j, A i j = 0%Re).
+Admitted.
+
 Lemma finite_residual_1 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -5754,7 +5761,8 @@ apply dotprod_finite.
       rewrite !nth_vec_to_list_float.
       rewrite !mxE.
       assert (\row_j (A2_J A' (inord x) j) = \row_j (Zconst t 0)).
-      { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+      { apply matrixP. unfold eqrel. intros. rewrite mxE. rewrite [in RHS]mxE.
+        
         
 
 
