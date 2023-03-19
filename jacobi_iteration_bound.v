@@ -5693,6 +5693,33 @@ apply Rplus_eq_R0 in H.
   apply /RleP; apply matrix_norm_pd.
 Qed.
 
+Lemma finite_residual_i {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  @size_constraint t (length A).-1 ->
+  (forall i j, finite (A2_J A' i j)) ->
+  (forall i, finite (x0' i ord0)) ->
+  input_bound_at_N_0 A x0 b ->
+  (forall i, finite (A' i i)) ->
+  (forall i, finite (A1_inv_J A' i ord0)) ->
+  (forall i, finite (b' i ord0)) ->
+  matrix_inf_norm (FT2R_mat (A2_J A')) = 0%Re ->
+  forall i,
+  finite (norm2 (resid (jacobi_n A b x0 i))).
+Proof.
+
+
+
+
+Admitted.
+
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
@@ -5746,6 +5773,10 @@ destruct H0.
                     (vector_inj b (length A).-1.+1)
                     acc < 0)%nat). by apply /ssrnat.ltP.
          by rewrite ltn0 in H.
+      ++ apply H1.
+    * intros. split.
+      ++ intros.
+         
 
 
 
