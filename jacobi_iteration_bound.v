@@ -5629,8 +5629,6 @@ apply ltn_ord.
 Qed.
 
 
-(*** matrix_inf_norm
-             (FT2R_mat (A2_J A)) ***)
 Lemma rho_0_implies_N_eq_0 {t} {n:nat} 
   (A: 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1):
   rho_def A b = 0%Re ->
@@ -5731,9 +5729,30 @@ destruct H0.
 - split.
   + apply H.
   + (*** TODO: k = 1 : for k = 1, the residual should evaluate to 0 ***) 
-    (*** TODO: Derive from rho = 0, that N = 0 ***)
+    apply rho_0_implies_N_eq_0 in H0.
+    exists 1%nat.
+    split.
+    * assert (k = 0%nat \/ (0 < k)%nat).
+      { assert ((0 <= k)%nat). by [].
+        rewrite leq_eqVlt in H1. 
+        assert ((0%nat == k) \/ (0 < k)%nat). by apply /orP.
 
- exists 0%nat.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  exists 0%nat.
     split.
     * apply /ssrnat.leP. lia.
     * intros. split.
