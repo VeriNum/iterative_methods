@@ -5663,7 +5663,10 @@ destruct H0.
 (*** || N || = 0 case. ***)
 - split.
   + apply H.
-  + exists 0%nat.
+  + (*** TODO: k = 1 : for k = 1, the residual should evaluate to 0 ***) 
+    (*** TODO: Derive from rho = 0, that N = 0 ***)
+
+ exists 0%nat.
     split.
     * apply /ssrnat.leP. lia.
     * intros. split.
@@ -6855,6 +6858,6 @@ destruct H0.
                 rewrite -?Heqn -?HeqA' -?Heqb'. intros. apply H.
              -- rewrite <- finite_is_finite. apply H.
 Qed.
-
+(** merge N= 0 and ||x|| <= ? case **)
 
 End WITH_NANS.
