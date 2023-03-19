@@ -5640,7 +5640,8 @@ intros.
 unfold rho_def in H.
 apply Rplus_eq_R0 in H.
 + destruct H as [Hrho1 Hrho2].
-  
+  rewrite Hrho2 in Hrho1. rewrite Rmult_0_r in Hrho1.
+  rewrite Rplus_0_l in Hrho1.
 
 
 
