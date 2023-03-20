@@ -5709,7 +5709,14 @@ assert ((x <= y)%Re \/ (y <= x)%Re).
 Qed.
 
 
-
+Lemma seq_nth_equiv i s:
+  nth i s 0%Re = seq.nth 0%Re s i.
+Proof.
+elim: s i => [ |a s IHs] i.
++ simpl. by destruct i.
++ simpl. destruct i.
+  by simpl. simpl. apply IHs.
+Qed.
 
 Lemma bigmaxr_cons_0 (a:R) s :
  (forall i : nat,
@@ -5737,17 +5744,8 @@ assert (s = [::] \/ s != [::]).
     assert (forall j, (0 <= nth j s 0%Re)%Re).
     { intros. specialize (H j.+1).
       simpl in H. apply H.
-    } apply H3.
-
-
-
- apply H.
-
-
-
-
-  admit.
-Admitted.
+    } specialize (H3 i). by rewrite -seq_nth_equiv.
+Qed.
   
 
 
