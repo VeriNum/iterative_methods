@@ -5768,22 +5768,19 @@ elim: s i H H0 => [ |a s IHs] i H H0 .
   - apply H.
 Qed.
 
-Lemma bigsum_eq_0 I r (P: pred I) (E : I -> R):
-  (forall i, P i -> (0 <= E i)%Re) -> 
-  (\big[+%R/0]_(i <-r | P i) E i = 0%Re) ->
-  (forall i,  P i -> E i = 0%Re).
-Proof.
-intros.
-  
 
-Lemma bigsum_eq_0 {n} (f : 'I_n.+1 ->R):
-  (forall i, (0 <= f i)%Re) -> 
+Lemma bigsum_eq_0 {n} (f : nat ->R):
+  (forall i, (i < n)%nat -> (0 <= f i)%Re) -> 
   \sum_(j < n.+1) (f j) = 0%Re ->
-  (forall i, f i = 0%Re).
+  (forall i, (i < n)%nat -> f i = 0%Re).
 Proof.
 intros.
 induction n.
-+ rewrite big_ord_recr /=  big_ord0 in H0.
++ by rewrite ltn0 in H1.
++ apply IHn.
+
+
+rewrite big_ord_recr /=  big_ord0 in H0.
   rewrite -RplusE Rplus_0_l in H0. 
   assert (i = 0).
   { apply ord1. } rewrite H1. 
