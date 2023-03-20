@@ -5953,6 +5953,23 @@ Qed.
 
 Close Scope R_scope.
 
+
+(** entries zero in real ==> entries zero in float **)
+Lemma A_real_to_float_zero {t} {n} (A : 'M[ftype t]_n.+1):
+  forall i j,
+  FT2R (A i j) = 0%Re ->
+  A i j = Zconst t 0.
+Proof.
+intros.
+apply B2R_inj.
++ admit.
++ admit.
++ unfold FT2R in H. by rewrite H;simpl. 
+Admitted.
+
+
+
+
 Lemma finite_residual_1 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -6016,7 +6033,15 @@ apply dotprod_finite.
     specialize (H7 x).
     assert (\row_j (A2_J A' (inord x) j) = \row_j (Zconst t 0)).
     { apply matrixP. unfold eqrel. intros. rewrite mxE. rewrite mxE.
-    specialize (H7 y0). rewrite mxE in H7. admit. 
+    specialize (H7 y0). rewrite mxE in H7.
+    
+
+
+
+
+
+
+ admit. 
     } admit.
   } rewrite H7.
   rewrite !nth_vec_to_list_float. 
