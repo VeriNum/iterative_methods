@@ -6177,6 +6177,19 @@ destruct H0.
       ++ apply H1.
     * intros. split.
       ++ intros.
+         assert (i = 0%nat \/ i = 1%nat).
+         { rewrite leq_eqVlt in H1. 
+           assert ((i == 1%nat) \/ (i < 1)%nat). by apply /orP.
+           destruct H2; try (right; by apply /eqP).
+           left. apply ltnSE in H2. rewrite leqn0 in H2.
+           by apply /eqP.
+         } destruct H2.
+         -- rewrite H2. apply finite_residual_0.
+            
+
+
+
+
          admit.
       ++ unfold BCMP.
          rewrite Bcompare_correct.
