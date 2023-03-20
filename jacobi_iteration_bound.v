@@ -6019,8 +6019,8 @@ apply dotprod_finite.
   assert (BMULT (A1_J A' (inord k) ord0)  (Zconst t 0) = Zconst t 0).
   { admit. } rewrite H8. split.
   - admit.
-  - intros. simpl. rewrite Rabs_R0. apply sqrt_lt_R0.
-    apply fun_bound_gt_0. 
+  - rewrite rev_length H2. intros. simpl. rewrite Rabs_R0. apply sqrt_lt_R0.
+    apply fun_bound_gt_0. unfold n0. by apply g1_constraint. 
 
 
   split.
