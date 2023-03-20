@@ -5990,6 +5990,20 @@ rewrite -Bsign_B2BSN  in H0.
   destruct (B2BSN (fprec t) (femax t) (A i j)); simpl; try by [].
 Qed.
 
+Lemma BMINUS_x_x {t} {x y : ftype t}:
+  finite x ->
+  BMINUS x x = Zconst t 0.
+Proof.
+intros.
+rewrite /BMINUS /BINOP /Bminus /BSN2B /BinarySingleNaN.Bminus /=.
+apply finite_is_finite in H. rewrite -is_finite_B2BSN in H.
+unfold BinarySingleNaN.is_finite in H.
+destruct (B2BSN (fprec t) (femax t) x); simpl.
+destruct (Bool.eqb s (~~ s)); simpl.
+
+ 
+
+
 (** Dot product with zero vector **)
 Lemma dotprod_r_eq_0 {t} (v1 v2: list (ftype t)):
   (forall i, nth i v1 (Zconst t 0) = (Zconst t 0)) ->
@@ -6076,7 +6090,7 @@ apply dotprod_finite.
                     (@vec_to_list_float _ n n.+1
                         (\col_j x0' j ord0))). 
     simpl. rewrite H9. rewrite  H10.
-    
+    by [].
 
 
 
