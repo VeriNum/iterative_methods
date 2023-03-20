@@ -5891,6 +5891,29 @@ apply Rlt_pow_R1. apply default_rel_plus_1_gt_1.
 lia.
 Qed.
 
+Lemma defualt_abs_lt_fmax t :
+default_abs t < bpow Zaux.radix2 (femax t).
+Proof.
+replace (bpow Zaux.radix2 (femax t)) with (1 * bpow Zaux.radix2 (femax t)) by nra.
+unfold default_abs; apply Rmult_lt_compat; try nra.
+apply bpow_ge_0.
+apply bpow_lt.
+apply Z.lt_sub_lt_add_r.
+apply Z.lt_sub_lt_add_r.
+eapply Z.lt_trans with (fprec t + fprec t + femax t)%Z; 
+  [ | repeat apply Zplus_lt_compat_r; apply fprec_lt_femax].
+eapply Z.lt_trans with (fprec t + fprec t + fprec t)%Z;
+[ |  repeat apply Zplus_lt_compat_l; apply fprec_lt_femax ].
+eapply Z.lt_trans with (1 + fprec t + fprec t)%Z;
+[ |  repeat apply Zplus_lt_compat_r; apply fprec_gt_one].
+eapply Z.lt_trans with (1 + 1 + fprec t)%Z;
+[ |  repeat apply Zplus_lt_compat_r; repeat apply Zplus_lt_compat_l; 
+apply fprec_gt_one].
+eapply Z.le_lt_trans with (1 + 1 + 1)%Z;
+[ lia |  repeat apply Zplus_lt_compat_r; repeat apply Zplus_lt_compat_l; 
+apply fprec_gt_one].
+Qed.
+
 Lemma fun_bound_pos t n :
 forall (Hn : g1 t (n + 1) n <= fmax t), 
 0 < fun_bnd t n. 
@@ -5901,7 +5924,7 @@ unfold fun_bnd. apply Rmult_lt_0_compat.
   apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
   apply Rcomplements.Rlt_minus_r.
   assert (Hn': (n= 0%nat)%coq_nat \/ (1<=n)%coq_nat) by lia; destruct Hn'; subst.
-  { simpl. unfold g1, g. simpl; field_simplify. admit. (* apply defualt_abs_lt_fmax.  *) }
+  { simpl. unfold g1, g. simpl; field_simplify. apply defualt_abs_lt_fmax. }
   assert (Hn'': (n= 1%nat)%coq_nat \/ (1 < n)%coq_nat) by lia; destruct Hn''; subst.
   { simpl. unfold g1, g. simpl; field_simplify.
     eapply Rlt_trans.
@@ -5926,17 +5949,6 @@ unfold fun_bnd. apply Rmult_lt_0_compat.
   apply Rplus_lt_le_0_compat. nra.
   apply Rmult_le_pos. apply pos_INR.
   apply Rplus_le_le_0_compat. apply g_pos. nra.
-
-
-apply Rinv_0_lt_compat.
-
-
-apply Rmult_le_pos.
-apply fun_bnd_pos_1; auto.
-apply Rdiv_le_0_compat_Raux; try nra.
-apply Rplus_lt_le_0_compat; try nra.
-apply Rmult_le_pos; try apply pos_INR.
-apply Rplus_le_le_0_compat; try nra; apply g_pos.
 Qed.
 
 Lemma finite_residual_1 {t: type} :
