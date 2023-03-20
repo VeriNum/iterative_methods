@@ -6205,7 +6205,75 @@ destruct H0.
                       vector_inj (resid (jacobi_n A b x0 1%nat)) n.+1).
             { apply /matrixP. unfold eqrel. intros. by rewrite !mxE. } 
             rewrite H7.
-
+            assert ((FT2R
+                     (norm2
+                        (rev
+                           (vec_to_list_float n.+1
+                              (vector_inj (resid (jacobi_n A b x0 1%nat)) n.+1)))) < 0)%Re \/
+                    (0 <= FT2R
+                           (norm2
+                              (rev
+                                 (vec_to_list_float n.+1
+                                    (vector_inj (resid (jacobi_n A b x0 1%nat)) n.+1)))))%Re).
+            { nra. } destruct H8.
+            destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+            apply Rlt_le_trans with 0%Re.
+            nra.
+            remember (@matrix_inj _ A n.+1 n.+1) as A'.
+            remember (@vector_inj _ b n.+1) as b'.
+            apply Rle_trans with 
+            ( g1 t n.+1 (n.+1 - 1)%coq_nat +
+              INR n.+1 * (1 + g t n.+1) *
+              (g1 t n.+1 (n.+1 - 1)%coq_nat +
+               2 * (1 + g t n.+1) *
+               (1 + default_rel t) *
+               vec_inf_norm (FT2R_mat (A1_J A')) *
+               d_mag_def_alt A' b' *
+               / (1 - rho_def_alt A' b'))²)%Re.
+            apply Rplus_le_le_0_compat; first by apply g1_pos.
+            apply Rmult_le_pos. apply Rmult_le_pos. apply pos_INR.
+            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+            apply Rle_0_sqr. 
+            rewrite HeqGamma. unfold acc2. nra.
+            assert (FT2R (norm2 (rev
+                           (vec_to_list_float n.+1
+                              (vector_inj
+                                 (resid
+                                    (jacobi_n A b x0 1%nat)) n.+1)))) =
+                     Rabs (FT2R (norm2 (rev
+                           (vec_to_list_float n.+1
+                              (vector_inj
+                                 (resid
+                                    (jacobi_n A b x0 1%nat)) n.+1)))))).
+             { rewrite Rabs_right. nra. by apply Rle_ge. }
+             rewrite H9. clear H9.
+             eapply Rle_lt_trans.
+             apply norm2_vec_inf_norm_rel.
+             ** admit.
+             ** rewrite -H7 -H5. apply finite_residual_1. 
+                apply HlenA. apply HeqAb. 
+                unfold size_constraint. rewrite -Heqn. apply H.
+                rewrite -Heqn. intros. apply H.
+                rewrite -Heqn. intros.
+                assert (vector_inj
+                   (repeat (Zconst t 0) (length b)) n.+1 =
+                 \col_(j < n.+1) (Zconst t 0)).
+                 { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                   by rewrite nth_repeat.
+                 } rewrite H9. apply H. 
+                apply input_bound_at_N_0_equiv.
+                rewrite -Heqn. 
+                assert (vector_inj
+                               (repeat (Zconst t 0) (length b)) n.+1 =
+                             \col_(j < n.+1) (Zconst t 0)).
+                { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                  by rewrite nth_repeat.
+                } rewrite H9. apply H.
+                rewrite -Heqn. intros. apply H.
+                rewrite -Heqn. intros. rewrite mxE. apply H.
+                rewrite -Heqn. intros. apply H.
+                rewrite -Heqn. apply H0.
+             ** 
 
 
 
