@@ -5819,6 +5819,22 @@ specialize (H0 i).
 rewrite seq_nth_equiv seq_equiv in H0.
 rewrite nth_mkseq in H0; last by apply ltn_ord.
 unfold row_sum in H0.
+pose proof (@bigsum_eq_0 n.+1). 
+specialize (H2 (fun j => Rabs (A i (@inord n j)))).
+assert (forall i0 : nat,
+        (i0 < n.+1)%nat ->
+        (0 <= (fun j : nat => Rabs (A i (@inord n j))) i0)%Re).
+{ intros. apply Rabs_pos. } specialize (H2 H3).
+assert (\sum_(j < n.+1)
+        (fun j0 : nat => Rabs (A i (@inord n j))) j = 0%Re).
+{ rewrite -H0. apply eq_big. by []. intros. 
+  by rewrite !inord_val.
+} specialize (H2 H4). clear H3 H4. 
+
+
+
+
+apply (@bigsum_eq_0 n.+1 _) in H0.
 assert (\sum_(j < n.+1) 0%Re = 0%Re).
 { admit. } rewrite -H2 in H0.
 
