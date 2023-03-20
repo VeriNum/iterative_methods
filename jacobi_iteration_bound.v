@@ -5903,12 +5903,30 @@ apply dotprod_finite.
               X_m_jacobi 1 x0' b' A') = \col_j (Zconst t 0)).
     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
       rewrite !nth_vec_to_list_float.
-      rewrite !mxE.
-      assert (\row_j (A2_J A' (inord x) j) = \row_j (Zconst t 0)).
+      rewrite !mxE. admit.
+      (*assert (\row_j (A2_J A' (inord x) j) = \row_j (Zconst t 0)).
       { apply matrixP. unfold eqrel. intros. rewrite mxE. rewrite [in RHS]mxE.
-        
-        
-
+      *)
+    } rewrite H7.
+    rewrite !nth_vec_to_list_float. 
+    rewrite !inord_val. rewrite mxE.
+    admit.
+    rewrite H2 in Hlen.
+    rewrite inordK; (by apply /ssrnat.ltP ).
+    rewrite H2 in Hlen.
+    rewrite inordK; (by apply /ssrnat.ltP ).
+  - rewrite -/n -/A' -/b' -/x0'.
+    assert ((X_m_jacobi 2 x0' b' A' -f
+              X_m_jacobi 1 x0' b' A') = \col_j (Zconst t 0)).
+    { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+      rewrite !nth_vec_to_list_float.
+      rewrite !mxE. admit.
+      (*assert (\row_j (A2_J A' (inord x) j) = \row_j (Zconst t 0)).
+      { apply matrixP. unfold eqrel. intros. rewrite mxE. rewrite [in RHS]mxE.
+      *)
+    } rewrite H7.
+     rewrite !nth_vec_to_list_float. 
+    rewrite !inord_val. rewrite mxE.
 
 
 
