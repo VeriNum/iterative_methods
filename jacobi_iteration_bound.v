@@ -5886,15 +5886,14 @@ apply Rmult_le_compat_l. apply bpow_ge_0.
 
 (*apply default_abs_ge_0. *)
 rewrite <- !Rmult_assoc.
-rewrite Rmult_comm. apply Rmult_lt_compat_l. apply lt_0_INR. 
-by apply /ssrnat.ltP.
+rewrite Rmult_comm. 
 apply Rmult_le_compat_l; [apply pos_INR| ].
 rewrite Rmult_comm.
 rewrite tech_pow_Rmult.
-replace (S m) with (m + 1)%nat by lia; nra.
+replace (S m) with (m + 1)%coq_nat by lia; nra.
 replace (default_abs t) with (default_abs t * 1) at 1 by nra.
-apply Rmult_le_compat_l; [apply  default_abs_ge_0 | ].
-apply default_rel_plus_1_ge_1'.
+apply Rmult_lt_compat_l; [apply  default_abs_gt_0 | ].
+apply default_rel_plus_1_gt_1'.
 Qed.
 
 Lemma fun_bound_pos t n :
