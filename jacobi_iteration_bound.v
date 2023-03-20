@@ -5990,6 +5990,12 @@ rewrite -Bsign_B2BSN  in H0.
   destruct (B2BSN (fprec t) (femax t) (A i j)); simpl; try by [].
 Qed.
 
+(** Dot product with zero vector **)
+Lemma dotprod_r_eq_0 {t} (v1 v2: list (ftype t)):
+  (forall i, nth i v1 (Zconst t 0) = (Zconst t 0)) ->
+  dotprod_r v1 v2 = Zconst t 0.
+Admitted.
+
 
 Lemma finite_residual_1 {t: type} :
  forall (A: matrix t) (b: vector t),
@@ -6059,6 +6065,12 @@ apply dotprod_finite.
     rewrite inord_val. apply H7.
     admit. (** sign **)
     } rewrite H8.
+    pose proof (@dotprod_r_eq_0 t).
+    specialize (H9 (@vec_to_list_float _ n n
+                      (\row__ Zconst t 0)^T)
+                    (@vec_to_list_float _ n n
+                        (\col_j jacobi_iter x0' b' A' j ord0))).
+    
 
 
 
