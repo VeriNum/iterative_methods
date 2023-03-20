@@ -5763,20 +5763,10 @@ elim: s i H H0 => [ |a s IHs] i H H0 .
 + apply bigmaxr_cons_0 in H0. 
   - simpl. destruct i.
     * apply H0.
-    * apply IHs. intros.
-
-
-
-simpl. d
-destruct i.
-  - admit.
-  - specialize (IHs i). apply IHs.
-    admit.
-Admitted.
-  
-
-
-
+    * apply IHs. intros. specialize (H i0.+1). simpl in H.
+      apply H. apply H0.
+  - apply H.
+Qed.
 
 
 Lemma matrix_inf_norm_0_implies {n:nat}:
