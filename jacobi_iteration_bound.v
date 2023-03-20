@@ -6000,14 +6000,41 @@ apply finite_is_finite in H. rewrite -is_finite_B2BSN in H.
 unfold BinarySingleNaN.is_finite in H.
 destruct (B2BSN (fprec t) (femax t) x); simpl.
 destruct (Bool.eqb s (~~ s)); simpl.
++ unfold Zconst, vcfloat.IEEE754_extra.BofZ, binary_normalize; simpl.
+  admit.
++ by unfold Zconst, vcfloat.IEEE754_extra.BofZ, binary_normalize; simpl.
++ by destruct (Bool.eqb s (~~ s)); simpl.
++ by [].
++ (destruct (BinarySingleNaN.binary_normalize 
+    (fprec t) (femax t) (fprec_gt_0 t)
+    (fprec_lt_femax t) BinarySingleNaN.mode_NE
+    (BinarySingleNaN.Fplus_naive s m e 
+       (~~ s) m e (Z.min e e)) 
+    (Z.min e e) false); simpl;auto;simpl in *; auto).
+  - admit.
+  - admit.
+  - 
 
+
+
+
+
+
+ rewrite Z.min_id. simpl.
+  Locate BinarySingleNaN.Fplus_naive.
+  rewrite BinarySingleNaN.Fplus_naive_correct .
  
+  unfold BinarySingleNaN.Fplus_naive.
+  simpl.
+
+
+unfold BinarySingleNaN.binary_normalize;simpl.
 
 
 (** Dot product with zero vector **)
 Lemma dotprod_r_eq_0 {t} (v1 v2: list (ftype t)):
   (forall i, nth i v1 (Zconst t 0) = (Zconst t 0)) ->
-  dotprod_r v1 v2 = Zconst t 0.
+  dotprod_r v1 v2 = Zconst t 0. 
 Admitted.
 
 
