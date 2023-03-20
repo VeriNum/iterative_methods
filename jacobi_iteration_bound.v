@@ -5760,7 +5760,15 @@ Proof.
 intros.
 elim: s i H H0 => [ |a s IHs] i H H0 .
 + rewrite /nth /=. by destruct i.
-+ simpl. destruct i.
++ apply bigmaxr_cons_0 in H0. 
+  - simpl. destruct i.
+    * apply H0.
+    * apply IHs. intros.
+
+
+
+simpl. d
+destruct i.
   - admit.
   - specialize (IHs i). apply IHs.
     admit.
