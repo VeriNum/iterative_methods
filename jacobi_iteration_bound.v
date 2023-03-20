@@ -5720,6 +5720,7 @@ Qed.
 
 Lemma bigmaxr_cons_0 (a:R) s :
  (forall i : nat,
+    (i < length (a :: s))%nat ->
     (0 <= nth i (a :: s) 0)%Re) ->
   bigmaxr 0%Re (a :: s) = 0%Re ->
   a = 0%Re /\ bigmaxr 0%Re s = 0%Re.
@@ -5737,35 +5738,32 @@ assert (s = [::] \/ s != [::]).
   rewrite H1 in H0. rewrite bigmaxr_cons in H0.
   rewrite -H1 in H0. rewrite -RmaxE in H0.
   apply Rmax_le_0; last by [].
-  - specialize (H 0%nat). simpl in H. nra.
+  - specialize (H 0%nat). simpl in H. apply H. by [].
   - apply /RleP. apply bigmax_le_0.
     apply /RleP. apply Rle_refl.
     intros. apply /RleP.
-    assert (forall j, (0 <= nth j s 0%Re)%Re).
+    assert (forall j, (j < size s)%nat -> (0 <= nth j s 0%Re)%Re).
     { intros. specialize (H j.+1).
-      simpl in H. apply H.
-    } specialize (H3 i). by rewrite -seq_nth_equiv.
+      simpl in H. apply H. apply H3.
+    } specialize (H3 i). rewrite -seq_nth_equiv.
+    by apply H3.
 Qed.
   
 
-
-
-
-
 Lemma bigmaxr_eq_0 s:
-  (forall i, (0 <= nth i s 0%Re)%Re) -> 
+  (forall i, (i < length s)%nat -> (0 <= nth i s 0%Re)%Re) -> 
   bigmaxr 0%Re s = 0%Re ->
-  (forall i, nth i s 0%Re = 0%Re).
+  (forall i, (i < length s)%nat -> nth i s 0%Re = 0%Re).
 Proof.
 intros.
-elim: s i H H0 => [ |a s IHs] i H H0 .
+elim: s i H H0 H1 => [ |a s IHs] i H H0 H1.
 + rewrite /nth /=. by destruct i.
 + apply bigmaxr_cons_0 in H0. 
   - simpl. destruct i.
     * apply H0.
     * apply IHs. intros. specialize (H i0.+1). simpl in H.
-      apply H. apply H0.
-  - apply H.
+      apply H. apply H2. apply H0. apply H1.
+  - intros. apply H.
 Qed.
 
 
