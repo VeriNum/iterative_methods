@@ -6401,6 +6401,26 @@ destruct H0.
                apply /RleP. apply vec_norm_pd.
                apply Rplus_le_le_0_compat. nra. apply g_pos.
                apply Rle_refl. admit.
+         -- apply finite_is_finite. apply finite_residual_1; try by apply H.
+            apply HlenA. apply HeqAb.
+            intros.
+            assert (vector_inj
+                   (repeat (Zconst t 0) (length b)) (length A).-1.+1 =
+                 \col_(j < (length A).-1.+1) (Zconst t 0)).
+            { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+              by rewrite nth_repeat.
+            } rewrite H1. apply H. 
+            apply input_bound_at_N_0_equiv. 
+            assert (vector_inj
+                         (repeat (Zconst t 0) (length b)) (length A).-1.+1 =
+                             \col_(j < (length A).-1.+1) (Zconst t 0)).
+            { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+              by rewrite nth_repeat.
+            } rewrite H1. apply H.
+            intros. apply H.
+            intros. rewrite mxE. apply H.
+            apply H0.
+        -- apply finite_is_finite. apply H.
 
 
 
