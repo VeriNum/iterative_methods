@@ -5997,11 +5997,8 @@ Proof.
 intros.
 apply finite_is_finite in H.
 unfold is_finite in H.
-destruct x;unfold BMINUS, BINOP, Bminus; simpl.
-
-
-
-Search "BMINUS".
+destruct x;unfold BMINUS, BINOP, Bminus; simpl in *; auto.
+Admitted.
 
 
 Lemma finite_residual_1 {t: type} :
@@ -6058,6 +6055,22 @@ apply dotprod_finite.
   rewrite nth_vec_to_list_float in Hnth.
   rewrite mxE in Hnth. rewrite -Hnth.
   rewrite -/n -/A' -/b' -/x0'.
+  rewrite !nth_vec_to_list_float.
+  rewrite !inord_val. rewrite mxE.
+  assert (FT2R ((X_m_jacobi 2 x0' b' A' -f
+                  X_m_jacobi 1 x0' b' A') (inord k) ord0) = 0%Re).
+  { admit. }
+  
+
+
+
+
+
+
+
+
+
+
   assert ((X_m_jacobi 2 x0' b' A' -f
               X_m_jacobi 1 x0' b' A') = \col_j (Zconst t 0)).
   { apply matrixP. unfold eqrel. intros. rewrite !mxE.
