@@ -5973,14 +5973,33 @@ Qed.
 Lemma A_entry_mult_0 {t} {n} (A : 'M[ftype t]_n.+1):
   forall i j,
   finite (A i j) ->
+  Bsign (fprec t) (femax t) (A i j) = false ->
   BMULT (A i j)  (Zconst t 0) = Zconst t 0.
 Proof.
 intros. 
 rewrite /BMULT /BINOP /Bmult /BSN2B /BinarySingleNaN.Bmult /=. 
 apply finite_is_finite in H. rewrite -is_finite_B2BSN in H.
 unfold BinarySingleNaN.is_finite in H.
+rewrite -Bsign_B2BSN  in H0.
+
+
+
+admit.
+rewrite -is_nan_B2BSN.
+unfold BinarySingleNaN.is_nan. 
+destruct (B2BSN (fprec t) (femax t) (A i j)); simpl; try by [].
+
+
+
+unfold Bsign in H0.
+
+
 destruct (B2BSN (fprec t) (femax t) (A i j)); simpl; try by [].
 unfold Zconst, vcfloat.IEEE754_extra.BofZ, binary_normalize. simpl.
+Print B754_zero.
+
+
+
 destruct s; simpl; try by []. admit.
 unfold Zconst, vcfloat.IEEE754_extra.BofZ, binary_normalize. simpl.
 destruct s; simpl; try by []. admit.
