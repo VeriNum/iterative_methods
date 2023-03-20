@@ -5975,6 +5975,12 @@ Lemma A_entry_mult_0 {t} {n} (A : 'M[ftype t]_n.+1):
   finite (A i j) ->
   BMULT (A i j)  (Zconst t 0) = Zconst t 0.
 Proof.
+intros. 
+rewrite /BMULT /BINOP /Bmult /BSN2B /BinarySingleNaN.Bmult /=. 
+apply finite_is_finite in H. rewrite -is_finite_B2BSN in H.
+unfold BinarySingleNaN.is_finite in H.
+destruct (B2BSN (fprec t) (femax t) (A i j)); simpl; try by [].
+simpl.
 
 
 Lemma finite_residual_1 {t: type} :
