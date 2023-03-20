@@ -5845,6 +5845,58 @@ rewrite Rabs_left in H2; try nra.
 Qed.
 
 Local Open Scope R_scope.
+
+Lemma bpow_femax_lb_strict t : 
+4 < bpow Zaux.radix2 (femax t).
+Proof. 
+pose proof fprec_gt_one t.
+pose proof fprec_lt_femax t.
+assert (1 < femax t)%Z.
+eapply Z.lt_trans with (fprec t); auto.
+eapply Rle_lt_trans with (bpow Zaux.radix2 2).
+unfold bpow; simpl; nra.
+apply bpow_lt; lia.
+Qed.
+
+
+Lemma mult_d_e_g1_lt' t n m:
+(1 <= n )%nat -> (1 <= m)%nat ->
+g1 t n m * (1 + default_rel t)  + default_abs t < g1 t (S n) (S m).
+Proof.
+intros; replace (S n) with (n + 1)%coq_nat by lia.
+replace (S m) with (m + 1)%coq_nat by lia.
+unfold g1, g; field_simplify. rewrite plus_INR.
+replace (INR 1) with 1 by (simpl; nra).
+(*replace (INR (n + 1)) with (INR n + 1) by 
+  (rewrite Nat.add_comm; rewrite S_O_plus_INR; simpl; nra).
+replace (INR (m + 1)) with (INR m + 1) by
+  (rewrite Nat.add_comm; rewrite S_O_plus_INR; simpl; nra). *)
+rewrite !Rmult_plus_distr_l.
+rewrite !Rmult_1_r. replace
+(INR n * default_abs t * (1 + default_rel t) ^ m * default_rel t +
+INR n * default_abs t * (1 + default_rel t) ^ m) with
+(INR n * default_abs t * (1 + default_rel t) ^ m * (1 + default_rel t)) by nra.
+rewrite !Rmult_plus_distr_r.
+apply Rplus_le_lt_compat.
+rewrite !Rmult_assoc.
+rewrite Rmult_comm.
+rewrite !Rmult_assoc.
+apply Rmult_le_compat_l. nra. 
+apply Rmult_le_compat_l. apply bpow_ge_0.
+
+(*apply default_abs_ge_0. *)
+rewrite <- !Rmult_assoc.
+rewrite Rmult_comm. apply Rmult_lt_compat_l. apply lt_0_INR. 
+by apply /ssrnat.ltP.
+apply Rmult_le_compat_l; [apply pos_INR| ].
+rewrite Rmult_comm.
+rewrite tech_pow_Rmult.
+replace (S m) with (m + 1)%nat by lia; nra.
+replace (default_abs t) with (default_abs t * 1) at 1 by nra.
+apply Rmult_le_compat_l; [apply  default_abs_ge_0 | ].
+apply default_rel_plus_1_ge_1'.
+Qed.
+
 Lemma fun_bound_pos t n :
 forall (Hn : g1 t (n + 1) n <= fmax t), 
 0 < fun_bnd t n. 
@@ -5866,14 +5918,10 @@ unfold fun_bnd. apply Rmult_lt_0_compat.
     apply default_abs_ub_strict.
     apply default_rel_ub_strict.
     apply Rmult_lt_compat_l; try nra.
-    apply default_abs_ub_strict.
+    apply default_abs_ub_strict. 
     eapply Rlt_trans; [| apply bpow_femax_lb_strict]; nra. }
-    eapply Rle_trans. apply mult_d_e_g1_le'; try lia. 
-    replace (S n) with (n + 1)%nat by lia.
-    replace (S (n - 1)) with n by lia; auto.
-
-
-admit.
+    eapply Rlt_le_trans; last by apply Hn. admit. (*apply mult_d_e_g1_le'; try lia. *) 
+    replace (S n) with (n + 1)%coq_nat by lia. 
 + assert (forall x:R, (1 / x)%Re = (/x)%Re). 
   { intros. nra. } rewrite H. apply Rinv_0_lt_compat.
   apply Rplus_lt_le_0_compat. nra.
