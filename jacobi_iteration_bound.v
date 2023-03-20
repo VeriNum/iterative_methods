@@ -5951,6 +5951,8 @@ unfold fun_bnd. apply Rmult_lt_0_compat.
   apply Rplus_le_le_0_compat. apply g_pos. nra.
 Qed.
 
+Close Scope R_scope.
+
 Lemma finite_residual_1 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -6009,9 +6011,15 @@ apply dotprod_finite.
               X_m_jacobi 1 x0' b' A') = \col_j (Zconst t 0)).
   { apply matrixP. unfold eqrel. intros. rewrite !mxE.
     repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
-    rewrite !mxE. admit.
-      (*assert (\row_j (A2_J A' (inord x) j) = \row_j (Zconst t 0)).
-      { apply matrixP. unfold eqrel. intros. rewrite mxE. rewrite [in RHS]mxE.
+    rewrite !mxE.
+    pose proof (@matrix_inf_norm_0_implies n (FT2R_mat (A2_J A')) HN0).
+    specialize (H7 x).
+    assert (\row_j (A2_J A' (inord x) j) = \row_j (Zconst t 0)).
+    { 
+
+
+
+apply matrixP. unfold eqrel. intros. rewrite mxE. rewrite [in RHS]mxE.
       *)
   } rewrite H7.
   rewrite !nth_vec_to_list_float. 
