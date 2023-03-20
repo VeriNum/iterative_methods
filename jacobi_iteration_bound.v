@@ -5970,7 +5970,7 @@ apply B2R_Bsign_inj.
 + by simpl. 
 Qed.
 
-Lemma A_entry_mult_0 {t} {n} (A : 'M[ftype t]_n.+1):
+Lemma A_entry_mult_0 {t} {m n} (A : 'M[ftype t]_(m.+1, n.+1)):
   forall i j,
   finite (A i j) ->
   Bsign (fprec t) (femax t) (A i j) = false ->
@@ -6071,15 +6071,11 @@ admit.
   rewrite !nth_vec_to_list_float. 
   rewrite !inord_val. rewrite mxE.
   assert (BMULT (A1_J A' (inord k) ord0)  (Zconst t 0) = Zconst t 0).
-  { rewrite /BMULT /BINOP /Bmult /BSN2B /BinarySingleNaN.Bmult /=. 
-
-
-simpl.
-
-
-
-admit. } rewrite H8. split.
-  - admit.
+  { apply A_entry_mult_0; try rewrite mxE; try rewrite inord_val; try by [].
+    admit. (** Bsign (fprec t) (femax t)
+  (A' (inord k) (inord k)) = false **)
+  } rewrite H8. split.
+  - by simpl. 
   - rewrite rev_length H2. intros. simpl. rewrite Rabs_R0. apply sqrt_lt_R0.
     apply fun_bound_gt_0. unfold n0. by apply g1_constraint. 
   - rewrite H2 in Hlen.
