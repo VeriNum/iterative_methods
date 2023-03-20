@@ -5990,14 +5990,25 @@ rewrite -Bsign_B2BSN  in H0.
   destruct (B2BSN (fprec t) (femax t) (A i j)); simpl; try by [].
 Qed.
 
-
+Local Open Scope R_scope.
 Lemma BMINUS_x_x {t} {x y : ftype t}:
   finite x ->
   BMINUS x x = Zconst t 0.
 Proof.
 intros.
+apply finite_is_finite in H.
 pose proof (Binary.Bminus_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan t) 
-                      BinarySingleNaN.mode_NE x y FINx FINy ).
+                      BinarySingleNaN.mode_NE x x H H ).
+change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
+cbv zeta in H0. 
+assert ((FT2R x - FT2R x) = 0) by nra.
+rewrite H1 in H0.
+
+
+
+ simpl in *.
+replace (FT2R x - FT2R x) with 0 by nra.
+
 
 
 
