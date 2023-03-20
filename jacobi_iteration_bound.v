@@ -5980,7 +5980,11 @@ rewrite /BMULT /BINOP /Bmult /BSN2B /BinarySingleNaN.Bmult /=.
 apply finite_is_finite in H. rewrite -is_finite_B2BSN in H.
 unfold BinarySingleNaN.is_finite in H.
 destruct (B2BSN (fprec t) (femax t) (A i j)); simpl; try by [].
-simpl.
+unfold Zconst, vcfloat.IEEE754_extra.BofZ, binary_normalize. simpl.
+destruct s; simpl; try by []. admit.
+unfold Zconst, vcfloat.IEEE754_extra.BofZ, binary_normalize. simpl.
+destruct s; simpl; try by []. admit.
+Admitted.
 
 
 Lemma finite_residual_1 {t: type} :
