@@ -5834,26 +5834,9 @@ specialize (H2 j).
 assert ((j < n.+1)%nat). { by apply ltn_ord. }
 specialize (H2 H3). simpl in H2.
 rewrite inord_val in H2.
-nra.
-
-
-
-apply (@bigsum_eq_0 n.+1 _) in H0.
-assert (\sum_(j < n.+1) 0%Re = 0%Re).
-{ admit. } rewrite -H2 in H0.
-
-
-
-  
-
-
-
-
-apply (bigmaxr_eq_0 (i%nat)) in H.
-
-
-
-
+assert ((0 <= A i j)%Re \/ (A i j < 0)%Re). nra.
+destruct H4. rewrite Rabs_right in H2; nra.
+rewrite Rabs_left in H2; try nra.
 Admitted.
 
 Lemma finite_residual_1 {t: type} :
