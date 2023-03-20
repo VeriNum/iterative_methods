@@ -5959,6 +5959,7 @@ Lemma A_real_to_float_zero {t} {n} (A : 'M[ftype t]_n.+1):
   forall i j,
   finite (A i j) ->
   FT2R (A i j) = 0%Re ->
+  Bsign (fprec t) (femax t) (A i j) = false ->
   A i j = Zconst t 0.
 Proof.
 intros.
@@ -5966,10 +5967,8 @@ apply B2R_Bsign_inj.
 + by apply finite_is_finite.
 + by simpl.
 + unfold FT2R in H0. by rewrite H0;simpl.
-+ 
-
- 
-Admitted.
++ by simpl. 
+Qed.
 
 
 
