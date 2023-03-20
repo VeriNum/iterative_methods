@@ -6055,15 +6055,18 @@ apply dotprod_finite.
   rewrite nth_vec_to_list_float in Hnth.
   rewrite mxE in Hnth. rewrite -Hnth.
   rewrite -/n -/A' -/b' -/x0'.
-  rewrite !nth_vec_to_list_float.
+  (*rewrite !nth_vec_to_list_float.
   rewrite !inord_val. rewrite mxE.
   assert (FT2R ((X_m_jacobi 2 x0' b' A' -f
                   X_m_jacobi 1 x0' b' A') (inord k) ord0) = 0%Re).
   { admit. }
-  
+  split.
+  - apply BMULT_no_overflow_is_finite; try by [].
+    ++ rewrite mxE. apply Bplus_bminus_opp_implies.
+       
 
 
-
+*)
 
 
 
@@ -6174,8 +6177,34 @@ destruct H0.
       ++ apply H1.
     * intros. split.
       ++ intros.
-         
-
+         admit.
+      ++ unfold BCMP.
+         rewrite Bcompare_correct.
+         -- rewrite Rcompare_Lt; first by [].
+            change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
+            remember (FT2R acc2) as Gamma.
+            pose proof (@vector_residual_equiv t A b x0 0%nat).
+            assert (length b = length A) by (symmetry; apply HeqAb).
+            assert (length x0 = length A).
+            { unfold x0. by rewrite !repeat_length. }
+            assert ((0 < length A)%coq_nat) by apply HlenA.
+            specialize (H1 H2 H3 H4).
+            pose proof (@v_equiv t).
+            remember (length A).-1 as n.
+            specialize (H5 (resid (jacobi_n A b x0 1%nat)) n).
+            assert (length (resid (jacobi_n A b x0 1%nat)) = n.+1).
+            { repeat rewrite /matrix_vector_mult !map_length combine_length.
+              rewrite !map_length. unfold jacobi_n. 
+              rewrite !seq_length /matrix_rows_nat -HeqAb !Nat.min_id.
+              rewrite Heqn prednK. by []. by apply /ssrnat.ltP.
+            } specialize (H5 H6).
+            rewrite H5.
+            assert ((\col_j0 vector_inj
+                      (resid (jacobi_n A b x0 1%nat))
+                      n.+1 j0 ord0) = 
+                      vector_inj (resid (jacobi_n A b x0 1%nat)) n.+1).
+            { apply /matrixP. unfold eqrel. intros. by rewrite !mxE. } 
+            rewrite H7.
 
 
 
