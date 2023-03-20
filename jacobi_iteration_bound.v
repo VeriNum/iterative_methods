@@ -5768,6 +5768,36 @@ elim: s i H H0 => [ |a s IHs] i H H0 .
   - apply H.
 Qed.
 
+Lemma bigsum_eq_0 I r (P: pred I) (E : I -> R):
+  (forall i, P i -> (0 <= E i)%Re) -> 
+  (\big[+%R/0]_(i <-r | P i) E i = 0%Re) ->
+  (forall i,  P i -> E i = 0%Re).
+Proof.
+intros.
+  
+
+Lemma bigsum_eq_0 {n} (f : 'I_n.+1 ->R):
+  (forall i, (0 <= f i)%Re) -> 
+  \sum_(j < n.+1) (f j) = 0%Re ->
+  (forall i, f i = 0%Re).
+Proof.
+intros.
+induction n.
++ rewrite big_ord_recr /=  big_ord0 in H0.
+  rewrite -RplusE Rplus_0_l in H0. 
+  assert (i = 0).
+  { apply ord1. } rewrite H1. 
+  assert (@ord_max 0 = 0). { by apply /eqP. } rewrite H2 in H0.
+  apply H0.
++ specialize (IHn f).
+
+
+
+elim: s i H H0 => [ |a s IHs] i H H0 .
++ rewrite /nth /=. by destruct i.
++ 
+  
+*)
 
 Lemma matrix_inf_norm_0_implies {n:nat}:
   forall (A : 'M[R]_n.+1),  
@@ -5793,6 +5823,8 @@ specialize (H0 i).
 rewrite seq_nth_equiv seq_equiv in H0.
 rewrite nth_mkseq in H0; last by apply ltn_ord.
 unfold row_sum in H0.
+assert (\sum_(j < n.+1) 0%Re = 0%Re).
+{ admit. } rewrite -H2 in H0.
 
 
 
