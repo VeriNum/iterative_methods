@@ -6003,7 +6003,35 @@ change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
 cbv zeta in H0. 
 assert ((FT2R x - FT2R x) = 0) by nra.
 rewrite H1 in H0.
+assert (Rlt_bool
+        (Rabs
+           (Generic_fmt.round
+              Zaux.radix2
+              (SpecFloat.fexp 
+                 (fprec t) 
+                 (femax t))
+              (BinarySingleNaN.round_mode
+                 BinarySingleNaN.mode_NE)
+              0))
+          (bpow Zaux.radix2 (femax t)) = true).
+{ apply Rlt_bool_true. 
+  pose proof (generic_round_property t 0).
+  destruct H2 as [d [e [Hde [Hd [He H2]]]]].
+  rewrite H2. rewrite Rmult_0_l Rplus_0_l.
+  
+  
 
+Search  "Rlt_bool".
+
+
+
+Print Rcompare.
+
+
+
+assert (Rcompare 0 0 = Eq).
+{ unfold Rcompare.
+ simpl.
 
 
  simpl in *.
