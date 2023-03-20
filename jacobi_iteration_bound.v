@@ -6066,10 +6066,16 @@ apply dotprod_finite.
     admit. (** sign **)
     } rewrite H8.
     pose proof (@dotprod_r_eq_0 t).
-    specialize (H9 (@vec_to_list_float _ n n
+    specialize (H9 (@vec_to_list_float _ n n.+1
                       (\row__ Zconst t 0)^T)
-                    (@vec_to_list_float _ n n
+                    (@vec_to_list_float _ n n.+1
                         (\col_j jacobi_iter x0' b' A' j ord0))).
+    pose proof (@dotprod_r_eq_0 t).
+    specialize (H10 (@vec_to_list_float _ n n.+1
+                      (\row__ Zconst t 0)^T)
+                    (@vec_to_list_float _ n n.+1
+                        (\col_j x0' j ord0))). 
+    simpl. rewrite H9. rewrite  H10.
     
 
 
