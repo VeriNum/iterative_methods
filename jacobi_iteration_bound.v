@@ -5957,14 +5957,18 @@ Close Scope R_scope.
 (** entries zero in real ==> entries zero in float **)
 Lemma A_real_to_float_zero {t} {n} (A : 'M[ftype t]_n.+1):
   forall i j,
+  finite (A i j) ->
   FT2R (A i j) = 0%Re ->
   A i j = Zconst t 0.
 Proof.
 intros.
-apply B2R_inj.
-+ admit.
-+ admit.
-+ unfold FT2R in H. by rewrite H;simpl. 
+apply B2R_Bsign_inj.
++ by apply finite_is_finite.
++ by simpl.
++ unfold FT2R in H0. by rewrite H0;simpl.
++ 
+
+ 
 Admitted.
 
 
