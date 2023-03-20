@@ -5851,7 +5851,14 @@ forall (Hn : g1 t (n + 1) n <= fmax t),
 Proof.
 intros;
 unfold fun_bnd. apply Rmult_lt_0_compat.
-+ admit.
++ apply Rlt_Rminus. apply Generic_proof.Rdiv_lt_mult_pos.
+  apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
+  apply Rcomplements.Rlt_minus_r.
+  
+
+
+
+admit.
 + assert (forall x:R, (1 / x)%Re = (/x)%Re). 
   { intros. nra. } rewrite H. apply Rinv_0_lt_compat.
   apply Rplus_lt_le_0_compat. nra.
