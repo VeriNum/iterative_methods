@@ -5695,6 +5695,22 @@ Qed.
 
 Print nth.
 
+Lemma Rmax_le_0 (x y :R):
+  (0 <= x)%Re -> (0 <= y)%Re -> Rmax x y = 0%Re ->
+  x = 0%Re /\ y = 0%Re.
+Proof.
+intros.
+assert ((x <= y)%Re \/ (y <= x)%Re).
+{ nra. } destruct H2.
++ rewrite Rmax_right in H1; last by nra.
+  rewrite H1 in H2. nra.
++ rewrite Rmax_left in H1; last by nra.
+  rewrite H1 in H2. nra.
+Qed.
+
+
+
+
 Lemma bigmaxr_cons_0 (a:R) s :
  (forall i : nat,
     (0 <= nth i (a :: s) 0)%Re) ->
