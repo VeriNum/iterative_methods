@@ -6321,7 +6321,86 @@ destruct H0.
                 remember (matrix_inj A n.+1 n.+1) as A'.
                 remember (vector_inj x0 n.+1) as x0'.
                 remember (vector_inj b n.+1) as b'.
-
+                unfold residual_math.
+                pose proof (@vec_norm_diag _ t n  (A1_J A')
+                            (X_m_jacobi 2 x0' b' A' -f
+                                X_m_jacobi 1 x0' b' A')).
+                assert (forall xy : ftype t * ftype t,
+                          In xy
+                            (combine
+                               (vec_to_list_float n.+1
+                                  (A1_J A'))
+                               (vec_to_list_float n.+1
+                                  (X_m_jacobi 2 x0' b' A' -f
+                                   X_m_jacobi 1 x0' b' A'))) ->
+                          finite xy.1 /\ finite xy.2 /\
+                          finite (BMULT xy.1 xy.2)).
+                { intros. admit.
+                  (*pose proof (@finite_implies_1 t A b HlenA HeqAb).
+                  pose proof (@finite_residual_0 t A b HlenA HeqAb).
+                  destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
+                  rewrite Heqn in size_cons.
+                  specialize (H12 size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl).
+                  specialize (H11 H12).
+                  apply H11. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
+                  apply H10. *)
+                }
+               specialize (H10 H11).
+               assert ((vec_inf_norm
+                        (FT2R_mat
+                           (diag_vector_mult 
+                              (A1_J A')
+                              (X_m_jacobi 2 x0' b' A' -f
+                               X_m_jacobi 1 x0' b' A')) -
+                         diag_matrix_vec_mult_R
+                           (FT2R_mat (A1_J A'))
+                           (FT2R_mat
+                              (X_m_jacobi 2 x0' b' A' -f
+                               X_m_jacobi 1 x0' b' A'))) <=
+                      vec_inf_norm (FT2R_mat (A1_J A')) *
+                      vec_inf_norm
+                        (FT2R_mat
+                           (X_m_jacobi 2 x0' b' A' -f
+                            X_m_jacobi 1 x0' b' A')) *
+                      g t n.+1 + g1 t n.+1 (n.+1 - 1))). { by apply /RleP. }
+               apply reverse_triang_ineq in H12.
+               assert ((vec_inf_norm
+                        (FT2R_mat
+                           (diag_vector_mult (A1_J A')
+                              (X_m_jacobi 2 x0' b' A' -f
+                               X_m_jacobi 1 x0' b' A'))) <=
+                        (vec_inf_norm (FT2R_mat (A1_J A')) *
+                          vec_inf_norm
+                            (FT2R_mat
+                               (X_m_jacobi 2 x0' b' A' -f
+                                X_m_jacobi 1 x0' b' A'))) * 
+                         (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re).
+               { rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
+                 assert (forall a b c d :R, (a - b <= c + d)%Re -> (a <= b + c+d)%Re).
+                 { intros. nra. } apply H13. eapply Rle_trans; last by (apply /RleP; apply H12).
+                 rewrite -RminusE. apply Rplus_le_compat_l.
+                 apply Ropp_le_contravar.
+                 apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R.
+               } eapply Rle_lt_trans.
+               apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
+               apply Rmult_le_compat_l. apply pos_INR.
+               apply Rle_trans with 
+               (Rsqr (vec_inf_norm (FT2R_mat (A1_J A')) *
+                       vec_inf_norm
+                         (FT2R_mat
+                            (X_m_jacobi 2 x0' b' A' -f
+                             X_m_jacobi 1 x0' b' A')) *
+                       (1 + g t n.+1) +
+                       g1 t n.+1 (n.+1 - 1)%coq_nat)).
+               apply Rsqr_incr_1. apply H13. 
+               apply /RleP. apply vec_norm_pd.
+               apply Rplus_le_le_0_compat; last by apply g1_pos.
+               repeat apply Rmult_le_pos.
+               apply /RleP. apply vec_norm_pd.
+               apply /RleP. apply vec_norm_pd.
+               apply Rplus_le_le_0_compat. nra. apply g_pos.
+               apply Rle_refl. admit.
 
 
 
