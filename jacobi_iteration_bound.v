@@ -5981,29 +5981,14 @@ rewrite /BMULT /BINOP /Bmult /BSN2B /BinarySingleNaN.Bmult /=.
 apply finite_is_finite in H. rewrite -is_finite_B2BSN in H.
 unfold BinarySingleNaN.is_finite in H.
 rewrite -Bsign_B2BSN  in H0.
-
-
-
-admit.
-rewrite -is_nan_B2BSN.
-unfold BinarySingleNaN.is_nan. 
-destruct (B2BSN (fprec t) (femax t) (A i j)); simpl; try by [].
-
-
-
-unfold Bsign in H0.
-
-
-destruct (B2BSN (fprec t) (femax t) (A i j)); simpl; try by [].
-unfold Zconst, vcfloat.IEEE754_extra.BofZ, binary_normalize. simpl.
-Print B754_zero.
-
-
-
-destruct s; simpl; try by []. admit.
-unfold Zconst, vcfloat.IEEE754_extra.BofZ, binary_normalize. simpl.
-destruct s; simpl; try by []. admit.
-Admitted.
++ unfold BinarySingleNaN.Bsign in H0.
+  destruct (B2BSN (fprec t) (femax t) (A i j)); simpl; try by [];
+  (unfold Zconst, vcfloat.IEEE754_extra.BofZ, binary_normalize; simpl;
+    by rewrite H0; simpl).
++ rewrite -is_nan_B2BSN.
+  unfold BinarySingleNaN.is_nan. 
+  destruct (B2BSN (fprec t) (femax t) (A i j)); simpl; try by [].
+Qed.
 
 
 Lemma finite_residual_1 {t: type} :
