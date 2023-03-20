@@ -5696,6 +5696,8 @@ Qed.
 Print nth.
 
 Lemma bigmaxr_cons_0 (a:R) s :
+ (forall i : nat,
+    (0 <= nth i (a :: s) 0)%Re) ->
   bigmaxr 0%Re (a :: s) = 0%Re ->
   a = 0%Re /\ bigmaxr 0%Re s = 0%Re.
 Proof.
@@ -5704,13 +5706,15 @@ assert (s = [::] \/ s != [::]).
 { destruct s.
   + by left.
   + by right.
-} destruct H0.
-+ rewrite H0 in H. rewrite H0. 
-  rewrite bigmaxr_un in H. rewrite bigmaxr_nil .
+} destruct H1.
++ rewrite H1 in H0. rewrite H1. 
+  rewrite bigmaxr_un in H0. rewrite bigmaxr_nil .
   nra.
-+ apply (s_destruct 0%Re) in H0.
-  rewrite H0 in H. rewrite bigmaxr_cons in H.
-  rewrite -H0 in H. 
++ apply (s_destruct 0%Re) in H1.
+  rewrite H1 in H0. rewrite bigmaxr_cons in H0.
+  rewrite -H1 in H0. rewrite -RmaxE in H0.
+  admit.
+Admitted.
   
 
 
@@ -5718,11 +5722,12 @@ assert (s = [::] \/ s != [::]).
 
 
 Lemma bigmaxr_eq_0 s:
+  (forall i, (0 <= nth i s 0%Re)%Re) -> 
   bigmaxr 0%Re s = 0%Re ->
   (forall i, nth i s 0%Re = 0%Re).
 Proof.
 intros.
-elim: s i H => [ |a s IHs] i H .
+elim: s i H H0 => [ |a s IHs] i H H0 .
 + rewrite /nth /=. by destruct i.
 + simpl. destruct i.
   - admit.
