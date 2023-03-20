@@ -6316,7 +6316,11 @@ destruct H0.
                 rewrite -Heqn. intros. rewrite mxE. apply H.
                 rewrite -Heqn. intros. apply H.
                 rewrite -Heqn. apply H0.
-             ** 
+             ** pose proof (@vector_residual_equiv t A b x0 1%nat H2 H3 H4).
+                rewrite -Heqn in H9. rewrite H9.
+                remember (matrix_inj A n.+1 n.+1) as A'.
+                remember (vector_inj x0 n.+1) as x0'.
+                remember (vector_inj b n.+1) as b'.
 
 
 
