@@ -5914,15 +5914,13 @@ unfold fun_bnd. apply Rmult_lt_0_compat.
     apply Rmult_lt_compat_l; try nra.
     apply default_abs_ub_strict. 
     eapply Rlt_trans; [| apply bpow_femax_lb_strict]; nra. }
-    eapply Rlt_le_trans; last by apply Hn.   (*apply mult_d_e_g1_le'; try lia. *) 
+    eapply Rlt_le_trans; last by apply Hn.  
     replace (n + 1)%coq_nat with (S n) by lia.
     assert (n = (S (n - 1))%coq_nat). rewrite subn1. rewrite prednK. by [].
     apply /ssrnat.ltP. lia.
     rewrite [in X in (_ < g1 t _ X)]H1. rewrite addn1.
-    apply mult_d_e_g1_lt'. by apply /ssrnat.ltP. 
-
-
-by apply /ssrnat.ltP.
+    apply mult_d_e_g1_lt'. by apply /ssrnat.ltP.
+    rewrite subn_gt0. by apply /ssrnat.ltP. 
 + assert (forall x:R, (1 / x)%Re = (/x)%Re). 
   { intros. nra. } rewrite H. apply Rinv_0_lt_compat.
   apply Rplus_lt_le_0_compat. nra.
