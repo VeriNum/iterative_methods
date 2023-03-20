@@ -5729,6 +5729,23 @@ assert (s = [::] \/ s != [::]).
 + apply (s_destruct 0%Re) in H1.
   rewrite H1 in H0. rewrite bigmaxr_cons in H0.
   rewrite -H1 in H0. rewrite -RmaxE in H0.
+  apply Rmax_le_0; last by [].
+  - specialize (H 0%nat). simpl in H. nra.
+  - apply /RleP. apply bigmax_le_0.
+    apply /RleP. apply Rle_refl.
+    intros. apply /RleP.
+    assert (forall j, (0 <= nth j s 0%Re)%Re).
+    { intros. specialize (H j.+1).
+      simpl in H. apply H.
+    } apply H3.
+
+
+
+ apply H.
+
+
+
+
   admit.
 Admitted.
   
