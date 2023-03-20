@@ -6026,7 +6026,33 @@ intros.
 apply matrixP. unfold eqrel. intros. rewrite !mxE.
 repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
 rewrite inord_val.
-
+rewrite Bminus_bplus_opp_equiv.
++ pose proof (BPLUS_accurate' t (BMULT (A1_inv_J A' x ord0)
+        ((b' -f
+          A2_J A' *f
+          jacobi_iter x0' b' A') x ord0)) (BOPP
+        (BMULT (A1_inv_J A' x ord0)
+           ((b' -f A2_J A' *f x0') x
+              ord0)))).
+  assert (finite
+           (BPLUS
+              (BMULT (A1_inv_J A' x ord0)
+                 ((b' -f
+                   A2_J A' *f
+                   jacobi_iter x0' b' A') x
+                    ord0))
+              (BOPP
+                 (BMULT (A1_inv_J A' x ord0)
+                    ((b' -f A2_J A' *f x0')
+                       x ord0))))) by admit.
+  specialize (H9 H10).
+  destruct H9 as [d [Hd H9]].
+  rewrite H9.
+  assert (forall x: ftype t, FT2R (BOPP x) = (- (FT2R x))%Re).
+  { intros. unfold FT2R. by rewrite B2R_Bopp. }
+  rewrite H11.
+  
+  
 
 
 
