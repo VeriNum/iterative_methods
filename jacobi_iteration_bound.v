@@ -5844,6 +5844,32 @@ destruct H4. rewrite Rabs_right in H2; nra.
 rewrite Rabs_left in H2; try nra.
 Qed.
 
+Local Open Scope R_scope.
+Lemma fun_bound_pos t n :
+forall (Hn : g1 t (n + 1) n <= fmax t), 
+0 < fun_bnd t n. 
+Proof.
+intros;
+unfold fun_bnd. apply Rmult_lt_0_compat.
++ admit.
++ assert (forall x:R, (1 / x)%Re = (/x)%Re). 
+  { intros. nra. } rewrite H. apply Rinv_0_lt_compat.
+  apply Rplus_lt_le_0_compat. nra.
+  apply Rmult_le_pos. apply pos_INR.
+  apply Rplus_le_le_0_compat. apply g_pos. nra.
+
+
+apply Rinv_0_lt_compat.
+
+
+apply Rmult_le_pos.
+apply fun_bnd_pos_1; auto.
+apply Rdiv_le_0_compat_Raux; try nra.
+apply Rplus_lt_le_0_compat; try nra.
+apply Rmult_le_pos; try apply pos_INR.
+apply Rplus_le_le_0_compat; try nra; apply g_pos.
+Qed.
+
 Lemma finite_residual_1 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -5909,7 +5935,11 @@ apply dotprod_finite.
   } rewrite H7.
   rewrite !nth_vec_to_list_float. 
   rewrite !inord_val. rewrite mxE.
-  
+  assert (BMULT (A1_J A' (inord k) ord0)  (Zconst t 0) = Zconst t 0).
+  { admit. } rewrite H8. split.
+  - admit.
+  - intros. simpl. rewrite Rabs_R0. apply sqrt_lt_R0.
+    apply fun_bnd_gt_0.
 
 
   split.
