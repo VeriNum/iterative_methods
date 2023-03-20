@@ -6015,12 +6015,9 @@ apply dotprod_finite.
     pose proof (@matrix_inf_norm_0_implies n (FT2R_mat (A2_J A')) HN0).
     specialize (H7 x).
     assert (\row_j (A2_J A' (inord x) j) = \row_j (Zconst t 0)).
-    { 
-
-
-
-apply matrixP. unfold eqrel. intros. rewrite mxE. rewrite [in RHS]mxE.
-      *)
+    { apply matrixP. unfold eqrel. intros. rewrite mxE. rewrite mxE.
+    specialize (H7 y0). rewrite mxE in H7. admit. 
+    } admit.
   } rewrite H7.
   rewrite !nth_vec_to_list_float. 
   rewrite !inord_val. rewrite mxE.
