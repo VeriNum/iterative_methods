@@ -5914,7 +5914,7 @@ eapply Z.le_lt_trans with (1 + 1 + 1)%Z;
 apply fprec_gt_one].
 Qed.
 
-Lemma fun_bound_pos t n :
+Lemma fun_bound_gt_0 t n :
 forall (Hn : g1 t (n + 1) n <= fmax t), 
 0 < fun_bnd t n. 
 Proof.
@@ -6020,7 +6020,7 @@ apply dotprod_finite.
   { admit. } rewrite H8. split.
   - admit.
   - intros. simpl. rewrite Rabs_R0. apply sqrt_lt_R0.
-    apply fun_bnd_gt_0.
+    apply fun_bound_gt_0. 
 
 
   split.
