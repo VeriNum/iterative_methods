@@ -5970,7 +5970,7 @@ apply B2R_Bsign_inj.
 + by simpl. 
 Qed.
 
-Lemma A_entry_mult_0 {t} {m n} (A : 'M[ftype t]_(m.+1, n.+1)):
+Lemma A_entry_mult_0 {t} {n} (A : 'M[ftype t]_n.+1):
   forall i j,
   finite (A i j) ->
   Bsign (fprec t) (femax t) (A i j) = false ->
@@ -5990,100 +5990,18 @@ rewrite -Bsign_B2BSN  in H0.
   destruct (B2BSN (fprec t) (femax t) (A i j)); simpl; try by [].
 Qed.
 
-Local Open Scope R_scope.
-Lemma BMINUS_x_x {t} {x y : ftype t}:
+Lemma Bminus_x_x {t} (x : ftype t):
   finite x ->
   BMINUS x x = Zconst t 0.
 Proof.
 intros.
 apply finite_is_finite in H.
-pose proof (Binary.Bminus_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan t) 
-                      BinarySingleNaN.mode_NE x x H H ).
-change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
-cbv zeta in H0. 
-assert ((FT2R x - FT2R x) = 0) by nra.
-rewrite H1 in H0.
-assert (Rlt_bool
-        (Rabs
-           (Generic_fmt.round
-              Zaux.radix2
-              (SpecFloat.fexp 
-                 (fprec t) 
-                 (femax t))
-              (BinarySingleNaN.round_mode
-                 BinarySingleNaN.mode_NE)
-              0))
-          (bpow Zaux.radix2 (femax t)) = true).
-{ apply Rlt_bool_true. 
-  pose proof (generic_round_property t 0).
-  destruct H2 as [d [e [Hde [Hd [He H2]]]]].
-  rewrite H2. rewrite Rmult_0_l Rplus_0_l.
-  
-  
-
-Search  "Rlt_bool".
+unfold is_finite in H.
+destruct x;unfold BMINUS, BINOP, Bminus; simpl.
 
 
 
-Print Rcompare.
-
-
-
-assert (Rcompare 0 0 = Eq).
-{ unfold Rcompare.
- simpl.
-
-
- simpl in *.
-replace (FT2R x - FT2R x) with 0 by nra.
-
-
-
-
-
-intros.
-rewrite /BMINUS /BINOP /Bminus /BSN2B /BinarySingleNaN.Bminus /=.
-apply finite_is_finite in H. rewrite -is_finite_B2BSN in H.
-unfold BinarySingleNaN.is_finite in H.
-destruct (B2BSN (fprec t) (femax t) x); simpl.
-destruct (Bool.eqb s (~~ s)); simpl.
-+ unfold Zconst, vcfloat.IEEE754_extra.BofZ, binary_normalize; simpl.
-  admit.
-+ by unfold Zconst, vcfloat.IEEE754_extra.BofZ, binary_normalize; simpl.
-+ by destruct (Bool.eqb s (~~ s)); simpl.
-+ by [].
-+ (destruct (BinarySingleNaN.binary_normalize 
-    (fprec t) (femax t) (fprec_gt_0 t)
-    (fprec_lt_femax t) BinarySingleNaN.mode_NE
-    (BinarySingleNaN.Fplus_naive s m e 
-       (~~ s) m e (Z.min e e)) 
-    (Z.min e e) false); simpl;auto;simpl in *; auto).
-  - admit.
-  - admit.
-  - admit.
-  - simpl.
-
-
-
-
-
-
- rewrite Z.min_id. simpl.
-  Locate BinarySingleNaN.Fplus_naive.
-  rewrite BinarySingleNaN.Fplus_naive_correct .
- 
-  unfold BinarySingleNaN.Fplus_naive.
-  simpl.
-
-
-unfold BinarySingleNaN.binary_normalize;simpl.
-*)
-
-(** Dot product with zero vector **)
-Lemma dotprod_r_eq_0 {t} (v1 v2: list (ftype t)):
-  (forall i, nth i v1 (Zconst t 0) = (Zconst t 0)) ->
-  dotprod_r v1 v2 = Zconst t 0. 
-Admitted.
+Search "BMINUS".
 
 
 Lemma finite_residual_1 {t: type} :
@@ -6154,18 +6072,6 @@ apply dotprod_finite.
     rewrite inord_val. apply H7.
     admit. (** sign **)
     } rewrite H8.
-    pose proof (@dotprod_r_eq_0 t).
-    specialize (H9 (@vec_to_list_float _ n n.+1
-                      (\row__ Zconst t 0)^T)
-                    (@vec_to_list_float _ n n.+1
-                        (\col_j jacobi_iter x0' b' A' j ord0))).
-    pose proof (@dotprod_r_eq_0 t).
-    specialize (H10 (@vec_to_list_float _ n n.+1
-                      (\row__ Zconst t 0)^T)
-                    (@vec_to_list_float _ n n.+1
-                        (\col_j x0' j ord0))). 
-    simpl. rewrite H9. rewrite  H10.
-    by [].
 
 
 
@@ -6178,11 +6084,15 @@ admit.
   rewrite !nth_vec_to_list_float. 
   rewrite !inord_val. rewrite mxE.
   assert (BMULT (A1_J A' (inord k) ord0)  (Zconst t 0) = Zconst t 0).
-  { apply A_entry_mult_0; try rewrite mxE; try rewrite inord_val; try by [].
-    admit. (** Bsign (fprec t) (femax t)
-  (A' (inord k) (inord k)) = false **)
-  } rewrite H8. split.
-  - by simpl. 
+  { rewrite /BMULT /BINOP /Bmult /BSN2B /BinarySingleNaN.Bmult /=. 
+
+
+simpl.
+
+
+
+admit. } rewrite H8. split.
+  - admit.
   - rewrite rev_length H2. intros. simpl. rewrite Rabs_R0. apply sqrt_lt_R0.
     apply fun_bound_gt_0. unfold n0. by apply g1_constraint. 
   - rewrite H2 in Hlen.
