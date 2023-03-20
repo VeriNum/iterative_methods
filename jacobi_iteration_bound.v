@@ -5771,30 +5771,21 @@ Qed.
 
 Lemma bigsum_eq_0 {n} (f : nat ->R):
   (forall i, (i < n)%nat -> (0 <= f i)%Re) -> 
-  \sum_(j < n.+1) (f j) = 0%Re ->
+  \sum_(j < n) (f j) = 0%Re ->
   (forall i, (i < n)%nat -> f i = 0%Re).
 Proof.
 intros.
 induction n.
 + by rewrite ltn0 in H1.
-+ apply IHn.
++ rewrite big_ord_recr /= in H0.
+  rewrite -RplusE in H0. apply Rplus_eq_R0 in H0.
+  - admit.
+  - apply /RleP. apply big_ge_0_ex_abstract. intros.
+    apply /RleP. apply H. apply ltn_trans with n.
+    apply ltn_ord. apply ltnSn.
+  - apply H. apply ltnSn.
 
-
-rewrite big_ord_recr /=  big_ord0 in H0.
-  rewrite -RplusE Rplus_0_l in H0. 
-  assert (i = 0).
-  { apply ord1. } rewrite H1. 
-  assert (@ord_max 0 = 0). { by apply /eqP. } rewrite H2 in H0.
-  apply H0.
-+ specialize (IHn f).
-
-
-
-elim: s i H H0 => [ |a s IHs] i H H0 .
-+ rewrite /nth /=. by destruct i.
-+ 
-  
-*)
+Admitted.
 
 Lemma matrix_inf_norm_0_implies {n:nat}:
   forall (A : 'M[R]_n.+1),  
