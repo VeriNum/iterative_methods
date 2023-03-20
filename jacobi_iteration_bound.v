@@ -6184,8 +6184,25 @@ destruct H0.
            left. apply ltnSE in H2. rewrite leqn0 in H2.
            by apply /eqP.
          } destruct H2.
-         -- rewrite H2. apply finite_residual_0.
-            
+         -- rewrite H2. apply finite_residual_0; try by apply H.
+            apply HlenA. apply HeqAb.
+            intros.
+            assert (vector_inj
+                   (repeat (Zconst t 0) (length b)) (length A).-1.+1 =
+                 \col_(j < (length A).-1.+1) (Zconst t 0)).
+            { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+              by rewrite nth_repeat.
+            } rewrite H3. apply H. 
+            apply input_bound_at_N_0_equiv. 
+            assert (vector_inj
+                         (repeat (Zconst t 0) (length b)) (length A).-1.+1 =
+                             \col_(j < (length A).-1.+1) (Zconst t 0)).
+            { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+              by rewrite nth_repeat.
+            } rewrite H3. apply H.
+            intros. apply H.
+            intros. rewrite mxE. apply H.
+
 
 
 
