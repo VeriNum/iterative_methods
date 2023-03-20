@@ -5970,7 +5970,11 @@ apply B2R_Bsign_inj.
 + by simpl. 
 Qed.
 
-
+Lemma A_entry_mult_0 {t} {n} (A : 'M[ftype t]_n.+1):
+  forall i j,
+  finite (A i j) ->
+  BMULT (A i j)  (Zconst t 0) = Zconst t 0.
+Proof.
 
 
 Lemma finite_residual_1 {t: type} :
@@ -6037,20 +6041,30 @@ apply dotprod_finite.
     assert (\row_j (A2_J A' (inord x) j) = \row_j (Zconst t 0)).
     { apply matrixP. unfold eqrel. intros. rewrite mxE. rewrite mxE.
     specialize (H7 y0). rewrite mxE in H7.
-    
+    apply A_real_to_float_zero; try by []. 
+    rewrite inord_val. apply H7.
+    admit. (** sign **)
+    } rewrite H8.
 
 
 
 
 
 
- admit. 
-    } admit.
+
+admit.
   } rewrite H7.
   rewrite !nth_vec_to_list_float. 
   rewrite !inord_val. rewrite mxE.
   assert (BMULT (A1_J A' (inord k) ord0)  (Zconst t 0) = Zconst t 0).
-  { admit. } rewrite H8. split.
+  { rewrite /BMULT /BINOP /Bmult /BSN2B /BinarySingleNaN.Bmult /=. 
+
+
+simpl.
+
+
+
+admit. } rewrite H8. split.
   - admit.
   - rewrite rev_length H2. intros. simpl. rewrite Rabs_R0. apply sqrt_lt_R0.
     apply fun_bound_gt_0. unfold n0. by apply g1_constraint. 
