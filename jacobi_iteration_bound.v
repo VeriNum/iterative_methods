@@ -5720,7 +5720,7 @@ Qed.
 
 Lemma bigmaxr_cons_0 (a:R) s :
  (forall i : nat,
-    (i < length (a :: s))%nat ->
+    (i < size (a :: s))%nat ->
     (0 <= nth i (a :: s) 0)%Re) ->
   bigmaxr 0%Re (a :: s) = 0%Re ->
   a = 0%Re /\ bigmaxr 0%Re s = 0%Re.
@@ -5751,9 +5751,9 @@ Qed.
   
 
 Lemma bigmaxr_eq_0 s:
-  (forall i, (i < length s)%nat -> (0 <= nth i s 0%Re)%Re) -> 
+  (forall i, (i < size s)%nat -> (0 <= nth i s 0%Re)%Re) -> 
   bigmaxr 0%Re s = 0%Re ->
-  (forall i, (i < length s)%nat -> nth i s 0%Re = 0%Re).
+  (forall i, (i < size s)%nat -> nth i s 0%Re = 0%Re).
 Proof.
 intros.
 elim: s i H H0 H1 => [ |a s IHs] i H H0 H1.
@@ -5763,7 +5763,7 @@ elim: s i H H0 H1 => [ |a s IHs] i H H0 H1.
     * apply H0.
     * apply IHs. intros. specialize (H i0.+1). simpl in H.
       apply H. apply H2. apply H0. apply H1.
-  - intros. apply H.
+  - intros. by apply H.
 Qed.
 
 
@@ -5803,6 +5803,11 @@ unfold matrix_inf_norm in H.
 pose proof bigmaxr_eq_0.
 specialize (H0 [seq row_sum A i | i <- enum 'I_n.+1]).
 assert (forall i : nat,
+        (i <
+        size
+         [seq row_sum A i0
+            | i0 <- enum
+                    'I_n.+1])%nat ->
           (0 <=
            nth i
              [seq row_sum A i0
@@ -5811,7 +5816,7 @@ assert (forall i : nat,
 { intros. rewrite seq_equiv seq_nth_equiv. rewrite nth_mkseq.
   unfold row_sum. apply /RleP. apply big_ge_0_ex_abstract.
   intros. apply /RleP. apply Rabs_pos.
-  admit.
+  by rewrite size_map size_enum_ord in H1.
 } specialize (H0 H1 H).
 specialize (H0 i).
 rewrite seq_nth_equiv seq_equiv in H0.
@@ -5826,7 +5831,9 @@ assert (forall i0 : nat,
 assert (\sum_(j < n.+1)
         (fun j0 : nat => Rabs (A i (@inord n j))) j = 0%Re).
 { rewrite -H0. apply eq_big. by []. intros. 
-  by rewrite !inord_val.
+  by rewrite !inord_val. 
+  rewrite size_map. rewrite -val_enum_ord. rewrite size_map size_enum_ord.
+  apply ltn_ord.
 } specialize (H2 H4). clear H3 H4. 
 specialize (H2 j).
 assert ((j < n.+1)%nat). { by apply ltn_ord. }
@@ -5835,7 +5842,7 @@ rewrite inord_val in H2.
 assert ((0 <= A i j)%Re \/ (A i j < 0)%Re). nra.
 destruct H4. rewrite Rabs_right in H2; nra.
 rewrite Rabs_left in H2; try nra.
-Admitted.
+Qed.
 
 Lemma finite_residual_1 {t: type} :
  forall (A: matrix t) (b: vector t),
