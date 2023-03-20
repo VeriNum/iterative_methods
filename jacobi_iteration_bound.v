@@ -5867,10 +5867,6 @@ intros; replace (S n) with (n + 1)%coq_nat by lia.
 replace (S m) with (m + 1)%coq_nat by lia.
 unfold g1, g; field_simplify. rewrite plus_INR.
 replace (INR 1) with 1 by (simpl; nra).
-(*replace (INR (n + 1)) with (INR n + 1) by 
-  (rewrite Nat.add_comm; rewrite S_O_plus_INR; simpl; nra).
-replace (INR (m + 1)) with (INR m + 1) by
-  (rewrite Nat.add_comm; rewrite S_O_plus_INR; simpl; nra). *)
 rewrite !Rmult_plus_distr_l.
 rewrite !Rmult_1_r. replace
 (INR n * default_abs t * (1 + default_rel t) ^ m * default_rel t +
@@ -5883,8 +5879,6 @@ rewrite Rmult_comm.
 rewrite !Rmult_assoc.
 apply Rmult_le_compat_l. nra. 
 apply Rmult_le_compat_l. apply bpow_ge_0.
-
-(*apply default_abs_ge_0. *)
 rewrite <- !Rmult_assoc.
 rewrite Rmult_comm. 
 apply Rmult_le_compat_l; [apply pos_INR| ].
@@ -5893,7 +5887,8 @@ rewrite tech_pow_Rmult.
 replace (S m) with (m + 1)%coq_nat by lia; nra.
 replace (default_abs t) with (default_abs t * 1) at 1 by nra.
 apply Rmult_lt_compat_l; [apply  default_abs_gt_0 | ].
-apply default_rel_plus_1_gt_1'.
+apply Rlt_pow_R1. apply default_rel_plus_1_gt_1.
+lia.
 Qed.
 
 Lemma fun_bound_pos t n :
@@ -5919,8 +5914,15 @@ unfold fun_bnd. apply Rmult_lt_0_compat.
     apply Rmult_lt_compat_l; try nra.
     apply default_abs_ub_strict. 
     eapply Rlt_trans; [| apply bpow_femax_lb_strict]; nra. }
-    eapply Rlt_le_trans; last by apply Hn. admit. (*apply mult_d_e_g1_le'; try lia. *) 
-    replace (S n) with (n + 1)%coq_nat by lia. 
+    eapply Rlt_le_trans; last by apply Hn.   (*apply mult_d_e_g1_le'; try lia. *) 
+    replace (n + 1)%coq_nat with (S n) by lia.
+    assert (n = (S (n - 1))%coq_nat). rewrite subn1. rewrite prednK. by [].
+    apply /ssrnat.ltP. lia.
+    rewrite [in X in (_ < g1 t _ X)]H1. rewrite addn1.
+    apply mult_d_e_g1_lt'. by apply /ssrnat.ltP. 
+
+
+by apply /ssrnat.ltP.
 + assert (forall x:R, (1 / x)%Re = (/x)%Re). 
   { intros. nra. } rewrite H. apply Rinv_0_lt_compat.
   apply Rplus_lt_le_0_compat. nra.
