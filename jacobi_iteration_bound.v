@@ -5854,8 +5854,23 @@ unfold fun_bnd. apply Rmult_lt_0_compat.
 + apply Rlt_Rminus. apply Generic_proof.Rdiv_lt_mult_pos.
   apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
   apply Rcomplements.Rlt_minus_r.
-  
-
+  assert (Hn': (n= 0%nat)%coq_nat \/ (1<=n)%coq_nat) by lia; destruct Hn'; subst.
+  { simpl. unfold g1, g. simpl; field_simplify. admit. (* apply defualt_abs_lt_fmax.  *) }
+  assert (Hn'': (n= 1%nat)%coq_nat \/ (1 < n)%coq_nat) by lia; destruct Hn''; subst.
+  { simpl. unfold g1, g. simpl; field_simplify.
+    eapply Rlt_trans.
+    apply Rplus_lt_compat. 
+    apply Rmult_lt_compat.
+    apply default_abs_ge_0. 
+    apply default_rel_ge_0.
+    apply default_abs_ub_strict.
+    apply default_rel_ub_strict.
+    apply Rmult_lt_compat_l; try nra.
+    apply default_abs_ub_strict.
+    eapply Rlt_trans; [| apply bpow_femax_lb_strict]; nra. }
+    eapply Rle_trans. apply mult_d_e_g1_le'; try lia. 
+    replace (S n) with (n + 1)%nat by lia.
+    replace (S (n - 1)) with n by lia; auto.
 
 
 admit.
