@@ -5830,7 +5830,11 @@ assert (\sum_(j < n.+1)
 { rewrite -H0. apply eq_big. by []. intros. 
   by rewrite !inord_val.
 } specialize (H2 H4). clear H3 H4. 
-
+specialize (H2 j).
+assert ((j < n.+1)%nat). { by apply ltn_ord. }
+specialize (H2 H3). simpl in H2.
+rewrite inord_val in H2.
+nra.
 
 
 
