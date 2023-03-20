@@ -5779,13 +5779,21 @@ induction n.
 + by rewrite ltn0 in H1.
 + rewrite big_ord_recr /= in H0.
   rewrite -RplusE in H0. apply Rplus_eq_R0 in H0.
-  - admit.
+  - assert (i = n \/ (i < n)%nat). 
+    { rewrite leq_eqVlt in H1. 
+      assert ((i.+1 == n.+1) \/ (i.+1 < n.+1)%nat).
+      { by apply /orP. } destruct H2; try (right; apply H2).
+      left. by apply /eqP.
+    } destruct H2. 
+    * rewrite H2. apply H0.
+    * apply IHn. intros.
+      apply H. apply ltn_trans with n. apply H3. apply ltnSn.
+      apply H0. apply H2.
   - apply /RleP. apply big_ge_0_ex_abstract. intros.
     apply /RleP. apply H. apply ltn_trans with n.
     apply ltn_ord. apply ltnSn.
   - apply H. apply ltnSn.
-
-Admitted.
+Qed.
 
 Lemma matrix_inf_norm_0_implies {n:nat}:
   forall (A : 'M[R]_n.+1),  
