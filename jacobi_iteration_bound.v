@@ -5776,6 +5776,14 @@ Lemma matrix_inf_norm_0_implies {n:nat}:
 Proof.
 intros.
 unfold matrix_inf_norm in H.
+pose proof bigmaxr_eq_0.
+specialize (H0 [seq row_sum A i | i <- enum 'I_n.+1]).
+
+
+
+
+
+apply (bigmaxr_eq_0 (i%nat)) in H.
 
 
 
