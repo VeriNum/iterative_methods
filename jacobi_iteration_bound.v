@@ -5778,7 +5778,25 @@ intros.
 unfold matrix_inf_norm in H.
 pose proof bigmaxr_eq_0.
 specialize (H0 [seq row_sum A i | i <- enum 'I_n.+1]).
+assert (forall i : nat,
+          (0 <=
+           nth i
+             [seq row_sum A i0
+                | i0 <- enum
+                        'I_n.+1] 0)%Re).
+{ intros. rewrite seq_equiv seq_nth_equiv. rewrite nth_mkseq.
+  unfold row_sum. apply /RleP. apply big_ge_0_ex_abstract.
+  intros. apply /RleP. apply Rabs_pos.
+  admit.
+} specialize (H0 H1 H).
+specialize (H0 i).
+rewrite seq_nth_equiv seq_equiv in H0.
+rewrite nth_mkseq in H0; last by apply ltn_ord.
+unfold row_sum in H0.
 
+
+
+  
 
 
 
