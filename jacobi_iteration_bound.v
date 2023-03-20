@@ -6021,6 +6021,15 @@ Lemma resid_sub_0_N_0 {t: type} :
   FT2R_mat
        (X_m_jacobi 2 x0' b' A' -f
         X_m_jacobi 1 x0' b' A') = 0.
+Proof.
+intros.
+apply matrixP. unfold eqrel. intros. rewrite !mxE.
+repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
+rewrite inord_val.
+
+
+
+
 Admitted.
 
 
