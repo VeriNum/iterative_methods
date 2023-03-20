@@ -6051,7 +6051,23 @@ rewrite Bminus_bplus_opp_equiv.
   assert (forall x: ftype t, FT2R (BOPP x) = (- (FT2R x))%Re).
   { intros. unfold FT2R. by rewrite B2R_Bopp. }
   rewrite H11.
-  
+  pose proof (BMULT_accurate' t (A1_inv_J A' x ord0)
+              ((b' -f
+                 A2_J A' *f
+                 jacobi_iter x0' b' A') x ord0)).
+  apply BPLUS_finite_e in H10.
+  destruct H10 as [H10a H10b].
+  specialize (H12 H10a).
+  destruct H12 as [d1 [e1 [Hde1 [Hd1 [He1 H12]]]]].
+  rewrite H12.
+  pose proof (BMULT_accurate' t (A1_inv_J A' x ord0)
+              ((b' -f A2_J A' *f x0') x ord0)).
+  apply finite_is_finite in H10b. 
+  rewrite is_finite_Bopp in H10b.
+  apply finite_is_finite in H10b.
+  specialize (H10 H10b).
+  destruct H10 as [d2 [e2 [Hde2 [Hd2 [He2 H10]]]]].
+  rewrite H10.
   
 
 
