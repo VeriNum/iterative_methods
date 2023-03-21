@@ -6712,7 +6712,7 @@ destruct H0.
                  rewrite -?Heqb' -?HeqA'. apply H.
                } specialize (H14 HfA2l Hfx0l Hinpl HfAl  HfA1_invl  Hfbl ).
                rewrite -?Heqn -?Heqb' -?HeqA' -Heqx0' in H14. rewrite H14; try by [].
-                
+               rewrite Rmult_0_r Rmult_0_l Rplus_0_l. 
 
 
  admit.
