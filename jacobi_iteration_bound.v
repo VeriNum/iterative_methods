@@ -6066,6 +6066,7 @@ Admitted.
 Lemma dotprod_r_eq_0 {t} (v : list (ftype t * ftype t)):
   (forall i, nth i (fst (List.split v)) (Zconst t 0) = Zconst t 0 \/
              nth i (fst (List.split v)) (Zconst t 0) = neg_zero) ->
+  (forall i, finite (nth i  (snd (List.split v)) (Zconst t 0))) ->
   dotprod_r (fst (List.split v)) (snd (List.split v)) = Zconst t 0 .
   (*dotprod_r (fst (List.split v)) (snd (List.split v)) = neg_zero. *)
 Proof.
@@ -6079,12 +6080,22 @@ induction v.
              nth i (split v).1 (Zconst t 0) = neg_zero).
   { intros. specialize (H i.+1). 
     by rewrite list_split_l ?list_split_r /= in H.
-  } specialize (IHv H0).
+  } specialize (IHv H1).
   unfold dotprod_r in IHv. rewrite IHv.
   specialize (H 0%nat).
   rewrite list_split_l ?list_split_r /= in H.
+  specialize (H0 0%nat).
+  rewrite ?list_split_l ?list_split_r /= in H0.
   destruct H.
-  -
+  - rewrite H. auto.
+    destruct a.2; try contradiction; simpl;auto.
+    destruct s; auto. admit.
+  - rewrite H. auto.
+    destruct a.2; try contradiction; simpl;auto.
+    destruct s; auto. admit.
+  - intros.
+    specialize (H0 i.+1).
+    by rewrite ?list_split_l ?list_split_r /= in H0.
 
 
 
