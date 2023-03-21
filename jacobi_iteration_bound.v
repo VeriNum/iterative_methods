@@ -6136,6 +6136,17 @@ assert (forall j, A2_J A' i j = Zconst t 0 \/ A2_J A' i j = neg_zero).
 { intros. apply x_real_to_float_zero. apply H2.
   specialize (H9 j). rewrite mxE in H9. apply H9.
 } 
+pose proof (@dotprod_r_eq_0 t).
+specialize (H11 (combine 
+                (vec_to_list_float n.+1
+                    (\row_j  A2_J A' (inord i) j)^T)
+                (vec_to_list_float  n.+1
+                  (\col_j jacobi_iter x0' b' A' j ord0)))).
+rewrite combine_split in H11; last by rewrite !length_veclist.
+
+
+
+
 
 
 assert ((X_m_jacobi 2 x0' b' A' -f
