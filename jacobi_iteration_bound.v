@@ -7325,9 +7325,16 @@ destruct H0.
                    } rewrite H. rewrite  !Rmult_0_r !Rmult_0_l ?Rplus_0_r ?Rplus_0_l.
                    assert ((vec_inf_norm (FT2R_mat b') <= 
                               matrix_inf_norm (FT2R_mat A') * 
-                                d_mag_def_alt A' b' /
-                                  (1 - rho_def_alt A' b'))%Re).
-                   {
+                                (d_mag_def_alt A' b' /
+                                  (1 - rho_def_alt A' b')))%Re).
+                   { apply Rle_trans with 
+                     (matrix_inf_norm (FT2R_mat A') *
+                       (vec_inf_norm (x_fix x b_real A_real)))%Re.
+                     admit.
+                     apply Rmult_le_compat_l. apply /RleP. apply matrix_norm_pd.
+                     apply H1.
+  
+                    
   
 
 
