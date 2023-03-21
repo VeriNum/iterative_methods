@@ -6223,8 +6223,20 @@ apply dotprod_finite.
                   X_m_jacobi 1 x0' b' A')
                    (inord k) ord0))) by admit.
   specialize (H7 H8).
-  split; try apply H8.
-  intros.
+  split; try apply H8. rewrite rev_length H2.
+  intros. rewrite /n0.
+  destruct H7 as [d [e [Hde [Hd [He H7]]]]].
+  rewrite H7.
+  eapply Rle_lt_trans. apply Rabs_triang.
+  eapply Rle_lt_trans. apply Rplus_le_compat_l. apply He.
+  apply Rcomplements.Rlt_minus_r.
+  rewrite Rabs_mult. eapply Rle_lt_trans.
+  apply Rmult_le_compat_l. apply Rabs_pos.
+  eapply Rle_trans. apply Rabs_triang.
+  rewrite Rabs_R1. apply Rplus_le_compat_l. apply Hd.
+  apply Rcomplements.Rlt_div_r.
+  apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
+  rewrite Rabs_mult.
   
 
 
