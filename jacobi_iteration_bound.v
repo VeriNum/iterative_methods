@@ -6062,7 +6062,6 @@ destruct s0; simpl in *; auto.
 
 Admitted.
 
-(*
 Lemma resid_sub_0_N_0 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -6081,11 +6080,13 @@ Lemma resid_sub_0_N_0 {t: type} :
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
   matrix_inf_norm (FT2R_mat (A2_J A')) = 0%Re ->
-  FT2R_mat
-       (X_m_jacobi 2 x0' b' A' -f
-        X_m_jacobi 1 x0' b' A') = 0.
+  forall i, 
+  FT2R ((X_m_jacobi 2 x0' b' A' -f
+          X_m_jacobi 1 x0' b' A') i ord0) = 0.
 Proof.
 intros.
+
+
 apply matrixP. unfold eqrel. intros. rewrite !mxE.
 repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
 rewrite inord_val.
@@ -6237,6 +6238,10 @@ apply dotprod_finite.
   apply Rcomplements.Rlt_div_r.
   apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
   rewrite Rabs_mult.
+
+
+
+
   admit.
  - rewrite H2 in Hlen.
    rewrite inordK; (by apply /ssrnat.ltP ).
