@@ -6237,7 +6237,13 @@ apply dotprod_finite.
   apply Rcomplements.Rlt_div_r.
   apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
   rewrite Rabs_mult.
-  
+  admit.
+ - rewrite H2 in Hlen.
+   rewrite inordK; (by apply /ssrnat.ltP ).
+ - rewrite H2 in Hlen.
+   rewrite inordK; (by apply /ssrnat.ltP ).
+ - rewrite H2 in Hlen. by apply /ssrnat.ltP.
+ - rewrite length_veclist. by rewrite H2 in Hlen.
 
 
 
