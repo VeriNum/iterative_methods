@@ -5990,6 +5990,19 @@ rewrite -Bsign_B2BSN  in H0.
   destruct (B2BSN (fprec t) (femax t) (A i j)); simpl; try by [].
 Qed.
 
+Search BinarySingleNaN.Bminus.
+
+Lemma Bminus_x_0 {t} (x: ftype t):
+  finite x ->
+  BMINUS x (Zconst t 0) = x.
+Proof.
+intros.
+destruct x; try contradiction; simpl;auto.
+destruct s; auto.
+Qed.
+
+
+
 Lemma Bminus_x_x {t} (x : ftype t):
   finite x ->
   BMINUS x x = Zconst t 0.
@@ -5997,7 +6010,7 @@ Proof.
 intros.
 apply finite_is_finite in H.
 unfold is_finite in H.
-destruct x;unfold BMINUS, BINOP, Bminus; simpl in *; auto.
+destruct x;unfold BMINUS, BINOP, Bminus, BSN2B; simpl in *; auto.
 Admitted.
 
 Lemma resid_sub_0_N_0 {t: type} :
@@ -6068,6 +6081,25 @@ rewrite Bminus_bplus_opp_equiv.
   specialize (H10 H10b).
   destruct H10 as [d2 [e2 [Hde2 [Hd2 [He2 H10]]]]].
   rewrite H10.
+  rewrite !mxE.
+  rewrite !Bminus_bplus_opp_equiv.
+  - pose proof (BPLUS_accurate' t (nth x b (Zconst t 0))
+                  (BOPP
+                    (let l1 :=
+                       vec_to_list_float n.+1
+                         (\row_j A2_J A' x j)^T in
+                     let l2 :=
+                       vec_to_list_float n.+1
+                         (\col_j jacobi_iter x0'
+                                   b' A' j ord0)
+                       in
+                     dotprod_r l1 l2))).
+    apply BMULT_finite_e in H10a.
+    destruct H10a as [_ H10a].
+    rewrite !mxE in H10a. apply Bminus_bplus_opp_implies in H10a.
+    specialize (H13 H10a).
+    destruct H13 as [d3 [Hd3 H13]].
+    rewrite H13. rewrite H11.
   
 
 
@@ -7706,3 +7738,4 @@ Qed.
 (** merge N= 0 and ||x|| <= ? case **)
 
 End WITH_NANS.
+
