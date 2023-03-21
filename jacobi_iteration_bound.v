@@ -7323,7 +7323,11 @@ destruct H0.
                        unfold x0. rewrite nth_repeat. simpl. rewrite Rabs_R0.
                        apply /RleP. apply Rle_refl.
                    } rewrite H. rewrite  !Rmult_0_r !Rmult_0_l ?Rplus_0_r ?Rplus_0_l.
-                   
+                   assert ((vec_inf_norm (FT2R_mat b') <= 
+                              matrix_inf_norm (FT2R_mat A') * 
+                                d_mag_def_alt A' b' /
+                                  (1 - rho_def_alt A' b'))%Re).
+                   {
   
 
 
