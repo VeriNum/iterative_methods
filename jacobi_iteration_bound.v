@@ -6072,7 +6072,16 @@ Proof.
 intros.
 induction v.
 + simpl. unfold dotprod_r. by unfold combine;simpl.
-+ 
++ unfold dotprod_r. rewrite list_split_l list_split_r.
+  simpl.
+  assert (forall i : nat,
+             nth i (split v).1 (Zconst t 0) = Zconst t 0 \/
+             nth i (split v).1 (Zconst t 0) = neg_zero).
+  { intros. specialize (H i.+1). 
+    by rewrite list_split_l ?list_split_r /= in H.
+  } specialize (IHv H0).
+  unfold dotprod_r in IHv. rewrite IHv.
+  
 
 
 
