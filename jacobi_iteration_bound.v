@@ -6062,6 +6062,7 @@ destruct s0; simpl in *; auto.
 
 Admitted.
 
+(*
 Lemma resid_sub_0_N_0 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -6154,7 +6155,7 @@ rewrite Bminus_bplus_opp_equiv.
 
 
 Admitted.
-
+*)
 
 Lemma finite_residual_1 {t: type} :
  forall (A: matrix t) (b: vector t),
@@ -6210,8 +6211,27 @@ apply dotprod_finite.
   rewrite nth_vec_to_list_float in Hnth.
   rewrite mxE in Hnth. rewrite -Hnth.
   rewrite -/n -/A' -/b' -/x0'.
-  (*rewrite !nth_vec_to_list_float.
+  rewrite !nth_vec_to_list_float.
   rewrite !inord_val. rewrite mxE.
+  pose proof (@BMULT_accurate' _ t (A' (inord k) (inord k))
+                ((X_m_jacobi 2 x0' b' A' -f
+                  X_m_jacobi 1 x0' b' A') (inord k) ord0)).
+  assert (finite
+             (BMULT
+                (A' (inord k) (inord k))
+                ((X_m_jacobi 2 x0' b' A' -f
+                  X_m_jacobi 1 x0' b' A')
+                   (inord k) ord0))) by admit.
+  specialize (H7 H8).
+  split; try apply H8.
+  intros.
+  
+
+
+
+
+
+
   assert (FT2R ((X_m_jacobi 2 x0' b' A' -f
                   X_m_jacobi 1 x0' b' A') (inord k) ord0) = 0%Re).
   { admit. }
