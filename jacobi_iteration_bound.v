@@ -6062,6 +6062,43 @@ destruct s0; simpl in *; auto.
 
 Admitted.
 
+
+Lemma dotprod_r_eq_0 {t} (v : list (ftype t * ftype t)):
+  (forall i, nth i (fst (List.split v)) (Zconst t 0) = Zconst t 0 \/
+             nth i (fst (List.split v)) (Zconst t 0) = neg_zero) ->
+  dotprod_r (fst (List.split v)) (snd (List.split v)) = Zconst t 0 .
+  (*dotprod_r (fst (List.split v)) (snd (List.split v)) = neg_zero. *)
+Proof.
+intros.
+induction v.
++ simpl. unfold dotprod_r. by unfold combine;simpl.
++ 
+
+
+
+
+
+rewrite -dotprod_rev_equiv.
+
+
+
+
+assert (dotprod (rev (split v).1) (rev (split v).2) = 
+        fma_dotprod t (rev (split v).1) (rev (split v).2)).
+{ by unfold dotprod, fma_dotprod. }
+rewrite H0.
++ induction v.
+  - simpl. apply fma_dot_prod_rel.
+
+
+
+unfold dotprod. apply fma_dot_prod_rel.
+
+
+induction v.
++ simpl. unfold dotprod_r.
+
+
 Lemma resid_sub_0_N_0 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
