@@ -6267,18 +6267,30 @@ Lemma vec_norm_resid_N_0 {t: type} :
   vec_inf_norm
     (FT2R_mat
        (X_m_jacobi 2 x0' b' A' -f
-        X_m_jacobi 1 x0' b' A')) = 0.
+        X_m_jacobi 1 x0' b' A')) = 0%Re.
 Proof.
 intros.
 unfold vec_inf_norm.
 apply bigmaxrP.
 split.
-+ admit.
++ assert (seq.nth 0%Re [seq Rabs
+                         (FT2R_mat
+                            (X_m_jacobi 2 x0'
+                               b' A' -f
+                             X_m_jacobi 1 x0'
+                               b' A') i 0)
+                     | i <- enum 'I_n.+1] 0%nat = 0%Re).
+  { rewrite seq_equiv. rewrite nth_mkseq; last by [].
+    rewrite mxE. rewrite resid_sub_0_N_0; try by [].
+    by rewrite Rabs_R0. 
+  } rewrite -H9. apply mem_nth.
+  by rewrite size_map size_enum_ord.
 + intros. 
   rewrite size_map size_enum_ord in H9.
   rewrite seq_equiv. rewrite nth_mkseq; last by apply H9.
   rewrite mxE. rewrite resid_sub_0_N_0; try by [].
   rewrite Rabs_R0. apply /RleP. apply Rle_refl.
+Qed.
 
 
 
