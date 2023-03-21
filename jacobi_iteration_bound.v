@@ -6136,13 +6136,63 @@ assert (forall j, A2_J A' i j = Zconst t 0 \/ A2_J A' i j = neg_zero).
 { intros. apply x_real_to_float_zero. apply H2.
   specialize (H9 j). rewrite mxE in H9. apply H9.
 } 
-pose proof (@dotprod_r_eq_0 t).
-specialize (H11 (combine 
-                (vec_to_list_float n.+1
-                    (\row_j  A2_J A' (inord i) j)^T)
-                (vec_to_list_float  n.+1
-                  (\col_j jacobi_iter x0' b' A' j ord0)))).
-rewrite combine_split in H11; last by rewrite !length_veclist.
+assert ((let l1 :=
+              vec_to_list_float
+                n.+1
+                (\row_j 
+                 A2_J A' 
+                   (inord i) j)^T
+              in
+            let l2 :=
+              vec_to_list_float
+                n.+1
+                (\col_j 
+                 jacobi_iter x0'
+                   b' A' j ord0)
+              in
+            dotprod_r l1 l2) = Zconst t 0).
+{ pose proof (@dotprod_r_eq_0 t).
+  specialize (H11 (combine 
+                  (vec_to_list_float n.+1
+                      (\row_j  A2_J A' (inord i) j)^T)
+                  (vec_to_list_float  n.+1
+                    (\col_j jacobi_iter x0' b' A' j ord0)))).
+  rewrite combine_split in H11; last by rewrite !length_veclist.
+  assert (forall l l': vector t, (l, l').1 = l).
+  { intros. by simpl. } rewrite H12 in H11.
+  assert (forall l l': vector t, (l, l').2 = l').
+  { intros. by simpl. } rewrite H13 in H11.
+  apply H11. intros. admit.
+}
+rewrite H11.
+assert ((let l1 :=
+              vec_to_list_float
+                n.+1
+                (\row_j 
+                 A2_J A' 
+                   (inord i) j)^T
+              in
+            let l2 :=
+              vec_to_list_float
+                n.+1
+                (\col_j 
+                 x0' j ord0) in
+            dotprod_r l1 l2) = Zconst t 0).
+{ pose proof (@dotprod_r_eq_0 t).
+  specialize (H12 (combine 
+                  (vec_to_list_float n.+1
+                      (\row_j  A2_J A' (inord i) j)^T)
+                  (vec_to_list_float  n.+1
+                    (\col_j (x0' j ord0))))).
+  rewrite combine_split in H12; last by rewrite !length_veclist.
+  assert (forall l l': vector t, (l, l').1 = l).
+  { intros. by simpl. } rewrite H13 in H12.
+  assert (forall l l': vector t, (l, l').2 = l').
+  { intros. by simpl. } rewrite H14 in H12.
+  apply H12. intros. admit.
+} rewrite H12.
+
+
 
 
 
