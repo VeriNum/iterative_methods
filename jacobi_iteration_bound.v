@@ -6191,7 +6191,76 @@ assert ((let l1 :=
   { intros. by simpl. } rewrite H14 in H12.
   apply H12. intros. admit.
 } rewrite H12.
+rewrite Bminus_x_0 .
++ rewrite  Bminus_bplus_opp_equiv.
+  - pose proof (BPLUS_accurate' t 
+                  (BMULT
+                      (BDIV (Zconst t 1)
+                         (nth (@inord n i)
+                            (nth (@inord n i) A [])
+                            (Zconst t 0)))
+                      (nth (@inord n i) b
+                         (Zconst t 0))) (BOPP
+                  (BMULT
+                     (BDIV (Zconst t 1)
+                        (nth (@inord n i)
+                           (nth (@inord n i) A
+                              [])
+                           (Zconst t 0)))
+                     (nth (@inord n i) b
+                        (Zconst t 0))))).
+    assert (finite
+            (BPLUS
+               (BMULT
+                      (BDIV (Zconst t 1)
+                         (nth (@inord n i)
+                            (nth (@inord n i) A [])
+                            (Zconst t 0)))
+                      (nth (@inord n i) b
+                         (Zconst t 0))) (BOPP
+                  (BMULT
+                     (BDIV (Zconst t 1)
+                        (nth (@inord n i)
+                           (nth (@inord n i) A
+                              [])
+                           (Zconst t 0)))
+                     (nth (@inord n i) b
+                        (Zconst t 0)))))) by admit.
+    specialize (H13 H14).
+    
+   
+     
+    
 
+
+
+
+
+ pose proof (BM_accurate'  t 
+              (BDIV (Zconst t 1)
+               (nth (@inord n i)
+                  (nth (@inord n i) A [])
+                  (Zconst t 0))) (nth (@inord n i) b
+           (Zconst t 0))).
+  assert (finite
+            (BMULT
+               (BDIV (Zconst t 1)
+                  (nth (@inord n i) (nth (@inord n i) A [])
+                     (Zconst t 0)))
+               (nth (@inord n i) b (Zconst t 0)))) by admit. 
+  specialize (H13 H14).
+  destruct H13 as [d [e [Hde [Hd [He H13]]]]].
+  rewrite H13.
+
+
+
+
+
+
+
+admit.
++ rewrite inord_val. specialize (H7 i).
+  by rewrite !mxE in H7.
 
 
 
