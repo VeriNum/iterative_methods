@@ -6239,13 +6239,6 @@ assert (Hf_minus: finite
 Admitted.
 
 
-(**
-vec_inf_norm
-    (FT2R_mat
-       (X_m_jacobi 2 x0' b' A' -f
-        X_m_jacobi 1 x0' b' A'))
-**)
-
 Lemma vec_norm_resid_N_0 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -6666,7 +6659,62 @@ destruct H0.
                apply /RleP. apply vec_norm_pd.
                apply /RleP. apply vec_norm_pd.
                apply Rplus_le_le_0_compat. nra. apply g_pos.
-               apply Rle_refl. admit.
+               apply Rle_refl.
+               pose proof (@vec_norm_resid_N_0 t A b HlenA HeqAb).
+               assert (size_cons: @size_constraint t (length A).-1).
+               { unfold size_constraint. rewrite -Heqn. apply H. }
+               specialize (H14 size_cons).
+               assert (HfA2l :  (forall i j : 'I_(length A).-1.+1,
+                                         finite
+                                           (A2_J
+                                              (matrix_inj A (length A).-1.+1
+                                                 (length A).-1.+1) i j))).
+               { rewrite -Heqn. intros. rewrite -?Heqb' -?HeqA'. apply H. }
+               assert (Hfx0l : (forall i : 'I_(length A).-1.+1,
+                                       finite
+                                         (vector_inj
+                                            (repeat (Zconst t 0)
+                                               (length b))
+                                            (length A).-1.+1 i ord0))).
+               { rewrite -Heqn. intros. 
+                 assert (vector_inj
+                               (repeat (Zconst t 0) (length b)) n.+1 =
+                             \col_(j < n.+1) (Zconst t 0)).
+                 { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                   by rewrite nth_repeat.
+                 } rewrite H15. rewrite -?Heqb' -?HeqA'. apply H.
+               } 
+               assert (HfAl : (forall i : 'I_(length A).-1.+1,
+                                       finite
+                                         (matrix_inj A (length A).-1.+1
+                                            (length A).-1.+1 i i))).
+               { rewrite -Heqn. intros. rewrite -?Heqb' -?HeqA'. apply H. }
+               assert (HfA1_invl: (forall i : 'I_(length A).-1.+1,
+                                           finite
+                                             (A1_inv_J
+                                                (matrix_inj A (length A).-1.+1
+                                                   (length A).-1.+1) i ord0))).
+               { rewrite -Heqn. intros. rewrite -?Heqb' -?HeqA'.  rewrite mxE. apply H. }
+               assert (Hfbl : (forall i : 'I_(length A).-1.+1,
+                                       finite
+                                         (vector_inj b (length A).-1.+1 i
+                                            ord0))).
+               { rewrite -Heqn. intros. rewrite -?Heqb' -?HeqA'. apply H. }
+               assert (Hinpl : input_bound_at_N_0 A x0 b).
+               { apply input_bound_at_N_0_equiv.
+                 rewrite -Heqn.
+                 assert (vector_inj
+                                   (repeat (Zconst t 0) (length b)) n.+1 =
+                                 \col_(j < n.+1) (Zconst t 0)).
+                 { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                   by rewrite nth_repeat.
+                 } rewrite H15.
+                 rewrite -?Heqb' -?HeqA'. apply H.
+               } speciali
+
+
+
+ admit.
          -- apply finite_is_finite. apply finite_residual_1; try by apply H.
             apply HlenA. apply HeqAb.
             intros.
