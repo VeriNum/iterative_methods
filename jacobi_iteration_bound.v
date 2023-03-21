@@ -7322,9 +7322,9 @@ destruct H0.
                        last by rewrite size_map size_enum_ord in H.
                        unfold x0. rewrite nth_repeat. simpl. rewrite Rabs_R0.
                        apply /RleP. apply Rle_refl.
-                   }
-
-
+                   } rewrite H. rewrite  !Rmult_0_r !Rmult_0_l ?Rplus_0_r ?Rplus_0_l.
+                   
+  
 
 
 
