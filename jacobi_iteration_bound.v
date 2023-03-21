@@ -7315,6 +7315,14 @@ destruct H0.
                        { rewrite seq_equiv. rewrite nth_mkseq; last by [].
                          rewrite Heqx0'. rewrite !mxE /=. rewrite inordK; last by [].
                          unfold x0. rewrite nth_repeat. simpl. by rewrite Rabs_R0.
+                       } rewrite -H. apply mem_nth. by rewrite size_map size_enum_ord.
+                     + intros. rewrite seq_equiv. rewrite nth_mkseq;
+                       last by rewrite size_map size_enum_ord in H.
+                       rewrite Heqx0'. rewrite !mxE /=. rewrite inordK; 
+                       last by rewrite size_map size_enum_ord in H.
+                       unfold x0. rewrite nth_repeat. simpl. rewrite Rabs_R0.
+                       apply /RleP. apply Rle_refl.
+                   }
 
 
 
