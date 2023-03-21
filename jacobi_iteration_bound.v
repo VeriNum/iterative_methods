@@ -6085,6 +6085,33 @@ Lemma resid_sub_0_N_0 {t: type} :
           X_m_jacobi 1 x0' b' A') i ord0) = 0.
 Proof.
 intros.
+rewrite !mxE.
+repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
+rewrite !mxE.
+pose proof (@matrix_inf_norm_0_implies n (FT2R_mat (A2_J A')) H8).
+specialize (H9 i).    
+assert (forall j, A2_J A' i j = Zconst t 0 \/ A2_J A' i j = neg_zero).
+{ intros. apply x_real_to_float_zero. apply H2.
+  specialize (H9 j). rewrite mxE in H9. apply H9.
+} 
+
+
+assert ((X_m_jacobi 2 x0' b' A' -f
+              X_m_jacobi 1 x0' b' A') = \col_j (Zconst t 0)).
+  { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+    repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
+    rewrite !mxE.
+    pose proof (@matrix_inf_norm_0_implies n (FT2R_mat (A2_J A')) HN0).
+    specialize (H7 x).
+    assert (\row_j (A2_J A' (inord x) j) = \row_j (Zconst t 0)).
+    { apply matrixP. unfold eqrel. intros. rewrite mxE. rewrite mxE.
+    specialize (H7 y0). rewrite mxE in H7.
+    apply A_real_to_float_zero; try by []. 
+    rewrite inord_val. apply H7.
+    admit. (** sign **)
+    } rewrite H8.
+
+
 
 
 apply matrixP. unfold eqrel. intros. rewrite !mxE.
