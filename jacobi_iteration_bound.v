@@ -5955,6 +5955,23 @@ Close Scope R_scope.
 
 
 (** entries zero in real ==> entries zero in float **)
+Lemma x_real_to_float_zero {t} (x: ftype t):
+  finite x ->
+  FT2R x = 0%Re ->
+  x = Zconst t 0 \/ x = neg_zero.
+Proof.
+intros.
+pose proof (B2R_Bsign_inj (fprec t) (femax t)). 
+specialize (H1 x).
+destruct (Bsign (fprec t) (femax t) x).
++ specialize (H1 neg_zero). right.
+  apply H1; try by simpl.
+  by apply finite_is_finite.
++ specialize (H1 (Zconst t 0)). left.
+  apply H1; try by simpl.
+  by apply finite_is_finite.
+Qed.
+
 Lemma A_real_to_float_zero {t} {n} (A : 'M[ftype t]_n.+1):
   forall i j,
   finite (A i j) ->
@@ -6005,6 +6022,13 @@ destruct s; simpl in *; auto.
 Qed.
 
 
+Lemma neg_zero_real {t}:
+  @FT2R t neg_zero = 0%Re.
+Proof.
+auto.
+Qed.
+
+
 Lemma Bminus_x_0 {t} (x: ftype t):
   finite x ->
   BMINUS x (Zconst t 0) = x.
@@ -6016,8 +6040,29 @@ Qed.
 
 Lemma Bminus_x_x {t} (x : ftype t):
   finite x ->
-  BMINUS x x = Zconst t 0.
+  finite (BMINUS x x) ->
+  BMINUS x x = Zconst t 0 \/
+  BMINUS x x = neg_zero .
 Proof.
+intros.
+destruct x; try contradiction; simpl;auto.
+destruct s; simpl in * ; auto; try by [].
+unfold BMINUS, BINOP, Bminus, BSN2B in *. simpl in *; auto.
+destruct 
+(BinarySingleNaN.binary_normalize
+    (fprec t) (femax t) (fprec_gt_0 t)
+    (fprec_lt_femax t)
+    BinarySingleNaN.mode_NE
+    (BinarySingleNaN.Fplus_naive s m e
+       (~~ s) m e (Z.min e e))
+    (Z.min e e) false); simpl in *; auto; try by [].
+destruct s0; simpl in *; auto.
+
+
+
+
+
+
 intros.
 destruct x; try contradiction; simpl;auto.
 destruct s; auto.
