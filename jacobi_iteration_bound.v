@@ -6124,7 +6124,7 @@ Lemma resid_sub_0_N_0 {t: type} :
   matrix_inf_norm (FT2R_mat (A2_J A')) = 0%Re ->
   forall i, 
   FT2R ((X_m_jacobi 2 x0' b' A' -f
-          X_m_jacobi 1 x0' b' A') i ord0) = 0.
+          X_m_jacobi 1 x0' b' A') i ord0) = 0%Re.
 Proof.
 intros.
 rewrite !mxE.
@@ -6192,6 +6192,23 @@ assert ((let l1 :=
   apply H12. intros. admit.
 } rewrite H12.
 rewrite Bminus_x_0 .
+assert (Hf_minus: finite
+            (BPLUS
+               (BMULT
+                      (BDIV (Zconst t 1)
+                         (nth (@inord n i)
+                            (nth (@inord n i) A [])
+                            (Zconst t 0)))
+                      (nth (@inord n i) b
+                         (Zconst t 0))) (BOPP
+                  (BMULT
+                     (BDIV (Zconst t 1)
+                        (nth (@inord n i)
+                           (nth (@inord n i) A
+                              [])
+                           (Zconst t 0)))
+                     (nth (@inord n i) b
+                        (Zconst t 0)))))) by admit.
 + rewrite  Bminus_bplus_opp_equiv.
   - pose proof (BPLUS_accurate' t 
                   (BMULT
@@ -6209,153 +6226,18 @@ rewrite Bminus_x_0 .
                            (Zconst t 0)))
                      (nth (@inord n i) b
                         (Zconst t 0))))).
-    assert (finite
-            (BPLUS
-               (BMULT
-                      (BDIV (Zconst t 1)
-                         (nth (@inord n i)
-                            (nth (@inord n i) A [])
-                            (Zconst t 0)))
-                      (nth (@inord n i) b
-                         (Zconst t 0))) (BOPP
-                  (BMULT
-                     (BDIV (Zconst t 1)
-                        (nth (@inord n i)
-                           (nth (@inord n i) A
-                              [])
-                           (Zconst t 0)))
-                     (nth (@inord n i) b
-                        (Zconst t 0)))))) by admit.
-    specialize (H13 H14).
     
-   
-     
-    
-
-
-
-
-
- pose proof (BM_accurate'  t 
-              (BDIV (Zconst t 1)
-               (nth (@inord n i)
-                  (nth (@inord n i) A [])
-                  (Zconst t 0))) (nth (@inord n i) b
-           (Zconst t 0))).
-  assert (finite
-            (BMULT
-               (BDIV (Zconst t 1)
-                  (nth (@inord n i) (nth (@inord n i) A [])
-                     (Zconst t 0)))
-               (nth (@inord n i) b (Zconst t 0)))) by admit. 
-  specialize (H13 H14).
-  destruct H13 as [d [e [Hde [Hd [He H13]]]]].
-  rewrite H13.
-
-
-
-
-
-
-
-admit.
+    specialize (H13 Hf_minus).
+    destruct H13 as [d [Hd H13]].
+    rewrite H13.
+    assert (forall x : ftype t, FT2R (BOPP x) = (- (FT2R x))%Re).
+    { intros. unfold FT2R. by rewrite B2R_Bopp. }
+    rewrite H14. nra.
+  - apply Hf_minus.
 + rewrite inord_val. specialize (H7 i).
   by rewrite !mxE in H7.
-
-
-
-
-
-
-
-assert ((X_m_jacobi 2 x0' b' A' -f
-              X_m_jacobi 1 x0' b' A') = \col_j (Zconst t 0)).
-  { apply matrixP. unfold eqrel. intros. rewrite !mxE.
-    repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
-    rewrite !mxE.
-    pose proof (@matrix_inf_norm_0_implies n (FT2R_mat (A2_J A')) HN0).
-    specialize (H7 x).
-    assert (\row_j (A2_J A' (inord x) j) = \row_j (Zconst t 0)).
-    { apply matrixP. unfold eqrel. intros. rewrite mxE. rewrite mxE.
-    specialize (H7 y0). rewrite mxE in H7.
-    apply A_real_to_float_zero; try by []. 
-    rewrite inord_val. apply H7.
-    admit. (** sign **)
-    } rewrite H8.
-
-
-
-
-apply matrixP. unfold eqrel. intros. rewrite !mxE.
-repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
-rewrite inord_val.
-rewrite Bminus_bplus_opp_equiv.
-+ pose proof (BPLUS_accurate' t (BMULT (A1_inv_J A' x ord0)
-        ((b' -f
-          A2_J A' *f
-          jacobi_iter x0' b' A') x ord0)) (BOPP
-        (BMULT (A1_inv_J A' x ord0)
-           ((b' -f A2_J A' *f x0') x
-              ord0)))).
-  assert (finite
-           (BPLUS
-              (BMULT (A1_inv_J A' x ord0)
-                 ((b' -f
-                   A2_J A' *f
-                   jacobi_iter x0' b' A') x
-                    ord0))
-              (BOPP
-                 (BMULT (A1_inv_J A' x ord0)
-                    ((b' -f A2_J A' *f x0')
-                       x ord0))))) by admit.
-  specialize (H9 H10).
-  destruct H9 as [d [Hd H9]].
-  rewrite H9.
-  assert (forall x: ftype t, FT2R (BOPP x) = (- (FT2R x))%Re).
-  { intros. unfold FT2R. by rewrite B2R_Bopp. }
-  rewrite H11.
-  pose proof (BMULT_accurate' t (A1_inv_J A' x ord0)
-              ((b' -f
-                 A2_J A' *f
-                 jacobi_iter x0' b' A') x ord0)).
-  apply BPLUS_finite_e in H10.
-  destruct H10 as [H10a H10b].
-  specialize (H12 H10a).
-  destruct H12 as [d1 [e1 [Hde1 [Hd1 [He1 H12]]]]].
-  rewrite H12.
-  pose proof (BMULT_accurate' t (A1_inv_J A' x ord0)
-              ((b' -f A2_J A' *f x0') x ord0)).
-  apply finite_is_finite in H10b. 
-  rewrite is_finite_Bopp in H10b.
-  apply finite_is_finite in H10b.
-  specialize (H10 H10b).
-  destruct H10 as [d2 [e2 [Hde2 [Hd2 [He2 H10]]]]].
-  rewrite H10.
-  rewrite !mxE.
-  rewrite !Bminus_bplus_opp_equiv.
-  - pose proof (BPLUS_accurate' t (nth x b (Zconst t 0))
-                  (BOPP
-                    (let l1 :=
-                       vec_to_list_float n.+1
-                         (\row_j A2_J A' x j)^T in
-                     let l2 :=
-                       vec_to_list_float n.+1
-                         (\col_j jacobi_iter x0'
-                                   b' A' j ord0)
-                       in
-                     dotprod_r l1 l2))).
-    apply BMULT_finite_e in H10a.
-    destruct H10a as [_ H10a].
-    rewrite !mxE in H10a. apply Bminus_bplus_opp_implies in H10a.
-    specialize (H13 H10a).
-    destruct H13 as [d3 [Hd3 H13]].
-    rewrite H13. rewrite H11.
-  
-
-
-
 Admitted.
-*)
+
 
 Lemma finite_residual_1 {t: type} :
  forall (A: matrix t) (b: vector t),
