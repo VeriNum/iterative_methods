@@ -6081,7 +6081,10 @@ induction v.
     by rewrite list_split_l ?list_split_r /= in H.
   } specialize (IHv H0).
   unfold dotprod_r in IHv. rewrite IHv.
-  
+  specialize (H 0%nat).
+  rewrite list_split_l ?list_split_r /= in H.
+  destruct H.
+  -
 
 
 
