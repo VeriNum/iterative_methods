@@ -6319,10 +6319,8 @@ apply dotprod_finite.
   apply Rcomplements.Rlt_div_r.
   apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
   rewrite Rabs_mult.
-
-
-
-
+  rewrite resid_sub_0_N_0 ; try by [].
+  rewrite Rabs_R0 Rmult_0_r. 
   admit.
  - rewrite H2 in Hlen.
    rewrite inordK; (by apply /ssrnat.ltP ).
@@ -6330,77 +6328,7 @@ apply dotprod_finite.
    rewrite inordK; (by apply /ssrnat.ltP ).
  - rewrite H2 in Hlen. by apply /ssrnat.ltP.
  - rewrite length_veclist. by rewrite H2 in Hlen.
-
-
-
-
-
-
-  assert (FT2R ((X_m_jacobi 2 x0' b' A' -f
-                  X_m_jacobi 1 x0' b' A') (inord k) ord0) = 0%Re).
-  { admit. }
-  split.
-  - apply BMULT_no_overflow_is_finite; try by [].
-    ++ rewrite mxE. apply Bplus_bminus_opp_implies.
-       
-
-
-*)
-
-
-
-
-
-
-
-  assert ((X_m_jacobi 2 x0' b' A' -f
-              X_m_jacobi 1 x0' b' A') = \col_j (Zconst t 0)).
-  { apply matrixP. unfold eqrel. intros. rewrite !mxE.
-    repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
-    rewrite !mxE.
-    pose proof (@matrix_inf_norm_0_implies n (FT2R_mat (A2_J A')) HN0).
-    specialize (H7 x).
-    assert (\row_j (A2_J A' (inord x) j) = \row_j (Zconst t 0)).
-    { apply matrixP. unfold eqrel. intros. rewrite mxE. rewrite mxE.
-    specialize (H7 y0). rewrite mxE in H7.
-    apply A_real_to_float_zero; try by []. 
-    rewrite inord_val. apply H7.
-    admit. (** sign **)
-    } rewrite H8.
-
-
-
-
-
-
-
-admit.
-  } rewrite H7.
-  rewrite !nth_vec_to_list_float. 
-  rewrite !inord_val. rewrite mxE.
-  assert (BMULT (A1_J A' (inord k) ord0)  (Zconst t 0) = Zconst t 0).
-  { rewrite /BMULT /BINOP /Bmult /BSN2B /BinarySingleNaN.Bmult /=. 
-
-
-simpl.
-
-
-
-admit. } rewrite H8. split.
-  - admit.
-  - rewrite rev_length H2. intros. simpl. rewrite Rabs_R0. apply sqrt_lt_R0.
-    apply fun_bound_gt_0. unfold n0. by apply g1_constraint. 
-  - rewrite H2 in Hlen.
-    rewrite inordK; (by apply /ssrnat.ltP ).
-  - rewrite H2 in Hlen.
-    rewrite inordK; (by apply /ssrnat.ltP ).
-  - rewrite H2 in Hlen. by apply /ssrnat.ltP.
-  - rewrite length_veclist. by rewrite H2 in Hlen.
-
-
 Admitted.
-
-
 
 
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
