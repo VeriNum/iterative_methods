@@ -6710,8 +6710,9 @@ destruct H0.
                    by rewrite nth_repeat.
                  } rewrite H15.
                  rewrite -?Heqb' -?HeqA'. apply H.
-               } speciali
-
+               } specialize (H14 HfA2l Hfx0l Hinpl HfAl  HfA1_invl  Hfbl ).
+               rewrite -?Heqn -?Heqb' -?HeqA' -Heqx0' in H14. rewrite H14; try by [].
+                
 
 
  admit.
