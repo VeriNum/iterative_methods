@@ -6068,7 +6068,6 @@ Lemma dotprod_r_eq_0 {t} (v : list (ftype t * ftype t)):
              nth i (fst (List.split v)) (Zconst t 0) = neg_zero) ->
   (forall i, finite (nth i  (snd (List.split v)) (Zconst t 0))) ->
   dotprod_r (fst (List.split v)) (snd (List.split v)) = Zconst t 0 .
-  (*dotprod_r (fst (List.split v)) (snd (List.split v)) = neg_zero. *)
 Proof.
 intros.
 induction v.
@@ -6089,37 +6088,20 @@ induction v.
   destruct H.
   - rewrite H. auto.
     destruct a.2; try contradiction; simpl;auto.
-    destruct s; auto. admit.
+    destruct s; auto.
+    unfold BFMA, Bfma, BSN2B,BinarySingleNaN.Bfma.
+    simpl. unfold BinarySingleNaN.Bfma_szero.
+    simpl. destruct s; simpl; auto.
   - rewrite H. auto.
     destruct a.2; try contradiction; simpl;auto.
-    destruct s; auto. admit.
+    destruct s; auto. 
+    unfold BFMA, Bfma, BSN2B,BinarySingleNaN.Bfma.
+    simpl. unfold BinarySingleNaN.Bfma_szero.
+    simpl. destruct s; simpl; auto.
   - intros.
     specialize (H0 i.+1).
     by rewrite ?list_split_l ?list_split_r /= in H0.
-
-
-
-
-
-rewrite -dotprod_rev_equiv.
-
-
-
-
-assert (dotprod (rev (split v).1) (rev (split v).2) = 
-        fma_dotprod t (rev (split v).1) (rev (split v).2)).
-{ by unfold dotprod, fma_dotprod. }
-rewrite H0.
-+ induction v.
-  - simpl. apply fma_dot_prod_rel.
-
-
-
-unfold dotprod. apply fma_dot_prod_rel.
-
-
-induction v.
-+ simpl. unfold dotprod_r.
+Qed.
 
 
 Lemma resid_sub_0_N_0 {t: type} :
