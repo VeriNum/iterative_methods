@@ -1081,7 +1081,7 @@ assert (HG_re: (FT2R (BMULT accuracy accuracy) >
                   vec_inf_norm (FT2R_mat (A1_J A)) *
                   d_mag_def A b * / (1 - rho_def A b))²)%Re).
 { apply Rgt_lt. 
-  (*destruct HG1 as [HG1 _]. *)
+  destruct HG1 as [HG1 _]. 
   eapply Rle_lt_trans; try apply HG1.
   apply Rplus_le_compat_l. apply Rmult_le_compat_l.
   - apply Rmult_le_pos. apply pos_INR. 
@@ -7307,7 +7307,20 @@ destruct H0.
                    apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
                    apply Rplus_le_le_0_compat. nra. apply g_pos.
                    destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
-                   destruct HG as [_ HG].
+                   assert (vec_inf_norm (FT2R_mat x0') = 0%Re).
+                   { unfold vec_inf_norm. apply bigmaxrP.
+                     split.
+                     + assert (seq.nth 0%Re [seq Rabs (FT2R_mat x0' i 0)
+                                                | i <- enum 'I_n.+1] 0%nat = 0%Re).
+                       { rewrite seq_equiv. rewrite nth_mkseq; last by [].
+                         rewrite Heqx0'. rewrite !mxE /=. rewrite inordK; last by [].
+                         unfold x0. rewrite nth_repeat. simpl. by rewrite Rabs_R0.
+
+
+
+
+
+destruct HG as [_ HG].
                    assert (vector_inj
                                (repeat (Zconst t 0) (length b)) n.+1 =
                              \col_(j < n.+1) (Zconst t 0)).
