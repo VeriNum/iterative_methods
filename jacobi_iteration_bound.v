@@ -7461,7 +7461,9 @@ destruct H0.
                    } eapply Rle_lt_trans.
                    apply Rplus_le_compat_r. apply Rmult_le_compat_r.
                    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-                    
+                   apply Rmult_le_compat_l. apply pos_INR.
+                   apply Rsqr_incr_1.
+                   a
   
 
 
