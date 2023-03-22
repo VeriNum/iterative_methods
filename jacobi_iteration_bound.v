@@ -6386,6 +6386,18 @@ Lemma bound_norm_d {n} (A : 'M[R]_n.+1) (b : 'cV[R]_n.+1):
   ((vec_inf_norm (A1_diag A) * vec_inf_norm b) / 
       (1 + vec_inf_norm (A1_diag A) * (matrix_inf_norm (A2_J_real A))) <=
    vec_inf_norm (x_fix x b A))%Re.
+Proof.
+intros. apply Rdiv_le_left.
++ apply Rplus_lt_le_0_compat. nra.
+  apply Rmult_le_pos. 
+  apply /RleP. apply vec_norm_pd.
+  apply /RleP. apply matrix_norm_pd.
++
+
+
+Search (_ / _ <= _)%Re.
+
+
 Admitted.
 
 
