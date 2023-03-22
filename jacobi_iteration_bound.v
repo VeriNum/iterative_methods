@@ -6392,8 +6392,20 @@ intros. apply Rdiv_le_left.
   apply Rmult_le_pos. 
   apply /RleP. apply vec_norm_pd.
   apply /RleP. apply matrix_norm_pd.
-+
++ rewrite Rmult_plus_distr_l Rmult_1_r.
+  apply Rcomplements.Rle_minus_l.
+  match goal with |-context[(_ - ?a * (?b * ?c) <= _)%Re]=>
+    replace (a * (b * c))%Re with (b * (c * a))%Re by nra
+  end. rewrite -Rmult_minus_distr_l .
+  Search (_ * _ - _ * _ = _)%Re.
 
+
+
+  rewrite [in X in (_ - X <= _)%Re]Rmult_comm.
+   rewrite -Rmult_assoc.
+  rewrite [in X in (_ - X <= _)%Re]Rmult_comm.
+  Search (_ - _ <= _)%Re.
+ 
 
 Search (_ / _ <= _)%Re.
 
