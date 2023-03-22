@@ -6267,14 +6267,8 @@ assert (Hf_minus: finite
   rewrite Rabs_mult. 
   assert (forall x:R, (x + - x)%Re = 0%Re). { intros. nra. }
   rewrite H15. rewrite Rabs_R0. rewrite Rmult_0_l Rplus_0_l.
-  
-
-  
-
-
-
-
- by admit.
+  apply defualt_abs_lt_fmax.
+}
 + rewrite  Bminus_bplus_opp_equiv.
   - pose proof (BPLUS_accurate' t 
                   (BMULT
