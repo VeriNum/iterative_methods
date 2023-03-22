@@ -6237,7 +6237,7 @@ Lemma resid_sub_0_N_0 {t: type} :
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A x0 b /\ input_bound_at_N_0_Rcompute_1 A' x0' b' ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
@@ -6353,9 +6353,24 @@ assert (Hf_minus: finite
                      (nth (@inord n i) b
                         (Zconst t 0)))))).
 { apply Bplus_no_ov_finite.
-  admit.
+  rewrite inord_val.
+  assert (b' i ord0 = (nth i b (Zconst t 0))).
+  { by rewrite !mxE. }
+  assert (A1_inv_J A' i ord0 = 
+          (BDIV (Zconst t 1)
+            (nth i (nth i A []) (Zconst t 0)))).
+  { by rewrite !mxE. } rewrite -H13 -H14.
+  apply D_inv_mult_b_is_finite ; try by [].
   apply finite_is_finite. rewrite is_finite_Bopp.
-  apply finite_is_finite. admit.
+  apply finite_is_finite.
+  rewrite inord_val.
+  assert (b' i ord0 = (nth i b (Zconst t 0))).
+  { by rewrite !mxE. }
+  assert (A1_inv_J A' i ord0 = 
+          (BDIV (Zconst t 1)
+            (nth i (nth i A []) (Zconst t 0)))).
+  { by rewrite !mxE. } rewrite -H13 -H14.
+  apply D_inv_mult_b_is_finite ; try by [].
   assert (forall x: ftype t, FT2R (BOPP x) = (- (FT2R x))%Re).
   {  intros. unfold FT2R. by rewrite B2R_Bopp. } rewrite H13.
   unfold Bplus_no_overflow.
@@ -6413,7 +6428,7 @@ assert (Hf_minus: finite
   - apply Hf_minus.
 + rewrite inord_val. specialize (H7 i).
   by rewrite !mxE in H7.
-Admitted.
+Qed.
 
 
 
