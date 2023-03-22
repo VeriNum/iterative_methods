@@ -6052,10 +6052,7 @@ induction v.
       by []. rewrite -ltnS.
       destruct (length v). contradict H1. lia. 
       simpl. by apply /ssrnat.ltP.
-    } 
-
-
-
+    } rewrite H3 in H. 
     by rewrite list_split_l ?list_split_r /= in H.
   } specialize (IHv H1).
   unfold dotprod_r in IHv. rewrite IHv.
