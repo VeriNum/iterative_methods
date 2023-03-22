@@ -7454,13 +7454,11 @@ destruct H0.
                        rewrite [in X in (X <= _)%Re]H13.
                        apply Rle_refl.
                        rewrite HeqA_real Heqb_real. by rewrite H12.
-                       
-
-
-                     admit.
-                     apply Rmult_le_compat_l. apply /RleP. apply matrix_norm_pd.
-                     apply H1.
-  
+                       intros. 
+                       rewrite HeqA_real. rewrite mxE. by apply BDIV_FT2R_sep_zero.
+                     + apply Rmult_le_compat_l. apply /RleP. apply matrix_norm_pd.
+                       apply H1.
+                   }
                     
   
 
