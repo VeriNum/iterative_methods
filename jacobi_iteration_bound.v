@@ -7503,15 +7503,8 @@ destruct H0.
                             apply Rplus_le_le_0_compat; try nra; try apply g_pos.
                        ++++ apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
                        ++++ apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-
-
-destruct HG as [_ HG].
-                   assert (vector_inj
-                               (repeat (Zconst t 0) (length b)) n.+1 =
-                             \col_(j < n.+1) (Zconst t 0)).
-                    { apply matrixP. unfold eqrel. intros. rewrite !mxE.
-                      by rewrite nth_repeat.
-                    } rewrite Heqx0' /x0. rewrite H. rewrite HeqGamma. rewrite -Heqn. apply HG.
+                   --- destruct HG as [_ HG].
+                       rewrite HeqGamma. rewrite -Heqn. apply HG.
              -- rewrite <- finite_is_finite. apply finite_residual_0.
                 apply HlenA. apply HeqAb. unfold size_constraint. 
                 destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
