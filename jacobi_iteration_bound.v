@@ -3574,6 +3574,7 @@ Lemma bound_each_elem_A2_x0 {t: type} :
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
   input_bound_at_N_0 A x0 b ->
+  @size_constraint t n ->
   (forall x : ftype t * ftype t,
       In x
         (combine
@@ -3586,18 +3587,18 @@ Lemma bound_each_elem_A2_x0 {t: type} :
       (Rabs (FT2R x.1) < sqrt (fun_bnd t n.+1))%Re /\
       (Rabs (FT2R x.2) < sqrt (fun_bnd t n.+1))%Re).
 Proof.
-intros. apply in_rev in H5.
+intros. apply in_rev in H6.
 pose proof (@In_nth _ (rev (combine
           (vec_to_list_float n.+1
              (\row_j A2_J A' (inord k) j)^T)
           (vec_to_list_float n.+1
-             (\col_j x0' j ord0)))) x (Zconst t 0, Zconst t 0) H5).
-destruct H6 as [p [Hlenp Hnth]].
+             (\col_j x0' j ord0)))) x (Zconst t 0, Zconst t 0) H6).
+destruct H7 as [p [Hlenp Hnth]].
 rewrite rev_length combine_length !length_veclist Nat.min_id in Hlenp.
 rewrite rev_nth in Hnth.
 rewrite combine_length !length_veclist Nat.min_id in Hnth.
 assert ((n.+1 - p.+1)%coq_nat = (n.+1.-1 - p)%coq_nat) by lia.
-rewrite H6 in Hnth. rewrite combine_nth in Hnth.
+rewrite H7 in Hnth. rewrite combine_nth in Hnth.
 rewrite !nth_vec_to_list_float in Hnth.
 rewrite mxE in Hnth. rewrite mxE in Hnth.
 rewrite mxE in Hnth.
@@ -3609,9 +3610,7 @@ repeat split; try apply H2; try apply H3; try apply H4.
 rewrite !mxE. unfold x0. rewrite nth_repeat /=.
 rewrite Rabs_R0. apply sqrt_lt_R0.      
 apply fun_bound_gt_0.
-
-
-
+by apply g1_constraint.
 by apply /ssrnat.ltP.
 by apply /ssrnat.ltP.
 by rewrite !length_veclist.
