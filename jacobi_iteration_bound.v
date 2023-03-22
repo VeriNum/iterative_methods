@@ -7482,7 +7482,11 @@ destruct H0.
                             repeat apply Rmult_le_pos.
                             apply /RleP. apply vec_norm_pd.
                             apply Rplus_le_le_0_compat; last by apply g1_pos.
-  
+                            apply /RleP. apply vec_norm_pd.
+                            apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+                            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+                       ++++ apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+                       ++++ apply Rplus_le_le_0_compat; try nra; try apply g_pos.
 
 
 
