@@ -7475,7 +7475,13 @@ destruct H0.
                        apply Rmult_le_compat_r.
                        apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
                        apply Rplus_le_compat_r. apply H13.
-                   --- 
+                   --- apply Rplus_le_le_0_compat; last by apply g1_pos.
+                       repeat apply Rmult_le_pos.
+                       ++++ apply /RleP. apply vec_norm_pd.
+                       ++++ apply Rplus_le_le_0_compat; last by apply g1_pos.
+                            repeat apply Rmult_le_pos.
+                            apply /RleP. apply vec_norm_pd.
+                            apply Rplus_le_le_0_compat; last by apply g1_pos.
   
 
 
