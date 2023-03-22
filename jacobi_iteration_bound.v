@@ -6056,9 +6056,14 @@ induction v.
     by rewrite list_split_l ?list_split_r /= in H.
   } specialize (IHv H1).
   unfold dotprod_r in IHv. rewrite IHv.
-  specialize (H 0%nat).
+  specialize (H (length (a :: v)).-1).
+  assert (((length (a :: v)).-1 < length (a :: v))%coq_nat).
+  { apply /ssrnat.ltP. apply ltnSn. } specialize (H H2).
+  assert (((length (a :: v)).-1 - (length (a :: v)).-1)%coq_nat = 0%nat).
+  { lia. } rewrite H3 in H. 
   rewrite list_split_l ?list_split_r /= in H.
-  specialize (H0 0%nat).
+  specialize (H0 (length (a :: v)).-1 H2 ).
+  rewrite H3 in H0.
   rewrite ?list_split_l ?list_split_r /= in H0.
   destruct H.
   - rewrite H. auto.
@@ -6074,15 +6079,23 @@ induction v.
     simpl. unfold BinarySingleNaN.Bfma_szero.
     simpl. destruct s; simpl; auto.
   - intros.
-    specialize (H0 i.+1).
+    specialize (H0 i).
+    assert ((i < length (a :: v))%coq_nat).
+    { simpl. lia. } specialize (H0 H3).
+    assert (((length (a :: v)).-1 - i)%coq_nat = 
+            (((length v).-1 - i).+1)%coq_nat) .
+    { simpl. rewrite -subSn /=.
+      destruct (length v). contradict H1. lia.
+      simpl. destruct i. by rewrite subn0. rewrite subSS. 
+      by []. rewrite -ltnS.
+      destruct (length v). contradict H1. lia. 
+      simpl. by apply /ssrnat.ltP.
+    } rewrite H4 in H0. 
     by rewrite ?list_split_l ?list_split_r /= in H0.
 Qed.
 
 
-
-
-
-
+(*
 Lemma dotprod_r_eq_0 {t} (v : list (ftype t * ftype t)):
   (forall i, nth i (fst (List.split v)) (Zconst t 0) = Zconst t 0 \/
              nth i (fst (List.split v)) (Zconst t 0) = neg_zero) ->
@@ -6122,6 +6135,7 @@ induction v.
     specialize (H0 i.+1).
     by rewrite ?list_split_l ?list_split_r /= in H0.
 Qed.
+*)
 
 (**
 finite
