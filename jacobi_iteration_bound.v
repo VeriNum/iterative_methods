@@ -6097,10 +6097,6 @@ Qed.
 
 (** TODO
 finite
-  ((X_m_jacobi 2 x0' b' A' -f
-    X_m_jacobi 1 x0' b' A') 
-     (inord m) ord0) /\
-finite
   (BMULT (A1_J A' (inord m) ord0)
      ((X_m_jacobi 2 x0' b' A' -f
        X_m_jacobi 1 x0' b' A') 
@@ -6606,6 +6602,32 @@ apply Bplus_no_ov_finite.
 Qed.
 
 
+Lemma finite_A_mult_x2_minus_x1 {t: type} :
+  forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  @size_constraint t (length A).-1 ->
+  (forall i j, finite (A2_J A' i j)) ->
+  (forall i, finite (x0' i ord0)) ->
+  input_bound_at_N_0 A x0 b ->
+  (forall i, finite (A' i i)) ->
+  (forall i, finite (A1_inv_J A' i ord0)) ->
+  (forall i, finite (b' i ord0)) ->
+  matrix_inf_norm (FT2R_mat (A2_J A')) = 0%Re ->
+  forall i, 
+  finite (BMULT (A' i i )
+           ((X_m_jacobi 2 x0' b' A' -f
+             X_m_jacobi 1 x0' b' A') i ord0)).
+Admitted.
+
+
+
 Lemma vec_norm_resid_N_0 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -6951,11 +6973,10 @@ destruct H0.
                 repeat (rewrite nth_vec_to_list_float; try (rewrite inordK; by apply /ssrnat.ltP)).
                 rewrite !inord_val.
 
-
-
-
-
-admit.
+                admit.
+                by apply /ssrnat.ltP.
+                by rewrite !length_veclist.
+                apply Hlenm.
              ** rewrite -H7 -H5. apply finite_residual_1. 
                 apply HlenA. apply HeqAb. 
                 unfold size_constraint. rewrite -Heqn. apply H.
@@ -7018,9 +7039,12 @@ admit.
                   destruct H12 as [H12a H12b].
                   rewrite -H12a -H12b. 
                   split.
-                  rewrite !mxE. apply H.
+                  rewrite !mxE. apply H. split.
+                  + rewrite HeqA' Heqb' .
+                    pose proof (@finite_x2_minus_x1 t A b HlenA HeqAb).
+                    apply  finite_x2_minus_x1; try by [].
                   admit.
-                  admit.
+                  by apply /ssrnat.ltP.
                   by apply /ssrnat.ltP.
                   by rewrite !length_veclist.
                   apply Hmth.
