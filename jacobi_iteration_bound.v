@@ -6208,7 +6208,18 @@ assert ((let l1 :=
   { intros. by simpl. } rewrite H12 in H11.
   assert (forall l l': vector t, (l, l').2 = l').
   { intros. by simpl. } rewrite H13 in H11.
-  apply H11. intros. admit.
+  apply H11. intros. 
+  + rewrite combine_length !length_veclist Nat.min_id.
+    rewrite combine_length !length_veclist Nat.min_id in H14.
+    rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
+    rewrite mxE. rewrite mxE. 
+    apply x_real_to_float_zero.
+    by []. rewrite !inord_val. 
+    specialize (H9 (@inord n i0)). by rewrite mxE in H9. 
+  + 
+
+
+admit.
 }
 rewrite H11.
 assert ((let l1 :=
