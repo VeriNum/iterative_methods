@@ -7446,7 +7446,11 @@ destruct H0.
                    { apply Rle_trans with 
                      (matrix_inf_norm (FT2R_mat A') *
                        (vec_inf_norm (x_fix x b_real A_real)))%Re.
-                     + rewrite H12. appl
+                     + rewrite H12. eapply Rle_trans.
+                       apply /RleP. apply submult_prop.
+                       rewrite -RmultE. apply Rmult_le_compat_l.
+                       apply /RleP. apply matrix_norm_pd.
+                       
 
 
                      admit.
