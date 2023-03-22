@@ -6388,7 +6388,72 @@ Lemma vec_norm_diag_matrix_mult_le {n} (v1 v2: 'cV[R]_n.+1) :
   (vec_inf_norm v1 * vec_inf_norm v2 <=
     vec_inf_norm (diag_matrix_vec_mult_R v1 v2))%Re.
 Proof.
+unfold vec_inf_norm, diag_matrix_vec_mult_R.
+apply /RleP. rewrite RmultE.
+rewrite -bigmaxr_mulr.
++ apply /RleP. apply bigmax_le.
+  - by rewrite size_map size_enum_ord.
+  - intros.
+    assert ([seq bigmaxr 0%Re
+                    [seq Rabs (v1 i1 0) | i1 <- enum 'I_n.+1] *
+                  Rabs (v2 i0 0)
+                | i0 <- enum 'I_n.+1] = 
+               mkseq (fun i: nat => bigmaxr 0%Re
+                            [seq Rabs (v1 i1 0) | i1 <- enum 'I_n.+1] *
+                            Rabs (v2 (@inord n i) 0))
+                             n.+1).
+      { by rewrite !seq_equiv. } rewrite H0.
+    rewrite nth_mkseq; 
+    last by rewrite size_map size_enum_ord in H.
+    rewrite -!RmultE.
+    
 
+
+
+ rewrite seq_equiv. rewrite nth_mkseq. 
+    last by rewrite size_map size_enum_ord in H.
+    apply Rle_trans with 
+    [seq (bigmaxr 0%Re
+           [seq Rabs (v1 i1 0) | i1 <- enum 'I_n.+1] *
+         Rabs (v2 i0 0))%Ri
+      | i0 <- enum 'I_n.+1]`_i.
+    * assert ([seq bigmaxr 0%Re
+                    [seq Rabs (v1 i1 0) | i1 <- enum 'I_n.+1] *
+                  Rabs (v2 i0 0)
+                | i0 <- enum 'I_n.+1] = 
+               mkseq (fun i: nat => bigmaxr 0%Re
+                            [seq Rabs (v1 i1 0) | i1 <- enum 'I_n.+1] *
+                            Rabs (v2 (@inord n i) 0))
+                             n.+1).
+      { by rewrite !seq_equiv. } rewrite H0.
+      rewrite nth_mkseq; 
+      last by rewrite size_map size_enum_ord in H.
+      rewrite !mxE. rewrite -!RmultE. rewrite Rabs_mult.
+      rewrite !nth_vec_to_list_real; try rewrite inord_val.
+      ++ apply Rmult_le_compat_r; try apply Rabs_pos.
+         apply Rle_trans with 
+         [seq Rabs (v1 i1 0) | i1 <- enum 'I_n.+1]`_i.
+         -- rewrite seq_equiv. rewrite nth_mkseq; 
+            last by rewrite size_map size_enum_ord in H.
+            apply Rle_refl.
+         -- apply /RleP.
+            apply (@bigmaxr_ler _ 0%Re [seq Rabs (v1 i1 0) | i1 <- enum 'I_n.+1] i).
+            rewrite size_map size_enum_ord.
+            by rewrite size_map size_enum_ord in H.
+      ++ by rewrite size_map size_enum_ord in H.
+      ++ by rewrite size_map size_enum_ord in H.
+    * apply /RleP.
+      apply (@bigmaxr_ler _ 0%Re [seq bigmaxr 0%Re
+                     [seq Rabs (v1 i1 0) | i1 <- enum 'I_n.+1] *
+                   Rabs (v2 i0 0)
+                 | i0 <- enum 'I_n.+1] i).
+       rewrite size_map size_enum_ord.
+       by rewrite size_map size_enum_ord in H.
++ apply bigmax_le_0.
+  - apply /RleP. apply Rle_refl.
+  - intros. rewrite seq_equiv. rewrite nth_mkseq;
+    last by rewrite size_map size_enum_ord in H.
+    apply /RleP. apply Rabs_pos.
 
 
 
