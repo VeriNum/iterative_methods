@@ -6262,6 +6262,12 @@ assert (Hf_minus: finite
                (Zconst t 0))))%Re).
   destruct H14 as [d [e [Hde [Hd [He H14]]]]].
   rewrite H14. eapply Rle_lt_trans.
+  apply Rabs_triang. eapply Rle_lt_trans.
+  apply Rplus_le_compat_l. apply He.
+  rewrite Rabs_mult. 
+  assert (forall x:R, (x + - x)%Re = 0%Re). { intros. nra. }
+  rewrite H15. rewrite Rabs_R0. rewrite Rmult_0_l Rplus_0_l.
+  
 
   
 
