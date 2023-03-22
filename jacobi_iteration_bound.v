@@ -6517,8 +6517,6 @@ specialize (H7 i). rewrite !mxE in H7. rewrite inord_val. apply H7.
 Qed.
 
 
-
-
 Lemma finite_x2_minus_x1 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -6532,7 +6530,7 @@ Lemma finite_x2_minus_x1 {t: type} :
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A x0 b /\ input_bound_at_N_0_Rcompute_1 A' x0' b'  ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
@@ -6674,7 +6672,7 @@ Lemma finite_A_mult_x2_minus_x1 {t: type} :
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A x0 b /\ input_bound_at_N_0_Rcompute_1 A' x0' b' ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
@@ -6700,7 +6698,6 @@ apply BMULT_no_overflow_is_finite.
 Qed.
 
 
-
 Lemma vec_norm_resid_N_0 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -6714,7 +6711,7 @@ Lemma vec_norm_resid_N_0 {t: type} :
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A x0 b /\ input_bound_at_N_0_Rcompute_1 A' x0' b' ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
@@ -6763,7 +6760,7 @@ Lemma finite_residual_1 {t: type} :
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A x0 b /\ input_bound_at_N_0_Rcompute_1 A' x0' b' ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
