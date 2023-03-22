@@ -6384,6 +6384,7 @@ Admitted.
    (diag_matrix_vec_mult_R (A1_diag A)
       (b - A2_J_real A *m x)))%Re
 *)
+(*
 Lemma vec_norm_diag_matrix_mult_le {n} (v1 v2: 'cV[R]_n.+1) : 
   (vec_inf_norm v1 * vec_inf_norm v2 <=
     vec_inf_norm (diag_matrix_vec_mult_R v1 v2))%Re.
@@ -6456,11 +6457,17 @@ rewrite -bigmaxr_mulr.
     apply /RleP. apply Rabs_pos.
 
 
-
+*)
+(*
 
 
 Lemma bound_norm_d {n} (A : 'M[R]_n.+1) (b : 'cV[R]_n.+1):
   let x := A^-1 *m b in
+  vec_inf_norm b <= matrix
+
+
+
+
   ((vec_inf_norm (A1_diag A) * vec_inf_norm b) / 
       (1 + vec_inf_norm (A1_diag A) * (matrix_inf_norm (A2_J_real A))) <=
    vec_inf_norm (x_fix x b A))%Re.
@@ -6476,11 +6483,11 @@ intros. apply Rdiv_le_left.
     replace (a * (b * c))%Re with (b * (c * a))%Re by nra
   end. rewrite -Rmult_minus_distr_l .
   rewrite [in X in (_ <= X)%Re]/x_fix.
-  
+ 
 
 
 Admitted.
-
+*)
 
 
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
@@ -7426,7 +7433,15 @@ destruct H0.
                        unfold x0. rewrite nth_repeat. simpl. rewrite Rabs_R0.
                        apply /RleP. apply Rle_refl.
                    } rewrite H. rewrite  !Rmult_0_r !Rmult_0_l ?Rplus_0_r ?Rplus_0_l.
-                   assert ((vec_inf_norm (FT2R_mat b') <= 
+                   (** use : Heqx : x = A_real^-1 *m b_real **)
+                   assert (b_real = A_real *m x).
+                   { rewrite Heqx. rewrite mulmxA. rewrite mulmxV.
+                     by rewrite mul1mx. rewrite HeqA_real. apply diagonal_dominance_implies_invertibility.
+                     apply HinvA. 
+                   }
+
+
+assert ((vec_inf_norm (FT2R_mat b') <= 
                               matrix_inf_norm (FT2R_mat A') * 
                                 (d_mag_def_alt A' b' /
                                   (1 - rho_def_alt A' b')))%Re).
