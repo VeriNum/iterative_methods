@@ -3664,6 +3664,29 @@ apply H6.
 + by apply bound_each_elem_A2_x0 .
 Qed.
 
+Lemma A2_mult_x0_eq_0 {t: type} :
+  forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  forall k,
+  (k < n.+1)%coq_nat ->
+  @size_constraint t n ->
+  (forall i j, finite (A2_J A' i j)) ->
+  (forall i, finite (x0' i ord0)) ->
+  input_bound_at_N_0 A x0 b ->
+  forall i,
+  (A2_J A' *f x0') i ord0 = Zconst t 0.
+Proof.
+intros.
+rewrite !mxE.
+
+
 Lemma no_overflow_0_aux1 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
