@@ -6577,22 +6577,16 @@ destruct H0.
                   rewrite H13 in H12.
                   rewrite combine_nth in H12.
                   repeat (rewrite nth_vec_to_list_float in H12;try by []).
-
-
-
-
-
-
-
-admit.
-                  (*pose proof (@finite_implies_1 t A b HlenA HeqAb).
-                  pose proof (@finite_residual_0 t A b HlenA HeqAb).
-                  destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
-                  rewrite Heqn in size_cons.
-                  specialize (H12 size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl).
-                  specialize (H11 H12).
-                  apply H11. rewrite -Heqn -HeqA' -Heqx0' -Heqb'.
-                  apply H10. *)
+                  destruct xy. simpl. apply inject_pair_iff in H12.
+                  destruct H12 as [H12a H12b].
+                  rewrite -H12a -H12b. 
+                  split.
+                  rewrite !mxE. apply H.
+                  admit.
+                  admit.
+                  by apply /ssrnat.ltP.
+                  by rewrite !length_veclist.
+                  apply Hmth.
                 }
                specialize (H10 H11).
                assert ((vec_inf_norm
