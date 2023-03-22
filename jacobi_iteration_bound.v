@@ -6380,6 +6380,16 @@ apply dotprod_finite.
 Admitted.
 
 
+
+Lemma bound_norm_d {n} (A : 'M[R]_n.+1) (b : 'cV[R]_n.+1):
+  let x := A^-1 *m b in
+  ((vec_inf_norm (A1_diag A) * vec_inf_norm b) / 
+      (1 + vec_inf_norm (A1_diag A) * (matrix_inf_norm (A2_J_real A))) <=
+   vec_inf_norm (x_fix x b A))%Re.
+Admitted.
+
+
+
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
