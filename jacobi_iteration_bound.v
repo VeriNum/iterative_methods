@@ -6624,7 +6624,21 @@ Lemma finite_A_mult_x2_minus_x1 {t: type} :
   finite (BMULT (A' i i )
            ((X_m_jacobi 2 x0' b' A' -f
              X_m_jacobi 1 x0' b' A') i ord0)).
-Admitted.
+Proof.
+intros.
+apply BMULT_no_overflow_is_finite.
++ apply H5.
++ apply finite_x2_minus_x1; try by [].
++ unfold Bmult_no_overflow.
+  rewrite resid_sub_0_N_0; try by [].
+  rewrite Rmult_0_r. 
+  unfold rounded.
+  pose proof (@generic_round_property t 0%Re).
+  destruct H9 as [d [e [Hde [Hd [He H9]]]]].
+  rewrite H9. rewrite Rmult_0_l Rplus_0_l.
+  eapply Rle_lt_trans. apply He.
+  apply defualt_abs_lt_fmax.
+Qed.
 
 
 
