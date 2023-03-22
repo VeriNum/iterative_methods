@@ -6124,7 +6124,20 @@ Lemma D_inv_mult_b_is_finite {t: type} :
   finite (BMULT (A1_inv_J A' i ord0) (b' i ord0)). 
 Proof.
 intros.
-
+apply BMULT_no_overflow_is_finite.
++ apply H6.
++ apply H7.
++ unfold Bmult_no_overflow, rounded.
+  pose proof (@generic_round_property t 
+                (FT2R (A1_inv_J A' i ord0) *
+                      FT2R (b' i ord0))%Re).
+  destruct H8 as [d [e [Hde [Hd [He H8]]]]].
+  rewrite H8.
+  eapply Rle_lt_trans. apply Rabs_triang.
+  eapply Rle_lt_trans. apply Rplus_le_compat_l. apply He.
+  apply Rcomplements.Rlt_minus_r.
+  
+  
 
 
 
