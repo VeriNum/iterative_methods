@@ -6095,7 +6095,7 @@ induction v.
 Qed.
 
 
-(**
+(** TODO
 finite
   ((X_m_jacobi 2 x0' b' A' -f
     X_m_jacobi 1 x0' b' A') 
@@ -6108,6 +6108,19 @@ finite
 ________________________
 
 ***)
+
+(** TODO
+finite
+  (jacobi_iter x0' b' A' 
+     (inord i0) ord0)
+finite
+  (BMULT
+     (BDIV (Zconst t 1)
+        (nth (inord i)
+           (nth (inord i) A [])
+           (Zconst t 0)))
+     (nth (inord i) b (Zconst t 0)))
+**)
 
 
 Lemma resid_sub_0_N_0 {t: type} :
