@@ -7146,12 +7146,14 @@ destruct H0.
                    } split.
                   + rewrite HeqA' Heqb' .
                     pose proof (@finite_x2_minus_x1 t A b HlenA HeqAb size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl ).
-                    rewrite -Heqn in H12. by apply H12. apply  finite_x2_minus_x1; try by [].
-                  admit.
-                  by apply /ssrnat.ltP.
-                  by apply /ssrnat.ltP.
-                  by rewrite !length_veclist.
-                  apply Hmth.
+                    rewrite -Heqn in H12. rewrite Heqx0'. apply H12. by rewrite -HeqA'. 
+                  + rewrite HeqA' Heqb' .
+                    pose proof (@finite_A_mult_x2_minus_x1 t A b HlenA HeqAb size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl ).
+                    rewrite -Heqn in H12. rewrite Heqx0'. rewrite mxE. apply H12. by rewrite -HeqA'. 
+                  + by apply /ssrnat.ltP.
+                  + by apply /ssrnat.ltP.
+                  + by rewrite !length_veclist.
+                  + apply Hmth.
                 }
                specialize (H10 H11).
                assert ((vec_inf_norm
