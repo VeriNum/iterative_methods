@@ -3366,6 +3366,117 @@ split.
     } by rewrite H9. 
 Qed.
 
+
+Local Open Scope R_scope.
+
+Lemma bpow_femax_lb_strict t : 
+4 < bpow Zaux.radix2 (femax t).
+Proof. 
+pose proof fprec_gt_one t.
+pose proof fprec_lt_femax t.
+assert (1 < femax t)%Z.
+eapply Z.lt_trans with (fprec t); auto.
+eapply Rle_lt_trans with (bpow Zaux.radix2 2).
+unfold bpow; simpl; nra.
+apply bpow_lt; lia.
+Qed.
+
+
+Lemma mult_d_e_g1_lt' t n m:
+(1 <= n )%nat -> (1 <= m)%nat ->
+g1 t n m * (1 + default_rel t)  + default_abs t < g1 t (S n) (S m).
+Proof.
+intros; replace (S n) with (n + 1)%coq_nat by lia.
+replace (S m) with (m + 1)%coq_nat by lia.
+unfold g1, g; field_simplify. rewrite plus_INR.
+replace (INR 1) with 1 by (simpl; nra).
+rewrite !Rmult_plus_distr_l.
+rewrite !Rmult_1_r. replace
+(INR n * default_abs t * (1 + default_rel t) ^ m * default_rel t +
+INR n * default_abs t * (1 + default_rel t) ^ m) with
+(INR n * default_abs t * (1 + default_rel t) ^ m * (1 + default_rel t)) by nra.
+rewrite !Rmult_plus_distr_r.
+apply Rplus_le_lt_compat.
+rewrite !Rmult_assoc.
+rewrite Rmult_comm.
+rewrite !Rmult_assoc.
+apply Rmult_le_compat_l. nra. 
+apply Rmult_le_compat_l. apply bpow_ge_0.
+rewrite <- !Rmult_assoc.
+rewrite Rmult_comm. 
+apply Rmult_le_compat_l; [apply pos_INR| ].
+rewrite Rmult_comm.
+rewrite tech_pow_Rmult.
+replace (S m) with (m + 1)%coq_nat by lia; nra.
+replace (default_abs t) with (default_abs t * 1) at 1 by nra.
+apply Rmult_lt_compat_l; [apply  default_abs_gt_0 | ].
+apply Rlt_pow_R1. apply default_rel_plus_1_gt_1.
+lia.
+Qed.
+
+Lemma defualt_abs_lt_fmax t :
+default_abs t < bpow Zaux.radix2 (femax t).
+Proof.
+replace (bpow Zaux.radix2 (femax t)) with (1 * bpow Zaux.radix2 (femax t)) by nra.
+unfold default_abs; apply Rmult_lt_compat; try nra.
+apply bpow_ge_0.
+apply bpow_lt.
+apply Z.lt_sub_lt_add_r.
+apply Z.lt_sub_lt_add_r.
+eapply Z.lt_trans with (fprec t + fprec t + femax t)%Z; 
+  [ | repeat apply Zplus_lt_compat_r; apply fprec_lt_femax].
+eapply Z.lt_trans with (fprec t + fprec t + fprec t)%Z;
+[ |  repeat apply Zplus_lt_compat_l; apply fprec_lt_femax ].
+eapply Z.lt_trans with (1 + fprec t + fprec t)%Z;
+[ |  repeat apply Zplus_lt_compat_r; apply fprec_gt_one].
+eapply Z.lt_trans with (1 + 1 + fprec t)%Z;
+[ |  repeat apply Zplus_lt_compat_r; repeat apply Zplus_lt_compat_l; 
+apply fprec_gt_one].
+eapply Z.le_lt_trans with (1 + 1 + 1)%Z;
+[ lia |  repeat apply Zplus_lt_compat_r; repeat apply Zplus_lt_compat_l; 
+apply fprec_gt_one].
+Qed.
+
+Lemma fun_bound_gt_0 t n :
+forall (Hn : g1 t (n + 1) n <= fmax t), 
+0 < fun_bnd t n. 
+Proof.
+intros;
+unfold fun_bnd. apply Rmult_lt_0_compat.
++ apply Rlt_Rminus. apply Generic_proof.Rdiv_lt_mult_pos.
+  apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
+  apply Rcomplements.Rlt_minus_r.
+  assert (Hn': (n= 0%nat)%coq_nat \/ (1<=n)%coq_nat) by lia; destruct Hn'; subst.
+  { simpl. unfold g1, g. simpl; field_simplify. apply defualt_abs_lt_fmax. }
+  assert (Hn'': (n= 1%nat)%coq_nat \/ (1 < n)%coq_nat) by lia; destruct Hn''; subst.
+  { simpl. unfold g1, g. simpl; field_simplify.
+    eapply Rlt_trans.
+    apply Rplus_lt_compat. 
+    apply Rmult_lt_compat.
+    apply default_abs_ge_0. 
+    apply default_rel_ge_0.
+    apply default_abs_ub_strict.
+    apply default_rel_ub_strict.
+    apply Rmult_lt_compat_l; try nra.
+    apply default_abs_ub_strict. 
+    eapply Rlt_trans; [| apply bpow_femax_lb_strict]; nra. }
+    eapply Rlt_le_trans; last by apply Hn.  
+    replace (n + 1)%coq_nat with (S n) by lia.
+    assert (n = (S (n - 1))%coq_nat). rewrite subn1. rewrite prednK. by [].
+    apply /ssrnat.ltP. lia.
+    rewrite [in X in (_ < g1 t _ X)]H1. rewrite addn1.
+    apply mult_d_e_g1_lt'. by apply /ssrnat.ltP.
+    rewrite subn_gt0. by apply /ssrnat.ltP. 
++ assert (forall x:R, (1 / x)%Re = (/x)%Re). 
+  { intros. nra. } rewrite H. apply Rinv_0_lt_compat.
+  apply Rplus_lt_le_0_compat. nra.
+  apply Rmult_le_pos. apply pos_INR.
+  apply Rplus_le_le_0_compat. apply g_pos. nra.
+Qed.
+
+Close Scope R_scope.
+
+
 Definition input_bound_at_N_0 {t: type} 
   (A: matrix t) (x0 b: vector t) :=
   let n := (length A).-1 in
@@ -3375,9 +3486,9 @@ Definition input_bound_at_N_0 {t: type}
   (forall i j, 
     (Rabs (FT2R (A2_J A' i j)) <
           sqrt (fun_bnd t n.+1))%Re) /\
-  (forall i,
+  (*(forall i,
     (Rabs (FT2R (x0' i ord0)) <
-            sqrt (fun_bnd t n.+1))%Re) /\
+            sqrt (fun_bnd t n.+1))%Re) /\ *)
   (forall i,
     ((Rabs (FT2R (b' i ord0)) +
         ((\sum_j
@@ -3495,6 +3606,12 @@ apply inject_pair_iff in Hnth.
 destruct Hnth as [Hnth1 Hnth2].
 simpl. rewrite -Hnth1 -Hnth2.
 repeat split; try apply H2; try apply H3; try apply H4.
+rewrite !mxE. unfold x0. rewrite nth_repeat /=.
+rewrite Rabs_R0. apply sqrt_lt_R0.      
+apply fun_bound_gt_0.
+
+
+
 by apply /ssrnat.ltP.
 by apply /ssrnat.ltP.
 by rewrite !length_veclist.
@@ -5844,114 +5961,6 @@ destruct H4. rewrite Rabs_right in H2; nra.
 rewrite Rabs_left in H2; try nra.
 Qed.
 
-Local Open Scope R_scope.
-
-Lemma bpow_femax_lb_strict t : 
-4 < bpow Zaux.radix2 (femax t).
-Proof. 
-pose proof fprec_gt_one t.
-pose proof fprec_lt_femax t.
-assert (1 < femax t)%Z.
-eapply Z.lt_trans with (fprec t); auto.
-eapply Rle_lt_trans with (bpow Zaux.radix2 2).
-unfold bpow; simpl; nra.
-apply bpow_lt; lia.
-Qed.
-
-
-Lemma mult_d_e_g1_lt' t n m:
-(1 <= n )%nat -> (1 <= m)%nat ->
-g1 t n m * (1 + default_rel t)  + default_abs t < g1 t (S n) (S m).
-Proof.
-intros; replace (S n) with (n + 1)%coq_nat by lia.
-replace (S m) with (m + 1)%coq_nat by lia.
-unfold g1, g; field_simplify. rewrite plus_INR.
-replace (INR 1) with 1 by (simpl; nra).
-rewrite !Rmult_plus_distr_l.
-rewrite !Rmult_1_r. replace
-(INR n * default_abs t * (1 + default_rel t) ^ m * default_rel t +
-INR n * default_abs t * (1 + default_rel t) ^ m) with
-(INR n * default_abs t * (1 + default_rel t) ^ m * (1 + default_rel t)) by nra.
-rewrite !Rmult_plus_distr_r.
-apply Rplus_le_lt_compat.
-rewrite !Rmult_assoc.
-rewrite Rmult_comm.
-rewrite !Rmult_assoc.
-apply Rmult_le_compat_l. nra. 
-apply Rmult_le_compat_l. apply bpow_ge_0.
-rewrite <- !Rmult_assoc.
-rewrite Rmult_comm. 
-apply Rmult_le_compat_l; [apply pos_INR| ].
-rewrite Rmult_comm.
-rewrite tech_pow_Rmult.
-replace (S m) with (m + 1)%coq_nat by lia; nra.
-replace (default_abs t) with (default_abs t * 1) at 1 by nra.
-apply Rmult_lt_compat_l; [apply  default_abs_gt_0 | ].
-apply Rlt_pow_R1. apply default_rel_plus_1_gt_1.
-lia.
-Qed.
-
-Lemma defualt_abs_lt_fmax t :
-default_abs t < bpow Zaux.radix2 (femax t).
-Proof.
-replace (bpow Zaux.radix2 (femax t)) with (1 * bpow Zaux.radix2 (femax t)) by nra.
-unfold default_abs; apply Rmult_lt_compat; try nra.
-apply bpow_ge_0.
-apply bpow_lt.
-apply Z.lt_sub_lt_add_r.
-apply Z.lt_sub_lt_add_r.
-eapply Z.lt_trans with (fprec t + fprec t + femax t)%Z; 
-  [ | repeat apply Zplus_lt_compat_r; apply fprec_lt_femax].
-eapply Z.lt_trans with (fprec t + fprec t + fprec t)%Z;
-[ |  repeat apply Zplus_lt_compat_l; apply fprec_lt_femax ].
-eapply Z.lt_trans with (1 + fprec t + fprec t)%Z;
-[ |  repeat apply Zplus_lt_compat_r; apply fprec_gt_one].
-eapply Z.lt_trans with (1 + 1 + fprec t)%Z;
-[ |  repeat apply Zplus_lt_compat_r; repeat apply Zplus_lt_compat_l; 
-apply fprec_gt_one].
-eapply Z.le_lt_trans with (1 + 1 + 1)%Z;
-[ lia |  repeat apply Zplus_lt_compat_r; repeat apply Zplus_lt_compat_l; 
-apply fprec_gt_one].
-Qed.
-
-Lemma fun_bound_gt_0 t n :
-forall (Hn : g1 t (n + 1) n <= fmax t), 
-0 < fun_bnd t n. 
-Proof.
-intros;
-unfold fun_bnd. apply Rmult_lt_0_compat.
-+ apply Rlt_Rminus. apply Generic_proof.Rdiv_lt_mult_pos.
-  apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
-  apply Rcomplements.Rlt_minus_r.
-  assert (Hn': (n= 0%nat)%coq_nat \/ (1<=n)%coq_nat) by lia; destruct Hn'; subst.
-  { simpl. unfold g1, g. simpl; field_simplify. apply defualt_abs_lt_fmax. }
-  assert (Hn'': (n= 1%nat)%coq_nat \/ (1 < n)%coq_nat) by lia; destruct Hn''; subst.
-  { simpl. unfold g1, g. simpl; field_simplify.
-    eapply Rlt_trans.
-    apply Rplus_lt_compat. 
-    apply Rmult_lt_compat.
-    apply default_abs_ge_0. 
-    apply default_rel_ge_0.
-    apply default_abs_ub_strict.
-    apply default_rel_ub_strict.
-    apply Rmult_lt_compat_l; try nra.
-    apply default_abs_ub_strict. 
-    eapply Rlt_trans; [| apply bpow_femax_lb_strict]; nra. }
-    eapply Rlt_le_trans; last by apply Hn.  
-    replace (n + 1)%coq_nat with (S n) by lia.
-    assert (n = (S (n - 1))%coq_nat). rewrite subn1. rewrite prednK. by [].
-    apply /ssrnat.ltP. lia.
-    rewrite [in X in (_ < g1 t _ X)]H1. rewrite addn1.
-    apply mult_d_e_g1_lt'. by apply /ssrnat.ltP.
-    rewrite subn_gt0. by apply /ssrnat.ltP. 
-+ assert (forall x:R, (1 / x)%Re = (/x)%Re). 
-  { intros. nra. } rewrite H. apply Rinv_0_lt_compat.
-  apply Rplus_lt_le_0_compat. nra.
-  apply Rmult_le_pos. apply pos_INR.
-  apply Rplus_le_le_0_compat. apply g_pos. nra.
-Qed.
-
-Close Scope R_scope.
 
 
 (** entries zero in real ==> entries zero in float **)
@@ -8060,4 +8069,3 @@ Qed.
 
 
 End WITH_NANS.
-
