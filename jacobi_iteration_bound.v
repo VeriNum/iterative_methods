@@ -6335,10 +6335,51 @@ Lemma xm_1_is_finte {t: type} :
 Proof.
 intros.
 rewrite mxE.
+pose proof (@matrix_inf_norm_0_implies n (FT2R_mat (A2_J A')) H8).
+specialize (H9 i).    
+assert (forall j, A2_J A' i j = Zconst t 0 \/ A2_J A' i j = neg_zero).
+{ intros. apply x_real_to_float_zero. apply H2.
+  specialize (H9 j). rewrite mxE in H9. apply H9.
+} 
 repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
 rewrite !mxE. apply BMULT_no_overflow_is_finite.
 + specialize (H6 i). rewrite !mxE in H6. rewrite inord_val. apply H6.
-+
++ assert ((let l1 :=
+              vec_to_list_float
+                n.+1
+                (\row_j 
+                 A2_J A' 
+                   (inord i) j)^T
+              in
+            let l2 :=
+              vec_to_list_float
+                n.+1
+                (\col_j 
+                 x0' j ord0) in
+            dotprod_r l1 l2) = Zconst t 0).
+  { pose proof (@dotprod_r_eq_0 t).
+    specialize (H11 (combine 
+                    (vec_to_list_float n.+1
+                        (\row_j  A2_J A' (inord i) j)^T)
+                    (vec_to_list_float  n.+1
+                      (\col_j (x0' j ord0))))).
+    rewrite combine_split in H11; last by rewrite !length_veclist.
+    assert (forall l l': vector t, (l, l').1 = l).
+    { intros. by simpl. } rewrite H12 in H11.
+    assert (forall l l': vector t, (l, l').2 = l').
+    { intros. by simpl. } rewrite H13 in H11.
+    apply H11. 
+    + rewrite combine_length !length_veclist Nat.min_id.
+      intros. 
+      rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
+      rewrite mxE. rewrite mxE. 
+      apply x_real_to_float_zero.
+      by []. rewrite !inord_val. 
+      specialize (H9 (@inord n i0)). by rewrite mxE in H9. 
+    + rewrite combine_length !length_veclist Nat.min_id.
+      intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
+      by rewrite mxE. 
+  } rewrite H11.
 
 
 
