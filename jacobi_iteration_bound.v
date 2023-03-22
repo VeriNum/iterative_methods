@@ -6372,10 +6372,10 @@ apply dotprod_finite.
   rewrite Rabs_R0 Rmult_0_r.
   apply Rmult_lt_0_compat.
   apply Rlt_Rminus. apply Rle_lt_trans with 1%Re.
-  apply default_abs_ub.
-
- 
-  admit.
+  apply default_abs_ub. rewrite -sqrt_1.
+  apply sqrt_lt_1_alt. split. nra. by apply fun_bnd_gt_1.
+  apply Rinv_0_lt_compat.
+  apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
  - rewrite H2 in Hlen.
    rewrite inordK; (by apply /ssrnat.ltP ).
  - rewrite H2 in Hlen.
