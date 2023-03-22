@@ -6240,7 +6240,29 @@ assert (Hf_minus: finite
   apply finite_is_finite. rewrite is_finite_Bopp.
   apply finite_is_finite. admit.
   assert (forall x: ftype t, FT2R (BOPP x) = (- (FT2R x))%Re).
-  {  intros. unfold FT2R. by rewrite B2R_Bopp. }
+  {  intros. unfold FT2R. by rewrite B2R_Bopp. } rewrite H13.
+  unfold Bplus_no_overflow.
+  pose proof (@generic_round_property t).
+  specialize (H14 (FT2R
+         (BMULT
+            (BDIV (Zconst t 1)
+               (nth (@inord n i)
+                  (nth (@inord n i) A [])
+                  (Zconst t 0)))
+            (nth (@inord n i) b
+               (Zconst t 0))) +
+       -
+       FT2R
+         (BMULT
+            (BDIV (Zconst t 1)
+               (nth (@inord n i)
+                  (nth (@inord n i) A [])
+                  (Zconst t 0)))
+            (nth (@inord n i) b
+               (Zconst t 0))))%Re).
+  destruct H14 as [d [e [Hde [Hd [He H14]]]]].
+  rewrite H14. eapply Rle_lt_trans.
+
   
 
 
