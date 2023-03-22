@@ -6755,7 +6755,8 @@ apply dotprod_finite.
                 (A' (inord k) (inord k))
                 ((X_m_jacobi 2 x0' b' A' -f
                   X_m_jacobi 1 x0' b' A')
-                   (inord k) ord0))) by admit.
+                   (inord k) ord0))).
+  { apply finite_A_mult_x2_minus_x1; try by []. }
   specialize (H7 H8).
   split; try apply H8. rewrite rev_length H2.
   intros. rewrite /n0.
@@ -6785,7 +6786,7 @@ apply dotprod_finite.
    rewrite inordK; (by apply /ssrnat.ltP ).
  - rewrite H2 in Hlen. by apply /ssrnat.ltP.
  - rewrite length_veclist. by rewrite H2 in Hlen.
-Admitted.
+Qed.
 
 
 Lemma jacobi_iteration_bound_lowlevel {t: type} :
