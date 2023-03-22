@@ -7458,7 +7458,9 @@ destruct H0.
                        rewrite HeqA_real. rewrite mxE. by apply BDIV_FT2R_sep_zero.
                      + apply Rmult_le_compat_l. apply /RleP. apply matrix_norm_pd.
                        apply H1.
-                   }
+                   } eapply Rle_lt_trans.
+                   apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+                   apply Rplus_le_le_0_compat; try nra; try apply g_pos.
                     
   
 
