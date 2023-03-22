@@ -6108,6 +6108,8 @@ finite
 ________________________
 
 ***)
+
+
 Lemma resid_sub_0_N_0 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -6232,7 +6234,19 @@ assert (Hf_minus: finite
                               [])
                            (Zconst t 0)))
                      (nth (@inord n i) b
-                        (Zconst t 0)))))) by admit.
+                        (Zconst t 0)))))).
+{ apply Bplus_no_ov_finite.
+  admit.
+  apply finite_is_finite. rewrite is_finite_Bopp.
+  apply finite_is_finite. admit.
+  assert (forall x: ftype t, FT2R (BOPP x) = (- (FT2R x))%Re).
+  {  intros. unfold FT2R. by rewrite B2R_Bopp. }
+  
+
+
+
+
+ by admit.
 + rewrite  Bminus_bplus_opp_equiv.
   - pose proof (BPLUS_accurate' t 
                   (BMULT
