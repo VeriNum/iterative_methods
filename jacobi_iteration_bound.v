@@ -6116,7 +6116,7 @@ Lemma D_inv_mult_b_is_finite {t: type} :
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A x0 b /\ input_bound_at_N_0_Rcompute_1 A' x0' b' ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
@@ -6142,12 +6142,8 @@ apply BMULT_no_overflow_is_finite.
   apply Rplus_le_compat_l. apply Hd.
   apply Rcomplements.Rlt_div_r.
   apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-  
-
-  
-
-
-
+  apply H4.
+Qed.
 
 Lemma xm_1_is_finte {t: type} :
  forall (A: matrix t) (b: vector t),
@@ -6162,7 +6158,7 @@ Lemma xm_1_is_finte {t: type} :
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A x0 b /\ input_bound_at_N_0_Rcompute_1 A' x0' b' ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
@@ -6216,9 +6212,16 @@ assert ((let l1 :=
       intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
       by rewrite mxE. 
   } rewrite H11. rewrite Bminus_x_0 .
-  admit.
+  rewrite inord_val.
+  assert (b' i ord0 = (nth i b (Zconst t 0))).
+  { by rewrite !mxE. }
+  assert (A1_inv_J A' i ord0 = 
+          (BDIV (Zconst t 1)
+            (nth i (nth i A []) (Zconst t 0)))).
+  { by rewrite !mxE. } rewrite -H12 -H13.
+  apply D_inv_mult_b_is_finite ; try by [].
   specialize (H7 i). rewrite !mxE in H7. rewrite inord_val. apply H7.
-Admitted.
+Qed.
 
 
 Lemma resid_sub_0_N_0 {t: type} :
