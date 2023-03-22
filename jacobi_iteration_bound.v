@@ -6546,6 +6546,13 @@ destruct H0.
                                                     1)) n.+1)))) xy (Zconst t 0, Zconst t 0)).
                 specialize (H10 H9). destruct H10 as [m [Hlenm Hmth]].
                 rewrite rev_length combine_length !length_veclist Nat.min_id in Hlenm.
+                rewrite rev_nth combine_length !length_veclist Nat.min_id in Hmth.
+                assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat) by lia.
+                rewrite H10 combine_nth in Hmth. 
+                rewrite nth_vec_to_list_float in Hmth; try by [].
+                destruct xy. simpl. apply inject_pair_iff in Hmth.
+                destruct Hmth as [Hmth1 Hmth2]. rewrite -Hmth1 -Hmth2.
+                pose proof (@vector_residual_equiv t A b x0 1%nat H2 H3 HlenA).
                 
 
 
