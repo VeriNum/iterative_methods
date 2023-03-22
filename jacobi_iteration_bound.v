@@ -6334,6 +6334,37 @@ Lemma finite_x2_minus_x1 {t: type} :
   finite
   ((X_m_jacobi 2 x0' b' A' -f
     X_m_jacobi 1 x0' b' A') i ord0).
+Proof.
+intros.
+rewrite mxE.
+apply Bplus_bminus_opp_implies.
+apply Bplus_no_ov_finite.
++ admit.
++ apply finite_is_finite. rewrite is_finite_Bopp. 
+  apply finite_is_finite. admit.
++ assert (forall x: ftype t, FT2R (BOPP x) = (- (FT2R x))%Re).
+  {  intros. unfold FT2R. by rewrite B2R_Bopp. } rewrite H9.
+  unfold Bplus_no_overflow.
+  pose proof (@generic_round_property t).
+  specialize (H10 (FT2R
+                     (X_m_jacobi 2 x0' b' A' i
+                        ord0) +
+                   -
+                   FT2R
+                     (X_m_jacobi 1 x0' b' A' i
+                        ord0))%Re).
+  destruct H10 as [d [e [Hde [Hd [He H10]]]]].
+  rewrite H10. eapply Rle_lt_trans. apply Rabs_triang.
+  eapply Rle_lt_trans. apply Rplus_le_compat_l. apply He.
+  rewrite Rabs_mult.
+  pose proof (@resid_sub_0_N_0 t A b H  H0 H1 H2 H3 H4 H5 H6 H7 H8 i).
+  
+  
+  
+
+
+
+
 Admitted.
 
 
