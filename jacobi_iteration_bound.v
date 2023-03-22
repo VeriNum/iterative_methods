@@ -6026,6 +6026,67 @@ Admitted.
 *)
 
 Lemma dotprod_r_eq_0 {t} (v : list (ftype t * ftype t)):
+  (forall i, (i < length v)%coq_nat ->
+             nth ((length v).-1 - i)%coq_nat (fst (List.split v)) (Zconst t 0) = Zconst t 0 \/
+             nth ((length v).-1 - i)%coq_nat (fst (List.split v)) (Zconst t 0) = neg_zero) ->
+  (forall i, (i < length v)%coq_nat ->
+             finite (nth ((length v).-1 - i)%coq_nat  (snd (List.split v)) (Zconst t 0))) ->
+  dotprod_r (fst (List.split v)) (snd (List.split v)) = Zconst t 0 .
+Proof.
+intros.
+induction v.
++ simpl. unfold dotprod_r. by unfold combine;simpl.
++ unfold dotprod_r. rewrite list_split_l list_split_r.
+  simpl.
+  assert (forall i : nat, (i < length v)%coq_nat ->
+             nth ((length v).-1 - i)%coq_nat (split v).1 (Zconst t 0) = Zconst t 0 \/
+             nth ((length v).-1 - i)%coq_nat (split v).1 (Zconst t 0) = neg_zero).
+  { intros. specialize (H i).
+    assert ((i < length (a :: v))%coq_nat).
+    { simpl. lia. } specialize (H H2).
+    assert (((length (a :: v)).-1 - i)%coq_nat = 
+            (((length v).-1 - i).+1)%coq_nat) .
+    { simpl. rewrite -subSn /=.
+      destruct (length v). contradict H1. lia.
+      simpl. destruct i. by rewrite subn0. rewrite subSS. 
+      by []. rewrite -ltnS.
+      destruct (length v). contradict H1. lia. 
+      simpl. by apply /ssrnat.ltP.
+    } 
+
+
+
+    by rewrite list_split_l ?list_split_r /= in H.
+  } specialize (IHv H1).
+  unfold dotprod_r in IHv. rewrite IHv.
+  specialize (H 0%nat).
+  rewrite list_split_l ?list_split_r /= in H.
+  specialize (H0 0%nat).
+  rewrite ?list_split_l ?list_split_r /= in H0.
+  destruct H.
+  - rewrite H. auto.
+    destruct a.2; try contradiction; simpl;auto.
+    destruct s; auto.
+    unfold BFMA, Bfma, BSN2B,BinarySingleNaN.Bfma.
+    simpl. unfold BinarySingleNaN.Bfma_szero.
+    simpl. destruct s; simpl; auto.
+  - rewrite H. auto.
+    destruct a.2; try contradiction; simpl;auto.
+    destruct s; auto. 
+    unfold BFMA, Bfma, BSN2B,BinarySingleNaN.Bfma.
+    simpl. unfold BinarySingleNaN.Bfma_szero.
+    simpl. destruct s; simpl; auto.
+  - intros.
+    specialize (H0 i.+1).
+    by rewrite ?list_split_l ?list_split_r /= in H0.
+Qed.
+
+
+
+
+
+
+Lemma dotprod_r_eq_0 {t} (v : list (ftype t * ftype t)):
   (forall i, nth i (fst (List.split v)) (Zconst t 0) = Zconst t 0 \/
              nth i (fst (List.split v)) (Zconst t 0) = neg_zero) ->
   (forall i, finite (nth i  (snd (List.split v)) (Zconst t 0))) ->
@@ -6163,7 +6224,12 @@ assert ((let l1 :=
   { intros. by simpl. } rewrite H13 in H12.
   assert (forall l l': vector t, (l, l').2 = l').
   { intros. by simpl. } rewrite H14 in H12.
-  apply H12. intros. admit.
+  apply H12. intros.
+
+
+
+
+ admit.
 } rewrite H12.
 rewrite Bminus_x_0 .
 assert (Hf_minus: finite
