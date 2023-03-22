@@ -6379,7 +6379,15 @@ apply dotprod_finite.
  - rewrite length_veclist. by rewrite H2 in Hlen.
 Admitted.
 
-
+(*
+ vec_inf_norm
+   (diag_matrix_vec_mult_R (A1_diag A)
+      (b - A2_J_real A *m x)))%Re
+*)
+Lemma vec_norm_diag_matrix_mult_eq {n} (v1 v2: 'cV[R]_n.+1) :
+  vec_inf_norm (diag_matrix_vec_mult_R v1 v2) = 
+  (vec_inf_norm v1 * vec_inf_norm v2)%Re.
+Proof.
 
 Lemma bound_norm_d {n} (A : 'M[R]_n.+1) (b : 'cV[R]_n.+1):
   let x := A^-1 *m b in
@@ -6397,17 +6405,8 @@ intros. apply Rdiv_le_left.
   match goal with |-context[(_ - ?a * (?b * ?c) <= _)%Re]=>
     replace (a * (b * c))%Re with (b * (c * a))%Re by nra
   end. rewrite -Rmult_minus_distr_l .
-  Search (_ * _ - _ * _ = _)%Re.
-
-
-
-  rewrite [in X in (_ - X <= _)%Re]Rmult_comm.
-   rewrite -Rmult_assoc.
-  rewrite [in X in (_ - X <= _)%Re]Rmult_comm.
-  Search (_ - _ <= _)%Re.
- 
-
-Search (_ / _ <= _)%Re.
+  rewrite [in X in (_ <= X)%Re]/x_fix.
+  
 
 
 Admitted.
