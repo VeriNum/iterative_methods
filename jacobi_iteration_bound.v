@@ -6384,10 +6384,15 @@ Admitted.
    (diag_matrix_vec_mult_R (A1_diag A)
       (b - A2_J_real A *m x)))%Re
 *)
-Lemma vec_norm_diag_matrix_mult_eq {n} (v1 v2: 'cV[R]_n.+1) :
-  vec_inf_norm (diag_matrix_vec_mult_R v1 v2) = 
-  (vec_inf_norm v1 * vec_inf_norm v2)%Re.
+Lemma vec_norm_diag_matrix_mult_le {n} (v1 v2: 'cV[R]_n.+1) : 
+  (vec_inf_norm v1 * vec_inf_norm v2 <=
+    vec_inf_norm (diag_matrix_vec_mult_R v1 v2))%Re.
 Proof.
+
+
+
+
+
 
 Lemma bound_norm_d {n} (A : 'M[R]_n.+1) (b : 'cV[R]_n.+1):
   let x := A^-1 *m b in
