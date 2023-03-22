@@ -6065,7 +6065,19 @@ induction v.
     by rewrite ?list_split_l ?list_split_r /= in H0.
 Qed.
 
+(**
+finite
+  ((X_m_jacobi 2 x0' b' A' -f
+    X_m_jacobi 1 x0' b' A') 
+     (inord m) ord0) /\
+finite
+  (BMULT (A1_J A' (inord m) ord0)
+     ((X_m_jacobi 2 x0' b' A' -f
+       X_m_jacobi 1 x0' b' A') 
+        (inord m) ord0))
+________________________
 
+***)
 Lemma resid_sub_0_N_0 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -6518,7 +6530,29 @@ destruct H0.
              rewrite H9. clear H9.
              eapply Rle_lt_trans.
              apply norm2_vec_inf_norm_rel.
-             ** admit.
+             ** intros.
+                apply in_rev in H9.
+                pose proof (@In_nth _ (rev
+                                      (combine
+                                         (vec_to_list_float n.+1
+                                            (vector_inj
+                                               (resid
+                                                  (jacobi_n A b x0
+                                                    1)) n.+1))
+                                         (vec_to_list_float n.+1
+                                            (vector_inj
+                                               (resid
+                                                  (jacobi_n A b x0
+                                                    1)) n.+1)))) xy (Zconst t 0, Zconst t 0)).
+                specialize (H10 H9). destruct H10 as [m [Hlenm Hmth]].
+                rewrite rev_length combine_length !length_veclist Nat.min_id in Hlenm.
+                
+
+
+
+
+
+admit.
              ** rewrite -H7 -H5. apply finite_residual_1. 
                 apply HlenA. apply HeqAb. 
                 unfold size_constraint. rewrite -Heqn. apply H.
