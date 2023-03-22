@@ -6379,7 +6379,10 @@ rewrite !mxE. apply BMULT_no_overflow_is_finite.
     + rewrite combine_length !length_veclist Nat.min_id.
       intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
       by rewrite mxE. 
-  } rewrite H11.
+  } rewrite H11. rewrite Bminus_x_0 .
+  specialize (H7 i). rewrite !mxE in H7. rewrite inord_val. apply H7.
+  specialize (H7 i). rewrite !mxE in H7. rewrite inord_val. apply H7.
++
 
 
 
