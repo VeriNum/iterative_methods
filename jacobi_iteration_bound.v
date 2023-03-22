@@ -6369,7 +6369,12 @@ apply dotprod_finite.
   apply Rplus_lt_le_0_compat. nra. apply default_rel_ge_0.
   rewrite Rabs_mult.
   rewrite resid_sub_0_N_0 ; try by [].
-  rewrite Rabs_R0 Rmult_0_r. 
+  rewrite Rabs_R0 Rmult_0_r.
+  apply Rmult_lt_0_compat.
+  apply Rlt_Rminus. apply Rle_lt_trans with 1%Re.
+  apply default_abs_ub.
+
+ 
   admit.
  - rewrite H2 in Hlen.
    rewrite inordK; (by apply /ssrnat.ltP ).
