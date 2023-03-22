@@ -288,6 +288,15 @@ Definition input_bound_at_N_0_Rcompute {t: type} {n:nat}
         (sqrt (fun_bnd t n.+1) - default_abs t) /
             (1 + default_rel t) / (1 + default_rel t))%Re).
 
+Definition input_bound_at_N_0_Rcompute_1 {t: type} {n:nat}
+  (A: 'M[ftype t]_n.+1) (x0 b: 'cV[ftype t]_n.+1) :=
+  forall i,
+  (Rabs
+   (FT2R (A1_inv_J A i ord0) *
+    FT2R (b i ord0)) <
+ (bpow Zaux.radix2 (femax t) -
+  default_abs t) / (1 + default_rel t))%Re.
+
 (** Rcompute **)
 Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
@@ -343,7 +352,8 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
   (** constraint on the dimension **)
   @size_constraint t n /\
   (** constraint on bounds for input **)
-  input_bound_Rcompute A x0 b /\ input_bound_at_N_0_Rcompute A x0 b.
+  input_bound_Rcompute A x0 b /\ input_bound_at_N_0_Rcompute A x0 b /\
+  input_bound_at_N_0_Rcompute_1 A x0 b.
 
 
 End WITH_NANS.
