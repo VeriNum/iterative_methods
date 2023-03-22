@@ -6561,7 +6561,30 @@ destruct H0.
                                    X_m_jacobi 1 x0' b' A'))) ->
                           finite xy.1 /\ finite xy.2 /\
                           finite (BMULT xy.1 xy.2)).
-                { intros. admit.
+                { intros. apply in_rev in H11.
+                  pose proof (@In_nth _ (rev
+                                           (combine
+                                              (vec_to_list_float n.+1
+                                                 (A1_J A'))
+                                              (vec_to_list_float n.+1
+                                                 (X_m_jacobi 2 x0' b' A' -f
+                                                  X_m_jacobi 1 x0' b' A')))) xy (Zconst t 0 , Zconst t 0)).
+                  specialize (H12 H11).
+                  destruct H12 as [m [Hmth H12]].
+                  rewrite rev_length combine_length !length_veclist Nat.min_id in Hmth.
+                  rewrite rev_nth combine_length !length_veclist Nat.min_id in H12.
+                  assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat) by lia.
+                  rewrite H13 in H12.
+                  rewrite combine_nth in H12.
+                  repeat (rewrite nth_vec_to_list_float in H12;try by []).
+
+
+
+
+
+
+
+admit.
                   (*pose proof (@finite_implies_1 t A b HlenA HeqAb).
                   pose proof (@finite_residual_0 t A b HlenA HeqAb).
                   destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
