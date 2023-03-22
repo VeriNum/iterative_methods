@@ -7450,6 +7450,10 @@ destruct H0.
                        apply /RleP. apply submult_prop.
                        rewrite -RmultE. apply Rmult_le_compat_l.
                        apply /RleP. apply matrix_norm_pd.
+                       pose proof (@x_fixpoint n x b_real A_real).
+                       rewrite [in X in (X <= _)%Re]H13.
+                       apply Rle_refl.
+                       rewrite HeqA_real Heqb_real. by rewrite H12.
                        
 
 
