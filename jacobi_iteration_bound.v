@@ -6829,6 +6829,10 @@ destruct H0.
                rewrite Rplus_comm. apply Rplus_le_compat_l.
                rewrite Rmult_assoc. rewrite [in X in (_ <= X)%Re]Rmult_assoc.
                apply Rmult_le_compat_l. apply pos_INR.
+               rewrite Rmult_comm. apply Rmult_le_compat_l.
+               apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+               apply Rsqr_incr_1.
+               *** assert 
 
 
 
