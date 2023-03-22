@@ -7094,10 +7094,59 @@ destruct H0.
                   destruct H12 as [H12a H12b].
                   rewrite -H12a -H12b. 
                   split.
-                  rewrite !mxE. apply H. split.
+                  rewrite !mxE. apply H. 
+                  assert (size_cons: @size_constraint t (length A).-1).
+                   { unfold size_constraint. rewrite -Heqn. apply H. }
+                   assert (HfA2l :  (forall i j : 'I_(length A).-1.+1,
+                                             finite
+                                               (A2_J
+                                                  (matrix_inj A (length A).-1.+1
+                                                     (length A).-1.+1) i j))).
+                   { rewrite -Heqn. intros. rewrite -?Heqb' -?HeqA'. apply H. }
+                   assert (Hfx0l : (forall i : 'I_(length A).-1.+1,
+                                           finite
+                                             (vector_inj
+                                                (repeat (Zconst t 0)
+                                                   (length b))
+                                                (length A).-1.+1 i ord0))).
+                   { rewrite -Heqn. intros. 
+                     assert (vector_inj
+                                   (repeat (Zconst t 0) (length b)) n.+1 =
+                                 \col_(j < n.+1) (Zconst t 0)).
+                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                       by rewrite nth_repeat.
+                     } rewrite H12. rewrite -?Heqb' -?HeqA'. apply H.
+                   } 
+                   assert (HfAl : (forall i : 'I_(length A).-1.+1,
+                                           finite
+                                             (matrix_inj A (length A).-1.+1
+                                                (length A).-1.+1 i i))).
+                   { rewrite -Heqn. intros. rewrite -?Heqb' -?HeqA'. apply H. }
+                   assert (HfA1_invl: (forall i : 'I_(length A).-1.+1,
+                                               finite
+                                                 (A1_inv_J
+                                                    (matrix_inj A (length A).-1.+1
+                                                       (length A).-1.+1) i ord0))).
+                   { rewrite -Heqn. intros. rewrite -?Heqb' -?HeqA'.  rewrite mxE. apply H. }
+                   assert (Hfbl : (forall i : 'I_(length A).-1.+1,
+                                           finite
+                                             (vector_inj b (length A).-1.+1 i
+                                                ord0))).
+                   { rewrite -Heqn. intros. rewrite -?Heqb' -?HeqA'. apply H. }
+                   assert (Hinpl : input_bound_at_N_0 A x0 b).
+                   { apply input_bound_at_N_0_equiv.
+                     rewrite -Heqn.
+                     assert (vector_inj
+                                       (repeat (Zconst t 0) (length b)) n.+1 =
+                                     \col_(j < n.+1) (Zconst t 0)).
+                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
+                       by rewrite nth_repeat.
+                     } rewrite H12.
+                     rewrite -?Heqb' -?HeqA'. apply H.
+                   } split.
                   + rewrite HeqA' Heqb' .
-                    pose proof (@finite_x2_minus_x1 t A b HlenA HeqAb).
-                    apply  finite_x2_minus_x1; try by [].
+                    pose proof (@finite_x2_minus_x1 t A b HlenA HeqAb size_cons HfA2l Hfx0l Hinpl HfAl HfA1_invl Hfbl ).
+                    rewrite -Heqn in H12. by apply H12. apply  finite_x2_minus_x1; try by [].
                   admit.
                   by apply /ssrnat.ltP.
                   by apply /ssrnat.ltP.
