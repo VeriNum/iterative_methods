@@ -6312,6 +6312,40 @@ assert (Hf_minus: finite
 Admitted.
 
 
+Lemma xm_1_is_finte {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  @size_constraint t (length A).-1 ->
+  (forall i j, finite (A2_J A' i j)) ->
+  (forall i, finite (x0' i ord0)) ->
+  input_bound_at_N_0 A x0 b ->
+  (forall i, finite (A' i i)) ->
+  (forall i, finite (A1_inv_J A' i ord0)) ->
+  (forall i, finite (b' i ord0)) ->
+  matrix_inf_norm (FT2R_mat (A2_J A')) = 0%Re ->
+  forall i,
+  finite (X_m_jacobi 1 x0' b' A' i ord0).
+Proof.
+intros.
+
+
+
+
+
+
+
+
+
+
+
+
 Lemma finite_x2_minus_x1 {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
@@ -6357,8 +6391,7 @@ apply Bplus_no_ov_finite.
   rewrite H10. eapply Rle_lt_trans. apply Rabs_triang.
   eapply Rle_lt_trans. apply Rplus_le_compat_l. apply He.
   rewrite Rabs_mult.
-  pose proof (@resid_sub_0_N_0 t A b H  H0 H1 H2 H3 H4 H5 H6 H7 H8 i).
-  
+  rewrite !mxE.
   
   
 
