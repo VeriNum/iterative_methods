@@ -7487,7 +7487,23 @@ destruct H0.
                             apply Rplus_le_le_0_compat; try nra; try apply g_pos.
                        ++++ apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
                        ++++ apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+                   --- apply Rplus_le_le_0_compat; last by apply g1_pos.
+                       repeat apply Rmult_le_pos.
+                       ++++ apply /RleP. apply vec_norm_pd.
+                       ++++ apply Rplus_le_le_0_compat; last by apply g1_pos.
+                            repeat apply Rmult_le_pos.
+                            apply /RleP. apply vec_norm_pd.
+                            apply Rplus_le_le_0_compat; last by apply g1_pos.
+                            apply Rmult_le_pos. 
+                            apply /RleP. apply matrix_norm_pd.
+                            apply Rmult_le_pos. apply d_mag_def_alt_ge_0. apply Hrho.
+                            
 
+apply /RleP. apply vec_norm_pd.
+                            apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+                            apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+                       ++++ apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+                       ++++ apply Rplus_le_le_0_compat; try nra; try apply g_pos.
 
 
 destruct HG as [_ HG].
