@@ -6122,6 +6122,77 @@ finite
      (nth (inord i) b (Zconst t 0)))
 **)
 
+Lemma xm_1_is_finte {t: type} :
+ forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  @size_constraint t (length A).-1 ->
+  (forall i j, finite (A2_J A' i j)) ->
+  (forall i, finite (x0' i ord0)) ->
+  input_bound_at_N_0 A x0 b ->
+  (forall i, finite (A' i i)) ->
+  (forall i, finite (A1_inv_J A' i ord0)) ->
+  (forall i, finite (b' i ord0)) ->
+  matrix_inf_norm (FT2R_mat (A2_J A')) = 0%Re ->
+  forall i,
+  finite (X_m_jacobi 1 x0' b' A' i ord0).
+Proof.
+intros.
+rewrite mxE.
+pose proof (@matrix_inf_norm_0_implies n (FT2R_mat (A2_J A')) H8).
+specialize (H9 i).    
+assert (forall j, A2_J A' i j = Zconst t 0 \/ A2_J A' i j = neg_zero).
+{ intros. apply x_real_to_float_zero. apply H2.
+  specialize (H9 j). rewrite mxE in H9. apply H9.
+} 
+repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
+rewrite !mxE.
+assert ((let l1 :=
+              vec_to_list_float
+                n.+1
+                (\row_j 
+                 A2_J A' 
+                   (inord i) j)^T
+              in
+            let l2 :=
+              vec_to_list_float
+                n.+1
+                (\col_j 
+                 x0' j ord0) in
+            dotprod_r l1 l2) = Zconst t 0).
+  { pose proof (@dotprod_r_eq_0 t).
+    specialize (H11 (combine 
+                    (vec_to_list_float n.+1
+                        (\row_j  A2_J A' (inord i) j)^T)
+                    (vec_to_list_float  n.+1
+                      (\col_j (x0' j ord0))))).
+    rewrite combine_split in H11; last by rewrite !length_veclist.
+    assert (forall l l': vector t, (l, l').1 = l).
+    { intros. by simpl. } rewrite H12 in H11.
+    assert (forall l l': vector t, (l, l').2 = l').
+    { intros. by simpl. } rewrite H13 in H11.
+    apply H11. 
+    + rewrite combine_length !length_veclist Nat.min_id.
+      intros. 
+      rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
+      rewrite mxE. rewrite mxE. 
+      apply x_real_to_float_zero.
+      by []. rewrite !inord_val. 
+      specialize (H9 (@inord n i0)). by rewrite mxE in H9. 
+    + rewrite combine_length !length_veclist Nat.min_id.
+      intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
+      by rewrite mxE. 
+  } rewrite H11. rewrite Bminus_x_0 .
+  admit.
+  specialize (H7 i). rewrite !mxE in H7. rewrite inord_val. apply H7.
+Admitted.
+
 
 Lemma resid_sub_0_N_0 {t: type} :
  forall (A: matrix t) (b: vector t),
@@ -6191,7 +6262,10 @@ assert ((let l1 :=
     specialize (H9 (@inord n i0)). by rewrite mxE in H9. 
   + rewrite combine_length !length_veclist Nat.min_id.
     intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
-    rewrite mxE. admit. 
+    rewrite mxE. 
+    assert (jacobi_iter x0' b' A' (@inord n i0) ord0 = X_m_jacobi 1 x0' b' A' (@inord n i0) ord0).
+    { by rewrite !mxE. } rewrite H15.
+    apply xm_1_is_finte; try by [].
 }
 rewrite H11.
 assert ((let l1 :=
@@ -6312,7 +6386,8 @@ assert (Hf_minus: finite
 Admitted.
 
 
-Lemma xm_1_is_finte {t: type} :
+
+Lemma xm_2_is_finte {t: type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -6331,7 +6406,7 @@ Lemma xm_1_is_finte {t: type} :
   (forall i, finite (b' i ord0)) ->
   matrix_inf_norm (FT2R_mat (A2_J A')) = 0%Re ->
   forall i,
-  finite (X_m_jacobi 1 x0' b' A' i ord0).
+  finite (X_m_jacobi 2 x0' b' A' i ord0).
 Proof.
 intros.
 rewrite mxE.
@@ -6354,35 +6429,37 @@ assert ((let l1 :=
               vec_to_list_float
                 n.+1
                 (\col_j 
-                 x0' j ord0) in
+                 jacobi_iter x0'
+                   b' A' j ord0)
+              in
             dotprod_r l1 l2) = Zconst t 0).
-  { pose proof (@dotprod_r_eq_0 t).
-    specialize (H11 (combine 
-                    (vec_to_list_float n.+1
-                        (\row_j  A2_J A' (inord i) j)^T)
-                    (vec_to_list_float  n.+1
-                      (\col_j (x0' j ord0))))).
-    rewrite combine_split in H11; last by rewrite !length_veclist.
-    assert (forall l l': vector t, (l, l').1 = l).
-    { intros. by simpl. } rewrite H12 in H11.
-    assert (forall l l': vector t, (l, l').2 = l').
-    { intros. by simpl. } rewrite H13 in H11.
-    apply H11. 
-    + rewrite combine_length !length_veclist Nat.min_id.
-      intros. 
-      rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
-      rewrite mxE. rewrite mxE. 
-      apply x_real_to_float_zero.
-      by []. rewrite !inord_val. 
-      specialize (H9 (@inord n i0)). by rewrite mxE in H9. 
-    + rewrite combine_length !length_veclist Nat.min_id.
-      intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
-      by rewrite mxE. 
-  } rewrite H11. rewrite Bminus_x_0 .
-  admit.
-  specialize (H7 i). rewrite !mxE in H7. rewrite inord_val. apply H7.
+{ pose proof (@dotprod_r_eq_0 t).
+  specialize (H11 (combine 
+                  (vec_to_list_float n.+1
+                      (\row_j  A2_J A' (inord i) j)^T)
+                  (vec_to_list_float  n.+1
+                    (\col_j jacobi_iter x0' b' A' j ord0)))).
+  rewrite combine_split in H11; last by rewrite !length_veclist.
+  assert (forall l l': vector t, (l, l').1 = l).
+  { intros. by simpl. } rewrite H12 in H11.
+  assert (forall l l': vector t, (l, l').2 = l').
+  { intros. by simpl. } rewrite H13 in H11.
+  apply H11. intros. 
+  + rewrite combine_length !length_veclist Nat.min_id.
+    rewrite combine_length !length_veclist Nat.min_id in H14.
+    rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
+    rewrite mxE. rewrite mxE. 
+    apply x_real_to_float_zero.
+    by []. rewrite !inord_val. 
+    specialize (H9 (@inord n i0)). by rewrite mxE in H9. 
+  + rewrite combine_length !length_veclist Nat.min_id.
+    intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
+    rewrite mxE. admit. 
+}
+rewrite H11. rewrite Bminus_x_0 .
+admit.
+specialize (H7 i). rewrite !mxE in H7. rewrite inord_val. apply H7.
 Admitted.
-
 
 
 
@@ -6414,9 +6491,10 @@ intros.
 rewrite mxE.
 apply Bplus_bminus_opp_implies.
 apply Bplus_no_ov_finite.
-+ admit.
++ apply xm_2_is_finte; try by [].
 + apply finite_is_finite. rewrite is_finite_Bopp. 
-  apply finite_is_finite. admit.
+  apply finite_is_finite. 
+  apply xm_1_is_finte; try by [].
 + assert (forall x: ftype t, FT2R (BOPP x) = (- (FT2R x))%Re).
   {  intros. unfold FT2R. by rewrite B2R_Bopp. } rewrite H9.
   unfold Bplus_no_overflow.
