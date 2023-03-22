@@ -6342,9 +6342,8 @@ assert (forall j, A2_J A' i j = Zconst t 0 \/ A2_J A' i j = neg_zero).
   specialize (H9 j). rewrite mxE in H9. apply H9.
 } 
 repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
-rewrite !mxE. apply BMULT_no_overflow_is_finite.
-+ specialize (H6 i). rewrite !mxE in H6. rewrite inord_val. apply H6.
-+ assert ((let l1 :=
+rewrite !mxE.
+assert ((let l1 :=
               vec_to_list_float
                 n.+1
                 (\row_j 
@@ -6380,15 +6379,9 @@ rewrite !mxE. apply BMULT_no_overflow_is_finite.
       intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
       by rewrite mxE. 
   } rewrite H11. rewrite Bminus_x_0 .
+  admit.
   specialize (H7 i). rewrite !mxE in H7. rewrite inord_val. apply H7.
-  specialize (H7 i). rewrite !mxE in H7. rewrite inord_val. apply H7.
-+
-
-
-
-
-
-
+Admitted.
 
 
 
