@@ -6001,29 +6001,6 @@ destruct x; try contradiction; simpl;auto.
 destruct s; auto.
 Qed.
 
-(*
-Lemma Bminus_x_x {t} (x : ftype t):
-  finite x ->
-  finite (BMINUS x x) ->
-  BMINUS x x = Zconst t 0 \/
-  BMINUS x x = neg_zero .
-Proof.
-intros.
-destruct x; try contradiction; simpl;auto.
-destruct s; simpl in * ; auto; try by [].
-unfold BMINUS, BINOP, Bminus, BSN2B in *. simpl in *; auto.
-destruct 
-(BinarySingleNaN.binary_normalize
-    (fprec t) (femax t) (fprec_gt_0 t)
-    (fprec_lt_femax t)
-    BinarySingleNaN.mode_NE
-    (BinarySingleNaN.Fplus_naive s m e
-       (~~ s) m e (Z.min e e))
-    (Z.min e e) false); simpl in *; auto; try by [].
-destruct s0; simpl in *; auto.
-
-Admitted.
-*)
 
 Lemma dotprod_r_eq_0 {t} (v : list (ftype t * ftype t)):
   (forall i, (i < length v)%coq_nat ->
@@ -6094,15 +6071,7 @@ induction v.
     by rewrite ?list_split_l ?list_split_r /= in H0.
 Qed.
 
-(** TODO
-finite
-  (BMULT
-     (BDIV (Zconst t 1)
-        (nth (inord i)
-           (nth (inord i) A [])
-           (Zconst t 0)))
-     (nth (inord i) b (Zconst t 0)))
-**)
+
 Lemma D_inv_mult_b_is_finite {t: type} :
   forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
