@@ -6823,7 +6823,7 @@ destruct H0.
                } specialize (H14 HfA2l Hfx0l Hinpl HfAl  HfA1_invl  Hfbl ).
                rewrite -?Heqn -?Heqb' -?HeqA' -Heqx0' in H14. rewrite H14; try by [].
                rewrite Rmult_0_r Rmult_0_l Rplus_0_l. 
-               destruct H as [_ [_ [_ [_ [HG H]]]]].
+               destruct H as [_ [Hrho [_ [_ [HG H]]]]].
                destruct HG as [HG _]. rewrite HeqGamma. unfold acc2.
                eapply Rle_lt_trans; last by apply HG.
                rewrite Rplus_comm. apply Rplus_le_compat_l.
@@ -6832,13 +6832,22 @@ destruct H0.
                rewrite Rmult_comm. apply Rmult_le_compat_l.
                apply Rplus_le_le_0_compat; try nra; try apply g_pos.
                apply Rsqr_incr_1.
-               *** assert 
-
-
-
-
-
-admit.
+               *** assert (forall a b:R, (0 <= b)%Re -> (a <= a + b)%Re).
+                   { intros. nra. } apply H15.
+                   repeat apply Rmult_le_pos; try nra. 
+                   apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+                   apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+                   apply /RleP. apply vec_norm_pd.
+                   apply d_mag_def_alt_ge_0. apply Hrho.
+                   apply Rlt_le, Rinv_0_lt_compat, Rlt_Rminus, Hrho.
+               *** apply g1_pos.
+               *** apply Rplus_le_le_0_compat; try by apply g1_pos.
+                   repeat apply Rmult_le_pos; try nra.
+                   apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+                   apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
+                   apply /RleP. apply vec_norm_pd.
+                   apply d_mag_def_alt_ge_0. apply Hrho.
+                   apply Rlt_le, Rinv_0_lt_compat, Rlt_Rminus, Hrho.
          -- apply finite_is_finite. apply finite_residual_1; try by apply H.
             apply HlenA. apply HeqAb.
             intros.
