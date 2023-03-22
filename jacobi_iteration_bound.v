@@ -5972,45 +5972,6 @@ destruct (Bsign (fprec t) (femax t) x).
   by apply finite_is_finite.
 Qed.
 
-(*
-Lemma A_real_to_float_zero {t} {n} (A : 'M[ftype t]_n.+1):
-  forall i j,
-  finite (A i j) ->
-  FT2R (A i j) = 0%Re ->
-  Bsign (fprec t) (femax t) (A i j) = false ->
-  A i j = Zconst t 0.
-Proof.
-intros.
-apply B2R_Bsign_inj.
-+ by apply finite_is_finite.
-+ by simpl.
-+ unfold FT2R in H0. by rewrite H0;simpl.
-+ by simpl. 
-Qed.
-*)
-
-(*
-Lemma A_entry_mult_0 {t} {n} (A : 'M[ftype t]_n.+1):
-  forall i j,
-  finite (A i j) ->
-  Bsign (fprec t) (femax t) (A i j) = false ->
-  BMULT (A i j)  (Zconst t 0) = Zconst t 0.
-Proof.
-intros. 
-rewrite /BMULT /BINOP /Bmult /BSN2B /BinarySingleNaN.Bmult /=. 
-apply finite_is_finite in H. rewrite -is_finite_B2BSN in H.
-unfold BinarySingleNaN.is_finite in H.
-rewrite -Bsign_B2BSN  in H0.
-+ unfold BinarySingleNaN.Bsign in H0.
-  destruct (B2BSN (fprec t) (femax t) (A i j)); simpl; try by [];
-  (unfold Zconst, vcfloat.IEEE754_extra.BofZ, binary_normalize; simpl;
-    by rewrite H0; simpl).
-+ rewrite -is_nan_B2BSN.
-  unfold BinarySingleNaN.is_nan. 
-  destruct (B2BSN (fprec t) (femax t) (A i j)); simpl; try by [].
-Qed.
-*)
-
 Lemma Bmult_x_0 {t} (x: ftype t):
   finite x ->
   BMULT x (Zconst t 0) = Zconst t 0 \/
@@ -6040,6 +6001,7 @@ destruct x; try contradiction; simpl;auto.
 destruct s; auto.
 Qed.
 
+(*
 Lemma Bminus_x_x {t} (x : ftype t):
   finite x ->
   finite (BMINUS x x) ->
@@ -6061,7 +6023,7 @@ destruct
 destruct s0; simpl in *; auto.
 
 Admitted.
-
+*)
 
 Lemma dotprod_r_eq_0 {t} (v : list (ftype t * ftype t)):
   (forall i, nth i (fst (List.split v)) (Zconst t 0) = Zconst t 0 \/
