@@ -316,22 +316,20 @@ Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
       2 * (1 + g t n.+1) * (1 + default_rel t) *
       vec_inf_norm (FT2R_mat (A1_J A)) *
       d_mag * / (1 - rho_hat))²)%Re /\
-    (INR n.+1 *
-     (vec_inf_norm (FT2R_mat (A1_J A)) *
-      ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
-        ((vec_inf_norm (FT2R_mat b) +
-          (matrix_inf_norm
-             (FT2R_mat (A2_J A)) *
-           vec_inf_norm (FT2R_mat x0) *
-           (1 + g t n.+1) +
-           g1 t n.+1 (n.+1 - 1))) *
-         (1 + default_rel t)) * 
-        (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1) +
-        vec_inf_norm (FT2R_mat x0)) *
-       (1 + default_rel t)) * (1 + g t n.+1) +
-      g1 t n.+1 (n.+1 - 1)%coq_nat)² *
-     (1 + g t n.+1) +
-     g1 t n.+1 (n.+1 - 1)%coq_nat < FT2R (BMULT accuracy accuracy))%Re) /\
+     (INR n.+1 *
+       (vec_inf_norm (FT2R_mat (A1_J A)) *
+        ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
+          ((matrix_inf_norm (FT2R_mat A) *
+            (d_mag_def_alt A b /
+             (1 - rho_def_alt A b)) +
+            g1 t n.+1 (n.+1 - 1)) *
+           (1 + default_rel t)) * 
+          (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)) *
+         (1 + default_rel t)) * (1 + g t n.+1) +
+        g1 t n.+1 (n.+1 - 1)%coq_nat)² *
+       (1 + g t n.+1) +
+       g1 t n.+1
+         (n.+1 - 1)%coq_nat < FT2R (BMULT accuracy accuracy))%Re) /\
   (** Gamma is finite **)
   finite (BMULT accuracy accuracy) /\
   (** constraint on k **)
