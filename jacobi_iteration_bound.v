@@ -6553,7 +6553,10 @@ destruct H0.
                 destruct xy. simpl. apply inject_pair_iff in Hmth.
                 destruct Hmth as [Hmth1 Hmth2]. rewrite -Hmth1 -Hmth2.
                 pose proof (@vector_residual_equiv t A b x0 1%nat H2 H3 HlenA).
-                
+                unfold resid. rewrite -Heqn in H11. rewrite H11.
+                unfold residual_math. rewrite mxE.
+                repeat (rewrite nth_vec_to_list_float; try (rewrite inordK; by apply /ssrnat.ltP)).
+                rewrite !inord_val.
 
 
 
