@@ -6103,6 +6103,31 @@ finite
            (Zconst t 0)))
      (nth (inord i) b (Zconst t 0)))
 **)
+Lemma D_inv_mult_b_is_finite {t: type} :
+  forall (A: matrix t) (b: vector t),
+  let x0 := (repeat  (Zconst t 0) (length b)) in
+  let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+  (0 < length A)%coq_nat ->
+  length A = length b ->
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+  let x0' := @vector_inj _ x0 n.+1 in
+  @size_constraint t (length A).-1 ->
+  (forall i j, finite (A2_J A' i j)) ->
+  (forall i, finite (x0' i ord0)) ->
+  input_bound_at_N_0 A x0 b ->
+  (forall i, finite (A' i i)) ->
+  (forall i, finite (A1_inv_J A' i ord0)) ->
+  (forall i, finite (b' i ord0)) ->
+  forall i,
+  finite (BMULT (A1_inv_J A' i ord0) (b' i ord0)). 
+Proof.
+intros.
+
+
+
+
 
 Lemma xm_1_is_finte {t: type} :
  forall (A: matrix t) (b: vector t),
@@ -7995,7 +8020,7 @@ destruct H0.
                 rewrite -?Heqn -?HeqA' -?Heqb'. intros. apply H.
              -- rewrite <- finite_is_finite. apply H.
 Qed.
-(** merge N= 0 and ||x|| <= ? case **)
+
 
 End WITH_NANS.
 
