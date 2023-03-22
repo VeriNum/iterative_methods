@@ -6334,7 +6334,11 @@ Lemma xm_1_is_finte {t: type} :
   finite (X_m_jacobi 1 x0' b' A' i ord0).
 Proof.
 intros.
-
+rewrite mxE.
+repeat (rewrite nth_vec_to_list_float; last by apply ltn_ord).
+rewrite !mxE. apply BMULT_no_overflow_is_finite.
++ specialize (H6 i). rewrite !mxE in H6. rewrite inord_val. apply H6.
++
 
 
 
