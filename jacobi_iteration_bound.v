@@ -7463,7 +7463,19 @@ destruct H0.
                    apply Rplus_le_le_0_compat; try nra; try apply g_pos.
                    apply Rmult_le_compat_l. apply pos_INR.
                    apply Rsqr_incr_1.
-                   a
+                   --- apply Rplus_le_compat_r. apply Rmult_le_compat_r.
+                       apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+                       apply Rmult_le_compat_l. apply /RleP. apply vec_norm_pd.
+                       apply Rmult_le_compat_r.
+                       apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+                       apply Rplus_le_compat_r.
+                       apply Rmult_le_compat_r.
+                       apply Rplus_le_le_0_compat; try nra; try apply g_pos.
+                       apply Rmult_le_compat_l. apply /RleP. apply vec_norm_pd.
+                       apply Rmult_le_compat_r.
+                       apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
+                       apply Rplus_le_compat_r. apply H13.
+                   --- 
   
 
 
