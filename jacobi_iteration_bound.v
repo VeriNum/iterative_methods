@@ -6825,7 +6825,10 @@ destruct H0.
                rewrite Rmult_0_r Rmult_0_l Rplus_0_l. 
                destruct H as [_ [_ [_ [_ [HG H]]]]].
                destruct HG as [HG _]. rewrite HeqGamma. unfold acc2.
-               
+               eapply Rle_lt_trans; last by apply HG.
+               rewrite Rplus_comm. apply Rplus_le_compat_l.
+               rewrite Rmult_assoc. rewrite [in X in (_ <= X)%Re]Rmult_assoc.
+               apply Rmult_le_compat_l. apply pos_INR.
 
 
 
