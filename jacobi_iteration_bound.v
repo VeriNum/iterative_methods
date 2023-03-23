@@ -3949,8 +3949,12 @@ rewrite nth_vec_to_list_float in H6. rewrite inord_val mxE in H6.
 apply Bminus_bplus_opp_implies in H6.
 rewrite Bminus_bplus_opp_equiv; last by apply H6.
 rewrite A2_mult_x0_eq_0; try by [].
-rewrite Bplus_x_BOPP_0.
-
+rewrite Bplus_x_BOPP_0. apply Rle_refl.
+apply H4.
+rewrite inordK; (by apply /ssrnat.ltP).
+apply H3.
+rewrite inordK; (by apply /ssrnat.ltP).
+rewrite inordK; (by apply /ssrnat.ltP).
 
 
 
