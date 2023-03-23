@@ -3816,6 +3816,17 @@ rewrite A2_mult_x0_eq_0; try by [].
 assert (FT2R (BOPP (Zconst t 0)) = 0%Re).
 { by simpl. } rewrite H2 Rplus_0_r.
 pose proof (@generic_round_property t).
+specialize (H3 (FT2R (b' (inord k) ord0))).
+destruct H3 as [d [e [Hde [Hd [He H3]]]]].
+rewrite H3.
+eapply Rle_lt_trans. apply Rabs_triang.
+eapply Rle_lt_trans. apply Rplus_le_compat_l. apply He.
+apply Rcomplements.Rlt_minus_r. rewrite Rabs_mult.
+eapply Rle_lt_trans.  apply Rmult_le_compat_l. apply Rabs_pos.
+eapply Rle_trans. apply Rabs_triang. rewrite Rabs_R1.
+apply Rplus_le_compat_l. apply Hd. 
+apply Rcomplements.Rlt_div_r.
+apply Rplus_lt_le_0_compat;try nra;try apply default_rel_ge_0.
 
 
 
