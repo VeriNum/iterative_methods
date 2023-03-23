@@ -4033,6 +4033,62 @@ Lemma no_overflow_x1_minus_x0 {t: type} :
 Proof.
 intros ? ? ? ? ? ? ? ? ? ? ? ? size_cons HfA2 Hfx0 Hinp HfA1_inv Hfb.
 unfold Bplus_no_overflow.
+assert (X_m_jacobi 0 x0' b' A' (inord k) ord0 = Zconst t 0).
+{ rewrite !mxE. unfold x0. by rewrite nth_repeat. }
+rewrite H2.
+assert (FT2R (BOPP (Zconst t 0)) = 0%Re).
+{ by simpl. } rewrite H3 Rplus_0_r.
+pose proof (@generic_round_property t 
+              (FT2R (X_m_jacobi 1 x0' b' A'
+                   (inord k) ord0))).
+destruct H4 as [d [e [Hde [Hd [He H4]]]]].
+rewrite H4. eapply Rle_lt_trans.
+apply Rabs_triang. eapply Rle_lt_trans. apply Rplus_le_compat_l.
+apply He. apply Rcomplements.Rlt_minus_r.
+rewrite Rabs_mult. eapply Rle_lt_trans.
+apply Rmult_le_compat_l. apply Rabs_pos.
+eapply Rle_trans. apply Rabs_triang. rewrite Rabs_R1.
+apply Rplus_le_compat_l. apply Hd.
+apply Rcomplements.Rlt_div_r.
+apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+rewrite !mxE.
+pose proof (@BMULT_accurate' _ t).
+specialize (H5 (nth (n.+1.-1 - @inord n k)
+                    (vec_to_list_float n.+1
+                       (A1_inv_J A')) 
+                    (Zconst t 0))
+              (nth (n.+1.-1 - @inord n k)
+                (vec_to_list_float n.+1
+                   (b' -f A2_J A' *f x0'))
+                (Zconst t 0))).
+pose proof (@finite_residual_0_aux3 t A b H H0 k H1 size_cons HfA2 Hfx0 Hinp HfA1_inv Hfb). 
+specialize (H5 H6). rewrite -/n -/A' -/b' -/x0' in H6.
+destruct H5 as [d1 [e1 [Hde1 [Hd1 [He1 H5]]]]].
+rewrite H5.
+rewrite !nth_vec_to_list_float.
+rewrite inord_val. eapply Rle_lt_trans.
+apply Rabs_triang. eapply Rle_lt_trans.
+apply Rplus_le_compat_l. apply He1.
+rewrite Rabs_mult. eapply Rle_lt_trans.
+apply Rplus_le_compat_r.
+apply Rmult_le_compat; try apply Rabs_pos. 
+
+
+
+
+
+
+
+apply Rplus_le_compat.
+rewrite Rabs_mult.
+apply Rmult_le_compat; try apply Rabs_pos.
+
+
+
+
+
+
+
 pose proof (@generic_round_property t 
             (FT2R
                  (X_m_jacobi 1 x0' b' A' 
