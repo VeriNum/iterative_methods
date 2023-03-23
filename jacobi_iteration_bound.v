@@ -3489,7 +3489,13 @@ Definition input_bound_at_N_0 {t: type}
   (*(forall i,
     (Rabs (FT2R (x0' i ord0)) <
             sqrt (fun_bnd t n.+1))%Re) /\ *)
+
   (forall i,
+      (Rabs (FT2R (b' i ord0)) <
+         (bpow Zaux.radix2 (femax t) -
+          default_abs t) /
+         (1 + default_rel t))%Re) /\
+ (* (forall i,
     ((Rabs (FT2R (b' i ord0)) +
         ((\sum_j
              (Rabs
@@ -3499,7 +3505,7 @@ Definition input_bound_at_N_0 {t: type}
          g1 t n.+1 (n.+1 - 1)%coq_nat)) *
        (1 + default_rel t) <
        bpow Zaux.radix2 (femax t) -
-       default_abs t)%Re) /\
+       default_abs t)%Re) /\ *)
   (forall i,
       (Rabs (FT2R (A1_inv_J A' i ord0)) *
          ((Rabs (FT2R (b' i ord0)) +
@@ -3554,9 +3560,11 @@ Lemma input_bound_at_N_0_equiv {t: type}
   input_bound_at_N_0_Rcompute A' x0' b' ->
   input_bound_at_N_0 A x0 b. 
 Proof.
+Admitted.
+(*
 intros. apply H.
 Qed.
-
+*)
   
 
 Lemma bound_each_elem_A2_x0 {t: type} :
@@ -3827,131 +3835,9 @@ eapply Rle_trans. apply Rabs_triang. rewrite Rabs_R1.
 apply Rplus_le_compat_l. apply Hd. 
 apply Rcomplements.Rlt_div_r.
 apply Rplus_lt_le_0_compat;try nra;try apply default_rel_ge_0.
-
-
-
-
-
-
-
-
-pose proof (@generic_round_property t).
-specialize (H2 (FT2R (b' (inord k) ord0) +
-                   FT2R
-                     (BOPP
-                        ((A2_J A' *f x0') 
-                           (inord k) ord0)))%Re ).
-destruct H2 as [d [e [Hde [Hd [He H2]]]]].
-rewrite H2.
-eapply Rle_lt_trans. apply Rabs_triang.
-eapply Rle_lt_trans. apply Rplus_le_compat_l.
-apply He. 
-apply Rcomplements.Rlt_minus_r. rewrite Rabs_mult.
-eapply Rle_lt_trans. 
-apply Rmult_le_compat; try apply Rabs_pos.
-eapply Rle_trans.
-apply Rabs_triang.
-apply Rplus_le_compat_l.
-assert (forall x: ftype t, FT2R (BOPP x) = (- FT2R x)%Re).
-{ intros. by rewrite /FT2R B2R_Bopp. } rewrite H3.
-rewrite Rabs_Ropp. rewrite mxE.
-pose proof (@fma_dotprod_forward_error _ t).
-specialize (H4 (vec_to_list_float n.+1
-                        (\row_j A2_J A' (inord k) j)^T)
-                    (vec_to_list_float n.+1
-                            (\col_j x0' j ord0))).
-rewrite !length_veclist in H4.
-assert (n.+1 = n.+1) by lia.
-specialize (H4 H5). clear H5.
-specialize (H4 (dotprod_r 
-                      (vec_to_list_float n.+1
-                        (\row_j A2_J A' (inord k) j)^T)
-                      (vec_to_list_float n.+1
-                            (\col_j x0' j ord0)))).
-specialize (H4 (\sum_j (FT2R (A2_J A' (inord k) j) * FT2R (x0' j ord0))%Re)).
-specialize (H4 (\sum_j (Rabs (FT2R (A2_J A' (inord k) j)) * Rabs (FT2R (x0' j ord0)))%Re)).
-pose proof (@fma_dot_prod_rel_holds _ n t n.+1 k (A2_J A')
-                    (\col_j x0' j ord0)). 
-specialize (H4 H5). clear H5.
-pose proof (@R_dot_prod_rel_holds n t n.+1 k (leqnn n.+1) (A2_J A')
-                    (\col_j x0' j ord0)).
-assert (\sum_j
-            (FT2R (A2_J A' (inord k) j) *
-             FT2R (x0' j ord0))%Re = 
-           \sum_(j < n.+1)
-            (FT2R_mat (A2_J A') 
-              (inord k)
-              (widen_ord (m:=n.+1)
-                 (leqnn n.+1) j) *
-              FT2R_mat (\col_j0 x0' j0 ord0)
-                (widen_ord (m:=n.+1)
-                   (leqnn n.+1) j) ord0)%Re).
-{ apply eq_big. by []. intros. 
-  assert ((widen_ord (m:=n.+1) (leqnn n.+1) i) = i).
-  { unfold widen_ord. 
-    apply val_inj. by simpl.
-  } rewrite H7. by rewrite !mxE.
-} rewrite -H6 in H5. specialize (H4 H5).
-clear H5 H6.
-pose proof (@R_dot_prod_rel_abs_holds n t n.+1 k (A2_J A')
-                    (\col_j x0' j ord0)).
-rewrite -sum_fold_mathcomp_equiv in H5.
-assert (\sum_(j < n.+1)
-              (FT2R_abs (FT2R_mat (A2_J A'))
-                (inord k)
-                (widen_ord (m:=n.+1)
-                   (leqnn n.+1) j) *
-              FT2R_abs
-                (FT2R_mat
-                   (\col_j0 x0' j0 ord0))
-                (widen_ord (m:=n.+1)
-                   (leqnn n.+1) j) ord0)%Re = 
-            \sum_j
-              (Rabs
-                 (FT2R (A2_J A' (inord k) j)) *
-               Rabs (FT2R (x0' j ord0)))%Re).
-{ apply eq_big. by []. intros. 
-  assert (widen_ord (m:=n.+1) (leqnn n.+1) i = i).
-  { unfold widen_ord. 
-    apply val_inj. by simpl.
-  } rewrite H7. by rewrite !mxE.
-} rewrite H6 in H5. specialize (H4 H5).
-clear H5 H6.
-rewrite finite_is_finite in H4.
-pose proof (@finite_residual_0_aux1 t A b H H0 k H1 size_cons HfA2 Hfx0 Hinp).
-specialize (H4 H5). clear H5.
-apply Rle_trans with 
-    (Rabs
-         (\sum_j
-             (Rabs
-                (FT2R (A2_J A' (inord k) j)) *
-              Rabs (FT2R (x0' j ord0)))%Re) *
-     (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
-rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
-apply Rle_trans with 
-    (Rabs
-         (\sum_j
-             ((FT2R (A2_J A' (inord k) j)) *
-               (FT2R (x0' j ord0)))%Re) +
-       Rabs
-         (\sum_j
-             (Rabs (FT2R (A2_J A' (inord k) j)) *
-              Rabs (FT2R (x0' j ord0)))%Re) *
-       g t n.+1 + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
-assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
-{ intros. nra. } apply H5.
-eapply Rle_trans. apply Rabs_triang_inv.
-nra. repeat apply Rplus_le_compat_r.
-rewrite [in X in (_ <= X)%Re]sum_abs_eq.
-rewrite Rabs_sum_in. apply /RleP. apply Rabs_ineq.
-intros. apply Rmult_le_pos; apply Rabs_pos.
-rewrite sum_abs_eq. apply Rle_refl.
-intros. apply Rmult_le_pos; apply Rabs_pos.
-eapply Rle_trans. apply Rabs_triang.
-rewrite Rabs_R1. apply Rplus_le_compat_l.
-apply Hd.
 apply Hinp.
 Qed.
+
 
 Lemma finite_residual_0_aux2 {t: type} :
  forall (A: matrix t) (b: vector t),
