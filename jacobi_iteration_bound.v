@@ -3506,6 +3506,15 @@ Definition input_bound_at_N_0 {t: type}
        (1 + default_rel t) <
        bpow Zaux.radix2 (femax t) -
        default_abs t)%Re) /\ *)
+  (forall i, 
+    (Rabs
+         (FT2R
+            (A1_inv_J A' (inord k) ord0)) *
+       Rabs (FT2R (b' (inord k) ord0)) <
+       (bpow Zaux.radix2 (femax t) -
+        default_abs t) /
+       (1 + default_rel t))%Re) /\
+(*
   (forall i,
       (Rabs (FT2R (A1_inv_J A' i ord0)) *
          ((Rabs (FT2R (b' i ord0)) +
@@ -3517,7 +3526,7 @@ Definition input_bound_at_N_0 {t: type}
             g1 t n.+1 (n.+1 - 1)%coq_nat)) *
           (1 + default_rel t)) <
          (bpow Zaux.radix2 (femax t) -
-          default_abs t) / (1 + default_rel t))%Re) /\
+          default_abs t) / (1 + default_rel t))%Re) /\ *)
   (forall i,
     (Rabs (FT2R (A1_inv_J A' i ord0)) *
        ((Rabs (FT2R (b' i ord0)) +
