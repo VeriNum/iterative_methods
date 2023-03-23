@@ -6844,15 +6844,16 @@ destruct H0.
                      { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                        by rewrite nth_repeat.
                      } intros. rewrite H11. apply H.
-                     apply input_bound_at_N_0_equiv.
-                     rewrite -Heqn.
+                    rewrite -?Heqn -?Heqb' -?HeqA'. apply H.
+                     (*rewrite -Heqn.
                      assert (vector_inj
                                (repeat (Zconst t 0) (length b)) n.+1 =
                              \col_(j < n.+1) (Zconst t 0)).
                      { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                        by rewrite nth_repeat.
-                     } rewrite H11.
-                     rewrite -Heqb' -HeqA'. apply H.
+                     } rewrite H11. *)
+                     rewrite -Heqn. intros.
+                     rewrite  -?Heqb' -?HeqA'. apply H.
                      rewrite -Heqn.
                      intros. rewrite -?Heqb' -HeqA'. apply H. rewrite -Heqn. intros. rewrite mxE. rewrite -?Heqb' -?HeqA'. apply H.
                      rewrite -Heqn.
