@@ -4437,8 +4437,20 @@ apply dotprod_finite.
                           (Zconst t 0)) H8). 
     destruct H10 as [d2 [e2 [Hde2 [Hd2 [He2 H10]]]]].
     rewrite H10. rewrite  !nth_vec_to_list_float.
-    rewrite inord_val. eapply Rle_lt_trans.
-
+    rewrite inord_val. eapply Rle_trans.
+    apply Rabs_triang. apply Rplus_le_compat.
+    rewrite Rabs_mult. apply Rmult_le_compat; try apply Rabs_pos.
+    rewrite Rabs_mult. apply Rmult_le_compat_l; try apply Rabs_pos.
+    rewrite mxE. rewrite A2_mult_x0_eq_0; try by [].
+    rewrite Bminus_x_0. apply Rle_refl. apply Hfb.
+    eapply Rle_trans. apply Rabs_triang. rewrite Rabs_R1.
+    apply Rplus_le_compat_l. apply Hd2. apply He2. 
+    rewrite H2 in Hlen.
+    rewrite inordK; (try by apply /ssrnat.ltP) .
+    rewrite H2 in Hlen.
+    rewrite inordK; (try by apply /ssrnat.ltP) .
+    rewrite H2 in Hlen.
+    apply /ssrnat.ltP.
 
 
 
