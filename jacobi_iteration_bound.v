@@ -4197,6 +4197,34 @@ apply BMULT_no_overflow_is_finite.
   rewrite  nth_vec_to_list_float; last by apply /ssrnat.ltP.
   rewrite mxE. 
   rewrite [in X in (_ * X < _)%Re]mxE.
+  assert (X_m_jacobi 0 x0' b' A' (inord k) ord0 = Zconst t 0).
+  { rewrite mxE. unfold x0. by rewrite nth_repeat. }
+  rewrite H3. rewrite Bminus_x_0. 
+  rewrite [in X in (_ * X < _)%Re]mxE.
+  pose proof(@BMULT_accurate' _ t). 
+  specialize (H4 (nth (n.+1.-1 - @inord n k)
+                      (vec_to_list_float n.+1
+                         (A1_inv_J A'))
+                      (Zconst t 0))
+                    (nth (n.+1.-1 - @inord n k)
+                        (vec_to_list_float n.+1
+                           (b' -f A2_J A' *f x0'))
+                        (Zconst t 0))).
+  pose proof (@finite_residual_0_aux3 t A b H H0 k H1 size_cons HfA2 Hfx0 fbnd HdivA Hfb).
+  specialize (H4 H5).
+  destruct H4 as [d2 [e2 [Hde2 [Hd2 [He2 H4]]]]].
+  rewrite H4. rewrite  !nth_vec_to_list_float.
+  
+  
+
+
+
+
+
+
+
+
+
   rewrite Bminus_bplus_opp_equiv.
   - pose proof (@BPLUS_accurate' _ t).
     specialize (H3 (X_m_jacobi 1 x0' b' A'
