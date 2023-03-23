@@ -3507,9 +3507,7 @@ Definition input_bound_at_N_0 {t: type}
        bpow Zaux.radix2 (femax t) -
        default_abs t)%Re) /\ *)
   (forall i, 
-    (Rabs
-         (FT2R
-            (A1_inv_J A' i ord0)) *
+    (Rabs (FT2R (A1_inv_J A' i ord0)) *
        Rabs (FT2R (b' i ord0)) <
        (bpow Zaux.radix2 (femax t) -
         default_abs t) /
@@ -4094,10 +4092,10 @@ rewrite Bminus_x_0. apply Rle_refl.
 apply Hfb. eapply Rle_trans. apply Rabs_triang.
 rewrite Rabs_R1. apply Rplus_le_compat_l.
 apply Hd1.
-admit.
+apply Hinp.
 rewrite inordK; (by apply /ssrnat.ltP).
 rewrite inordK; (by apply /ssrnat.ltP).
-Admitted.
+Qed.
 
 Lemma finite_residual_0_aux4 {t: type} :
  forall (A: matrix t) (b: vector t),
