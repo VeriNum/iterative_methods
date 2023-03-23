@@ -4214,6 +4214,12 @@ apply BMULT_no_overflow_is_finite.
   specialize (H4 H5).
   destruct H4 as [d2 [e2 [Hde2 [Hd2 [He2 H4]]]]].
   rewrite H4. rewrite  !nth_vec_to_list_float.
+  rewrite inord_val. eapply Rle_lt_trans.
+  apply Rmult_le_compat_l; try apply Rabs_pos.
+  eapply Rle_trans. apply Rabs_triang.
+  apply Rplus_le_compat; last by apply He2.
+  rewrite Rabs_mult. apply Rmult_le_compat; try apply Rabs_pos.
+  rewrite Rabs_mult. apply Rmult_le_compat_l; try apply Rabs_pos.
   
   
 
