@@ -3755,6 +3755,40 @@ Lemma A2_mult_x0_eq_0 {t: type} :
 Proof.
 intros.
 rewrite !mxE.
+assert ((let l1 :=
+              vec_to_list_float
+                n.+1
+                (\row_j 
+                 A2_J A' 
+                   (inord i) j)^T
+              in
+            let l2 :=
+              vec_to_list_float
+                n.+1
+                (\col_j 
+                 x0' j ord0) in
+            dotprod_r l1 l2) = Zconst t 0).
+  { pose proof (@dotprod_r_eq_0_r t).
+    specialize (H6 (combine 
+                    (vec_to_list_float n.+1
+                        (\row_j  A2_J A' (inord i) j)^T)
+                    (vec_to_list_float  n.+1
+                      (\col_j (x0' j ord0))))).
+    rewrite combine_split in H6; last by rewrite !length_veclist.
+    assert (forall l l': vector t, (l, l').1 = l).
+    { intros. by simpl. } rewrite H7 in H6.
+    assert (forall l l': vector t, (l, l').2 = l').
+    { intros. by simpl. } rewrite H8 in H6.
+    apply H6. 
+    + rewrite combine_length !length_veclist Nat.min_id.
+      intros. 
+      rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
+      rewrite mxE. rewrite mxE. 
+      unfold x0. rewrite nth_repeat /=. by left.
+   + rewrite combine_length !length_veclist Nat.min_id.
+      intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
+      rewrite mxE. by rewrite mxE.
+  } rewrite inord_val in H6. rewrite H6. 
 
 
 Lemma no_overflow_0_aux1 {t: type} :
