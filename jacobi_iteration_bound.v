@@ -3812,6 +3812,18 @@ Lemma no_overflow_0_aux1 {t: type} :
 Proof.
 intros ? ? ? ? ? ? ? ? ? ? ? ? size_cons HfA2 Hfx0 Hinp. 
 unfold Bplus_no_overflow.
+rewrite A2_mult_x0_eq_0; try by [].
+assert (FT2R (BOPP (Zconst t 0)) = 0%Re).
+{ by simpl. } rewrite H2 Rplus_0_r.
+pose proof (@generic_round_property t).
+
+
+
+
+
+
+
+
 pose proof (@generic_round_property t).
 specialize (H2 (FT2R (b' (inord k) ord0) +
                    FT2R
