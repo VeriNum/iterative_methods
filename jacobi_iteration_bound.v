@@ -3478,11 +3478,10 @@ Close Scope R_scope.
 
 
 Definition input_bound_at_N_0 {t: type} 
-  (A: matrix t) (x0 b: vector t) :=
+  (A: matrix t) (b: vector t) :=
   let n := (length A).-1 in
   let A' := @matrix_inj _ A n.+1 n.+1 in
   let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
   (forall i j, 
     (Rabs (FT2R (A2_J A' i j)) <
           sqrt (fun_bnd t n.+1))%Re) /\
@@ -3517,20 +3516,15 @@ Definition input_bound_at_N_0 {t: type}
   
 
 Lemma input_bound_at_N_0_equiv {t: type} 
-  (A: matrix t) (x0 b: vector t) :
+  (A: matrix t) (b: vector t) :
   let n := (length A).-1 in
   let A' := @matrix_inj _ A n.+1 n.+1 in
   let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
-  input_bound_at_N_0_Rcompute A' x0' b' ->
-  input_bound_at_N_0 A x0 b. 
+  input_bound_at_N_0_Rcompute A' b' ->
+  input_bound_at_N_0 A b. 
 Proof.
-Admitted.
-(*
 intros. apply H.
 Qed.
-*)
-  
 
 Lemma bound_each_elem_A2_x0 {t: type} :
  forall (A: matrix t) (b: vector t),
@@ -3546,7 +3540,7 @@ Lemma bound_each_elem_A2_x0 {t: type} :
   (k < n.+1)%coq_nat -> 
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A b ->
   @size_constraint t n ->
   (forall x : ftype t * ftype t,
       In x
