@@ -6707,14 +6707,6 @@ destruct H0.
          -- apply finite_is_finite. apply finite_residual_1; try by apply H.
             apply HlenA. apply HeqAb.
             intros.
-(*
-            assert (vector_inj
-                   (repeat (Zconst t 0) (length b)) (length A).-1.+1 =
-                 \col_(j < (length A).-1.+1) (Zconst t 0)).
-            { apply matrixP. unfold eqrel. intros. rewrite !mxE.
-              by rewrite nth_repeat.
-            } rewrite H1. apply H. split. 
-            apply input_bound_at_N_0_equiv.  *)
             assert (vector_inj
                          (repeat (Zconst t 0) (length b)) (length A).-1.+1 =
                              \col_(j < (length A).-1.+1) (Zconst t 0)).
@@ -6905,16 +6897,10 @@ destruct H0.
                                          (vector_inj b (length A).-1.+1 i
                                             ord0))).
                       { rewrite -Heqn. intros. rewrite -?Heqb' -?HeqA'. apply H. }
-                      assert (Hinpl : input_bound_at_N_0 A x0 b).
-                      { apply input_bound_at_N_0_equiv.
-                         rewrite -Heqn.
-                         assert (vector_inj
-                                   (repeat (Zconst t 0) (length b)) n.+1 =
-                                 \col_(j < n.+1) (Zconst t 0)).
-                         { apply matrixP. unfold eqrel. intros. rewrite !mxE.
-                           by rewrite nth_repeat.
-                         } rewrite H10.
-                         rewrite -?Heqb' -?HeqA'. apply H.
+                      assert (Hinpl : input_bound_at_N_0_Rcompute 
+                              (matrix_inj A (length A).-1.+1  (length A).-1.+1)
+                              (vector_inj b (length A).-1.+1)).
+                      { rewrite -Heqn. rewrite -?Heqb' -?HeqA'. apply H.
                       } unfold resid.  rewrite Heqn. 
                     rewrite H2. unfold residual_math.
                     remember (vector_inj x0 n.+1) as x0'.
@@ -7376,14 +7362,7 @@ destruct H0.
                 { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                   by rewrite nth_repeat.
                 }  rewrite H2.  apply H.
-                apply input_bound_at_N_0_equiv.
-                assert (vector_inj
-                               (repeat (Zconst t 0) (length b)) (length A).-1.+1 =
-                             \col_(j < (length A).-1.+1) (Zconst t 0)).
-                { apply matrixP. unfold eqrel. intros. rewrite !mxE.
-                  by rewrite nth_repeat.
-                }  rewrite H2. rewrite -?Heqn -?HeqA' -?Heqb'.
-                apply H.
+                rewrite -?Heqn -?HeqA' -?Heqb'. apply H.
                 rewrite -?Heqn -?HeqA' -?Heqb'. intros. apply H.
                 rewrite -?Heqn -?HeqA' -?Heqb'. intros. rewrite mxE. apply H.
                 rewrite -?Heqn -?HeqA' -?Heqb'. intros. apply H.
