@@ -4220,6 +4220,14 @@ apply BMULT_no_overflow_is_finite.
   apply Rplus_le_compat; last by apply He2.
   rewrite Rabs_mult. apply Rmult_le_compat; try apply Rabs_pos.
   rewrite Rabs_mult. apply Rmult_le_compat_l; try apply Rabs_pos.
+  rewrite mxE. rewrite A2_mult_x0_eq_0; try by [].
+  rewrite Bminus_x_0. apply Rle_refl. apply Hfb.
+  eapply Rle_trans. apply Rabs_triang. rewrite Rabs_R1.
+  apply Rplus_le_compat_l. apply Hd2.
+  admit.
+  rewrite inordK; (by apply /ssrnat.ltP).
+  rewrite inordK; (by apply /ssrnat.ltP).
+  rewrite mxE.
   
   
 
