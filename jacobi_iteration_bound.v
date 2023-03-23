@@ -6260,8 +6260,7 @@ destruct H0.
 (*** || N || = 0 case. ***)
 - split.
   + apply H.
-  + (*** TODO: k = 1 : for k = 1, the residual should evaluate to 0 ***) 
-    apply rho_0_implies_N_eq_0 in H0.
+  + apply rho_0_implies_N_eq_0 in H0.
     exists 1%nat.
     split.
     * assert (k = 0%nat \/ (0 < k)%nat).
@@ -6453,13 +6452,7 @@ destruct H0.
                assert (Hinpl : input_bound_at_N_0_Rcompute 
                               (matrix_inj A (length A).-1.+1  (length A).-1.+1)
                               (vector_inj b (length A).-1.+1)).
-               { rewrite -Heqn.
-                 assert (vector_inj
-                                   (repeat (Zconst t 0) (length b)) n.+1 =
-                                 \col_(j < n.+1) (Zconst t 0)).
-                 { apply matrixP. unfold eqrel. intros. rewrite !mxE.
-                   by rewrite nth_repeat.
-                 } apply H. 
+               { rewrite -Heqn. apply H. 
                } 
                specialize (H12 HfA2l Hfx0l Hinpl HfAl  HfA1_invl  Hfbl ).
                rewrite -Heqn in H12. specialize (H12 H0 (@inord n m)). split;apply H12.
