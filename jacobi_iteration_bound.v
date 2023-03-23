@@ -4232,10 +4232,8 @@ apply BMULT_no_overflow_is_finite.
   eapply Rlt_trans. apply fbnd.
   apply Rmult_lt_compat_r.
   apply Rinv_0_lt_compat.
-
-
-
-  apply fbnd.
+  apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
+  apply Rplus_lt_compat_r. by apply sqrt_fun_bnd_lt_fmax.
   rewrite inordK; (by apply /ssrnat.ltP).
   rewrite inordK; (by apply /ssrnat.ltP).
   rewrite mxE. by apply finite_residual_0_aux3.
