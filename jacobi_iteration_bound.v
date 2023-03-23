@@ -3600,7 +3600,7 @@ Lemma finite_residual_0_aux1 {t: type} :
   @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A b ->
   is_finite (fprec t) (femax t)
     (let l1 :=
        vec_to_list_float n.+1
@@ -3769,7 +3769,7 @@ Lemma no_overflow_0_aux1 {t: type} :
   @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A b ->
   Bplus_no_overflow t
   (FT2R (b' (@inord n k) ord0))
   (FT2R
@@ -3813,7 +3813,7 @@ Lemma finite_residual_0_aux2 {t: type} :
   @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A b ->
   finite (b' (inord k) ord0) ->
   finite
     (nth (n.+1.-1 - @inord n k)
@@ -3859,7 +3859,7 @@ Lemma no_overflow_Bmult_A1_inv_b_minus {t: type} :
   @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A b ->
   finite (b' (inord k) ord0) ->
   Bmult_no_overflow t
   (FT2R
@@ -3932,7 +3932,7 @@ Lemma finite_residual_0_aux3 {t: type} :
   @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A b ->
   finite (A1_inv_J A' (inord k) ord0) ->
   finite (b' (inord k) ord0) ->
   finite
@@ -3978,7 +3978,7 @@ Lemma no_overflow_x1_minus_x0 {t: type} :
   @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A b ->
   finite (A1_inv_J A' (inord k) ord0) ->
   finite (b' (inord k) ord0) ->
   Bplus_no_overflow t
@@ -4057,7 +4057,7 @@ Lemma finite_residual_0_aux4 {t: type} :
   @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A b ->
   finite (A1_inv_J A' (inord k) ord0) ->
   finite (b' (inord k) ord0) ->
   finite
@@ -4094,7 +4094,7 @@ Lemma finite_residual_0_mult {t: type} :
   @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A b ->
   finite (A' (inord k) (inord k)) ->
   finite (A1_inv_J A' (inord k) ord0) ->
   finite (b' (inord k) ord0) ->
@@ -4193,7 +4193,7 @@ Lemma finite_in{t: type}  :
   @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A b ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
@@ -4270,7 +4270,7 @@ Lemma finite_residual_0 {t: type} :
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
+  input_bound_at_N_0 A b ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
@@ -4387,7 +4387,7 @@ apply dotprod_finite.
     rewrite H2 in Hlen.
     rewrite inordK; (try by apply /ssrnat.ltP) .
     rewrite H2 in Hlen. by apply /ssrnat.ltP.
-    admit.
+    apply Hinp.
     rewrite mxE. apply finite_residual_0_aux3; try by [].
     rewrite -/n.
     by rewrite H2 in Hlen. 
@@ -4397,9 +4397,7 @@ apply dotprod_finite.
   - rewrite H2 in Hlen;(try by apply /ssrnat.ltP) .
   - rewrite length_veclist.
     by rewrite H2 in Hlen;(try by apply /ssrnat.ltP) .
-Admitted.
-
-
+Qed.
 
 Lemma finite_implies_1 {t: type} :
  forall (A: matrix t) (b: vector t),
@@ -5547,7 +5545,7 @@ Lemma D_inv_mult_b_is_finite {t: type} :
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b /\ input_bound_at_N_0_Rcompute_1 A' x0' b' ->
+  input_bound_at_N_0_Rcompute A' b'  ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
@@ -5573,7 +5571,7 @@ apply BMULT_no_overflow_is_finite.
   apply Rplus_le_compat_l. apply Hd.
   apply Rcomplements.Rlt_div_r.
   apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-  apply H4.
+  rewrite Rabs_mult. apply H4.
 Qed.
 
 Lemma xm_1_is_finte {t: type} :
@@ -5589,7 +5587,7 @@ Lemma xm_1_is_finte {t: type} :
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b /\ input_bound_at_N_0_Rcompute_1 A' x0' b' ->
+  input_bound_at_N_0_Rcompute A' b' ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
@@ -5668,7 +5666,7 @@ Lemma resid_sub_0_N_0 {t: type} :
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b /\ input_bound_at_N_0_Rcompute_1 A' x0' b' ->
+  input_bound_at_N_0_Rcompute A' b' ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
@@ -5876,7 +5874,7 @@ Lemma xm_2_is_finte {t: type} :
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b /\ input_bound_at_N_0_Rcompute_1 A' x0' b'  ->
+  input_bound_at_N_0_Rcompute A' b'  ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
@@ -5961,7 +5959,7 @@ Lemma finite_x2_minus_x1 {t: type} :
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b /\ input_bound_at_N_0_Rcompute_1 A' x0' b'  ->
+  input_bound_at_N_0_Rcompute A' b' ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
@@ -6103,7 +6101,7 @@ Lemma finite_A_mult_x2_minus_x1 {t: type} :
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b /\ input_bound_at_N_0_Rcompute_1 A' x0' b' ->
+  input_bound_at_N_0_Rcompute A' b' ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
@@ -6142,7 +6140,7 @@ Lemma vec_norm_resid_N_0 {t: type} :
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b /\ input_bound_at_N_0_Rcompute_1 A' x0' b' ->
+  input_bound_at_N_0_Rcompute A' b' ->
   (forall i, finite (A' i i)) ->
   (forall i, finite (A1_inv_J A' i ord0)) ->
   (forall i, finite (b' i ord0)) ->
