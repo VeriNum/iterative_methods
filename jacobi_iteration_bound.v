@@ -3486,77 +3486,23 @@ Definition input_bound_at_N_0 {t: type}
   (forall i j, 
     (Rabs (FT2R (A2_J A' i j)) <
           sqrt (fun_bnd t n.+1))%Re) /\
-  (*(forall i,
-    (Rabs (FT2R (x0' i ord0)) <
-            sqrt (fun_bnd t n.+1))%Re) /\ *)
-
   (forall i,
       (Rabs (FT2R (b' i ord0)) <
          (bpow Zaux.radix2 (femax t) -
           default_abs t) /
          (1 + default_rel t))%Re) /\
- (* (forall i,
-    ((Rabs (FT2R (b' i ord0)) +
-        ((\sum_j
-             (Rabs
-                (FT2R (A2_J A' i j)) *
-              Rabs (FT2R (x0' j ord0)))%Re) *
-         (1 + g t n.+1) +
-         g1 t n.+1 (n.+1 - 1)%coq_nat)) *
-       (1 + default_rel t) <
-       bpow Zaux.radix2 (femax t) -
-       default_abs t)%Re) /\ *)
   (forall i, 
     (Rabs (FT2R (A1_inv_J A' i ord0)) *
        Rabs (FT2R (b' i ord0)) <
        (bpow Zaux.radix2 (femax t) -
         default_abs t) /
        (1 + default_rel t))%Re) /\
-(*
-  (forall i,
-      (Rabs (FT2R (A1_inv_J A' i ord0)) *
-         ((Rabs (FT2R (b' i ord0)) +
-           ((\sum_j
-                (Rabs
-                   (FT2R (A2_J A' i j)) *
-                 Rabs (FT2R (x0' j ord0)))%Re) *
-            (1 + g t n.+1) +
-            g1 t n.+1 (n.+1 - 1)%coq_nat)) *
-          (1 + default_rel t)) <
-         (bpow Zaux.radix2 (femax t) -
-          default_abs t) / (1 + default_rel t))%Re) /\ *)
   (forall i,
       (Rabs (FT2R (A1_inv_J A' i ord0)) *
        Rabs (FT2R (b' i ord0)) *
        (1 + default_rel t) + default_abs t <
        (bpow Zaux.radix2 (femax t) - default_abs t) /
        (1 + default_rel t))%Re) /\
-  (*
-  (forall i,
-    (Rabs (FT2R (A1_inv_J A' i ord0)) *
-       ((Rabs (FT2R (b' i ord0)) +
-         ((\sum_j
-              (Rabs
-                 (FT2R (A2_J A' i j)) *
-               Rabs (FT2R (x0' j ord0)))%Re) *
-          (1 + g t n.+1) +
-          g1 t n.+1 (n.+1 - 1)%coq_nat)) *
-        (1 + default_rel t)) *
-       (1 + default_rel t) + default_abs t +
-       Rabs (FT2R (x0' i ord0)) <
-       (bpow Zaux.radix2 (femax t) -
-        default_abs t) / (1 + default_rel t))%Re) /\ *)
-  (*(forall i,
-    (Rabs (FT2R (A' i i)) *
-         (Rabs
-            (FT2R
-               (A1_inv_J A' i ord0)) *
-          Rabs (FT2R (b' i ord0)) *
-          (1 + default_rel t) +
-          default_abs t) <
-         (bpow Zaux.radix2 (femax t) -
-          default_abs t) /
-         (1 + default_rel t))%Re) /\  *)
   (forall i,
       (Rabs (FT2R (A' i i)) *
        (Rabs
@@ -5521,23 +5467,6 @@ destruct x; try contradiction; simpl;auto.
 destruct s; simpl in * ; auto; try by [].
 unfold BMULT, BINOP, Bmult. simpl in *.
 destruct s; simpl in *; auto.
-Qed.
-
-
-Lemma neg_zero_real {t}:
-  @FT2R t neg_zero = 0%Re.
-Proof.
-auto.
-Qed.
-
-
-Lemma Bminus_x_0 {t} (x: ftype t):
-  finite x ->
-  BMINUS x (Zconst t 0) = x.
-Proof.
-intros.
-destruct x; try contradiction; simpl;auto.
-destruct s; auto.
 Qed.
 
 
