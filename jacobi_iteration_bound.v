@@ -3875,6 +3875,15 @@ apply Bplus_no_ov_finite.
   rewrite -/n. rewrite inordK; try by apply /ssrnat.ltP.
   by apply H1. 
 Qed.
+
+Lemma Bplus_x_BOPP_0 {t} (x: ftype t):
+  finite x ->
+  BPLUS x (BOPP (Zconst t 0)) = x.
+Proof.
+intros.
+destruct x; try contradiction; simpl;auto.
+destruct s; auto.
+Qed.
     
 Lemma no_overflow_Bmult_A1_inv_b_minus {t: type} :
  forall (A: matrix t) (b: vector t),
@@ -3939,6 +3948,20 @@ rewrite -/n -/A' -/b' -/x0' in H6.
 rewrite nth_vec_to_list_float in H6. rewrite inord_val mxE in H6.
 apply Bminus_bplus_opp_implies in H6.
 rewrite Bminus_bplus_opp_equiv; last by apply H6.
+rewrite A2_mult_x0_eq_0; try by [].
+rewrite Bplus_x_BOPP_0.
+
+
+
+
+
+
+
+
+
+
+
+
 pose proof (@BPLUS_accurate' _ t).
 specialize (H7 (b' (inord k) ord0) (BOPP
             ((A2_J A' *f x0') 
