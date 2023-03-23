@@ -3744,12 +3744,7 @@ Lemma A2_mult_x0_eq_0 {t: type} :
   let A' := @matrix_inj _ A n.+1 n.+1 in
   let b' := @vector_inj _ b n.+1 in
   let x0' := @vector_inj _ x0 n.+1 in
-  forall k,
-  (k < n.+1)%coq_nat ->
-  @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
-  (forall i, finite (x0' i ord0)) ->
-  input_bound_at_N_0 A x0 b ->
   forall i,
   (A2_J A' *f x0') i ord0 = Zconst t 0.
 Proof.
@@ -3769,17 +3764,17 @@ assert ((let l1 :=
                  x0' j ord0) in
             dotprod_r l1 l2) = Zconst t 0).
   { pose proof (@dotprod_r_eq_0_r t).
-    specialize (H6 (combine 
+    specialize (H2 (combine 
                     (vec_to_list_float n.+1
                         (\row_j  A2_J A' (inord i) j)^T)
                     (vec_to_list_float  n.+1
                       (\col_j (x0' j ord0))))).
-    rewrite combine_split in H6; last by rewrite !length_veclist.
+    rewrite combine_split in H2; last by rewrite !length_veclist.
     assert (forall l l': vector t, (l, l').1 = l).
-    { intros. by simpl. } rewrite H7 in H6.
+    { intros. by simpl. } rewrite H3 in H2.
     assert (forall l l': vector t, (l, l').2 = l').
-    { intros. by simpl. } rewrite H8 in H6.
-    apply H6. 
+    { intros. by simpl. } rewrite H4 in H2.
+    apply H2. 
     + rewrite combine_length !length_veclist Nat.min_id.
       intros. 
       rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
@@ -3788,7 +3783,8 @@ assert ((let l1 :=
    + rewrite combine_length !length_veclist Nat.min_id.
       intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
       rewrite mxE. by rewrite mxE.
-  } rewrite inord_val in H6. rewrite H6. 
+  } rewrite inord_val in H2. by rewrite H2.
+Qed. 
 
 
 Lemma no_overflow_0_aux1 {t: type} :
