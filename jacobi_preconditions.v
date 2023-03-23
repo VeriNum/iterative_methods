@@ -231,9 +231,9 @@ Definition input_bound_at_N_0_Rcompute {t: type} {n:nat}
   (forall i j, 
     (Rabs (FT2R (A2_J A i j)) <
           sqrt (fun_bnd t n.+1))%Re) /\
-  (forall i,
+ (* (forall i,
     (Rabs (FT2R (x0 i ord0)) <
-            sqrt (fun_bnd t n.+1))%Re) /\
+            sqrt (fun_bnd t n.+1))%Re) /\ *)
   (forall i,
     ((Rabs (FT2R (b i ord0)) +
         ((\sum_j
