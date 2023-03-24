@@ -3521,7 +3521,7 @@ rewrite !nth_vec_to_list_float in Hnth.
 rewrite mxE in Hnth. rewrite mxE in Hnth.
 rewrite mxE in Hnth.
 destruct x.
-apply inject_pair_iff in Hnth.
+first [apply inject_pair_iff in Hnth | apply pair_equal_spec in Hnth].
 destruct Hnth as [Hnth1 Hnth2].
 simpl. rewrite -Hnth1 -Hnth2.
 repeat split; try apply H2; try apply H3; try apply H4.
@@ -4184,7 +4184,7 @@ rewrite combine_length !length_veclist Nat.min_id in Hnth.
 assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
 rewrite combine_nth in Hnth.
 destruct xy . simpl. 
-apply inject_pair_iff in Hnth.
+first [apply inject_pair_iff in Hnth | apply pair_equal_spec in Hnth].
 destruct Hnth as [Hnth1 Hnth2].
 rewrite -Hnth1 -Hnth2.
 pose proof (@vector_residual_equiv t A b x0 0%nat).
@@ -4419,7 +4419,8 @@ assert (finite (BMULT xy.1 xy.2)).
     destruct xy. rewrite rev_combine in Hnth.
     rewrite combine_nth in Hnth.
     rewrite [in LHS]/=. rewrite !rev_nth !length_veclist in Hnth.
-    rewrite !H5 in Hnth. apply inject_pair_iff in Hnth.
+    rewrite !H5 in Hnth.
+    first [apply inject_pair_iff in Hnth | apply pair_equal_spec in Hnth].
     destruct Hnth as [Hnth1 Hnth2]. 
     rewrite -Hnth1 -Hnth2.
     rewrite inordK; try by apply Hlen.  by [].
@@ -4556,7 +4557,7 @@ rewrite rev_nth combine_length !length_veclist Nat.min_id in Hnth.
 assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
 rewrite H3 in Hnth.
 rewrite combine_nth in Hnth.
-apply inject_pair_iff in Hnth.
+first [apply inject_pair_iff in Hnth | apply pair_equal_spec in Hnth].
 simpl.
 destruct Hnth as [Hnth1 Hnth2].
 assert (X_m_jacobi 1 x0' b' A' (inord k) ord0 = 
@@ -4713,7 +4714,7 @@ rewrite rev_nth combine_length !length_veclist Nat.min_id in Hnth.
 assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
 rewrite H5 in Hnth.
 rewrite combine_nth in Hnth.
-apply inject_pair_iff in Hnth.
+first [apply inject_pair_iff in Hnth | apply pair_equal_spec in Hnth].
 simpl.
 destruct Hnth as [Hnth1 Hnth2].
 rewrite -Hnth1 -Hnth2.
@@ -4854,7 +4855,7 @@ assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
 rewrite H5 in Hnth.
 destruct xy .
 simpl.
-apply inject_pair_iff in Hnth.
+first [apply inject_pair_iff in Hnth | apply pair_equal_spec in Hnth].
 simpl.
 destruct Hnth as [Hnth1 Hnth2].
 rewrite -Hnth1 -Hnth2.
@@ -6401,7 +6402,8 @@ destruct H0.
                 assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat) by lia.
                 rewrite H10 combine_nth in Hmth. 
                 rewrite nth_vec_to_list_float in Hmth; try by [].
-                destruct xy. simpl. apply inject_pair_iff in Hmth.
+                destruct xy. simpl.
+               first [apply inject_pair_iff in Hmth | apply pair_equal_spec in Hmth].
                 destruct Hmth as [Hmth1 Hmth2]. rewrite -Hmth1 -Hmth2.
                 pose proof (@vector_residual_equiv t A b x0 1%nat H2 H3 HlenA).
                 unfold resid. rewrite -Heqn in H11. rewrite H11.
@@ -6510,7 +6512,8 @@ destruct H0.
                   rewrite H13 in H12.
                   rewrite combine_nth in H12.
                   repeat (rewrite nth_vec_to_list_float in H12;try by []).
-                  destruct xy. simpl. apply inject_pair_iff in H12.
+                  destruct xy. simpl.
+                  first [apply inject_pair_iff in H12 | apply pair_equal_spec in H12].
                   destruct H12 as [H12a H12b].
                   rewrite -H12a -H12b. 
                   split.
