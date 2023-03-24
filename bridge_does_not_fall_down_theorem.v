@@ -25,36 +25,40 @@ Section WITH_NANS.
 
 Context {NANS: Nans}.
 
+Definition jacobi_accuracy_preconditions {t} (A: matrix t) (b: vector t)  (tau: ftype t) := False.
 
-Definition bridge_safety_preconditions := False.
+Definition compute_jacobi_accuracy {t} (A: matrix t) (b: vector t)  (tau: ftype t) : R. 
+Admitted.
 
-Search Bcompare.
-Lemma bridge_is_not_falling_ever {t: type} :
- forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
-   bridge_safety_preconditions ->
-   let acc2 := BMULT acc acc in
+Lemma jacobi_accuracy {t: type} :
+ forall (A: matrix t) (b: vector t) (acc: ftype t) (j: nat),
+   jacobi_accuracy_preconditions A b acc ->
    let x0 := (repeat  (Zconst t 0) (length b)) in
+   let y :=  jacobi_n A b x0 j in
    let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
-   (exists j,
-    (j <= k)%nat /\
-    let y :=  jacobi_n A b x0 j in
-    let r2 := norm2 (resid y) in
-    (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
-    BCMP Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false ) ->
-    exists (j:nat) (bnd:R),
-    let y :=  jacobi_n A b x0 j in
+   let bnd := compute_jacobi_accuracy A b (norm2 (resid y)) in 
+    (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) ->
+    BCMP Lt false (norm2 (resid y)) (BMULT acc acc) = false  ->
     let n := (length A).-1 in
     let A' := @matrix_inj _ A n.+1 n.+1 in
     let b' := @vector_inj _ b n.+1 in
-    (0 < length A)%coq_nat ->
-    length A = length b ->
     let x:= (FT2R_mat A')^-1 *m (FT2R_mat b') in
     vec_inf_norm ((FT2R_mat (@vector_inj _ y n.+1 )) - x) <= bnd.
 Admitted.
-    
 
-
-
-
+Lemma jacobi_accuracy_alt {t: type} :
+ forall (A: matrix t) (b: vector t) (acc: ftype t) (y: vector t),
+   jacobi_accuracy_preconditions A b acc ->
+   let acc2 := BMULT acc acc in
+   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+   let r2 := norm2 (resid y) in
+   let bnd := compute_jacobi_accuracy A b acc in 
+    BCMP Gt true acc2 (norm2 (resid y)) = true ->
+    let n := (length A).-1 in
+    let A' := @matrix_inj _ A n.+1 n.+1 in
+    let b' := @vector_inj _ b n.+1 in
+    let x:= (FT2R_mat A')^-1 *m (FT2R_mat b') in
+    vec_inf_norm ((FT2R_mat (@vector_inj _ y n.+1 )) - x) <= bnd.
+Admitted.
 
 End WITH_NANS.
