@@ -40,7 +40,7 @@ Lemma bridge_is_not_falling_ever {t: type} :
     let y :=  jacobi_n A b x0 j in
     let r2 := norm2 (resid y) in
     (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
-    BCMP Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = true ) ->
+    BCMP Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false ) ->
     exists (j:nat) (bnd:R),
     let y :=  jacobi_n A b x0 j in
     let n := (length A).-1 in
