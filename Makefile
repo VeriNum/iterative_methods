@@ -31,6 +31,7 @@ clean:
 	rm -f *.vo *.vos *.vok *.glob
 	rm -f sparse/*.o sparse/run sparse/test
 	rm -f sparse/*.{vo,vos,vok,glob}
+	rm -f StationaryMethods/*.{vo,vos,vok,glob}
 
 # This should be the last rule, to handle any targets not declared above
 %: invoke-coqmakefile
