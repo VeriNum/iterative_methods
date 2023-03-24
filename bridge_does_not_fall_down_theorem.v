@@ -27,38 +27,34 @@ Context {NANS: Nans}.
 
 Definition jacobi_accuracy_preconditions {t} (A: matrix t) (b: vector t)  (tau: ftype t) := False.
 
-Definition compute_jacobi_accuracy {t} (A: matrix t) (b: vector t)  (tau: ftype t) : R. 
+Definition bound_jacobi_accuracy {t} (A: matrix t) (b: vector t)  (tau: ftype t) : R. 
 Admitted.
 
-Lemma jacobi_accuracy {t: type} :
+Definition jacobi_accuracy {t: type}  (A: matrix t) (b: vector t) (y: vector t) : R :=
+     let n := (length A).-1 in
+    let A' := @matrix_inj _ A n.+1 n.+1 in
+    let b' := @vector_inj _ b n.+1 in
+    let x:= (FT2R_mat A')^-1 *m (FT2R_mat b') in
+    vec_inf_norm ((FT2R_mat (@vector_inj _ y n.+1 )) - x).
+
+Lemma jacobi_accurate {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (j: nat),
    jacobi_accuracy_preconditions A b acc ->
    let x0 := (repeat  (Zconst t 0) (length b)) in
    let y :=  jacobi_n A b x0 j in
    let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
-   let bnd := compute_jacobi_accuracy A b (norm2 (resid y)) in 
     (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) ->
     BCMP Lt false (norm2 (resid y)) (BMULT acc acc) = false  ->
-    let n := (length A).-1 in
-    let A' := @matrix_inj _ A n.+1 n.+1 in
-    let b' := @vector_inj _ b n.+1 in
-    let x:= (FT2R_mat A')^-1 *m (FT2R_mat b') in
-    vec_inf_norm ((FT2R_mat (@vector_inj _ y n.+1 )) - x) <= bnd.
+    jacobi_accuracy A b y <= bound_jacobi_accuracy A b (norm2 (resid y)).
 Admitted.
 
-Lemma jacobi_accuracy_alt {t: type} :
+Lemma jacobi_accurate_alt {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (y: vector t),
    jacobi_accuracy_preconditions A b acc ->
-   let acc2 := BMULT acc acc in
    let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
-   let r2 := norm2 (resid y) in
-   let bnd := compute_jacobi_accuracy A b acc in 
-    BCMP Gt true acc2 (norm2 (resid y)) = true ->
-    let n := (length A).-1 in
-    let A' := @matrix_inj _ A n.+1 n.+1 in
-    let b' := @vector_inj _ b n.+1 in
-    let x:= (FT2R_mat A')^-1 *m (FT2R_mat b') in
-    vec_inf_norm ((FT2R_mat (@vector_inj _ y n.+1 )) - x) <= bnd.
-Admitted.
+    BCMP Lt false (norm2 (resid y)) (BMULT acc acc) = false  ->
+    jacobi_accuracy A b y <= bound_jacobi_accuracy A b (norm2 (resid y)).
+Abort.
+
 
 End WITH_NANS.
