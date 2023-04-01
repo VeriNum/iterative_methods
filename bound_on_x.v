@@ -120,6 +120,13 @@ assert (Lim_seq (fun k:nat => vec_inf_norm x1) =
 { by rewrite Lim_seq_const. } rewrite -H0.
 apply Lim_seq_le_loc.
 unfold eventually.
+assert (is_lim_seq (fun n => (R_def ^ n)%Re) 0%Re).
+{ apply is_lim_seq_geom. 
+  rewrite Rabs_right. apply H.
+  unfold R_def. apply Rle_ge. apply Rmult_le_pos.
+  apply /RleP. apply vec_norm_pd.
+  apply /RleP. apply matrix_norm_pd.
+}
 
 
 
