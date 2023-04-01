@@ -126,7 +126,15 @@ assert (is_lim_seq (fun n => (R_def ^ n)%Re) 0%Re).
   unfold R_def. apply Rle_ge. apply Rmult_le_pos.
   apply /RleP. apply vec_norm_pd.
   apply /RleP. apply matrix_norm_pd.
-}
+} rewrite <-is_lim_seq_spec in H1. 
+unfold is_lim_seq' in H1.
+assert ((0 < 1)%Re) by nra.
+specialize (H1 (mkposreal 1%Re H2)).
+unfold eventually in H1. 
+destruct H1 as [N H1].
+exists N. intros.
+specialize (H1 n0). specialize (H1 H3).
+simpl in H1.
 
 
 
