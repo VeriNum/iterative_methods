@@ -111,6 +111,50 @@ Lemma x_bounded_by_x_k {t} {n:nat}
   let R_def := (vec_inf_norm ( A1_diag A_real) * 
                  matrix_inf_norm (A2_J_real A_real))%Re in 
   (R_def < 1)%Re ->
+  Rbar_le (Rbar_minus (vec_inf_norm x1)  
+              (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))))%Re 
+          0%Re.
+Proof.
+intros.
+assert ((Rbar_minus (vec_inf_norm x1)  
+              (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))) = 0%Re).
+{ assert (Lim_seq (fun k:nat => vec_inf_norm x1) = 
+        vec_inf_norm x1).
+  { by rewrite Lim_seq_const. } rewrite -H0.
+  rewrite  -Lim_seq_minus.
+  + apply is_lim_seq_unique. admit.
+  +
+
+
+
+
+  admit.
+} 
+
+rewrite H0. simpl. nra.
+
+
+
+assert (Lim_seq (fun k:nat => vec_inf_norm x1) = 
+        vec_inf_norm x1).
+{ by rewrite Lim_seq_const. } rewrite -H0.
+
+
+
+
+
+
+
+Lemma x_bounded_by_x_k {t} {n:nat}
+  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x := A_real^-1 *m b_real in
+  let x1 := x_fix x b_real A_real in
+  let x0 := (\col_(j < n.+1) 0%Re) in
+  let R_def := (vec_inf_norm ( A1_diag A_real) * 
+                 matrix_inf_norm (A2_J_real A_real))%Re in 
+  (R_def < 1)%Re ->
   Rbar_le (vec_inf_norm x1) 
     (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))).
 Proof.
@@ -142,7 +186,7 @@ specialize (H1 n0). specialize (H1 H3).
 simpl in H1.
 apply RIneq.Rminus_le. apply /RleP.
 apply reverse_triang_ineq. apply /RleP.
-apply Rle_trans wtih 
+apply Rle_trans with 
 
 
 
