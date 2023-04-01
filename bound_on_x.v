@@ -58,6 +58,9 @@ Lemma x_bound_exists {t} {n:nat}
         vec_inf_norm (b_real)) / (1 - R_def))%Re.
 Proof.
 intros.
+remember (\col_(j < n.+1) 0%Re) as x0.
+apply Rle_trans with
+  (topology.lim (series (fun k : nat => vec_inf_norm (x_k k x0 b_real A_real)))).
 
 
 
@@ -83,6 +86,5 @@ Admitted.
 
 
 End WITH_NANS.
-
 
 
