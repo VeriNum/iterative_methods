@@ -1,6 +1,6 @@
 Require Import vcfloat.VCFloat vcfloat.FPLib.
 From mathcomp Require Import all_ssreflect ssralg  ssrnat all_algebra seq matrix .
-From mathcomp.analysis Require Import Rstruct.
+From mathcomp.analysis Require Import Rstruct sequences.
 Require Import fma_is_finite dotprod_model.
 Require Import floatlib jacob_list_fun_model.
 Require Import fma_real_func_model fma_floating_point_model.
@@ -24,6 +24,22 @@ Section WITH_NANS.
 
 Context {NANS: Nans}.
 
+Print series.
+
+
+(** Check (series (fun n: nat => (vec_inf_norm x1))). **)
+
+
+(** Define the solution vector at k-th iteration **)
+Fixpoint x_k {n:nat} (k: nat) 
+  (x0 b : 'cV[R]_n.+1) (A: 'M[R]_n.+1):= 
+  match k with 
+  | O => x0
+  | p.+1 => x_fix (x_k p x0 b A ) b A
+  end.
+  
+
+
 
 (** bound for ||x|| **)
 Lemma x_bound_exists {t} {n:nat}
@@ -40,6 +56,28 @@ Lemma x_bound_exists {t} {n:nat}
    (vec_inf_norm x1 <= 
       (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
         vec_inf_norm (b_real)) / (1 - R_def))%Re.
+Proof.
+intros.
+
+
+
+
+Print lim.
+
+
+
+Print topology.lim.
+
+Locate lim.
+Print lim.
+
+
+apply Rle_trans
+
+
+
+
+
 Admitted.
 
 
