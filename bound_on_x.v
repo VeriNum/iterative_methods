@@ -101,6 +101,7 @@ by unfold Rbar_le in H.
 Qed.
 
 
+
 Lemma x_bounded_by_x_k {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
   let A_real := FT2R_mat A in
@@ -111,8 +112,10 @@ Lemma x_bounded_by_x_k {t} {n:nat}
   let R_def := (vec_inf_norm ( A1_diag A_real) * 
                  matrix_inf_norm (A2_J_real A_real))%Re in 
   (R_def < 1)%Re ->
+  is_finite (vec_inf_norm x1) ->
+  is_finite (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))) ->
   Rbar_le (Rbar_minus (vec_inf_norm x1)  
-              (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))))%Re 
+              (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))))
           0%Re.
 Proof.
 intros.
@@ -120,10 +123,23 @@ assert ((Rbar_minus (vec_inf_norm x1)
               (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))) = 0%Re).
 { assert (Lim_seq (fun k:nat => vec_inf_norm x1) = 
         vec_inf_norm x1).
-  { by rewrite Lim_seq_const. } rewrite -H0.
+  { by rewrite Lim_seq_const. } rewrite -H2.
   rewrite  -Lim_seq_minus.
   + apply is_lim_seq_unique. admit.
-  +
+  + apply ex_lim_seq_const.
+  + apply ex_lim_seq_decr. intros.
+    admit.
+  + unfold ex_Rbar_minus.
+    unfold ex_Rbar_plus. 
+    unfold Rbar_plus'.
+    destruct (Lim_seq (fun=> vec_inf_norm x1)); simpl.
+    unfold Rbar_opp.
+    destruct (Lim_seq
+        (fun k : nat =>
+         vec_inf_norm
+           (x_k k x0 b_real A_real))); simpl; auto.
+    rewrite -H2 in H0. 
+    contradict H0. auto.
 
 
 
