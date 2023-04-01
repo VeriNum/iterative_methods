@@ -130,6 +130,8 @@ assert (is_lim_seq (fun n => ((R_def ^ n) * vec_inf_norm x1)%Re) 0%Re).
     apply /RleP. apply matrix_norm_pd.
   + apply is_lim_seq_const.
 } rewrite <-is_lim_seq_spec in H1. 
+
+
 unfold is_lim_seq' in H1.
 assert ((0 < 1)%Re) by nra.
 specialize (H1 (mkposreal 1%Re H2)).
@@ -138,6 +140,9 @@ destruct H1 as [N H1].
 exists N. intros.
 specialize (H1 n0). specialize (H1 H3).
 simpl in H1.
+apply RIneq.Rminus_le. apply /RleP.
+apply reverse_triang_ineq. apply /RleP.
+apply Rle_trans wtih 
 
 
 
