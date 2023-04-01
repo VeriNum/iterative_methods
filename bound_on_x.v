@@ -50,6 +50,17 @@ Fixpoint x_k {n:nat} (k: nat)
   end.
   
 
+Lemma x_bounded_by_x_k {t} {n:nat}
+  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x := A_real^-1 *m b_real in
+  let x1 := x_fix x b_real A_real in
+  let x0 := (\col_(j < n.+1) 0%Re) in 
+  (vec_inf_norm x1 <= 
+      (lim (series (fun k : nat => vec_inf_norm (x_k k x0 b_real A_real)))))%Re.
+Admitted.
+
 
 
 (** bound for ||x|| **)
@@ -70,26 +81,11 @@ Lemma x_bound_exists {t} {n:nat}
 Proof.
 intros.
 remember (\col_(j < n.+1) 0%Re) as x0.
-Print topology.lim.
 apply Rle_trans with
-  (lim (fun j: nat => series (fun k : nat => vec_inf_norm (x_k k x0 b_real A_real)) j )).
-
-
-
-
-Print lim.
-
-
-
-Print topology.lim.
-
-Locate lim.
-Print lim.
-
-
-apply Rle_trans
-
-
+  (lim (series (fun k : nat => vec_inf_norm (x_k k x0 b_real A_real)))).
++ (** ||x|| <= lim ||x_k|| **)
+   admit.
++ 
 
 
 
@@ -98,5 +94,6 @@ Admitted.
 
 
 End WITH_NANS.
+
 
 
