@@ -91,6 +91,69 @@ rewrite -[in X in (X <= _)%Re]lim_id.
 Admitted.
 *)
 
+Lemma Rbar_le_real:
+  forall (x y :R),
+  Rbar_le x y ->
+  (x <= y)%Re.
+Proof.
+intros. 
+by unfold Rbar_le in H.
+Qed.
+
+
+Lemma x_bounded_by_x_k {t} {n:nat}
+  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x := A_real^-1 *m b_real in
+  let x1 := x_fix x b_real A_real in
+  let x0 := (\col_(j < n.+1) 0%Re) in
+  let R_def := (vec_inf_norm ( A1_diag A_real) * 
+                 matrix_inf_norm (A2_J_real A_real))%Re in 
+  (R_def < 1)%Re ->
+  Rbar_le (vec_inf_norm x1) 
+    (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))).
+Proof.
+intros.
+assert (Lim_seq (fun k:nat => vec_inf_norm x1) = 
+        vec_inf_norm x1).
+{ by rewrite Lim_seq_const. } rewrite -H0.
+apply Lim_seq_le_loc.
+unfold eventually.
+
+
+
+
+
+
+
+  (vec_inf_norm x1 <= 
+      (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))%Re))%Re.
+Proof.
+intros.
+apply Rbar_le_real.
+assert (Lim_seq (fun k:nat => vec_inf_norm x1) = 
+        vec_inf_norm x1).
+{ by rewrite Lim_seq_const. } rewrite -H.
+pose proof Lim_seq_le_loc.
+specialize (H0 (fun=> vec_inf_norm x1)
+               (fun k : nat =>
+                    vec_inf_norm (x_k k x0 b_real A_real))).
+
+apply (@Lim_seq_le_loc (fun=> vec_inf_norm x1) 
+         (fun k : nat =>
+            vec_inf_norm (x_k k x0 b_real A_real))).
+
+
+).
+
+
+
+
+
+
+
+
 
 (** bound for ||x|| **)
 Lemma x_bound_exists {t} {n:nat}
@@ -112,7 +175,7 @@ intros.
 remember (\col_(j < n.+1) 0%Re) as x0.
 apply Rle_trans with
   (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))).
-
++
 
 
 
