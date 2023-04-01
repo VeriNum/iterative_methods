@@ -18,6 +18,8 @@ Require Import float_acc_lems.
 Require Import vec_sum_inf_norm_rel.
 Require Import fma_dot_mat_model.
 Require Import jacobi_preconditions.
+From Coquelicot Require Import Coquelicot.
+
 
 From mathcomp.classical Require Import boolp classical_sets functions.
 
@@ -49,7 +51,7 @@ Fixpoint x_k {n:nat} (k: nat)
   | p.+1 => x_fix (x_k p x0 b A ) b A
   end.
   
-
+(*
 Lemma x_bounded_by_x_k {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
   let A_real := FT2R_mat A in
@@ -59,8 +61,35 @@ Lemma x_bounded_by_x_k {t} {n:nat}
   let x0 := (\col_(j < n.+1) 0%Re) in 
   (vec_inf_norm x1 <= 
       (lim (series (fun k : nat => vec_inf_norm (x_k k x0 b_real A_real)))))%Re.
-Admitted.
+Proof.
 
+intros.  
+pose proof (@limr_ge nat \oo eventually_filter).
+apply /RleP.
+apply H.
++
+
+assert (ProperFilter \oo).
+{ apply eventually_filter. }
+
+
+
+by []. Locate "ProperFilter".
+
+
+
+
+Print lim_id.
+assert (vec_inf_norm x1 = lim (series ( fun _ => vec_inf_norm x1))).
+{ rewrite lim_id.
+
+
+
+rewrite -[in X in (X <= _)%Re]lim_id.
+
+
+Admitted.
+*)
 
 
 (** bound for ||x|| **)
@@ -81,6 +110,14 @@ Lemma x_bound_exists {t} {n:nat}
 Proof.
 intros.
 remember (\col_(j < n.+1) 0%Re) as x0.
+apply Rle_trans with
+  (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))).
+
+
+
+
+
+
 apply Rle_trans with
   (lim (series (fun k : nat => vec_inf_norm (x_k k x0 b_real A_real)))).
 + (** ||x|| <= lim ||x_k|| **)
