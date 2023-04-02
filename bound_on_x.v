@@ -101,7 +101,9 @@ assert (Lim_seq
         ((vec_inf_norm (A1_diag A_real) * vec_inf_norm b_real) / 
         (1 - vec_inf_norm (A1_diag A_real) * 
               matrix_inf_norm (A2_J_real A_real)))%Re).
-
+{ apply is_lim_seq_unique. admit. }
+rewrite H1.
+simpl.
 
 
 
