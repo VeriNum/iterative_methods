@@ -527,7 +527,12 @@ apply (@is_lim_seq_le_le_loc
     apply Rmult_le_pos.
     apply /RleP. apply vec_norm_pd.
     apply /RleP. apply matrix_norm_pd.
-  } 
+  } apply is_lim_seq_spec in H1.
+  unfold is_lim_seq' in H1.
+  assert ((0 < 1)%Re) by nra.
+  specialize (H1 (mkposreal 1%Re H2)).
+  unfold eventually in H1. destruct H1 as [N H1].
+  unfold eventually. exists N.
 
 
 
