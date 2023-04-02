@@ -479,6 +479,27 @@ apply (@is_lim_seq_le_le
   apply is_lim_seq_const.
 Qed.
 
+(**
+(1 +
+ R_def_real *
+ (\sum_(j < k) (R_def_real ^ j)%Re) <=
+ \sum_(i < k) (R_def_real ^ i)%Re +
+ R_def_real ^ k)%Re
+**)
+
+Lemma sum_part_equiv (a:R) (k:nat) :
+  (1 + a * \sum_(j < k) (a^j)%Re)%Re = 
+  (\sum_(j < k) (a^j)%Re + a^k)%Re.
+Proof.
+intros.
+induction k.
++ rewrite big_ord0 /= Rmult_0_r. by rewrite Rplus_0_r Rplus_0_l.
++ rewrite big_ord_recr /=. rewrite -!RplusE.
+  rewrite Rmult_plus_distr_l.
+
+
+
+
 
 Lemma upper_bound_xk {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
