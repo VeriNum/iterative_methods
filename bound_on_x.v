@@ -50,6 +50,66 @@ Fixpoint x_k {n:nat} (k: nat)
   | O => x0
   | p.+1 => x_fix (x_k p x0 b A ) b A
   end.
+
+
+Lemma x_bound_exists {t} {n:nat}
+  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x := A_real^-1 *m b_real in
+  let x1 := x_fix x b_real A_real in
+  let A1_inv_real := FT2R_mat (A1_inv_J A) in 
+  let A2_real := FT2R_mat (A2_J A) in
+  let R_def := (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
+                     matrix_inf_norm (A2_real))%Re in
+  (R_def < 1)%Re ->
+   (vec_inf_norm x1 <= 
+      (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
+        vec_inf_norm (b_real)) / (1 - R_def))%Re.
+Proof.
+intros.
+remember (\col_(j < n.+1) 0%Re) as x0.
+assert ((Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))
+          = vec_inf_norm x1).
+{ apply is_lim_seq_unique.
+  
+
+
+
+
+apply Rle_trans with
+  (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))).
++
+
+
+
+
+
+apply Rle_trans with
+  (lim (series (fun k : nat => vec_inf_norm (x_k k x0 b_real A_real)))).
++ (** ||x|| <= lim ||x_k|| **)
+   admit.
++ 
+
+
+
+Admitted.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   
 (*
 Lemma x_bounded_by_x_k {t} {n:nat}
@@ -156,6 +216,59 @@ Lemma x_bounded_by_x_k {t} {n:nat}
               (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))))%Re.
           
 Proof.
+intros.
+apply Rbar_le_real.
+assert (is_finite (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))
+        \/ ~(is_finite (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))))).
+{ admit. } destruct H0.
++ admit.
++ destruct (Lim_seq
+     (fun k : nat =>
+      vec_inf_norm (x_k k x0 b_real A_real))); simpl.
+  - contradict H0. admit.
+  -
+
+
+
+
+assert (Finite (Lim_seq
+     (fun k : nat =>
+      vec_inf_norm (x_k k x0 b_real A_real))) = 
+      Lim_seq
+     (fun k : nat =>
+      vec_inf_norm (x_k k x0 b_real A_real))).
+{ destruct (Lim_seq
+     (fun k : nat =>
+      vec_inf_norm (x_k k x0 b_real A_real))); simpl.
+  by [].
+  
+
+
+
+
+admit. } rewrite H0.
+pose proof (@x_bounded_by_x_k_aux1 _ _ A  b).
+specialize (H1 H). 
+unfold x1, b_real, A_real, x, x0.
+
+
+
+Unset Printing implicit.
+
+
+
+rewrite is_finite.
+
+
+destruct (Lim_seq
+     (fun k : nat =>
+      vec_inf_norm (x_k k x0 b_real A_real))).
++ 
+
+
+
+apply x_bounded_by_x_k_aux1.
+
 
 
 
