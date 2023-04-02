@@ -178,7 +178,9 @@ Qed.
 
 
 Lemma R_def_lt_1_implies {t} {n:nat}
-  (A : 'M[ftype t]_n.+1) :
+  (A : 'M[ftype t]_n.+1) 
+  (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
+  (Ha : forall i j, finite (A i j)):
   let A_real := FT2R_mat A in
   let A2_real := FT2R_mat (A2_J A) in
   let R_def := (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
@@ -195,7 +197,8 @@ assert (A2_J_real A_real = A2_real).
   case: (x == y :> nat); simpl; auto.
 } rewrite H0. apply Rmult_le_compat_r.
 apply /RleP. apply matrix_norm_pd.
-
+by apply vec_norm_A1_rel.
+Qed.
 
 
 
