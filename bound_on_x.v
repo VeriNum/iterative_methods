@@ -493,6 +493,8 @@ Lemma lim_xk_is_bounded {t} {n:nat}
   let R_def := (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
                      matrix_inf_norm (A2_real))%Re in
   let x0 := \col_(j < n.+1) 0%Re in
+  let R_def_real := (vec_inf_norm (A1_diag A_real) * 
+                       matrix_inf_norm (A2_J_real A_real))%Re in
   (R_def < 1)%Re ->
   A_real \in unitmx ->
   is_lim_seq
@@ -535,14 +537,37 @@ apply is_lim_seq_ext with
 + apply is_lim_seq_plus'.
   apply is_lim_seq_const.
   apply is_lim_seq_abs_0.
-  
-
-
-  apply is_lim_seq_opp.
-  
-
-
-
+  apply (@is_lim_seq_le_le
+          (fun _ => 0%Re)
+          (fun n0 : nat =>
+           Rabs
+             (vec_inf_norm
+                (x_k n0 x0 b_real A_real) -
+              vec_inf_norm (A1_diag A_real) *
+              vec_inf_norm b_real /
+              (1 -
+               vec_inf_norm (A1_diag A_real) *
+               matrix_inf_norm
+                 (A2_J_real A_real))))
+          (fun k: nat =>
+            ((1 + (R_def_real)^k) *  
+                (vec_inf_norm (A1_diag A_real) *
+              vec_inf_norm b_real /
+              (1 -
+               vec_inf_norm (A1_diag A_real) *
+               matrix_inf_norm
+                 (A2_J_real A_real))) - 
+             (vec_inf_norm (A1_diag A_real) *
+              vec_inf_norm b_real /
+              (1 -
+               vec_inf_norm (A1_diag A_real) *
+               matrix_inf_norm
+                 (A2_J_real A_real))))%Re)).
+  - intros. split. 
+    * apply Rabs_pos.
+    * admit.
+  - apply is_lim_seq_const.
+  - admit.
 
 
 Admitted.
