@@ -517,7 +517,13 @@ apply (@is_lim_seq_le_le_loc
                      (1 -
                       vec_inf_norm (A1_diag A_real) *
                       matrix_inf_norm (A2_J_real A_real)))%Re)
-        (fun k: nat => R_
+        (fun k : nat => vec_inf_norm (x_k k x0 b_real A_real))
+        (fun k: nat => (f * \sum_(j < k) ((R_def_real)^j)%Re)%Re)).
++ admit.
++ rewrite Heqf. apply is_lim_seq_const.
++ admit.
+Admitted.
+        
 
 
 
