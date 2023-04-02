@@ -107,6 +107,10 @@ simpl.
 match goal with |-context[((?a * ?b) / ?c <= _)%Re]=>
   replace ((a * b) / c)%Re with ((a * /c) * b)%Re by nra
 end.
+match goal with |-context[(_ <= (?a * ?b)/?c)%Re]=>
+  replace ((a * b)/c)%Re with ((a * /c)*b)%Re by nra
+end. apply Rmult_le_compat_r.
++ apply /RleP. apply vec_norm_pd.
 
 
 
