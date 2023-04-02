@@ -479,7 +479,33 @@ apply (@is_lim_seq_le_le
   apply is_lim_seq_const.
 Qed.
 
-
+(** lemma on bound for ||x_k|| **)
+Lemma lim_xk_is_bounded {t} {n:nat}
+  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
+  (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
+  (Ha : forall i j, finite (A i j)):
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x := A_real^-1 *m b_real in
+  let x1 := x_fix x b_real A_real in
+  let A1_inv_real := FT2R_mat (A1_inv_J A) in 
+  let A2_real := FT2R_mat (A2_J A) in
+  let R_def := (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
+                     matrix_inf_norm (A2_real))%Re in
+  let x0 := \col_(j < n.+1) 0%Re in
+  (R_def < 1)%Re ->
+  A_real \in unitmx ->
+  is_lim_seq
+    (fun k : nat =>
+     vec_inf_norm
+       (x_k k x0 b_real A_real))
+    (vec_inf_norm (A1_diag A_real) *
+     vec_inf_norm b_real /
+     (1 -
+      vec_inf_norm (A1_diag A_real) *
+      matrix_inf_norm
+        (A2_J_real A_real)))%Re.
+Admitted.
 
 Lemma x_bound_exists {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
@@ -527,7 +553,12 @@ assert (Lim_seq
         ((vec_inf_norm (A1_diag A_real) * vec_inf_norm b_real) / 
         (1 - vec_inf_norm (A1_diag A_real) * 
               matrix_inf_norm (A2_J_real A_real)))%Re).
-{ apply is_lim_seq_unique. admit. }
+{ apply is_lim_seq_unique.
+  pose proof (@lim_xk_is_bounded t).
+  specialize (H2 n A b Hinv Ha H).
+  unfold x1,x , A_real, b_real. rewrite Heqx0.
+  apply H2. by fold A_real.
+}
 rewrite H2.
 simpl.
 match goal with |-context[((?a * ?b) / ?c <= _)%Re]=>
