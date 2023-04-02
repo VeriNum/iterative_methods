@@ -534,6 +534,11 @@ apply is_lim_seq_ext with
 + intros. nra.
 + apply is_lim_seq_plus'.
   apply is_lim_seq_const.
+  apply is_lim_seq_abs_0.
+  
+
+
+  apply is_lim_seq_opp.
   
 
 
