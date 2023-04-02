@@ -532,12 +532,12 @@ apply (@is_lim_seq_le_le_loc
   assert ((0 < 1)%Re) by nra.
   specialize (H1 (mkposreal 1%Re H2)).
   unfold eventually in H1. destruct H1 as [N H1].
-  unfold eventually. exists N.
+  unfold eventually. exists N. intros.
+  specialize (H1 n0 H3). simpl in H1.
+  rewrite Rminus_0_r in H1. split.
+  - admit.
+  - admit.
 
-
-
-
-admit.
 + rewrite Heqf. apply is_lim_seq_const.
 + apply is_lim_seq_mult'.
   apply is_lim_seq_const.
