@@ -511,15 +511,15 @@ assert ((Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))
          (x_k k x0 b_real A_real) - vec_inf_norm x1))%Re).
   intros. nra.
   assert (vec_inf_norm x1 = (vec_inf_norm x1 + 0)%Re).
-  { nra. } rewrite [in X in (is_lim_seq _ X)]H0.
+  { nra. } rewrite [in X in (is_lim_seq _ X)]H1.
   apply is_lim_seq_plus'. 
   apply is_lim_seq_const.
   pose proof (@lim_of_x_minus_xk_is_zero t ).
-  specialize (H1 n A b Hinv Ha H).
+  specialize (H2 n A b Hinv Ha H).
   unfold x1,x , A_real, b_real. rewrite Heqx0.
-  apply H1.
+  apply H2. by fold A_real.
 } apply Rbar_le_real.
-rewrite -H0.
+rewrite -H1.
 assert (Lim_seq
          (fun k : nat =>
           vec_inf_norm
@@ -528,7 +528,7 @@ assert (Lim_seq
         (1 - vec_inf_norm (A1_diag A_real) * 
               matrix_inf_norm (A2_J_real A_real)))%Re).
 { apply is_lim_seq_unique. admit. }
-rewrite H1.
+rewrite H2.
 simpl.
 match goal with |-context[((?a * ?b) / ?c <= _)%Re]=>
   replace ((a * b) / c)%Re with ((a * /c) * b)%Re by nra
@@ -550,20 +550,21 @@ end. apply Rmult_le_compat_r.
       assert (A2_J_real A_real = A2_real).
       { apply matrixP. unfold eqrel. intros. rewrite !mxE /=.
         case: (x2 == y :> nat); simpl; auto.
-      } rewrite H2. apply Rmult_le_compat_r.
+      } rewrite H3. apply Rmult_le_compat_r.
       apply /RleP. apply matrix_norm_pd.
       by apply vec_norm_A1_rel.
     }
-    destruct H2.
+    destruct H3.
     * apply Rlt_le, Rinv_lt_contravar.
       apply Rmult_lt_0_compat.
       ++ by apply Rlt_Rminus.
       ++ by apply Rlt_Rminus, R_def_lt_1_implies.
-      ++ apply H2.
-    * rewrite H2. nra.
+      ++ apply H3.
+    * rewrite H3. nra.
 Admitted.
 
 End WITH_NANS.
+
 
 
 
