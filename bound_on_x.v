@@ -509,6 +509,23 @@ Lemma lim_xk_is_bounded {t} {n:nat}
         (A2_J_real A_real)))%Re.
 Proof.
 intros.
+remember (vec_inf_norm (A1_diag A_real) * 
+          vec_inf_norm (b_real))%Re as f.
+apply (@is_lim_seq_le_le_loc
+        (fun _ => (vec_inf_norm (A1_diag A_real) *
+                     vec_inf_norm b_real /
+                     (1 -
+                      vec_inf_norm (A1_diag A_real) *
+                      matrix_inf_norm (A2_J_real A_real)))%Re)
+        (fun k: nat => R_
+
+
+
+
+
+
+
+
 assert ((vec_inf_norm (A1_diag A_real) *
            vec_inf_norm b_real /
            (1 -
@@ -565,7 +582,12 @@ apply is_lim_seq_ext with
                  (A2_J_real A_real))))%Re)).
   - intros. split. 
     * apply Rabs_pos.
-    * admit.
+    * apply Rabs_le. split.
+      ++ 
+
+
+
+admit.
   - apply is_lim_seq_const.
   - admit.
 
