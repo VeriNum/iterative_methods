@@ -518,7 +518,21 @@ assert ((vec_inf_norm (A1_diag A_real) *
             vec_inf_norm (A1_diag A_real) *
             matrix_inf_norm (A2_J_real A_real))) + 0)%Re) by nra.
 rewrite H1. clear H1.
-
+apply is_lim_seq_ext with 
+(fun k: nat =>
+  ((vec_inf_norm (A1_diag A_real) *
+   vec_inf_norm b_real /
+   (1 -
+    vec_inf_norm (A1_diag A_real) *
+    matrix_inf_norm (A2_J_real A_real))) + 
+    ((vec_inf_norm
+     (x_k k x0 b_real A_real)) - (vec_inf_norm (A1_diag A_real) *
+       vec_inf_norm b_real /
+       (1 -
+        vec_inf_norm (A1_diag A_real) *
+        matrix_inf_norm (A2_J_real A_real)))))%Re).
++ intros. nra.
++ 
 
 
 
