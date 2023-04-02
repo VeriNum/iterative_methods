@@ -402,6 +402,10 @@ induction k.
   - rewrite [in X in (X <= _)%Re]vec_inf_norm_opp.
     rewrite opp_equiv.
     pose proof (@x_fixpoint n x b_real A_real).
+    rewrite [in X in (X <= _)%Re]H0. 
+    rewrite [in X in (X <= _)%Re]/x_fix.
+    apply Rle_refl.
+    
 
 
 
