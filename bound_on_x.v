@@ -213,6 +213,15 @@ assert ((b x y + (a x y - b x y))%Re =
 { nra. } rewrite H0. nra.
 Qed.
 
+Lemma opp_equiv {n:nat}:
+  forall (a b: 'cV[R]_n),
+  - (a - b) = (b - a).
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE.
+rewrite -RoppE -!RminusE. nra.
+Qed.
+
 Lemma lim_of_x_minus_xk_is_zero {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
@@ -249,6 +258,9 @@ apply (@is_lim_seq_le_le
   - apply Rabs_le.
     split.
     apply Rminus_plus_le_minus. rewrite Rplus_comm.
+    assert (forall x y:R, (x + -y)%Re = (x - y)%Re).
+    { intros. nra. } rewrite H0.
+    rewrite [in X in (_ - X <= _)%Re]vec_inf_norm_opp.
     
 
 
