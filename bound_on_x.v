@@ -527,23 +527,13 @@ induction k.
     split.
     + assert (0%Re = [seq Rabs ((\col__ 0%Re) i 0)
                       | i <- enum 'I_n.+1]`_0).
-      { rewrite 
-
-
-
-
-
- admit. } rewrite [in X in (X \in _)]H1.
+      { rewrite seq_equiv. rewrite nth_mkseq.
+        rewrite !mxE. by rewrite Rabs_R0.
+        by [].
+      } rewrite [in X in (X \in _)]H1.
       apply (@mem_nth _ 0%Re [seq Rabs ((\col__ 0%Re) i 0)
                       | i <- enum 'I_n.+1] 0%nat).
       by rewrite size_map size_enum_ord.
-
-
-
-
-
-
-admit.
     + intros. rewrite seq_equiv. rewrite nth_mkseq;
       last by rewrite size_map size_enum_ord in H1.
       rewrite !mxE Rabs_R0. apply /RleP. apply Rle_refl.
@@ -574,7 +564,7 @@ admit.
   apply Rmult_le_pos; 
   (apply /RleP; apply vec_norm_pd).
   rewrite sum_part_equiv. apply Rle_refl.
-Admitted.
+Qed.
 
 
 (** lemma on bound for ||x_k|| **)
