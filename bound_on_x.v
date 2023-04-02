@@ -505,6 +505,33 @@ Lemma lim_xk_is_bounded {t} {n:nat}
       vec_inf_norm (A1_diag A_real) *
       matrix_inf_norm
         (A2_J_real A_real)))%Re.
+Proof.
+intros.
+assert ((vec_inf_norm (A1_diag A_real) *
+           vec_inf_norm b_real /
+           (1 -
+            vec_inf_norm (A1_diag A_real) *
+            matrix_inf_norm (A2_J_real A_real)))%Re = 
+        ((vec_inf_norm (A1_diag A_real) *
+           vec_inf_norm b_real /
+           (1 -
+            vec_inf_norm (A1_diag A_real) *
+            matrix_inf_norm (A2_J_real A_real))) + 0)%Re) by nra.
+rewrite H1. clear H1.
+
+
+
+
+
+apply (@is_lim_seq_le_le 
+        (fun _ => 0%Re)
+
+
+
+
+
+
+
 Admitted.
 
 Lemma x_bound_exists {t} {n:nat}
@@ -592,7 +619,7 @@ end. apply Rmult_le_compat_r.
       ++ by apply Rlt_Rminus, R_def_lt_1_implies.
       ++ apply H3.
     * rewrite H3. nra.
-Admitted.
+Qed.
 
 End WITH_NANS.
 
