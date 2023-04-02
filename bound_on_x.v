@@ -273,7 +273,9 @@ apply (@is_lim_seq_le_le
       rewrite opp_equiv.
       apply /RleP. apply reverse_triang_ineq.
       rewrite sub_vec_5. apply /RleP. apply Rle_refl.
-    *
+    * apply /RleP. apply reverse_triang_ineq.
+      apply /RleP. apply Rle_refl.
+  -
 
 
 
