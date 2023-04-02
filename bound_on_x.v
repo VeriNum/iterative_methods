@@ -464,20 +464,11 @@ apply (@is_lim_seq_le_le
     * apply /RleP. apply reverse_triang_ineq.
       apply /RleP. apply Rle_refl.
   - pose proof (@x_minus_xk_norm t n A b Hinv Ha H H0 n0) .
-    
-
-    
-
-
-
-
-
-
-
-admit.
+    unfold x1, x, b_real, A_real, x0.
+    rewrite HeqR_def_real. apply H1.
 + apply is_lim_seq_const.
 + assert (0%Re = (0 * vec_inf_norm x1)%Re).
-  { nra. } rewrite H0. apply is_lim_seq_mult'.
+  { nra. } rewrite H1. apply is_lim_seq_mult'.
   apply is_lim_seq_geom.
   rewrite Rabs_right. rewrite HeqR_def_real.
   by apply R_def_lt_1_implies.
@@ -486,7 +477,7 @@ admit.
   apply /RleP. apply vec_norm_pd.
   apply /RleP. apply matrix_norm_pd.
   apply is_lim_seq_const.
-Admitted.
+Qed.
 
 
 
@@ -503,6 +494,7 @@ Lemma x_bound_exists {t} {n:nat}
   let R_def := (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
                      matrix_inf_norm (A2_real))%Re in
   (R_def < 1)%Re ->
+  A_real \in unitmx ->
    (vec_inf_norm x1 <= 
       (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
         vec_inf_norm (b_real)) / (1 - R_def))%Re.
