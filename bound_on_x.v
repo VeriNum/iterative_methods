@@ -94,6 +94,17 @@ assert ((Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))
   admit.
 } apply Rbar_le_real.
 rewrite -H0.
+assert (Lim_seq
+         (fun k : nat =>
+          vec_inf_norm
+            (x_k k x0 b_real A_real))  = 
+        ((vec_inf_norm (A1_diag A_real) * vec_inf_norm b_real) / 
+        (1 - vec_inf_norm (A1_diag A_real) * 
+              matrix_inf_norm (A2_J_real A_real)))%Re).
+
+
+
+
 
 
 Admitted.
