@@ -327,7 +327,9 @@ induction k.
          (x_k k x0 b_real A_real - x1)))%Re.
   unfold x1, x_fix.
   rewrite diag_matrix_vec_mult_diff.
-
+  eapply Rle_trans. 
+  apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R.
+  rewrite -RmultE.
 
 
 
