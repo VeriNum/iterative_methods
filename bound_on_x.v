@@ -218,6 +218,24 @@ Lemma lim_of_x_minus_xk_is_zero {t} {n:nat}
   (fun n0 : nat =>
    (vec_inf_norm (x_k n0 x0 b_real A_real) -
     vec_inf_norm x1)%Re) 0%Re.
+Proof.
+intros.
+remember (vec_inf_norm (A1_diag A_real) * 
+              matrix_inf_norm (A2_J_real A_real))%Re as R_def_real.
+apply (@is_lim_seq_le_le 
+        (fun _ => 0%Re)
+        (fun n0 : nat =>
+         (vec_inf_norm (x_k n0 x0 b_real A_real) -
+          vec_inf_norm x1)%Re)
+        (fun k: nat => ((R_def_real)^k-1 * vec_inf_norm x1)%Re)).
+
+           
+
+
+
+
+
+
 Admitted.
 
 Lemma x_bound_exists {t} {n:nat}
