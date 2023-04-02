@@ -132,32 +132,13 @@ assert ((Rbar_minus (vec_inf_norm x1)
   + unfold ex_Rbar_minus.
     unfold ex_Rbar_plus. 
     unfold Rbar_plus'.
-    destruct (Lim_seq (fun=> vec_inf_norm x1)); simpl.
-    unfold Rbar_opp.
-    destruct (Lim_seq
-        (fun k : nat =>
-         vec_inf_norm
-           (x_k k x0 b_real A_real))); simpl; auto.
-    rewrite -H2 in H0. 
-    contradict H0. auto.
-
-
-
-
-  admit.
+    apply is_finite_correct in H0, H1.
+    destruct H0 as [x1f H0].
+    destruct H1 as [x2f H1]. rewrite H0 in H2.
+    by rewrite H1 H2 /=.
 } 
-
-rewrite H0. simpl. nra.
-
-
-
-assert (Lim_seq (fun k:nat => vec_inf_norm x1) = 
-        vec_inf_norm x1).
-{ by rewrite Lim_seq_const. } rewrite -H0.
-
-
-
-
+rewrite H2. simpl. nra.
+Admitted.
 
 
 
