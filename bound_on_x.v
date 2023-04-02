@@ -326,7 +326,7 @@ induction k.
   (R_def_real * (vec_inf_norm
          (x_k k x0 b_real A_real - x1)))%Re.
   unfold x1, x_fix.
-  
+  rewrite diag_matrix_vec_mult_diff.
 
 
 
@@ -488,6 +488,7 @@ end. apply Rmult_le_compat_r.
 Admitted.
 
 End WITH_NANS.
+
 
 
 
