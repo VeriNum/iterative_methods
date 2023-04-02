@@ -242,15 +242,9 @@ apply (@is_lim_seq_le_le
          Rabs (vec_inf_norm  (x_k n0 x0 b_real A_real) -
                   vec_inf_norm x1))
         (fun k: nat => ((R_def_real)^k * vec_inf_norm x1)%Re)).
-+ intros.
-  
-
-
-
-
-
-
-admit.
++ intros. split.
+  apply Rabs_pos.
+  admit.
 + apply is_lim_seq_const.
 + assert (0%Re = (0 * vec_inf_norm x1)%Re).
   { nra. } rewrite H0. apply is_lim_seq_mult'.
@@ -262,8 +256,6 @@ admit.
   apply /RleP. apply vec_norm_pd.
   apply /RleP. apply matrix_norm_pd.
   apply is_lim_seq_const.
-
-
 Admitted.
 
 
