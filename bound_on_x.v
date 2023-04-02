@@ -203,7 +203,9 @@ Qed.
 
 
 Lemma x_bound_exists {t} {n:nat}
-  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
+  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
+  (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
+  (Ha : forall i j, finite (A i j)):
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x := A_real^-1 *m b_real in
@@ -255,17 +257,27 @@ end. apply Rmult_le_compat_r.
 + apply Rmult_le_compat.
   - apply /RleP. apply vec_norm_pd.
   - apply Rlt_le, Rinv_0_lt_compat, Rlt_Rminus.
-    
-
-
-admit.
-  - admit.
-  -
-
-
-
-
-
+    by apply R_def_lt_1_implies.
+  - by apply vec_norm_A1_rel.
+  - assert ((1 - R_def <= (1 -
+                            vec_inf_norm (A1_diag A_real) *
+                            matrix_inf_norm (A2_J_real A_real)))%Re).
+    { apply Rplus_le_compat_l, Ropp_le_contravar.
+      unfold R_def. 
+      assert (A2_J_real A_real = A2_real).
+      { apply matrixP. unfold eqrel. intros. rewrite !mxE /=.
+        case: (x2 == y :> nat); simpl; auto.
+      } rewrite H2. apply Rmult_le_compat_r.
+      apply /RleP. apply matrix_norm_pd.
+      by apply vec_norm_A1_rel.
+    }
+    destruct H2.
+    * apply Rlt_le, Rinv_lt_contravar.
+      apply Rmult_lt_0_compat.
+      ++ by apply Rlt_Rminus.
+      ++ by apply Rlt_Rminus, R_def_lt_1_implies.
+      ++ apply H2.
+    * rewrite H2. nra.
 Admitted.
 
 End WITH_NANS.
