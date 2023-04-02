@@ -101,7 +101,6 @@ by unfold Rbar_le in H.
 Qed.
 
 
-
 Lemma x_bounded_by_x_k_aux1 {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
   let A_real := FT2R_mat A in
@@ -143,6 +142,20 @@ assert ((Rbar_minus (vec_inf_norm x1)
 rewrite H2. simpl. nra.
 Admitted.
 
+Lemma x_bounded_by_x_k {t} {n:nat}
+  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x := A_real^-1 *m b_real in
+  let x1 := x_fix x b_real A_real in
+  let x0 := (\col_(j < n.+1) 0%Re) in
+  let R_def := (vec_inf_norm ( A1_diag A_real) * 
+                 matrix_inf_norm (A2_J_real A_real))%Re in 
+  (R_def < 1)%Re ->
+  ((vec_inf_norm x1)   <=
+              (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))))%Re.
+          
+Proof.
 
 
 
@@ -363,7 +376,6 @@ Admitted.
 
 
 End WITH_NANS.
-
 
 
 
