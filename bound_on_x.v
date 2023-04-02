@@ -265,7 +265,16 @@ intros.
 induction k.
 + simpl. rewrite Rmult_1_l. rewrite sub_vec_6.
   rewrite -vec_inf_norm_opp. nra.
-+ 
++ simpl. rewrite Rmult_assoc.
+  apply Rle_trans with 
+  (R_def_real * (vec_inf_norm
+         (x_k k x0 b_real A_real - x1)))%Re.
+  admit.
+  apply Rmult_le_compat_l; last by apply IHk.
+  unfold R_def_real. apply Rmult_le_pos.
+  apply /RleP. apply vec_norm_pd.
+  apply /RleP. apply matrix_norm_pd.
+
   
 
 
