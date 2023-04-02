@@ -532,6 +532,14 @@ induction k.
   apply Rmult_le_compat_l. apply Rmult_le_pos.
   apply /RleP. apply vec_norm_pd.
   apply /RleP. apply matrix_norm_pd.
+  apply IHk. 
+  assert ((f + R_def_real *
+            (f * (\sum_(j < k) (R_def_real ^ j)%Re)))%Re = 
+          (f * (1 + R_def_real * (\sum_(j < k) (R_def_real ^ j)%Re)))%Re).
+  { nra. } rewrite H1. apply Rmult_le_compat_l.
+  apply Rmult_le_pos; 
+  (apply /RleP; apply vec_norm_pd).
+  
 
 
 Admitted.
