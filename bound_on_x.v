@@ -331,7 +331,10 @@ assert ((Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))
   { nra. } rewrite [in X in (is_lim_seq _ X)]H0.
   apply is_lim_seq_plus'. 
   apply is_lim_seq_const.
-  admit.
+  pose proof (@lim_of_x_minus_xk_is_zero t ).
+  specialize (H1 n A b Hinv Ha H).
+  unfold x1,x , A_real, b_real. rewrite Heqx0.
+  apply H1.
 } apply Rbar_le_real.
 rewrite -H0.
 assert (Lim_seq
