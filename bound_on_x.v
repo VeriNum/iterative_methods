@@ -295,6 +295,13 @@ rewrite -bigmaxr_mulr.
     apply /RleP. apply Rabs_pos.
 Qed.
 
+Lemma add_vec_distr_4 {n:nat}:
+  forall a b c d: 'cV[R]_n,
+  (a - b) - (a - d) = d - b.
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+Qed.
 
 Lemma x_minus_xk_norm {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
@@ -329,7 +336,13 @@ induction k.
   rewrite diag_matrix_vec_mult_diff.
   eapply Rle_trans. 
   apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R.
+  rewrite -RmultE. rewrite add_vec_distr_4.
+  rewrite -mulmxBr.
+  eapply Rle_trans. apply Rmult_le_compat_l.
+  apply /RleP. apply vec_norm_pd.
+  apply /RleP. apply submult_prop.
   rewrite -RmultE.
+  
 
 
 
