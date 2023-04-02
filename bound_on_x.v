@@ -519,7 +519,20 @@ apply (@is_lim_seq_le_le_loc
                       matrix_inf_norm (A2_J_real A_real)))%Re)
         (fun k : nat => vec_inf_norm (x_k k x0 b_real A_real))
         (fun k: nat => (f * \sum_(j < k) ((R_def_real)^j)%Re)%Re)).
-+ admit.
++ assert (is_lim_seq (fun k: nat => (R_def_real ^k)%Re) 0%Re).
+  { apply is_lim_seq_geom.
+    rewrite Rabs_right.
+    unfold R_def_real. by apply R_def_lt_1_implies .
+    apply Rle_ge. unfold R_def_real.
+    apply Rmult_le_pos.
+    apply /RleP. apply vec_norm_pd.
+    apply /RleP. apply matrix_norm_pd.
+  } 
+
+
+
+
+admit.
 + rewrite Heqf. apply is_lim_seq_const.
 + apply is_lim_seq_mult'.
   apply is_lim_seq_const.
