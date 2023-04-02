@@ -527,8 +527,16 @@ induction k.
     split.
     + assert (0%Re = [seq Rabs ((\col__ 0%Re) i 0)
                       | i <- enum 'I_n.+1]`_0).
-      { admit. } rewrite [in X in (X \in _)]H1.
-     apply mem_nth.
+      { rewrite 
+
+
+
+
+
+ admit. } rewrite [in X in (X \in _)]H1.
+      apply (@mem_nth _ 0%Re [seq Rabs ((\col__ 0%Re) i 0)
+                      | i <- enum 'I_n.+1] 0%nat).
+      by rewrite size_map size_enum_ord.
 
 
 
