@@ -343,7 +343,10 @@ induction k.
   apply /RleP. apply submult_prop.
   rewrite -RmultE. rewrite -Rmult_assoc.
   unfold R_def_real. apply Rmult_le_compat_l.
-  
+  - apply Rmult_le_pos.
+    apply /RleP. apply vec_norm_pd.
+    apply /RleP. apply matrix_norm_pd.
+  - 
   
 
 
