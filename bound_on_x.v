@@ -228,7 +228,9 @@ apply (@is_lim_seq_le_le
          (vec_inf_norm (x_k n0 x0 b_real A_real) -
           vec_inf_norm x1)%Re)
         (fun k: nat => ((R_def_real)^k-1 * vec_inf_norm x1)%Re)).
-
++ admit.
++ apply is_lim_seq_const.
++ admit.
            
 
 
@@ -237,6 +239,19 @@ apply (@is_lim_seq_le_le
 
 
 Admitted.
+
+Lemma sub_vec_4 {n:nat}:
+  forall a b: 'cV[R]_n,
+  a = b + (a - b) .
+Proof.
+intros. apply matrixP. unfold eqrel.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. 
+assert ((a x y + - b x y)%Re = (a x y - b x y)%Re).
+{ nra. } rewrite H. 
+assert ((b x y + (a x y - b x y))%Re = 
+         (a x y + (b x y - b x y))%Re).
+{ nra. } rewrite H0. nra.
+Qed.
 
 Lemma x_bound_exists {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
@@ -260,6 +275,28 @@ remember (\col_(j < n.+1) 0%Re) as x0.
 assert ((Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))
           = vec_inf_norm x1).
 { apply is_lim_seq_unique.
+  apply (@is_lim_seq_le_le 
+        (fun _ => 0%Re)
+        (fun k : nat =>
+         vec_inf_norm (x_k k x0 b_real A_real))
+        (fun k: nat => 
+          (vec_inf_norm x1 + 
+            (vec_inf_norm (x_k k x0 b_real A_real - x1)))%Re)).
+  + intros. split.
+    - apply /RleP. apply vec_norm_pd.
+    - assert (x_k n0 x0 b_real A_real = x1 + 
+              (x_k n0 x0 b_real A_real - x1)).
+      { by apply sub_vec_4. } rewrite H0.
+      
+
+
+
+((R_def_real)^k-1 * vec_inf_norm x1)%Re)).
+  
+
+
+
+
   apply is_lim_seq_ext with
   (fun k : nat =>
      (vec_inf_norm x1 + 
