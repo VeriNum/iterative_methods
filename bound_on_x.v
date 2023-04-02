@@ -502,6 +502,21 @@ Lemma upper_bound_xk {t} {n:nat}
   forall k: nat,
   (vec_inf_norm (x_k k x0 b_real A_real) <=
       f * (\sum_(j < k) (R_def_real ^ j)%Re))%Re.
+Proof.
+intros.
+induction k.
++ simpl. rewrite big_ord0 /= Rmult_0_r.
+  assert (vec_inf_norm x0 = 0%Re).
+  { unfold vec_inf_norm, x0. apply bigmaxrP.
+    split.
+    + admit.
+    + intros. rewrite seq_equiv. rewrite nth_mkseq;
+      last by rewrite size_map size_enum_ord in H1.
+      rewrite !mxE Rabs_R0. apply /RleP. apply Rle_refl.
+  }
+  
+
+
 Admitted.
 
 
