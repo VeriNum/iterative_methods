@@ -521,7 +521,19 @@ apply (@is_lim_seq_le_le_loc
         (fun k: nat => (f * \sum_(j < k) ((R_def_real)^j)%Re)%Re)).
 + admit.
 + rewrite Heqf. apply is_lim_seq_const.
-+ admit.
++ apply is_lim_seq_mult'.
+  apply is_lim_seq_const.
+  fold R_def_real.
+  assert ((/ (1 - R_def_real))%Re = (1 * (/ (1 - R_def_real)))%Re) by nra.
+  rewrite H1.
+  apply is_lim_seq_ext with
+  (fun n0 : nat =>
+    ((1 - R_def_real^n0) * (/ (1 - R_def_real)))%Re).
+  - intros. admit.
+  - apply is_lim_seq_mult'.
+    admit.
+    apply is_lim_seq_const.
+
 Admitted.
         
 
