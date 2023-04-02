@@ -51,6 +51,15 @@ Fixpoint x_k {n:nat} (k: nat)
   | p.+1 => x_fix (x_k p x0 b A ) b A
   end.
 
+Lemma Rbar_le_real:
+  forall (x y :R),
+  Rbar_le x y ->
+  (x <= y)%Re.
+Proof.
+intros. 
+by unfold Rbar_le in H.
+Qed.
+
 
 Lemma x_bound_exists {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
@@ -83,37 +92,14 @@ assert ((Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))
   apply is_lim_seq_plus'. 
   apply is_lim_seq_const.
   admit.
-} 
-assert (Finite (vec_inf_norm x1) = (vec_inf_norm x1)).
-{ by []. } symmetry in H1. rewrite H1.
-
+} apply Rbar_le_real.
 rewrite -H0.
-
-
-
-
-
-apply Rle_trans with
-  (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))).
-+
-
-
-
-
-
-apply Rle_trans with
-  (lim (series (fun k : nat => vec_inf_norm (x_k k x0 b_real A_real)))).
-+ (** ||x|| <= lim ||x_k|| **)
-   admit.
-+ 
-
 
 
 Admitted.
 
-
-
 End WITH_NANS.
+
 
 
 
