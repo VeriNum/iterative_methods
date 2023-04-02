@@ -104,6 +104,9 @@ assert (Lim_seq
 { apply is_lim_seq_unique. admit. }
 rewrite H1.
 simpl.
+match goal with |-context[((?a * ?b) / ?c <= _)%Re]=>
+  replace ((a * b) / c)%Re with ((a * /c) * b)%Re by nra
+end.
 
 
 
