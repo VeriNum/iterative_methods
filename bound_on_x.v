@@ -405,15 +405,16 @@ induction k.
     rewrite [in X in (X <= _)%Re]H0. 
     rewrite [in X in (X <= _)%Re]/x_fix.
     apply Rle_refl.
-    
-
-
-
-  admit.
-  apply Rmult_le_compat_l; last by apply IHk.
-  unfold R_def_real. apply Rmult_le_pos.
-  apply /RleP. apply vec_norm_pd.
-  apply /RleP. apply matrix_norm_pd.
+    rewrite /x. rewrite mulmxA.
+    rewrite mulmxV. by rewrite mul1mx.
+    admit.
+    intros. unfold A_real. rewrite mxE.
+    by apply BDIV_FT2R_sep_zero.
+  - auto.
+  - apply Rmult_le_compat_l; last by apply IHk.
+    unfold R_def_real. apply Rmult_le_pos.
+    apply /RleP. apply vec_norm_pd.
+    apply /RleP. apply matrix_norm_pd.
 Admitted.
 
 Lemma lim_of_x_minus_xk_is_zero {t} {n:nat}
