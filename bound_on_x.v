@@ -496,9 +496,6 @@ induction k.
 Qed.
 
 
-
-
-
 Lemma upper_bound_xk {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
@@ -558,9 +555,7 @@ induction k.
   { nra. } rewrite H1. apply Rmult_le_compat_l.
   apply Rmult_le_pos; 
   (apply /RleP; apply vec_norm_pd).
-  
-
-
+  rewrite sum_part_equiv. apply Rle_refl.
 Admitted.
 
 
