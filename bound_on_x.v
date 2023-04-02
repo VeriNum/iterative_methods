@@ -805,6 +805,12 @@ match goal with |-context[(_ <= (?a * ?b)/?c)%Re]=>
 end. 
 pose proof (@upper_bound_xk t n A b Hinv Ha H).
 fold A_real in H6. specialize (H6 H0 n0).
+eapply Rle_trans.
+rewrite Heqx0 /b_real. apply H6.
+match goal with |-context[(_ <= (?a * /?c) * ?b)%Re]=>
+  replace ((a * /c) * b)%Re with (a * (b * /c))%Re by nra
+end. rewrite Rmult_assoc.
+apply Rmult_le_compat.
 
 
 
