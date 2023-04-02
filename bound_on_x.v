@@ -811,7 +811,13 @@ match goal with |-context[(_ <= (?a * /?c) * ?b)%Re]=>
   replace ((a * /c) * b)%Re with (a * (b * /c))%Re by nra
 end. rewrite Rmult_assoc.
 apply Rmult_le_compat.
-
+apply /RleP. apply vec_norm_pd.
+apply Rmult_le_pos. 
+apply /RleP. apply vec_norm_pd.
+admit.
+by apply vec_norm_A1_rel.
+apply Rmult_le_compat_l.
+apply /RleP. apply vec_norm_pd.
 
 
 
