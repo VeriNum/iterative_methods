@@ -286,8 +286,9 @@ assert ((Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))
     - apply /RleP. apply vec_norm_pd.
     - assert (x_k n0 x0 b_real A_real = x1 + 
               (x_k n0 x0 b_real A_real - x1)).
-      { by apply sub_vec_4. } rewrite H0.
-      
+      { by apply sub_vec_4. } rewrite [in X in (X <= _)%Re]H0.
+      apply /RleP. rewrite RplusE. apply triang_ineq.
+  +
 
 
 
