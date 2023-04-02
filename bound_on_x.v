@@ -222,6 +222,15 @@ intros. rewrite !mxE.
 rewrite -RoppE -!RminusE. nra.
 Qed.
 
+Lemma sub_vec_5 {n:nat}:
+  forall a b: 'cV[R]_n,
+  a - (a - b) = b .
+Proof.
+intros. apply matrixP. unfold eqrel. intros.
+rewrite !mxE. rewrite -!RminusE. nra.
+Qed.
+
+
 Lemma lim_of_x_minus_xk_is_zero {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
@@ -257,12 +266,14 @@ apply (@is_lim_seq_le_le
     (vec_inf_norm ((x_k n0 x0 b_real A_real) - x1)).
   - apply Rabs_le.
     split.
-    apply Rminus_plus_le_minus. rewrite Rplus_comm.
-    assert (forall x y:R, (x + -y)%Re = (x - y)%Re).
-    { intros. nra. } rewrite H0.
-    rewrite [in X in (_ - X <= _)%Re]vec_inf_norm_opp.
-    
-
+    * apply Rminus_plus_le_minus. rewrite Rplus_comm.
+      assert (forall x y:R, (x + -y)%Re = (x - y)%Re).
+      { intros. nra. } rewrite H0.
+      rewrite [in X in (_ - X <= _)%Re]vec_inf_norm_opp.
+      rewrite opp_equiv.
+      apply /RleP. apply reverse_triang_ineq.
+      rewrite sub_vec_5. apply /RleP. apply Rle_refl.
+    *
 
 
 
@@ -365,6 +376,7 @@ end. apply Rmult_le_compat_r.
 Admitted.
 
 End WITH_NANS.
+
 
 
 
