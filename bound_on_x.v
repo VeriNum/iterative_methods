@@ -112,13 +112,16 @@ Lemma x_bounded_by_x_k_aux1 {t} {n:nat}
   let R_def := (vec_inf_norm ( A1_diag A_real) * 
                  matrix_inf_norm (A2_J_real A_real))%Re in 
   (R_def < 1)%Re ->
-  is_finite (vec_inf_norm x1) ->
   is_finite (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))) ->
   Rbar_le (Rbar_minus (vec_inf_norm x1)  
               (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))))
           0%Re.
 Proof.
 intros.
+assert (is_finite (vec_inf_norm x1)).
+{ apply is_finite_correct. 
+  by exists (vec_inf_norm x1). 
+}
 assert ((Rbar_minus (vec_inf_norm x1)  
             (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))) = 0%Re).
 { assert ((Lim_seq (fun k:nat => vec_inf_norm x1)) = 
@@ -134,8 +137,8 @@ assert ((Rbar_minus (vec_inf_norm x1)
     unfold Rbar_plus'. simpl.
     apply is_finite_correct in H0, H1.
     destruct H0 as [x1f H0].
-    destruct H1 as [x2f H1]. rewrite H0 in H2.
-    by rewrite H1 H2 /=.
+    destruct H1 as [x2f H1]. rewrite H1 in H2.
+    by rewrite H2 H0 /=.
 } 
 rewrite H2. simpl. nra.
 Admitted.
