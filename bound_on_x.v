@@ -520,7 +520,12 @@ induction k.
   rewrite -RmultE. eapply Rle_trans.
   apply Rmult_le_compat_l. 
   apply /RleP. apply vec_norm_pd.
-  
+  apply /RleP. apply triang_ineq. rewrite -RplusE.
+  rewrite -vec_inf_norm_opp.
+  eapply Rle_trans. apply Rmult_le_compat_l.
+  apply /RleP. apply vec_norm_pd.
+  apply Rplus_le_compat_l. apply /RleP.
+  apply submult_prop. rewrite -RmultE.
   
 
 
