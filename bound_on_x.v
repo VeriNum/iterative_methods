@@ -624,8 +624,10 @@ apply (@is_lim_seq_le_le_loc
   specialize (H1 n0 H3). simpl in H1.
   rewrite Rminus_0_r in H1. split.
   - admit.
-  - admit.
-
+  - pose proof (@upper_bound_xk t n A b Hinv Ha).
+    specialize (H4 H). rewrite Heqf.
+    unfold x0, R_def_real, b_real, A_real .
+    apply H4. by fold A_real.
 + rewrite Heqf. apply is_lim_seq_const.
 + apply is_lim_seq_mult'.
   apply is_lim_seq_const.
