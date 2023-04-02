@@ -525,7 +525,17 @@ induction k.
   assert (vec_inf_norm x0 = 0%Re).
   { unfold vec_inf_norm, x0. apply bigmaxrP.
     split.
-    + admit.
+    + assert (0%Re = [seq Rabs ((\col__ 0%Re) i 0)
+                      | i <- enum 'I_n.+1]`_0).
+      { admit. } rewrite [in X in (X \in _)]H1.
+     apply mem_nth.
+
+
+
+
+
+
+admit.
     + intros. rewrite seq_equiv. rewrite nth_mkseq;
       last by rewrite size_map size_enum_ord in H1.
       rewrite !mxE Rabs_R0. apply /RleP. apply Rle_refl.
