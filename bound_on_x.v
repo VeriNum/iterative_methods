@@ -432,6 +432,7 @@ Lemma lim_of_x_minus_xk_is_zero {t} {n:nat}
                      matrix_inf_norm (A2_real))%Re in
   let x0 := \col_(j < n.+1) 0%Re in
   (R_def < 1)%Re ->
+  A_real \in unitmx ->
   is_lim_seq
   (fun n0 : nat =>
    (vec_inf_norm (x_k n0 x0 b_real A_real) -
@@ -455,14 +456,17 @@ apply (@is_lim_seq_le_le
     split.
     * apply Rminus_plus_le_minus. rewrite Rplus_comm.
       assert (forall x y:R, (x + -y)%Re = (x - y)%Re).
-      { intros. nra. } rewrite H0.
+      { intros. nra. } rewrite H1.
       rewrite [in X in (_ - X <= _)%Re]vec_inf_norm_opp.
       rewrite opp_equiv.
       apply /RleP. apply reverse_triang_ineq.
       rewrite sub_vec_5. apply /RleP. apply Rle_refl.
     * apply /RleP. apply reverse_triang_ineq.
       apply /RleP. apply Rle_refl.
-  -
+  - pose proof (@x_minus_xk_norm t n A b Hinv Ha H H0 n0) .
+    
+
+    
 
 
 
