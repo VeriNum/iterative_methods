@@ -532,15 +532,9 @@ apply is_lim_seq_ext with
         vec_inf_norm (A1_diag A_real) *
         matrix_inf_norm (A2_J_real A_real)))))%Re).
 + intros. nra.
-+ 
-
-
-
-
-apply (@is_lim_seq_le_le 
-        (fun _ => 0%Re)
-
-
++ apply is_lim_seq_plus'.
+  apply is_lim_seq_const.
+  
 
 
 
