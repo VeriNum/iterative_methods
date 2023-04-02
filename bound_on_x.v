@@ -346,7 +346,8 @@ induction k.
   - apply Rmult_le_pos.
     apply /RleP. apply vec_norm_pd.
     apply /RleP. apply matrix_norm_pd.
-  - 
+  - rewrite [in X in (X <= _)%Re]vec_inf_norm_opp.
+    rewrite opp_equiv.
   
 
 
