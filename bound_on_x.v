@@ -341,7 +341,9 @@ induction k.
   eapply Rle_trans. apply Rmult_le_compat_l.
   apply /RleP. apply vec_norm_pd.
   apply /RleP. apply submult_prop.
-  rewrite -RmultE.
+  rewrite -RmultE. rewrite -Rmult_assoc.
+  unfold R_def_real. apply Rmult_le_compat_l.
+  
   
 
 
@@ -503,6 +505,7 @@ end. apply Rmult_le_compat_r.
 Admitted.
 
 End WITH_NANS.
+
 
 
 
