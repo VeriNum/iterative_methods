@@ -120,6 +120,47 @@ Lemma x_bounded_by_x_k_aux1 {t} {n:nat}
 Proof.
 intros.
 assert ((Rbar_minus (vec_inf_norm x1)  
+            (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))) = 0%Re).
+{ assert ((Lim_seq (fun k:nat => vec_inf_norm x1)) = 
+        vec_inf_norm x1).
+  { by rewrite Lim_seq_const. } rewrite -H2.
+  rewrite  -Lim_seq_minus.
+  + apply is_lim_seq_unique. admit.
+  + apply ex_lim_seq_const.
+  + apply ex_lim_seq_decr. intros.
+    admit.
+  + unfold ex_Rbar_minus.
+    unfold ex_Rbar_plus. 
+    unfold Rbar_plus'. simpl.
+    apply is_finite_correct in H0, H1.
+    destruct H0 as [x1f H0].
+    destruct H1 as [x2f H1]. rewrite H0 in H2.
+    by rewrite H1 H2 /=.
+} 
+rewrite H2. simpl. nra.
+Admitted.
+
+
+
+
+Lemma x_bounded_by_x_k_aux1 {t} {n:nat}
+  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x := A_real^-1 *m b_real in
+  let x1 := x_fix x b_real A_real in
+  let x0 := (\col_(j < n.+1) 0%Re) in
+  let R_def := (vec_inf_norm ( A1_diag A_real) * 
+                 matrix_inf_norm (A2_J_real A_real))%Re in 
+  (R_def < 1)%Re ->
+  is_finite (vec_inf_norm x1) ->
+  is_finite (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))) ->
+  Rbar_le (Rbar_minus (vec_inf_norm x1)  
+              (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))))
+          0%Re.
+Proof.
+intros.
+assert ((Rbar_minus (vec_inf_norm x1)  
               (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))) = 0%Re).
 { assert (Lim_seq (fun k:nat => vec_inf_norm x1) = 
         vec_inf_norm x1).
@@ -140,6 +181,11 @@ assert ((Rbar_minus (vec_inf_norm x1)
 rewrite H2. simpl. nra.
 Admitted.
 
+Lemma Rbar_minus_real_equiv (x:R) (y:Rbar) :
+  Rbar_minus x (Finite y) = (x - y)%Re.
+Proof.
+simpl. auto.
+Qed.
 
 Lemma x_bounded_by_x_k_aux2 {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
@@ -151,11 +197,51 @@ Lemma x_bounded_by_x_k_aux2 {t} {n:nat}
   let R_def := (vec_inf_norm ( A1_diag A_real) * 
                  matrix_inf_norm (A2_J_real A_real))%Re in 
   (R_def < 1)%Re ->
+  is_finite (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real))) ->
   Rbar_le ((vec_inf_norm x1) -
-             (real (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))))%Re
+             (Finite (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))))%Re
           0%Re.
 Proof.
+intros.
+assert (((vec_inf_norm x1) -
+             (Finite (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))))%Re = 
+        Rbar_minus (vec_inf_norm x1)
+             (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))).
+{ simpl. admit. }
+rewrite H1. 
+apply x_bounded_by_x_k_aux1.
 
+
+
+
+  destruct (Lim_seq
+     (fun k : nat =>
+      vec_inf_norm
+        (x_k k x0 b_real A_real))); simpl;auto.
+
+
+
+
+
+
+
+ nra. } rewrite H0. 
+assert (Finite (real (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))) =
+           (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))).
+{ symmetry. apply is_finite.
+
+
+
+ reflexivity. apply (@is_finite (Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))).
+
+
+
+
+
+
+
+
+apply x_bounded_by_x_k_aux1.
 
 
 Lemma x_bounded_by_x_k {t} {n:nat}
@@ -274,6 +360,7 @@ Admitted.
 
 
 End WITH_NANS.
+
 
 
 
