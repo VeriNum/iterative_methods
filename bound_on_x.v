@@ -372,6 +372,7 @@ Lemma x_minus_xk_norm {t} {n:nat}
   let R_def_real := (vec_inf_norm (A1_diag A_real) * 
                        matrix_inf_norm (A2_J_real A_real))%Re in
   (R_def < 1)%Re ->
+  A_real \in unitmx ->
   forall k:nat, 
   (vec_inf_norm
    (x_k k x0 b_real A_real - x1) <=
@@ -402,12 +403,12 @@ induction k.
   - rewrite [in X in (X <= _)%Re]vec_inf_norm_opp.
     rewrite opp_equiv.
     pose proof (@x_fixpoint n x b_real A_real).
-    rewrite [in X in (X <= _)%Re]H0. 
+    rewrite [in X in (X <= _)%Re]H1. 
     rewrite [in X in (X <= _)%Re]/x_fix.
     apply Rle_refl.
     rewrite /x. rewrite mulmxA.
     rewrite mulmxV. by rewrite mul1mx.
-    admit.
+    apply H0.
     intros. unfold A_real. rewrite mxE.
     by apply BDIV_FT2R_sep_zero.
   - auto.
@@ -415,7 +416,7 @@ induction k.
     unfold R_def_real. apply Rmult_le_pos.
     apply /RleP. apply vec_norm_pd.
     apply /RleP. apply matrix_norm_pd.
-Admitted.
+Qed.
 
 Lemma lim_of_x_minus_xk_is_zero {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
