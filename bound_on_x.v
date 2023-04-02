@@ -61,6 +61,18 @@ by unfold Rbar_le in H.
 Qed.
 
 
+Lemma R_def_lt_1_implies {t} {n:nat}
+  (A : 'M[ftype t]_n.+1) :
+  let A_real := FT2R_mat A in
+  let A2_real := FT2R_mat (A2_J A) in
+  let R_def := (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
+                     matrix_inf_norm (A2_real))%Re in
+  (R_def < 1)%Re ->
+  (vec_inf_norm (A1_diag A_real) *
+    matrix_inf_norm (A2_J_real A_real) <1)%Re.
+Proof.
+
+
 Lemma x_bound_exists {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) :
   let A_real := FT2R_mat A in
@@ -111,6 +123,15 @@ match goal with |-context[(_ <= (?a * ?b)/?c)%Re]=>
   replace ((a * b)/c)%Re with ((a * /c)*b)%Re by nra
 end. apply Rmult_le_compat_r.
 + apply /RleP. apply vec_norm_pd.
++ apply Rmult_le_compat.
+  - apply /RleP. apply vec_norm_pd.
+  - apply Rlt_le, Rinv_0_lt_compat, Rlt_Rminus.
+    
+
+
+admit.
+  - admit.
+  -
 
 
 
