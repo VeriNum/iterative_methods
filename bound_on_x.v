@@ -623,7 +623,14 @@ apply (@is_lim_seq_le_le_loc
   unfold eventually. exists N. intros.
   specialize (H1 n0 H3). simpl in H1.
   rewrite Rminus_0_r in H1. split.
-  - admit.
+  - rewrite -Heqf.
+
+
+
+
+
+
+admit.
   - pose proof (@upper_bound_xk t n A b Hinv Ha).
     specialize (H4 H). rewrite Heqf.
     unfold x0, R_def_real, b_real, A_real .
@@ -767,6 +774,35 @@ assert ((Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))
   apply H2. by fold A_real.
 } apply Rbar_le_real.
 rewrite -H1.
+assert (Lim_seq (fun _ => ((vec_inf_norm (FT2R_mat (A1_inv_J A)) +
+    default_abs t) / (1 - default_rel t) *
+   vec_inf_norm b_real / (1 - R_def))%Re) = 
+      ((vec_inf_norm (FT2R_mat (A1_inv_J A)) +
+    default_abs t) / (1 - default_rel t) *
+   vec_inf_norm b_real / (1 - R_def))%Re).
+{ apply Lim_seq_const. }
+rewrite -H2.
+apply Lim_seq_le_loc.
+remember (vec_inf_norm (A1_diag A_real) * 
+              matrix_inf_norm (A2_J_real A_real))%Re as R_def_real.
+assert (is_lim_seq (fun k: nat => (R_def_real ^k)%Re) 0%Re).
+{ apply is_lim_seq_geom.
+    rewrite Rabs_right.
+  rewrite HeqR_def_real. by apply R_def_lt_1_implies .
+    apply Rle_ge. unfold R_def_real.
+    apply Rmult_le_pos.
+    apply /RleP. apply vec_norm_pd.
+    apply /RleP. apply matrix_norm_pd.
+} apply is_lim_seq_spec in H1.
+  unfold is_lim_seq' in H1.
+  assert ((0 < 1)%Re) by nra.
+  specialize (H1 (mkposreal 1%Re H2)).
+
+
+
+
+
+
 assert (Lim_seq
          (fun k : nat =>
           vec_inf_norm
