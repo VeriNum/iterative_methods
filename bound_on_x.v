@@ -401,7 +401,7 @@ induction k.
     apply /RleP. apply matrix_norm_pd.
   - rewrite [in X in (X <= _)%Re]vec_inf_norm_opp.
     rewrite opp_equiv.
-    rewrite x_fixpoint.
+    pose proof (@x_fixpoint n x b_real A_real).
 
 
 
