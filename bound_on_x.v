@@ -513,7 +513,14 @@ induction k.
     + intros. rewrite seq_equiv. rewrite nth_mkseq;
       last by rewrite size_map size_enum_ord in H1.
       rewrite !mxE Rabs_R0. apply /RleP. apply Rle_refl.
-  }
+  } rewrite H1. nra.
++ rewrite big_ord_recr /=. rewrite -RplusE.
+  unfold x_fix.
+  eapply Rle_trans. apply /RleP. apply vec_inf_norm_diag_matrix_vec_mult_R.
+  rewrite -RmultE. eapply Rle_trans.
+  apply Rmult_le_compat_l. 
+  apply /RleP. apply vec_norm_pd.
+  
   
 
 
