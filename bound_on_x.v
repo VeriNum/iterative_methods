@@ -263,7 +263,9 @@ Lemma x_minus_xk_norm {t} {n:nat}
 Proof.
 intros.
 induction k.
-+ simpl. rewrite Rmult_1_l.
++ simpl. rewrite Rmult_1_l. rewrite sub_vec_6.
+  rewrite -vec_inf_norm_opp. nra.
++ 
   
 
 
