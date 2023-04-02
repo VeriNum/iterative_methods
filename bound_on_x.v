@@ -230,6 +230,15 @@ intros. apply matrixP. unfold eqrel. intros.
 rewrite !mxE. rewrite -!RminusE. nra.
 Qed.
 
+Lemma sub_vec_6 {n:nat}:
+  forall a : 'cV[R]_n.+1,
+  let x0 := \col_(j < n.+1) 0%Re in 
+  x0 - a = -a.
+Proof.
+intros. unfold x0. apply matrixP. unfold eqrel.
+intros. rewrite !mxE. rewrite -RminusE. rewrite -RoppE.
+nra.
+Qed.
 
 Lemma x_minus_xk_norm {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
@@ -251,6 +260,16 @@ Lemma x_minus_xk_norm {t} {n:nat}
   (vec_inf_norm
    (x_k k x0 b_real A_real - x1) <=
       R_def_real ^ k * vec_inf_norm x1)%Re.
+Proof.
+intros.
+induction k.
++ simpl. rewrite Rmult_1_l.
+  
+
+
+
+
+
 Admitted.
 
 Lemma lim_of_x_minus_xk_is_zero {t} {n:nat}
