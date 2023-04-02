@@ -526,7 +526,8 @@ induction k.
   apply /RleP. apply vec_norm_pd.
   apply Rplus_le_compat_l. apply /RleP.
   apply submult_prop. rewrite -RmultE.
-  
+  rewrite Rmult_plus_distr_l. fold f. 
+  rewrite -Rmult_assoc. fold R_def_real.
 
 
 Admitted.
