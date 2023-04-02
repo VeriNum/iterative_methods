@@ -235,13 +235,22 @@ Proof.
 intros.
 remember (vec_inf_norm (A1_diag A_real) * 
               matrix_inf_norm (A2_J_real A_real))%Re as R_def_real.
-apply (@is_lim_seq_le_le_loc 
+apply is_lim_seq_abs_0.
+apply (@is_lim_seq_le_le
         (fun _ => 0%Re)
         (fun n0 : nat =>
-         (vec_inf_norm (x_k n0 x0 b_real A_real) -
-          vec_inf_norm x1)%Re)
+         Rabs (vec_inf_norm  (x_k n0 x0 b_real A_real) -
+                  vec_inf_norm x1))
         (fun k: nat => ((R_def_real)^k * vec_inf_norm x1)%Re)).
-+ admit.
++ intros.
+  
+
+
+
+
+
+
+admit.
 + apply is_lim_seq_const.
 + assert (0%Re = (0 * vec_inf_norm x1)%Re).
   { nra. } rewrite H0. apply is_lim_seq_mult'.
