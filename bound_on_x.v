@@ -72,6 +72,12 @@ remember (\col_(j < n.+1) 0%Re) as x0.
 assert ((Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))
           = vec_inf_norm x1).
 { apply is_lim_seq_unique.
+  apply is_lim_seq_ext with
+  (fun k : nat =>
+     (vec_inf_norm x1 + 
+       (vec_inf_norm
+         (x_k k x0 b_real A_real) - vec_inf_norm x1))%Re).
+  intros. nra.
   
 
 
