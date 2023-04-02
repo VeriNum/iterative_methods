@@ -787,16 +787,27 @@ remember (vec_inf_norm (A1_diag A_real) *
               matrix_inf_norm (A2_J_real A_real))%Re as R_def_real.
 assert (is_lim_seq (fun k: nat => (R_def_real ^k)%Re) 0%Re).
 { apply is_lim_seq_geom.
-    rewrite Rabs_right.
+  rewrite Rabs_right.
   rewrite HeqR_def_real. by apply R_def_lt_1_implies .
-    apply Rle_ge. unfold R_def_real.
-    apply Rmult_le_pos.
-    apply /RleP. apply vec_norm_pd.
-    apply /RleP. apply matrix_norm_pd.
-} apply is_lim_seq_spec in H1.
-  unfold is_lim_seq' in H1.
-  assert ((0 < 1)%Re) by nra.
-  specialize (H1 (mkposreal 1%Re H2)).
+  apply Rle_ge. rewrite HeqR_def_real.
+  apply Rmult_le_pos.
+  apply /RleP. apply vec_norm_pd.
+  apply /RleP. apply matrix_norm_pd.
+} apply is_lim_seq_spec in H3.
+unfold is_lim_seq' in H3.
+assert ((0 < 1)%Re) by nra.
+specialize (H3 (mkposreal 1%Re H4)).
+unfold eventually in H3. destruct H3 as [N H3].
+unfold eventually. exists N. intros.
+specialize (H3 n0 H5). simpl in H3.
+match goal with |-context[(_ <= (?a * ?b)/?c)%Re]=>
+  replace ((a * b)/c)%Re with ((a * /c)*b)%Re by nra
+end. 
+pose proof (@upper_bound_xk t n A b Hinv Ha H).
+fold A_real in H6. specialize (H6 H0 n0).
+
+
+
 
 
 
