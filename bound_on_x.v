@@ -524,14 +524,22 @@ apply (@is_lim_seq_le_le_loc
 + apply is_lim_seq_mult'.
   apply is_lim_seq_const.
   fold R_def_real.
-  assert ((/ (1 - R_def_real))%Re = (1 * (/ (1 - R_def_real)))%Re) by nra.
+  assert ((/ (1 - R_def_real))%Re = ((1 - 0) * (/ (1 - R_def_real)))%Re) by nra.
   rewrite H1.
   apply is_lim_seq_ext with
   (fun n0 : nat =>
     ((1 - R_def_real^n0) * (/ (1 - R_def_real)))%Re).
   - intros. admit.
   - apply is_lim_seq_mult'.
-    admit.
+    apply is_lim_seq_minus'.
+    apply is_lim_seq_const.
+    apply is_lim_seq_geom.
+    rewrite Rabs_right.
+    unfold R_def_real. by apply R_def_lt_1_implies .
+    apply Rle_ge. unfold R_def_real.
+    apply Rmult_le_pos.
+    apply /RleP. apply vec_norm_pd.
+    apply /RleP. apply matrix_norm_pd.
     apply is_lim_seq_const.
 
 Admitted.
