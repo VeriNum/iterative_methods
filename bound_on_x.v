@@ -231,6 +231,28 @@ rewrite !mxE. rewrite -!RminusE. nra.
 Qed.
 
 
+Lemma x_minus_xk_norm {t} {n:nat}
+  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
+  (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
+  (Ha : forall i j, finite (A i j)):
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x := A_real^-1 *m b_real in
+  let x1 := x_fix x b_real A_real in
+  let A1_inv_real := FT2R_mat (A1_inv_J A) in 
+  let A2_real := FT2R_mat (A2_J A) in
+  let R_def := (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
+                     matrix_inf_norm (A2_real))%Re in
+  let x0 := \col_(j < n.+1) 0%Re in
+  let R_def_real := (vec_inf_norm (A1_diag A_real) * 
+                       matrix_inf_norm (A2_J_real A_real))%Re in
+  (R_def < 1)%Re ->
+  forall k:nat, 
+  (vec_inf_norm
+   (x_k k x0 b_real A_real - x1) <=
+      R_def_real ^ k * vec_inf_norm x1)%Re.
+Admitted.
+
 Lemma lim_of_x_minus_xk_is_zero {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
