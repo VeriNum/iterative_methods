@@ -125,17 +125,19 @@ Qed.
 *)
 
 Lemma Rabs_ineq_filter {n:nat} (f : 'I_n.+1 -> R) P:
-  Rabs (\sum_(j < n.+1 | P j) f j) <= \sum_(j < n.+1 | P j) (Rabs (f j)).
+  (Rabs (\sum_(j < n.+1 | P j) f j) <= \sum_(j < n.+1 | P j) (Rabs (f j)))%Re.
 Proof.
 intros. rewrite big_mkcond /=.
-rewrite big
+rewrite [in X in (_ <= X)%Re]big_mkcond /=.
 induction n.
-+ simpl. rewrite !big_ord_recr //= !big_ord0 !add0r //=.
++ simpl. rewrite !big_ord_recr //= !big_ord0.
+  rewrite -!RplusE. rewrite !Rplus_0_l.
+  case: (P ord_max).
+  - apply Rle_refl.
+  - rewrite Rabs_R0. apply Rle_refl.
 + simpl. rewrite big_ord_recr //=.
-  assert (\sum_(j < n.+2) Rabs (f j) = 
-            \sum_(j < n.+1) Rabs (f (widen_ord (leqnSn n.+1) j)) + Rabs (f ord_max)).
-  { by rewrite !big_ord_recr//=. } rewrite H. 
-  apply /RleP. rewrite -!RplusE.
+  rewrite [in X in (_ <= X)%Re]big_ord_recr //=.
+  rewrite -!RplusE.
   apply Rle_trans with 
   (Rabs (\sum_(i < n.+1) f (widen_ord (leqnSn n.+1) i)) +
     Rabs (f ord_max))%Re.
