@@ -48,14 +48,6 @@ apply matrixP in H. unfold eqrel in H.
 specialize (H y x). by rewrite !mxE.
 Qed.
 
-
-(*
-Lemma vec_is_zero_or_not: 
-  forall (n:nat) (x : 'cV[R]_n.+1),
-   x = 0 \/ x != 0.
-Admitted.
-*)
-
 Lemma transpose_idempotent {m n:nat} (A: 'M[R]_(m,n)):
   A = (A^T)^T.
 Proof.
