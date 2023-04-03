@@ -76,6 +76,18 @@ Lemma vec_norm_not_zero_implies {n:nat}:
             v k ord0 <> 0%Re.
 Admitted.
 
+Lemma R0_no_Rabs:
+  forall x:R, 
+  Rabs x <> 0%Re -> x <> 0%Re.
+Proof.
+intros. 
+pose proof (Rcase_abs x). destruct H0.
++ nra.
++ assert (x = 0%Re \/ (0 < x)%Re). nra.
+  destruct H0.
+  - rewrite H0 in H. rewrite Rabs_R0 in H. nra.
+  - nra.
+Qed.
 
 Lemma diagonal_dominance_implies_invertibility {t} {n:nat} 
   (A: 'M[ftype t]_n.+1):
@@ -107,6 +119,8 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
   contradict H1.
   apply /eqP. apply /cV0Pn.
   exists k. rewrite !mxE. apply /eqP.
+  apply R0_no_Rabs.
+  
 
 
 
