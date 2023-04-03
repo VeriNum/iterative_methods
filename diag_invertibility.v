@@ -80,41 +80,11 @@ rewrite -transpose_idempotent in H1.
 apply transpose_implies.
 remember (v^T) as v_c.
 rewrite -Heqv_c. rewrite trmx0.
-
-
-
-
-
-
-rewrite -unitmx_tr.
-
-
-
-
-
-
-
-
-
-rewrite -H0. apply transpose_implies.
-rewrite trmx_mul. symmetry.
-rewrite -transpose_idempotent.
-remember (v^T) as v_c.
-rewrite -Heqv_c.
-remember (FT2R_mat A) as A_real.
-assert (v_c = 0 \/ v_c != 0).
-{ by apply vec_is_zero_or_not. }
-destruct H1.
-+ rewrite H1. by rewrite mulmx0.
-+ apply matrixP. unfold eqrel. intros.
-  rewrite !mxE.
-  rewrite (bigD1 x) /=.
-  apply Rle_antisym.
-  
-
-
-
-
+rewrite -Heqv_c trmx0 in H1.
+assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
+{ nra. } destruct H2.
++ admit.
++ admit.
 
 Admitted.
 
