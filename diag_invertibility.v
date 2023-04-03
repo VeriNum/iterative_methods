@@ -107,10 +107,14 @@ induction s.
   - assert (s = seq.head x0 s :: behead s).
     { by apply s_destruct. }
     assert (bigmaxr x0 (a :: s) <> x0 ->
-            bigmaxr x0 s <> x0).
-    { admit. } apply H2 in H.
-    specialize (IHs H). destruct IHs as [i [Hsize IHs]].
-    exists i. intros. 
+            bigmaxr x0 s <> x0 /\ a <> x0).
+    { admit. } specialize (H2 H). 
+    destruct H2 as [H2 Ha].
+    specialize (IHs H2). destruct IHs as [i [Hsize IHs]].
+    exists i. split.
+    * apply ltn_trans with (size s). apply Hsize.
+      apply ltnSn.
+    * simpl.
 
 
 
