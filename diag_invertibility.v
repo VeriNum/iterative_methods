@@ -163,7 +163,15 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
   eapply Rlt_le_trans; last by 
   (apply Rplus_le_compat_l;
     apply Ropp_le_contravar; apply Rabs_ineq_filter).
-
+  assert (\sum_(j < n.+1 | (fun j0 : 'I_n.+1 =>
+                    j0 != k) j)
+             Rabs ((fun j0 : 'I_n.+1 =>
+                        FT2R_mat A k j0 * v_c j0 0) j) = 
+          \sum_(j < n.+1 | j != k) (Rabs (FT2R_mat A k j) * Rabs (v_c j ord0))%Re).
+  { apply eq_big. by []. intros. rewrite -RmultE. 
+    by rewrite Rabs_mult.
+  } rewrite H3.
+  
  
 
 Admitted.
