@@ -101,6 +101,49 @@ rewrite -[in X in (_ - X <= _)%Re]Rabs_Ropp.
 apply Rabs_triang_inv.
 Qed.
 
+Search "Rabs".
+
+(*
+Lemma Rabs_ineq_filter_abstract I r (P: pred I) (E1: I -> R):
+  Rabs (\big[+%R/0]_(i <-r | P i) E1 i) <= \big[+%R/0]_(i <-r | P i) (Rabs (E1 i)).
+Proof.
+intros.
+apply /RleP. apply big_rec.
++ admit.
++ intros.
+
+
+ auto.
+
+
+apply big_ind2.
++ nra.
++ intros. rewrite -!RplusE. by apply Rplus_le_compat.
++ apply leE12.
+Qed.
+
+*)
+
+Lemma Rabs_ineq_filter {n:nat} (f : 'I_n.+1 -> R) P:
+  Rabs (\sum_(j < n.+1 | P j) f j) <= \sum_(j < n.+1 | P j) (Rabs (f j)).
+Proof.
+intros. rewrite big_mkcond /=.
+rewrite big
+induction n.
++ simpl. rewrite !big_ord_recr //= !big_ord0 !add0r //=.
++ simpl. rewrite big_ord_recr //=.
+  assert (\sum_(j < n.+2) Rabs (f j) = 
+            \sum_(j < n.+1) Rabs (f (widen_ord (leqnSn n.+1) j)) + Rabs (f ord_max)).
+  { by rewrite !big_ord_recr//=. } rewrite H. 
+  apply /RleP. rewrite -!RplusE.
+  apply Rle_trans with 
+  (Rabs (\sum_(i < n.+1) f (widen_ord (leqnSn n.+1) i)) +
+    Rabs (f ord_max))%Re.
+  - apply Rabs_triang.
+  - apply Rplus_le_compat_r. apply /RleP. by apply IHn.
+Qed.
+ *) 
+
 Lemma diagonal_dominance_implies_invertibility {t} {n:nat} 
   (A: 'M[ftype t]_n.+1):
   strict_diagonal_dominance A ->
@@ -140,7 +183,7 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
   eapply Rlt_le_trans.
   admit.
   apply Rplus_le_compat_l.
-  apply Ropp_le_contravar.
+  apply Ropp_le_contravar. apply /RleP. apply Rabs_ineq.
   Search ( - _ <= - _)%Re.
   
 
