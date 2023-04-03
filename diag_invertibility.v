@@ -80,11 +80,28 @@ split.
   apply H. apply ltn_ord.
 Qed.
 
+
+Local Open Scope R_scope.
+Lemma bigmax_not_0_implies s:
+  bigmaxr 0 s <> 0 ->
+  (exists i, (i < size s)%nat ->
+             seq.nth 0 s i = bigmaxr 0 s /\
+             seq.nth 0 s i <> 0).
+
+
 Lemma vec_norm_not_zero_implies {n:nat}:
   forall v: 'cV[R]_n.+1,
   vec_inf_norm v <> 0%Re ->
   exists k, Rabs (v k ord0) = vec_inf_norm v /\
             v k ord0 <> 0%Re.
+Proof.
+intros.
+
+
+
+
+
+
 Admitted.
 
 Lemma R0_no_Rabs:
