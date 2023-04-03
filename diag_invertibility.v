@@ -95,6 +95,13 @@ induction s.
 + assert (bigmaxr x0 (a :: s) <> x0 ->
             bigmaxr x0 s <> x0 \/ a <> x0).
   { admit. } specialize (H0 H).
+  destruct H0.
+  - specialize (IHs H0). 
+    destruct IHs as [i [Hsize IHs]].
+    exists i. split. 
+    * apply ltn_trans with (size s); first by [].
+      simpl. apply ltnSn.
+    * simpl.
 
 
 
