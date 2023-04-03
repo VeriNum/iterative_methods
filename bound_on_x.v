@@ -566,7 +566,7 @@ induction k.
   rewrite sum_part_equiv. apply Rle_refl.
 Qed.
 
-
+(*
 (** lemma on bound for ||x_k|| **)
 Lemma lim_xk_is_bounded {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
@@ -658,83 +658,8 @@ admit.
     apply is_lim_seq_const.
 
 Admitted.
-        
-
-
-
-(*
-
-
-
-
-assert ((vec_inf_norm (A1_diag A_real) *
-           vec_inf_norm b_real /
-           (1 -
-            vec_inf_norm (A1_diag A_real) *
-            matrix_inf_norm (A2_J_real A_real)))%Re = 
-        ((vec_inf_norm (A1_diag A_real) *
-           vec_inf_norm b_real /
-           (1 -
-            vec_inf_norm (A1_diag A_real) *
-            matrix_inf_norm (A2_J_real A_real))) + 0)%Re) by nra.
-rewrite H1. clear H1.
-apply is_lim_seq_ext with 
-(fun k: nat =>
-  ((vec_inf_norm (A1_diag A_real) *
-   vec_inf_norm b_real /
-   (1 -
-    vec_inf_norm (A1_diag A_real) *
-    matrix_inf_norm (A2_J_real A_real))) + 
-    ((vec_inf_norm
-     (x_k k x0 b_real A_real)) - (vec_inf_norm (A1_diag A_real) *
-       vec_inf_norm b_real /
-       (1 -
-        vec_inf_norm (A1_diag A_real) *
-        matrix_inf_norm (A2_J_real A_real)))))%Re).
-+ intros. nra.
-+ apply is_lim_seq_plus'.
-  apply is_lim_seq_const.
-  apply is_lim_seq_abs_0.
-  apply (@is_lim_seq_le_le
-          (fun _ => 0%Re)
-          (fun n0 : nat =>
-           Rabs
-             (vec_inf_norm
-                (x_k n0 x0 b_real A_real) -
-              vec_inf_norm (A1_diag A_real) *
-              vec_inf_norm b_real /
-              (1 -
-               vec_inf_norm (A1_diag A_real) *
-               matrix_inf_norm
-                 (A2_J_real A_real))))
-          (fun k: nat =>
-            ((1 + (R_def_real)^k) *  
-                (vec_inf_norm (A1_diag A_real) *
-              vec_inf_norm b_real /
-              (1 -
-               vec_inf_norm (A1_diag A_real) *
-               matrix_inf_norm
-                 (A2_J_real A_real))) - 
-             (vec_inf_norm (A1_diag A_real) *
-              vec_inf_norm b_real /
-              (1 -
-               vec_inf_norm (A1_diag A_real) *
-               matrix_inf_norm
-                 (A2_J_real A_real))))%Re)).
-  - intros. split. 
-    * apply Rabs_pos.
-    * apply Rabs_le. split.
-      ++ 
-
-
-
-admit.
-  - apply is_lim_seq_const.
-  - admit.
-
-
-Admitted.
 *)
+
 Lemma x_bound_exists {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
@@ -814,12 +739,16 @@ apply Rmult_le_compat.
 apply /RleP. apply vec_norm_pd.
 apply Rmult_le_pos. 
 apply /RleP. apply vec_norm_pd.
-admit.
+apply /RleP. apply big_ge_0_ex_abstract.
+intros. apply /RleP. apply pow_le.
+apply Rmult_le_pos.
+apply /RleP. apply vec_norm_pd.
+apply /RleP. apply matrix_norm_pd.
 by apply vec_norm_A1_rel.
 apply Rmult_le_compat_l.
 apply /RleP. apply vec_norm_pd.
 
-
+(*
 
 
 
@@ -872,7 +801,8 @@ end. apply Rmult_le_compat_r.
       ++ by apply Rlt_Rminus, R_def_lt_1_implies.
       ++ apply H3.
     * rewrite H3. nra.
-Qed.
+*)
+Admitted.
 
 End WITH_NANS.
 
