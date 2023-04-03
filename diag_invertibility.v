@@ -92,7 +92,18 @@ intros.
 induction s.
 + simpl. rewrite bigmaxr_nil in H. 
   contradict H. reflexivity.
-+ rewrite /bigmaxr. rewrite big_cons //=.
++ rewrite /bigmaxr. 
+  exists 0%nat. split.
+  - by simpl. 
+  -
+
+
+
+
+
+
+
+rewrite big_cons //=.
   assert (s = [::] \/ s != [::]).
   { destruct s.
     + by left.
@@ -117,9 +128,9 @@ induction s.
     * simpl. 
       assert (i = 0%nat \/ (0 < i)%nat). by admit.
       destruct H3.
-      ++ simpl. split; try apply Ha.
+      ++ rewrite H3. simpl. split; try apply Ha.
          admit.
-      ++ simpl.
+      ++ 
 
 
 
