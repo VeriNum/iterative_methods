@@ -137,7 +137,11 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
   rewrite (bigD1 k) /=.
   eapply Rlt_le_trans; last by apply Rabs_sub.
   rewrite -RmultE. rewrite Rabs_mult.
-  
+  eapply Rlt_le_trans.
+  admit.
+  apply Rplus_le_compat_l.
+  apply Ropp_le_contravar.
+  Search ( - _ <= - _)%Re.
   
 
 
