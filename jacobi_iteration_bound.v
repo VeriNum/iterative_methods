@@ -174,8 +174,6 @@ apply matrixP. unfold eqrel. intros.
 by rewrite !mxE. 
 Qed.
 
-
-
 Lemma diagonal_dominance_implies_invertibility {t} {n:nat} 
   (A: 'M[ftype t]_n.+1):
   strict_diagonal_dominance A ->
@@ -188,6 +186,14 @@ rewrite -row_free_unit.
 apply inj_row_free. intros.
 rewrite -H0. apply transpose_implies.
 rewrite trmx_mul. symmetry.
+rewrite -transpose_idempotent.
+remember (v^T) as v_c.
+rewrite -Heqv_c.
+assert (v_c = 0 \/ v_c != 0).
+{ by apply vec_is_zero_or_not. }
+destruct H1.
++ rewrite H1. rewr
+
 
 
 
