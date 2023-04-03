@@ -151,12 +151,18 @@ apply Rplus_le_compat.
 Qed.
 
 
+Lemma diagonal_dominance_implies_invertibility {t} {n:nat} 
+  (A: 'M[ftype t]_n.+1):
+  strict_diagonal_dominance A ->
+  (FT2R_mat A) \in unitmx.
+Admitted.
 
 (** relation between the non-computable and computable d_mag **)
 Lemma d_mag_def_le_alt {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
-(Ha : forall i j, finite (A i j)):
+  (Ha : forall i j, finite (A i j))
+  (Hsd: strict_diagonal_dominance A):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re ->
   (d_mag_def A b <= d_mag_def_alt A b)%Re.
@@ -242,7 +248,8 @@ apply Rplus_le_compat.
          apply Rmult_le_pos.
          apply default_rel_ge_0.
          apply Rplus_le_le_0_compat; try nra; try apply g_pos.
-  - apply x_bound_exists. by apply rho_1_implies_rho_2 with b .
+  - apply x_bound_exists; try by []. by apply rho_1_implies_rho_2 with b .
+    by apply diagonal_dominance_implies_invertibility.
 Qed.
 
 
@@ -445,22 +452,6 @@ unfold f_error.
 Qed.
 
 (** Replace Gamma with tau_squared  **)
-
-
-Lemma diagonal_dominance_implies_invertibility {t} {n:nat} 
-  (A: 'M[ftype t]_n.+1):
-  strict_diagonal_dominance A ->
-  (FT2R_mat A) \in unitmx.
-Admitted.
-
-(*** We might not need this ***)
-(*
-Lemma diagonal_dominance_implies_rho_lt_1 {t} {n:nat} 
-  (A: 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1):
-  strict_diagonal_dominance A ->
-  (rho_def A b < 1)%Re.
-Admitted.
-*)
 
 (** g  g1  rho d_mag : what do they mean intuitively **)
 Lemma d_mag_rel_1 {t: type} {n:nat}
