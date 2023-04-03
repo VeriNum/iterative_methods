@@ -135,6 +135,8 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
   assert (forall x:R, (0 < x)%Re -> x <> 0%Re).
   { intros. nra. } apply H1.
   rewrite (bigD1 k) /=.
+  eapply Rlt_le_trans; last by apply Rabs_sub.
+  rewrite -RmultE. rewrite Rabs_mult.
   
   
 
