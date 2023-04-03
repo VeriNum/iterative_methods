@@ -75,11 +75,10 @@ split.
   assert ((0 < n.+1)%nat). by [].
   specialize (H H0  Hb i).
   assert ((i < n.+1)%nat). by apply ltn_ord.
-  specialize (H H1).
-  apply bigmax_le_implies in Hb.
-
-
-Admitted.
+  specialize (H H1). rewrite seq_equiv in H.
+  rewrite nth_mkseq in H. rewrite inord_val in H.
+  apply H. apply ltn_ord.
+Qed.
 
 Lemma vec_norm_not_zero_implies {n:nat}:
   forall v: 'cV[R]_n.+1,
