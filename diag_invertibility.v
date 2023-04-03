@@ -104,7 +104,9 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
   apply H3.
 + pose proof (@vec_norm_not_zero_implies n v_c H2).
   destruct H3 as [k [Habs Hneq0]].
-  
+  contradict H1.
+  apply /eqP. apply /cV0Pn.
+  exists k. rewrite !mxE. apply /eqP.
 
 
 
