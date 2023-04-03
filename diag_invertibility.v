@@ -106,7 +106,21 @@ induction s.
   - assert (s = seq.head x0 s :: behead s).
     { by apply s_destruct. }
     rewrite H1. rewrite bigrmax_dflt. rewrite -H1.
-    rewrite H1 in H. rewrite bigrmax_dflt.
+    assert (bigmaxr x0 (a :: s) = Num.max a (bigmaxr x0 s)).
+
+
+
+
+            Num.max a
+                (\big[Num.max/a]_(j <- 
+                 (seq.head x0 s :: behead s)) j)).
+    { rewrite /bigmaxr. rewrite H1. rewrite bigrmax_dflt.
+      rewrite -H1. simpl.
+
+
+    rewrite /bigmaxr in H.
+    rewrite H1 in H. 
+    rewrite bigrmax_dflt in H.
     rewrite le_maxr. apply /orP.
     specialize (H0 0%N). simpl in H0.
     left. by apply H0.
