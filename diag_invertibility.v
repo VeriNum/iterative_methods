@@ -92,7 +92,13 @@ intros.
 induction s.
 + simpl. rewrite bigmaxr_nil in H. 
   contradict H. reflexivity.
-+ 
++ rewrite /bigmaxr. rewrite big_cons //=.
+  assert (s = [::] \/ s != [::]).
+  { destruct s.
+    + by left.
+    + by right.
+  } destruct H0.
+  - 
 
 Lemma vec_norm_not_zero_implies {n:nat}:
   forall v: 'cV[R]_n.+1,
