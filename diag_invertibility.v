@@ -37,6 +37,19 @@ specialize (H y x).
 by rewrite !mxE in H.
 Qed.
 
+Lemma transpose_implies_col {n}:
+  forall v1 v2: 'rV[R]_n.+1,
+  v1 = v2 ->
+  v1^T = v2^T.
+Proof.
+intros.
+apply matrixP. unfold eqrel. intros.
+apply matrixP in H. unfold eqrel in H.
+specialize (H y x). by rewrite !mxE.
+Qed.
+
+
+
 Lemma vec_is_zero_or_not: 
   forall (n:nat) (x : 'cV[R]_n.+1),
    x = 0 \/ x != 0.
@@ -56,10 +69,36 @@ Lemma diagonal_dominance_implies_invertibility {t} {n:nat}
   (FT2R_mat A) \in unitmx.
 Proof.
 intros.
-rewrite -unitmx_tr.
 unfold strict_diagonal_dominance in H.
 rewrite -row_free_unit.
 apply inj_row_free. intros.
+pose proof (@transpose_implies_col n ).
+specialize (H1 (v *m FT2R_mat A) 0 H0).
+
+
+
+apply (transpose_implies_col (v *m FT2R_mat A) 0) in H.
+
+
+
+
+clear
+
+
+
+
+
+
+rewrite -unitmx_tr.
+
+
+
+
+
+
+
+
+
 rewrite -H0. apply transpose_implies.
 rewrite trmx_mul. symmetry.
 rewrite -transpose_idempotent.
