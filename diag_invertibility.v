@@ -114,7 +114,10 @@ induction s.
     exists i. split.
     * apply ltn_trans with (size s). apply Hsize.
       apply ltnSn.
-    * simpl.
+    * simpl. destruct i.
+      ++ simpl. split; try apply Ha.
+         admit.
+      ++ simpl.
 
 
 
