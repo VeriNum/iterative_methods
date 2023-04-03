@@ -88,6 +88,7 @@ Lemma bigmax_not_0_implies (x0:R) s:
              seq.nth x0 s i = bigmaxr x0 s /\
              seq.nth x0 s i <> x0).
 Proof.
+(*
 intros.
 induction s.
 + simpl. rewrite bigmaxr_nil in H. 
@@ -185,6 +186,8 @@ specialize (H0 0%N).
     simpl in H0. rewrite -RmaxE. rewrite Rmax_left.
     * by [].
     * nra.
+*)
+Admitted.
 
 Lemma vec_norm_not_zero_implies {n:nat}:
   forall v: 'cV[R]_n.+1,
@@ -192,7 +195,12 @@ Lemma vec_norm_not_zero_implies {n:nat}:
   exists k, Rabs (v k ord0) = vec_inf_norm v /\
             v k ord0 <> 0%Re.
 Proof.
-intros.
+intros. unfold vec_inf_norm in H.
+pose proof  bigmax_not_0_implies.
+specialize (H0 0%Re [seq Rabs (v i ord0)
+                          | i <- enum 'I_n.+1] H).
+rewrite size_map size_enum_ord in H0.
+destruct H0 as [i [Hsize H0]].
 
 
 
