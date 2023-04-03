@@ -925,7 +925,8 @@ Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
   (Hrho_gt_0: (0 < rho_def A b)%Re)
   (Hx_lb: (d_mag_def_alt A b / (1 - rho_def_alt A b) <
               vec_inf_norm (x_fix ((FT2R_mat A)^-1 *m (FT2R_mat b))
-                                  (FT2R_mat b) (FT2R_mat A)))%Re) :
+                                  (FT2R_mat b) (FT2R_mat A)))%Re) 
+  (Hsd : strict_diagonal_dominance A):
   jacobi_preconditions_Rcompute A b accuracy k ->
   jacobi_preconditions_math A b accuracy k.
 Proof.
@@ -967,7 +968,7 @@ assert (HG_re: (FT2R (BMULT accuracy accuracy) >
          apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
          apply /RleP. apply vec_norm_pd.
          apply d_mag_def_le_alt. intros. apply Hfdiv.
-         intros. apply Hfa. apply Hrho.
+         intros. apply Hfa. apply Hsd. apply Hrho.
       ++ assert ((rho_def A b = rho_def_alt A b)%Re \/
                   (rho_def A b < rho_def_alt A b)%Re).
          { pose proof (@rho_def_le_alt t n A b Hfdiv Hfa). nra. }
@@ -1010,7 +1011,7 @@ assert (Hf_ge: (0 <
     - apply Rlt_le, Rinv_0_lt_compat. apply Rlt_Rminus.
       apply Rle_lt_trans with (rho_def_alt A b).
       by apply rho_def_le_alt. apply Hrho.
-    - apply d_mag_def_le_alt. apply Hfdiv. apply Hfa. apply Hrho.
+    - apply d_mag_def_le_alt. apply Hfdiv. apply Hfa. apply Hsd. apply Hrho.
     - assert ((rho_def A b = rho_def_alt A b)%Re \/
                   (rho_def A b < rho_def_alt A b)%Re).
       { pose proof (@rho_def_le_alt t n A b Hfdiv Hfa). nra. }
@@ -1105,7 +1106,7 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
             ** nra.
             ** apply Rplus_le_le_0_compat; try nra; by try apply rho_ge_0.
             ** apply Rplus_le_compat.
-               +++ apply f_error0_bnd. apply rho_1_implies_rho_2 with b.
+               +++ apply f_error0_bnd; try by []. apply rho_1_implies_rho_2 with b.
                    apply Hrho.
                +++ apply Ropp_le_contravar. apply Rmult_le_pos.
                    apply d_mag_ge_0. apply Rlt_le, Rinv_0_lt_compat.
@@ -1116,7 +1117,7 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
             apply Hfdiv. apply Hfa. apply Hrho. apply HG1.
             apply Rplus_le_compat_l.
             apply Ropp_le_contravar. apply d_mag_rel_1.
-            apply Hfdiv. apply Hfa. apply Hrho.
+            apply Hfdiv. apply Hfa. apply Hsd. apply Hrho.
     * apply ln_rho_rel. apply Hfdiv. apply Hfa.
       apply Rlt_le_trans with (rho_def A b)%Re.
       apply Hrho_gt_0. by apply rho_def_le_alt.
