@@ -566,6 +566,16 @@ induction k.
   rewrite sum_part_equiv. apply Rle_refl.
 Qed.
 
+(** Lemma sum_bigop_equiv **)
+Lemma sum_big_equiv (k:nat) (x:R):
+  \sum_(j < k.+1) (x ^ j)%Re = 
+  sum_f_R0 (fun j :nat => (x^j)%Re) k.
+Proof.
+induction k.
++ simpl. rewrite big_ord_recr big_ord0 /=.
+  rewrite -RplusE. by rewrite Rplus_0_l.
++ 
+
 
 Lemma x_bound_exists {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
