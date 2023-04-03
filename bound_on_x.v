@@ -684,6 +684,11 @@ apply Rle_trans with
   - assert (n0 = n0.-1.+1).
     { by rewrite prednK. } rewrite H8.
     rewrite sum_big_equiv.
+    pose proof (GP_finite R_def_real n0.-1).
+    Search (_ * _ = _ )%Re.
+    assert (forall x y z:R, (x * (y - 1))%Re  = (z - 1)%Re ->
+                         (x * (1 - y))%Re  = (1 - z)%Re).
+    { intros. nra. } apply H10 in H9. clear H10.
 
 
 
