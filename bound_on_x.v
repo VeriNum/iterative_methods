@@ -670,6 +670,17 @@ apply Rle_trans with
 (/ (1 - vec_inf_norm (A1_diag A_real) *
         matrix_inf_norm (A2_J_real A_real)))%Re.
 + rewrite -HeqR_def_real.
+  assert (n0 = 0%nat \/ (0 < n0)%nat).
+  { assert ((0 <= n0)%nat). by [].
+    rewrite leq_eqVlt in H7.
+    assert ((0%nat == n0) \/ (0 < n0)%nat). by apply /orP.
+    destruct H8.
+    + rewrite eq_sym in H8. left. by apply /eqP.
+    + by right.
+  } destruct H7.
+
+
+  rewrite sum_big_equiv.
 
 
 
