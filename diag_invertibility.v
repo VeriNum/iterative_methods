@@ -98,7 +98,21 @@ induction s.
     + by left.
     + by right.
   } destruct H0.
-  - 
+  - rewrite H0 //=. rewrite H0 //= in H.
+    rewrite big_nil. exists 0%nat.
+    intros. simpl. rewrite bigmaxr_un in H.
+    split;try apply H. rewrite -RmaxE.
+    symmetry. apply Rmax_left. apply Rle_refl.
+  -
+
+
+
+
+specialize (H0 0%N).
+    assert ((0 < 1)%N). { by []. } specialize (H0 H2).
+    simpl in H0. rewrite -RmaxE. rewrite Rmax_left.
+    * by [].
+    * nra.
 
 Lemma vec_norm_not_zero_implies {n:nat}:
   forall v: 'cV[R]_n.+1,
