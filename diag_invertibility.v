@@ -89,6 +89,18 @@ pose proof (Rcase_abs x). destruct H0.
   - nra.
 Qed.
 
+
+Lemma Rabs_sub: 
+  forall x y:R,
+  (Rabs x - Rabs y <= Rabs (x + y))%Re.
+Proof.
+intros.
+assert ((x + y)%Re = (x - (-y))%Re). nra.
+rewrite H.
+rewrite -[in X in (_ - X <= _)%Re]Rabs_Ropp.
+apply Rabs_triang_inv.
+Qed.
+
 Lemma diagonal_dominance_implies_invertibility {t} {n:nat} 
   (A: 'M[ftype t]_n.+1):
   strict_diagonal_dominance A ->
