@@ -689,6 +689,9 @@ apply Rle_trans with
     assert (forall x y z:R, (x * (y - 1))%Re  = (z - 1)%Re ->
                          (x * (1 - y))%Re  = (1 - z)%Re).
     { intros. nra. } apply H10 in H9. clear H10.
+    Search ( _ * _ <= _ * _)%Re.
+    apply Rmult_le_reg_r with (1 - R_def_real)%Re.
+    apply Rmult_le_compat_r in H9.
 
 
 
