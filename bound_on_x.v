@@ -574,7 +574,9 @@ Proof.
 induction k.
 + simpl. rewrite big_ord_recr big_ord0 /=.
   rewrite -RplusE. by rewrite Rplus_0_l.
-+ 
++ rewrite big_ord_recr /=. rewrite IHk.
+  by rewrite -RplusE.
+Qed. 
 
 
 Lemma x_bound_exists {t} {n:nat}
