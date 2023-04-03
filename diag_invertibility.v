@@ -124,6 +124,16 @@ induction n.
     * rewrite Rabs_R0. apply Rle_refl.
 Qed.
 
+Lemma pos_to_gt: 
+  forall x:R, x <> 0%Re -> (0 <= x)%Re -> (0 < x)%Re.
+Proof.
+intros.
+assert (x = 0%Re \/ (0 < x)%Re). nra.
+destruct H1.
++ rewrite H1 in H. nra.
++ nra.
+Qed.
+
 Lemma diagonal_dominance_implies_invertibility {t} {n:nat} 
   (A: 'M[ftype t]_n.+1):
   strict_diagonal_dominance A ->
@@ -179,14 +189,8 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
     rewrite -Rmult_minus_distr_r.
     apply Rmult_lt_0_compat.
     * admit.
-    * nra.
-
-
-
-
-
-
-admit.
+    * apply pos_to_gt. apply H2.
+      apply /RleP. apply vec_norm_pd.
   - apply Rplus_le_compat_l. apply Ropp_le_contravar.
     apply /RleP. apply big_sum_ge_ex_abstract.
     intros. apply Rmult_le_compat_l. apply Rabs_pos.
