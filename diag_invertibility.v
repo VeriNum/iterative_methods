@@ -177,7 +177,9 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
                                   vec_inf_norm v_c)%Re))%Re.
   - rewrite -big_distrl /=. rewrite -RmultE.
     rewrite -Rmult_minus_distr_r.
-    apply 
+    apply Rmult_lt_0_compat.
+    * admit.
+    * nra.
 
 
 
