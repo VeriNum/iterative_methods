@@ -177,6 +177,8 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
                                   vec_inf_norm v_c)%Re))%Re.
   - admit.
   - apply Rplus_le_compat_l. apply Ropp_le_contravar.
+    apply /RleP. apply big_sum_ge_ex_abstract.
+    intros. apply Rmult_le_compat_l. apply Rabs_pos.
     
 
 
