@@ -747,6 +747,30 @@ apply /RleP. apply matrix_norm_pd.
 by apply vec_norm_A1_rel.
 apply Rmult_le_compat_l.
 apply /RleP. apply vec_norm_pd.
+apply Rle_trans with
+(/ (1 - vec_inf_norm (A1_diag A_real) *
+        matrix_inf_norm (A2_J_real A_real)))%Re.
++ admit.
++ assert ((1 - R_def <= (1 -
+                            vec_inf_norm (A1_diag A_real) *
+                            matrix_inf_norm (A2_J_real A_real)))%Re).
+    { apply Rplus_le_compat_l, Ropp_le_contravar.
+      unfold R_def. 
+      assert (A2_J_real A_real = A2_real).
+      { apply matrixP. unfold eqrel. intros. rewrite !mxE /=.
+        case: (x2 == y :> nat); simpl; auto.
+      } rewrite H7. apply Rmult_le_compat_r.
+      apply /RleP. apply matrix_norm_pd.
+      by apply vec_norm_A1_rel.
+    }
+    destruct H7.
+    * apply Rlt_le, Rinv_lt_contravar.
+      apply Rmult_lt_0_compat.
+      ++ by apply Rlt_Rminus.
+      ++ by apply Rlt_Rminus, R_def_lt_1_implies.
+      ++ apply H7.
+    * rewrite H7. nra.
+
 
 (*
 
