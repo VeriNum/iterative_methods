@@ -155,6 +155,14 @@ Lemma diagonal_dominance_implies_invertibility {t} {n:nat}
   (A: 'M[ftype t]_n.+1):
   strict_diagonal_dominance A ->
   (FT2R_mat A) \in unitmx.
+Proof.
+intros.
+unfold strict_diagonal_dominance in H.
+rewrite -row_free_unit.
+apply inj_row_free. intros.
+
+
+
 Admitted.
 
 (** relation between the non-computable and computable d_mag **)
