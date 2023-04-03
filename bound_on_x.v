@@ -691,20 +691,16 @@ apply Rle_trans with
     apply Rmult_le_reg_r with (1 - R_def_real)%Re.
     apply Rlt_Rminus. rewrite HeqR_def_real. by apply R_def_lt_1_implies.
     rewrite H9. rewrite Rinv_l.
-    admit.
+    assert (forall x:R, (0 <= x)%Re -> (1 - x <= 1)%Re).
+    { intros. nra. } apply H10.
+    apply pow_le.
+    rewrite HeqR_def_real.
+    apply Rmult_le_pos.
+    apply /RleP. apply vec_norm_pd.
+    apply /RleP. apply matrix_norm_pd.
     assert (forall x:R, (0 < x)%Re -> x <> 0%Re). 
     { intros. nra. } apply H10.
     apply Rlt_Rminus. rewrite HeqR_def_real. by apply R_def_lt_1_implies.
-    
-    Print Rinv_l.
-
-
-    apply Rmult_le_compat_r in H9.
-
-
-
-
-admit.
 + assert ((1 - R_def <= (1 -
                             vec_inf_norm (A1_diag A_real) *
                             matrix_inf_norm (A2_J_real A_real)))%Re).
@@ -724,7 +720,7 @@ admit.
       ++ by apply Rlt_Rminus, R_def_lt_1_implies.
       ++ apply H7.
     * rewrite H7. nra.
-Admitted.
+Qed.
 
 End WITH_NANS.
 
