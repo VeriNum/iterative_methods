@@ -685,12 +685,20 @@ apply Rle_trans with
     { by rewrite prednK. } rewrite H8.
     rewrite sum_big_equiv.
     pose proof (GP_finite R_def_real n0.-1).
-    Search (_ * _ = _ )%Re.
     assert (forall x y z:R, (x * (y - 1))%Re  = (z - 1)%Re ->
                          (x * (1 - y))%Re  = (1 - z)%Re).
     { intros. nra. } apply H10 in H9. clear H10.
-    Search ( _ * _ <= _ * _)%Re.
     apply Rmult_le_reg_r with (1 - R_def_real)%Re.
+    apply Rlt_Rminus. rewrite HeqR_def_real. by apply R_def_lt_1_implies.
+    rewrite H9. rewrite Rinv_l.
+    admit.
+    assert (forall x:R, (0 < x)%Re -> x <> 0%Re). 
+    { intros. nra. } apply H10.
+    apply Rlt_Rminus. rewrite HeqR_def_real. by apply R_def_lt_1_implies.
+    
+    Print Rinv_l.
+
+
     apply Rmult_le_compat_r in H9.
 
 
