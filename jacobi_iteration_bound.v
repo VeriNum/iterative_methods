@@ -189,11 +189,13 @@ rewrite trmx_mul. symmetry.
 rewrite -transpose_idempotent.
 remember (v^T) as v_c.
 rewrite -Heqv_c.
+remember (FT2R_mat A) as A_real.
 assert (v_c = 0 \/ v_c != 0).
 { by apply vec_is_zero_or_not. }
 destruct H1.
 + rewrite H1. by rewrite mulmx0.
-+
++ apply matrixP. unfold eqrel. intros.
+  a
 
 
 
