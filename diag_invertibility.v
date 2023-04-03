@@ -58,7 +58,17 @@ Qed.
 Lemma vec_norm_implies_vec_zero {n: nat}:
   forall v: 'cV[R]_n.+1,
   vec_inf_norm v = 0%Re ->
-  (forall i, v i ord0 = 0%Re).
+  (forall i, Rabs (v i ord0) = 0%Re).
+Proof.
+intros.
+apply Rge_ge_eq in H.
+apply Rge_ge_eq.
+destruct H as [Ha Hb].
+split.
++ apply Rle_ge. apply Rabs_pos.
++ apply Rle_ge. 
+
+
 Admitted.
 
 Lemma vec_norm_not_zero_implies {n:nat}:
