@@ -6594,7 +6594,7 @@ destruct H0.
     ++ apply jacobi_precond_compute_implies_math.
        rewrite HeqA' Heqb' Heqn in H0. apply H0.
        rewrite -Heqn -HeqA' -Heqb' -HeqA_real -Heqb_real -Heqx.
-       apply H1. 
+       apply H1. rewrite -?Heqn -?HeqA' -?Heqb'. apply H.
        rewrite -Heqn -HeqA' -Heqb'. apply H.
     ++ apply HeqAb. 
     ++ apply HlenA.
