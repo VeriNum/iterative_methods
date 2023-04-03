@@ -188,7 +188,8 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
   - rewrite -big_distrl /=. rewrite -RmultE.
     rewrite -Rmult_minus_distr_r.
     apply Rmult_lt_0_compat.
-    * admit.
+    * specialize (H k). apply Rlt_Rminus.
+      apply Rgt_lt. apply H.
     * apply pos_to_gt. apply H2.
       apply /RleP. apply vec_norm_pd.
   - apply Rplus_le_compat_l. apply Ropp_le_contravar.
@@ -204,13 +205,7 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
       apply (@bigmaxr_ler _ 0%Re [seq Rabs (v_c i0 0)
                                     | i0 <- enum 'I_n.+1] i).
       rewrite size_map size_enum_ord. apply ltn_ord.
-
-
-
-Admitted.
-
-
-
-
+  - auto.
+Qed.
 
 End WITH_NANS.
