@@ -461,7 +461,8 @@ Qed.
 Lemma d_mag_rel_1 {t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
-  (Ha : forall i j, finite (A i j)):
+  (Ha : forall i j, finite (A i j))
+  (Hsd: strict_diagonal_dominance A):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re -> 
   (2 * d_mag_def A b *
