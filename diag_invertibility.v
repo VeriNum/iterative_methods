@@ -179,7 +179,11 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
   - apply Rplus_le_compat_l. apply Ropp_le_contravar.
     apply /RleP. apply big_sum_ge_ex_abstract.
     intros. apply Rmult_le_compat_l. apply Rabs_pos.
-    
+    unfold vec_inf_norm.
+    apply Rle_trans with 
+    [seq Rabs (v_c i0 0)
+      | i0 <- enum 'I_n.+1]`_i.
+    * rewrite seq_equiv. rewrite nth_mkseq.
 
 
 
