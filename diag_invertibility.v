@@ -145,6 +145,19 @@ destruct H1.
 + nra.
 Qed.
 
+
+Lemma Rabs_0_implies_0: 
+  forall x:R, 
+  Rabs x = 0%Re -> x = 0%Re.
+Proof.
+intros.
+pose proof Rcase_abs. specialize (H0 x).
+destruct H0.
++ rewrite Rabs_left in H; nra. 
++ rewrite Rabs_right in H; nra.
+Qed.
+
+
 Lemma diagonal_dominance_implies_invertibility {t} {n:nat} 
   (A: 'M[ftype t]_n.+1):
   strict_diagonal_dominance A ->
@@ -169,7 +182,7 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
   pose proof (@vec_norm_implies_vec_zero n v_c H2 x).
   rewrite !mxE. 
   assert (y = ord0). by apply ord1. rewrite H4.
-  apply H3.
+  by apply Rabs_0_implies_0.
 + pose proof (@vec_norm_not_zero_implies n v_c H2).
   destruct H3 as [k [Habs Hneq0]].
   contradict H1.
