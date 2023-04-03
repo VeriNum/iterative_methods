@@ -183,7 +183,12 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
     apply Rle_trans with 
     [seq Rabs (v_c i0 0)
       | i0 <- enum 'I_n.+1]`_i.
-    * rewrite seq_equiv. rewrite nth_mkseq.
+    * rewrite seq_equiv. rewrite nth_mkseq; last by apply ltn_ord.
+      rewrite inord_val. apply Rle_refl.
+    * apply /RleP. 
+      apply (@bigmaxr_ler _ 0%Re [seq Rabs (v_c i0 0)
+                                    | i0 <- enum 'I_n.+1] i).
+      rewrite size_map size_enum_ord. apply ltn_ord.
 
 
 
