@@ -82,11 +82,11 @@ Qed.
 
 
 Local Open Scope R_scope.
-Lemma bigmax_not_0_implies s:
-  bigmaxr 0 s <> 0 ->
+Lemma bigmax_not_0_implies (x0:R) s:
+  bigmaxr x0 s <> x0 ->
   (exists i, (i < size s)%nat ->
-             seq.nth 0 s i = bigmaxr 0 s /\
-             seq.nth 0 s i <> 0).
+             seq.nth x0 s i = bigmaxr x0 s /\
+             seq.nth x0 s i <> x0).
 Proof.
 intros.
 induction s.
@@ -103,7 +103,13 @@ induction s.
     intros. simpl. rewrite bigmaxr_un in H.
     split;try apply H. rewrite -RmaxE.
     symmetry. apply Rmax_left. apply Rle_refl.
-  -
+  - assert (s = seq.head x0 s :: behead s).
+    { by apply s_destruct. }
+    rewrite H1. rewrite bigrmax_dflt. rewrite -H1.
+    rewrite H1 in H. rewrite bigrmax_dflt.
+    rewrite le_maxr. apply /orP.
+    specialize (H0 0%N). simpl in H0.
+    left. by apply H0.
 
 
 
