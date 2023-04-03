@@ -114,7 +114,9 @@ induction s.
     exists i. split.
     * apply ltn_trans with (size s). apply Hsize.
       apply ltnSn.
-    * simpl. destruct i.
+    * simpl. 
+      assert (i = 0%nat \/ (0 < i)%nat). by admit.
+      destruct H3.
       ++ simpl. split; try apply Ha.
          admit.
       ++ simpl.
