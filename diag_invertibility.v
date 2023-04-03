@@ -120,6 +120,10 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
   apply /eqP. apply /cV0Pn.
   exists k. rewrite !mxE. apply /eqP.
   apply R0_no_Rabs.
+  assert (forall x:R, (0 < x)%Re -> x <> 0%Re).
+  { intros. nra. } apply H1.
+  rewrite (bigD1 k) /=.
+  
   
 
 
