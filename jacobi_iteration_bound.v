@@ -192,7 +192,8 @@ rewrite -Heqv_c.
 assert (v_c = 0 \/ v_c != 0).
 { by apply vec_is_zero_or_not. }
 destruct H1.
-+ rewrite H1. rewr
++ rewrite H1. by rewrite mulmx0.
++
 
 
 
