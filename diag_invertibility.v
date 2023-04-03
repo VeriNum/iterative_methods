@@ -189,26 +189,6 @@ specialize (H0 0%N).
 *)
 Admitted.
 
-Lemma vec_norm_not_zero_implies {n:nat}:
-  forall v: 'cV[R]_n.+1,
-  vec_inf_norm v <> 0%Re ->
-  exists k, Rabs (v k ord0) = vec_inf_norm v /\
-            v k ord0 <> 0%Re.
-Proof.
-intros. unfold vec_inf_norm in H.
-pose proof  bigmax_not_0_implies.
-specialize (H0 0%Re [seq Rabs (v i ord0)
-                          | i <- enum 'I_n.+1] H).
-rewrite size_map size_enum_ord in H0.
-destruct H0 as [i [Hsize H0]].
-
-
-
-
-
-
-Admitted.
-
 Lemma R0_no_Rabs:
   forall x:R, 
   Rabs x <> 0%Re -> x <> 0%Re.
@@ -221,6 +201,28 @@ pose proof (Rcase_abs x). destruct H0.
   - rewrite H0 in H. rewrite Rabs_R0 in H. nra.
   - nra.
 Qed.
+
+Lemma vec_norm_not_zero_implies {n:nat}:
+  forall v: 'cV[R]_n.+1,
+  vec_inf_norm v <> 0%Re ->
+  exists k, Rabs (v k ord0) = vec_inf_norm v /\
+            v k ord0 <> 0%Re.
+Proof.
+intros. unfold vec_inf_norm in H.
+pose proof  bigmax_not_0_implies.
+specialize (H0 0%Re [seq Rabs (v i ord0)
+                          | i <- enum 'I_n.+1] H).
+rewrite size_map size_enum_ord in H0.
+destruct H0 as [i [Hsize H0]].
+exists (@inord n i). 
+unfold vec_inf_norm.
+rewrite seq_equiv in H0. rewrite nth_mkseq in H0; last by apply Hsize.
+destruct H0 as [H0a H0b].
+split.
++ rewrite seq_equiv. apply H0a.
++ by apply R0_no_Rabs.
+Qed.
+
 
 
 Lemma Rabs_sub: 
