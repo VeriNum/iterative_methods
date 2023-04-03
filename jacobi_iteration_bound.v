@@ -174,6 +174,10 @@ apply matrixP. unfold eqrel. intros.
 by rewrite !mxE. 
 Qed.
 
+Definition diag {n:nat} (A: 'M[R]_n.+1):=
+  \matrix_(i < n.+1,j < n.+1) 
+      if (i == j :> nat) then A i i else 0%Re.
+
 Lemma diagonal_dominance_implies_invertibility {t} {n:nat} 
   (A: 'M[ftype t]_n.+1):
   strict_diagonal_dominance A ->
@@ -195,7 +199,7 @@ assert (v_c = 0 \/ v_c != 0).
 destruct H1.
 + rewrite H1. by rewrite mulmx0.
 + apply matrixP. unfold eqrel. intros.
-  a
+  assert (A_real =  A_real + A2_J_real A_real).
 
 
 
