@@ -69,7 +69,12 @@ Lemma vec_norm_implies_vec_zero {n: nat}:
   (forall i, v i ord0 = 0%Re).
 Admitted.
 
-
+Lemma vec_norm_not_zero_implies {n:nat}:
+  forall v: 'cV[R]_n.+1,
+  vec_inf_norm v <> 0%Re ->
+  exists k, Rabs (v k ord0) = vec_inf_norm v /\
+            v k ord0 <> 0%Re.
+Admitted.
 
 
 Lemma diagonal_dominance_implies_invertibility {t} {n:nat} 
@@ -97,7 +102,15 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
   rewrite !mxE. 
   assert (y = ord0). by apply ord1. rewrite H4.
   apply H3.
-+ admit.
++ pose proof (@vec_norm_not_zero_implies n v_c H2).
+  destruct H3 as [k [Habs Hneq0]].
+  
+
+
+
+
+
+admit.
 
 Admitted.
 
