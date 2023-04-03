@@ -426,7 +426,10 @@ Qed.
 
 (** relation between non-computable and computable defn of e_o in reals **)
 Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
-  (b : 'cV[ftype t]_n.+1):
+  (b : 'cV[ftype t]_n.+1)
+  (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
+  (Ha : forall i j, finite (A i j))
+  (Hsd: strict_diagonal_dominance A):
   let x0 := \col_(j < n.+1) (Zconst t 0) in
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -448,7 +451,8 @@ unfold f_error.
   assert (X_m_jacobi 0 x0 b A = x0).
   { by simpl. } rewrite H0. rewrite -RplusE.
   apply Rplus_le_compat_l.
-  apply x_bound_exists. apply H.
+  apply x_bound_exists; try by []. 
+  by apply diagonal_dominance_implies_invertibility.
 Qed.
 
 (** Replace Gamma with tau_squared  **)
