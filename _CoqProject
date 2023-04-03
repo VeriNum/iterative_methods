@@ -8,20 +8,21 @@ fma_floating_point_model.v
 fma_real_func_model.v
 
 
-StationaryMethods/common.v
-StationaryMethods/op_defs.v
-StationaryMethods/float_acc_lems.v
-StationaryMethods/list_lemmas.v
-StationaryMethods/dotprod_model.v
-StationaryMethods/sum_model.v
-StationaryMethods/fma_dot_acc.v
-StationaryMethods/fma_is_finite.v
+common.v
+op_defs.v
+float_acc_lems.v
+list_lemmas.v
+dotprod_model.v
+sum_model.v
+fma_dot_acc.v
+fma_is_finite.v
 
 finite_lemmas_additional.v
 norm_compat.v
 fma_matrix_vec_mult.v
 vec_sum_inf_norm_rel.v
 fma_jacobi_forward_error.v
+bound_on_x.v
 jacobi_preconditions.v
 jacobi_iteration_bound.v
 
