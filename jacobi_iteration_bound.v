@@ -162,6 +162,39 @@ specialize (H y x).
 by rewrite !mxE in H.
 Qed.
 
+Lemma vec_is_zero_or_not: 
+  forall (n:nat) (x : 'cV[R]_n.+1),
+   x = 0 \/ x != 0.
+Proof.
+intros.
+assert (vec_norm_C x = 0%Re \/ vec_norm_C x <> 0%Re).
+{ nra. } destruct H.
++ left. apply matrixP. unfold eqrel. intros.
+  rewrite /vec_norm_C in H. apply sqrt_eq_0 in H.
+  - rewrite [RHS]mxE. move: x0. apply big_0_implies_all_0.
+    assert (y = 0). { by apply ord1. } by rewrite H0.
+  - apply /RleP. apply sum_n_ge_0. intros. apply /RleP. apply Rle_0_sqr.
++ right. rewrite /vec_norm_C in H. apply /cV0Pn.
+  apply sqrt_not_0 in H. apply big_0_implies_not_0 in H.
+  destruct H as [l H]. exists l. by apply /eqP.
+Qed.
+
+
+
+move => [a b]. rewrite eq_complex //=.
+assert ( a = 0 \/ a <> 0). { by apply Req_dec. }
+assert ( b = 0 \/ b <> 0). { by apply Req_dec. } 
+destruct H.
++ rewrite H //=.
+  destruct H0.
+  - rewrite H0 //=. apply /orP. left. 
+    apply /andP. by split; apply /eqP.
+  - apply /orP. right. apply /nandP. by right; apply /eqP.
++ apply /orP. right. apply /nandP. left. by apply /eqP.
+Qed. 
+
+
+
 
 Lemma diagonal_dominance_implies_invertibility {t} {n:nat} 
   (A: 'M[ftype t]_n.+1):
@@ -173,6 +206,7 @@ unfold strict_diagonal_dominance in H.
 rewrite -row_free_unit.
 apply inj_row_free. intros.
 rewrite -H0. apply transpose_implies.
+rewrite trmx_mul. symmetry.
 
 
 
