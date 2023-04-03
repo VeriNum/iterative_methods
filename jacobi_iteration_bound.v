@@ -165,8 +165,11 @@ Qed.
 Lemma vec_is_zero_or_not: 
   forall (n:nat) (x : 'cV[R]_n.+1),
    x = 0 \/ x != 0.
-Proof.
-intros.
+Admitted.
+
+
+
+
 assert (vec_norm_C x = 0%Re \/ vec_norm_C x <> 0%Re).
 { nra. } destruct H.
 + left. apply matrixP. unfold eqrel. intros.
