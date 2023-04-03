@@ -175,7 +175,16 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
   (Rabs (FT2R_mat A k k) * vec_inf_norm v_c -
    (\sum_(j < n.+1 | j != k) (Rabs (FT2R_mat A k j) *
                                   vec_inf_norm v_c)%Re))%Re.
-  - admit.
+  - rewrite -big_distrl /=. rewrite -RmultE.
+    rewrite -Rmult_minus_distr_r.
+    apply 
+
+
+
+
+
+
+admit.
   - apply Rplus_le_compat_l. apply Ropp_le_contravar.
     apply /RleP. apply big_sum_ge_ex_abstract.
     intros. apply Rmult_le_compat_l. apply Rabs_pos.
