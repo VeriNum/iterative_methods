@@ -92,10 +92,20 @@ intros.
 induction s.
 + simpl. rewrite bigmaxr_nil in H. 
   contradict H. reflexivity.
-+ rewrite /bigmaxr. 
++ assert (bigmaxr x0 (a :: s) <> x0 ->
+            bigmaxr x0 s <> x0 \/ a <> x0).
+  { admit. } specialize (H0 H).
+
+
+
+
+
+
+
+ rewrite /bigmaxr. 
   exists 0%nat. split.
   - by simpl. 
-  -
+  - simpl. 
 
 
 
