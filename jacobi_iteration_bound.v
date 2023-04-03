@@ -150,6 +150,18 @@ apply Rplus_le_compat.
     apply Rplus_le_le_0_compat; try nra; try apply g_pos.
 Qed.
 
+Lemma transpose_implies {n}:
+  forall v1 v2: 'rV[R]_n,
+  v1^T = v2^T ->
+  v1 = v2.
+Proof.
+intros.
+apply matrixP. unfold eqrel. intros.
+apply matrixP in H. unfold eqrel in H.
+specialize (H y x).
+by rewrite !mxE in H.
+Qed.
+
 
 Lemma diagonal_dominance_implies_invertibility {t} {n:nat} 
   (A: 'M[ftype t]_n.+1):
@@ -160,6 +172,8 @@ intros.
 unfold strict_diagonal_dominance in H.
 rewrite -row_free_unit.
 apply inj_row_free. intros.
+rewrite -H0. apply transpose_implies.
+
 
 
 
