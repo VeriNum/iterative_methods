@@ -637,7 +637,8 @@ repeat split.
       by apply rho_def_le_alt. apply Hrho.
     * by apply d_mag_rel_1.
   - apply Rmult_le_compat_l. nra.
-    apply x_bound_exists. by apply rho_1_implies_rho_2 with b.
+    apply x_bound_exists; try by []. by apply rho_1_implies_rho_2 with b.
+    by apply diagonal_dominance_implies_invertibility.
 Qed.
 
 Lemma ln_rho_rel {t: type} {n:nat}
