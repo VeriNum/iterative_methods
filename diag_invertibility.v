@@ -105,9 +105,22 @@ induction s.
     symmetry. apply Rmax_left. apply Rle_refl.
   - assert (s = seq.head x0 s :: behead s).
     { by apply s_destruct. }
+    assert (bigmaxr x0 (a :: s) <> x0 ->
+            bigmaxr x0 s <> x0).
+    { admit. } apply H2 in H.
+    specialize (IHs H).
+
+
+
     rewrite H1. rewrite bigrmax_dflt. rewrite -H1.
     assert (bigmaxr x0 (a :: s) = Num.max a (bigmaxr x0 s)).
+    { rewrite /bigmaxr. rewrite H1. simpl. rewrite -/bigmaxr.
+      rewrite bigmaxr_cons.
+      rewrite [in LHS]bigrmax_dflt.
 
+
+ rewrite bigmaxr_cons.
+      rewrite -H1.
 
 
 
