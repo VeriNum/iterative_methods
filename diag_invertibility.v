@@ -49,11 +49,12 @@ specialize (H y x). by rewrite !mxE.
 Qed.
 
 
-
+(*
 Lemma vec_is_zero_or_not: 
   forall (n:nat) (x : 'cV[R]_n.+1),
    x = 0 \/ x != 0.
 Admitted.
+*)
 
 Lemma transpose_idempotent {m n:nat} (A: 'M[R]_(m,n)):
   A = (A^T)^T.
@@ -61,6 +62,14 @@ Proof.
 apply matrixP. unfold eqrel. intros.
 by rewrite !mxE. 
 Qed.
+
+Lemma vec_norm_implies_vec_zero {n: nat}:
+  forall v: 'cV[R]_n.+1,
+  vec_inf_norm v = 0%Re ->
+  (forall i, v i ord0 = 0%Re).
+Admitted.
+
+
 
 
 Lemma diagonal_dominance_implies_invertibility {t} {n:nat} 
@@ -83,7 +92,11 @@ rewrite -Heqv_c. rewrite trmx0.
 rewrite -Heqv_c trmx0 in H1.
 assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
 { nra. } destruct H2.
-+ admit.
++ apply matrixP. unfold eqrel. intros.
+  pose proof (@vec_norm_implies_vec_zero n v_c H2 x).
+  rewrite !mxE. 
+  assert (y = ord0). by apply ord1. rewrite H4.
+  apply H3.
 + admit.
 
 Admitted.
