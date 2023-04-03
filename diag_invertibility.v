@@ -66,7 +66,11 @@ apply Rge_ge_eq.
 destruct H as [Ha Hb].
 split.
 + apply Rle_ge. apply Rabs_pos.
-+ apply Rle_ge. 
++ apply Rle_ge. apply Rge_le in Hb.
+  unfold vec_inf_norm in Hb.
+  pose proof bigmax_le_implies.
+  specialize (H 0%Re 
+  apply bigmax_le_implies in Hb.
 
 
 Admitted.
