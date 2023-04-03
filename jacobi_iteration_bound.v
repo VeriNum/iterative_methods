@@ -577,9 +577,10 @@ repeat split.
   eapply Rle_lt_trans; last by apply bnd2.
   apply Rplus_le_compat.
   - apply Rplus_le_compat.
-    apply x_bound_exists. by apply rho_1_implies_rho_2 with b.
+    apply x_bound_exists; try by []. by apply rho_1_implies_rho_2 with b.
+    by apply diagonal_dominance_implies_invertibility.
     rewrite !Rmult_1_l.
-    apply f_error0_bnd . by apply rho_1_implies_rho_2 with b.
+    apply f_error0_bnd ; try by []. by apply rho_1_implies_rho_2 with b.
   - by apply d_mag_rel_2 .
 + intros. unfold input_bound_Rcompute in H.
   destruct H as [_ [_ [bnd3 _]]]. apply bnd3.
@@ -594,9 +595,10 @@ repeat split.
     intros. apply /RleP. apply Rabs_pos.
   - apply Rplus_le_compat.
     * apply Rplus_le_compat.
-      apply x_bound_exists. by apply rho_1_implies_rho_2 with b.
+      apply x_bound_exists; try by []. by apply rho_1_implies_rho_2 with b.
+      by apply diagonal_dominance_implies_invertibility.
       rewrite !Rmult_1_l.
-      apply f_error0_bnd . by apply rho_1_implies_rho_2 with b.
+      apply f_error0_bnd ; try by []. by apply rho_1_implies_rho_2 with b.
     * by apply d_mag_rel_2 .
 + intros. unfold input_bound_Rcompute in H.
   destruct H as [_[_[_[_[bnd5 _]]]]].
@@ -611,9 +613,10 @@ repeat split.
     intros. apply /RleP. apply Rabs_pos.
   - apply Rplus_le_compat.
     * apply Rplus_le_compat.
-      apply x_bound_exists. by apply rho_1_implies_rho_2 with b.
+      apply x_bound_exists; try by []. by apply rho_1_implies_rho_2 with b.
+      by apply diagonal_dominance_implies_invertibility.
       rewrite !Rmult_1_l.
-      apply f_error0_bnd . by apply rho_1_implies_rho_2 with b.
+      apply f_error0_bnd; try by []. by apply rho_1_implies_rho_2 with b.
     * by apply d_mag_rel_2 .
 + intros. unfold input_bound_Rcompute in H.
   destruct H as [_[_[_[_[_ bnd6]]]]].
@@ -626,7 +629,7 @@ repeat split.
       apply Rlt_le. apply He0.
       apply Rplus_le_compat_l. by apply rho_def_le_alt.
       apply Rplus_le_compat. 
-      apply f_error0_bnd . by apply rho_1_implies_rho_2 with b.
+      apply f_error0_bnd; try by []. by apply rho_1_implies_rho_2 with b.
       apply Ropp_le_contravar.
       apply Rmult_le_pos. apply d_mag_ge_0.
       apply Rlt_le, Rinv_0_lt_compat. 
