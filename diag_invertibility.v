@@ -69,20 +69,17 @@ Lemma diagonal_dominance_implies_invertibility {t} {n:nat}
   (FT2R_mat A) \in unitmx.
 Proof.
 intros.
+rewrite -unitmx_tr.
 unfold strict_diagonal_dominance in H.
 rewrite -row_free_unit.
 apply inj_row_free. intros.
 pose proof (@transpose_implies_col n ).
-specialize (H1 (v *m FT2R_mat A) 0 H0).
-
-
-
-apply (transpose_implies_col (v *m FT2R_mat A) 0) in H.
-
-
-
-
-clear
+specialize (H1 (v *m (FT2R_mat A)^T) 0 H0).
+rewrite trmx_mul in H1.
+rewrite -transpose_idempotent in H1.
+apply transpose_implies.
+remember (v^T) as v_c.
+rewrite -Heqv_c. rewrite trmx0.
 
 
 
