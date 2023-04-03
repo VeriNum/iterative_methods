@@ -566,99 +566,6 @@ induction k.
   rewrite sum_part_equiv. apply Rle_refl.
 Qed.
 
-(*
-(** lemma on bound for ||x_k|| **)
-Lemma lim_xk_is_bounded {t} {n:nat}
-  (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
-  (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
-  (Ha : forall i j, finite (A i j)):
-  let A_real := FT2R_mat A in
-  let b_real := FT2R_mat b in
-  let x := A_real^-1 *m b_real in
-  let x1 := x_fix x b_real A_real in
-  let A1_inv_real := FT2R_mat (A1_inv_J A) in 
-  let A2_real := FT2R_mat (A2_J A) in
-  let R_def := (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) * 
-                     matrix_inf_norm (A2_real))%Re in
-  let x0 := \col_(j < n.+1) 0%Re in
-  let R_def_real := (vec_inf_norm (A1_diag A_real) * 
-                       matrix_inf_norm (A2_J_real A_real))%Re in
-  (R_def < 1)%Re ->
-  A_real \in unitmx ->
-  is_lim_seq
-    (fun k : nat =>
-     vec_inf_norm
-       (x_k k x0 b_real A_real))
-    (vec_inf_norm (A1_diag A_real) *
-     vec_inf_norm b_real /
-     (1 -
-      vec_inf_norm (A1_diag A_real) *
-      matrix_inf_norm
-        (A2_J_real A_real)))%Re.
-Proof.
-intros.
-remember (vec_inf_norm (A1_diag A_real) * 
-          vec_inf_norm (b_real))%Re as f.
-apply (@is_lim_seq_le_le_loc
-        (fun _ => (vec_inf_norm (A1_diag A_real) *
-                     vec_inf_norm b_real /
-                     (1 -
-                      vec_inf_norm (A1_diag A_real) *
-                      matrix_inf_norm (A2_J_real A_real)))%Re)
-        (fun k : nat => vec_inf_norm (x_k k x0 b_real A_real))
-        (fun k: nat => (f * \sum_(j < k) ((R_def_real)^j)%Re)%Re)).
-+ assert (is_lim_seq (fun k: nat => (R_def_real ^k)%Re) 0%Re).
-  { apply is_lim_seq_geom.
-    rewrite Rabs_right.
-    unfold R_def_real. by apply R_def_lt_1_implies .
-    apply Rle_ge. unfold R_def_real.
-    apply Rmult_le_pos.
-    apply /RleP. apply vec_norm_pd.
-    apply /RleP. apply matrix_norm_pd.
-  } apply is_lim_seq_spec in H1.
-  unfold is_lim_seq' in H1.
-  assert ((0 < 1)%Re) by nra.
-  specialize (H1 (mkposreal 1%Re H2)).
-  unfold eventually in H1. destruct H1 as [N H1].
-  unfold eventually. exists N. intros.
-  specialize (H1 n0 H3). simpl in H1.
-  rewrite Rminus_0_r in H1. split.
-  - rewrite -Heqf.
-
-
-
-
-
-
-admit.
-  - pose proof (@upper_bound_xk t n A b Hinv Ha).
-    specialize (H4 H). rewrite Heqf.
-    unfold x0, R_def_real, b_real, A_real .
-    apply H4. by fold A_real.
-+ rewrite Heqf. apply is_lim_seq_const.
-+ apply is_lim_seq_mult'.
-  apply is_lim_seq_const.
-  fold R_def_real.
-  assert ((/ (1 - R_def_real))%Re = ((1 - 0) * (/ (1 - R_def_real)))%Re) by nra.
-  rewrite H1.
-  apply is_lim_seq_ext with
-  (fun n0 : nat =>
-    ((1 - R_def_real^n0) * (/ (1 - R_def_real)))%Re).
-  - intros. admit.
-  - apply is_lim_seq_mult'.
-    apply is_lim_seq_minus'.
-    apply is_lim_seq_const.
-    apply is_lim_seq_geom.
-    rewrite Rabs_right.
-    unfold R_def_real. by apply R_def_lt_1_implies .
-    apply Rle_ge. unfold R_def_real.
-    apply Rmult_le_pos.
-    apply /RleP. apply vec_norm_pd.
-    apply /RleP. apply matrix_norm_pd.
-    apply is_lim_seq_const.
-
-Admitted.
-*)
 
 Lemma x_bound_exists {t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
@@ -750,7 +657,12 @@ apply /RleP. apply vec_norm_pd.
 apply Rle_trans with
 (/ (1 - vec_inf_norm (A1_diag A_real) *
         matrix_inf_norm (A2_J_real A_real)))%Re.
-+ admit.
++ rewrite -HeqR_def_real.
+
+
+
+
+admit.
 + assert ((1 - R_def <= (1 -
                             vec_inf_norm (A1_diag A_real) *
                             matrix_inf_norm (A2_J_real A_real)))%Re).
@@ -770,62 +682,6 @@ apply Rle_trans with
       ++ by apply Rlt_Rminus, R_def_lt_1_implies.
       ++ apply H7.
     * rewrite H7. nra.
-
-
-(*
-
-
-
-
-
-
-assert (Lim_seq
-         (fun k : nat =>
-          vec_inf_norm
-            (x_k k x0 b_real A_real))  = 
-        ((vec_inf_norm (A1_diag A_real) * vec_inf_norm b_real) / 
-        (1 - vec_inf_norm (A1_diag A_real) * 
-              matrix_inf_norm (A2_J_real A_real)))%Re).
-{ apply is_lim_seq_unique.
-  pose proof (@lim_xk_is_bounded t).
-  specialize (H2 n A b Hinv Ha H).
-  unfold x1,x , A_real, b_real. rewrite Heqx0.
-  apply H2. by fold A_real.
-}
-rewrite H2.
-simpl.
-match goal with |-context[((?a * ?b) / ?c <= _)%Re]=>
-  replace ((a * b) / c)%Re with ((a * /c) * b)%Re by nra
-end.
-match goal with |-context[(_ <= (?a * ?b)/?c)%Re]=>
-  replace ((a * b)/c)%Re with ((a * /c)*b)%Re by nra
-end. apply Rmult_le_compat_r.
-+ apply /RleP. apply vec_norm_pd.
-+ apply Rmult_le_compat.
-  - apply /RleP. apply vec_norm_pd.
-  - apply Rlt_le, Rinv_0_lt_compat, Rlt_Rminus.
-    by apply R_def_lt_1_implies.
-  - by apply vec_norm_A1_rel.
-  - assert ((1 - R_def <= (1 -
-                            vec_inf_norm (A1_diag A_real) *
-                            matrix_inf_norm (A2_J_real A_real)))%Re).
-    { apply Rplus_le_compat_l, Ropp_le_contravar.
-      unfold R_def. 
-      assert (A2_J_real A_real = A2_real).
-      { apply matrixP. unfold eqrel. intros. rewrite !mxE /=.
-        case: (x2 == y :> nat); simpl; auto.
-      } rewrite H3. apply Rmult_le_compat_r.
-      apply /RleP. apply matrix_norm_pd.
-      by apply vec_norm_A1_rel.
-    }
-    destruct H3.
-    * apply Rlt_le, Rinv_lt_contravar.
-      apply Rmult_lt_0_compat.
-      ++ by apply Rlt_Rminus.
-      ++ by apply Rlt_Rminus, R_def_lt_1_implies.
-      ++ apply H3.
-    * rewrite H3. nra.
-*)
 Admitted.
 
 End WITH_NANS.
