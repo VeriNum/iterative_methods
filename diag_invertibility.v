@@ -87,7 +87,12 @@ Lemma bigmax_not_0_implies s:
   (exists i, (i < size s)%nat ->
              seq.nth 0 s i = bigmaxr 0 s /\
              seq.nth 0 s i <> 0).
-
+Proof.
+intros.
+induction s.
++ simpl. rewrite bigmaxr_nil in H. 
+  contradict H. reflexivity.
++ 
 
 Lemma vec_norm_not_zero_implies {n:nat}:
   forall v: 'cV[R]_n.+1,
