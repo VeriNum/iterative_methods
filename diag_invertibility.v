@@ -69,7 +69,13 @@ split.
 + apply Rle_ge. apply Rge_le in Hb.
   unfold vec_inf_norm in Hb.
   pose proof bigmax_le_implies.
-  specialize (H 0%Re 
+  specialize (H 0%Re [seq Rabs (v i 0)
+           | i <- enum 'I_n.+1] 0%Re).
+  rewrite size_map size_enum_ord in H.
+  assert ((0 < n.+1)%nat). by [].
+  specialize (H H0  Hb i).
+  assert ((i < n.+1)%nat). by apply ltn_ord.
+  specialize (H H1).
   apply bigmax_le_implies in Hb.
 
 
