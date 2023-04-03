@@ -678,9 +678,12 @@ apply Rle_trans with
     + rewrite eq_sym in H8. left. by apply /eqP.
     + by right.
   } destruct H7.
-
-
-  rewrite sum_big_equiv.
+  - rewrite H7. rewrite big_ord0 /=.
+    apply Rlt_le, Rinv_0_lt_compat.
+    apply Rlt_Rminus. rewrite HeqR_def_real. by apply R_def_lt_1_implies.
+  - assert (n0 = n0.-1.+1).
+    { by rewrite prednK. } rewrite H8.
+    rewrite sum_big_equiv.
 
 
 
