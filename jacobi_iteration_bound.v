@@ -731,8 +731,6 @@ apply Rlt_le_trans with
 Qed.
 
 
-
-
 Lemma tau_sqr_rel{t: type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
