@@ -7245,9 +7245,12 @@ destruct H0 as [Hfacc H0].
 split; try apply Hfacc.
 destruct H0 as [j [Hj [Hfres Hresbnd]]].
 exists j.
-
-
-
+split.
++ by apply /ssrnat.leP.
++ split.
+  - intros. apply Hfres. by apply /ssrnat.leP.
+  - apply Hresbnd.
+Qed.
 
 
 End WITH_NANS.
