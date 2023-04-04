@@ -82,15 +82,46 @@ Qed.
 
 
 Local Open Scope R_scope.
+Lemma bigmax_not_0_implies_aux (x0:R) s:
+  (0 < size s)%nat ->
+  (exists i, (i < size s)%nat /\
+             seq.nth x0 s i = bigmaxr x0 s).
+Proof.
+intros.
+induction s.
+
+
+
+
+
+
+
 Lemma bigmax_not_0_implies (x0:R) s:
   bigmaxr x0 s <> x0 ->
   (exists i, (i < size s)%nat /\
              seq.nth x0 s i = bigmaxr x0 s /\
              seq.nth x0 s i <> x0).
 Proof.
-(*
 intros.
+pose proof eq_bigmax_cond.
+
+
+assert (exists i, 
+
+
+
+pose proof eq_bigmax.
+specialize (X 
+
+
+
+
+
+
+
+
 induction s.
+
 + simpl. rewrite bigmaxr_nil in H. 
   contradict H. reflexivity.
 + assert (bigmaxr x0 (a :: s) <> x0 ->
@@ -188,6 +219,8 @@ specialize (H0 0%N).
     * nra.
 *)
 Admitted.
+Close Scope R_scope.
+
 
 Lemma R0_no_Rabs:
   forall x:R, 
@@ -222,8 +255,6 @@ split.
 + rewrite seq_equiv. apply H0a.
 + by apply R0_no_Rabs.
 Qed.
-
-
 
 Lemma Rabs_sub: 
   forall x y:R,
