@@ -82,6 +82,13 @@ Qed.
 
 
 Local Open Scope R_scope.
+
+Lemma max_order:
+  forall x y:R,
+  Rmax x y = x \/ Rmax x y = y.
+Proof.
+
+
 Lemma bigmax_destruct (a x0:R) s:
   bigmaxr x0 (a :: s) = a \/ 
   bigmaxr x0 (a :: s) = bigmaxr x0 s.
@@ -95,7 +102,8 @@ assert (s = [::] \/ s != [::]).
 + assert (s = seq.head x0 s :: behead s).
   { by apply s_destruct. } rewrite H0.
   rewrite bigmaxr_cons. rewrite -H0.
-  rewrite -RmaxE.
+  rewrite -RmaxE. 
+  assert ((
 
 
 
