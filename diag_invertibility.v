@@ -13,13 +13,7 @@ Set Bullet Behavior "Strict Subproofs".
 Require Import lemmas.
 Require Import fma_dot_acc fma_matrix_vec_mult.
 From Flocq Require Import Binary.
-Require Import finite_lemmas_additional.
-Require Import fma_jacobi_forward_error.
-Require Import float_acc_lems.
-Require Import vec_sum_inf_norm_rel.
-Require Import fma_dot_mat_model.
 Require Import jacobi_preconditions.
-Require Import bound_on_x.
 
 Section WITH_NANS.
 
