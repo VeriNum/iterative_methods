@@ -6086,7 +6086,7 @@ apply dotprod_finite.
 Qed.
 
 
-Lemma jacobi_iteration_bound_lowlevel {t: type} :
+Lemma jacobi_iteration_bound_lowlevel_aux {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
    let acc2 := BMULT acc acc in
@@ -7225,5 +7225,19 @@ destruct H0.
              -- rewrite <- finite_is_finite. apply H.
 Qed.
 
+Lemma jacobi_iteration_bound_lowlevel {t: type} :
+ forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
+   jacobi_preconditions A b acc k ->
+   let acc2 := BMULT acc acc in
+   let x0 := (repeat  (Zconst t 0) (length b)) in
+   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+   finite acc2 /\ 
+   exists j,
+    Nat.le j k /\
+    let y :=  jacobi_n A b x0 j in
+    let r2 := norm2 (resid y) in
+    (forall i, Nat.le i j -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
+    BCMP Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
+Proof.  
 
 End WITH_NANS.
