@@ -85,6 +85,21 @@ Local Open Scope R_scope.
 Lemma bigmax_destruct (a x0:R) s:
   bigmaxr x0 (a :: s) = a \/ 
   bigmaxr x0 (a :: s) = bigmaxr x0 s.
+Proof.
+assert (s = [::] \/ s != [::]).
+{ destruct s.
+  + by left.
+  + by right.
+} destruct H.
++ rewrite H. rewrite bigmaxr_un. by left.
++ assert (s = seq.head x0 s :: behead s).
+  { by apply s_destruct. } rewrite H0.
+  rewrite bigmaxr_cons. rewrite -H0.
+  rewrite -RmaxE.
+
+
+
+
 Admitted.
 
 
