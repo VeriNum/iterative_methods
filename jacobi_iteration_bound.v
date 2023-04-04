@@ -20,6 +20,7 @@ Require Import vec_sum_inf_norm_rel.
 Require Import fma_dot_mat_model.
 Require Import jacobi_preconditions.
 Require Import bound_on_x.
+Require Import diag_invertibility.
 
 Section WITH_NANS.
 
@@ -150,60 +151,6 @@ apply Rplus_le_compat.
     apply Rplus_le_le_0_compat; try nra; try apply g_pos.
 Qed.
 
-Lemma transpose_implies {n}:
-  forall v1 v2: 'rV[R]_n,
-  v1^T = v2^T ->
-  v1 = v2.
-Proof.
-intros.
-apply matrixP. unfold eqrel. intros.
-apply matrixP in H. unfold eqrel in H.
-specialize (H y x).
-by rewrite !mxE in H.
-Qed.
-
-Lemma vec_is_zero_or_not: 
-  forall (n:nat) (x : 'cV[R]_n.+1),
-   x = 0 \/ x != 0.
-Admitted.
-
-Lemma transpose_idempotent {m n:nat} (A: 'M[R]_(m,n)):
-  A = (A^T)^T.
-Proof.
-apply matrixP. unfold eqrel. intros.
-by rewrite !mxE. 
-Qed.
-
-
-Lemma diagonal_dominance_implies_invertibility {t} {n:nat} 
-  (A: 'M[ftype t]_n.+1):
-  strict_diagonal_dominance A ->
-  (FT2R_mat A) \in unitmx.
-Proof.
-intros.
-rewrite -unitmx_tr.
-unfold strict_diagonal_dominance in H.
-rewrite -row_free_unit.
-apply inj_row_free. intros.
-rewrite -H0. apply transpose_implies.
-rewrite trmx_mul. symmetry.
-rewrite -transpose_idempotent.
-remember (v^T) as v_c.
-rewrite -Heqv_c.
-remember (FT2R_mat A) as A_real.
-assert (v_c = 0 \/ v_c != 0).
-{ by apply vec_is_zero_or_not. }
-destruct H1.
-+ rewrite H1. by rewrite mulmx0.
-+ apply matrixP. unfold eqrel. intros.
-  rewrite !mxE.
-  rewrite (bigD1 x) /=.
-
-
-
-
-
-Admitted.
 
 (** relation between the non-computable and computable d_mag **)
 Lemma d_mag_def_le_alt {t: type} {n:nat}
