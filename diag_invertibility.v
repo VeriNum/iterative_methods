@@ -101,7 +101,14 @@ induction s.
   destruct H0.
   - exists 0%nat. simpl. split.
     by []. by rewrite H0.
-  - 
+  - assert (s = [::] \/ s != [::]).
+    { destruct s.
+      + by left.
+      + by right.
+    } destruct H1.
+    * rewrite H1. exists 0%nat.
+      simpl. split. by []. by rewrite bigmaxr_un.
+    *
   
   
 
