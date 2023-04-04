@@ -110,7 +110,11 @@ induction s.
       simpl. split. by []. by rewrite bigmaxr_un.
     * assert ((0 < size s)%nat).
       { destruct s. by []. by simpl. } specialize (IHs H2).
-      
+      destruct IHs as [i [Hsize IHs]].
+      exists i.+1. split.
+      ++ simpl. by []. 
+      ++ simpl. by rewrite H0.
+Qed. 
   
   
 
