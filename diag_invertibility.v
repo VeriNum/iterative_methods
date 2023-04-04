@@ -108,7 +108,9 @@ induction s.
     } destruct H1.
     * rewrite H1. exists 0%nat.
       simpl. split. by []. by rewrite bigmaxr_un.
-    *
+    * assert ((0 < size s)%nat).
+      { destruct s. by []. by simpl. } specialize (IHs H2).
+      
   
   
 
