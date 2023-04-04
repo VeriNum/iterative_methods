@@ -111,7 +111,6 @@ assert (s = [::] \/ s != [::]).
 Qed.
 
 
-
 Lemma bigmax_not_0_implies_aux (x0:R) s:
   (0 < size s)%nat ->
   (exists i, (i < size s)%nat /\
@@ -162,124 +161,6 @@ assert (s = [::] \/ s != [::]).
   apply H2. by rewrite H2.
 Qed.
 
-
-
-pose proof eq_bigmax_cond.
-
-
-assert (exists i, 
-
-
-
-pose proof eq_bigmax.
-specialize (X 
-
-
-
-
-
-
-
-
-induction s.
-
-+ simpl. rewrite bigmaxr_nil in H. 
-  contradict H. reflexivity.
-+ assert (bigmaxr x0 (a :: s) <> x0 ->
-            bigmaxr x0 s <> x0 \/ a <> x0).
-  { admit. } specialize (H0 H).
-  destruct H0.
-  - specialize (IHs H0). 
-    destruct IHs as [i [Hsize IHs]].
-    exists i. split. 
-    * apply ltn_trans with (size s); first by [].
-      simpl. apply ltnSn.
-    * simpl.
-
-
-
-
-
-
-
- rewrite /bigmaxr. 
-  exists 0%nat. split.
-  - by simpl. 
-  - simpl. 
-
-
-
-
-
-
-
-rewrite big_cons //=.
-  assert (s = [::] \/ s != [::]).
-  { destruct s.
-    + by left.
-    + by right.
-  } destruct H0.
-  - rewrite H0 //=. rewrite H0 //= in H.
-    rewrite big_nil. exists 0%nat.
-    intros. simpl. rewrite bigmaxr_un in H.
-    split. by [].
-    split;try apply H. rewrite -RmaxE.
-    symmetry. apply Rmax_left. apply Rle_refl.
-  - assert (s = seq.head x0 s :: behead s).
-    { by apply s_destruct. }
-    assert (bigmaxr x0 (a :: s) <> x0 ->
-            bigmaxr x0 s <> x0 /\ a <> x0).
-    { admit. } specialize (H2 H). 
-    destruct H2 as [H2 Ha].
-    specialize (IHs H2). destruct IHs as [i [Hsize IHs]].
-    exists i. split.
-    * apply ltn_trans with (size s). apply Hsize.
-      apply ltnSn.
-    * simpl. 
-      assert (i = 0%nat \/ (0 < i)%nat). by admit.
-      destruct H3.
-      ++ rewrite H3. simpl. split; try apply Ha.
-         admit.
-      ++ 
-
-
-
-    rewrite H1. rewrite bigrmax_dflt. rewrite -H1.
-    assert (bigmaxr x0 (a :: s) = Num.max a (bigmaxr x0 s)).
-    { rewrite /bigmaxr. rewrite H1. simpl. rewrite -/bigmaxr.
-      rewrite bigmaxr_cons.
-      rewrite [in LHS]bigrmax_dflt.
-
-
- rewrite bigmaxr_cons.
-      rewrite -H1.
-
-
-
-            Num.max a
-                (\big[Num.max/a]_(j <- 
-                 (seq.head x0 s :: behead s)) j)).
-    { rewrite /bigmaxr. rewrite H1. rewrite bigrmax_dflt.
-      rewrite -H1. simpl.
-
-
-    rewrite /bigmaxr in H.
-    rewrite H1 in H. 
-    rewrite bigrmax_dflt in H.
-    rewrite le_maxr. apply /orP.
-    specialize (H0 0%N). simpl in H0.
-    left. by apply H0.
-
-
-
-
-specialize (H0 0%N).
-    assert ((0 < 1)%N). { by []. } specialize (H0 H2).
-    simpl in H0. rewrite -RmaxE. rewrite Rmax_left.
-    * by [].
-    * nra.
-*)
-Admitted.
 Close Scope R_scope.
 
 
