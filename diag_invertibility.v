@@ -97,7 +97,13 @@ Proof.
 intros.
 induction s.
 + by simpl in H.
-+ assert (bigmaxr x0 (a :: s) = a \/ bigmaxr x0 s). 
++ pose proof (bigmax_destruct a x0 s).
+  destruct H0.
+  - exists 0%nat. simpl. split.
+    by []. by rewrite H0.
+  - 
+  
+  
 
 
 
