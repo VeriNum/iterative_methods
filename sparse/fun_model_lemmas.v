@@ -1,5 +1,5 @@
 Require Import VST.floyd.proofauto.
-From Iterative Require Import floatlib jacob_list_fun_model.
+From Iterative Require Import floatlib jacob_list_fun_model jacobi_iteration_bound.
 From Iterative.sparse Require Import jacobi sparse_model.
 Require Import vcfloat.VCFloat.
 
@@ -428,10 +428,6 @@ destruct (going _ _); auto.
 apply (IHk (jacobi_iter (diag_of_matrix A) (remove_diag A) b x0)).
 Qed.
 
-Import PlaceHolder. (* FIXME: When the proofs in
-  jacobi_iteration_bound.v are done, then get rid of PlaceHolder
- and use the real proofs instead *)
-
 Lemma jacobi_n_jacobi {NAN: Nans} {t: type}:
   forall A b acc k, 
    jacobi_preconditions A b acc k ->
@@ -442,6 +438,10 @@ Proof.
 intros.
 apply jacobi_iteration_bound_lowlevel in H.
 destruct H as [FINacc2 [j [? [H2 H3]]]].
+assert (j <= k)%nat.
+clear - H. unfold ssrnat.leq.
+Search (is_true (ssrnat.leq _ _)).
+Search ssrnat.leq.
 pose proof I.
 unfold jacobi.
 fold x0 in H2,H3.
