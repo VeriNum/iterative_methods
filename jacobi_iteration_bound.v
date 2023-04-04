@@ -7239,5 +7239,15 @@ Lemma jacobi_iteration_bound_lowlevel {t: type} :
     (forall i, Nat.le i j -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
     BCMP Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
 Proof.  
+intros.
+pose proof (@jacobi_iteration_bound_lowlevel_aux t A b acc k H).
+destruct H0 as [Hfacc H0].
+split; try apply Hfacc.
+destruct H0 as [j [Hj [Hfres Hresbnd]]].
+exists j.
+
+
+
+
 
 End WITH_NANS.
