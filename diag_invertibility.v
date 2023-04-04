@@ -116,14 +116,6 @@ induction s.
       ++ simpl. by rewrite H0.
 Qed. 
   
-  
-
-
-
-
-
-
-
 Lemma bigmax_not_0_implies (x0:R) s:
   bigmaxr x0 s <> x0 ->
   (exists i, (i < size s)%nat /\
@@ -131,6 +123,24 @@ Lemma bigmax_not_0_implies (x0:R) s:
              seq.nth x0 s i <> x0).
 Proof.
 intros.
+assert (s = [::] \/ s != [::]).
+{ destruct s.
+  + by left.
+  + by right.
+} destruct H0.
++ rewrite H0 in H. rewrite bigmaxr_nil in H.
+  by contradict H.
++ assert ((0 < size s)%nat).
+  { destruct s. by []. by simpl. } 
+  pose proof (bigmax_not_0_implies_aux x0 s H1).
+  destruct H2 as [i [Hsize H2]].
+  exists i. split.
+  apply Hsize. split.
+  apply H2. by rewrite H2.
+Qed.
+
+
+
 pose proof eq_bigmax_cond.
 
 
