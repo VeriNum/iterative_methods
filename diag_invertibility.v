@@ -87,7 +87,12 @@ Lemma max_order:
   forall x y:R,
   Rmax x y = x \/ Rmax x y = y.
 Proof.
-
+intros.
+assert ((x <= y)%Re \/ (y <= x)%Re). nra.
+destruct H.
++ rewrite Rmax_right. by right. apply H.
++ rewrite Rmax_left. by left. apply H.
+Qed.
 
 Lemma bigmax_destruct (a x0:R) s:
   bigmaxr x0 (a :: s) = a \/ 
@@ -102,13 +107,8 @@ assert (s = [::] \/ s != [::]).
 + assert (s = seq.head x0 s :: behead s).
   { by apply s_destruct. } rewrite H0.
   rewrite bigmaxr_cons. rewrite -H0.
-  rewrite -RmaxE. 
-  assert ((
-
-
-
-
-Admitted.
+  rewrite -RmaxE. apply max_order.
+Qed.
 
 
 
