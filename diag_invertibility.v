@@ -82,6 +82,13 @@ Qed.
 
 
 Local Open Scope R_scope.
+Lemma bigmax_destruct (a x0:R) s:
+  bigmaxr x0 (a :: s) = a \/ 
+  bigmaxr x0 (a :: s) = bigmaxr x0 s.
+Admitted.
+
+
+
 Lemma bigmax_not_0_implies_aux (x0:R) s:
   (0 < size s)%nat ->
   (exists i, (i < size s)%nat /\
@@ -89,6 +96,8 @@ Lemma bigmax_not_0_implies_aux (x0:R) s:
 Proof.
 intros.
 induction s.
++ by simpl in H.
++ assert (bigmaxr x0 (a :: s) = a \/ bigmaxr x0 s). 
 
 
 
