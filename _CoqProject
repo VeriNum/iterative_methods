@@ -22,9 +22,9 @@ norm_compat.v
 fma_matrix_vec_mult.v
 vec_sum_inf_norm_rel.v
 fma_jacobi_forward_error.v
-diag_invertibility.v
 bound_on_x.v
 jacobi_preconditions.v
+diag_invertibility.v
 jacobi_iteration_bound.v
 
 
