@@ -8761,4 +8761,35 @@ split.
 Qed.
 
 
+(**jacobi_iteration_bound_lowlevel_aux_strict_Lt **)
+
+Lemma jacobi_iteration_bound_lowlevel_strict_Lt {t: type} :
+ forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
+   jacobi_preconditions A b acc k ->
+   let acc2 := BMULT acc acc in
+   let x0 := (repeat  (Zconst t 0) (length b)) in
+   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+   finite acc2 /\ 
+   exists j,
+    Nat.le j k /\
+    let y :=  jacobi_n A b x0 j in
+    let r2 := norm2 (resid y) in
+    (forall i, Nat.le i j -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
+    BCMP Lt true (norm2 (resid (jacobi_n A b x0 j))) acc2 = true.
+Proof.  
+intros.
+pose proof (@jacobi_iteration_bound_lowlevel_aux_strict_Lt t A b acc k H).
+destruct H0 as [Hfacc H0].
+split; try apply Hfacc.
+destruct H0 as [j [Hj [Hfres Hresbnd]]].
+exists j.
+split.
++ by apply /ssrnat.leP.
++ split.
+  - intros. apply Hfres. by apply /ssrnat.leP.
+  - apply Hresbnd.
+Qed.
+
+
+
 End WITH_NANS.
