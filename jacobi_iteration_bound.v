@@ -3407,6 +3407,101 @@ split.
     * rewrite <- finite_is_finite; auto.
 Qed.
 
+Lemma jacobi_iteration_bound_lowlevel_strict_Lt' {t: type} :
+ forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
+  let n := (length A).-1 in
+  let A' := @matrix_inj _ A n.+1 n.+1 in
+  let b' := @vector_inj _ b n.+1 in
+   jacobi_preconditions_math A' b' acc k ->
+   length A = length b ->
+   (0 < length A)%coq_nat ->
+   let acc2 := BMULT acc acc in
+   let x0 := (repeat  (Zconst t 0) (length b)) in
+   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
+   finite acc2 /\ 
+   exists j,
+    (j <= k)%nat /\
+    let y :=  jacobi_n A b x0 j in
+    let r2 := norm2 (resid y) in
+    (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
+    BCMP Lt true (norm2 (resid (jacobi_n A b x0 j))) acc2 = true.
+Proof.
+intros.
+pose proof (@jacobi_iteration_bound' t (length A).-1).
+specialize (H2 A' b' acc k H).
+destruct H2 as [Hacc H2].
+unfold jacobi_preconditions_math in H.
+destruct H as [HlA [Hlab H]]. 
+split.
++ by unfold acc2.
++ destruct H2 as [j [Hjrel H2]].
+  exists j. split; try by [].
+  intros. destruct H2 as [Hf Hlt]. split.
+  - intros.  specialize (Hf i H2).
+    pose proof (@vector_residual_equiv t A b x0 i).
+    assert (length b = length A) by (symmetry; apply  H0).
+    assert (length x0 = length A).
+    { unfold x0. by rewrite !repeat_length. }
+    assert ((0 < length A)%coq_nat) by apply H1.
+    specialize (H3 H4 H5 H6).
+    pose proof (@v_equiv t).
+    specialize (H7 (resid (jacobi_n A b x0 i)) n).
+    assert (length (resid (jacobi_n A b x0 i)) = n.+1).
+    { repeat rewrite /matrix_vector_mult !map_length combine_length.
+      rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+      rewrite !seq_length /matrix_rows_nat H4 !Nat.min_id.
+      rewrite /n prednK. by []. by apply /ssrnat.ltP.
+      by []. by []. 
+    }
+    specialize (H7 H8).
+    rewrite H7. 
+    assert ((\col_j0 vector_inj
+                      (resid (jacobi_n A b x0 i))
+                      n.+1 j0 ord0) = 
+            vector_inj (resid (jacobi_n A b x0 i)) n.+1).
+    { apply /matrixP. unfold eqrel. intros. by rewrite !mxE. }
+    rewrite H9. rewrite -/n in Hf.
+    rewrite vector_residual_equiv; try by [].
+    unfold A' , b' in Hf. rewrite -/n.
+    assert (vector_inj x0 n.+1 = \col_(j < n.+1) (Zconst t 0)).
+    { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+      by rewrite nth_repeat.
+    } rewrite H10. apply Hf.
+  - pose proof (@vector_residual_equiv t A b x0 j).
+    assert (length b = length A) by (symmetry; apply H0).
+    assert (length x0 = length A).
+    { unfold x0. by rewrite !repeat_length. }
+    assert ((0 < length A)%coq_nat) by apply H1.
+    specialize (H2 H3 H4 H5).
+    pose proof (@v_equiv t).
+    specialize (H6 (resid (jacobi_n A b x0 j)) n).
+    assert (length (resid (jacobi_n A b x0 j)) = n.+1).
+    { repeat rewrite /matrix_vector_mult !map_length combine_length.
+      rewrite !map_length. unfold jacobi_n. rewrite iter_length.
+      rewrite !seq_length H3 !Nat.min_id.
+      rewrite -/n prednK. by []. by apply /ssrnat.ltP.
+      by []. by [].
+    }
+    specialize (H6 H7).
+    rewrite H6. 
+    assert ((\col_j0 vector_inj
+                      (resid (jacobi_n A b x0 j))
+                      n.+1 j0 ord0) = 
+            vector_inj (resid (jacobi_n A b x0 j)) n.+1).
+    { apply /matrixP. unfold eqrel. intros. by rewrite !mxE. }
+    rewrite H8. rewrite -/n in Hlt. 
+    rewrite vector_residual_equiv; try by [].
+    unfold A' , b' in Hlt. rewrite -/n.
+    assert (vector_inj x0 n.+1 = \col_(j < n.+1) (Zconst t 0)).
+    { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+      by rewrite nth_repeat.
+    } by rewrite H9. 
+Qed.
+
+
+
+
+
 Lemma jacobi_iteration_bound_lowlevel' {t: type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
   let n := (length A).-1 in
