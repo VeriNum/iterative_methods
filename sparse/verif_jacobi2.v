@@ -13,7 +13,6 @@ Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
 
-
 Lemma subsume_jacobi2: funspec_sub (snd jacobi2_spec) (snd jacobi2_highspec).
 Proof.
 apply NDsubsume_subsume.
@@ -23,7 +22,7 @@ hnf; intros.
 split; auto. intros s [? ?].
 destruct s as [[[[[[[[[[[shA1 shA2] shb] A] A1p] A2p] bp] b] xp] acc] maxiter] gv].
 Exists (shA1,shA2,shb,A,A1p,A2p,bp,b,xp,
-           (Zrepeat (Zconst Tdouble 0) (matrix_rows A)),acc,maxiter,gv).
+           (Zrepeat (Zconst Tdouble 0) (matrix_rows A)),BMULT acc acc,maxiter,gv).
 Exists emp.
 Intros. clear H.
 unfold_for_go_lower; normalize.
@@ -45,10 +44,8 @@ Exists y s.
 rewrite !prop_true_andp; auto.
 cancel.
 destruct H15.
-split; auto.
 red in H15. simpl in H15.
-rewrite H15.
-destruct (jacobi_n_jacobi _ _ _ _ H4) as [j [? ?]].
+destruct (jacobi_n_jacobi _ _ _ _ H4) as [j [? [FINs [LT ?]]]].
 set (x0 := Zrepeat _ _) in *.
 set (x0nat := repeat _ _) in *.
 assert (x0nat = x0). {
@@ -58,16 +55,24 @@ assert (x0nat = x0). {
   rewrite Nat2Z.id. auto.
 }
 clearbody x0nat; subst x0nat.
-pose proof (jacobi_returns_residual A b x0 acc (Z.to_nat maxiter-1)).
+pose proof (jacobi_returns_residual A b x0 (acc*acc)%F64 (Z.to_nat maxiter-1)).
 replace (S _) with (Z.to_nat maxiter) in H21 by lia.
-destruct (jacobi A b x0 acc (Z.to_nat maxiter)) as [r2 xj].
-subst r2; simpl fst.
+replace (S _) with (Z.to_nat maxiter) in LT by lia.
+replace (S _) with (Z.to_nat maxiter) in FINs by lia.
+destruct (jacobi A b x0 (acc*acc)%F64 (Z.to_nat maxiter)) as [r2 xj].
+subst r2; simpl fst in *.
 red in H18. simpl snd in H18.
+split3; auto.
+rewrite H15.
 assert (Forall finite (diag_of_matrix A))
     by (apply diag_of_matrix_prop; auto).
 apply norm2_mor.
 apply jacobi_residual_mor; auto.
 symmetry; auto.
+rewrite <- H15 in FINs.
+rewrite <- LT at 2.
+apply BCMP_mor; auto.
+apply feq_strict_feq; auto.
 Qed.
 
 Definition surely_malloc_spec :=
