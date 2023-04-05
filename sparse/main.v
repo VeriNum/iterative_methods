@@ -7,7 +7,7 @@ From Iterative.sparse Require Import jacobi spec_sparse spec_jacobi verif_jacobi
 
 
 
-Lemma main_jacobi: semax_body Vprog Gprog f_jacobi2 jacobi2_highspec.
+Theorem main_jacobi: semax_body Vprog Gprog f_jacobi2 jacobi2_highspec.
 Proof.
 eapply semax_body_funspec_sub.
 apply body_jacobi2.
