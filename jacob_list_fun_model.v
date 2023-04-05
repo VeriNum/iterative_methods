@@ -66,54 +66,6 @@ Definition jacobi {t: type} (A: matrix t) (b: vector t) (x: vector t) (acc: ftyp
 
 End WITH_NANS.
 
-Module PlaceHolder.
-
-(* These definitions and proofs will are "placeholders" and will
- be replaced by the real ones being developed in jacobi_iteration_bound.v *)
-
-Section WITH_NANS.
-Context {NANS: Nans}.
-
-Definition jacobi_preconditions {t: type}
-  (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
-  (* some property of A,b,accuracy holds such that 
-    jacobi_n will indeed converge within k iterations to this accuracy, 
-   without ever overflowing *)
-   False.
-
-Lemma jacobi_iteration_bound_monotone:
-  forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k k': nat),
-   (k <= k')%nat ->
-   jacobi_preconditions A b acc k ->
-   jacobi_preconditions A b acc k'.
-Proof. auto. Qed. 
-
-Lemma jacobi_iteration_bound_corollaries:
-  forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
-   jacobi_preconditions A b acc k ->
-   matrix_cols A (matrix_rows A) /\
-   Forall (Forall finite) A /\
-   Forall finite (invert_diagmatrix (diag_of_matrix A)) /\
-   Forall finite b /\ finite acc.
-Proof. intros. contradiction. Qed.
-
-Lemma jacobi_iteration_bound_lowlevel {t: type} :
- forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
-   jacobi_preconditions A b acc k ->
-   let acc2 := BMULT acc acc in
-   let x0 := (repeat  (Zconst t 0) (length b)) in
-   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
-   finite acc2 /\ 
-   exists j,
-    (j <= k)%nat /\
-    let y :=  jacobi_n A b x0 j in
-    let r2 := norm2 (resid y) in
-    (forall i, (i <= j)%nat -> finite (norm2 (resid (jacobi_n A b x0 i)))) /\
-    BCMP Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
-Proof. intros. contradiction. Qed.
-
-End WITH_NANS.
-End PlaceHolder.
 
 Module Experiment.
 (***************** Some sanity checks about diag_of_matrix and matrix_of_diag ***)
