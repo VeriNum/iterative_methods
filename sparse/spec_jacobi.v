@@ -86,7 +86,7 @@ Definition jacobi2_highspec :=
              jacobi_preconditions A b acc (Z.to_nat (maxiter-1));
              0 < matrix_rows A < Int.max_unsigned;
              0 < maxiter <= Int.max_unsigned)
-    PARAMS(A1p; A2p; bp; xp; Vfloat acc; Vint (Int.repr maxiter)) GLOBALS(gv)
+    PARAMS(A1p; A2p; bp; xp; Vfloat (BMULT acc acc); Vint (Int.repr maxiter)) GLOBALS(gv)
     SEP (mem_mgr gv;
            data_at shA1 (tarray tdouble (matrix_rows A)) (map Vfloat (diag_of_matrix A)) A1p;
            crs_rep shA2 (remove_diag A) A2p;
@@ -95,7 +95,7 @@ Definition jacobi2_highspec :=
  POST [ tdouble ]
    EX y: vector Tdouble, EX s: ftype Tdouble,
     PROP(feq s (norm2 (jacobi_residual (diag_of_matrix A) (remove_diag A) b y));
-             BCMP Lt true s acc = true)
+             BCMP Lt true s (BMULT acc acc) = true)
     RETURN(Vfloat s)
     SEP (mem_mgr gv;
            data_at shA1 (tarray tdouble (matrix_rows A)) (map Vfloat (diag_of_matrix A)) A1p;

@@ -433,15 +433,14 @@ Lemma jacobi_n_jacobi {NAN: Nans} {t: type}:
    jacobi_preconditions A b acc k ->
   let acc2 := BMULT acc acc in
   let x0 := (repeat  (Zconst t 0) (length b)) in
-  exists j, (j<=k)%nat /\ snd (jacobi A b x0 acc2 (S k)) = jacobi_n A b x0 j.
+  exists j, (j<=k)%nat 
+       /\ finite (fst (jacobi A b x0 acc2 (S k)))
+       /\ BCMP Lt true (fst (jacobi A b x0 acc2 (S k))) acc2 = true
+       /\ snd (jacobi A b x0 acc2 (S k)) = jacobi_n A b x0 j.
 Proof.
 intros.
 apply jacobi_iteration_bound_lowlevel in H.
 destruct H as [FINacc2 [j [? [H2 H3]]]].
-assert (j <= k)%nat.
-clear - H. unfold ssrnat.leq.
-Search (is_true (ssrnat.leq _ _)).
-Search ssrnat.leq.
 pose proof I.
 unfold jacobi.
 fold x0 in H2,H3.
@@ -471,6 +470,17 @@ forget (k-i) as d.
 clear H7 k.
 rewrite (iter_stop_n_lem1 _ _ norm2 resid f acc2 d i x0
   (Nat.iter i f x0)).
+simpl fst.
+split; auto.
+split.
+{ clear - H5 H8 FINacc2.
+  specialize (H8 i (Nat.le_refl _)).
+  set (u := norm2 _) in *. clearbody u.
+  unfold BCMP, extend_comp in *.
+  apply finite_is_finite in H8, FINacc2.
+  rewrite Binary.Bcompare_correct in * by auto.
+  destruct (Rcompare _ _); auto.
+}
 split; auto.
 2: unfold going; rewrite H5, andb_false_iff; auto.
 revert x0 H5 H6 H8; induction i; simpl; intros; auto.
@@ -495,4 +505,5 @@ intros.
 rewrite iter_swap.
 apply (H8 (S i')). lia.
 Qed.
+
 

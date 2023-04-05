@@ -5090,8 +5090,6 @@ apply Rplus_eq_R0 in H.
   apply /RleP; apply matrix_norm_pd.
 Qed.
 
-Print nth.
-
 Lemma Rmax_le_0 (x y :R):
   (0 <= x)%Re -> (0 <= y)%Re -> Rmax x y = 0%Re ->
   x = 0%Re /\ y = 0%Re.
