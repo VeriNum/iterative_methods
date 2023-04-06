@@ -32,22 +32,19 @@ of Jacobi iteration, and connects the proof of accuracy with the proof of correc
 
 - `jacobi.c` : a C program implementing Jacobi iteration algorithm using the sparse matrix vector multiplication defined in `sparse.c`.
 - `spec_jacobi.v` : Defines specification for correctness of a Jacobi iteration algorithm. `jacobi2_spec` specifies that the C program refines the functional model, and 
-`jacobi2_highspec` specifies that the C program converges to a result vector with norm below the defined threshold if it satifies some conditions formalized in the proof 
-of accuracy for the Jacobi iteration algorithm.
+`jacobi2_highspec` specifies that the C program converges to a result vector with norm below the defined threshold if it satifies `jacobi_preconditions`.
 - `verif_jacobi2.v` : contains the proof of correctness of a C implementation of jacobi iteration with respect to the functional model. This proof of correctness is
 formalized in the lemma `body_jacobi2`. Another important result in this file is the lemma `subsume_jacobi2` which states that if the C program respects `jacobi2_spec` then it respects the `jacobi2_highspec`.
 - `main.v` : contains the main theorem `main_jacobi` that connects the proof of accuracy with the proof of correctness.
 
+#Building instructions
+To build this project, install the latest release of [Coq platform](https://github.com/coq/platform), [VCFloat](https://github.com/VeriNum/vcfloat), and [VST](https://github.com/PrincetonUniversity/VST). Details on building the files in the `sparse` directory are mentioned in the README file in the `sparse` directory itself.
+
+Then do:
+```
+git clone https://github.com/VeriNum/iterative_methods.git
+cd iterative_methods
+make
+```
 
 
-
-
-
-
-
-
-
-This repository contains the Coq formalization described in the paper *[Towards Verified Rounding Error Analysis for
-Stationary Iterative Methods](https://github.com/VeriNum/iterative_methods/blob/main/correctness_workshop_paper.pdf)*, which appeared at Correctness 2022: Sixth International Workshop on Software Correctness for HPC Applications.
-
-The main theorem for iterative round-off error is found in the file global_float_error.v. In order to run the proof script, you will need to have installed the [Coq platform](https://github.com/coq/platform) and [VCFloat](https://github.com/VeriNum/vcfloat).
