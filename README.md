@@ -27,7 +27,7 @@ definitons are needed to connect to data structures used in the correctness proo
 
 
 ## Proof of correctness of a C program implementing the Jacobi iteration
-This directory contains a sparse implentaion of the Jacobi iteration algorithm, proof of correctness of this implementation with respect to a functional model 
+The `sparse` directory contains a sparse implentaion of the Jacobi iteration algorithm, proof of correctness of this implementation with respect to a functional model 
 of Jacobi iteration, and connects the proof of accuracy with the proof of correctness to get an end-to-end verification of the Jacobi iteration.
 
 - `jacobi.c` : a C program implementing Jacobi iteration algorithm using the sparse matrix vector multiplication defined in `sparse.c`.
