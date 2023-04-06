@@ -6,15 +6,15 @@ Some important results in this formalization are summarized as follows:
 ## Formalization of FMA dot product:
 The directory `StationaryMethods` contains formal definition of both a naive dot product and fma dot product, and results on finiteness of fma dot product.
 
-- `dotprod_model.v` defines both naive or vanilla dot product, and the fma dot product.
-- `fma_dot_acc.v` formalizes a result on the forward error bound (rounding error between a real model and a floating point model for the fma dot product) 
+- `dotprod_model.v`: defines both naive or vanilla dot product, and the fma dot product.
+- `fma_dot_acc.v`: formalizes a result on the forward error bound (rounding error between a real model and a floating point model for the fma dot product) 
 `fma_dotprod_forward_error_3` assuming that the fma dot product operation does not overflow.
-- `fma_is_finite.v` formalizes conditions for which no overflow happens in the fma dot product operation. This lemma is called `finite_fma_from_bounded`.
+- `fma_is_finite.v`: formalizes conditions for which no overflow happens in the fma dot product operation. This lemma is called `finite_fma_from_bounded`.
 
 
 ## Proof of accuracy of the Jacobi iteration algorithm
 The main results are summarized as follows:
-- `fma_jacobi_forward_error.v`: This file contains a formalization of the forward error bound of the Jacobi iteration : `jacobi_forward_error_bound`, and defines a set of
+- `fma_jacobi_forward_error.v`: This file contains a formalization of the forward error bound of the Jacobi iteration `jacobi_forward_error_bound`, and defines a set of
 conditions `forward_error_cond` for the lemma `jacobi_forward_error_bound` to hold.
 - `jacobi_preconditions.v` : This file defines a set of conditions that need to hold for the convergence of a Jacobi iteration algorithm. These conditions are defined as
 `jacobi_preconditions_Rcompute`. 
@@ -27,7 +27,7 @@ definitons are needed to connect to data structures used in the correctness proo
 
 
 ## Proof of correctness of a C program implementing the Jacobi iteration
-The `sparse` directory contains a sparse implentaion of the Jacobi iteration algorithm, proof of correctness of this implementation with respect to a functional model 
+The `sparse` directory contains a sparse implementaion of the Jacobi iteration algorithm, proof of correctness of this implementation with respect to a functional model 
 of Jacobi iteration, and connects the proof of accuracy with the proof of correctness to get an end-to-end verification of the Jacobi iteration.
 
 - `jacobi.c` : a C program implementing Jacobi iteration algorithm using the sparse matrix vector multiplication defined in `sparse.c`.
