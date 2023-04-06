@@ -37,7 +37,7 @@ of Jacobi iteration, and connects the proof of accuracy with the proof of correc
 formalized in the lemma `body_jacobi2`. Another important result in this file is the lemma `subsume_jacobi2` which states that if the C program respects `jacobi2_spec` then it respects the `jacobi2_highspec`.
 - `main.v` : contains the main theorem `main_jacobi` that connects the proof of accuracy with the proof of correctness.
 
-#Building instructions
+##Building instructions
 To build this project, install the latest release of [Coq platform](https://github.com/coq/platform), [VCFloat](https://github.com/VeriNum/vcfloat), and [VST](https://github.com/PrincetonUniversity/VST). Details on building the files in the `sparse` directory are mentioned in the README file in the `sparse` directory itself.
 
 Then do:
