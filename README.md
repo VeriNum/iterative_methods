@@ -4,13 +4,13 @@ This repository contains an end-to-end Coq formalization of accuracy and correct
 Some important results in this formalization are summarized as follows:
 
 ## Formalization of FMA dot product:
-The directory `StationaryMethods` contains formal definition of both a naive dot product and fma dot product, and results on finiteness of fma dot product.
+The directory `StationaryMethods` contains formal definitions and proofs for both "vanilla" dot product (with rounding after each multiply and each add) and 
+"fma dot product" (that uses fused multiply-add with no rounding of the multiplies).
 
-- `dotprod_model.v`: defines both naive or vanilla dot product, and the fma dot product.
-- `fma_dot_acc.v`: formalizes a result on the forward error bound (rounding error between a real model and a floating point model for the fma dot product) 
+- `dotprod_model.v`: defines vanilla dot product and fma dot product.
+- `fma_dot_acc.v`: formalizes a result on the forward error bound (rounding error between a real model and a floating point model for the fma dot product).
 `fma_dotprod_forward_error_3` assuming that the fma dot product operation does not overflow.
 - `fma_is_finite.v`: formalizes conditions for which no overflow happens in the fma dot product operation. This lemma is called `finite_fma_from_bounded`.
-
 
 ## Proof of accuracy of the Jacobi iteration algorithm
 The main results are summarized as follows:
@@ -21,7 +21,7 @@ conditions `forward_error_cond` for the lemma `jacobi_forward_error_bound` to ho
 - `jacobi_iteration_bound.v`: This file contains the main proof of accuracy: `jacobi_iteration_bound_lowlevel`. This theorem uses the `jacobi_forward_error_bound` and `jacobi_preconditions_Rcompute` to prove that the residual converges to a values less than the user-defined tolerance with in `k_min` iterations which we define in the `jacobi_preconditions.v` file.
 - `inf_norm_properties.v` : This file contains formalization of infinity norms of vectors and matrices.
 - `fma_matrix_vec_mult.v` : This file contains results on forward error bound for a matrix-vector multiplication and connects to the fma dot product forward error bounds formalized in `fma_dot_acc.v`.
-- `jacob_list_fun_model.v` : Defines a floating point functional model for the Jacobi ieration algorithm. `jacobi_n` defines a vector obtained after n Jacobi iterations, and `jacobi` defines the resulting vector from Jacobi iterations equipped with a stopping condition.
+- `jacob_list_fun_model.v` : Defines a floating point functional model for the Jacobi iteration algorithm. `jacobi_n` defines a vector obtained after n Jacobi iterations, and `jacobi` defines the resulting vector from Jacobi iterations equipped with a stopping condition.
 - `fma_dot_mat_model.v` : This file defines an equivalence (`func_model_equiv`) between the mathcomp definition of matrix and vector with a list definition of a matrix and vector. The mathcomp definitions are used in accuracy analysis and leverages the powerful analysis infrastructure provided by the mathcomp library in Coq. The list
 definitons are needed to connect to data structures used in the correctness proof that uses powerful infrasture provided by the VST tool for C program verification.
 
@@ -40,12 +40,15 @@ formalized in the lemma `body_jacobi2`. Another important result in this file is
 This repository also contains results on the forward error bound for naive or vanilla dot product. These files are contained in the repo: `naive_dot_product`.
 
 # Building instructions
-To build this project, install the latest release of [Coq platform](https://github.com/coq/platform), [VCFloat](https://github.com/VeriNum/vcfloat), and [VST](https://github.com/PrincetonUniversity/VST). Details on building the files in the `sparse` directory are mentioned in the README file in the `sparse` directory itself.
+To build this project, install the latest release of [Coq platform](https://github.com/coq/platform) including [VST](https://github.com/PrincetonUniversity/VST).  Then install [VCFloat](https://github.com/VeriNum/vcfloat)
+and [VSTlib](https://github.com/PrincetonUniversity/VST/lib)
+as described in [sparse/README.md](sparse/README.md).
 
 Then do:
 ```
 git clone https://github.com/VeriNum/iterative_methods.git
 cd iterative_methods
+git checkout generalize # or git checkout this-tag-of-the-repository
 make
 ```
 
