@@ -1,0 +1,33 @@
+VSTLIB=$(COQMF_COQLIB)/user-contrib/VSTlib
+INCLUDE=$(VSTLIB)/include
+CFLAGS= -I$(INCLUDE) -O4
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@ 
+
+sparse/sparse.v: sparse/sparse.c sparse/sparse.h
+	clightgen -flongdouble -normalize $< -o $@ 
+
+sparse/jacobi.v: sparse/jacobi.c sparse/sparse.h
+	clightgen -flongdouble -normalize $< -o $@ 
+
+sparse/main.o: sparse/main.c sparse/parsparse.h
+sparse/test.o: sparse/test.c sparse/sparse.h
+sparse/sparse.o: sparse/sparse.c sparse/sparse.h
+sparse/jacobi.o: sparse/jacobi.c sparse/sparse.h
+sparse/test_jacobi.o: sparse/test_jacobi.c sparse/sparse.h sparse/jacobi.h
+sparse/example.o: sparse/example.c sparse/sparse.h
+sparse/parsplit.o: sparse/parsplit.c sparse/parsplit.h
+sparse/parsparse.o: sparse/parsparse.c sparse/sparse.h sparse/parsplit.h
+sparse/threads.o: $(VSTLIB)/src/threads.c
+sparse/locks.o: $(VSTLIB)/src/locks.c
+sparse/SC_atomics.o: $(VSTLIB)/src/SC_atomics.c
+
+sparse/test_jacobi: sparse/test_jacobi.o sparse/jacobi.o sparse/example.o sparse/sparse.o sparse/parsplit.o sparse/parsparse.o sparse/threads.o sparse/locks.o sparse/SC_atomics.o
+	$(CC) $(CFLAGS) $^ -o $@
+
+test: sparse/example.o sparse/sparse.o sparse/parsplit.o sparse/parsparse.o sparse/threads.o sparse/locks.o sparse/SC_atomics.o
+	$(CC) $(CFLAGS) $^ -o $@
+
+run: sparse/main.o sparse/sparse.o sparse/parsplit.o sparse/parsparse.o sparse/threads.o sparse/locks.o sparse/SC_atomics.o
+	$(CC) $(CFLAGS) $^ -o $@
