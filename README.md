@@ -1,7 +1,11 @@
 # Verified Error Analysis for Stationary Iterative Methods
 
 This repository contains an end-to-end Coq formalization of accuracy and correctness of a Stationary iterative method called the Jacobi method.
-Some important results in this formalization are summarized as follows:
+
+*Warm-up.*
+For an early version of this repo corresponding to the paper [Towards Verified Rounding Error Analysis for Stationary Iterative Methods](http://www-personal.umich.edu/~jeannin/papers/kellison2022towards.pdf), that appeared in [Correctness 2022](https://correctness-workshop.github.io/2022/), see tag [correctness2022](https://github.com/VeriNum/iterative_methods/releases/tag/correctness2022).
+
+*More recent work.* Some important results in this formalization are summarized as follows:
 
 ## Formalization of FMA dot product:
 The directory `StationaryMethods` contains formal definitions and proofs for both "vanilla" dot product (with rounding after each multiply and each add) and 
