@@ -40,7 +40,7 @@ intros.
 by unfold Rbar_le in H.
 Qed.
 
-Lemma matrix_norm_A2_rel {t: type} {n:nat}
+Lemma matrix_norm_A2_rel {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1):
   (matrix_inf_norm
    (A2_J_real (FT2R_mat A)) <=
@@ -49,7 +49,8 @@ Proof.
 assert (A2_J_real (FT2R_mat A) = 
         FT2R_mat (A2_J A)).
 { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
-  case: (x == y :> nat); simpl; nra.
+  unfold Zconst.
+  case: (x == y :> nat); simpl; auto. rewrite FT2R_ftype_of_float. reflexivity.
 } rewrite H; nra.
 Qed.
 
@@ -113,7 +114,7 @@ Qed.
 
 Close Scope Z_scope.
 
-Lemma vec_norm_A1_rel {t: type} {n:nat}
+Lemma vec_norm_A1_rel {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1)
 (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
 (Ha : forall i j, finite (A i j)):
@@ -137,7 +138,7 @@ apply bigmax_le.
   - rewrite seq_equiv. rewrite nth_mkseq;
     last by rewrite size_map size_enum_ord in H.
     rewrite !mxE.
-    pose proof (@Binv_accurate _ t (A (inord i) (inord i)) (Hinv (@inord n i)) (Ha (@inord n i) (@inord n i)) ).
+    pose proof (@Binv_accurate _ t _ (A (inord i) (inord i)) (Hinv (@inord n i)) (Ha (@inord n i) (@inord n i)) ).
     destruct H0 as [d [e [Hde [Hd [He H0]]]]].
     rewrite H0.
     assert (e = (- - e)%Re). 
@@ -163,7 +164,7 @@ apply bigmax_le.
 Qed.
 
 
-Lemma R_def_lt_1_implies {t} {n:nat}
+Lemma R_def_lt_1_implies {t} `{STD: is_standard t} {n:nat}
   (A : 'M[ftype t]_n.+1) 
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j)):
@@ -181,6 +182,7 @@ unfold R_def.
 assert (A2_J_real A_real = A2_real).
 { apply matrixP. unfold eqrel. intros. rewrite !mxE /=.
   case: (x == y :> nat); simpl; auto.
+  unfold Zconst; rewrite FT2R_ftype_of_float. auto.
 } rewrite H0. apply Rmult_le_compat_r.
 apply /RleP. apply matrix_norm_pd.
 by apply vec_norm_A1_rel.
@@ -235,7 +237,7 @@ intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
 Qed.
 
 
-Lemma x_minus_xk_norm {t} {n:nat}
+Lemma x_minus_xk_norm {t} `{STD: is_standard t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j)):
@@ -289,7 +291,7 @@ induction k.
     rewrite mulmxV. by rewrite mul1mx.
     apply H0.
     intros. unfold A_real. rewrite mxE.
-    by apply BDIV_FT2R_sep_zero.
+    eapply BDIV_FT2R_sep_zero; eauto.
   - auto.
   - apply Rmult_le_compat_l; last by apply IHk.
     unfold R_def_real. apply Rmult_le_pos.
@@ -297,7 +299,7 @@ induction k.
     apply /RleP. apply matrix_norm_pd.
 Qed.
 
-Lemma lim_of_x_minus_xk_is_zero {t} {n:nat}
+Lemma lim_of_x_minus_xk_is_zero {t} `{STD: is_standard t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j)):
@@ -342,7 +344,7 @@ apply (@is_lim_seq_le_le
       rewrite sub_vec_5. apply /RleP. apply Rle_refl.
     * apply /RleP. apply reverse_triang_ineq.
       apply /RleP. apply Rle_refl.
-  - pose proof (@x_minus_xk_norm t n A b Hinv Ha H H0 n0) .
+  - pose proof (@x_minus_xk_norm t _ n A b Hinv Ha H H0 n0) .
     unfold x1, x, b_real, A_real, x0.
     rewrite HeqR_def_real. apply H1.
 + apply is_lim_seq_const.
@@ -375,7 +377,7 @@ induction k.
 Qed.
 
 
-Lemma upper_bound_xk {t} {n:nat}
+Lemma upper_bound_xk {t} `{STD: is_standard t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j)):
@@ -458,7 +460,7 @@ induction k.
 Qed. 
 
 
-Lemma x_bound_exists {t} {n:nat}
+Lemma x_bound_exists {t} `{STD: is_standard t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) 
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j)):
@@ -491,7 +493,7 @@ assert ((Lim_seq (fun k: nat =>  vec_inf_norm (x_k k x0 b_real A_real)))
   { nra. } rewrite [in X in (is_lim_seq _ X)]H1.
   apply is_lim_seq_plus'. 
   apply is_lim_seq_const.
-  pose proof (@lim_of_x_minus_xk_is_zero t ).
+  pose proof (@lim_of_x_minus_xk_is_zero t _).
   specialize (H2 n A b Hinv Ha H).
   unfold x1,x , A_real, b_real. rewrite Heqx0.
   apply H2. by fold A_real.
@@ -526,7 +528,7 @@ specialize (H3 n0 H5). simpl in H3.
 match goal with |-context[(_ <= (?a * ?b)/?c)%Re]=>
   replace ((a * b)/c)%Re with ((a * /c)*b)%Re by nra
 end. 
-pose proof (@upper_bound_xk t n A b Hinv Ha H).
+pose proof (@upper_bound_xk t _ n A b Hinv Ha H).
 fold A_real in H6. specialize (H6 H0 n0).
 eapply Rle_trans.
 rewrite Heqx0 /b_real. apply H6.
@@ -588,6 +590,7 @@ apply Rle_trans with
       assert (A2_J_real A_real = A2_real).
       { apply matrixP. unfold eqrel. intros. rewrite !mxE /=.
         case: (x2 == y :> nat); simpl; auto.
+        unfold Zconst; rewrite FT2R_ftype_of_float; auto.
       } rewrite H7. apply Rmult_le_compat_r.
       apply /RleP. apply matrix_norm_pd.
       by apply vec_norm_A1_rel.

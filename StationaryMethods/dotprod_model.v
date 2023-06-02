@@ -1,24 +1,24 @@
-Require Import vcfloat.VCFloat.
+Require Import vcfloat.VCFloat vcfloat.FPLib.
 Require Import List.
 Import ListNotations.
 
-Require Import common op_defs list_lemmas.
+Require Import common list_lemmas.
 
 Section NAN.
 
 (* vanilla dot-product *)
-Definition dotprod {NAN: Nans} (t: type) (v1 v2: list (ftype t)) : ftype t :=
+Definition dotprod {NAN: Nans} (t: type) `{STD: is_standard t} (v1 v2: list (ftype t)) : ftype t :=
   fold_left (fun s x12 => BPLUS (BMULT (fst x12) (snd x12)) s) 
                 (List.combine v1 v2) neg_zero.
 
-Inductive dot_prod_rel {NAN: Nans} {t : type} : 
+Inductive dot_prod_rel {NAN: Nans} {t : type}  `{STD: is_standard t}: 
             list (ftype t * ftype t) -> ftype t -> Prop :=
 | dot_prod_rel_nil  : dot_prod_rel  nil (neg_zero )
 | dot_prod_rel_cons : forall l (xy : ftype t * ftype t) s,
     dot_prod_rel  l s ->
     dot_prod_rel  (xy::l) (BPLUS (BMULT (fst xy) (snd xy)) s).
 
-Lemma fdot_prod_rel_fold_right {NAN: Nans} t :
+Lemma fdot_prod_rel_fold_right {NAN: Nans} t  `{STD: is_standard t}:
 forall (v1 v2: list (ftype t)), 
     dot_prod_rel (rev (List.combine v1 v2)) (dotprod t v1 v2).
 Proof.
@@ -31,11 +31,12 @@ Qed.
 
 
 (* FMA dot-product *)
-Definition fma_dotprod {NAN: Nans} (t: type) (v1 v2: list (ftype t)) : ftype t :=
+Definition fma_dotprod {NAN: Nans} (t: type)  `{STD: is_standard t}
+        (v1 v2: list (ftype t)) : ftype t :=
   fold_left (fun s x12 => BFMA (fst x12) (snd x12) s) 
                 (List.combine v1 v2) (Zconst t 0).
 
-Inductive fma_dot_prod_rel {NAN: Nans} {t : type} : 
+Inductive fma_dot_prod_rel {NAN: Nans} {t : type} `{STD: is_standard t}: 
             list (ftype t * ftype t) -> ftype t -> Prop :=
 | fma_dot_prod_rel_nil  : fma_dot_prod_rel nil (Zconst t 0)
 | fma_dot_prod_rel_cons : forall l (xy : ftype t * ftype t) s,
@@ -43,7 +44,7 @@ Inductive fma_dot_prod_rel {NAN: Nans} {t : type} :
     fma_dot_prod_rel  (xy::l) (BFMA (fst xy) (snd xy) s).
 
 
-Lemma fma_dot_prod_rel_fold_right {NAN: Nans} t :
+Lemma fma_dot_prod_rel_fold_right {NAN: Nans} t `{STD: is_standard t}:
 forall (v1 v2: list (ftype t)), 
     fma_dot_prod_rel (rev (List.combine v1 v2)) (fma_dotprod t v1 v2).
 Proof.
@@ -198,7 +199,7 @@ Qed.
 
 
 Lemma dotprod_rel_R_exists {NAN: Nans}:
-  forall (t : type) (l : list (ftype t * ftype t)) (fp : ftype t)
+  forall (t : type) `{STD: is_standard t} (l : list (ftype t * ftype t)) (fp : ftype t)
   (Hfp : dot_prod_rel l fp),
   exists rp, R_dot_prod_rel (map FR2 l) rp.
 Proof.
@@ -211,7 +212,7 @@ apply R_dot_prod_rel_cons; auto.
 Qed.
 
 Lemma dotprod_rel_R_exists_fma {NAN: Nans}:
-  forall (t : type) (l : list (ftype t * ftype t)) (fp : ftype t)
+  forall (t : type) `{STD: is_standard t} (l : list (ftype t * ftype t)) (fp : ftype t)
   (Hfp : fma_dot_prod_rel l fp),
   exists rp, R_dot_prod_rel (map FR2 l) rp.
 Proof.
@@ -224,7 +225,7 @@ apply R_dot_prod_rel_cons; auto.
 Qed.
 
 Lemma sum_rel_R_abs_exists_fma {NAN: Nans}:
-  forall (t : type) (l : list (ftype t * ftype t)) (fp : ftype t)
+  forall (t : type) `{STD: is_standard t} (l : list (ftype t * ftype t)) (fp : ftype t)
   (Hfp : fma_dot_prod_rel l fp),
   exists rp, R_dot_prod_rel (map Rabsp (map FR2 l)) rp.
 Proof.

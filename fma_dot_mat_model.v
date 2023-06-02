@@ -22,7 +22,7 @@ Context {NANS: Nans}.
 Import jacob_list_fun_model.Experiment.
 
 
-Lemma A1_invert_equiv {ty} (A : matrix ty) i: 
+Lemma A1_invert_equiv {ty} `{STD: is_standard ty} (A : matrix ty) i: 
   (i < length A)%coq_nat ->
   nth i 
      (invert_diagmatrix (diag_of_matrix A))
@@ -43,7 +43,7 @@ by unfold matrix_rows_nat.
 Qed.
 
 
-Lemma v_equiv {ty} (v: vector ty) size:
+Lemma v_equiv {ty} `{STD: is_standard ty} (v: vector ty) size:
   length v = size.+1 -> 
   v = rev (vec_to_list_float size.+1
           (\col_j0 vector_inj v size.+1 j0 ord0)).
@@ -63,7 +63,7 @@ apply nth_ext with (Zconst ty 0) (Zconst ty 0).
 Qed.
 
 
-Lemma A2_equiv {ty} (A: matrix ty) size i :
+Lemma A2_equiv {ty} `{STD: is_standard ty} (A: matrix ty) size i :
   length A = size.+1 ->
   (i < size.+1)%coq_nat ->
   let A_v := matrix_inj A size.+1 size.+1 in
@@ -120,7 +120,7 @@ apply nth_ext with (Zconst ty 0) (Zconst ty 0).
     -- unfold matrix_rows_nat. by rewrite H.
 Qed.
 
-Lemma residual_equiv {ty} (v: vector ty) (A: matrix ty) i:
+Lemma residual_equiv {ty} `{STD: is_standard ty} (v: vector ty) (A: matrix ty) i:
   (0 < length A)%nat ->
   let size := (length A).-1 in   
   let A_v := matrix_inj A size.+1 size.+1 in
@@ -163,7 +163,7 @@ assert (v = rev (vec_to_list_float size.+1
   by rewrite prednK.
 }
 rewrite [in LHS]H2.
-rewrite (@A2_equiv _ _ size _).
+rewrite (@A2_equiv _ _ _ size _).
 rewrite dotprod_rev_equiv; try by [].
 by rewrite !length_veclist.
 by rewrite /size prednK /=.
@@ -173,7 +173,7 @@ apply H.
 Qed.
 
 
-Lemma iter_length {ty} n (A: matrix ty) (b: vector ty) (x: vector ty):
+Lemma iter_length {ty} `{STD: is_standard ty} n (A: matrix ty) (b: vector ty) (x: vector ty):
   length b = length A ->
   length x = length A ->
   length
@@ -194,7 +194,7 @@ induction n.
 Qed.
   
 
-Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat) :
+Lemma func_model_equiv {ty} `{STD: is_standard ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat) :
   let size := (length A).-1 in  
   let x_v := vector_inj x size.+1 in 
   let b_v := vector_inj b size.+1 in 
@@ -202,7 +202,7 @@ Lemma func_model_equiv {ty} (A: matrix ty) (b: vector ty) (x: vector ty) (n: nat
   (0 < length A)%nat ->
   length b = length A -> 
   length x = length A ->
-  vector_inj (jacobi_n A b x n) size.+1 = @X_m_jacobi _ ty size n x_v b_v A_v.
+  vector_inj (jacobi_n A b x n) size.+1 = @X_m_jacobi _ ty _ size n x_v b_v A_v.
 Proof.
 intros.
 induction n.

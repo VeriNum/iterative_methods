@@ -7,7 +7,7 @@ Definition rounded t r:=
 (Generic_fmt.round Zaux.radix2 (SpecFloat.fexp (fprec t) (femax t))
      (BinarySingleNaN.round_mode BinarySingleNaN.mode_NE) r).
 
-Definition neg_zero {t: type} := Binary.B754_zero (fprec t) (femax t) true.
+Definition neg_zero {t: type} `{STD: is_standard t} := ftype_of_float (Binary.B754_zero (fprec t) (femax t) true).
 
 Section NAN.
 

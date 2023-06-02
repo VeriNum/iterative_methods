@@ -14,15 +14,15 @@ Require Import floatlib.
 Section WITHNANS.
 Context {NANS: Nans}. 
 
-Definition sum ty (a b : ftype ty) : ftype ty := BPLUS a b.
+Definition sum ty `{STD: is_standard ty} (a b : ftype ty) : ftype ty := BPLUS a b.
 
-Definition list_to_vec_float {ty} {n:nat} 
+Definition list_to_vec_float {ty}  `{STD: is_standard ty}{n:nat} 
 (l : list (ftype ty)): 'cV[ftype ty]_n := 
 \col_(i < n) (List.nth (nat_of_ord i) l (Zconst ty 0)).
 
 
 (** Define matrix_addition **)
-Definition addmx_float {ty} {m n:nat} (A B: 'M[ftype ty]_(m,n))
+Definition addmx_float {ty}  `{STD: is_standard ty}{m n:nat} (A B: 'M[ftype ty]_(m,n))
   : 'M[ftype ty]_(m,n) :=
   \matrix_(i, j) (sum ty (A i j) (B i j)).
 
@@ -64,7 +64,7 @@ Qed.
 
 
 
-Definition dotprod_r {t: type} (v1 v2: list (ftype t)) : ftype t :=
+Definition dotprod_r {t: type} `{STD: is_standard t} (v1 v2: list (ftype t)) : ftype t :=
   fold_right (fun x12 s => BFMA (fst x12) (snd x12) s) 
                  (Zconst t 0) (List.combine v1 v2)  .
 
@@ -96,7 +96,7 @@ elim: v1 v2 H => [ |s v1 IHv1] v2 H.
 Qed.
 
 
-Lemma dotprod_rev_equiv {ty} (v1 v2: vector ty):
+Lemma dotprod_rev_equiv {ty} `{STD: is_standard ty} (v1 v2: vector ty):
   length v1 = length v2 ->
   dotprod (rev v1) (rev v2) = dotprod_r v1 v2.
 Proof.
@@ -120,20 +120,20 @@ Lemma fold_right_except_zero {A B}
 Admitted.
 *)
 
-Definition mulmx_float {ty} {m n p : nat} 
+Definition mulmx_float {ty} `{STD: is_standard ty} {m n p : nat} 
   (A: 'M[ftype ty]_(m.+1,n.+1)) (B: 'M[ftype ty]_(n.+1,p.+1)) : 
   'M[ftype ty]_(m.+1,p.+1):=
   \matrix_(i, k)
     let l1 := vec_to_list_float n.+1 (\row_(j < n.+1) A i j)^T in
     let l2 := vec_to_list_float n.+1 (\col_(j < n.+1) B j k) in
-    @dotprod_r ty l1 l2.
+    @dotprod_r ty _ l1 l2.
 
-Definition opp_mat {ty} {m n: nat} (A : 'M[ftype ty]_(m.+1, n.+1)) 
+Definition opp_mat {ty} `{STD: is_standard ty} {m n: nat} (A : 'M[ftype ty]_(m.+1, n.+1)) 
   : 'M[ftype ty]_(m.+1, n.+1) :=
   \matrix_(i,j) (BOPP (A i j)). 
 
 
-Definition sub_mat {ty} {m n: nat} (A B : 'M[ftype ty]_(m.+1, n.+1)) 
+Definition sub_mat {ty} `{STD: is_standard ty} {m n: nat} (A B : 'M[ftype ty]_(m.+1, n.+1)) 
   : 'M[ftype ty]_(m.+1, n.+1) :=
   \matrix_(i,j) (BMINUS (A i j) (B i j)). 
 
@@ -144,27 +144,27 @@ Notation "A *f B" := (mulmx_float A B) (at level 70).
 Notation "A -f B" := (sub_mat A B) (at level 80).
 
 
-Definition A1_inv_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
+Definition A1_inv_J {ty} `{STD: is_standard ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
   \col_i (BDIV (Zconst ty 1) (A i i)).
 
-Definition A2_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1): 
+Definition A2_J {ty} `{STD: is_standard ty} {n:nat} (A: 'M[ftype ty]_n.+1): 
   'M[ftype ty]_n.+1 :=
   \matrix_(i,j) 
     if (i==j :> nat) then (Zconst ty 0) else A i j.
 
 
-Definition diag_vector_mult {ty} {n:nat} (v1 v2: 'cV[ftype ty]_n.+1)
+Definition diag_vector_mult {ty} `{STD: is_standard ty} {n:nat} (v1 v2: 'cV[ftype ty]_n.+1)
   : 'cV[ftype ty]_n.+1 :=
   \col_i (BMULT (nth (n.+1.-1 -i) (vec_to_list_float n.+1 v1) (Zconst ty 0))
             (nth (n.+1.-1 - i) (vec_to_list_float n.+1 v2) (Zconst ty 0))).
 
-Definition jacobi_iter {ty} {n:nat} x0 b (A: 'M[ftype ty]_n.+1) : 
+Definition jacobi_iter {ty} `{STD: is_standard ty} {n:nat} x0 b (A: 'M[ftype ty]_n.+1) : 
   'cV[ftype ty]_n.+1 :=
    let r := b -f ((A2_J A) *f x0) in
    diag_vector_mult (A1_inv_J A) r.
 
 
-Definition X_m_jacobi {ty} {n:nat} m x0 b (A: 'M[ftype ty]_n.+1) :
+Definition X_m_jacobi {ty} `{STD: is_standard ty} {n:nat} m x0 b (A: 'M[ftype ty]_n.+1) :
   'cV[ftype ty]_n.+1 :=
    Nat.iter m  (fun x0 => jacobi_iter x0 b A) x0.
 
@@ -173,13 +173,13 @@ Definition matrix_inj' {t} (A: matrix t) m n  d d': 'M[ftype t]_(m,n):=
     \matrix_(i < m, j < n) 
      nth j (nth i A d) d'.
 
-Definition matrix_inj {t} (A: matrix t) m n  : 'M[ftype t]_(m,n):=
+Definition matrix_inj {t} `{STD: is_standard t} (A: matrix t) m n  : 'M[ftype t]_(m,n):=
   matrix_inj' A m n [::] (Zconst t 0).
 
-Definition vector_inj' {t} (v: vector t) n d : 'cV[ftype t]_n :=
+Definition vector_inj' {t} `{STD: is_standard t} (v: vector t) n d : 'cV[ftype t]_n :=
    \col_(i < n) nth i v d.
 
-Definition vector_inj {t} (v: vector t) n : 'cV[ftype t]_n :=
+Definition vector_inj {t} `{STD: is_standard t} (v: vector t) n : 'cV[ftype t]_n :=
    vector_inj' v n (Zconst t 0).
 
 

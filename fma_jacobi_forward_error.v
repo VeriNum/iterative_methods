@@ -40,7 +40,7 @@ Notation "A -f B" := (sub_mat A B) (at level 80).
 
 
 
-Definition f_error {ty} {n:nat} m b x0 x (A: 'M[ftype ty]_n.+1):=
+Definition f_error {ty} `{STD: is_standard ty} {n:nat} m b x0 x (A: 'M[ftype ty]_n.+1):=
   let x_k := X_m_jacobi m x0 b A in 
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -253,7 +253,7 @@ Qed.
 
 
 
-Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
+Lemma vec_norm_diag {ty}  `{STD: is_standard ty}  {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty),
     In xy
       (combine
@@ -378,10 +378,10 @@ apply bigmax_le.
  - rewrite inordK; by rewrite size_map size_enum_ord in H0.
 Qed.
 
-Lemma real_const_1 {ty}:
+Lemma real_const_1 {ty} `{STD: is_standard ty} :
   FT2R (Zconst ty 1) = 1%Re.
 Proof.
-unfold FT2R. unfold Zconst.
+unfold Zconst. rewrite FT2R_ftype_of_float.
 pose proof IEEE754_extra.BofZ_exact.
 specialize (H (fprec ty) (femax ty) (Pos2Z.is_pos (fprecp ty))
             (fprec_lt_femax ty) 1%Z).
@@ -394,7 +394,7 @@ Qed.
 
 
 (*** Lemma for error bound on the inverse ***)
-Lemma inverse_mat_norm_bound {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
+Lemma inverse_mat_norm_bound {ty}  `{STD: is_standard ty} {n:nat} (A: 'M[ftype ty]_n.+1):
   (forall i, finite (BDIV (Zconst ty 1) (A i i ))) ->
   (forall i, finite (A i i)) ->
   let A_real := FT2R_mat A in
@@ -403,7 +403,7 @@ Lemma inverse_mat_norm_bound {ty} {n:nat} (A: 'M[ftype ty]_n.+1):
 Proof.
 intros.
 assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
-{ intros. by apply BDIV_FT2R_sep_zero. }
+{ intros. eapply BDIV_FT2R_sep_zero; eauto. }
 unfold vec_inf_norm. rewrite RmultE. rewrite mulrC.
 rewrite -bigmaxr_mulr.
 + apply bigmax_le; first by rewrite size_map size_enum_ord.
@@ -418,7 +418,7 @@ rewrite -bigmaxr_mulr.
     last by rewrite size_map size_enum_ord in H1.
     rewrite -RmultE -RminusE. rewrite !mxE.
     specialize (H0 (@inord n i)). specialize (H (@inord n i)).
-    pose proof (@Binv_accurate _ ty (A (inord i) (inord i))) .
+    pose proof (@Binv_accurate _ ty _ (A (inord i) (inord i))) .
     specialize (H2 H H0).
     destruct H2 as [d [e [Hpr [Hdf [Hde H2]]]]].
     rewrite H2 /=. rewrite real_const_1.
@@ -465,7 +465,7 @@ induction l; simpl; intros; auto.
   destruct a; simpl; auto.
 Qed.
 
-Lemma dotprod_finite_implies {ty} (v: list (ftype ty * ftype ty)):
+Lemma dotprod_finite_implies {ty} `{STD: is_standard ty}  (v: list (ftype ty * ftype ty)):
   finite (dotprod_r (fst (List.split v)) (snd (List.split v))) ->
   (forall a, In a v ->finite (fst a) /\ finite (snd a)).
 Proof.
@@ -485,7 +485,7 @@ induction v.
     specialize (IHv Hf3 H0). apply IHv. 
 Qed.
 
-Definition x_fix_FT2R {ty} {n:nat} x b (A: 'M[ftype ty]_n.+1) : 
+Definition x_fix_FT2R {ty}  `{STD: is_standard ty}  {n:nat} x b (A: 'M[ftype ty]_n.+1) : 
   'cV[R]_n.+1 :=
   let r := b - ((A2_J_real (FT2R_mat A)) *m x) in
   diag_matrix_vec_mult_R (FT2R_mat (A1_inv_J A)) r.
@@ -647,7 +647,7 @@ repeat apply Rplus_le_le_0_compat.
 Qed.
   
 
-Lemma x_k_bound {ty} {n:nat} 
+Lemma x_k_bound {ty}  `{STD: is_standard ty}  {n:nat} 
   (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k i:
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -688,7 +688,7 @@ apply Rle_trans with
     by apply /RleP.
 Qed.
 
-Definition input_bound {t} {n:nat} 
+Definition input_bound {t}  `{STD: is_standard t} {n:nat} 
   (A: 'M[ftype t]_n.+1) (x0 b: 'cV[ftype t]_n.+1):=
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -754,7 +754,7 @@ Definition input_bound {t} {n:nat}
 
 
 
-Lemma bound_1  {t: type} {n:nat}
+Lemma bound_1  {t: type}  `{STD: is_standard t} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -809,7 +809,7 @@ apply Rle_lt_trans with
 Qed.
 
 
-Lemma  bound_2 {ty} {n:nat} 
+Lemma  bound_2 {ty}  `{STD: is_standard ty}  {n:nat} 
   (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k:
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -863,7 +863,7 @@ Qed.
 
 
 
-Lemma bound_3 {ty} {n:nat} 
+Lemma bound_3 {ty}  `{STD: is_standard ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1):
   input_bound A x0 b ->
   forall i j, 
@@ -876,7 +876,7 @@ apply bnd3.
 Qed.
 
 
-Lemma bound_4 {ty} {n:nat} 
+Lemma bound_4 {ty}  `{STD: is_standard ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k i:
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -943,7 +943,7 @@ apply Rle_lt_trans with
 Qed.
 
 
-Lemma bound_5 {ty} {n:nat} 
+Lemma bound_5 {ty}  `{STD: is_standard ty}  {n:nat} 
   (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k i:
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -1016,7 +1016,7 @@ apply Rle_lt_trans with
 + apply bnd5.
 Qed.
 
-Definition forward_error_cond {ty} {n:nat} 
+Definition forward_error_cond {ty}  `{STD: is_standard ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) :=
   let rho := rho_def A b in
   let d_mag := d_mag_def A b in
@@ -1033,7 +1033,7 @@ Definition forward_error_cond {ty} {n:nat}
   input_bound A x0 b.
 
 (** State the forward error theorem **)
-Theorem jacobi_forward_error_bound_aux {ty} {n:nat} 
+Theorem jacobi_forward_error_bound_aux {ty}  `{STD: is_standard ty}  {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -1078,7 +1078,7 @@ intros ? ? ? ? ? ? ? ? Hcond.
 unfold forward_error_cond in Hcond.
 destruct Hcond as [HAf [H [H0 [Hdivf [Hx0 [Ha1_inv [HfA2 [Hb [size_cons Hinp]]]]]]]]].
 assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re).
-{ intros. by apply BDIV_FT2R_sep_zero. }
+{ intros. eapply BDIV_FT2R_sep_zero; eauto. }
 induction k.
 + split; simpl; try nra.
   intros. apply Hx0. 
@@ -1097,7 +1097,7 @@ induction k.
                    (\col_j X_m_jacobi k x0 b A j
                              ord0) in
                dotprod_r l1 l2)).
-    { pose proof (@finite_fma_from_bounded _ ty).
+    { pose proof (@finite_fma_from_bounded _ ty _).
       specialize (H2 (vec_to_list_float n.+1
                          (\row_j A2_J A (inord i) j)^T)
                       ( vec_to_list_float n.+1
@@ -1108,7 +1108,7 @@ induction k.
                                 (\row_j A2_J A (inord i) j)^T)
                             (vec_to_list_float n.+1
                                  (\col_j X_m_jacobi k x0 b A j  ord0)))).
-      specialize (H2 (@fma_dot_prod_rel_holds _ _ _ n.+1 i (A2_J A) 
+      specialize (H2 (@fma_dot_prod_rel_holds _ _ _ _ n.+1 i (A2_J A) 
                           (\col_j X_m_jacobi k x0 b A j ord0))).
       assert ((g1 ty (n.+2 + 1)%coq_nat n.+2 <=  fmax ty)%Re).
       { by apply g1_constraint_Sn. } specialize (H2 H3).
@@ -1195,9 +1195,10 @@ induction k.
           apply Rcomplements.Rlt_div_r.
           apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
           eapply Rle_lt_trans. apply Rabs_triang.
-          rewrite [in X in (_ + X < _)%Re]/FT2R B2R_Bopp Rabs_Ropp.
+          unfold BOPP. rewrite FT2R_ftype_of_float.
+          rewrite [in X in (_ + X < _)%Re] B2R_Bopp Rabs_Ropp.
           fold (@FT2R ty). rewrite mxE.
-          pose proof (@fma_dotprod_forward_error _ ty).
+          pose proof (@fma_dotprod_forward_error _ ty _).
           specialize (H4 (vec_to_list_float n.+1
                                   (\row_j A2_J A (inord i) j)^T)
                          (vec_to_list_float n.+1
@@ -1216,7 +1217,7 @@ induction k.
           specialize (H4
                      (\sum_j (Rabs (FT2R (A2_J A (inord i) j)) * 
                               Rabs (FT2R (X_m_jacobi k x0 b A j ord0)))%Re)).
-          specialize (H4 (@fma_dot_prod_rel_holds _ _ _ n.+1 i (A2_J A) 
+          specialize (H4 (@fma_dot_prod_rel_holds _ _ _ _ n.+1 i (A2_J A) 
                           (\col_j X_m_jacobi k x0 b A j ord0))).
           assert (\sum_j
                      (FT2R
@@ -1287,7 +1288,7 @@ induction k.
                   g1 ty n.+1 (n.+1 - 1)%coq_nat))%Re.
             rewrite Rplus_comm.
             apply Rcomplements.Rle_minus_l.
-            eapply Rle_trans. apply Rabs_triang_inv.
+            eapply Rle_trans. apply Rabs_triang_inv. rewrite B2R_float_of_ftype.
             apply H4. rewrite -Rplus_assoc. apply Rplus_le_compat_r.
             rewrite Rmult_plus_distr_r. apply Rplus_le_compat_r.
             rewrite Rmult_1_l. rewrite Rabs_sum_in.
@@ -1342,7 +1343,7 @@ induction k.
       apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
       rewrite Rabs_mult. rewrite [in X in (_ * X < _)%Re]mxE. 
       rewrite Bminus_bplus_opp_equiv.
-      pose proof (@BPLUS_accurate' _ ty).
+      pose proof (@BPLUS_accurate' _ ty _).
       specialize (H5 (b (inord i) ord0) (BOPP 
             ((A2_J A *f X_m_jacobi k x0 b A)
                           (inord i) ord0))).
@@ -1365,11 +1366,11 @@ induction k.
         apply Rcomplements.Rlt_div_r.
         apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
         eapply Rle_lt_trans. apply Rmult_le_compat_l.
-        apply Rabs_pos. apply Rabs_triang.
-        rewrite [in X in (_ * (_ + X) < _)%Re]/FT2R B2R_Bopp.
+        apply Rabs_pos. apply Rabs_triang. unfold BOPP. rewrite FT2R_ftype_of_float. 
+        rewrite [in X in (_ * (_ + X) < _)%Re] B2R_Bopp.
         rewrite Rabs_Ropp. fold (@FT2R ty).
         rewrite [in X in (_ * (_ + X) < _)%Re]mxE.
-        pose proof (@fma_dotprod_forward_error _ ty).
+        pose proof (@fma_dotprod_forward_error _ ty _).
         specialize (H7 (vec_to_list_float n.+1
                                 (\row_j A2_J A (inord i) j)^T)
                        (vec_to_list_float n.+1
@@ -1388,7 +1389,7 @@ induction k.
       specialize (H7 
                    (\sum_j (Rabs (FT2R (A2_J A (inord i) j)) * 
                             Rabs (FT2R (X_m_jacobi k x0 b A j ord0)))%Re)).
-      specialize (H7 (@fma_dot_prod_rel_holds _ _ _ n.+1 i (A2_J A) 
+      specialize (H7 (@fma_dot_prod_rel_holds _ _ _ _ n.+1 i (A2_J A) 
                         (\col_j X_m_jacobi k x0 b A j ord0))).
       assert (\sum_j
                  (FT2R
@@ -1460,7 +1461,7 @@ induction k.
               g1 ty n.+1 (n.+1 - 1)%coq_nat))%Re.
         rewrite Rplus_comm.
         apply Rcomplements.Rle_minus_l.
-        eapply Rle_trans. apply Rabs_triang_inv.
+        eapply Rle_trans. apply Rabs_triang_inv. rewrite B2R_float_of_ftype.
         apply H7. rewrite -Rplus_assoc. apply Rplus_le_compat_r.
         rewrite Rmult_plus_distr_r. apply Rplus_le_compat_r.
         rewrite Rmult_1_l. rewrite Rabs_sum_in.
@@ -1629,7 +1630,7 @@ induction k.
                           ((vec_inf_norm (FT2R_mat (A1_inv_J A)) *
                             vec_inf_norm (FT2R_mat (b -f A2_J A *f X_m_jacobi k x0 b A))) * g ty n.+1 +
                                g1 ty n.+1 (n.+1 - 1))%Re.
-                        *** pose proof (@vec_norm_diag ty n). 
+                        *** pose proof (@vec_norm_diag ty _ n). 
                             apply H4. intros.
                             pose proof (@In_nth (ftype ty * ftype ty)
                                            (rev (combine
@@ -1739,7 +1740,7 @@ induction k.
                                         apply BPLUS_finite_e in Hfin2; try apply Hfin2.
                                         destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
                                         rewrite mxE in Hfin22.  
-                                        pose proof (@dotprod_finite_implies ty).
+                                        pose proof (@dotprod_finite_implies ty _).
                                         specialize (H6 (combine  (vec_to_list_float n.+1
                                                                       (\row_j0 A2_J A (inord i) j0)^T)
                                                                   (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
@@ -1769,7 +1770,7 @@ induction k.
                                         apply BPLUS_finite_e in Hfin2; try apply Hfin2.
                                         destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
                                         rewrite mxE in Hfin22.  
-                                        pose proof (@dotprod_finite_implies ty).
+                                        pose proof (@dotprod_finite_implies ty _).
                                         specialize (H6 (combine  (vec_to_list_float n.+1
                                                                       (\row_j0 A2_J A (inord i) j0)^T)
                                                                   (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
@@ -1890,7 +1891,7 @@ induction k.
                              ---- by rewrite rev_length in Hlength.
                ++++ assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
-                       by case: (x1 == y :> nat).
+                       case: (x1 == y :> nat); auto. unfold Zconst. rewrite FT2R_ftype_of_float; auto.
                     } rewrite H4. apply /RleP. apply matrix_vec_mult_bound_corollary.
                     intros.
                     specialize (Hfin (@inord n i)). 
@@ -1902,7 +1903,7 @@ induction k.
                     apply BPLUS_finite_e in Hfin2; try apply Hfin2.
                     destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
                     rewrite mxE in Hfin22.  
-                    pose proof (@dotprod_finite_implies ty).
+                    pose proof (@dotprod_finite_implies ty _).
                     specialize (H6 (combine  (vec_to_list_float n.+1
                                                                       (\row_j0 A2_J A (inord i) j0)^T)
                                                                   (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
@@ -1932,7 +1933,7 @@ induction k.
                      apply BPLUS_finite_e in Hfin2; try apply Hfin2.
                      destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
                      rewrite mxE in Hfin22.  
-                     pose proof (@dotprod_finite_implies ty).
+                     pose proof (@dotprod_finite_implies ty _).
                      specialize (H6 (combine  (vec_to_list_float n.+1
                                                                       (\row_j0 A2_J A (inord i) j0)^T)
                                                                   (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
@@ -1992,7 +1993,7 @@ induction k.
                                         apply BPLUS_finite_e in Hfin2; try apply Hfin2.
                                         destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
                                         rewrite mxE in Hfin22.  
-                                        pose proof (@dotprod_finite_implies ty).
+                                        pose proof (@dotprod_finite_implies ty _).
                                         specialize (H5 (combine  (vec_to_list_float n.+1
                                                                       (\row_j0 A2_J A (inord i) j0)^T)
                                                                   (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
@@ -2022,7 +2023,7 @@ induction k.
                                         apply BPLUS_finite_e in Hfin2; try apply Hfin2.
                                         destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
                                         rewrite mxE in Hfin22.  
-                                        pose proof (@dotprod_finite_implies ty).
+                                        pose proof (@dotprod_finite_implies ty _).
                                         specialize (H5 (combine  (vec_to_list_float n.+1
                                                                       (\row_j0 A2_J A (inord i) j0)^T)
                                                                   (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
@@ -2122,7 +2123,7 @@ induction k.
                              ---- apply Rmult_le_compat.
                                   +++++ apply /RleP. apply vec_norm_pd.
                                   +++++ apply /RleP. apply vec_norm_pd.
-                                  +++++  pose proof (@inverse_mat_norm_bound ty n A ).
+                                  +++++  pose proof (@inverse_mat_norm_bound ty _ n A ).
                                          assert (forall i : 'I_n.+1, finite (BDIV (Zconst ty 1) (A i i))) by apply Hdivf.
                                          assert (forall i : 'I_n.+1, finite (A i i)) by apply HAf.
                                          by specialize (H4 H5 H6).
@@ -2136,7 +2137,7 @@ induction k.
                                 vec_inf_norm (A1_diag (FT2R_mat A))* (1 + default_rel ty) +
                                 default_abs ty)%Re).
                        { rewrite Rmult_plus_distr_l. rewrite Rmult_1_r.
-                         pose proof (@inverse_mat_norm_bound ty n A ).
+                         pose proof (@inverse_mat_norm_bound ty _ n A ).
                          assert (forall i : 'I_n.+1, finite (BDIV (Zconst ty 1) (A i i))) by apply Hdivf.
                          assert (forall i : 'I_n.+1, finite (A i i)) by apply HAf.
                          specialize (H4 H5 H6).
@@ -2164,7 +2165,7 @@ induction k.
                                                    apply default_rel_ge_0. apply Rplus_le_le_0_compat.
                                                    nra. apply g_pos.
                                              ***** apply Rmult_le_compat_r. apply /RleP. apply matrix_norm_pd.
-                                                   pose proof (@inverse_mat_norm_bound ty n A ).
+                                                   pose proof (@inverse_mat_norm_bound ty _ n A ).
                                                    assert (forall i : 'I_n.+1, finite (BDIV (Zconst ty 1) (A i i))) by apply Hdivf.
                                                    assert (forall i : 'I_n.+1, finite (A i i)) by apply HAf.
                                                    specialize (H5 H6 H7).
@@ -2185,7 +2186,7 @@ induction k.
                                                apply Rmult_le_pos. apply g_pos. apply Rplus_le_le_0_compat; try nra.
                                                apply default_rel_ge_0. apply default_rel_ge_0.
                                                apply Rmult_le_compat_r. apply /RleP. apply vec_norm_pd.
-                                               pose proof (@inverse_mat_norm_bound ty n A ).
+                                               pose proof (@inverse_mat_norm_bound ty _ n A ).
                                                    assert (forall i : 'I_n.+1,
                                                             finite (BDIV (Zconst ty 1) (A i i)) ) by apply Hdivf.
                                                    assert (forall i : 'I_n.+1, finite (A i i)) by apply HAf.
@@ -2206,7 +2207,7 @@ induction k.
                                                apply Rmult_le_pos. apply Rmult_le_pos; try apply g1_pos.  
                                                apply Rplus_le_le_0_compat. nra. apply g_pos.
                                                apply Rplus_le_le_0_compat; try nra; try apply default_rel_ge_0.
-                                               pose proof (@inverse_mat_norm_bound ty n A ).
+                                               pose proof (@inverse_mat_norm_bound ty _ n A ).
                                                    assert (forall i : 'I_n.+1, finite (BDIV (Zconst ty 1) (A i i))) by apply Hdivf.
                                                    assert (forall i : 'I_n.+1, finite (A i i)) by apply HAf.
                                                    specialize (H5 H6 H7).
@@ -2272,12 +2273,12 @@ induction k.
                                         R2 * f_error k b x0 x A )%Re).
                                  { assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
                                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
-                                       by case: (x1 == y :> nat).
+                                      case: (x1 == y :> nat); auto. unfold Zconst; rewrite FT2R_ftype_of_float. reflexivity.
                                     } rewrite -!H5. fold A_real. nra.
                                  } rewrite H5. clear H5. 
                     assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
-                       by case: (x1 == y :> nat).
+                      case: (x1 == y :> nat); auto.  unfold Zconst; rewrite FT2R_ftype_of_float. reflexivity.
                     } rewrite -H5. fold A_real. fold R2. fold R2. fold b_real. 
                     assert ((vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)) <= 
                              f_error k b x0 x A + 
@@ -2419,7 +2420,7 @@ induction k.
 Qed.
 
 
-Theorem jacobi_forward_error_bound {ty} {n:nat} 
+Theorem jacobi_forward_error_bound {ty} `{STD: is_standard ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in

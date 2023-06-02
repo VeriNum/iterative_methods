@@ -5,7 +5,7 @@
 Require Import vcfloat.VCFloat.
 Require Import List.
 Import ListNotations.
-Require Import common sum_model float_acc_lems op_defs list_lemmas.
+Require Import common sum_model float_acc_lems list_lemmas.
 
 Require Import Reals.
 Open Scope R.
@@ -15,7 +15,7 @@ Section NAN.
 Variable NAN: Nans.
 
 Lemma sum_forward_error :
-  forall (t: type) (l: list (ftype t))
+  forall (t: type) `{STD: is_standard t} (l: list (ftype t))
   (Hlen: (1 <= length l)%nat)
   (fs : ftype t) (rs rs_abs : R)
   (Hfs: sum_rel_Ft t l fs)

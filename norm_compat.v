@@ -67,13 +67,13 @@ end.
 Qed.
 
 Require Import floatlib fma_floating_point_model common 
-      op_defs sum_model fma_dot_acc float_acc_lems dotprod_model fma_matrix_vec_mult.
+      sum_model fma_dot_acc float_acc_lems dotprod_model fma_matrix_vec_mult.
 
 
 From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
                             Float_notations Automate.
 
-Lemma fma_dot_prod_norm2_holds {t} {n:nat} {NANS: Nans} m (v : 'cV[ftype t]_n.+1):
+Lemma fma_dot_prod_norm2_holds {t} `{STD: is_standard t}  {n:nat} {NANS: Nans} m (v : 'cV[ftype t]_n.+1):
   let v_l := @vec_to_list_float _ n m v in
   fma_dot_prod_rel (combine v_l v_l) (norm2 (rev v_l)).
 Proof.
@@ -186,7 +186,7 @@ Qed.
 
 
 (*** error between norm2 float and norm2 real **)
-Lemma norm2_error {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
+Lemma norm2_error {t} `{STD: is_standard t}  {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
   let v_l := vec_to_list_float n.+1 v in
   (forall xy : ftype t * ftype t,
      In xy (combine v_l v_l) -> finite xy.1 /\ finite xy.2) ->
@@ -195,7 +195,7 @@ Lemma norm2_error {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
   g t n.+1 * (Rsqr (vec_norm2 (FT2R_mat v))) + g1 t n.+1 (n.+1 - 1)%coq_nat.
 Proof.
 intros.
-pose proof (@fma_dotprod_forward_error _ t v_l v_l).
+pose proof (@fma_dotprod_forward_error _ t _ v_l v_l).
 assert (length v_l = length v_l).
 { by rewrite !length_veclist. }
 specialize (H1 H2).
@@ -237,7 +237,7 @@ rewrite H6 in H1. rewrite sum_abs_eq in H1.
 Qed.
 
 (** Relate norm2 with inf-vec norm **)
-Lemma norm2_vec_inf_norm_rel {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
+Lemma norm2_vec_inf_norm_rel {t} `{STD: is_standard t}  {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
    let v_l := vec_to_list_float n.+1 v in
   (forall xy : ftype t * ftype t,
      In xy (combine v_l v_l) -> finite xy.1/\ finite xy.2) ->
@@ -246,7 +246,7 @@ Lemma norm2_vec_inf_norm_rel {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
     (INR n.+1 * Rsqr (vec_inf_norm (FT2R_mat v))) * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
 Proof.
 intros.
-pose proof (@norm2_error _ _ _ v H H0).
+pose proof (@norm2_error _ _ _ _ v H H0).
 apply Rle_trans with 
 ((vec_norm2 (FT2R_mat v))² * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat).
 + assert (Rsqr (vec_norm2 (FT2R_mat v)) = Rabs (Rsqr (vec_norm2 (FT2R_mat v)))).

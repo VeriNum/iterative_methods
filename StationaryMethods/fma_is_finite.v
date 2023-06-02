@@ -4,7 +4,7 @@ some restrictions on the elements of the vectors, an fma dot product will never 
 Require Import vcfloat.VCFloat vcfloat.FPLib.
 Require Import List.
 Import ListNotations.
-Require Import common op_defs dotprod_model sum_model.
+Require Import common dotprod_model sum_model.
 Require Import float_acc_lems list_lemmas.
 Require Import fma_dot_acc.
 
@@ -154,7 +154,7 @@ Qed.
 
 (* main theorem *)
 Lemma finite_fma_from_bounded : 
-  forall (t: type) (v1 v2: list (ftype t))
+  forall (t: type) `{STD: is_standard t} (v1 v2: list (ftype t))
   (fp : ftype t) 
   (Hfp: fma_dot_prod_rel (List.combine v1 v2) fp)
   (Hn : g1 t (S  (length (List.combine v1 v2)) + 1) (S (length (List.combine v1 v2))) <= fmax t),
@@ -163,9 +163,10 @@ Lemma finite_fma_from_bounded :
     Rabs (FT2R (snd x)) < sqrt  (fun_bnd t (length (List.combine v1 v2))))-> 
   finite fp. 
 Proof.
-intros ? ? ? .
+intros ? ? ? ?.
 induction (List.combine v1 v2).
-{ intros; inversion Hfp; subst; simpl; auto. }
+{ intros; inversion Hfp; subst; simpl; auto. unfold Zconst.
+   rewrite finite_is_finite, is_finite_Binary, float_of_ftype_of_float. reflexivity. }
 { intros. inversion Hfp; subst.
 assert (Hn' : g1 t (S (length l) + 1) (S (length l)) <= fmax t).
 { eapply Rle_trans; [ | apply Hn]; simpl. set (n:= (length l + 1)%nat).

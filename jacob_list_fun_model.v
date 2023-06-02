@@ -10,38 +10,38 @@ Context {NANS: Nans}.
 
 Definition diagmatrix t := list (ftype t).
 
-Definition invert_diagmatrix {t} (v: diagmatrix t) : diagmatrix t :=
+Definition invert_diagmatrix {t} `{STD: is_standard t} (v: diagmatrix t) : diagmatrix t :=
    map (BDIV (Zconst t 1)) v.
 
-Definition diagmatrix_vector_mult {t}: diagmatrix t -> vector t -> vector t :=
+Definition diagmatrix_vector_mult {t} `{STD: is_standard t}: diagmatrix t -> vector t -> vector t :=
   map2 BMULT.
 
-Definition diagmatrix_matrix_mult {t} (v: diagmatrix t) (m: matrix t) : matrix t :=
+Definition diagmatrix_matrix_mult {t} `{STD: is_standard t} (v: diagmatrix t) (m: matrix t) : matrix t :=
   map2 (fun d => map (BMULT d)) v m.
   
-Definition diag_of_matrix {t: type} (m: matrix t) : diagmatrix t :=
+Definition diag_of_matrix {t: type} `{STD: is_standard t} (m: matrix t) : diagmatrix t :=
   map (fun i => matrix_index m i i) (seq 0 (matrix_rows_nat m)).
 
-Definition remove_diag {t} (m: matrix t) : matrix t :=
+Definition remove_diag {t} `{STD: is_standard t} (m: matrix t) : matrix t :=
  matrix_by_index (matrix_rows_nat m) (matrix_rows_nat m)
   (fun i j => if Nat.eq_dec i j then Zconst t 0 else matrix_index m i j).
 
-Definition matrix_of_diag {t} (d: diagmatrix t) : matrix t :=
+Definition matrix_of_diag {t} `{STD: is_standard t} (d: diagmatrix t) : matrix t :=
  matrix_by_index (length d) (length d)
   (fun i j => if Nat.eq_dec i j then nth i d (Zconst t 0) else Zconst t 0).
 
-Definition jacobi_iter {t: type} (A1: diagmatrix t) (A2: matrix t) (b: vector t) (x: vector t) : vector t :=
+Definition jacobi_iter {t: type} `{STD: is_standard t} (A1: diagmatrix t) (A2: matrix t) (b: vector t) (x: vector t) : vector t :=
    diagmatrix_vector_mult (invert_diagmatrix A1) (vector_sub b (matrix_vector_mult A2 x)).
 
-Definition jacobi_residual {t: type} (A1: diagmatrix t) (A2: matrix t) (b: vector t) (x: vector t) : vector t :=
+Definition jacobi_residual {t: type} `{STD: is_standard t} (A1: diagmatrix t) (A2: matrix t) (b: vector t) (x: vector t) : vector t :=
    diagmatrix_vector_mult A1 (vector_sub (jacobi_iter A1 A2 b x) x).
 
 
-Definition going {t} (s acc: ftype t) := 
-   andb (Binary.is_finite (fprec t) (femax t) s) (BCMP Lt false s acc).
+Definition going {t} `{STD: is_standard t} (s acc: ftype t) := 
+   andb (is_finite s) (BCMP Lt false s acc).
 
 
-Fixpoint iter_stop {t} {A} (norm2: A -> ftype t) (residual: A -> A) (f : A -> A) (n:nat) (acc: ftype t) (x:A) :=
+Fixpoint iter_stop {t} `{STD: is_standard t} {A} (norm2: A -> ftype t) (residual: A -> A) (f : A -> A) (n:nat) (acc: ftype t) (x:A) :=
  let y := f x in 
  let s := norm2 (residual x) in 
  match n with
@@ -51,14 +51,14 @@ Fixpoint iter_stop {t} {A} (norm2: A -> ftype t) (residual: A -> A) (f : A -> A)
                 else (s,x)
   end.
 
-Definition jacobi_n {t: type} (A: matrix t) (b: vector t) (x: vector t) (n: nat) : vector t :=
+Definition jacobi_n {t: type} `{STD: is_standard t} (A: matrix t) (b: vector t) (x: vector t) (n: nat) : vector t :=
    let A1 := diag_of_matrix  A in 
    let A2 := remove_diag A in 
    Nat.iter n (jacobi_iter A1 A2 b) x.
 
-Definition dist2 {t: type} (x y: vector t) := norm2 (vector_sub x y).
+Definition dist2 {t: type} `{STD: is_standard t} (x y: vector t) := norm2 (vector_sub x y).
 
-Definition jacobi {t: type} (A: matrix t) (b: vector t) (x: vector t) (acc: ftype t) (n: nat) :
+Definition jacobi {t: type} `{STD: is_standard t} (A: matrix t) (b: vector t) (x: vector t) (acc: ftype t) (n: nat) :
          ftype t * vector t :=
    let A1 := diag_of_matrix  A in 
    let A2 := remove_diag A in 
@@ -82,7 +82,7 @@ Context {NANS: Nans}.
 
 Local Ltac inv H := inversion H; clear H; subst.
 
-Lemma length_diag_of_matrix: forall {t} (m: matrix t),
+Lemma length_diag_of_matrix: forall {t} `{STD: is_standard t} (m: matrix t),
    matrix_cols_nat m (matrix_rows_nat m) ->
    length (diag_of_matrix m) = matrix_rows_nat m.
 Proof.
@@ -91,7 +91,7 @@ Proof.
  rewrite map_length. rewrite seq_length. auto.
 Qed.
 
-Lemma rows_matrix_of_diag: forall {t} (v: diagmatrix t),
+Lemma rows_matrix_of_diag: forall {t} `{STD: is_standard t} (v: diagmatrix t),
    matrix_rows_nat (matrix_of_diag v) = length v.
 Proof.
 intros.
@@ -99,7 +99,7 @@ unfold matrix_of_diag.
 apply matrix_by_index_rows.
 Qed.
 
-Lemma cols_matrix_of_diag: forall {t} (v: diagmatrix t),
+Lemma cols_matrix_of_diag: forall {t} `{STD: is_standard t} (v: diagmatrix t),
    matrix_cols_nat (matrix_of_diag v) (length v).
 Proof.
 intros.
@@ -108,7 +108,7 @@ apply matrix_by_index_cols.
 Qed.
 
 Lemma diag_of_matrix_of_diag:
-  forall {t} (d: diagmatrix t),
+  forall {t} `{STD: is_standard t} (d: diagmatrix t),
   diag_of_matrix (matrix_of_diag d) = d.
 Proof.
 intros.
@@ -133,7 +133,7 @@ rewrite matrix_by_index_index by auto.
 destruct (Nat.eq_dec i); try contradiction; auto.
 Qed.
 
-Lemma Forall_diag_of_matrix {t}: forall (P: ftype t -> Prop) (m: matrix t),
+Lemma Forall_diag_of_matrix {t} `{STD: is_standard t}: forall (P: ftype t -> Prop) (m: matrix t),
  matrix_cols_nat m (matrix_rows_nat m) ->
  Forall (Forall P) m -> Forall P (diag_of_matrix m).
 Proof.
@@ -155,7 +155,7 @@ apply nth_In. lia.
 Qed.
 
 Lemma matrix_binop_by_index:
-  forall {t} (op: ftype t -> ftype t -> ftype t) (m1 m2: matrix t) cols,
+  forall {t} `{STD: is_standard t} (op: ftype t -> ftype t -> ftype t) (m1 m2: matrix t) cols,
   matrix_rows_nat m1 = matrix_rows_nat m2 ->
   matrix_cols_nat m1 cols -> matrix_cols_nat m2 cols ->  
   Forall2 (Forall2 feq) (map2 (map2 op) m1 m2)
@@ -207,7 +207,7 @@ intros.
      eapply IHm1; eauto. lia.
 Qed.
 
-Lemma matrix_rows_nat_remove_diag: forall {t} (m: matrix t),
+Lemma matrix_rows_nat_remove_diag: forall {t} `{STD: is_standard t} (m: matrix t),
     matrix_cols_nat m (matrix_rows_nat m) ->
   matrix_rows_nat m = matrix_rows_nat (remove_diag m).
 Proof.
@@ -217,7 +217,7 @@ Proof.
 Qed.
 
 Lemma matrix_rows_nat_matrix_binop:
- forall {t} (op: ftype t -> ftype t -> ftype t) (m1 m2: matrix t),
+ forall {t} `{STD: is_standard t} (op: ftype t -> ftype t -> ftype t) (m1 m2: matrix t),
  matrix_rows_nat m1 = matrix_rows_nat m2 ->
  matrix_rows_nat (map2 (map2 op) m1 m2) = matrix_rows_nat m1.
 Proof.
@@ -230,7 +230,7 @@ lia.
 Qed.
 
 Lemma matrix_cols_nat_matrix_binop:
- forall {t} (op: ftype t -> ftype t -> ftype t) (m1 m2: matrix t) cols,
+ forall {t} `{STD: is_standard t} (op: ftype t -> ftype t -> ftype t) (m1 m2: matrix t) cols,
  matrix_cols_nat m1 cols -> matrix_cols_nat m2 cols ->
  matrix_cols_nat (map2 (map2 op) m1 m2) cols.
 Proof.
@@ -250,10 +250,11 @@ apply IHm1; auto.
 Qed.
 
 Lemma matrix_cols_nat_matrix_unop:
- forall {t} (op: ftype t -> ftype t) (m: matrix t) cols,
+ forall {t} `{STD: is_standard t} (op: ftype t -> ftype t) (m: matrix t) cols,
  matrix_cols_nat m cols ->
  matrix_cols_nat (map (map op) m) cols.
 Proof.
+intros ? ?.
 induction 1.
 constructor.
 constructor.
@@ -261,7 +262,7 @@ rewrite map_length. auto.
 apply IHForall.
 Qed.
 
-Lemma matrix_cols_nat_remove_diag: forall {t} (m: matrix t),
+Lemma matrix_cols_nat_remove_diag: forall {t} `{STD: is_standard t} (m: matrix t),
     matrix_cols_nat m (matrix_rows_nat m) ->
   matrix_cols_nat (remove_diag m) (matrix_rows_nat m).
 Proof.
@@ -272,7 +273,7 @@ Qed.
 Local Open Scope nat.
 
 Lemma matrix_index_diag:
- forall {t} (d: diagmatrix t) i j,
+ forall {t} `{STD: is_standard t} (d: diagmatrix t) i j,
    i < length d -> j < length d ->
    matrix_index (matrix_of_diag d) i j =
     if (Nat.eq_dec i j) then nth i d (Zconst t 0) else Zconst t 0.
@@ -283,7 +284,7 @@ apply matrix_by_index_index; auto.
 Qed.
 
 Lemma binop_matrix_index:
- forall {t} (f: ftype t -> ftype t -> ftype t)
+ forall {t} `{STD: is_standard t} (f: ftype t -> ftype t -> ftype t)
   (m1 m2: matrix t) cols,
   matrix_rows_nat m1 = matrix_rows_nat m2 ->
   matrix_cols_nat m1 cols -> matrix_cols_nat m2 cols ->
@@ -307,7 +308,7 @@ apply (IHm1 m2 (length a)); auto.
 lia.
 Qed.
 
-Lemma remove_plus_diag: forall {t} (m: matrix t),
+Lemma remove_plus_diag: forall {t} `{STD: is_standard t} (m: matrix t),
    matrix_cols_nat m (matrix_rows_nat m) ->
    Forall (Forall finite) m ->
    Forall2 (Forall2 feq) (matrix_add  (matrix_of_diag (diag_of_matrix m)) (remove_diag m)) m.

@@ -203,53 +203,59 @@ fold sum_rel_R. simpl in IHl; auto.
 Qed.
 
 
-Definition sum_rel_Ft {NAN: Nans} (t: type) := @sum_rel (ftype t) neg_zero BPLUS.
+Definition sum_rel_Ft {NAN: Nans} (t: type) `{STD: is_standard t} := @sum_rel (ftype t) neg_zero BPLUS.
 
-Lemma sum_rel_Ft_single {NAN: Nans} t fs a:
-Binary.is_finite _ _ fs = true ->
+Lemma sum_rel_Ft_single {NAN: Nans} t `{STD: is_standard t} fs a:
+ is_finite fs = true ->
 sum_rel_Ft t [a] fs -> fs = a.
 Proof.
 intros.
-inversion H0.
-inversion H4; subst.
-unfold sum, BPLUS; destruct a; try discriminate; 
+inversion H0; clear H0; subst.
+inversion H4; clear H4; subst.
+rewrite is_finite_Binary in H.
+unfold sum, BPLUS, BINOP, neg_zero in *.
+rewrite !float_of_ftype_of_float in *.
+rewrite <- (ftype_of_float_of_ftype _ _ a) at 2.
+f_equal.
+destruct (float_of_ftype a); try discriminate;
   simpl; auto.
 destruct s; simpl; auto.
 Qed.
 
 
-Lemma is_finite_in {NAN: Nans} (t : type) :
+Lemma is_finite_in {NAN: Nans} (t : type) `{STD: is_standard t}:
   forall (l : list (ftype t)) fs,
   sum_rel_Ft t l fs ->
   let e  := default_abs t in
   let d  := default_rel t in 
   let ov := powerRZ 2 (femax t) in
-  Binary.is_finite (fprec t) (femax t) fs = true ->
-  forall a, In a l -> Binary.is_finite (fprec t) (femax t) a = true.
+  is_finite fs = true ->
+  forall a, In a l -> is_finite a = true.
 Proof.
 induction l.
 simpl; intros; auto.
-intros. 
+intros.
 destruct H1; subst.
-inversion H.
-rewrite <- H2 in H0. clear H2.
+inversion H; clear H; subst.
 unfold sum in H0.
-destruct a0, s; auto.
-destruct s, s0; simpl in H0; try discriminate.
-inversion H.
-fold (@sum_rel_Ft NAN t) in H5.
-assert (Binary.is_finite (fprec t) (femax t) s = true).
-unfold sum in H3.
-rewrite <- H3 in H0. clear H3.
-destruct a, s; auto.
-destruct s, s0; simpl in H0; try discriminate.
-specialize (IHl s H5 H6).
-apply IHl; auto.
+unfold BPLUS, BINOP in H0.
+rewrite is_finite_Binary in *. rewrite float_of_ftype_of_float in H0.
+destruct (float_of_ftype a0), (float_of_ftype s); auto.
+destruct s1, s0; simpl in H0; try discriminate.
+inversion H; clear H; subst.
+fold (@sum_rel_Ft NAN t _) in H5.
+apply (IHl s); auto.
+rewrite is_finite_Binary.
+unfold sum in H0.
+unfold BPLUS, BINOP in H0.
+rewrite is_finite_Binary in *. rewrite float_of_ftype_of_float in H0.
+destruct (float_of_ftype a), (float_of_ftype s); auto.
+destruct s1, s0; simpl in H0; try discriminate.
 Qed.
 
 
 
-Lemma sum_rel_Ft_fold {NAN: Nans} : forall t l fs, 
+Lemma sum_rel_Ft_fold {NAN: Nans} : forall t `{STD: is_standard t} l fs, 
    sum_rel_Ft t l fs -> fs = fold_right BPLUS neg_zero l.
 Proof. 
 induction l.

@@ -13,7 +13,7 @@ Section WITH_NANS.
 Context {NANS: Nans}.
 
 (** Computable definition of rho in reals **)
-Definition rho_def_alt  {t: type} {n:nat} (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) :=
+Definition rho_def_alt  {t: type} `{STD: is_standard t} {n:nat} (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) :=
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let A1_inv_real := FT2R_mat (A1_inv_J A) in 
@@ -31,7 +31,7 @@ Definition rho_def_alt  {t: type} {n:nat} (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]
                 matrix_inf_norm (A2_real) + R)%Re.
 
 (** Computable definition of d_mag in reals **)
-Definition d_mag_def_alt {t: type} {n:nat} (A: 'M[ftype t]_n.+1) 
+Definition d_mag_def_alt {t: type} `{STD: is_standard t} {n:nat} (A: 'M[ftype t]_n.+1) 
   (b: 'cV[ftype t]_n.+1) :=
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in 
@@ -66,7 +66,7 @@ Definition A1_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
   \col_i (A i i).
 
 
-Definition k_min {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
+Definition k_min {NANS: Nans} {t: type} `{STD: is_standard t} {n:nat} (A : 'M[ftype t]_n.+1)
   (b : 'cV[ftype t]_n.+1) (acc : ftype t) :=
   let rho := rho_def A b in
   let d_mag := d_mag_def A b in
@@ -74,7 +74,7 @@ Definition k_min {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
   let x:= mulmx (A_real^-1) b_real in
-  let e_0 := @f_error _ _ _ 0 b x0 x A in
+  let e_0 := @f_error _ _ _ _ 0 b x0 x A in
   let Gamma := FT2R (BMULT acc acc) in
   let delta := default_rel t in
   Z.to_nat (Zceil (Rlog (1 / rho)%Re 
@@ -88,7 +88,7 @@ Definition k_min {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                  (1 + delta) -
                  2 * d_mag / (1 - rho)))%Re)).
 
-Definition jacobi_preconditions_math {t: type} {n:nat}
+Definition jacobi_preconditions_math {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
   (* some property of A,b,accuracy holds such that 
     jacobi_n will indeed converge within k iterations to this accuracy, 
@@ -136,7 +136,7 @@ Definition jacobi_preconditions_math {t: type} {n:nat}
 
 
 
-Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
+Definition k_min_alt {NANS: Nans} {t: type} `{STD: is_standard t} {n:nat} (A : 'M[ftype t]_n.+1)
   (b : 'cV[ftype t]_n.+1) (acc : ftype t) :=
   let rho := rho_def_alt A b in
   let d_mag := d_mag_def_alt A b in
@@ -164,7 +164,7 @@ Definition k_min_alt {NANS: Nans} {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
                  2 * d_mag / (1 - rho)))%Re)).
 
 
-Definition input_bound_Rcompute {t} {n:nat} 
+Definition input_bound_Rcompute {t} `{STD: is_standard t} {n:nat} 
   (A: 'M[ftype t]_n.+1) (x0 b: 'cV[ftype t]_n.+1):=
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -226,7 +226,7 @@ Definition strict_diagonal_dominance {t} {n:nat}
      (Rabs (FT2R_mat A i i ) > 
       \sum_(j < n.+1 | j != i) Rabs (FT2R_mat A i j))%Re.
 
-Definition input_bound_at_N_0_Rcompute {t: type} {n:nat}
+Definition input_bound_at_N_0_Rcompute {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) :=
   (forall i j, 
     (Rabs (FT2R (A2_J A i j)) <
@@ -262,7 +262,7 @@ Definition input_bound_at_N_0_Rcompute {t: type} {n:nat}
 
 
 (** Rcompute **)
-Definition jacobi_preconditions_Rcompute {t: type} {n:nat}
+Definition jacobi_preconditions_Rcompute {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat) : Prop :=
   (* some property of A,b,accuracy holds such that 
     jacobi_n will indeed converge within k iterations to this accuracy, 

@@ -9,7 +9,6 @@ fma_real_func_model.v
 
 
 StationaryMethods/common.v
-StationaryMethods/op_defs.v
 StationaryMethods/float_acc_lems.v
 StationaryMethods/list_lemmas.v
 StationaryMethods/dotprod_model.v

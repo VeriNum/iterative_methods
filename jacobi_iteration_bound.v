@@ -27,7 +27,7 @@ Section WITH_NANS.
 Context {NANS: Nans}.
 
 
-Lemma matrix_vec_norm_A1_diag_mult_A {t: type} {n:nat}
+Lemma matrix_vec_norm_A1_diag_mult_A {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
 (Ha : forall i j, finite (A i j)):
@@ -47,7 +47,7 @@ Qed.
 
 
 (** relation between the non-computable and computable rho **)
-Lemma rho_def_le_alt {t: type} {n:nat}
+Lemma rho_def_le_alt {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
 (Ha : forall i j, finite (A i j)):
@@ -84,7 +84,7 @@ apply Rplus_le_compat.
 Qed.
 
 
-Lemma rho_1_implies_rho_2 {t: type} {n:nat}
+Lemma rho_1_implies_rho_2 {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re ->
@@ -153,7 +153,7 @@ Qed.
 
 
 (** relation between the non-computable and computable d_mag **)
-Lemma d_mag_def_le_alt {t: type} {n:nat}
+Lemma d_mag_def_le_alt {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j))
@@ -249,7 +249,7 @@ Qed.
 
 
 
-Lemma d_mag_def_alt_ge_0 {t: type} {n:nat}
+Lemma d_mag_def_alt_ge_0 {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
    (rho_def_alt A b < 1)%Re ->
    (0 <= d_mag_def_alt A b)%Re.
@@ -331,7 +331,7 @@ Qed.
 
 
 
-Lemma d_mag_alt_gt_0 {t: type} {n:nat}
+Lemma d_mag_alt_gt_0 {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
   (rho_def_alt A b < 1)%Re ->
   (0 < d_mag_def_alt A b)%Re .
@@ -420,7 +420,7 @@ Qed.
 (** Use: lower case gamma **)
 
 (** relation between non-computable and computable defn of e_o in reals **)
-Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
+Lemma f_error0_bnd {t: type} `{STD: is_standard t} {n:nat} (A : 'M[ftype t]_n.+1)
   (b : 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j))
@@ -434,7 +434,7 @@ Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
   let R_def :=  (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t)) *
                     matrix_inf_norm (A2_real))%Re in
   (R_def < 1)%Re ->
-  (@f_error _ _ _ 0 b x0 x A  <=
+  (@f_error _ _ _ _ 0 b x0 x A  <=
     vec_inf_norm (FT2R_mat x0) + 
     (((vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t))
         * vec_inf_norm (b_real)) / (1 - R_def))%Re.
@@ -453,7 +453,7 @@ Qed.
 (** Replace Gamma with tau_squared  **)
 
 (** g  g1  rho d_mag : what do they mean intuitively **)
-Lemma d_mag_rel_1 {t: type} {n:nat}
+Lemma d_mag_rel_1 {t: type}`{STD: is_standard t}  {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j))
@@ -474,7 +474,7 @@ apply rho_def_le_alt; try by []. apply Hrho.
 apply Rmult_le_compat_l. nra. by apply d_mag_def_le_alt.
 assert ((rho_def A b = rho_def_alt A b)%Re \/
                   (rho_def A b < rho_def_alt A b)%Re).
-{ pose proof (@rho_def_le_alt t n A b Hinv Ha).  nra. }
+{ pose proof (@rho_def_le_alt t _ n A b Hinv Ha).  nra. }
 destruct H. 
 rewrite H; nra.
 apply Rlt_le. apply Rinv_lt_contravar .
@@ -487,7 +487,7 @@ by apply Ropp_lt_contravar.
 Qed.
 
 
-Lemma d_mag_rel_2 {t: type} {n:nat}
+Lemma d_mag_rel_2 {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j))
@@ -510,7 +510,7 @@ by apply rho_def_le_alt. apply Hrho.
 apply d_mag_ge_0.
 assert ((rho_def A b = rho_def_alt A b)%Re \/
                   (rho_def A b < rho_def_alt A b)%Re).
-{ pose proof (@rho_def_le_alt t n A b Hinv Ha). nra. }
+{ pose proof (@rho_def_le_alt t _ n A b Hinv Ha). nra. }
 destruct H. 
 rewrite H; nra.
 apply Rlt_le. 
@@ -529,7 +529,7 @@ by apply d_mag_def_le_alt.
 Qed.
 
  
-Lemma input_bound_compute_implies_math {t: type} {n:nat}
+Lemma input_bound_compute_implies_math {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite  (A i j))
@@ -636,7 +636,7 @@ repeat split.
     by apply diagonal_dominance_implies_invertibility.
 Qed.
 
-Lemma ln_rho_rel {t: type} {n:nat}
+Lemma ln_rho_rel {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j)):
@@ -647,7 +647,7 @@ Lemma ln_rho_rel {t: type} {n:nat}
  / ln (1 / rho_def_alt A b))%Re.
 Proof.
 intros. 
-pose proof (@rho_def_le_alt t n A b Hinv Ha).
+pose proof (@rho_def_le_alt t _ n A b Hinv Ha).
 assert (rho_def A b = rho_def_alt A b \/
         (rho_def A b < rho_def_alt A b)%Re) by nra.
 destruct H3. rewrite H3. nra.
@@ -678,7 +678,7 @@ apply Rinv_lt_contravar.
 Qed.
 
 
-Lemma ln_rho_inv_ge_0 {t: type} {n:nat}
+Lemma ln_rho_inv_ge_0 {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j)):
@@ -726,7 +726,7 @@ apply Rlt_le_trans with
 Qed.
 
 
-Lemma tau_sqr_rel{t: type} {n:nat}
+Lemma tau_sqr_rel{t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A  i j)):
@@ -759,7 +759,7 @@ intros. apply Rlt_Rminus. repeat apply Rdiv_lt_right.
 + apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
 + apply vec_norm_strong_not_0 . intros. rewrite !mxE.
   assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
-  { intros. by apply BDIV_FT2R_sep_zero. } apply Hneq.
+  { intros. eapply BDIV_FT2R_sep_zero; eauto. } apply Hneq.
 + apply Rplus_lt_le_0_compat; try nra; try apply g_pos.
 + apply Rcomplements.Rlt_minus_r.
   apply  Rsqr_incrst_0.
@@ -815,7 +815,7 @@ intros. apply Rlt_Rminus. repeat apply Rdiv_lt_right.
 Qed.
 
 
-Lemma tau_sqr_rel_Rcompute {t: type} {n:nat}
+Lemma tau_sqr_rel_Rcompute {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j)):
@@ -851,7 +851,7 @@ intros. apply Rlt_Rminus. repeat apply Rdiv_lt_right.
 + apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
 + apply vec_norm_strong_not_0 . intros. rewrite !mxE.
   assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
-  { intros. by apply BDIV_FT2R_sep_zero. } apply Hneq.
+  { intros. eapply BDIV_FT2R_sep_zero; eauto. } apply Hneq.
 + apply Rplus_lt_le_0_compat; try nra; try apply g_pos.
 + apply Rcomplements.Rlt_minus_r.
   apply  Rsqr_incrst_0.
@@ -915,7 +915,7 @@ Qed.
 
 
 (** Refactoring definitions to make them readable and beautiful **)
-Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
+Lemma jacobi_precond_compute_implies_math {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat)
   (Hrho_gt_0: (0 < rho_def A b)%Re)
   (Hx_lb: (d_mag_def_alt A b / (1 - rho_def_alt A b) <
@@ -966,7 +966,7 @@ assert (HG_re: (FT2R (BMULT accuracy accuracy) >
          intros. apply Hfa. apply Hsd. apply Hrho.
       ++ assert ((rho_def A b = rho_def_alt A b)%Re \/
                   (rho_def A b < rho_def_alt A b)%Re).
-         { pose proof (@rho_def_le_alt t n A b Hfdiv Hfa). nra. }
+         { pose proof (@rho_def_le_alt t _ n A b Hfdiv Hfa). nra. }
          destruct H. 
          rewrite H; nra.
          apply Rlt_le. apply Rinv_lt_contravar .
@@ -1009,7 +1009,7 @@ assert (Hf_ge: (0 <
     - apply d_mag_def_le_alt. apply Hfdiv. apply Hfa. apply Hsd. apply Hrho.
     - assert ((rho_def A b = rho_def_alt A b)%Re \/
                   (rho_def A b < rho_def_alt A b)%Re).
-      { pose proof (@rho_def_le_alt t n A b Hfdiv Hfa). nra. }
+      { pose proof (@rho_def_le_alt t _ n A b Hfdiv Hfa). nra. }
       destruct H. 
       rewrite H; nra.
       apply Rlt_le. 
@@ -1024,17 +1024,17 @@ assert (Hf_ge: (0 <
       by apply Ropp_lt_contravar.
   + unfold f_error.
     assert (FT2R_mat (X_m_jacobi 0 (\col__ Zconst t 0) b A) = 0).
-    { apply matrixP. unfold eqrel. intros. rewrite !mxE. simpl. reflexivity. }
+    { apply matrixP. unfold eqrel. intros. rewrite !mxE. simpl.
+      unfold Zconst; apply FT2R_ftype_of_float. }
     rewrite H. rewrite sub0l_vec. rewrite -vec_inf_norm_opp.
     apply Hx_lb.
 }
-repeat split; try apply size_cons; try apply Hfa; try apply Hfdiv;
+repeat split; auto; try apply size_cons; try apply Hfa; try apply Hfdiv;
 try apply Hrho; try apply Hfacc; try (intros; apply Hfx0);
 try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
 + apply Rle_lt_trans with (rho_def_alt A b).
   by apply rho_def_le_alt. apply Hrho.
 + by apply diagonal_dominance_implies_invertibility.
-+ apply HG_re.
 + assert ((ln
              ((f_error 0 b (\col__ Zconst t 0)
                  ((FT2R_mat A)^-1 *m FT2R_mat b)
@@ -1118,7 +1118,6 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
       apply Hrho_gt_0. by apply rho_def_le_alt.
       apply Hrho. nra.
 + lia.
-+ apply Hf_ge.
 + intros. apply input_bound_compute_implies_math; try by [].  
   apply Hinp.
 + intros. apply input_bound_compute_implies_math;try by []. 
@@ -1133,7 +1132,7 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
 Qed.
 
 
-Definition jacobi_preconditions {t: type}
+Definition jacobi_preconditions {t: type}`{STD: is_standard t}
   (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
   (* some property of A,b,accuracy holds such that 
     jacobi_n will indeed converge within k iterations to this accuracy, 
@@ -1142,13 +1141,13 @@ Definition jacobi_preconditions {t: type}
     (0 < length A)%coq_nat /\
     (length A = length b) /\
     let n := (length A).-1 in
-    let A_v := @matrix_inj t A n.+1 n.+1 in
-    let b_v := @vector_inj t b n.+1 in  
+    let A_v := @matrix_inj t _ A n.+1 n.+1 in
+    let b_v := @vector_inj t _ b n.+1 in  
     jacobi_preconditions_Rcompute A_v b_v accuracy k.
 
 
 Lemma jacobi_iteration_bound_monotone:
-  forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k k': nat),
+  forall {t: type} `{STD: is_standard t} (A: matrix t) (b: vector t) (acc: ftype t) (k k': nat),
    (k <= k')%nat ->
    jacobi_preconditions A b acc k ->
    jacobi_preconditions A b acc k'.
@@ -1171,7 +1170,7 @@ assert (k == k' \/ (k < k')%nat).
 Qed.
 
 Lemma jacobi_iteration_bound_corollaries:
-  forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
+  forall {t: type} `{STD: is_standard t} (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
    matrix_cols A (matrix_rows A) /\
    Forall (Forall finite) A /\
@@ -1238,7 +1237,7 @@ Qed.
   
   
 (** finiteness of dot product **)
-Lemma dotprod_finite {t: type} (v : vector t)
+Lemma dotprod_finite {t: type} `{STD: is_standard t} (v : vector t)
 (Hg1: (g1 t ((length v).+1 + 1)%coq_nat (length v).+1 <= fmax t)%Re):
 (forall xy : ftype t,
   In xy (rev v) ->
@@ -1248,9 +1247,9 @@ Lemma dotprod_finite {t: type} (v : vector t)
    finite (dotprod v v).
 Proof.
 intros.
-pose proof (@finite_fma_from_bounded _ t (rev v) (rev v)).
+pose proof (@finite_fma_from_bounded _ t _ (rev v) (rev v)).
 specialize (H0 (dotprod v v)).
-pose proof (@fma_dot_prod_rel_fold_right _ t).
+pose proof (@fma_dot_prod_rel_fold_right _ t _).
 specialize (H1 v v).
 rewrite -combine_rev in H1; last by [].
 assert (fma_dotprod t v v = dotprod v v).
@@ -1278,13 +1277,13 @@ Notation "A -f B" := (sub_mat A B) (at level 80).
 
 
 
-Definition residual_math {t}  {n:nat}
+Definition residual_math {t} `{STD: is_standard t} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):=
   diag_vector_mult (A1_J A) 
     ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A)).
 
 
-Lemma A1_equiv {t: type} :
+Lemma A1_equiv {t: type} `{STD: is_standard t}:
  forall (A: matrix t) (x : nat),
  (x < length A)%coq_nat ->
  nth x (diag_of_matrix A) (Zconst t 0) =
@@ -1307,7 +1306,7 @@ assert (Rabs x = a \/(Rabs x < a)%Re).
 + apply Rabs_def2 in H0. nra.
 Qed.
 
-Lemma res_xkp1_minus_xk  {t: type} {n:nat}
+Lemma res_xkp1_minus_xk  {t: type} `{STD: is_standard t} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -1332,7 +1331,7 @@ eapply Rle_lt_trans. apply Rmult_le_compat_l.
 apply Rabs_pos. eapply Rle_trans.
 apply Rabs_triang.
 rewrite Rabs_Ropp.
-pose proof (@jacobi_forward_error_bound _ t n).
+pose proof (@jacobi_forward_error_bound _ t _ n).
 assert ((f_error k.+1 b x0 x A <=
           rho ^ k.+1 * f_error 0 b x0 x A +
           (1 - rho ^ k.+1) / (1 - rho) * d_mag)%Re).
@@ -1433,7 +1432,7 @@ apply H1.
 Qed.
 
 
-Lemma bound_6 {t: type} {n:nat}
+Lemma bound_6 {t: type} `{STD: is_standard t} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -1482,7 +1481,7 @@ Qed.
 
 
 
-Lemma no_overflow_xkp1_minus_xk {t: type} {n:nat}
+Lemma no_overflow_xkp1_minus_xk {t: type}`{STD: is_standard t} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
    let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -1506,7 +1505,7 @@ Proof.
 intros.
 eapply Rle_lt_trans. apply Rabs_triang.
 rewrite Rabs_Ropp.
-pose proof (@jacobi_forward_error_bound _ t n).
+pose proof (@jacobi_forward_error_bound _ t _ n).
 assert ((f_error k.+1 b x0 x A <=
           rho ^ k.+1 * f_error 0 b x0 x A +
           (1 - rho ^ k.+1) / (1 - rho) * d_mag)%Re).
@@ -1609,7 +1608,7 @@ apply H1.
 Qed.
 
 
-Lemma finite_xkp1_minus_xk {t: type} {n:nat}
+Lemma finite_xkp1_minus_xk {t: type} `{STD: is_standard t} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -1628,7 +1627,7 @@ Lemma finite_xkp1_minus_xk {t: type} {n:nat}
 Proof.
 intros ? ? ? ? ? ? Hcond Hf0.
 apply BPLUS_no_overflow_is_finite; try rewrite ?finite_BOPP;
-try (pose proof (@jacobi_forward_error_bound _ t n);
+try (pose proof (@jacobi_forward_error_bound _ t _ n);
   unfold forward_error_cond in Hcond;
   unfold rho_def in Hcond;apply H0; try (intros; apply Hcond); try apply size_cons).
 unfold Bplus_no_overflow.
@@ -1653,9 +1652,10 @@ eapply Rle_trans. apply Rabs_triang.
 rewrite Rabs_R1. apply Rplus_le_compat_l.
 apply Hd. apply Rcomplements.Rlt_div_r.
 apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-rewrite [in X in (Rabs ( _ + X) < _)%Re]/FT2R B2R_Bopp.
-fold (@FT2R t).
-by apply no_overflow_xkp1_minus_xk.
+unfold BOPP. rewrite FT2R_ftype_of_float.
+rewrite [in X in (Rabs ( _ + X) < _)%Re] B2R_Bopp.
+rewrite B2R_float_of_ftype.
+apply no_overflow_xkp1_minus_xk; auto.
 Qed.
 
 Lemma fun_bnd_lt_fmax {t} {n:nat}:
@@ -1770,7 +1770,7 @@ apply sqrt_less_alt.
 Qed.
 
 
-Lemma finite_Bmult_res {t: type} {n:nat}
+Lemma finite_Bmult_res {t: type} `{STD: is_standard t} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -1812,7 +1812,7 @@ apply BMULT_no_overflow_is_finite.
   rewrite Rabs_mult. rewrite mxE.
   rewrite Bminus_bplus_opp_equiv;
   try by apply finite_xkp1_minus_xk.
-    pose proof (@BPLUS_accurate' _ t).
+    pose proof (@BPLUS_accurate' _ t _).
     specialize (H2 (X_m_jacobi k.+1 x0 b A 
                       (inord m) ord0)
                     (BOPP
@@ -1821,8 +1821,9 @@ apply BMULT_no_overflow_is_finite.
     specialize (H2 (finite_xkp1_minus_xk _ _ _ _ _ H H0 Hf0)).
     destruct H2 as [d1 [Hd1 H2]].
     rewrite H2.
-    rewrite [in X in (_ * Rabs (( _ + X) * _) < _)%Re]/FT2R B2R_Bopp.
-    fold (@FT2R t). rewrite Rabs_mult.
+    unfold BOPP. rewrite FT2R_ftype_of_float.
+    rewrite [in X in (_ * Rabs (( _ + X) * _) < _)%Re] B2R_Bopp.
+    rewrite B2R_float_of_ftype. rewrite Rabs_mult.
     rewrite -Rmult_assoc. 
     eapply Rle_lt_trans. apply Rmult_le_compat_l.
     apply Rmult_le_pos; apply Rabs_pos.
@@ -1830,7 +1831,7 @@ apply BMULT_no_overflow_is_finite.
     rewrite Rabs_R1. apply Rplus_le_compat_l.
     apply Hd1. apply Rcomplements.Rlt_div_r.
     apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-    pose proof (@res_xkp1_minus_xk t n A x0 b k m). 
+    pose proof (@res_xkp1_minus_xk t _ n A x0 b k m). 
     assert ((m < n.+1)%nat). { by apply /ssrnat.ltP. }
     specialize (H3 H4 H0 Hf0).
     eapply Rlt_trans. 
@@ -1843,7 +1844,7 @@ apply BMULT_no_overflow_is_finite.
 Qed.
 
 
-Lemma residual_finite {t: type} {n:nat}
+Lemma residual_finite {t: type} `{STD: is_standard t} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) (k:nat):
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -1890,12 +1891,12 @@ repeat split.
     apply Hcond. 
   - rewrite mxE.  apply Bplus_bminus_opp_implies.
     apply Bplus_no_ov_finite.
-    * pose proof (@jacobi_forward_error_bound _ t n).
+    * pose proof (@jacobi_forward_error_bound _ t _ n).
       unfold forward_error_cond in Hcond.
       unfold rho_def in Hcond.
       apply H1; try (intros; apply Hcond).
     * rewrite  finite_BOPP. 
-      pose proof (@jacobi_forward_error_bound _ t n).
+      pose proof (@jacobi_forward_error_bound _ t _ n).
       unfold forward_error_cond in Hcond.
       unfold rho_def in Hcond.
       apply H1; try (intros; apply Hcond).
@@ -1911,8 +1912,9 @@ repeat split.
                                (inord m) ord0)))).
       destruct H1 as [d2 [e2 [Hde2 [Hd2 [He2 H1]]]]].
       rewrite H1.
-      rewrite [in X in (Rabs (( _ + X) * _ + _) < _)%Re]/FT2R B2R_Bopp.
-      fold (@FT2R t).
+      unfold BOPP. rewrite FT2R_ftype_of_float.
+      rewrite [in X in (Rabs (( _ + X) * _ + _) < _)%Re] B2R_Bopp.
+      rewrite B2R_float_of_ftype.
       eapply Rle_lt_trans. apply Rabs_triang.
       eapply Rle_lt_trans. apply Rplus_le_compat_l. apply He2.
       apply Rcomplements.Rlt_minus_r.
@@ -1950,7 +1952,7 @@ repeat split.
       by rewrite rev_length length_veclist in Hlenk.
     }
     rewrite Bminus_bplus_opp_equiv.
-    * pose proof (@BPLUS_accurate' _ t).
+    * pose proof (@BPLUS_accurate' _ t _).
       specialize (H3 (X_m_jacobi k.+1 x0 b A 
                           (inord m) ord0) 
                       (BOPP
@@ -1958,8 +1960,9 @@ repeat split.
                              (inord m) ord0)) H2).
       destruct H3 as [d4 [Hd4 H3]].
       rewrite H3.
-      rewrite [in X in (_ * Rabs (( _ + X) * _ ) < _)%Re]/FT2R B2R_Bopp.
-      fold (@FT2R t). rewrite Rabs_mult.
+      unfold BOPP. rewrite FT2R_ftype_of_float.
+      rewrite [in X in (_ * Rabs (( _ + X) * _ ) < _)%Re] B2R_Bopp.
+      rewrite B2R_float_of_ftype. rewrite Rabs_mult.
       eapply Rle_lt_trans. apply Rmult_le_compat_l. apply Rabs_pos.
       apply Rmult_le_compat_l. apply Rabs_pos.
       eapply Rle_trans. apply Rabs_triang. rewrite Rabs_R1.
@@ -1967,7 +1970,7 @@ repeat split.
       rewrite -Rmult_assoc.
       apply Rcomplements.Rlt_div_r.
       apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
-      pose proof (@res_xkp1_minus_xk  t n A x0 b k m).
+      pose proof (@res_xkp1_minus_xk  t _ n A x0 b k m).
       assert ((m < n.+1)%nat). 
       { rewrite rev_length length_veclist in Hlenk. by apply /ssrnat.ltP. }
       specialize (H4 H5 Hcond Hf0).
@@ -2002,7 +2005,7 @@ repeat split.
    rewrite rev_length length_veclist in Hlenk;
    apply /ssrnat.ltP)).
   rewrite mxE inord_val.
-  pose proof (@BMULT_accurate' _ t).
+  pose proof (@BMULT_accurate' _ t _).
   specialize (H1 (A (inord m) (inord m)) 
                  ((X_m_jacobi k.+1 x0 b A -f
                     X_m_jacobi k x0 b A) (inord m) ord0)).
@@ -2039,7 +2042,7 @@ repeat split.
      by rewrite rev_length length_veclist in Hlenk.
   }
   rewrite Bminus_bplus_opp_equiv.
-  - pose proof (@BPLUS_accurate' _ t).
+  - pose proof (@BPLUS_accurate' _ t _).
     specialize (H4 (X_m_jacobi k.+1 x0 b A 
                         (inord m) ord0)
                    (BOPP
@@ -2055,26 +2058,27 @@ repeat split.
     apply Rcomplements.Rlt_div_r.
     apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
     unfold n0.
-    rewrite [in X in (_ * (Rabs (_ + X)) < _)%Re]/FT2R B2R_Bopp.
-    fold (@FT2R t). apply res_xkp1_minus_xk.
+    unfold BOPP. rewrite FT2R_ftype_of_float.
+    rewrite [in X in (_ * (Rabs (_ + X)) < _)%Re] B2R_Bopp.
+    rewrite B2R_float_of_ftype. apply res_xkp1_minus_xk.
     rewrite rev_length length_veclist in Hlenk. by apply /ssrnat.ltP.
     apply Hcond. apply Hf0.
   - apply H3.
 Qed.
 
-Lemma vector_residual_equiv {t: type} :
+Lemma vector_residual_equiv {t: type} `{STD: is_standard t} :
  forall (A: matrix t) (b x0: vector t) (k:nat),
   let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
+  let A' := @matrix_inj _ _ A n.+1 n.+1 in
+  let b' := @vector_inj _ _ b n.+1 in
   let A_real := FT2R_mat A' in
   let b_real := FT2R_mat b' in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
-  let x0' := @vector_inj _ x0 n.+1 in
+  let x0' := @vector_inj _ _ x0 n.+1 in
   length b = length A ->
   length x0 = length A ->
   (0 < length A)%coq_nat ->
-  @vector_inj _ (resid (jacobi_n A b x0 k)) n.+1 = 
+  @vector_inj _ _ (resid (jacobi_n A b x0 k)) n.+1 = 
   residual_math A' x0' b' k.
 Proof.
 intros.
@@ -2095,7 +2099,7 @@ unfold resid, jacobi_residual.
          -- rewrite combine_nth.
             assert (nth x (jacobi_n A b x0 k) (Zconst t 0) = 
                       X_m_jacobi k x0' b' A' x ord0).
-            { pose proof (@func_model_equiv _ t A b x0 k).
+            { pose proof (@func_model_equiv _ t _ A b x0 k).
               unfold x0', b', A'. unfold n.
               rewrite -H2. rewrite !mxE. by [].
               by apply /ssrnat.ltP. apply H. apply H0.
@@ -2205,7 +2209,7 @@ intros. apply matrixP. unfold eqrel.
 intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
 Qed.
 
-Lemma dotprod_finite_implies {t: type} (v : vector t):
+Lemma dotprod_finite_implies {t: type} `{STD: is_standard t} (v : vector t):
   finite (dotprod (rev v) (rev v)) ->
 (forall x, In x v -> finite x).
 Proof.
@@ -2213,7 +2217,7 @@ intros.
 induction v.
 + by simpl in H0.
 + assert (dotprod (rev (a :: v)) (rev (a :: v)) = 
-           @BFMA _ t a a (dotprod (rev v) (rev v))).
+           @BFMA _ t _ a a (dotprod (rev v) (rev v))).
   { rewrite [in LHS]/dotprod.
     assert (combine (rev (a :: v)) (rev (a :: v))  = 
             (combine (rev v) (rev v)) ++ [(a,a)]).
@@ -2232,7 +2236,7 @@ induction v.
 Qed.
  
 
-Lemma vec_succ_err {t: type} {n:nat}
+Lemma vec_succ_err {t: type} `{STD: is_standard t} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) :
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
@@ -2247,7 +2251,7 @@ Lemma vec_succ_err {t: type} {n:nat}
     (rho ^ k * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))%Re.
 Proof.
 intros ? ? ? ? ? ?  ?  Hcond Hf0.
-pose proof (@vec_float_sub_1 _ t n).
+pose proof (@vec_float_sub_1 _ t _ n).
 specialize (H (X_m_jacobi k.+1 x0 b A) (X_m_jacobi k x0 b A)).
 assert (forall xy : ftype t * ftype t,
              In xy
@@ -2263,13 +2267,13 @@ assert (forall xy : ftype t * ftype t,
       x_k+1 - x_k is finite
   **)
   intros. 
-  pose proof (@residual_finite  t n A b k Hcond Hf0).
+  pose proof (@residual_finite  t _ n A b k Hcond Hf0).
   unfold norm2 in H1. 
-  pose proof (@dotprod_finite_implies t).
+  pose proof (@dotprod_finite_implies t _).
   specialize (H2 (
              (vec_to_list_float n.+1
                 (residual_math A x0 b k))) H1).
-  pose proof (@dotprod_finite_implies t).
+  pose proof (@dotprod_finite_implies t _).
   specialize (H3 (
              (vec_to_list_float n.+1
                 (residual_math A x0 b k))) H1).
@@ -2390,7 +2394,8 @@ apply Rle_trans with
           assert (FT2R_mat A *m A_real^-1 = 1).
           { fold A_real.  rewrite mulmxV . by []. apply Hcond. }
           rewrite H2. by rewrite mul1mx /b_real.
-        + intros. unfold A_real. rewrite !mxE. apply BDIV_FT2R_sep_zero; apply Hcond.
+        + intros. unfold A_real. rewrite !mxE.
+          eapply BDIV_FT2R_sep_zero; eauto; apply Hcond.
       }  rewrite H2.
       assert (vec_inf_norm
                  (FT2R_mat (X_m_jacobi k.+1 x0 b A) -
@@ -2400,7 +2405,7 @@ apply Rle_trans with
                  (FT2R_mat (X_m_jacobi k x0 b A) -
                   x_fix x b_real A_real) = f_error k b x0 x A).
       { by rewrite /f_error. } rewrite H3 H4.
-      pose proof (@jacobi_forward_error_bound _ t n A b).
+      pose proof (@jacobi_forward_error_bound _ t _ n A b).
       assert (forall i : 'I_n.+1,finite (A i i)) by apply Hcond.
       assert ((rho < 1)%Re) by apply Hcond.
       assert (FT2R_mat A \in unitmx). 
@@ -2472,7 +2477,7 @@ Qed.
 
 
 
-Lemma Gamma_constraint {t}  {n:nat} 
+Lemma Gamma_constraint {t} `{STD: is_standard t} {n:nat} 
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) (acc : ftype t) :
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
@@ -2557,7 +2562,7 @@ Qed.
 
 
 (*** Bound for the residual ***)
-Lemma residual_bound {t: type} {n:nat} 
+Lemma residual_bound {t: type} `{STD: is_standard t} {n:nat} 
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat):
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
@@ -2581,13 +2586,13 @@ intros ? ? ? ? ? ? ? ? ?  He0 Hcond .
 eapply Rle_trans.
 + apply norm2_vec_inf_norm_rel.
   - intros.
-    pose proof (@residual_finite  t n A  b k Hcond He0).
+    pose proof (@residual_finite  t _ n A  b k Hcond He0).
     unfold norm2 in H0. 
-    pose proof (@dotprod_finite_implies t).
+    pose proof (@dotprod_finite_implies t _).
     specialize (H1 (
                (vec_to_list_float n.+1
                   (residual_math A x0 b k))) H0).
-    pose proof (@dotprod_finite_implies t).
+    pose proof (@dotprod_finite_implies t _).
     specialize (H2 (
                      (vec_to_list_float n.+1
                         (residual_math A x0 b k))) H0).
@@ -2657,7 +2662,7 @@ eapply Rle_trans.
           vec_inf_norm (FT2R_mat (X_m_jacobi k.+1 x0 b A -f
                           X_m_jacobi k x0 b A)) * 
           g t n.+1 +  g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
-         -- pose proof (@vec_norm_diag _ t n (A1_J A) 
+         -- pose proof (@vec_norm_diag _ t _ n (A1_J A) 
                         (X_m_jacobi k.+1 x0 b A -f
                           X_m_jacobi k x0 b A)).
             assert (forall xy : ftype t * ftype t,
@@ -2671,13 +2676,13 @@ eapply Rle_trans.
                      finite xy.2 /\
                      finite (BMULT xy.1 xy.2)).
             { intros.
-              pose proof (@residual_finite  t n A b k Hcond He0).
+              pose proof (@residual_finite  t _ n A b k Hcond He0).
               unfold norm2 in H1.
-              pose proof (@dotprod_finite_implies t).
+              pose proof (@dotprod_finite_implies t _).
               specialize (H2 (
                          (vec_to_list_float n.+1
                             (residual_math A x0 b k))) H1).
-              pose proof (@dotprod_finite_implies t).
+              pose proof (@dotprod_finite_implies t _).
               specialize (H3 (
                               (vec_to_list_float n.+1
                                  (residual_math A x0 b k))) H1).
@@ -2866,7 +2871,7 @@ Qed.
 
 Close Scope Z_scope.
 
-Lemma jacobi_iteration_bound {t: type} {n : nat} :
+Lemma jacobi_iteration_bound {t: type} `{STD: is_standard t} {n : nat} :
  forall (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (acc: ftype t) (k: nat),
    jacobi_preconditions_math A b acc k -> 
    let acc2 := BMULT acc acc in
@@ -2895,7 +2900,7 @@ split.
   - unfold BCMP.
     rewrite Bcompare_correct. 
     * rewrite Rcompare_Lt; first by [].
-      change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
+      rewrite !B2R_float_of_ftype.
       remember (FT2R acc2) as Gamma.
       assert ((FT2R
                  (norm2
@@ -2936,7 +2941,7 @@ split.
           ((rho ^ (k_min A b acc).+1 * (1 + rho) * (e_0 - d_mag / (1 - rho)) + 2 * d_mag / (1 - rho)) * (1+ default_rel t))
             * (1 + g t n.+1) + g1 t n.+1 (n.+1 - 1)%coq_nat) *
           (1 + g t n.+1)) + g1 t n.+1 (n.+1 - 1)%coq_nat)%Re.
-      ++ pose proof (@residual_bound t n A b (k_min A b acc).+1).
+      ++ pose proof (@residual_bound t _ n A b (k_min A b acc).+1).
          rewrite Heqx Heqd_mag Heqrho in He0. specialize (H1 He0).
          assert (forward_error_cond A (\col__ Zconst t 0) b ).
          { unfold forward_error_cond. repeat split; try by intros; try by (intros; apply Hinp).
@@ -3014,7 +3019,7 @@ split.
             first  by (apply Rplus_lt_le_0_compat; try nra; try apply g_pos).
             rewrite Rmult_comm. apply Rcomplements.Rlt_div_r.
             ** assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
-               { intros. by apply BDIV_FT2R_sep_zero. }
+               { intros. eapply BDIV_FT2R_sep_zero; eauto. }
                apply vec_norm_strong_not_0. intros. 
                rewrite !mxE. apply Hneq.
             ** apply Rcomplements.Rlt_div_r;
@@ -3040,7 +3045,7 @@ split.
                                 apply Gamma_constraint. auto.
                                 rewrite Heqrho in Hrho. apply Hrho.
                                 intros.
-                                rewrite !mxE. by apply BDIV_FT2R_sep_zero.
+                                rewrite !mxE. eapply BDIV_FT2R_sep_zero; eauto.
                                 rewrite Heqrho Heqd_mag in HG. apply HG.
                            ++++ apply Rinv_0_lt_compat.
                                 apply pow_lt.  apply H1.
@@ -3079,7 +3084,7 @@ split.
                                 apply Gamma_constraint. auto.
                                 rewrite Heqrho in Hrho. apply Hrho.
                                 intros.
-                                rewrite !mxE. by apply BDIV_FT2R_sep_zero.
+                                rewrite !mxE. by eapply BDIV_FT2R_sep_zero.
                                 rewrite Heqrho Heqd_mag in HG. apply HG.
                           }
                           rewrite H4.
@@ -3126,19 +3131,19 @@ split.
              ** apply Rplus_le_le_0_compat. nra. apply default_rel_ge_0.
              ** apply Rplus_le_le_0_compat. nra. apply g_pos.
           -- apply sqrt_pos.
-    * rewrite <- finite_is_finite. apply residual_finite.
+    *  rewrite <- is_finite_Binary. rewrite <- finite_is_finite. apply residual_finite.
       unfold forward_error_cond. repeat split; try (by intros); try by (intros; apply Hinp); try apply Hrho. 
       ++ apply size_cons.
       ++ apply size_cons.
       ++ apply He0.
-    * rewrite <- finite_is_finite; auto.
+    * rewrite <- is_finite_Binary; rewrite <- finite_is_finite; auto.
 Qed.
 
-Lemma jacobi_iteration_bound_lowlevel' {t: type} :
+Lemma jacobi_iteration_bound_lowlevel' {t: type} `{STD: is_standard t}:
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
   let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
+  let A' := @matrix_inj _ _ A n.+1 n.+1 in
+  let b' := @vector_inj _ _ b n.+1 in
    jacobi_preconditions_math A' b' acc k ->
    length A = length b ->
    (0 < length A)%coq_nat ->
@@ -3154,7 +3159,7 @@ Lemma jacobi_iteration_bound_lowlevel' {t: type} :
     BCMP Lt false (norm2 (resid (jacobi_n A b x0 j))) acc2 = false.
 Proof.
 intros.
-pose proof (@jacobi_iteration_bound t (length A).-1).
+pose proof (@jacobi_iteration_bound t _ (length A).-1).
 specialize (H2 A' b' acc k H).
 destruct H2 as [Hacc H2].
 unfold jacobi_preconditions_math in H.
@@ -3165,13 +3170,13 @@ split.
   exists j. split; try by [].
   intros. destruct H2 as [Hf Hlt]. split.
   - intros.  specialize (Hf i H2).
-    pose proof (@vector_residual_equiv t A b x0 i).
+    pose proof (@vector_residual_equiv t _ A b x0 i).
     assert (length b = length A) by (symmetry; apply  H0).
     assert (length x0 = length A).
     { unfold x0. by rewrite !repeat_length. }
     assert ((0 < length A)%coq_nat) by apply H1.
     specialize (H3 H4 H5 H6).
-    pose proof (@v_equiv t).
+    pose proof (@v_equiv t _).
     specialize (H7 (resid (jacobi_n A b x0 i)) n).
     assert (length (resid (jacobi_n A b x0 i)) = n.+1).
     { repeat rewrite /matrix_vector_mult !map_length combine_length.
@@ -3194,13 +3199,13 @@ split.
     { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
       by rewrite nth_repeat.
     } rewrite H10. apply Hf.
-  - pose proof (@vector_residual_equiv t A b x0 j).
+  - pose proof (@vector_residual_equiv t _ A b x0 j).
     assert (length b = length A) by (symmetry; apply H0).
     assert (length x0 = length A).
     { unfold x0. by rewrite !repeat_length. }
     assert ((0 < length A)%coq_nat) by apply H1.
     specialize (H2 H3 H4 H5).
-    pose proof (@v_equiv t).
+    pose proof (@v_equiv t) _.
     specialize (H6 (resid (jacobi_n A b x0 j)) n).
     assert (length (resid (jacobi_n A b x0 j)) = n.+1).
     { repeat rewrite /matrix_vector_mult !map_length combine_length.
@@ -3336,16 +3341,16 @@ Qed.
 Close Scope R_scope.
 
 
-Lemma bound_each_elem_A2_x0 {t: type} :
+Lemma bound_each_elem_A2_x0 {t: type} `{STD: is_standard t}:
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
+  let A' := @matrix_inj _ _ A n.+1 n.+1 in
+  let b' := @vector_inj _ _ b n.+1 in
+  let x0' := @vector_inj _ _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat -> 
   (forall i j, finite (A2_J A' i j)) ->
@@ -3385,6 +3390,7 @@ destruct Hnth as [Hnth1 Hnth2].
 simpl. rewrite -Hnth1 -Hnth2.
 repeat split; try apply H2; try apply H3; try apply H4.
 rewrite !mxE. unfold x0. rewrite nth_repeat /=.
+unfold Zconst. rewrite FT2R_ftype_of_float; simpl.
 rewrite Rabs_R0. apply sqrt_lt_R0.      
 apply fun_bound_gt_0.
 by apply g1_constraint.
@@ -3395,23 +3401,23 @@ by rewrite combine_length !length_veclist Nat.min_id.
 Qed.
 
 
-Lemma finite_residual_0_aux1 {t: type} :
+Lemma finite_residual_0_aux1 {t: type} `{STD: is_standard t} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
+  let A' := @matrix_inj _ _ A n.+1 n.+1 in
+  let b' := @vector_inj _ _ b n.+1 in
+  let x0' := @vector_inj _ _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat -> 
   @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
   input_bound_at_N_0_Rcompute A' b' ->
-  is_finite (fprec t) (femax t)
+  FPCore.is_finite
     (let l1 :=
        vec_to_list_float n.+1
          (\row_j A2_J A' (inord k) j)^T in
@@ -3421,7 +3427,7 @@ Lemma finite_residual_0_aux1 {t: type} :
      dotprod_r l1 l2) = true.
 Proof.
 intros.
-pose proof (@finite_fma_from_bounded _ t).
+pose proof (@finite_fma_from_bounded _ t _).
 specialize (H6 (vec_to_list_float n.+1
                         (\row_j A2_J A' (inord k) j)^T)
                     (vec_to_list_float n.+1
@@ -3431,7 +3437,7 @@ specialize (H6 (dotprod_r
                         (\row_j A2_J A' (inord k) j)^T)
                       (vec_to_list_float n.+1
                             (\col_j x0' j ord0)))).
-pose proof (@fma_dot_prod_rel_holds _ n t n.+1 k (A2_J A')
+pose proof (@fma_dot_prod_rel_holds _ n t _ n.+1 k (A2_J A')
                     (\col_j x0' j ord0)).
 specialize (H6 H7). clear H7.
 rewrite combine_length !length_veclist Nat.min_id in H6.
@@ -3442,7 +3448,7 @@ apply H6.
 Qed.
 
 
-Lemma dotprod_r_eq_0_r {t} (v : list (ftype t * ftype t)):
+Lemma dotprod_r_eq_0_r {t} `{STD: is_standard t} (v : list (ftype t * ftype t)):
   (forall i, (i < length v)%coq_nat ->
              nth ((length v).-1 - i)%coq_nat (snd (List.split v)) (Zconst t 0) = Zconst t 0 \/
              nth ((length v).-1 - i)%coq_nat (snd (List.split v)) (Zconst t 0) = neg_zero) ->
@@ -3483,16 +3489,20 @@ induction v.
   rewrite H3 in H0.
   rewrite ?list_split_l ?list_split_r /= in H0.
   destruct H.
-  - rewrite H. auto.
-    destruct a.1; try contradiction; simpl;auto.
+  - rewrite H.
+    unfold BFMA. rewrite finite_is_finite in H0. rewrite is_finite_Binary in H0.
+    unfold Zconst; rewrite float_of_ftype_of_float.
+    destruct (float_of_ftype a.1); try discriminate; simpl;auto.
     destruct s; auto.
-    unfold BFMA, Bfma, BSN2B,BinarySingleNaN.Bfma.
+    unfold Bfma, BSN2B,BinarySingleNaN.Bfma. f_equal.
     simpl. unfold BinarySingleNaN.Bfma_szero.
     simpl. destruct s; simpl; auto.
-  - rewrite H. auto.
-    destruct a.1; try contradiction; simpl;auto.
-    destruct s; auto. 
-    unfold BFMA, Bfma, BSN2B,BinarySingleNaN.Bfma.
+  - rewrite H.
+    unfold BFMA. rewrite finite_is_finite in H0. rewrite is_finite_Binary in H0.
+    unfold Zconst, neg_zero; rewrite !float_of_ftype_of_float. f_equal.
+    destruct (float_of_ftype a.1); try discriminate; simpl;auto.
+    destruct s; auto.
+    unfold Bfma, BSN2B,BinarySingleNaN.Bfma.
     simpl. unfold BinarySingleNaN.Bfma_szero.
     simpl. destruct s; simpl; auto.
   - intros.
@@ -3511,16 +3521,16 @@ induction v.
     by rewrite ?list_split_l ?list_split_r /= in H0.
 Qed.
 
-Lemma A2_mult_x0_eq_0 {t: type} :
+Lemma A2_mult_x0_eq_0 {t: type} `{STD: is_standard t}:
   forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
+  let A' := @matrix_inj _ _ A n.+1 n.+1 in
+  let b' := @vector_inj _ _ b n.+1 in
+  let x0' := @vector_inj _ _ x0 n.+1 in
   (forall i j, finite (A2_J A' i j)) ->
   forall i,
   (A2_J A' *f x0') i ord0 = Zconst t 0.
@@ -3540,7 +3550,7 @@ assert ((let l1 :=
                 (\col_j 
                  x0' j ord0) in
             dotprod_r l1 l2) = Zconst t 0).
-  { pose proof (@dotprod_r_eq_0_r t).
+  { pose proof (@dotprod_r_eq_0_r t _).
     specialize (H2 (combine 
                     (vec_to_list_float n.+1
                         (\row_j  A2_J A' (inord i) j)^T)
@@ -3563,17 +3573,16 @@ assert ((let l1 :=
   } rewrite inord_val in H2. by rewrite H2.
 Qed. 
 
-
-Lemma no_overflow_0_aux1 {t: type} :
+Lemma no_overflow_0_aux1 {t: type} `{STD: is_standard t}:
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
+  let A' := @matrix_inj _ _ A n.+1 n.+1 in
+  let b' := @vector_inj _ _ b n.+1 in
+  let x0' := @vector_inj _ _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat ->
   @size_constraint t n ->
@@ -3591,7 +3600,7 @@ intros ? ? ? ? ? ? ? ? ? ? ? ? size_cons HfA2 Hfx0 Hinp.
 unfold Bplus_no_overflow.
 rewrite A2_mult_x0_eq_0; try by [].
 assert (FT2R (BOPP (Zconst t 0)) = 0%Re).
-{ by simpl. } rewrite H2 Rplus_0_r.
+{ unfold BOPP, Zconst. rewrite FT2R_ftype_of_float. rewrite float_of_ftype_of_float. by simpl. } rewrite H2 Rplus_0_r.
 pose proof (@generic_round_property t).
 specialize (H3 (FT2R (b' (inord k) ord0))).
 destruct H3 as [d [e [Hde [Hd [He H3]]]]].
@@ -3608,16 +3617,16 @@ apply Hinp.
 Qed.
 
 
-Lemma finite_residual_0_aux2 {t: type} :
+Lemma finite_residual_0_aux2 {t: type} `{STD: is_standard t}:
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
+  let A' := @matrix_inj _ _ A n.+1 n.+1 in
+  let b' := @vector_inj _ _ b n.+1 in
+  let x0' := @vector_inj _ _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat ->
   @size_constraint t n ->
@@ -3638,32 +3647,37 @@ apply Bplus_bminus_opp_implies.
 apply Bplus_no_ov_finite.
 + by rewrite inord_val. 
 + rewrite inord_val.
-  apply finite_is_finite. rewrite is_finite_Bopp.
-  rewrite mxE. by apply finite_residual_0_aux1.
+  apply finite_is_finite. rewrite is_finite_Binary.
+  unfold BOPP. rewrite float_of_ftype_of_float. rewrite is_finite_Bopp.
+  rewrite mxE. rewrite <- is_finite_Binary. by apply finite_residual_0_aux1.
 + apply no_overflow_0_aux1; try by [].
   rewrite -/n. rewrite inordK; try by apply /ssrnat.ltP.
   by apply H1. 
 Qed.
 
-Lemma Bplus_x_BOPP_0 {t} (x: ftype t):
+Lemma Bplus_x_BOPP_0 {t} `{STD: is_standard t} (x: ftype t):
   finite x ->
   BPLUS x (BOPP (Zconst t 0)) = x.
 Proof.
 intros.
-destruct x; try contradiction; simpl;auto.
+rewrite finite_is_finite in H. rewrite is_finite_Binary in H.
+unfold BPLUS, BINOP, BOPP, Zconst. rewrite !float_of_ftype_of_float.
+rewrite <- (ftype_of_float_of_ftype _ _ x) at 2.
+f_equal.
+destruct (float_of_ftype x); try discriminate; simpl;auto.
 destruct s; auto.
 Qed.
     
-Lemma no_overflow_Bmult_A1_inv_b_minus {t: type} :
+Lemma no_overflow_Bmult_A1_inv_b_minus {t: type} `{STD: is_standard t} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
+  let A' := @matrix_inj _ _ A n.+1 n.+1 in
+  let b' := @vector_inj _ _ b n.+1 in
+  let x0' := @vector_inj _ _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat ->
   @size_constraint t n ->
@@ -3711,7 +3725,7 @@ rewrite Rabs_mult.
 rewrite !nth_vec_to_list_float. rewrite inord_val.
 eapply Rle_lt_trans. apply Rmult_le_compat_l. apply Rabs_pos.
 rewrite mxE.
-pose proof (@finite_residual_0_aux2 t).
+pose proof (@finite_residual_0_aux2 t _).
 specialize (H6 A b H H0 k H1 H2 HfA2 Hfx0 H3 H4).
 rewrite -/n -/A' -/b' -/x0' in H6.
 rewrite nth_vec_to_list_float in H6. rewrite inord_val mxE in H6.
@@ -3727,16 +3741,16 @@ rewrite inordK; (by apply /ssrnat.ltP).
 Qed.
 
 
-Lemma finite_residual_0_aux3 {t: type} :
+Lemma finite_residual_0_aux3 {t: type} `{STD: is_standard t} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
+  let A' := @matrix_inj _ _ A n.+1 n.+1 in
+  let b' := @vector_inj _ _ b n.+1 in
+  let x0' := @vector_inj _ _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat ->
   @size_constraint t n ->
@@ -3763,26 +3777,30 @@ apply BMULT_no_overflow_is_finite.
 + by apply no_overflow_Bmult_A1_inv_b_minus.
 Qed.
 
-Lemma Bminus_x_0 {t} (x: ftype t):
+Lemma Bminus_x_0 {t} `{STD: is_standard t}  (x: ftype t):
   finite x ->
   BMINUS x (Zconst t 0) = x.
 Proof.
 intros.
-destruct x; try contradiction; simpl;auto.
+unfold BMINUS, BINOP, Zconst. rewrite float_of_ftype_of_float.
+rewrite <- (ftype_of_float_of_ftype _ _ x) at 2.
+f_equal.
+rewrite finite_is_finite is_finite_Binary in H. 
+destruct (float_of_ftype x); try discriminate; simpl;auto.
 destruct s; auto.
 Qed.
 
 
-Lemma no_overflow_x1_minus_x0 {t: type} :
+Lemma no_overflow_x1_minus_x0 {t: type} `{STD: is_standard t}  :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
+  let A' := @matrix_inj _ _ A n.+1 n.+1 in
+  let b' := @vector_inj _ _ b n.+1 in
+  let x0' := @vector_inj _ _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat ->
   @size_constraint t n ->
@@ -3806,7 +3824,7 @@ assert (X_m_jacobi 0 x0' b' A' (inord k) ord0 = Zconst t 0).
 { rewrite !mxE. unfold x0. by rewrite nth_repeat. }
 rewrite H2.
 assert (FT2R (BOPP (Zconst t 0)) = 0%Re).
-{ by simpl. } rewrite H3 Rplus_0_r.
+{ unfold BOPP, Zconst.  rewrite float_of_ftype_of_float FT2R_ftype_of_float. by simpl. } rewrite H3 Rplus_0_r.
 pose proof (@generic_round_property t 
               (FT2R (X_m_jacobi 1 x0' b' A'
                    (inord k) ord0))).
@@ -3821,7 +3839,7 @@ apply Rplus_le_compat_l. apply Hd.
 apply Rcomplements.Rlt_div_r.
 apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
 rewrite !mxE.
-pose proof (@BMULT_accurate' _ t).
+pose proof (@BMULT_accurate' _ t _).
 specialize (H5 (nth (n.+1.-1 - @inord n k)
                     (vec_to_list_float n.+1
                        (A1_inv_J A')) 
@@ -3830,7 +3848,7 @@ specialize (H5 (nth (n.+1.-1 - @inord n k)
                 (vec_to_list_float n.+1
                    (b' -f A2_J A' *f x0'))
                 (Zconst t 0))).
-pose proof (@finite_residual_0_aux3 t A b H H0 k H1 size_cons HfA2 Hfx0 Hinp HfA1_inv Hfb). 
+pose proof (@finite_residual_0_aux3 t _ A b H H0 k H1 size_cons HfA2 Hfx0 Hinp HfA1_inv Hfb). 
 specialize (H5 H6). rewrite -/n -/A' -/b' -/x0' in H6.
 destruct H5 as [d1 [e1 [Hde1 [Hd1 [He1 H5]]]]].
 rewrite H5.
@@ -3852,16 +3870,16 @@ rewrite inordK; (by apply /ssrnat.ltP).
 rewrite inordK; (by apply /ssrnat.ltP).
 Qed.
 
-Lemma finite_residual_0_aux4 {t: type} :
+Lemma finite_residual_0_aux4 {t: type} `{STD: is_standard t} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
+  let A' := @matrix_inj _ _ A n.+1 n.+1 in
+  let b' := @vector_inj _ _ b n.+1 in
+  let x0' := @vector_inj _ _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat ->
   @size_constraint t n ->
@@ -3884,21 +3902,21 @@ apply Bplus_bminus_opp_implies.
 apply Bplus_no_ov_finite.
 + rewrite mxE.
   by apply finite_residual_0_aux3.
-+ apply finite_is_finite. rewrite is_finite_Bopp.
-  simpl. by apply finite_is_finite.
++ apply finite_is_finite. rewrite is_finite_Binary.  unfold BOPP. rewrite float_of_ftype_of_float is_finite_Bopp.
+  simpl. rewrite <- is_finite_Binary. by apply finite_is_finite.
 + by apply no_overflow_x1_minus_x0.
 Qed.
 
-Lemma finite_residual_0_mult {t: type} :
+Lemma finite_residual_0_mult {t: type} `{STD: is_standard t} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
+  let A' := @matrix_inj _ _ A n.+1 n.+1 in
+  let b' := @vector_inj _ _ b n.+1 in
+  let x0' := @vector_inj _ _ x0 n.+1 in
   forall k,
   (k < n.+1)%coq_nat ->
   @size_constraint t n ->
@@ -3956,7 +3974,7 @@ apply BMULT_no_overflow_is_finite.
   { rewrite mxE. unfold x0. by rewrite nth_repeat. }
   rewrite H3. rewrite Bminus_x_0. 
   rewrite [in X in (_ * X < _)%Re]mxE.
-  pose proof(@BMULT_accurate' _ t). 
+  pose proof(@BMULT_accurate' _ t _). 
   specialize (H4 (nth (n.+1.-1 - @inord n k)
                       (vec_to_list_float n.+1
                          (A1_inv_J A'))
@@ -3965,7 +3983,7 @@ apply BMULT_no_overflow_is_finite.
                         (vec_to_list_float n.+1
                            (b' -f A2_J A' *f x0'))
                         (Zconst t 0))).
-  pose proof (@finite_residual_0_aux3 t A b H H0 k H1 size_cons HfA2 Hfx0 fbnd HdivA Hfb).
+  pose proof (@finite_residual_0_aux3 t _ A b H H0 k H1 size_cons HfA2 Hfx0 fbnd HdivA Hfb).
   specialize (H4 H5).
   destruct H4 as [d2 [e2 [Hde2 [Hd2 [He2 H4]]]]].
   rewrite H4. rewrite  !nth_vec_to_list_float.
@@ -3990,16 +4008,16 @@ apply BMULT_no_overflow_is_finite.
 Qed.
 
 
-Lemma finite_in{t: type}  :
+Lemma finite_in{t: type} `{STD: is_standard t}  :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
+  let A' := @matrix_inj _ _ A n.+1 n.+1 in
+  let b' := @vector_inj _ _ b n.+1 in
+  let x0' := @vector_inj _ _ x0 n.+1 in
   @size_constraint t n ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
@@ -4046,7 +4064,7 @@ destruct xy . simpl.
 first [apply inject_pair_iff in Hnth | apply pair_equal_spec in Hnth].
 destruct Hnth as [Hnth1 Hnth2].
 rewrite -Hnth1 -Hnth2.
-pose proof (@vector_residual_equiv t A b x0 0%nat).
+pose proof (@vector_residual_equiv t _ A b x0 0%nat).
 assert (length b = length A). { by []. }
 assert (length x0 = length A).
 { by rewrite repeat_length. }
@@ -4067,16 +4085,16 @@ by rewrite combine_length !length_veclist Nat.min_id.
 Qed.
 
 
-Lemma finite_residual_0 {t: type} :
+Lemma finite_residual_0 {t: type} `{STD: is_standard t} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A' := @matrix_inj _ A n.+1 n.+1 in
-  let b' := @vector_inj _ b n.+1 in
-  let x0' := @vector_inj _ x0 n.+1 in
+  let A' := @matrix_inj _ _ A n.+1 n.+1 in
+  let b' := @vector_inj _ _ b n.+1 in
+  let x0' := @vector_inj _ _ x0 n.+1 in
   @size_constraint t (length A).-1 ->
   (forall i j, finite (A2_J A' i j)) ->
   (forall i, finite (x0' i ord0)) ->
@@ -4100,7 +4118,7 @@ apply dotprod_finite.
 + intros. apply in_rev in H3.
   pose proof (@In_nth _ (resid (jacobi_n A b x0 0)) xy (Zconst t 0) H3 ).
   destruct H4 as [k [Hlen Hnth]].
-  pose proof (@v_equiv  t (resid (jacobi_n A b x0 0)) n H2).
+  pose proof (@v_equiv  t _ (resid (jacobi_n A b x0 0)) n H2).
   assert ((\col_j0 vector_inj
                      (resid (jacobi_n A b x0 0)) n.+1 j0  ord0) = 
            vector_inj (resid (jacobi_n A b x0 0)) n.+1).
@@ -4110,7 +4128,7 @@ apply dotprod_finite.
   rewrite length_veclist in Hnth.
   assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
   rewrite H5 in Hnth.
-  pose proof (@vector_residual_equiv t A b x0 0%nat).
+  pose proof (@vector_residual_equiv t _ A b x0 0%nat).
   assert (length b = length A). { by rewrite -H0. }
   specialize (H6 H7). clear H7.
   assert ( length x0 = length A ).
@@ -4125,7 +4143,7 @@ apply dotprod_finite.
     rewrite inordK; try by apply /ssrnat.ltP.
     apply Hlen.
   - intros. unfold n0. rewrite rev_length. rewrite H2.
-    pose proof (@BMULT_accurate' _ t).
+    pose proof (@BMULT_accurate' _ t _).
     rewrite inordK.
     specialize (H7 (nth (n.+1.-1 - k)
                     (vec_to_list_float n.+1
@@ -4173,7 +4191,7 @@ apply dotprod_finite.
     destruct H8 as [_ H8]. rewrite  !nth_vec_to_list_float in H8.
     rewrite mxE in H8. apply Bminus_bplus_opp_implies in H8.
     apply BPLUS_finite_e in H8. destruct H8 as [H8 _]. rewrite mxE in H8.
-    pose proof(@BMULT_accurate' _ t). 
+    pose proof(@BMULT_accurate' _ t _). 
     specialize (H10 (nth (n.+1.-1 - @inord n k)
                         (vec_to_list_float n.+1
                            (A1_inv_J A'))
@@ -4209,16 +4227,16 @@ apply dotprod_finite.
     by rewrite H2 in Hlen;(try by apply /ssrnat.ltP) .
 Qed.
 
-Lemma finite_implies_1 {t: type} :
+Lemma finite_implies_1 {t: type} `{STD: is_standard t} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A':= (@matrix_inj _ A n.+1 n.+1) in
-  let b' := (@vector_inj _ b n.+1) in
-  let x0' := (@vector_inj _ x0 n.+1) in
+  let A':= (@matrix_inj _ _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ _ b n.+1) in
+  let x0' := (@vector_inj _ _ x0 n.+1) in
   finite (norm2 (resid (jacobi_n A b x0 0)))->
 (forall xy : ftype t * ftype t,
              In xy (combine
@@ -4233,7 +4251,7 @@ Lemma finite_implies_1 {t: type} :
 Proof.
 intros.
 unfold norm2 in H1.
-pose proof (@dotprod_finite_implies t).
+pose proof (@dotprod_finite_implies t _).
 specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
 rewrite rev_involutive in H3.
 specialize (H3 H1).
@@ -4270,7 +4288,7 @@ assert (finite (BMULT xy.1 xy.2)).
                 (resid
                    (jacobi_n A b x0 0))
                 n.+1 j0 ord0) = 
-                @vector_inj _  (resid (jacobi_n A b x0 0)) n.+1).
+                @vector_inj _ _ (resid (jacobi_n A b x0 0)) n.+1).
     {  apply matrixP. unfold eqrel. intros. by rewrite !mxE. }
     rewrite H6. rewrite vector_residual_equiv; try by [].
     rewrite -/n. rewrite nth_vec_to_list_float.
@@ -4298,16 +4316,16 @@ assert (finite (BMULT xy.1 xy.2)).
 repeat split; try apply H4; try (apply BMULT_finite_e in H4; apply H4).
 Qed.
 
-Lemma finite_implies_2 {t: type} :
+Lemma finite_implies_2 {t: type} `{STD: is_standard t} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A':= (@matrix_inj _ A n.+1 n.+1) in
-  let b' := (@vector_inj _ b n.+1) in
-  let x0' := (@vector_inj _ x0 n.+1) in
+  let A':= (@matrix_inj _ _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ _ b n.+1) in
+  let x0' := (@vector_inj _ _ x0 n.+1) in
   finite (norm2 (resid (jacobi_n A b x0 0))) ->
   (forall xy : ftype t * ftype t,
             In xy
@@ -4323,7 +4341,7 @@ Lemma finite_implies_2 {t: type} :
 Proof.
 intros.
 unfold norm2 in H1.
-pose proof (@dotprod_finite_implies t).
+pose proof (@dotprod_finite_implies t _).
 specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
 rewrite rev_involutive in H3.
 specialize (H3 H1). apply in_rev in H2.
@@ -4390,7 +4408,7 @@ assert (In
                 (resid
                    (jacobi_n A b x0 0))
                 n.+1 j0 ord0) = 
-                @vector_inj _  (resid (jacobi_n A b x0 0)) n.+1).
+                @vector_inj _ _ (resid (jacobi_n A b x0 0)) n.+1).
     {  apply matrixP. unfold eqrel. intros. by rewrite !mxE. }
     rewrite H6. rewrite vector_residual_equiv; try by [].
     rewrite -/n. rewrite -/A' -/b' -/x0'.
@@ -4444,9 +4462,12 @@ apply BPLUS_finite_e in H32.
 apply H32.
 apply BPLUS_finite_e in H32.
 destruct H32 as [_ H32].
-apply finite_is_finite in H32.
+apply finite_is_finite in H32. 
+rewrite is_finite_Binary in H32.
+unfold BOPP in H32.
+rewrite float_of_ftype_of_float in H32.
 rewrite is_finite_Bopp in H32.
-by apply finite_is_finite.
+rewrite finite_is_finite. rewrite is_finite_Binary. auto.
 by rewrite !length_veclist.
 apply Hlen.
 by apply /ssrnat.ltP.
@@ -4454,16 +4475,16 @@ by apply /ssrnat.ltP.
 Qed.
 
 
-Lemma finite_implies_3 {t: type} :
+Lemma finite_implies_3 {t: type} `{STD: is_standard t} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A':= (@matrix_inj _ A n.+1 n.+1) in
-  let b' := (@vector_inj _ b n.+1) in
-  let x0' := (@vector_inj _ x0 n.+1) in
+  let A':= (@matrix_inj _ _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ _ b n.+1) in
+  let x0' := (@vector_inj _ _ x0 n.+1) in
   finite (norm2 (resid (jacobi_n A b x0 0))) ->
   (forall xy : ftype t * ftype t,
                          In xy
@@ -4479,7 +4500,7 @@ Proof.
 intros.
 intros.
 unfold norm2 in H1.
-pose proof (@dotprod_finite_implies t).
+pose proof (@dotprod_finite_implies t _).
 specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
 rewrite rev_involutive in H3.
 specialize (H3 H1). apply in_rev in H2.
@@ -4543,7 +4564,7 @@ assert (In
                 (resid
                    (jacobi_n A b x0 0))
                 n.+1 j0 ord0) = 
-                @vector_inj _  (resid (jacobi_n A b x0 0)) n.+1).
+                @vector_inj _ _ (resid (jacobi_n A b x0 0)) n.+1).
     {  apply matrixP. unfold eqrel. intros. by rewrite !mxE. }
     rewrite H6. rewrite vector_residual_equiv; try by [].
     rewrite -/n. rewrite -/A' -/b' -/x0'.
@@ -4590,16 +4611,16 @@ by apply /ssrnat.ltP.
 Qed.
 
 
-Lemma finite_implies_4 {t: type} :
+Lemma finite_implies_4 {t: type} `{STD: is_standard t} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A':= (@matrix_inj _ A n.+1 n.+1) in
-  let b' := (@vector_inj _ b n.+1) in
-  let x0' := (@vector_inj _ x0 n.+1) in
+  let A':= (@matrix_inj _ _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ _ b n.+1) in
+  let x0' := (@vector_inj _ _ x0 n.+1) in
   finite (norm2 (resid (jacobi_n A b x0 0))) ->
 (forall xy : ftype t * ftype t,
                            In xy
@@ -4614,7 +4635,7 @@ Proof.
 intros.
 intros.
 unfold norm2 in H1.
-pose proof (@dotprod_finite_implies t).
+pose proof (@dotprod_finite_implies t _).
 specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
 rewrite rev_involutive in H3.
 specialize (H3 H1). apply in_rev in H2.
@@ -4677,7 +4698,7 @@ assert (In
                 (resid
                    (jacobi_n A b x0 0))
                 n.+1 j0 ord0) = 
-                @vector_inj _  (resid (jacobi_n A b x0 0)) n.+1).
+                @vector_inj _ _ (resid (jacobi_n A b x0 0)) n.+1).
     {  apply matrixP. unfold eqrel. intros. by rewrite !mxE. }
     rewrite H6. rewrite vector_residual_equiv; try by [].
     rewrite -/n. rewrite -/A' -/b' -/x0'.
@@ -4729,7 +4750,9 @@ apply BPLUS_finite_e in H3.
 destruct H3 as [H31 H32].
 apply finite_is_finite .
 apply finite_is_finite in H32.
-by rewrite is_finite_Bopp in H32.
+rewrite is_finite_Binary in H32.
+unfold BOPP in H32. rewrite float_of_ftype_of_float in H32.
+rewrite is_finite_Bopp in H32. rewrite <- is_finite_Binary in H32. auto.
 by apply /ssrnat.ltP.
 rewrite !nth_vec_to_list_float.
 apply H3.
@@ -4743,16 +4766,16 @@ rewrite inordK; by apply /ssrnat.ltP.
 Qed.
 
 
-Lemma finite_implies_5 {t: type} :
+Lemma finite_implies_5 {t: type} `{STD: is_standard t} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A':= (@matrix_inj _ A n.+1 n.+1) in
-  let b' := (@vector_inj _ b n.+1) in
-  let x0' := (@vector_inj _ x0 n.+1) in
+  let A':= (@matrix_inj _ _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ _ b n.+1) in
+  let x0' := (@vector_inj _ _ x0 n.+1) in
   finite (norm2 (resid (jacobi_n A b x0 0))) ->
   (forall (xy : ftype t * ftype t)
                            (i : 'I_n.+1),
@@ -4768,7 +4791,7 @@ Lemma finite_implies_5 {t: type} :
 Proof.
 intros.
 unfold norm2 in H1.
-pose proof (@dotprod_finite_implies t).
+pose proof (@dotprod_finite_implies t _).
 specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
 rewrite rev_involutive in H3.
 specialize (H3 H1). apply in_rev in H2.
@@ -4832,7 +4855,7 @@ assert (In
                 (resid
                    (jacobi_n A b x0 0))
                 n.+1 j0 ord0) = 
-                @vector_inj _  (resid (jacobi_n A b x0 0)) n.+1).
+                @vector_inj _ _ (resid (jacobi_n A b x0 0)) n.+1).
     {  apply matrixP. unfold eqrel. intros. by rewrite !mxE. }
     rewrite H6. rewrite vector_residual_equiv; try by [].
     rewrite -/n. rewrite -/A' -/b' -/x0'.
@@ -4866,9 +4889,10 @@ apply Bminus_bplus_opp_implies in H3.
 apply BPLUS_finite_e  in H3.
 destruct H3 as [_ H3].
 apply finite_is_finite in H3.
-rewrite is_finite_Bopp in H3.
+rewrite is_finite_Binary in H3. unfold BOPP in H3. rewrite float_of_ftype_of_float in H3.
+rewrite is_finite_Bopp in H3. rewrite <- is_finite_Binary in H3.
 rewrite mxE in H3.
-pose proof (@fma_jacobi_forward_error.dotprod_finite_implies _ t).
+pose proof (@fma_jacobi_forward_error.dotprod_finite_implies _ t _).
 specialize (H5 (combine (vec_to_list_float n.+1
                            (\row_j A2_J A' (inord i) j)^T)
                         (vec_to_list_float n.+1
@@ -4905,16 +4929,16 @@ by rewrite combine_length !length_veclist Nat.min_id.
 Qed.
 
 
-Lemma finite_implies_6 {t: type} :
+Lemma finite_implies_6 {t: type} `{STD: is_standard t} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
   (0 < length A)%coq_nat ->
   length A = length b ->
   let n := (length A).-1 in
-  let A':= (@matrix_inj _ A n.+1 n.+1) in
-  let b' := (@vector_inj _ b n.+1) in
-  let x0' := (@vector_inj _ x0 n.+1) in
+  let A':= (@matrix_inj _ _ A n.+1 n.+1) in
+  let b' := (@vector_inj _ _ b n.+1) in
+  let x0' := (@vector_inj _ _ x0 n.+1) in
   finite (norm2 (resid (jacobi_n A b x0 0))) ->
   (forall i : 'I_n.+1,
                        finite 
@@ -4930,7 +4954,7 @@ Lemma finite_implies_6 {t: type} :
 Proof.
 intros.
 unfold norm2 in H1.
-pose proof (@dotprod_finite_implies t).
+pose proof (@dotprod_finite_implies t _).
 specialize (H2 (rev (resid (jacobi_n A b x0 0)))).
 rewrite rev_involutive in H2.
 specialize (H2 H1). 
@@ -4984,7 +5008,7 @@ assert (In
                 (resid
                    (jacobi_n A b x0 0))
                 n.+1 j0 ord0) = 
-                @vector_inj _  (resid (jacobi_n A b x0 0)) n.+1).
+                @vector_inj _ _ (resid (jacobi_n A b x0 0)) n.+1).
     {  apply matrixP. unfold eqrel. intros. by rewrite !mxE. }
     rewrite H5. rewrite vector_residual_equiv; try by [].
     rewrite -/n. rewrite -/A' -/b' -/x0'.
@@ -5016,8 +5040,12 @@ apply BPLUS_finite_e in H2.
 destruct H2 as [_ H2].
 rewrite inord_val in H2.
 rewrite mxE in H2.
-apply finite_is_finite in H2. 
+apply finite_is_finite in H2.
+rewrite is_finite_Binary in H2.
+unfold BOPP in H2.
+rewrite float_of_ftype_of_float in H2.
 rewrite is_finite_Bopp in H2.
+rewrite <- is_finite_Binary in H2.
 apply finite_is_finite.
 apply H2.
 rewrite inordK; apply ltn_ord.
@@ -5025,7 +5053,7 @@ apply ltn_ord.
 Qed.
 
 
-Lemma rho_0_implies_N_eq_0 {t} {n:nat} 
+Lemma rho_0_implies_N_eq_0 {t} `{STD: is_standard t}  {n:nat} 
   (A: 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1):
   rho_def A b = 0%Re ->
   matrix_inf_norm (FT2R_mat (A2_J A)) = 0%Re.
@@ -5047,7 +5075,8 @@ apply Rplus_eq_R0 in H.
   apply Rmult_eq_reg_l in Hrho1.
   assert (FT2R_mat (A2_J A)= A2_J_real (FT2R_mat A)).
   { apply matrixP. unfold eqrel. intros. rewrite !mxE.
-    case: (x == y :> nat); by simpl.
+    case: (x == y :> nat); auto.
+    unfold Zconst. apply FT2R_ftype_of_float.
   } rewrite H0. apply Hrho1.
   assert (forall x:R, (0 < x)%Re -> x <> 0%Re).
   { intros. nra. } apply H0.
@@ -5241,18 +5270,21 @@ Qed.
 
 
 (** entries zero in real ==> entries zero in float **)
-Lemma x_real_to_float_zero {t} (x: ftype t):
+Lemma x_real_to_float_zero {t} `{STD: is_standard t}  (x: ftype t):
   finite x ->
   FT2R x = 0%Re ->
   x = Zconst t 0 \/ x = neg_zero.
 Proof.
 intros.
 pose proof (B2R_Bsign_inj (fprec t) (femax t)). 
-specialize (H1 x).
-destruct (Bsign (fprec t) (femax t) x).
-+ specialize (H1 neg_zero). right.
+specialize (H1 (float_of_ftype x)).
+unfold neg_zero.
+destruct (Bsign (fprec t) (femax t) (float_of_ftype x)).
++ specialize (H1 (B754_zero (fprec t) (femax t) true)). right.
+  rewrite <- (ftype_of_float_of_ftype _ _ x). f_equal.
   apply H1; try by simpl.
-  by apply finite_is_finite.
+  rewrite <- is_finite_Binary.
+  by apply finite_is_finite. rewrite B2R_float_of_ftype.
 + specialize (H1 (Zconst t 0)). left.
   apply H1; try by simpl.
   by apply finite_is_finite.

@@ -53,7 +53,7 @@ Definition mat_vec_mult_err_bnd {n:nat} {ty}
 
 
 
-Lemma dotprod_cons {t: type} (v1 v2: list (ftype t)) (x y : ftype t): 
+Lemma dotprod_cons {t: type} `{STD: is_standard t} (v1 v2: list (ftype t)) (x y : ftype t): 
   length v1 = length v2 ->
   dotprod_r (x :: v1) (y :: v2) = 
   BFMA x y (dotprod_r v1 v2).
@@ -61,7 +61,7 @@ Proof.
 intros. by unfold dotprod_r. 
 Qed.
 
-Lemma fma_dot_prod_rel_holds {n:nat} {ty} m i
+Lemma fma_dot_prod_rel_holds {n:nat} {ty} `{STD: is_standard ty} m i
   (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1):
   fma_dot_prod_rel
   (combine
@@ -158,7 +158,7 @@ Qed.
 
 
 (** Write a lemma for matrix-vector multiplication **)
-Lemma matrix_vec_mult_bound {n:nat} {ty}:
+Lemma matrix_vec_mult_bound {n:nat} {ty} `{STD: is_standard ty}:
   forall (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1),
   (forall (xy : ftype ty * ftype ty) (i : 'I_n.+1),
     In xy
@@ -439,7 +439,7 @@ rewrite -bigmaxr_mulr.
 Qed.
 
 
-Lemma matrix_vec_mult_bound_corollary {n:nat} {ty}:
+Lemma matrix_vec_mult_bound_corollary {n:nat} {ty} `{STD: is_standard ty} :
   forall (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1),
   (forall (xy : ftype ty * ftype ty) (i : 'I_n.+1),
     In xy

@@ -65,7 +65,7 @@ apply Rmult_le_pos.
 Qed.
 
 
-Lemma finite_bminus {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1) i:
+Lemma finite_bminus {ty} `{STD: is_standard ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1) i:
   let xy := (v1 (inord i) ord0, v2 (inord i) ord0) in 
   In xy
       (combine 
@@ -103,7 +103,8 @@ apply Bplus_no_ov_finite .
                +++ apply Rabs_pos.
                +++ rewrite double. apply Rplus_le_compat. 
                    --- apply Ha1.
-                   --- unfold FT2R in *. rewrite B2R_Bopp. rewrite Rabs_Ropp.
+                   --- unfold BOPP. rewrite <- B2R_float_of_ftype. rewrite float_of_ftype_of_float.
+                        rewrite B2R_Bopp. rewrite Rabs_Ropp. rewrite B2R_float_of_ftype.
                        apply Ha2.
                +++ apply Rle_trans with (Rabs 1 + Rabs d)%Re.
                    apply Rabs_triang. rewrite Rabs_R1. by apply Rplus_le_compat_l.
@@ -208,7 +209,7 @@ apply Bplus_no_ov_finite .
 Qed.
 
 
-Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
+Lemma vec_float_sub {ty} `{STD: is_standard ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty),
     In xy
       (combine 
@@ -247,7 +248,8 @@ assert (Hin: In (v1 (inord i) ord0, v2 (inord i) ord0)
 rewrite Bminus_bplus_opp_equiv.
 + assert ((FT2R (v1 (inord i) ord0) -  FT2R (v2 (inord i) ord0))%Re = 
           (FT2R (v1 (inord i) ord0) +  FT2R (BOPP (v2 (inord i) ord0)))%Re ).
-  { unfold FT2R. rewrite B2R_Bopp. nra. }
+  { unfold BOPP. rewrite FT2R_ftype_of_float; rewrite B2R_Bopp. rewrite B2R_float_of_ftype.
+    nra. }
   rewrite H0.
   apply Rle_trans with 
   ((Rabs (FT2R (v1 (inord i) ord0)) + Rabs (FT2R (BOPP (v2 (inord i) ord0)))) * (default_rel ty))%Re.
@@ -279,7 +281,8 @@ rewrite Bminus_bplus_opp_equiv.
                  | i0 <- enum 'I_n.+1]`_i.
             ** rewrite seq_equiv. rewrite nth_mkseq;
                last by rewrite size_map size_enum_ord in H.
-               rewrite !mxE. unfold FT2R. rewrite B2R_Bopp Rabs_Ropp. nra.
+               rewrite !mxE. unfold BOPP. rewrite FT2R_ftype_of_float.
+                rewrite B2R_Bopp Rabs_Ropp. rewrite B2R_float_of_ftype. nra.
             ** apply /RleP. 
                apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v2 i0 ord0)
                                               | i0 <- enum 'I_n.+1] i).
@@ -290,7 +293,7 @@ rewrite Bminus_bplus_opp_equiv.
 Qed.
 
 
-Lemma vec_float_sub_1 {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
+Lemma vec_float_sub_1 {ty} `{STD: is_standard ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty),
     In xy
       (combine 
@@ -329,7 +332,7 @@ assert (Hin: In (v1 (inord i) ord0, v2 (inord i) ord0)
 rewrite Bminus_bplus_opp_equiv.
 + assert ((FT2R (v1 (inord i) ord0) -  FT2R (v2 (inord i) ord0))%Re = 
           (FT2R (v1 (inord i) ord0) +  FT2R (BOPP (v2 (inord i) ord0)))%Re ).
-  { unfold FT2R. rewrite B2R_Bopp. nra. }
+  { unfold BOPP. rewrite FT2R_ftype_of_float B2R_Bopp B2R_float_of_ftype. nra. }
   rewrite H0.
   apply Rle_trans with 
   (Rabs (FT2R (v1 (inord i) ord0) + (FT2R (BOPP (v2 (inord i) ord0)))) * (default_rel ty))%Re.
@@ -347,7 +350,7 @@ rewrite Bminus_bplus_opp_equiv.
          rewrite !mxE. rewrite -RminusE.
          assert (FT2R (BOPP (v2 (inord i) ord0)) = 
                   (- (FT2R (v2 (inord i) ord0)))%Re).
-         { unfold FT2R. rewrite B2R_Bopp. nra. }
+         { unfold BOPP. rewrite FT2R_ftype_of_float B2R_Bopp B2R_float_of_ftype.  nra. }
          rewrite H1. apply Rle_refl.
       ++ apply /RleP. 
          apply (@bigmaxr_ler _ 0%Re [seq Rabs
