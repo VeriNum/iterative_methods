@@ -1,11 +1,8 @@
 Require Import VST.floyd.proofauto.
 From Iterative Require Import floatlib jacob_list_fun_model.
 Require Import Iterative.sparse.fun_model_lemmas.
-Print Assumptions jacobi_n_jacobi.
 From Iterative.sparse Require Import jacobi spec_sparse spec_jacobi verif_jacobi2 (* jacobi sparse_model spec_sparse 
          spec_jacobi fun_model_lemmas vst_improvements *).
-
-
 
 Theorem main_jacobi: semax_body Vprog Gprog f_jacobi2 jacobi2_highspec.
 Proof.
@@ -15,6 +12,11 @@ apply subsume_jacobi2.
 apply compute_list_norepet_e; reflexivity.
 Qed.
 
+
+(* for good fun, uncomment one of the next two lines!
+Print All Dependencies functional_model_correctness.
+Print All Dependencies jacobi2_highspec.
+*)
 Print Assumptions main_jacobi.
 
 (*

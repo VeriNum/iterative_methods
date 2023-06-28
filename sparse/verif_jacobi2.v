@@ -13,6 +13,70 @@ Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
 
+Definition functional_model_correctness :=
+ forall 
+   (A : matrix Tdouble)
+   (b : vector Tdouble)
+   (acc : ftype Tdouble)
+   (maxiter : Z)
+   (LENb : Zlength b = matrix_rows A)
+   (H4 : jacobi_preconditions A b acc (Z.to_nat (maxiter - 1)))
+   (H6 : 0 < matrix_rows A)
+   (H7 : 0 < maxiter)
+   (H : matrix_cols A (matrix_rows A))
+   (H11 : Forall (Forall finite) A)
+   (H5 : Forall finite (invert_diagmatrix (diag_of_matrix A)))
+   (H12 : Forall finite b)
+   (H14 : finite (acc * acc)%F64)
+   (y : vector Tdouble)
+   (s : ftype Tdouble)
+   (H15 : feq s
+        (fst
+           (jacobi A b (Zrepeat (Zconst Tdouble 0) (matrix_rows A)) 
+              (acc * acc)%F64 (Z.to_nat maxiter))))
+   (H18 : (Forall2 feq @@2)%signature (s, y)
+        (jacobi A b (Zrepeat (Zconst Tdouble 0) (matrix_rows A)) 
+           (acc * acc)%F64 (Z.to_nat maxiter))),
+  feq s (norm2 (jacobi_residual (diag_of_matrix A) (remove_diag A) b y)) /\
+  BCMP Lt true s (acc * acc)%F64 = true.
+
+(*
+Print All Dependencies functional_model_correctness.
+Print All Dependencies ftype.
+*)
+Lemma functional_model_correct: functional_model_correctness.
+Proof.
+intro; intros.
+destruct (jacobi_n_jacobi _ _ _ _ H4) as [j [? [FINs [LT ?]]]].
+set (x0 := Zrepeat _ _) in *.
+set (x0nat := repeat _ _) in *.
+assert (x0nat = x0). {
+  unfold x0, x0nat. rewrite <- repeat_Zrepeat.
+  f_equal. rewrite Zlength_correct in LENb.
+  rewrite <- LENb.
+  rewrite Nat2Z.id. auto.
+}
+clearbody x0nat; subst x0nat.
+pose proof (jacobi_returns_residual A b x0 (acc*acc)%F64 (Z.to_nat maxiter-1)).
+replace (S _) with (Z.to_nat maxiter) in H2 by lia.
+replace (S _) with (Z.to_nat maxiter) in LT by lia.
+replace (S _) with (Z.to_nat maxiter) in FINs by lia.
+destruct (jacobi A b x0 (acc*acc)%F64 (Z.to_nat maxiter)) as [r2 xj].
+subst r2; simpl fst in *.
+red in H18. simpl snd in H18.
+split.
+rewrite H15.
+assert (Forall finite (diag_of_matrix A))
+    by (apply diag_of_matrix_prop; auto).
+apply norm2_mor.
+apply jacobi_residual_mor; auto.
+symmetry; auto.
+rewrite <- H15 in FINs.
+rewrite <- LT at 2.
+apply BCMP_mor; auto.
+apply feq_strict_feq; auto.
+Qed.
+
 Lemma subsume_jacobi2: funspec_sub (snd jacobi2_spec) (snd jacobi2_highspec).
 Proof.
 apply NDsubsume_subsume.
@@ -45,34 +109,8 @@ rewrite !prop_true_andp; auto.
 cancel.
 destruct H15.
 red in H15. simpl in H15.
-destruct (jacobi_n_jacobi _ _ _ _ H4) as [j [? [FINs [LT ?]]]].
-set (x0 := Zrepeat _ _) in *.
-set (x0nat := repeat _ _) in *.
-assert (x0nat = x0). {
-  unfold x0, x0nat. rewrite <- repeat_Zrepeat.
-  f_equal. rewrite Zlength_correct in LENb.
-  rewrite <- LENb.
-  rewrite Nat2Z.id. auto.
-}
-clearbody x0nat; subst x0nat.
-pose proof (jacobi_returns_residual A b x0 (acc*acc)%F64 (Z.to_nat maxiter-1)).
-replace (S _) with (Z.to_nat maxiter) in H21 by lia.
-replace (S _) with (Z.to_nat maxiter) in LT by lia.
-replace (S _) with (Z.to_nat maxiter) in FINs by lia.
-destruct (jacobi A b x0 (acc*acc)%F64 (Z.to_nat maxiter)) as [r2 xj].
-subst r2; simpl fst in *.
-red in H18. simpl snd in H18.
-split3; auto.
-rewrite H15.
-assert (Forall finite (diag_of_matrix A))
-    by (apply diag_of_matrix_prop; auto).
-apply norm2_mor.
-apply jacobi_residual_mor; auto.
-symmetry; auto.
-rewrite <- H15 in FINs.
-rewrite <- LT at 2.
-apply BCMP_mor; auto.
-apply feq_strict_feq; auto.
+apply and_assoc. split; auto.
+eapply functional_model_correct; eassumption.
 Qed.
 
 Definition surely_malloc_spec :=
