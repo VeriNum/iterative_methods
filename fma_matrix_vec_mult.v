@@ -128,8 +128,16 @@ Definition mat_vec_mult_err_bnd {n:nat} {ty}
  (A: 'M[ftype ty]_n.+1) (v: 'cV[ftype ty]_n.+1):=
  bigmaxr 0%Re [seq (e_i i A v) | i <- enum 'I_n.+1].
 
-(* propagate to here *)
 
+(* Variable n : nat.
+Variable i : 'I_n.+1.
+Variable ty : type.
+Variable A : 'M[ftype ty]_n.+1. *)
+
+Definition mat_vec_mult_err_bnd_sparse {n : nat} {ty}
+  (A : 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1) 
+  (r : nat) (HA : is_r_sparse_mat A r) :=
+  bigmaxr 0%Re [seq (@e_i_sparse n ty i A v r HA) | i <- enum 'I_n.+1].
 
 
 
