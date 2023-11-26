@@ -46,55 +46,10 @@ Definition e_i {n:nat} {ty} (i : 'I_n.+1)
   let rs:= sum_fold prods in
   (g ty (length l1) * Rabs rs  + g1 ty (length l1) (length l1 - 1))%Re.
 
-(* replace (length l1) by r *)
-
-(* e_i_sparse *)
-(* A is sparse as a hypothesis *)
-(*  *)
-
-(* Ask Mohit if there is definition for sparsity *)
-
-
-Definition extract_non_zero_elmt {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
-  filter (fun x => negb (Req_bool (FT2R x) 0)) (vec_to_list_float n.+1 v).
-
-Definition extract_non_zero_idx {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
-  let idx_seq := iota 0 n.+1 in
-  let l := combine idx_seq (vec_to_list_float n.+1 v) in
-  map fst (filter (fun x => negb (Req_bool (FT2R (snd x)) 0)) l).
-
-Definition sparsity_fac {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
-  length (extract_non_zero_elmt v).
-
-(* Search (?A -> (seq.seq ?A) -> bool). *)
-(* Definition extract_non_zero {n : nat} {ty} (r : nat) (v : 'cV[ftype ty]_n.+1) :=
-  filter (fun x => x != 0) (vec_to_list_float n.+1 v). *)
-
-(* Definition e_i_sparse {n : nat} {ty} (i : 'I_n+1)
-  (A : 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1) :=
-  let l1 := vec_to_list_float n.+1 (\row_(j < n.+1) A i j)^T in
-  let l2 := extract_non_zero_elmt v in
-  let L := combine l1 l2 in *)
-
-
-(* leverage the old theorem *)
-(* another vector to each new theorem *)
-(* modify the definition *)
-(* add arg r, extract non-zero elements *)
-(* pre-condition: dim of new vector = dim of v *)
-
-(* only assume that the first vector is sparse *)
-
 
 Definition mat_vec_mult_err_bnd {n:nat} {ty}
  (A: 'M[ftype ty]_n.+1) (v: 'cV[ftype ty]_n.+1):=
  bigmaxr 0%Re [seq (e_i i A v) | i <- enum 'I_n.+1].
-
-(* propagate to here *)
-
-
-
-
 
 Lemma dotprod_cons {t: type} (v1 v2: list (ftype t)) (x y : ftype t): 
   length v1 = length v2 ->
