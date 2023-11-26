@@ -66,15 +66,53 @@ Definition extract_non_zero_idx {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
 Definition sparsity_fac {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
   length (extract_non_zero_elmt v).
 
+Definition is_r_sparse {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) (r : nat) :=
+  sparsity_fac v = r.
+
+(* Variable ty : type.
+Variable n : nat.
+Variable A : 'M[ftype ty]_n.+1.
+
+Variable i : 'I_n.+1.
+Definition Ai := (\row_(j < n.+1) A i j)^T. *)
+
+(* Check maxn. *)
+
+Definition sparsity_fac_mat_row {n : nat} {ty} (A : 'M[ftype ty]_n.+1) (i : 'I_n.+1) :=
+  sparsity_fac (\row_(j < n.+1) A i j)^T.
+
+Definition sparsity_fac_mat {n : nat} {ty} (A: 'M[ftype ty]_n.+1) :=
+  foldr maxn 0%nat [seq (sparsity_fac_mat_row A i) | i <- enum 'I_n.+1].
+  
+Definition is_r_sparse_mat {n : nat} {ty} (A: 'M[ftype ty]_n.+1) (r : nat) :=
+  sparsity_fac_mat A = r.
+
+(* Definition e_i {n:nat} {ty} (i : 'I_n.+1) 
+  (A: 'M[ftype ty]_n.+1) (v: 'cV[ftype ty]_n.+1) := 
+  let l1 := vec_to_list_float n.+1 (\row_(j < n.+1) A i j)^T in
+  let l2 := vec_to_list_float n.+1 v in
+  let L := combine l1 l2 in
+  let prods := map (uncurry Rmult) (map Rabsp (map FR2 L)) in
+  let rs:= sum_fold prods in
+  (g ty (length l1) * Rabs rs  + g1 ty (length l1) (length l1 - 1))%Re. *)
+
+Definition e_i_sparse {n : nat} {ty} (i : 'I_n.+1)
+  (A : 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1) 
+  (r : nat) (HA : is_r_sparse_mat A r) :=
+  let l1 := vec_to_list_float n.+1 (\row_(j < n.+1) A i j)^T in
+  let l2 := vec_to_list_float n.+1 v in
+  let L := combine l1 l2 in
+  let prods := map (uncurry Rmult) (map Rabsp (map FR2 L)) in
+  let rs:= sum_fold prods in
+  (g ty r * Rabs rs  + g1 ty r (r - 1))%Re.
+
+
+
+
 (* Search (?A -> (seq.seq ?A) -> bool). *)
 (* Definition extract_non_zero {n : nat} {ty} (r : nat) (v : 'cV[ftype ty]_n.+1) :=
   filter (fun x => x != 0) (vec_to_list_float n.+1 v). *)
 
-(* Definition e_i_sparse {n : nat} {ty} (i : 'I_n+1)
-  (A : 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1) :=
-  let l1 := vec_to_list_float n.+1 (\row_(j < n.+1) A i j)^T in
-  let l2 := extract_non_zero_elmt v in
-  let L := combine l1 l2 in *)
 
 
 (* leverage the old theorem *)
