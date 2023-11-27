@@ -87,14 +87,6 @@ Definition sparsity_fac_mat {n : nat} {ty} (A: 'M[ftype ty]_n.+1) :=
 Definition is_r_sparse_mat {n : nat} {ty} (A: 'M[ftype ty]_n.+1) (r : nat) :=
   sparsity_fac_mat A = r.
 
-(* Definition e_i {n:nat} {ty} (i : 'I_n.+1) 
-  (A: 'M[ftype ty]_n.+1) (v: 'cV[ftype ty]_n.+1) := 
-  let l1 := vec_to_list_float n.+1 (\row_(j < n.+1) A i j)^T in
-  let l2 := vec_to_list_float n.+1 v in
-  let L := combine l1 l2 in
-  let prods := map (uncurry Rmult) (map Rabsp (map FR2 L)) in
-  let rs:= sum_fold prods in
-  (g ty (length l1) * Rabs rs  + g1 ty (length l1) (length l1 - 1))%Re. *)
 
 Definition e_i_sparse {n : nat} {ty} (i : 'I_n.+1)
   (A : 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1) 
@@ -307,6 +299,24 @@ apply Rle_trans with (e_i (@inord n i) A v).
   rewrite size_map size_enum_ord.
   by rewrite size_map size_enum_ord in H1.
 Qed.
+
+Lemma matrix_vec_mult_bound_sparse {n : nat} {ty}:
+  forall (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1)
+  {r : nat} {HA : is_r_sparse_mat A r},
+  (forall (xy : ftype ty * ftype ty) (i : 'I_n.+1),
+    In xy
+      (combine
+         (vec_to_list_float n.+1
+            (\row_j A (inord i) j)^T)
+         (vec_to_list_float n.+1 v)) ->
+    finite xy.1 /\finite xy.2) ->
+  (forall (i : 'I_n.+1),
+    finite  (let l1 := vec_to_list_float n.+1 (\row_j A (inord i) j)^T in
+         let l2 := vec_to_list_float n.+1 (\col_j v j 0) in
+         dotprod_r l1 l2)) ->
+  vec_inf_norm (FT2R_mat (A *f v) - (FT2R_mat A) *m (FT2R_mat v)) <=
+  @mat_vec_mult_err_bnd_sparse n ty A v r HA.
+Admitted.
   
 Definition FT2R_abs {m n: nat} (A : 'M[R]_(m.+1, n.+1)) :=
   \matrix_(i,j) Rabs (A i j).
