@@ -307,6 +307,8 @@ apply (IHm1 m2 (length a)); auto.
 lia.
 Qed.
 
+Ltac temp1 := try (rewrite matrix_by_index_rows);  try (rewrite length_diag_of_matrix); auto.
+(* Ltac temp2 := apply matrix_by_index_cols; apply length_diag_of_matrix; auto. *)
 Lemma remove_plus_diag: forall {t} (m: matrix t),
    matrix_cols_nat m (matrix_rows_nat m) ->
    Forall (Forall finite) m ->
@@ -316,28 +318,32 @@ intros.
 apply matrix_extensionality with (cols := matrix_rows_nat m); auto.
 unfold matrix_add.
 rewrite matrix_rows_nat_matrix_binop.
-unfold matrix_of_diag.
+1,2: unfold matrix_of_diag; temp1.
+unfold remove_diag. temp1.
+(* unfold matrix_of_diag.
 rewrite matrix_by_index_rows.
-apply length_diag_of_matrix; auto.
-unfold matrix_of_diag.
+apply length_diag_of_matrix; auto. *)
+(* unfold matrix_of_diag.
 rewrite matrix_by_index_rows.
-rewrite length_diag_of_matrix; auto.
-unfold remove_diag.
-rewrite matrix_by_index_rows; auto.
+rewrite length_diag_of_matrix; auto. *)
+(* rewrite matrix_by_index_rows; auto. *)
 apply matrix_cols_nat_matrix_binop.
 replace (matrix_rows_nat m) with (length (diag_of_matrix m)).
 apply matrix_by_index_cols.
 apply length_diag_of_matrix; auto.
+(* temp2. *)
 apply matrix_by_index_cols.
-unfold matrix_add at 1.
+unfold matrix_add at 1. 
 rewrite matrix_rows_nat_matrix_binop.
 2:{ unfold matrix_of_diag. rewrite matrix_by_index_rows.
-    unfold remove_diag.  rewrite matrix_by_index_rows.
-    apply length_diag_of_matrix; auto.
+    unfold remove_diag. temp1.
+    (*  rewrite matrix_by_index_rows.
+    apply length_diag_of_matrix; auto. *)
 }
 unfold matrix_of_diag at 1.
-rewrite matrix_by_index_rows; auto.
-rewrite length_diag_of_matrix; auto.
+temp1; temp1.
+(* rewrite matrix_by_index_rows; auto.
+rewrite length_diag_of_matrix; auto. *)
 intros.
 unfold matrix_add.
 rewrite binop_matrix_index with (cols := matrix_rows_nat m); auto.
