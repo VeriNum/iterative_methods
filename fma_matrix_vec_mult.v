@@ -67,7 +67,8 @@ Definition sparsity_fac {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
   length (extract_non_zero_elmt v).
 
 Definition is_r_sparse {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) (r : nat) :=
-  sparsity_fac v = r.
+  le (sparsity_fac v) r.
+
 
 (* Variable ty : type.
 Variable n : nat.
@@ -81,12 +82,16 @@ Definition Ai := (\row_(j < n.+1) A i j)^T. *)
 Definition sparsity_fac_mat_row {n : nat} {ty} (A : 'M[ftype ty]_n.+1) (i : 'I_n.+1) :=
   sparsity_fac (\row_(j < n.+1) A i j)^T.
 
+Definition is_r_sparse_mat {n : nat} {ty} (A : 'M[ftype ty]_n.+1) (r : nat) :=
+  foldr and True [seq (is_r_sparse (row i A)^T r) | i <- enum 'I_n.+1].
+
 Definition sparsity_fac_mat {n : nat} {ty} (A: 'M[ftype ty]_n.+1) :=
   foldr maxn 0%nat [seq (sparsity_fac_mat_row A i) | i <- enum 'I_n.+1].
-  
-Definition is_r_sparse_mat {n : nat} {ty} (A: 'M[ftype ty]_n.+1) (r : nat) :=
-  sparsity_fac_mat A = r.
 
+(* Definition is_r_sparse_mat {n : nat} {ty} (A: 'M[ftype ty]_n.+1) (r : nat) :=
+  le (sparsity_fac_mat A) r. *)
+
+(* alternative: BIG-AND of "is_r_sparse row" *)
 
 Definition e_i_sparse {n : nat} {ty} (i : 'I_n.+1)
   (A : 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1) 
@@ -316,6 +321,7 @@ Lemma matrix_vec_mult_bound_sparse {n : nat} {ty}:
          dotprod_r l1 l2)) ->
   vec_inf_norm (FT2R_mat (A *f v) - (FT2R_mat A) *m (FT2R_mat v)) <=
   @mat_vec_mult_err_bnd_sparse n ty A v r HA.
+
 Admitted.
   
 Definition FT2R_abs {m n: nat} (A : 'M[R]_(m.+1, n.+1)) :=
