@@ -69,6 +69,23 @@ Definition sparsity_fac {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
 Definition is_r_sparse {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) (r : nat) :=
   le (sparsity_fac v) r.
 
+Lemma non_zero_length {n : nat} {ty} (v : 'cV[ftype ty]_n.+1):
+  length (extract_non_zero_elmt v) = length (extract_non_zero_idx v).
+Proof.
+  unfold extract_non_zero_elmt, extract_non_zero_idx.
+  rewrite map_length.
+  remember (vec_to_list_float n.+1 v) as l.
+  assert (length l = n.+1).
+  { rewrite Heql. by rewrite length_veclist. }
+  clear Heql v.
+  revert n H.
+  induction l as [|h l']; intros.
+  + simpl. reflexivity.
+  + simpl. assert (length l' = n).
+    { simpl in H. lia. }
+    destruct (Req_bool (FT2R h) 0) eqn:Heq.
+Admitted.
+
 
 (* Variable ty : type.
 Variable n : nat.
@@ -135,8 +152,6 @@ Definition mat_vec_mult_err_bnd_sparse {n : nat} {ty}
   (A : 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1) 
   (r : nat) (HA : is_r_sparse_mat A r) :=
   bigmaxr 0%Re [seq (@e_i_sparse n ty i A v r HA) | i <- enum 'I_n.+1].
-
-
 
 
 Lemma dotprod_cons {t: type} (v1 v2: list (ftype t)) (x y : ftype t): 
@@ -241,7 +256,9 @@ induction m.
 + simpl. apply R_dot_prod_rel_nil.
 + simpl. rewrite !mxE. by apply R_dot_prod_rel_cons.
 Qed.
-Locate "*f".
+(* Locate "*f". *)
+
+(* try proving a lemma that reduces sparse vectors to normal vectors first *)
 
 (** Write a lemma for matrix-vector multiplication **)
 Lemma matrix_vec_mult_bound {n:nat} {ty}:
@@ -304,6 +321,53 @@ apply Rle_trans with (e_i (@inord n i) A v).
   rewrite size_map size_enum_ord.
   by rewrite size_map size_enum_ord in H1.
 Qed.
+
+(* Locate "*v".
+Print mulmx_float.
+Variable n : nat.
+Variable ty : type.
+Variable v1 : 'cV[ftype ty]_n.+1.
+Variable v2 : 'cV[ftype ty]_n.+1.
+Definition v1_nonzero := extract_non_zero_elmt v1.
+Definition r1 := sparsity_fac v1.
+
+Check (ftype ty).
+Search "zero".
+
+Check (let l1 := vec_to_list_float n.+1 v1 in
+         let l2 := vec_to_list_float n.+1 v2 in
+         dotprod ty l1 l2). *)
+
+Definition extract_elements {T} (idx : seq.seq nat) (l : list T) (default : T) :=
+  map (fun i => nth i l default) idx.
+
+Lemma extract_elements_length {T} (idx : seq.seq nat) (l : list T) (default : T):
+  length (extract_elements idx l default) = length idx.
+Proof.
+  induction idx as [|h idx'].
+  + simpl. auto.
+  + simpl. rewrite IHidx'. auto.
+Qed.
+
+Lemma reduce_sparse_vec_vec_mult {n : nat} {ty}:
+  forall (v1 v2 : 'cV[ftype ty]_n.+1) (r : nat) (Hv : is_r_sparse v1 r),
+  let l1 := vec_to_list_float n.+1 v1 in
+  let l2 := vec_to_list_float n.+1 v2 in
+  let l1_nonzero := extract_non_zero_elmt v1 in
+  let l2_nonzero := extract_elements (extract_non_zero_idx v1) l2 (Zconst ty 0) in
+  dotprod_r l1 l2 = dotprod_r l1_nonzero l2_nonzero.
+Proof.
+  intros. unfold dotprod_r.
+  assert (length l1 = length l2).
+  { rewrite !length_veclist. auto. }
+  assert (length l1_nonzero = length l2_nonzero).
+  { unfold l1_nonzero, l2_nonzero. rewrite extract_elements_length.
+
+
+
+
+
+  
 
 Lemma matrix_vec_mult_bound_sparse {n : nat} {ty}:
   forall (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1)
