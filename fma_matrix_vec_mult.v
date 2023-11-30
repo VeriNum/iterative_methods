@@ -366,7 +366,6 @@ Proof.
 
 
 
-
   
 
 Lemma matrix_vec_mult_bound_sparse {n : nat} {ty}:
