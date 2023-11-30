@@ -7,7 +7,9 @@
 #include "parsparse.h"
 #include "jacobi.h"
 
-unsigned num_threads = 4;
+#include <time.h>
+
+unsigned num_threads = 16;
 
 typedef struct {
   double a1;
@@ -272,12 +274,15 @@ void block_jacobi_oneiter(double *A1inv, double *A2, double *b, double *x, unsig
 
 void block_jacobi(double *A, double *b, double *x0, unsigned *block_idx, unsigned N, unsigned block_num, double acc, unsigned max_iter) 
 {
+
+  clock_t t0 = clock();
   double A1[N * N];
   double A2[N * N];
   block_diagonal_partition(A, A1, A2, block_idx, N, block_num);
 
   double A1inv[N * N];
   block_matrix_inverse_parallel(A1, A1inv, block_idx, N, block_num);
+  clock_t t1 = clock();
 
   double x[N];
   for (int i = 0; i < N; i++) {
@@ -301,15 +306,22 @@ void block_jacobi(double *A, double *b, double *x0, unsigned *block_idx, unsigne
     printf("residual = %.6f\n", res);
 
   }
+
+  clock_t t2 = clock();
+
+  double time_spent1 = (double)(t1 - t0) / CLOCKS_PER_SEC;
+  double time_spent2 = (double)(t2 - t1) / CLOCKS_PER_SEC;
+  printf("Time spent on inverse: %f\n", time_spent1);
+  printf("Time spent on iteration: %f\n", time_spent2);
 }
 
 
 int main()
 {
-  unsigned N = 100;
+  unsigned N = 200;
   double A[N * N];
 
-  unsigned block_idx[5] = {0, 15, 30, 60, 90};
+  unsigned block_idx[10] = {0, 20, 40, 60, 80, 100, 120, 140, 160, 180};
   for (int i = 0; i < N; i++){
     for (int j = 0; j < N; j++) {
       if (i == j) {
@@ -329,8 +341,14 @@ int main()
   double x[N];
   for (int i = 0; i < N; i++) x[i] = 0.0;
 
+  clock_t start = clock();
+
   block_jacobi(A, b, x, block_idx, N, 5, 1e-6, 100);
 
+  clock_t end = clock();
+  double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+  printf("Number of threads: %d\n", num_threads);
+  printf("Time spent: %f\n", time_spent);
 
 
 

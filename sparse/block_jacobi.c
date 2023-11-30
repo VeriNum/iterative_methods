@@ -29,7 +29,6 @@ void vector_linear_comb(double a1, double *v1, double a2, double *v2, double *re
 {
   int i;
   for (i = 0; i < N; i++) {
-    // res[i] = a1 * v1[i] + a2 * v2[i];
     res[i] = fma(a1, v1[i], 0);
     res[i] = fma(a2, v2[i], res[i]);
   }
@@ -187,18 +186,16 @@ void block_jacobi(double *A, double *b, double *x0, unsigned *block_idx, unsigne
     printf("]\n");
     printf("residual = %.6f\n", res);
 
-
-    
   }
 }
 
 
 int main()
 {
-  unsigned N = 8;
+  unsigned N = 50;
   double A[N * N];
 
-  unsigned block_idx[3] = {0, 2, 5};
+  unsigned block_idx[5] = {0, 10, 20, 30, 40};
   for (int i = 0; i < N; i++){
     for (int j = 0; j < N; j++) {
       if (i == j) {
@@ -217,9 +214,9 @@ int main()
   matrix_vector_multiplication(A, tempx, b, N);
 
   double x[N];
-  for (int i = 0; i < N; i++) x[i] = 0.0;
+  for (int i = 0; i < N; i++) x[i] = 100.0;
 
-  block_jacobi(A, b, x, block_idx, N, 3, 1e-6, 100);
+  block_jacobi(A, b, x, block_idx, N, 5, 1e-6, 100);
 
   // output matrix A
   // printf("Matrix A:\n");

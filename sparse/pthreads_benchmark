@@ -1,0 +1,30 @@
+Profile 1: A[100 * 100]; block_idx = {0, 20, 40, 60, 80}
+# threads: 1; time: 0.011310
+# threads: 2; time: 0.008302
+# threads: 3; time: 0.008110
+# threads: 4; time: 0.009561
+
+Profile 2: A[200 * 200]; block_idx = {0, 20, 40, 60, 80, 100, 120, 140, 160, 180}
+# threads: 1; time: 0.023249
+# threads: 2; time: 0.017087
+# threads: 3; time: 0.018451
+# threads: 4; time: 0.020936
+# threads: 6; time: 0.023612
+# threads: 8; time: 0.026971
+# threads: 12; time: 0.032455
+# threads: 16; time: 0.038506
+
+# threads: 1; inverse: 0.010849; iteration: 0.015402
+# threads: 2; inverse: 0.005729; iteration: 0.012462
+# threads: 4; inverse: 0.005457; iteration: 0.015481
+# threads: 8; inverse: 0.005871; iteration: 0.020558
+# threads: 16; inverse: 0.006001; iteration: 0.027505
+
+
+
+
+
+
+
+
+
