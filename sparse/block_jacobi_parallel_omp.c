@@ -7,7 +7,9 @@
 #include "jacobi.h"
 #include <omp.h>
 
-#define NUM_THREADS 4
+#include <time.h>
+
+#define NUM_THREADS 2
 
 void vector_linear_comb_parallel(double a1, double *v1, double a2, double *v2, double *res, unsigned N)
 {
@@ -187,10 +189,10 @@ int main()
 {
   omp_set_num_threads(NUM_THREADS);
 
-  unsigned N = 50;
+  unsigned N = 100;
   double A[N * N];
 
-  unsigned block_idx[5] = {0, 10, 20, 30, 40};
+  unsigned block_idx[5] = {0, 20, 40, 60, 80};
   for (int i = 0; i < N; i++){
     for (int j = 0; j < N; j++) {
       if (i == j) {
@@ -209,9 +211,16 @@ int main()
   matrix_vector_multiplication_parallel(A, tempx, b, N);
 
   double x[N];
-  for (int i = 0; i < N; i++) x[i] = 100.0;
+  for (int i = 0; i < N; i++) x[i] = i * 10.0;
+
+  clock_t start = clock();
 
   block_jacobi_parallel(A, b, x, block_idx, N, 5, 1e-6, 100);
+
+  clock_t end = clock();
+  double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
+  printf("Number of threads: %d\n", NUM_THREADS);
+  printf("Time spent: %f\n", time_spent);
 
 
 }

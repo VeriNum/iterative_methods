@@ -192,10 +192,10 @@ void block_jacobi(double *A, double *b, double *x0, unsigned *block_idx, unsigne
 
 int main()
 {
-  unsigned N = 50;
+  unsigned N = 20;
   double A[N * N];
 
-  unsigned block_idx[5] = {0, 10, 20, 30, 40};
+  unsigned block_idx[5] = {0, 4, 8, 12, 16};
   for (int i = 0; i < N; i++){
     for (int j = 0; j < N; j++) {
       if (i == j) {
@@ -214,7 +214,7 @@ int main()
   matrix_vector_multiplication(A, tempx, b, N);
 
   double x[N];
-  for (int i = 0; i < N; i++) x[i] = 100.0;
+  for (int i = 0; i < N; i++) x[i] = i * 10.0;
 
   block_jacobi(A, b, x, block_idx, N, 5, 1e-6, 100);
 
