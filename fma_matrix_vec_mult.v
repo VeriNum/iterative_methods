@@ -83,7 +83,12 @@ Proof.
   + simpl. reflexivity.
   + simpl. assert (length l' = n).
     { simpl in H. lia. }
+    clear H.
+    destruct n as [|n'].
+    { rewrite length_zero_iff_nil in H0. subst l'. simpl in *.
+      destruct (Req_bool (FT2R h) 0) eqn:Heq; simpl; reflexivity. }
     destruct (Req_bool (FT2R h) 0) eqn:Heq.
+    - simpl. rewrite (IHl' n'); [|auto]. simpl. 
 Admitted.
 
 
