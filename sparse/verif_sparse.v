@@ -1,13 +1,14 @@
 Require Import VST.floyd.proofauto.
 Require Import Iterative.floatlib.
 From Iterative.sparse Require Import sparse sparse_model spec_sparse.
-Require Import vcfloat.VCFloat.
-Require Import vcfloat.FPCompCert.
 Require Import VSTlib.spec_math.
+Require Import vcfloat.FPStdCompCert.
+Require Import vcfloat.FPStdLib.
 
 Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
+Close Scope R.
 
 Definition Gprog: funspecs := SparseASI ++ MathASI.
 
@@ -172,10 +173,8 @@ forward_if.
   Exists (h+1).
   entailer!.
   f_equal.
-  change (Binary.Bfma _ _ _ _ _ _ _ _ _) with 
-   (@BFMA _ Tdouble (Znth h vals) (Znth (Znth h col_ind) vval)
-     (partial_row i h vals col_ind row_ptr vval)
-  ).
+  change (FPCore.fprec _) with (fprec Tdouble).
+  rewrite BFMA_eq.
   eapply partial_row_next; try eassumption; lia.
 +
  forward. 

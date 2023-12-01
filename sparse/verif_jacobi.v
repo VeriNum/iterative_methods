@@ -1,13 +1,14 @@
 Require Import VST.floyd.proofauto.
 From Iterative Require Import floatlib jacob_list_fun_model.
 From Iterative.sparse Require Import jacobi sparse_model spec_sparse spec_jacobi fun_model_lemmas.
-Require Import vcfloat.VCFloat.
-Require Import vcfloat.FPCompCert.
+Require Import vcfloat.FPStdCompCert.
 Require Import VSTlib.spec_math.
+Require Import vcfloat.FPStdLib.
 
 Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
+Close Scope R.
 
 Definition Gprog: funspecs := JacobiASI ++ SparseASI ++ MathASI.
 
@@ -59,7 +60,7 @@ forward_for_simple_bound N
    autorewrite with float_elim in *.
    assert (LENiter := Zlength_jacobi_iter A1 A2 b x ltac:(lia) ltac:(lia) ltac:(lia)).
    assert (LENresid := Zlength_jacobi_residual A1 A2 b x ltac:(lia) ltac:(lia) ltac:(lia)).
-   change (Binary.Bfma _ _ _ _ _ _ ?x ?y ?z) with (BFMA x y z).
+   rewrite BFMA_eq.
    Exists (y ++ [BDIV (Zconst _ 1) (Znth i A1) * (Znth i b - y')]%F64).
    EExists.
    entailer!.

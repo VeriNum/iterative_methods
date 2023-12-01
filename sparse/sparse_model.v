@@ -1,12 +1,13 @@
 Require Import VST.floyd.proofauto.
 Require Import vcfloat.VCFloat.
-Require Import vcfloat.FPCompCert.
+Require Import vcfloat.FPStdCompCert.
 Require Import VSTlib.spec_math.
 Require Import Iterative.floatlib.
 
 Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
+Close Scope R.
 
 Inductive crs_row_rep {t: type}: forall (cols: Z) (vals: list (ftype t)) (col_ind: list Z) (v: list  (ftype t)), Prop :=
  | crs_row_rep_nil: crs_row_rep 0%Z nil nil nil
@@ -15,7 +16,7 @@ Inductive crs_row_rep {t: type}: forall (cols: Z) (vals: list (ftype t)) (col_in
           crs_row_rep cols vals col_ind (Zconst t 0 :: v)
  | crs_row_rep_val: forall cols x vals col_ind v,
           crs_row_rep (cols-1) vals (map Z.pred col_ind) v ->
-          crs_row_rep cols (x::vals) (0::col_ind) (x::v).
+          crs_row_rep cols (x::vals) (0%Z::col_ind) (x::v).
 
 Definition crs_rep_aux {t} (mval: matrix t) (cols: Z) (vals: list (ftype t)) (col_ind: list Z) (row_ptr: list Z) : Prop :=
   Zlength row_ptr = 1 + Zlength mval /\

@@ -1,4 +1,4 @@
-Require Import vcfloat.VCFloat vcfloat.FPLib.
+Require Import vcfloat.VCFloat vcfloat.FPStdLib.
 From mathcomp Require Import all_ssreflect ssralg  ssrnat all_algebra seq matrix .
 From mathcomp.analysis Require Import Rstruct.
 Require Import fma_is_finite dotprod_model.

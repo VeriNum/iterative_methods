@@ -115,7 +115,7 @@ Lemma vec_inf_norm_diag_matrix_vec_mult_R {n:nat} (v1 v2 : 'cV[R]_n.+1):
 Proof.
 unfold vec_inf_norm, diag_matrix_vec_mult_R.
 rewrite -bigmaxr_mulr.
-+ apply /RleP. apply bigmax_le.
++ apply /RleP. apply lemmas.bigmax_le.
   - by rewrite size_map size_enum_ord.
   - intros. rewrite seq_equiv. rewrite nth_mkseq; 
     last by rewrite size_map size_enum_ord in H.

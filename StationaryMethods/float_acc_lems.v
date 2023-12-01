@@ -1,7 +1,7 @@
 (* This file contains lemmas regarding the accuracy of floating point 
   operations such as BPLUS, BFMA, and BMULT. *)
 
-Require Import vcfloat.VCFloat vcfloat.FPLib.
+Require Import vcfloat.VCFloat vcfloat.FPStdLib.
 From vcfloat Require Import IEEE754_extra.
 Require Import common op_defs.
 Require Import ZArith.

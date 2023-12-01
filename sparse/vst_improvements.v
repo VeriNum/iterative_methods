@@ -2,7 +2,7 @@ Require Import VST.floyd.proofauto.
 From Iterative Require Import floatlib jacob_list_fun_model.
 From Iterative.sparse Require Import jacobi sparse_model.
 Require Import vcfloat.VCFloat.
-Require Import vcfloat.FPCompCert.
+Require Import vcfloat.FPStdCompCert.
 Require Import VSTlib.spec_math.
 
 Set Bullet Behavior "Strict Subproofs".

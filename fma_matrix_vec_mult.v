@@ -5,8 +5,7 @@ From mathcomp.analysis Require Import Rstruct.
 Import List ListNotations.
 
 
-From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
-                            Float_notations Automate.
+From vcfloat Require Import FPStdLib.
 
 Require Import floatlib fma_floating_point_model inf_norm_properties.
 
@@ -175,7 +174,7 @@ Lemma matrix_vec_mult_bound {n:nat} {ty}:
   mat_vec_mult_err_bnd A v.
 Proof.
 intros. unfold vec_inf_norm, mat_vec_mult_err_bnd.
-apply /RleP. apply bigmax_le; first by rewrite size_map size_enum_ord.
+apply /RleP. apply lemmas.bigmax_le; first by rewrite size_map size_enum_ord.
 intros. rewrite seq_equiv. 
 rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H1.
 pose proof (fma_dotprod_forward_error _ ty 
@@ -375,7 +374,7 @@ unfold vec_inf_norm, matrix_inf_norm.
 rewrite mulrC. rewrite [in X in (_ * X + _)]mulrC.
 rewrite -bigmaxr_mulr.
 + apply /RleP. rewrite -RplusE -RmultE.
-  apply bigmax_le.
+  apply lemmas.bigmax_le.
   - by rewrite size_map size_enum_ord.
   - intros. rewrite seq_equiv. rewrite nth_mkseq;
     last by rewrite size_map size_enum_ord in H.

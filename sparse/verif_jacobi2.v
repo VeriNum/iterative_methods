@@ -4,14 +4,17 @@ From Iterative.sparse Require Import jacobi sparse_model spec_sparse
          spec_jacobi fun_model_lemmas vst_improvements.
 Require Import Iterative.jacobi_iteration_bound.
 Import RelationPairs.
-Require Import vcfloat.VCFloat.
-Require Import vcfloat.FPCompCert.
+Require Import vcfloat.FPStdLib.
+Require Import vcfloat.FPStdCompCert.
 Require Import VSTlib.spec_math.
 Require Import VSTlib.spec_malloc.
 
 Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
+
+Import Morphisms.
+Close Scope R.
 
 Definition functional_model_correctness :=
  forall 
@@ -264,9 +267,12 @@ Intros y s.
 forward_if (temp _t'3 (Val.of_bool (going s acc))).
   { forward.
     entailer!!.
-   change (Float.cmp Cgt s acc) with ((s>acc)%F64).
+   change (Float.cmp Cge s acc) with ((s>=acc)%F64).
    unfold going.
    replace (Binary.is_finite _ _ _) with true; auto.
+   simpl.
+   unfold Val.of_bool, bool2val.
+   destruct (s >= acc)%F64; try reflexivity.
    destruct s; try discriminate; reflexivity.
   } 
   { forward.
@@ -277,20 +283,25 @@ forward_if (temp _t'3 (Val.of_bool (going s acc))).
   }
  rewrite sub_repr.
  forward_if (temp _t'4 (Val.of_bool (going s acc &&  Z.gtb maxiter 1))).
-  { forward. change 1024 with (femax Tdouble) in H1.  rewrite H1. 
-    entailer!!. simpl andb.
+  { destruct (going s acc); try discriminate.
+    forward.
+    entailer!!.
+    simpl andb.
     destruct (Z.gtb_spec maxiter 1).
     rewrite Int.eq_false. reflexivity.
    intro Hx. apply repr_inj_unsigned in Hx; try rep_lia.
    replace (maxiter - 1) with 0 by lia.
    rewrite Int.eq_true. reflexivity.
   }
-  { change 1024 with (femax Tdouble) in H1.  rewrite H1.
-    forward. entailer!!. rewrite H1. reflexivity.
+  { destruct (going s acc); try discriminate.
+    forward. entailer!!. 
   }
  forward_if.
- + forward. Exists y s. entailer!!.
-   rewrite andb_true_iff in H1; destruct H1; auto.
+ + forward. Exists y s.
+   destruct (going s acc); try discriminate.
+   simpl in H1.
+   entailer!!.
+   apply Z.gtb_gt. destruct (maxiter >? 1); auto; discriminate.
  + forward. Exists 1%nat x y s.
    entailer!!.
    rewrite H0.
@@ -299,11 +310,10 @@ forward_if (temp _t'3 (Val.of_bool (going s acc))).
    simpl. 
    destruct n. simpl iter_stop. reflexivity.
    iter_stop_S.
-   rewrite andb_false_iff in H1.
-   destruct H1; [ | lia].
-   rewrite H0 in H1.
-   rewrite H1.
-   reflexivity.
+   replace (going _ acc) with (going s acc) by (rewrite H0; auto).
+   destruct (going s acc); [ | reflexivity].
+   destruct (maxiter >? 1) eqn:?H; try discriminate.
+   lia.
 -
  Intros fx s.
  forward_loop 
@@ -358,9 +368,12 @@ forward.
 forward_if (temp _t'3 (Val.of_bool (going s acc))).
   { forward. 
     entailer!!.
-   change (Float.cmp Cgt ?s acc) with ((s>acc)%F64).
+   change (Float.cmp Cge ?s acc) with ((s>=acc)%F64).
    unfold going.
    replace (Binary.is_finite _ _ _) with true; auto.
+   simpl.
+   unfold Val.of_bool, bool2val.
+   destruct (s >= acc)%F64; try reflexivity.
    destruct s; try discriminate; reflexivity.
   } 
   { forward.
@@ -371,7 +384,8 @@ forward_if (temp _t'3 (Val.of_bool (going s acc))).
   }
  rewrite sub_repr. rewrite <- Z.sub_add_distr.
  forward_if (temp _t'4 (Val.of_bool (going s acc &&  Z.gtb maxiter (Z.of_nat n+1)))).
-  { forward. rewrite H4. 
+  { forward.
+    destruct (going s acc); try discriminate.
     entailer!!. 
     destruct (Z.gtb_spec maxiter (Z.of_nat n+1)).
     rewrite Int.eq_false. reflexivity.
@@ -379,9 +393,10 @@ forward_if (temp _t'3 (Val.of_bool (going s acc))).
     replace (_ - _) with  0 by lia.
     rewrite Int.eq_true. reflexivity.
   }
-  { rewrite H4.
+  { 
+    destruct (going s acc); try discriminate.
     forward.
-    rewrite H4. entailer!!.
+    entailer!!.
   }
 
 assert (LENv: Zlength v = N). {
@@ -403,24 +418,23 @@ forward.
 Exists (S n) fy s.
 rewrite !choose_S.
 entailer!!.
-rewrite andb_true_iff in H4.
-destruct H4.
-destruct (Z.gtb_spec maxiter (Z.of_nat n + 1)); try discriminate. clear H5.
-simpl.   
-
+destruct (going s acc) eqn:GOING; try discriminate.
+destruct (Z.gtb_spec maxiter (Z.of_nat n + 1)); try discriminate.
+clear H4.
+simpl.
 assert (FINs: finite s). {
-  unfold going in H4. rewrite andb_true_iff in H4. destruct H4.
+  unfold going in GOING. rewrite andb_true_iff in GOING. destruct GOING.
    apply finite_is_finite; auto.
 }
 fold resid in H2.
-split3; [ | | f_equal; f_equal; lia].
--- 
-rewrite <- H6 in H2. rewrite H2 in H4.
+split3; [ lia | | split; [ | f_equal; f_equal; lia]].
+--
+rewrite <- H6 in H2. rewrite H2 in GOING.
 
 apply iter_stop_n_S in K; auto.
 simpl in K.
 destruct (going (norm2 (resid x)) acc); inv K.
-rewrite H8. constructor.
+rewrite H7. constructor.
 rewrite <- H6 in H1. rewrite H1; auto.
 -- 
  rewrite H1.
@@ -442,7 +456,8 @@ rewrite H2 in H4|-*.
 destruct (going (norm2 (resid v)) acc) eqn:?H.
 --
 apply iter_stop_n_lem2 in K; auto.
-replace (pred _) with n by lia.
+destruct (maxiter >? Z.of_nat n + 1) eqn:?H; try discriminate.
+replace (Nat.pred _) with n by lia.
 rewrite K. reflexivity.
 --
 pose (k := (pred (Z.to_nat maxiter) - n)%nat).

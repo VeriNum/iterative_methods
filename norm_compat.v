@@ -70,8 +70,7 @@ Require Import floatlib fma_floating_point_model common
       op_defs sum_model fma_dot_acc float_acc_lems dotprod_model fma_matrix_vec_mult.
 
 
-From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
-                            Float_notations Automate.
+From vcfloat Require Import FPStdLib.
 
 Lemma fma_dot_prod_norm2_holds {t} {n:nat} {NANS: Nans} m (v : 'cV[ftype t]_n.+1):
   let v_l := @vec_to_list_float _ n m v in

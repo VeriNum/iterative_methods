@@ -3,15 +3,16 @@ From Iterative Require Import floatlib jacob_list_fun_model.
 From Iterative.sparse Require Import jacobi sparse_model.
 Require Import Iterative.jacobi_iteration_bound.
 Import RelationPairs.
-Require Import vcfloat.VCFloat.
-Require Import vcfloat.FPCompCert.
+Require Import vcfloat.FPStdCompCert.
 Require Import VSTlib.spec_math.
 Require Import VSTlib.spec_malloc.
+Require Import vcfloat.FPStdLib.
 #[export] Declare Instance M: MallocAPD.
 
 Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
+Close Scope R.
 
 Require Import Iterative.sparse.spec_sparse.
 

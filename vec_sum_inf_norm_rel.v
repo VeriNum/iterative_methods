@@ -4,8 +4,7 @@ From mathcomp Require Import all_ssreflect ssralg ssrnat all_algebra seq matrix.
 From mathcomp.analysis Require Import Rstruct.
 Import List ListNotations.
 
-From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
-                            Float_notations Automate FPLib.
+From vcfloat Require Import FPStdLib.
 
 Require Import fma_floating_point_model inf_norm_properties.
 
@@ -220,7 +219,7 @@ Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
 Proof.
 intros Hfin.
 unfold vec_inf_norm.
-apply /RleP. apply bigmax_le; first by rewrite size_map size_enum_ord.
+apply /RleP. apply lemmas.bigmax_le; first by rewrite size_map size_enum_ord.
 intros. rewrite seq_equiv. 
 rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
 rewrite !mxE. rewrite -!RminusE -RmultE -!RplusE.
@@ -302,7 +301,7 @@ Lemma vec_float_sub_1 {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
 Proof.
 intros Hfin.
 unfold vec_inf_norm.
-apply /RleP. apply bigmax_le; first by rewrite size_map size_enum_ord.
+apply /RleP. apply lemmas.bigmax_le; first by rewrite size_map size_enum_ord.
 intros. rewrite seq_equiv. 
 rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
 rewrite !mxE. rewrite -!RminusE -RmultE.

@@ -2,7 +2,7 @@
   the fused muliply add dot product of two floating point lists; 
   the functional model for the fma dot product is defined in dotprod_model.v.*)
 
-Require Import vcfloat.VCFloat vcfloat.FPLib.
+Require Import vcfloat.VCFloat vcfloat.FPStdLib.
 Require Import List.
 Import ListNotations.
 Require Import common op_defs dotprod_model sum_model float_acc_lems list_lemmas.
