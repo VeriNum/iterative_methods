@@ -54,14 +54,27 @@ Definition e_i {n:nat} {ty} (i : 'I_n.+1)
 
 (* Ask Mohit if there is definition for sparsity *)
 
+Definition extract_elements {T} (idx : seq.seq nat) (l : list T) (default : T) :=
+  map (fun i => nth i l default) idx.
 
-Definition extract_non_zero_elmt {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
-  filter (fun x => negb (Req_bool (FT2R x) 0)) (vec_to_list_float n.+1 v).
+Lemma extract_elements_length {T} (idx : seq.seq nat) (l : list T) (default : T):
+  length (extract_elements idx l default) = length idx.
+Proof.
+  induction idx as [|h idx'].
+  + simpl. auto.
+  + simpl. rewrite IHidx'. auto.
+Qed.
+
+(* Definition extract_non_zero_elmt {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
+  filter (fun x => negb (Req_bool (FT2R x) 0)) (vec_to_list_float n.+1 v). *)
 
 Definition extract_non_zero_idx {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
   let idx_seq := iota 0 n.+1 in
   let l := combine idx_seq (vec_to_list_float n.+1 v) in
   map fst (filter (fun x => negb (Req_bool (FT2R (snd x)) 0)) l).
+
+Definition extract_non_zero_elmt {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
+  extract_elements (extract_non_zero_idx v) (vec_to_list_float n.+1 v) (Zconst ty 0).
 
 Definition sparsity_fac {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
   length (extract_non_zero_elmt v).
@@ -69,10 +82,14 @@ Definition sparsity_fac {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
 Definition is_r_sparse {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) (r : nat) :=
   le (sparsity_fac v) r.
 
-Lemma non_zero_length {n : nat} {ty} (v : 'cV[ftype ty]_n.+1):
+Lemma extract_non_zero_length {n : nat} {ty} (v : 'cV[ftype ty]_n.+1):
   length (extract_non_zero_elmt v) = length (extract_non_zero_idx v).
 Proof.
-  unfold extract_non_zero_elmt, extract_non_zero_idx.
+  unfold extract_non_zero_elmt. 
+  rewrite extract_elements_length.
+  reflexivity.
+Qed.
+  (* unfold extract_non_zero_elmt, extract_non_zero_idx.
   rewrite map_length.
   remember (vec_to_list_float n.+1 v) as l.
   assert (length l = n.+1).
@@ -88,9 +105,7 @@ Proof.
     { rewrite length_zero_iff_nil in H0. subst l'. simpl in *.
       destruct (Req_bool (FT2R h) 0) eqn:Heq; simpl; reflexivity. }
     destruct (Req_bool (FT2R h) 0) eqn:Heq.
-    - simpl. rewrite (IHl' n'); [|auto]. simpl. 
-Admitted.
-
+    - simpl. rewrite (IHl' n'); [|auto]. simpl.  *)
 
 (* Variable ty : type.
 Variable n : nat.
@@ -343,16 +358,7 @@ Check (let l1 := vec_to_list_float n.+1 v1 in
          let l2 := vec_to_list_float n.+1 v2 in
          dotprod ty l1 l2). *)
 
-Definition extract_elements {T} (idx : seq.seq nat) (l : list T) (default : T) :=
-  map (fun i => nth i l default) idx.
 
-Lemma extract_elements_length {T} (idx : seq.seq nat) (l : list T) (default : T):
-  length (extract_elements idx l default) = length idx.
-Proof.
-  induction idx as [|h idx'].
-  + simpl. auto.
-  + simpl. rewrite IHidx'. auto.
-Qed.
 
 Lemma reduce_sparse_vec_vec_mult {n : nat} {ty}:
   forall (v1 v2 : 'cV[ftype ty]_n.+1) (r : nat) (Hv : is_r_sparse v1 r),
@@ -362,13 +368,18 @@ Lemma reduce_sparse_vec_vec_mult {n : nat} {ty}:
   let l2_nonzero := extract_elements (extract_non_zero_idx v1) l2 (Zconst ty 0) in
   dotprod_r l1 l2 = dotprod_r l1_nonzero l2_nonzero.
 Proof.
-  intros. unfold dotprod_r.
+  intros. 
   assert (length l1 = length l2).
   { rewrite !length_veclist. auto. }
   assert (length l1_nonzero = length l2_nonzero).
   { unfold l1_nonzero, l2_nonzero. rewrite extract_elements_length.
+    rewrite extract_non_zero_length. auto. }
+  induction l1 as [| x1 l1'].
+  
 
 
+
+Admitted.
 
 
   
