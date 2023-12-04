@@ -68,24 +68,41 @@ Qed.
 (* Definition extract_non_zero_elmt {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
   filter (fun x => negb (Req_bool (FT2R x) 0)) (vec_to_list_float n.+1 v). *)
 
-Definition extract_non_zero_idx {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
+Definition extract_nonzero_idx {ty} (l : list (ftype ty)) :=
+  map fst (filter (fun x => negb (Req_bool (FT2R (snd x)) 0)) (combine (iota 0 (length l)) l)).
+
+(* Definition extract_non_zero_idx {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
   let idx_seq := iota 0 n.+1 in
   let l := combine idx_seq (vec_to_list_float n.+1 v) in
-  map fst (filter (fun x => negb (Req_bool (FT2R (snd x)) 0)) l).
+  map fst (filter (fun x => negb (Req_bool (FT2R (snd x)) 0)) l). *)
 
-Definition extract_non_zero_elmt {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
-  extract_elements (extract_non_zero_idx v) (vec_to_list_float n.+1 v) (Zconst ty 0).
+Definition extract_nonzero_elmt {ty} (l : list (ftype ty)) :=
+  extract_elements (extract_nonzero_idx l) l (Zconst ty 0).
+
+Lemma extract_nonzero_idx_nil {ty} : @extract_nonzero_idx ty [] = [].
+Proof.
+  unfold extract_nonzero_idx. simpl. auto.
+Qed.
+
+Lemma extract_nonzero_elmt_nil {ty} : @extract_nonzero_elmt ty [] = [].
+Proof.
+  unfold extract_nonzero_elmt. rewrite extract_nonzero_idx_nil. simpl. auto.
+Qed.
+
+
+(* Definition extract_non_zero_elmt {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
+  extract_elements (extract_non_zero_idx v) (vec_to_list_float n.+1 v) (Zconst ty 0). *)
 
 Definition sparsity_fac {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
-  length (extract_non_zero_elmt v).
+  length (extract_nonzero_elmt (vec_to_list_float n.+1 v)).
 
 Definition is_r_sparse {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) (r : nat) :=
   le (sparsity_fac v) r.
 
-Lemma extract_non_zero_length {n : nat} {ty} (v : 'cV[ftype ty]_n.+1):
-  length (extract_non_zero_elmt v) = length (extract_non_zero_idx v).
+Lemma extract_nonzero_length {ty} (l : list (ftype ty)):
+  length (@extract_nonzero_elmt ty l) = length (@extract_nonzero_idx ty l).
 Proof.
-  unfold extract_non_zero_elmt. 
+  unfold extract_nonzero_elmt. 
   rewrite extract_elements_length.
   reflexivity.
 Qed.
@@ -357,6 +374,40 @@ Search "zero".
 Check (let l1 := vec_to_list_float n.+1 v1 in
          let l2 := vec_to_list_float n.+1 v2 in
          dotprod ty l1 l2). *)
+
+
+Lemma reduce_sparse_vec_vec_mult {n : nat} {ty}:
+  forall (l1 l2 : seq.seq (ftype ty)),
+  let l1_nonzero := @extract_nonzero_elmt ty l1 in
+  let l2_nonzero := extract_elements (@extract_nonzero_idx ty l1) l2 (Zconst ty 0) in
+  length l1 = length l2 ->
+  dotprod_r l1 l2 = dotprod_r l1_nonzero l2_nonzero.
+Proof.
+  intros. 
+  (* assert (length l1_nonzero = length l2_nonzero).
+  { unfold l1_nonzero, l2_nonzero. rewrite extract_elements_length.
+    rewrite extract_nonzero_length. auto. } *)
+  revert l2 H l2_nonzero.
+  induction l1 as [| x1 l1']; intros.
+  + simpl in H. 
+    assert (l2 = []). { destruct l2. auto. simpl in H. lia. }
+    subst l2. clear H. unfold dotprod_r. simpl. auto.
+  + destruct l2 as [| x2 l2']; [inversion H|].
+    inversion H. clear H. specialize (IHl1' l2' H1). simpl in *.
+    rewrite dotprod_cons; [|auto].
+    destruct (Req_bool (FT2R x1) 0) eqn:E.
+    - pose proof (Req_bool_spec (FT2R x1) 0).
+      rewrite E in H. inversion H.
+Admitted.
+
+    
+    
+(*     
+  + simpl. destruct l2 as [| x2 l2'].
+    - simpl. rewrite !dotprod_nil. auto.
+    - simpl. rewrite !dotprod_cons; [|auto].
+      rewrite !dotprod_cons; [|auto].
+      rewrite IHl1'. auto. *)
 
 
 
