@@ -5,7 +5,7 @@ From mathcomp.analysis Require Import Rstruct.
 Import List ListNotations.
 
 
-From vcfloat Require Import FPStdLib.
+From vcfloat Require Import RAux FPStdLib.
 
 Require Import floatlib inf_norm_properties.
 

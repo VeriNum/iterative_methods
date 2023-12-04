@@ -14,7 +14,6 @@ Set Bullet Behavior "Strict Subproofs".
 Open Scope logic.
 
 Import Morphisms.
-Close Scope R.
 
 Definition functional_model_correctness :=
  forall 

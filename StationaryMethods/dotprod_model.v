@@ -1,4 +1,4 @@
-Require Import vcfloat.FPStdLib.
+From vcfloat Require Import RAux FPStdLib.
 Require Import List.
 Import ListNotations.
 
@@ -28,7 +28,6 @@ induction (rev (List.combine v1 v2)).
 { simpl; auto. apply dot_prod_rel_nil. }
 simpl. apply dot_prod_rel_cons. auto.
 Qed.
-
 
 (* FMA dot-product *)
 Definition fma_dotprod {NAN: Nans} (t: type) (v1 v2: list (ftype t)) : ftype t :=

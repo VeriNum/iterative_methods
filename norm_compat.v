@@ -182,7 +182,7 @@ intros. induction m.
   } rewrite -H2. apply IHm.
 Qed. 
 
-
+Open Scope R_scope.
 
 (*** error between norm2 float and norm2 real **)
 Lemma norm2_error {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):

@@ -5,7 +5,6 @@ Require Import vcfloat.FPStdLib.
 
 Set Bullet Behavior "Strict Subproofs".
 
-Close Scope R.
 Open Scope logic.
 
 Lemma Zlength_jacobi_iter: 

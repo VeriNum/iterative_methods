@@ -12,7 +12,6 @@ Require Import vcfloat.FPStdLib.
 Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
-Close Scope R.
 
 Require Import Iterative.sparse.spec_sparse.
 

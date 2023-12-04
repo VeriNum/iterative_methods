@@ -8,7 +8,6 @@ Require Import vcfloat.FPStdLib.
 Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
-Close Scope R.
 
 Definition Gprog: funspecs := SparseASI ++ MathASI.
 

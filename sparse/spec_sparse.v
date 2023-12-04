@@ -11,7 +11,6 @@ Definition Vprog : varspecs. mk_varspecs prog. Defined.
 Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
-Close Scope R.
 
 Definition t_crs := Tstruct _crs_matrix noattr.
 

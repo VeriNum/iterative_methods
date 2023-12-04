@@ -3,7 +3,9 @@
 
 Require Import Flocq.Core.Raux.
 Require vcfloat.VCFloat.
-Require Import vcfloat.FPStdLib vcfloat.Float_lemmas.
+From vcfloat Require Import RAux FPStdLib Float_lemmas.
+
+Open Scope R.
 
 Definition rounded t r:=
 (Generic_fmt.round Zaux.radix2 (SpecFloat.fexp (fprec t) (femax t))

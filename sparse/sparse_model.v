@@ -7,7 +7,6 @@ Require Import Iterative.floatlib.
 Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
-Close Scope R.
 
 Inductive crs_row_rep {t: type}: forall (cols: Z) (vals: list (ftype t)) (col_ind: list Z) (v: list  (ftype t)), Prop :=
  | crs_row_rep_nil: crs_row_rep 0%Z nil nil nil

@@ -100,7 +100,7 @@ apply Bplus_no_ov_finite .
             ** apply Rmult_le_compat.
                +++ apply Rplus_le_le_0_compat; apply Rabs_pos.
                +++ apply Rabs_pos.
-               +++ rewrite double. apply Rplus_le_compat. 
+               +++ rewrite RIneq.double. apply Rplus_le_compat. 
                    --- apply Ha1.
                    --- unfold FT2R in *. rewrite B2R_Bopp. rewrite Rabs_Ropp.
                        apply Ha2.
