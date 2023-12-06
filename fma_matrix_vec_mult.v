@@ -89,6 +89,26 @@ Proof.
   unfold extract_nonzero_elmt. rewrite extract_nonzero_idx_nil. simpl. auto.
 Qed.
 
+Lemma extract_nonzero_idx_cons {ty} : forall x l,
+  @extract_nonzero_idx ty (x :: l) = 
+  if Req_bool (FT2R x) 0 then map S (extract_nonzero_idx l) else 0%nat :: map S (extract_nonzero_idx l).
+Proof.
+  intros. destruct (Req_bool (FT2R x) 0) eqn:E.
+  + unfold extract_nonzero_idx at 1. simpl. rewrite E. simpl. 
+    unfold extract_nonzero_idx.  
+
+Lemma extract_nonzero_elmt_cons {ty} : forall x l,
+  @extract_nonzero_elmt ty (x :: l) = 
+  if Req_bool (FT2R x) 0 then extract_nonzero_elmt l else x :: extract_nonzero_elmt l.
+Proof.
+  intros. unfold extract_nonzero_elmt. simpl.
+  destruct (Req_bool (FT2R x) 0) eqn:E.
+  + admit.
+  + unfold extract_nonzero_idx. simpl. rewrite E. simpl. 
+    unfold extract_elements. 
+
+  + simpl. rewrite E. simpl. auto.
+
 
 (* Definition extract_non_zero_elmt {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
   extract_elements (extract_non_zero_idx v) (vec_to_list_float n.+1 v) (Zconst ty 0). *)
@@ -398,6 +418,10 @@ Proof.
     destruct (Req_bool (FT2R x1) 0) eqn:E.
     - pose proof (Req_bool_spec (FT2R x1) 0).
       rewrite E in H. inversion H.
+      admit.
+    - 
+
+
 Admitted.
 
     
@@ -411,7 +435,7 @@ Admitted.
 
 
 
-Lemma reduce_sparse_vec_vec_mult {n : nat} {ty}:
+(* Lemma reduce_sparse_vec_vec_mult {n : nat} {ty}:
   forall (v1 v2 : 'cV[ftype ty]_n.+1) (r : nat) (Hv : is_r_sparse v1 r),
   let l1 := vec_to_list_float n.+1 v1 in
   let l2 := vec_to_list_float n.+1 v2 in
@@ -430,7 +454,7 @@ Proof.
 
 
 
-Admitted.
+Admitted. *)
 
 
   
