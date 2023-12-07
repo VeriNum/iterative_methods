@@ -54,7 +54,7 @@ split.
   by rewrite size_map size_enum_ord in H. 
 Qed.
 
-
+Ltac seq_rewrite := unfold mkseq; rewrite -val_enum_ord; rewrite -[in RHS]map_comp ;apply eq_map; unfold eqfun; intros.
 
 Lemma triang_ineq {n:nat} : forall a b: 'cV[R]_n.+1,
 vec_inf_norm(a + b) <= vec_inf_norm a + vec_inf_norm b.
@@ -69,33 +69,25 @@ apply bigmax_le.
      [seq Rabs (b i0 0) | i0 <- enum 'I_n.+1]`_i)%Re.
   - assert ([seq Rabs ((a + b)%Ri i0 0) | i0 <- enum 'I_n.+1] = 
                mkseq (fun i =>  Rabs ((a + b)%Ri (@inord n i) 0)) n.+1).
-    { unfold mkseq. rewrite -val_enum_ord.
-      rewrite -[in RHS]map_comp.
-      apply eq_map. unfold eqfun. intros.
-      rewrite !mxE //=. rewrite !mxE. by rewrite inord_val.
+    { 
+      seq_rewrite. rewrite !mxE //=. rewrite !mxE. by rewrite inord_val.
     } rewrite H0 nth_mkseq; last by rewrite size_map size_enum_ord in H.  
     assert ([seq Rabs (a i0 0) | i0 <- enum 'I_n.+1] = 
                mkseq (fun i =>  Rabs (a (@inord n i) 0)) n.+1).
-    { unfold mkseq. rewrite -val_enum_ord.
-      rewrite -[in RHS]map_comp.
-      apply eq_map. unfold eqfun. intros. by rewrite //= inord_val //=.
+    { 
+      seq_rewrite. by rewrite //= inord_val //=.
     } rewrite H1 nth_mkseq ; last by rewrite size_map size_enum_ord in H.
     assert ([seq Rabs (b i0 0) | i0 <- enum 'I_n.+1] = 
                mkseq (fun i =>  Rabs (b (@inord n i) 0)) n.+1).
-    { unfold mkseq. rewrite -val_enum_ord.
-      rewrite -[in RHS]map_comp.
-      apply eq_map. unfold eqfun. intros. by rewrite //= inord_val //=.
+    { 
+      seq_rewrite. by rewrite //= inord_val //=.
     } rewrite H2 nth_mkseq ; last by rewrite size_map size_enum_ord in H.
     rewrite !mxE //=. rewrite -RplusE. apply Rabs_triang.
   - apply Rplus_le_compat.
-    * apply /RleP. 
-      apply (@bigmaxr_ler _ 0%Re [seq Rabs (a i0 0) | i0 <- enum 'I_n.+1] i).
-      rewrite size_map size_enum_ord.
-      by rewrite size_map size_enum_ord in H.
-    * apply /RleP. 
-      apply (@bigmaxr_ler _ 0%Re [seq Rabs (b i0 0) | i0 <- enum 'I_n.+1] i).
-      rewrite size_map size_enum_ord.
-      by rewrite size_map size_enum_ord in H.
+      all: apply /RleP.
+      1: apply (@bigmaxr_ler _ 0%Re [seq Rabs (a i0 0) | i0 <- enum 'I_n.+1] i).
+      2: apply (@bigmaxr_ler _ 0%Re [seq Rabs (b i0 0) | i0 <- enum 'I_n.+1] i).
+      all: (rewrite size_map size_enum_ord; by rewrite size_map size_enum_ord in H).
 Qed.
 
 
@@ -116,20 +108,16 @@ rewrite -bigmaxr_mulr.
       | i0 <- enum 'I_n.+1]`_i.
     * assert ([seq Rabs ((A *m v) i0 0) | i0 <- enum 'I_n.+1] = 
               mkseq (fun i => Rabs ((A *m v) (@inord n i) 0)) n.+1).
-      { unfold mkseq. rewrite -val_enum_ord.
-        rewrite -[in RHS]map_comp.
-        apply eq_map. unfold eqfun. intros.
-        rewrite !mxE //=. rewrite !mxE. by rewrite //= inord_val //=.
+      { 
+        seq_rewrite. rewrite !mxE //=. rewrite !mxE. by rewrite //= inord_val //=.
       } rewrite H0 nth_mkseq ; last by rewrite size_map size_enum_ord in H.
       assert ([seq bigmaxr 0
                   [seq Rabs (v i1 0) | i1 <- enum 'I_n.+1] *  row_sum A i0
                     | i0 <- enum 'I_n.+1] = 
                mkseq (fun i =>  bigmaxr 0  
                         [seq Rabs (v i1 0) | i1 <- enum 'I_n.+1] *  row_sum A (@inord n i)) n.+1).
-      { unfold mkseq. rewrite -val_enum_ord.
-        rewrite -[in RHS]map_comp.
-        apply eq_map. unfold eqfun. intros.
-        by rewrite //= inord_val //=.
+      { 
+        seq_rewrite. by rewrite //= inord_val //=.
       } rewrite H1 nth_mkseq ; last by rewrite size_map size_enum_ord in H.
       rewrite -RmultE. rewrite !mxE.
       apply Rle_trans with 
@@ -148,10 +136,8 @@ rewrite -bigmaxr_mulr.
          -- apply Rle_trans with [seq Rabs (v i1 0) | i1 <- enum 'I_n.+1]`_i0.
             ** assert ([seq Rabs (v i1 0) | i1 <- enum 'I_n.+1] = 
                        mkseq (fun i => Rabs (v (@inord n i) 0)) n.+1).
-               { unfold mkseq. rewrite -val_enum_ord.
-                 rewrite -[in RHS]map_comp.
-                 apply eq_map. unfold eqfun. intros.
-                 by rewrite //= inord_val //=.
+               { 
+                 seq_rewrite. by rewrite //= inord_val //=.
                } rewrite H4 nth_mkseq ; last by rewrite size_map size_enum_ord in H. 
                rewrite //= inord_val. nra.
             ** apply /RleP. apply (@bigmaxr_ler _ 0%Re [seq Rabs (v i1 0) | i1 <- enum 'I_n.+1] i0).
@@ -172,10 +158,8 @@ rewrite -bigmaxr_mulr.
   - intros. 
     assert ([seq Rabs (v i0 0) | i0 <- enum 'I_n.+1]= 
               mkseq (fun i => Rabs (v (@inord n i) 0)) n.+1).
-    { unfold mkseq. rewrite -val_enum_ord.
-      rewrite -[in RHS]map_comp.
-      apply eq_map. unfold eqfun. intros.
-      by rewrite //= inord_val //=.
+    { 
+      seq_rewrite. by rewrite //= inord_val //=.
     } rewrite H0 nth_mkseq ; last by rewrite size_map size_enum_ord in H.
     unfold row_sum. apply /RleP. apply Rabs_pos.
 Qed.
@@ -289,6 +273,7 @@ apply /RleP. apply bigmax_le.
                      (Rabs (A (inord i) k) * Rabs (B k j))%Re).
       { apply exchange_big. } rewrite H0. 
       rewrite mulrC. rewrite -bigmaxr_mulr.
+
       apply Rle_trans with 
       (nth 0 [seq (bigmaxr 0 [seq \sum_(j < n.+1) Rabs (B i1 j)
                       | i1 <- enum 'I_n.+1] *
@@ -328,9 +313,16 @@ apply /RleP. apply bigmax_le.
 Qed.
 
 
+(* Ltac apply_seq H0 A j n i0 i:= rewrite H0; apply /RleP; apply (@bigmaxr_ler _ 0 [seq \sum_(j < n.+1) Rabs (A i0 j)
+| i0 <- enum 'I_n.+1] i).
+
+Ltac seq_rewrite' H H0 A j n i0 i:=  rewrite seq_equiv; rewrite nth_mkseq; try by []; try by rewrite size_map size_enum_ord in H; 
+apply_seq H0 A j n i0 i; rewrite size_map size_enum_ord in H; by rewrite size_map size_enum_ord. *)
+
 Lemma matrix_norm_add {n:nat}:
   forall (A B : 'M[R]_n.+1),
   matrix_inf_norm (A + B) <= matrix_inf_norm A + matrix_inf_norm B.
+
 Proof.
 intros. rewrite /matrix_inf_norm.
 apply /RleP. apply bigmax_le.
@@ -354,9 +346,10 @@ apply /RleP. apply bigmax_le.
            + by rewrite size_map size_enum_ord in H.
          } rewrite H0. apply /RleP.
          apply (@bigmaxr_ler _ 0 [seq \sum_(j < n.+1) Rabs (A i0 j)
-                                      | i0 <- enum 'I_n.+1] i).
-         rewrite size_map size_enum_ord in H.
+                                      | i0 <- enum 'I_n.+1] i). 
+          rewrite size_map size_enum_ord in H.
          by rewrite size_map size_enum_ord.
+         (* seq_rewrite' H H0 A j n i0 i.  *)
       ++ assert (\sum_(j < n.+1) Rabs (B (inord i) j) = 
                   nth 0 [seq \sum_(j < n.+1) Rabs (B i0 j)
                             | i0 <- enum 'I_n.+1] i).
@@ -368,6 +361,7 @@ apply /RleP. apply bigmax_le.
                                       | i0 <- enum 'I_n.+1] i).
          rewrite size_map size_enum_ord in H.
          by rewrite size_map size_enum_ord.
+         (* seq_rewrite' H H0 B j n i0 i. *)
   - by rewrite size_map size_enum_ord in H.
 Qed.
 

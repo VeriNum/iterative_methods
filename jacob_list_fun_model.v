@@ -121,8 +121,7 @@ transitivity (nth i (map f (seq 0 (length d))) (f (length d))).
 f_equal. subst f. simpl.
 unfold matrix_by_index.
 unfold matrix_index.
-rewrite nth_overflow; auto.
-rewrite nth_overflow; auto.
+do 2 (rewrite nth_overflow; auto).
 simpl; lia.
 rewrite map_length. rewrite seq_length. lia.
 rewrite map_nth.
@@ -160,17 +159,27 @@ Lemma matrix_binop_by_index:
   matrix_cols_nat m1 cols -> matrix_cols_nat m2 cols ->  
   Forall2 (Forall2 feq) (map2 (map2 op) m1 m2)
   (matrix_by_index (matrix_rows_nat m1) cols (fun i j => op (matrix_index m1 i j) (matrix_index m2 i j))).
+
+
+Ltac ind_des m1 :=
+  match goal with
+  | [ |- forall j, _ -> forall l, _] => induction m1; destruct j,l; simpl; intros
+  | [ |- forall m2, _ ] => induction m1; destruct m2; simpl; intros
+  end.
+  
 Proof.
 intros.
 apply (matrix_extensionality _ _ cols); auto.
 -
 rewrite matrix_by_index_rows.
 clear H0 H1.
-revert m2 H; induction m1; destruct m2; simpl; intros; inv H; auto.
+revert m2 H; ind_des m1 ; inv H; auto.
+
 f_equal; eauto.
 -
 clear H.
-revert m2 H1; induction H0; destruct m2; simpl; intros; constructor.
+revert m2 H1; ind_des H0; constructor.
+
 inv H1.
 unfold uncurry, map2.
 rewrite map_length.
@@ -183,11 +192,12 @@ apply matrix_by_index_cols.
 -
 intros.
  assert (matrix_rows_nat (map2 (map2 op) m1 m2) = matrix_rows_nat m1). {
-  clear - H. revert m2 H; induction m1; destruct m2; simpl; intros; inv H; f_equal; eauto.
+  clear - H. revert m2 H; ind_des m1; inv H; f_equal; eauto.
  }
  rewrite H4 in *.
  rewrite matrix_by_index_index; auto.
- revert m2 H H1 i H2 H4; induction m1; destruct m2; simpl; intros; inv H.
+ revert m2 H H1 i H2 H4; ind_des m1; inv H.
+
  + lia.
  + destruct i; simpl.
    * clear IHm1.
@@ -196,7 +206,7 @@ intros.
        unfold map2.
        inv H0. inv H1.
        clear - H3 H5.
-       revert j H3 l H5; induction a; destruct j,l; simpl; intros; inv H5; auto.
+       revert j H3 l H5; ind_des a; inv H5; auto.
        inv H3. inv H3.
        simpl in H3.
        eapply IHa; eauto. lia.
@@ -235,9 +245,7 @@ Lemma matrix_cols_nat_matrix_binop:
  matrix_cols_nat (map2 (map2 op) m1 m2) cols.
 Proof.
 induction m1; destruct m2; simpl; intros.
-constructor.
-constructor.
-constructor.
+1,2,3: constructor.
 inv H.
 inv H0.
 unfold map2 at 1.
@@ -254,9 +262,8 @@ Lemma matrix_cols_nat_matrix_unop:
  matrix_cols_nat m cols ->
  matrix_cols_nat (map (map op) m) cols.
 Proof.
-induction 1.
-constructor.
-constructor.
+induction 1; constructor.
+
 rewrite map_length. auto.
 apply IHForall.
 Qed.
@@ -301,14 +308,13 @@ unfold matrix_index. simpl.
 unfold map2.
 clear - H3 H4.
 revert j H3 l H4; induction a; destruct l,j; simpl; intros; inv H4; auto.
-simpl in H3; lia. simpl in H3; lia.
-simpl in H3. apply IHa; auto. lia.
-apply (IHm1 m2 (length a)); auto.
-lia.
+1,2,3: simpl in H3. 1,2 : lia.
+apply IHa; auto. lia.
+apply (IHm1 m2 (length a)); auto. lia.
 Qed.
 
-Ltac temp1 := try (rewrite matrix_by_index_rows);  try (rewrite length_diag_of_matrix); auto.
-(* Ltac temp2 := apply matrix_by_index_cols; apply length_diag_of_matrix; auto. *)
+Ltac  diag_matrix_len := rewrite length_diag_of_matrix; auto.
+Ltac  matrix_rows_len := try (rewrite matrix_by_index_rows); try (diag_matrix_len).
 Lemma remove_plus_diag: forall {t} (m: matrix t),
    matrix_cols_nat m (matrix_rows_nat m) ->
    Forall (Forall finite) m ->
@@ -318,32 +324,20 @@ intros.
 apply matrix_extensionality with (cols := matrix_rows_nat m); auto.
 unfold matrix_add.
 rewrite matrix_rows_nat_matrix_binop.
-1,2: unfold matrix_of_diag; temp1.
-unfold remove_diag. temp1.
-(* unfold matrix_of_diag.
-rewrite matrix_by_index_rows.
-apply length_diag_of_matrix; auto. *)
-(* unfold matrix_of_diag.
-rewrite matrix_by_index_rows.
-rewrite length_diag_of_matrix; auto. *)
-(* rewrite matrix_by_index_rows; auto. *)
+1,2: unfold matrix_of_diag; matrix_rows_len.
+unfold remove_diag. rewrite matrix_by_index_rows; auto.
 apply matrix_cols_nat_matrix_binop.
 replace (matrix_rows_nat m) with (length (diag_of_matrix m)).
 apply matrix_by_index_cols.
-apply length_diag_of_matrix; auto.
-(* temp2. *)
+diag_matrix_len.
 apply matrix_by_index_cols.
 unfold matrix_add at 1. 
 rewrite matrix_rows_nat_matrix_binop.
 2:{ unfold matrix_of_diag. rewrite matrix_by_index_rows.
-    unfold remove_diag. temp1.
-    (*  rewrite matrix_by_index_rows.
-    apply length_diag_of_matrix; auto. *)
+    unfold remove_diag. matrix_rows_len.
 }
 unfold matrix_of_diag at 1.
-temp1; temp1.
-(* rewrite matrix_by_index_rows; auto.
-rewrite length_diag_of_matrix; auto. *)
+matrix_rows_len; matrix_rows_len.
 intros.
 unfold matrix_add.
 rewrite binop_matrix_index with (cols := matrix_rows_nat m); auto.
@@ -357,18 +351,16 @@ apply BPLUS_0_r.
 eapply matrix_index_prop; eauto.
 apply BPLUS_0_l.
 eapply matrix_index_prop; eauto.
-rewrite length_diag_of_matrix; auto.
-rewrite length_diag_of_matrix; auto.
+1,2 : diag_matrix_len.
 unfold matrix_of_diag, remove_diag.
 rewrite !matrix_by_index_rows; auto.
-apply length_diag_of_matrix; auto.
+diag_matrix_len.
 replace (matrix_rows_nat m) with (length (diag_of_matrix m)).
 apply matrix_by_index_cols.
-apply length_diag_of_matrix; auto.
+diag_matrix_len.
 apply matrix_by_index_cols.
 unfold matrix_of_diag.
-rewrite matrix_by_index_rows; auto.
-rewrite length_diag_of_matrix; auto.
+matrix_rows_len.
 Qed.
 End WITH_NANS.
 End Experiment.
