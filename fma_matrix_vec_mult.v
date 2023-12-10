@@ -68,8 +68,56 @@ Qed.
 (* Definition extract_non_zero_elmt {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
   filter (fun x => negb (Req_bool (FT2R x) 0)) (vec_to_list_float n.+1 v). *)
 
+
+(* Check feq.
+Search (Z -> ftype _).
+Print relation.
+Search (Prop -> bool).
+Locate boolp.asbool. *)
+(* Print BCMP.
+Variable ty : type.
+Variable h : ftype ty.
+Definition h' := Zconst ty 0.
+
+Check (BCMP Eq true h h').
+Print BCMP.
+Definition h'' := Zconst ty 1. *)
+
+Fixpoint extract_nonzero_idx_aux {ty} (l : list (ftype ty)) (k : nat) : list nat :=
+  match l with 
+  | [] => []
+  | h :: t => if (BCMP Eq false h (Zconst ty 0)) 
+      then k :: extract_nonzero_idx_aux t (S k) 
+      else extract_nonzero_idx_aux t (S k) 
+  end.
+
+Definition extract_nonzero_idx {ty} (l : list (ftype ty)) :=
+  extract_nonzero_idx_aux l 0.
+
+Definition a := map (Zconst Tsingle) ([0; 3; 0; 5; 7; 0; 9])%Z.
+Definition b := extract_nonzero_idx a.
+Compute b.
+
+Fixpoint nat_extract_nonzero_idx_aux (l : list nat) (k : nat) : list nat :=
+  match l with 
+  | [] => []
+  | h :: t => if (negb (Nat.eqb h 0)) 
+      then k :: nat_extract_nonzero_idx_aux t (S k) 
+      else nat_extract_nonzero_idx_aux t (S k) 
+  end.
+
+Definition nat_extract_nonzero_idx (l : list nat) :=
+  nat_extract_nonzero_idx_aux l 0.
+
+(* Definition a := ([0; 3; 0; 5; 0; 0; 7; 8; 9; 10; 0])%nat.
+Definition b := nat_extract_nonzero_idx a.
+Compute b. *)
+
+
 Definition extract_nonzero_idx {ty} (l : list (ftype ty)) :=
   map fst (filter (fun x => negb (Req_bool (FT2R (snd x)) 0)) (combine (iota 0 (length l)) l)).
+
+
 
 (* Definition extract_non_zero_idx {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
   let idx_seq := iota 0 n.+1 in
