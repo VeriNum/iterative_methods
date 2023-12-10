@@ -65,6 +65,14 @@ Proof.
   + simpl. rewrite IHidx'. auto.
 Qed.
 
+Lemma extract_elements_succ {T} (idx : seq.seq nat) (x : T) (l : list T) (default : T) :
+  extract_elements (map S idx) (x :: l) default = extract_elements idx l default.
+Proof.
+  induction idx as [|i0 idx'].
+  + simpl. auto.
+  + simpl. f_equal. auto.
+Qed.
+
 (* Definition extract_non_zero_elmt {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
   filter (fun x => negb (Req_bool (FT2R x) 0)) (vec_to_list_float n.+1 v). *)
 
@@ -113,11 +121,8 @@ Definition nat_extract_nonzero_idx (l : list nat) :=
 Definition b := nat_extract_nonzero_idx a.
 Compute b. *)
 
-
-Definition extract_nonzero_idx {ty} (l : list (ftype ty)) :=
-  map fst (filter (fun x => negb (Req_bool (FT2R (snd x)) 0)) (combine (iota 0 (length l)) l)).
-
-
+(* Definition extract_nonzero_idx {ty} (l : list (ftype ty)) :=
+  map fst (filter (fun x => negb (Req_bool (FT2R (snd x)) 0)) (combine (iota 0 (length l)) l)). *)
 
 (* Definition extract_non_zero_idx {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
   let idx_seq := iota 0 n.+1 in
@@ -137,15 +142,53 @@ Proof.
   unfold extract_nonzero_elmt. rewrite extract_nonzero_idx_nil. simpl. auto.
 Qed.
 
+(* Lemma extract_nonzero_idx_cons {ty} : forall x l,
+  @extract_nonzero_idx ty (x :: l) = 
+  if (BCMP Eq false x (Zconst ty 0)) then map S (extract_nonzero_idx l) else 0%nat :: map S (extract_nonzero_idx l).
+Proof.   *)
+
+Lemma extract_nonzero_idx_aux_cons {ty} : forall x l k,
+  @extract_nonzero_idx_aux ty (x :: l) k = 
+  if (BCMP Eq false x (Zconst ty 0)) then k%nat :: (extract_nonzero_idx_aux l k.+1) else (extract_nonzero_idx_aux l k.+1).
+Proof.
+  intros. simpl. destruct (BCMP Eq false x (Zconst ty 0)) eqn:E; auto.
+Qed.
+
+Lemma extract_nonzero_idx_aux_succ {ty} : forall l k,
+  @extract_nonzero_idx_aux ty l (k.+1) = map S (extract_nonzero_idx_aux l k).
+Proof.
+  intros. revert k. induction l as [|h l'].
+  + simpl. reflexivity.
+  + intros. repeat rewrite extract_nonzero_idx_aux_cons.
+    destruct (BCMP Eq false h (Zconst ty 0)) eqn:E.
+    - simpl. rewrite IHl'. reflexivity.
+    - simpl. rewrite IHl'. reflexivity.
+Qed.  
+
 Lemma extract_nonzero_idx_cons {ty} : forall x l,
   @extract_nonzero_idx ty (x :: l) = 
-  if Req_bool (FT2R x) 0 then map S (extract_nonzero_idx l) else 0%nat :: map S (extract_nonzero_idx l).
+  if (BCMP Eq false x (Zconst ty 0)) then 0%nat :: map S (extract_nonzero_idx l) else map S (extract_nonzero_idx l).
 Proof.
-  intros. destruct (Req_bool (FT2R x) 0) eqn:E.
-  + unfold extract_nonzero_idx at 1. simpl. rewrite E. simpl. 
-    unfold extract_nonzero_idx.  
+  intros. destruct (BCMP Eq false x (Zconst ty 0)) eqn:E.
+  + unfold extract_nonzero_idx in *. rewrite <- extract_nonzero_idx_aux_succ.
+    rewrite extract_nonzero_idx_aux_cons. rewrite E. auto.
+  + unfold extract_nonzero_idx in *. rewrite <- extract_nonzero_idx_aux_succ.
+    rewrite extract_nonzero_idx_aux_cons. rewrite E. auto.
+Qed. 
 
 Lemma extract_nonzero_elmt_cons {ty} : forall x l,
+  @extract_nonzero_elmt ty (x :: l) = 
+  if (BCMP Eq false x (Zconst ty 0)) then x :: extract_nonzero_elmt l else extract_nonzero_elmt l.
+Proof.
+  intros. unfold extract_nonzero_elmt.
+  destruct (BCMP Eq false x (Zconst ty 0)) eqn:E.
+  + rewrite extract_nonzero_idx_cons. rewrite E. simpl.
+    f_equal. rewrite extract_elements_succ. auto.
+  + rewrite extract_nonzero_idx_cons. rewrite E. simpl.
+    rewrite extract_elements_succ. auto.
+Qed.
+
+(* Lemma extract_nonzero_elmt_cons {ty} : forall x l,
   @extract_nonzero_elmt ty (x :: l) = 
   if Req_bool (FT2R x) 0 then extract_nonzero_elmt l else x :: extract_nonzero_elmt l.
 Proof.
@@ -155,7 +198,7 @@ Proof.
   + unfold extract_nonzero_idx. simpl. rewrite E. simpl. 
     unfold extract_elements. 
 
-  + simpl. rewrite E. simpl. auto.
+  + simpl. rewrite E. simpl. auto. *)
 
 
 (* Definition extract_non_zero_elmt {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
@@ -451,7 +494,10 @@ Lemma reduce_sparse_vec_vec_mult {n : nat} {ty}:
   length l1 = length l2 ->
   dotprod_r l1 l2 = dotprod_r l1_nonzero l2_nonzero.
 Proof.
-  intros. 
+  intros.
+  
+  
+
   (* assert (length l1_nonzero = length l2_nonzero).
   { unfold l1_nonzero, l2_nonzero. rewrite extract_elements_length.
     rewrite extract_nonzero_length. auto. } *)
@@ -463,11 +509,7 @@ Proof.
   + destruct l2 as [| x2 l2']; [inversion H|].
     inversion H. clear H. specialize (IHl1' l2' H1). simpl in *.
     rewrite dotprod_cons; [|auto].
-    destruct (Req_bool (FT2R x1) 0) eqn:E.
-    - pose proof (Req_bool_spec (FT2R x1) 0).
-      rewrite E in H. inversion H.
-      admit.
-    - 
+
 
 
 Admitted.
