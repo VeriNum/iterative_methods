@@ -486,16 +486,73 @@ Check (let l1 := vec_to_list_float n.+1 v1 in
          let l2 := vec_to_list_float n.+1 v2 in
          dotprod ty l1 l2). *)
 
+Search (ftype _ -> Prop).
+
+Print binary_float.
+
+Definition is_positive {ty} (x : ftype ty) :=
+  match x with 
+  | B754_zero b => negb b
+  | B754_infinity b => negb b 
+  | B754_nan _ _ _ => false
+  | B754_finite b m e _ => negb b 
+  end.
+
+Lemma bcmp_zero_pos {ty} (x : ftype ty) :
+  BCMP Eq false x (Zconst ty 0) = false ->
+  finite x ->
+  is_positive x ->  
+  x = Zconst ty 0.
+Proof.
+  intros. destruct x.
+  + simpl in *. destruct s; auto. inversion H1. 
+  + inversion H0.
+  + inversion H0.
+  + simpl in *.
+    destruct s; try inversion H1; auto.
+    unfold BCMP in H. unfold extend_comp in H. unfold Bcompare in H.
+    unfold BinarySingleNaN.Bcompare in H. simpl in H. inversion H.
+Qed. 
+
+Lemma bfma_bcmp_zero {ty} (x y z : ftype ty):
+  BCMP Eq false x (Zconst ty 0) = false ->
+  finite x ->
+  finite y ->
+  finite z ->
+  feq (BFMA x y z) z.
+Proof.
+  intros. destruct (is_positive x) eqn:E.
+  + pose proof (bcmp_zero_pos H H0 E). subst x. rewrite BFMA_zero1; auto.
+  + unfold BFMA. unfold Bfma. unfold BSN2B.  
+
+
 
 Lemma reduce_sparse_vec_vec_mult {n : nat} {ty}:
   forall (l1 l2 : seq.seq (ftype ty)),
   let l1_nonzero := @extract_nonzero_elmt ty l1 in
   let l2_nonzero := extract_elements (@extract_nonzero_idx ty l1) l2 (Zconst ty 0) in
   length l1 = length l2 ->
-  dotprod_r l1 l2 = dotprod_r l1_nonzero l2_nonzero.
+  feq (dotprod_r l1 l2) (dotprod_r l1_nonzero l2_nonzero).
 Proof.
   intros.
-  
+  revert l2 H l2_nonzero.
+  induction l1 as [| x1 l1']; intros.
+  + simpl in H. destruct l2; auto.
+  + destruct l2 as [| x2 l2']; [inversion H|].
+    simpl in *. inversion H. clear H.
+    specialize (IHl1' l2' H1).
+    rewrite dotprod_cons; auto.
+
+
+
+
+    inversion H. clear H. specialize (IHl1' l2' H1). simpl in *.
+    rewrite dotprod_cons; [|auto].
+    rewrite !extract_nonzero_elmt_cons.
+    rewrite !extract_nonzero_idx_cons.
+    destruct (BCMP Eq false x1 (Zconst ty 0)) eqn:E.
+    - simpl. rewrite IHl1'. auto.
+    - simpl. rewrite IHl1'. auto.
   
 
   (* assert (length l1_nonzero = length l2_nonzero).
