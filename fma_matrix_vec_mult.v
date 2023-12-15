@@ -498,21 +498,15 @@ Definition is_positive {ty} (x : ftype ty) :=
   | B754_finite b m e _ => negb b 
   end.
 
-Lemma bcmp_zero_pos {ty} (x : ftype ty) :
+Lemma bcmp_zero {ty} (x : ftype ty) :
   BCMP Eq false x (Zconst ty 0) = false ->
   finite x ->
-  is_positive x ->  
-  x = Zconst ty 0.
+  feq x (Zconst ty 0).
 Proof.
-  intros. destruct x.
-  + simpl in *. destruct s; auto. inversion H1. 
-  + inversion H0.
-  + inversion H0.
-  + simpl in *.
-    destruct s; try inversion H1; auto.
-    unfold BCMP in H. unfold extend_comp in H. unfold Bcompare in H.
-    unfold BinarySingleNaN.Bcompare in H. simpl in H. inversion H.
-Qed. 
+  intros. destruct x; auto; inversion H0.
+  unfold BCMP in H. unfold extend_comp in H. unfold Bcompare in H.
+  unfold BinarySingleNaN.Bcompare in H. simpl in H. destruct s; inversion H.
+Qed.
 
 Lemma bfma_bcmp_zero {ty} (x y z : ftype ty):
   BCMP Eq false x (Zconst ty 0) = false ->
@@ -521,11 +515,9 @@ Lemma bfma_bcmp_zero {ty} (x y z : ftype ty):
   finite z ->
   feq (BFMA x y z) z.
 Proof.
-  intros. destruct (is_positive x) eqn:E.
-  + pose proof (bcmp_zero_pos H H0 E). subst x. rewrite BFMA_zero1; auto.
-  + unfold BFMA. unfold Bfma. unfold BSN2B.  
-
-
+  intros. rewrite (bcmp_zero H); auto.
+  rewrite BFMA_zero1; auto.
+Qed.
 
 Lemma reduce_sparse_vec_vec_mult {n : nat} {ty}:
   forall (l1 l2 : seq.seq (ftype ty)),
