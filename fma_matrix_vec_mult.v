@@ -512,11 +512,38 @@ Lemma bfma_bcmp_zero {ty} (x y z : ftype ty):
   BCMP Eq false x (Zconst ty 0) = false ->
   finite x ->
   finite y ->
-  finite z ->
+  (* finite z -> *)
   feq (BFMA x y z) z.
 Proof.
   intros. rewrite (bcmp_zero H); auto.
   rewrite BFMA_zero1; auto.
+Qed.
+
+Definition list_finite {ty} (l : list (ftype ty)) :=
+  forall x, In x l -> finite x.
+
+Lemma list_finite_nil {ty} : list_finite (@nil (ftype ty)).
+Proof.
+  unfold list_finite. intros. inversion H.
+Qed.
+
+Lemma list_finite_cons {ty} : forall x l,
+  finite x ->
+  @list_finite ty l ->
+  list_finite (x :: l).
+Proof.
+  unfold list_finite. intros. simpl in H1. destruct H1.
+  + subst x0. auto.
+  + apply H0. auto.
+Qed.
+
+Lemma list_finite_cons_inv {ty} : forall x l,
+  @list_finite ty (x :: l) ->
+  finite x /\ list_finite l.
+Proof.
+  unfold list_finite. intros. split.
+  + apply H. simpl. auto.
+  + intros. apply H. simpl. auto.
 Qed.
 
 Lemma reduce_sparse_vec_vec_mult {n : nat} {ty}:
@@ -524,45 +551,33 @@ Lemma reduce_sparse_vec_vec_mult {n : nat} {ty}:
   let l1_nonzero := @extract_nonzero_elmt ty l1 in
   let l2_nonzero := extract_elements (@extract_nonzero_idx ty l1) l2 (Zconst ty 0) in
   length l1 = length l2 ->
+  list_finite l1 ->
+  list_finite l2 ->
   feq (dotprod_r l1 l2) (dotprod_r l1_nonzero l2_nonzero).
 Proof.
   intros.
-  revert l2 H l2_nonzero.
+  revert l2 H H1 l2_nonzero.
   induction l1 as [| x1 l1']; intros.
   + simpl in H. destruct l2; auto.
   + destruct l2 as [| x2 l2']; [inversion H|].
     simpl in *. inversion H. clear H.
-    specialize (IHl1' l2' H1).
+    pose proof (proj2 (list_finite_cons_inv H0)).
+    pose proof (proj2 (list_finite_cons_inv H1)).
+    specialize (IHl1' H l2' H3 H2).
     rewrite dotprod_cons; auto.
-
-
-
-
-    inversion H. clear H. specialize (IHl1' l2' H1). simpl in *.
-    rewrite dotprod_cons; [|auto].
-    rewrite !extract_nonzero_elmt_cons.
-    rewrite !extract_nonzero_idx_cons.
     destruct (BCMP Eq false x1 (Zconst ty 0)) eqn:E.
-    - simpl. rewrite IHl1'. auto.
-    - simpl. rewrite IHl1'. auto.
-  
-
-  (* assert (length l1_nonzero = length l2_nonzero).
-  { unfold l1_nonzero, l2_nonzero. rewrite extract_elements_length.
-    rewrite extract_nonzero_length. auto. } *)
-  revert l2 H l2_nonzero.
-  induction l1 as [| x1 l1']; intros.
-  + simpl in H. 
-    assert (l2 = []). { destruct l2. auto. simpl in H. lia. }
-    subst l2. clear H. unfold dotprod_r. simpl. auto.
-  + destruct l2 as [| x2 l2']; [inversion H|].
-    inversion H. clear H. specialize (IHl1' l2' H1). simpl in *.
-    rewrite dotprod_cons; [|auto].
-
-
-
-Admitted.
-
+    - subst l1_nonzero. rewrite extract_nonzero_elmt_cons. rewrite E.
+      subst l2_nonzero. rewrite extract_nonzero_idx_cons. rewrite E. simpl.
+      rewrite extract_elements_succ. rewrite dotprod_cons.
+      2:{ rewrite extract_elements_length. rewrite extract_nonzero_length. auto. }
+      rewrite IHl1'. auto.
+    - pose proof (proj1 (list_finite_cons_inv H0)).
+      pose proof (proj1 (list_finite_cons_inv H1)).
+      rewrite bfma_bcmp_zero; auto.
+      subst l1_nonzero. rewrite extract_nonzero_elmt_cons. rewrite E.
+      subst l2_nonzero. rewrite extract_nonzero_idx_cons. rewrite E. simpl.
+      rewrite extract_elements_succ. rewrite IHl1'. auto.
+Qed.
     
     
 (*     
