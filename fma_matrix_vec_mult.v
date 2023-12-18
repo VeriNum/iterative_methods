@@ -204,11 +204,17 @@ Proof.
 (* Definition extract_non_zero_elmt {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
   extract_elements (extract_non_zero_idx v) (vec_to_list_float n.+1 v) (Zconst ty 0). *)
 
+Definition sparsity_fac_aux {ty} (l : list (ftype ty)) :=
+  length (extract_nonzero_idx l).
+
 Definition sparsity_fac {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) :=
-  length (extract_nonzero_elmt (vec_to_list_float n.+1 v)).
+  sparsity_fac_aux (vec_to_list_float n.+1 v).
+
+Definition is_r_sparse_aux {ty} (l : list (ftype ty)) (r : nat) :=
+  le (sparsity_fac_aux l) r.
 
 Definition is_r_sparse {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) (r : nat) :=
-  le (sparsity_fac v) r.
+  is_r_sparse_aux (vec_to_list_float n v) r.
 
 Lemma extract_nonzero_length {ty} (l : list (ftype ty)):
   length (@extract_nonzero_elmt ty l) = length (@extract_nonzero_idx ty l).
@@ -244,11 +250,20 @@ Definition Ai := (\row_(j < n.+1) A i j)^T. *)
 
 (* Check maxn. *)
 
+(* Definition sparsity_fac_mat_row {ty} (A : list (list (ftype ty))) (i : nat) :=
+  sparsity_fac (nth i A []). *)
+
 Definition sparsity_fac_mat_row {n : nat} {ty} (A : 'M[ftype ty]_n.+1) (i : 'I_n.+1) :=
   sparsity_fac (\row_(j < n.+1) A i j)^T.
 
+(* Definition is_r_sparse_mat {ty} (A : list (list (ftype ty))) (r : nat) :=
+  foldr and True [seq (is_r_sparse (nth i A []) r) | i <- iota 0 (length A)]. *)
+
 Definition is_r_sparse_mat {n : nat} {ty} (A : 'M[ftype ty]_n.+1) (r : nat) :=
   foldr and True [seq (is_r_sparse (row i A)^T r) | i <- enum 'I_n.+1].
+
+(* Definition sparsity_fac_mat {ty} (A : list (list (ftype ty))) :=
+  foldr maxn 0%nat [seq (sparsity_fac_mat_row A i) | i <- iota 0 (length A)]. *)
 
 Definition sparsity_fac_mat {n : nat} {ty} (A: 'M[ftype ty]_n.+1) :=
   foldr maxn 0%nat [seq (sparsity_fac_mat_row A i) | i <- enum 'I_n.+1].
@@ -257,6 +272,25 @@ Definition sparsity_fac_mat {n : nat} {ty} (A: 'M[ftype ty]_n.+1) :=
   le (sparsity_fac_mat A) r. *)
 
 (* alternative: BIG-AND of "is_r_sparse row" *)
+(* Search (matrix.matrix _ _ _-> (seq.seq _)).
+
+Print vec_to_list_float. *)
+
+(* Variable ty : type.
+Variable n : nat.
+Variable A : 'M[ftype ty]_n.+1.
+Check (row 0 A)^T.
+Check dsubmx.
+Check (@dsubmx (ftype ty) 1 n n.+1 A). *)
+
+(* row is primary *)
+Fail Fixpoint mat_to_list_list_float {ty} {n m : nat} 
+  (A : 'M[ftype ty]_(n.+1, m.+1)) : list (list (ftype ty)) :=
+  match n with
+  | 0%nat => []
+  | n'.+1 => (vec_to_list_float m.+1 (row 0 A)^T) :: @mat_to_list_list_float ty n' m (@dsubmx (ftype ty) 1 n m.+1 A)
+  end.
+
 
 Definition e_i_sparse {n : nat} {ty} (i : 'I_n.+1)
   (A : 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1) 
@@ -603,7 +637,56 @@ Proof.
       subst l2_nonzero. rewrite extract_nonzero_idx_cons. rewrite E. simpl.
       rewrite extract_elements_succ. rewrite IHl1'. auto.
 Qed.
-  
+
+Lemma op_defs_BFMA_zero1 {ty} y s:
+  strict_feq y y ->
+  feq (op_defs.BFMA (Zconst ty 0) y s) s.
+Proof.
+  intros.
+  intros.
+  change (Zconst ty 0) with 
+    (Binary.B754_zero (fprec ty)  (femax ty) false).
+  unfold BFMA, BPLUS, BINOP in *.
+  destruct y, s; try discriminate; simpl; auto.
+Qed.
+
+Lemma fma_dot_prod_rel_holds_sparse {ty}:
+  forall (l1 l2 : seq.seq (ftype ty)),
+  let l1_nonzero := @extract_nonzero_elmt ty l1 in
+  let l2_nonzero := extract_elements (@extract_nonzero_idx ty l1) l2 (Zconst ty 0) in
+  length l1 = length l2 ->
+  list_finite l1 ->
+  list_finite l2 ->
+  forall fp,
+  fma_dot_prod_rel (combine l1 l2) fp ->
+  fma_dot_prod_rel (combine l1_nonzero l2_nonzero) fp.
+Proof.
+  intros. generalize dependent l2. revert fp.
+  induction l1 as [| x1 l1']; intros.
+  + destruct l2; auto.
+  + destruct l2 as [| x2 l2']; [inversion H |].
+    simpl in *. inversion H. clear H.
+    pose proof (proj2 (list_finite_cons_inv H0)).
+    pose proof (proj2 (list_finite_cons_inv H1)).
+    inversion H2. rename s into fp'. subst xy l. simpl in *.
+    specialize (IHl1' H fp' l2' H4 H3 H8). 
+    destruct (BCMP Eq false x1 (Zconst ty 0)) eqn:E.
+    - subst l1_nonzero. rewrite extract_nonzero_elmt_cons. rewrite E.
+      subst l2_nonzero. rewrite extract_nonzero_idx_cons. rewrite E. simpl.
+      rewrite extract_elements_succ. constructor. auto. 
+    - subst l1_nonzero. rewrite extract_nonzero_elmt_cons. rewrite E.
+      subst l2_nonzero. rewrite extract_nonzero_idx_cons. rewrite E. simpl.
+      rewrite extract_elements_succ.
+      pose proof (bcmp_zero E (proj1 (list_finite_cons_inv H0))).
+      assert (feq (op_defs.BFMA x1 x2 fp') fp').
+      { rewrite H5. rewrite op_defs_BFMA_zero1. auto. 
+        pose proof (proj1 (list_finite_cons_inv H1)). auto. }
+Admitted.      
+
+
+
+
+
     
 (*     
   + simpl. destruct l2 as [| x2 l2'].
@@ -635,10 +718,10 @@ Proof.
 
 Admitted. *)
 
-Check fma_dotprod_forward_error.
+Print fma_dot_prod_rel.
 
 Lemma fma_dotprod_forward_error_sparse {ty} {n : nat}:
-  forall (v1 v2 : seq.seq (ftype ty)) (r : nat) (HA : is_r_sparse (@list_to_vec_float ty n.+1 v1) r),
+  forall (v1 v2 : seq.seq (ftype ty)) (r : nat) (HA : is_r_sparse_aux v1 r),
   length v1 = length v2 ->
   forall (fp : ftype ty) (rp rp_abs : R),
   fma_dot_prod_rel (combine v1 v2) fp ->
@@ -647,8 +730,7 @@ Lemma fma_dotprod_forward_error_sparse {ty} {n : nat}:
   finite fp ->
   (Rabs (FT2R fp - rp) <= g ty r * Rabs rp_abs + g1 ty r (r-1)%nat)%Re.
 Proof.
-  intros. unfold is_r_sparse in HA. unfold sparsity_fac in HA.
-Admitted.
+  intros.
 
 
 (* Lemma vec_vec_mult_bound_sparse {n : nat} {ty}:
