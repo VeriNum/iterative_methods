@@ -377,7 +377,6 @@ induction m.
   rewrite H. by apply fma_dot_prod_rel_cons.
 Qed.
 
-
 Lemma R_dot_prod_rel_holds {n:nat} {ty} m i (le_n_m : (m <= n.+1)%nat)
   (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1):
   R_dot_prod_rel
@@ -549,6 +548,14 @@ Proof.
   unfold BinarySingleNaN.Bcompare in H. simpl in H. destruct s; inversion H.
 Qed.
 
+Lemma bcmp_nonzero {ty} (x : ftype ty) : 
+  BCMP Eq false x (Zconst ty 0) = true ->
+  finite x ->
+  ~ feq x (Zconst ty 0).
+Proof.
+  intros. destruct x; auto; inversion H0.
+Qed.
+
 Lemma bfma_bcmp_zero {ty} (x y z : ftype ty):
   BCMP Eq false x (Zconst ty 0) = false ->
   finite x ->
@@ -650,7 +657,52 @@ Proof.
   destruct y, s; try discriminate; simpl; auto.
 Qed.
 
-Lemma fma_dot_prod_rel_holds_sparse {ty}:
+Lemma fma_dot_prod_rel_holds_vec {ty} (l1 l2 : seq.seq (ftype ty)) :
+  length l1 = length l2 ->
+  fma_dot_prod_rel (combine l1 l2) (dotprod_r l1 l2).
+Proof.
+  intros. revert l2 H. induction l1 as [|x1 l1']; intros.
+  + destruct l2. 2:{ inversion H. }
+    unfold dotprod_r. simpl. apply fma_dot_prod_rel_nil.
+  + destruct l2 as [|x2 l2']; inversion H.
+    specialize (IHl1' l2' H1).
+    apply fma_dot_prod_rel_cons. apply IHl1'.
+Qed.
+
+Lemma fma_dot_prod_rel_hold_vec_inv {ty} (l1 l2 : seq.seq (ftype ty)) :
+  length l1 = length l2 ->
+  forall p, fma_dot_prod_rel (combine l1 l2) p -> feq p (dotprod_r l1 l2).
+Proof.
+  revert l2. induction l1 as [|x1 l1']; intros.
+  + destruct l2; try inversion H.
+    inversion H0. auto.
+  + destruct l2 as [|x2 l2']; inversion H. inversion H0.
+    specialize (IHl1' l2' H2 s H5).
+    rewrite dotprod_cons; auto. simpl. rewrite <- IHl1'. auto.
+Qed.
+
+Lemma feq_zero {ty} (x : ftype ty) :
+  feq x (Zconst ty 0) ->
+  x = B754_zero (fprec ty) (femax ty) true \/ x = B754_zero _ _ false.
+Proof.
+  intros. destruct x; try inversion H.
+  destruct s; auto.
+Qed.
+
+Lemma bfma_zero_eq {ty} (x y z : ftype ty) :
+  feq x (Zconst ty 0) ->
+  finite y ->
+  BFMA x y z = z.
+Proof.
+  intros. pose proof (feq_zero H). destruct H1 eqn:Ex; subst.
+  + unfold BFMA. unfold Bfma. unfold BSN2B. unfold BinarySingleNaN.Bfma. simpl.
+    destruct y; try inversion H0; simpl.
+    - destruct z. 
+      * simpl. unfold BinarySingleNaN.Bfma_szero. simpl. 
+        destruct s eqn:E; destruct s0 eqn:E0; simpl; auto.
+Abort.
+
+Lemma fma_dot_prod_rel_holds_sparse {ty} : 
   forall (l1 l2 : seq.seq (ftype ty)),
   let l1_nonzero := @extract_nonzero_elmt ty l1 in
   let l2_nonzero := extract_elements (@extract_nonzero_idx ty l1) l2 (Zconst ty 0) in
@@ -659,7 +711,49 @@ Lemma fma_dot_prod_rel_holds_sparse {ty}:
   list_finite l2 ->
   forall fp,
   fma_dot_prod_rel (combine l1 l2) fp ->
-  fma_dot_prod_rel (combine l1_nonzero l2_nonzero) fp.
+  exists fp', feq fp fp' /\ fma_dot_prod_rel (combine l1_nonzero l2_nonzero) fp'.
+Proof.
+  intros. generalize dependent l2. revert fp.
+  induction l1 as [| x1 l1']; intros.
+  + destruct l2; try inversion H. inversion H2.
+    exists fp. subst fp. split; auto.
+  + destruct l2 as [| x2 l2']; inversion H.
+    simpl in *. clear H.
+    pose proof (proj2 (list_finite_cons_inv H0)).
+    pose proof (proj2 (list_finite_cons_inv H1)).
+    inversion H2. simpl in H6. rename s into fps. subst xy l. simpl in *.
+    specialize (IHl1' H fps l2' H4 H3 H8).
+    destruct IHl1' as [fps' [? ?]].
+    pose proof (proj1 (list_finite_cons_inv H0)).
+    destruct (BCMP Eq false x1 (Zconst ty 0)) eqn:E.
+    - subst l1_nonzero. rewrite extract_nonzero_elmt_cons. rewrite E.
+      subst l2_nonzero. rewrite extract_nonzero_idx_cons. rewrite E. simpl.
+      rewrite extract_elements_succ. exists (op_defs.BFMA x1 x2 fps'). split.
+      2:{ constructor. auto. }
+      rewrite H5. auto.
+    - subst l1_nonzero. rewrite extract_nonzero_elmt_cons. rewrite E.
+      subst l2_nonzero. rewrite extract_nonzero_idx_cons. rewrite E. simpl.
+      rewrite extract_elements_succ.
+      pose proof (bcmp_zero E (proj1 (list_finite_cons_inv H0))).
+      assert (feq (op_defs.BFMA x1 x2 fps) fps).
+      { rewrite H10. rewrite op_defs_BFMA_zero1. auto.  
+        pose proof (proj1 (list_finite_cons_inv H1)). auto. }
+      exists fps'. split; auto.
+      rewrite H11. auto.
+Qed. 
+
+
+(* Lemma fma_dot_prod_rel_holds_sparse {ty}:
+  forall (l1 l2 : seq.seq (ftype ty)),
+  let l1_nonzero := @extract_nonzero_elmt ty l1 in
+  let l2_nonzero := extract_elements (@extract_nonzero_idx ty l1) l2 (Zconst ty 0) in
+  length l1 = length l2 ->
+  list_finite l1 ->
+  list_finite l2 ->
+  forall fp,
+  fma_dot_prod_rel (combine l1 l2) fp ->
+  (* fma_dot_prod_rel (combine l1_nonzero l2_nonzero) fp. *)
+  exists fp', feq fp fp' /\ fma_dot_prod_rel (combine l1_nonzero l2_nonzero) fp'.
 Proof.
   intros. generalize dependent l2. revert fp.
   induction l1 as [| x1 l1']; intros.
@@ -681,12 +775,37 @@ Proof.
       assert (feq (op_defs.BFMA x1 x2 fp') fp').
       { rewrite H5. rewrite op_defs_BFMA_zero1. auto. 
         pose proof (proj1 (list_finite_cons_inv H1)). auto. }
-Admitted.      
+      rewrite H6 in H7. rewrite H6.
+      (* try to prove if fp and fp' have the same sign from H6 *)
+      (* look at BFMA definition *)
+Abort. *)
 
+(* Question: whether the following is true
+if x1 = 0, fp is B754_zero, bfma x1 x2 fp = fp', 
+then fp = fp' (same sign) 
+method: unroll bfma *)
 
-
-
-
+(* Lemma fma_dot_prod_rel_holds_sparse {ty}:
+  forall (l1 l2 : seq.seq (ftype ty)),
+  let l1_nonzero := @extract_nonzero_elmt ty l1 in
+  let l2_nonzero := extract_elements (@extract_nonzero_idx ty l1) l2 (Zconst ty 0) in
+  length l1 = length l2 ->
+  list_finite l1 ->
+  list_finite l2 ->
+  forall fp,
+  fma_dot_prod_rel (combine l1 l2) fp ->
+  fma_dot_prod_rel (combine l1_nonzero l2_nonzero) fp.
+Proof.
+  intros. 
+  pose proof (reduce_sparse_vec_vec_mult H H0 H1).
+  assert (length l1_nonzero = length l2_nonzero).
+  { subst l1_nonzero. subst l2_nonzero. 
+    rewrite extract_elements_length.
+    rewrite extract_nonzero_length. auto. }
+  pose proof (fma_dot_prod_rel_holds_vec H4).
+  pose proof (fma_dot_prod_rel_hold_vec_inv H H2).
+  rewrite <- H6 in H3. 
+Admitted. *)
     
 (*     
   + simpl. destruct l2 as [| x2 l2'].
@@ -694,8 +813,6 @@ Admitted.
     - simpl. rewrite !dotprod_cons; [|auto].
       rewrite !dotprod_cons; [|auto].
       rewrite IHl1'. auto. *)
-
-
 
 (* Lemma reduce_sparse_vec_vec_mult {n : nat} {ty}:
   forall (v1 v2 : 'cV[ftype ty]_n.+1) (r : nat) (Hv : is_r_sparse v1 r),
@@ -718,8 +835,6 @@ Proof.
 
 Admitted. *)
 
-Print fma_dot_prod_rel.
-
 Lemma fma_dotprod_forward_error_sparse {ty} {n : nat}:
   forall (v1 v2 : seq.seq (ftype ty)) (r : nat) (HA : is_r_sparse_aux v1 r),
   length v1 = length v2 ->
@@ -732,6 +847,7 @@ Lemma fma_dotprod_forward_error_sparse {ty} {n : nat}:
 Proof.
   intros.
 
+Abort.
 
 (* Lemma vec_vec_mult_bound_sparse {n : nat} {ty}:
   forall (v1 v2 : 'cV[ftype ty]_n.+1) (r : nat) (Hv : is_r_sparse v1 r),
