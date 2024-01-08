@@ -1,8 +1,8 @@
 Require Import VST.floyd.proofauto.
 Require Import Iterative.floatlib.
 From Iterative.sparse Require Import sparse sparse_model.
-Require Import vcfloat.VCFloat.
-Require Import vcfloat.FPCompCert.
+Require Import vcfloat.FPStdCompCert.
+Require Import vcfloat.FPStdLib.
 Require Import VSTlib.spec_math.
 
 #[export] Instance CompSpecs : compspecs. make_compspecs prog. Defined.
@@ -110,3 +110,15 @@ Definition SparseASI : funspecs := [
    crs_row_vector_multiply_spec;
    crs_matrix_vector_multiply_byrows_spec;
    crs_matrix_vector_multiply_spec ].
+
+Lemma BFMA_eq:
+   forall H H0 x y z,
+  Binary.Bfma (fprec Tdouble) (femax Tdouble) H H0
+    (@FPCompCert.FMA_NAN.fma_nan_pl FPCore.Tdouble FPCore.is_standard_Tdouble) BinarySingleNaN.mode_NE x y z = 
+  BFMA x y z.
+Proof.
+intros.
+ unfold BFMA.
+ f_equal; try apply proof_irr.
+Qed.
+

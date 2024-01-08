@@ -61,7 +61,7 @@ vec_inf_norm(a + b) <= vec_inf_norm a + vec_inf_norm b.
 Proof.
 intros.
 rewrite /vec_inf_norm. apply /RleP.
-apply bigmax_le.
+apply lemmas.bigmax_le.
 + by rewrite size_map size_enum_ord. 
 + intros. rewrite -RplusE. 
   apply Rle_trans with 
@@ -106,7 +106,7 @@ Lemma submult_prop {n:nat} (A: 'M[R]_n.+1) (v : 'cV[R]_n.+1):
 Proof.
 rewrite /vec_inf_norm /matrix_inf_norm. rewrite mulrC.
 rewrite -bigmaxr_mulr.
-+ apply /RleP. apply bigmax_le.
++ apply /RleP. apply lemmas.bigmax_le.
   - by rewrite size_map size_enum_ord.
   - intros.
     apply Rle_trans with
@@ -266,7 +266,7 @@ Lemma matrix_norm_le {n:nat}:
   matrix_inf_norm (A *m B) <= matrix_inf_norm A * matrix_inf_norm B.
 Proof.
 intros. rewrite /matrix_inf_norm.
-apply /RleP. apply bigmax_le.
+apply /RleP. apply lemmas.bigmax_le.
 + by rewrite size_map size_enum_ord.
 + intros. rewrite seq_equiv. rewrite nth_mkseq.
   - rewrite /row_sum. 
@@ -333,7 +333,7 @@ Lemma matrix_norm_add {n:nat}:
   matrix_inf_norm (A + B) <= matrix_inf_norm A + matrix_inf_norm B.
 Proof.
 intros. rewrite /matrix_inf_norm.
-apply /RleP. apply bigmax_le.
+apply /RleP. apply lemmas.bigmax_le.
 + by rewrite size_map size_enum_ord //=.
 + intros.
   rewrite seq_equiv. rewrite nth_mkseq.

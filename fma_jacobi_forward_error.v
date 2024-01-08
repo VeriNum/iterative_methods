@@ -5,8 +5,7 @@ From mathcomp.analysis Require Import Rstruct.
 Import List ListNotations.
 
 
-From vcfloat Require Import FPLang FPLangOpt RAux Rounding Reify 
-                            Float_notations Automate.
+From vcfloat Require Import RAux FPStdLib.
 
 Require Import floatlib inf_norm_properties.
 
@@ -268,7 +267,7 @@ Proof.
 intros.
 unfold diag_vector_mult, diag_matrix_vec_mult_R.
 unfold vec_inf_norm.
-apply bigmax_le.
+apply lemmas.bigmax_le.
 + by rewrite size_map size_enum_ord.
 + intros. rewrite seq_equiv. rewrite nth_mkseq;
   last by rewrite size_map size_enum_ord in H0.
@@ -406,7 +405,7 @@ assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
 { intros. by apply BDIV_FT2R_sep_zero. }
 unfold vec_inf_norm. rewrite RmultE. rewrite mulrC.
 rewrite -bigmaxr_mulr.
-+ apply bigmax_le; first by rewrite size_map size_enum_ord.
++ apply lemmas.bigmax_le; first by rewrite size_map size_enum_ord.
   intros. rewrite seq_equiv. 
   rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H1.
   rewrite !mxE. 

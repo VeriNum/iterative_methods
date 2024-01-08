@@ -1,4 +1,4 @@
-Require Import vcfloat.VCFloat vcfloat.FPLib.
+From vcfloat Require Import RAux FPStdLib.
 From mathcomp Require Import all_ssreflect ssralg  ssrnat all_algebra seq matrix .
 From mathcomp.analysis Require Import Rstruct.
 Require Import fma_is_finite dotprod_model.
@@ -3225,8 +3225,9 @@ split.
     } by rewrite H9. 
 Qed.
 
-
+Delimit Scope Z_scope with Z.
 Local Open Scope R_scope.
+
 
 Lemma bpow_femax_lb_strict t : 
 4 < bpow Zaux.radix2 (femax t).

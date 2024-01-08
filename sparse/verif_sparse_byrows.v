@@ -1,9 +1,9 @@
 Require Import VST.floyd.proofauto.
 Require Import Iterative.floatlib.
 From Iterative.sparse Require Import sparse sparse_model spec_sparse.
-Require Import vcfloat.VCFloat.
-Require Import vcfloat.FPCompCert.
+Require Import vcfloat.FPStdCompCert.
 Require Import VSTlib.spec_math.
+Require Import vcfloat.FPStdLib.
 
 Set Bullet Behavior "Strict Subproofs".
 
@@ -105,10 +105,7 @@ forward_call (Znth h vals, Znth (Znth h col_ind) vval, partial_row i h vals col_
 forward.
 entailer!.
 f_equal.
-change (Binary.Bfma _ _ _ _ _ _ _ _ _) with 
-   (@BFMA _ Tdouble (Znth h vals) (Znth (Znth h col_ind) vval)
-     (partial_row i h vals col_ind row_ptr vval)
-  ).
+rewrite BFMA_eq.
 eapply partial_row_next; try eassumption; lia.
 -
  forward.

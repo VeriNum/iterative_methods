@@ -1,11 +1,10 @@
 Require Import VST.floyd.proofauto.
 From Iterative Require Import floatlib jacob_list_fun_model jacobi_iteration_bound.
 From Iterative.sparse Require Import jacobi sparse_model.
-Require Import vcfloat.VCFloat.
+Require Import vcfloat.FPStdLib.
 
 Set Bullet Behavior "Strict Subproofs".
 
-Close Scope R.
 Open Scope logic.
 
 Lemma Zlength_jacobi_iter: 
@@ -94,6 +93,10 @@ apply matrix_by_index_rows.
 Qed.
 
 #[export] Hint Rewrite @Zmatrix_rows_nat : sublist rep_lia.
+
+Require Import Setoid.
+Require Import Relation_Definitions.
+Import Morphisms.
 
 Add Parametric Morphism  {NAN: Nans}{t}: (@diagmatrix_vector_mult _ t)
   with signature Forall2 feq ==> Forall2 feq ==> Forall2 feq 

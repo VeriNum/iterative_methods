@@ -1,7 +1,7 @@
 (* The main theorem in this file is "finite_fma_from_bounded". It states that under
 some restrictions on the elements of the vectors, an fma dot product will never overflow *)
 
-Require Import vcfloat.VCFloat vcfloat.FPLib.
+Require Import vcfloat.VCFloat vcfloat.FPStdLib.
 Require Import List.
 Import ListNotations.
 Require Import common op_defs dotprod_model sum_model.

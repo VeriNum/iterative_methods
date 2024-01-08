@@ -1,7 +1,11 @@
 (* This file contains basic definitions and lemmas common to all other files in 
   the repository. *)
 
-Require Import vcfloat.VCFloat.
+Require Import Flocq.Core.Raux.
+Require vcfloat.VCFloat.
+From vcfloat Require Import RAux FPStdLib Float_lemmas.
+
+Open Scope R.
 
 Definition rounded t r:=
 (Generic_fmt.round Zaux.radix2 (SpecFloat.fexp (fprec t) (femax t))
@@ -11,10 +15,10 @@ Definition neg_zero {t: type} := Binary.B754_zero (fprec t) (femax t) true.
 
 Section NAN.
 
-Definition default_rel (t: FPCore.type) : R :=
+Definition default_rel (t: type) : R :=
   / 2 * Raux.bpow Zaux.radix2 (- fprec t + 1).
 
-Definition default_abs (t: FPCore.type) : R :=
+Definition default_abs (t: type) : R :=
   / 2 * Raux.bpow Zaux.radix2 (3 - femax t - fprec t).
 
 Lemma default_rel_sep_0 t : 
