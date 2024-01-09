@@ -594,6 +594,29 @@ Proof.
   + intros. apply H. simpl. auto.
 Qed.
 
+Lemma extract_elements_inclusion {ty} : forall (l : list (ftype ty)) idx d x,
+  In x (extract_elements idx l d) ->
+  In x l \/ x = d.
+Proof.
+  intros. induction idx as [|i' idx'].
+  + simpl in H. destruct H.
+  + simpl in H. destruct H.
+    - pose proof (nth_in_or_default i' l d). subst x. 
+      destruct H0; [left | right]; auto.
+    - apply (IHidx' H).
+Qed.
+
+Lemma list_finite_extract {ty} : forall (l : list (ftype ty)) idx d,
+  list_finite l ->
+  finite d ->
+  list_finite (extract_elements idx l d).
+Proof.
+  unfold list_finite. intros.
+  pose proof (extract_elements_inclusion H1). destruct H2.
+  + apply (H x H2).
+  + subst x. apply H0.
+Qed.
+
 Definition list_list_finite {ty} (l : list (list (ftype ty))) :=
   forall x, In x l -> list_finite x.
 
@@ -742,6 +765,75 @@ Proof.
       rewrite H11. auto.
 Qed. 
 
+Lemma bcmp_zero_b754zero {ty} (x : ftype ty) :
+  BCMP Eq false x (Zconst ty 0) = false ->
+  finite x ->
+  exists b, x = B754_zero _ _ b.
+Proof.
+  intros. pose proof (bcmp_zero H H0).
+  destruct x; inversion H1.
+  exists s; auto.
+Qed.
+
+Lemma R_dot_prod_rel_holds_sparse {ty} (v1 v2 : list (ftype ty)) (rp : R):
+  let v1_nonzero := @extract_nonzero_elmt ty v1 in
+  let v2_nonzero := extract_elements (@extract_nonzero_idx ty v1) v2 (Zconst ty 0) in
+  length v1 = length v2 ->
+  list_finite v1 ->
+  list_finite v2 ->
+  R_dot_prod_rel (combine (map FT2R v1) (map FT2R v2)) rp ->
+  R_dot_prod_rel (combine (map FT2R v1_nonzero) (map FT2R v2_nonzero)) rp.
+Proof.
+  intros. generalize dependent v2. revert rp. induction v1 as [| x1 v1']; intros.
+  + destruct v2; inversion H. simpl.
+    inversion H2. subst. constructor.
+  + destruct v2 as [| x2 v2']; inversion H.
+    simpl in *. clear H.
+    pose proof (proj2 (list_finite_cons_inv H0)).
+    pose proof (proj2 (list_finite_cons_inv H1)).
+    inversion H2; subst. rename s into rp'; simpl in *.
+    specialize (IHv1' H rp' v2' H4 H3 H8).
+    destruct (BCMP Eq false x1 (Zconst ty 0)) eqn:E.
+    - subst v1_nonzero. rewrite extract_nonzero_elmt_cons. rewrite E.
+      subst v2_nonzero. rewrite extract_nonzero_idx_cons. rewrite E. simpl.
+      constructor. rewrite extract_elements_succ. auto.
+    - subst v1_nonzero. rewrite extract_nonzero_elmt_cons. rewrite E.
+      subst v2_nonzero. rewrite extract_nonzero_idx_cons. rewrite E. simpl.
+      rewrite extract_elements_succ.
+      pose proof (bcmp_zero_b754zero E (proj1 (list_finite_cons_inv H0))).
+      destruct H5 as [b ?]. subst x1. simpl.
+      rewrite Rmult_0_l. rewrite Rplus_0_l. auto.
+Qed.
+
+Lemma R_dot_prod_rel_abs_holds_sparse {ty} (v1 v2 : list (ftype ty)) (rp_abs : R):
+  let v1_nonzero := @extract_nonzero_elmt ty v1 in
+  let v2_nonzero := extract_elements (@extract_nonzero_idx ty v1) v2 (Zconst ty 0) in
+  length v1 = length v2 ->
+  list_finite v1 ->
+  list_finite v2 ->
+  R_dot_prod_rel (combine (map Rabs (map FT2R v1)) (map Rabs (map FT2R v2))) rp_abs ->
+  R_dot_prod_rel (combine (map Rabs (map FT2R v1_nonzero)) (map Rabs (map FT2R v2_nonzero))) rp_abs.
+Proof.
+  intros. generalize dependent v2. revert rp_abs. induction v1 as [| x1 v1']; intros.
+  + destruct v2; inversion H. simpl.
+    inversion H2. subst. constructor.
+  + destruct v2 as [| x2 v2']; inversion H.
+    simpl in *. clear H.
+    pose proof (proj2 (list_finite_cons_inv H0)).
+    pose proof (proj2 (list_finite_cons_inv H1)).
+    inversion H2; subst. rename s into rp'; simpl in *.
+    specialize (IHv1' H rp' v2' H4 H3 H8).
+    destruct (BCMP Eq false x1 (Zconst ty 0)) eqn:E.
+    - subst v1_nonzero. rewrite extract_nonzero_elmt_cons. rewrite E.
+      subst v2_nonzero. rewrite extract_nonzero_idx_cons. rewrite E. simpl.
+      constructor. rewrite extract_elements_succ. auto.
+    - subst v1_nonzero. rewrite extract_nonzero_elmt_cons. rewrite E.
+      subst v2_nonzero. rewrite extract_nonzero_idx_cons. rewrite E. simpl.
+      rewrite extract_elements_succ.
+      pose proof (bcmp_zero_b754zero E (proj1 (list_finite_cons_inv H0))).
+      destruct H5 as [b ?]. subst x1. simpl.
+      rewrite Rabs_R0. rewrite Rmult_0_l. rewrite Rplus_0_l. auto.
+Qed.
 
 (* Lemma fma_dot_prod_rel_holds_sparse {ty}:
   forall (l1 l2 : seq.seq (ftype ty)),
@@ -829,25 +921,113 @@ Proof.
   { unfold l1_nonzero, l2_nonzero. rewrite extract_elements_length.
     rewrite extract_non_zero_length. auto. }
   induction l1 as [| x1 l1'].
-  
-
-
-
 Admitted. *)
+
+Lemma feq_finite {ty} (x y : ftype ty) :
+  feq x y ->
+  finite x -> 
+  finite y.
+Proof.
+  intros. destruct x; destruct y; inversion H; inversion H0; simpl; auto.
+Qed.
+
+Lemma feq_to_r {ty} (x y : ftype ty) :
+  feq x y ->
+  FT2R x = FT2R y.
+Proof.
+  intros.
+  destruct x; destruct y; inversion H; simpl; auto.
+  destruct H1; subst s0 m0 e1. auto.
+Qed. 
+
+Lemma g_increasing {ty} (n n' : nat) :
+  le n n' ->
+  Rle (g ty n) (g ty n').
+Proof.
+  intros. unfold g. 
+  pose proof (default_rel_ge_0 ty).
+  remember (default_rel ty) as p.
+  clear Heqp. induction H.
+  + right. auto.
+  + eapply Rle_trans; [apply IHle |].
+    unfold pow; fold pow. 
+    apply Rplus_le_compat_r.
+    rewrite Rmult_comm.
+    rewrite <- (Rmult_1_r ((1+p)^m)) at 1.
+    apply Rmult_le_compat_l; try lra.
+    apply Rlt_le. apply pow_lt. lra.
+Qed.
+
+Lemma g1_increasing {ty} (n n' m m': nat) :
+  le n n' ->
+  le m m' ->
+  Rle (g1 ty n m) (g1 ty n' m').
+Proof.
+  intros. unfold g1.
+  pose proof (default_abs_ge_0 ty).
+  eapply Rmult_le_compat.
+  + apply Rmult_le_pos.
+    - apply pos_INR.
+    - apply H1.
+  + pose proof (g_pos ty m). lra. 
+  + pose proof (le_INR n n' H). 
+    pose proof (pos_INR n). 
+    apply Rmult_le_compat_r; auto.
+  + pose proof (@g_increasing ty m m' H0). lra.
+Qed.
+
+Lemma le_minus_1 {a b : nat} :
+  (a <= b)%coq_nat -> (a - 1 <= b - 1)%coq_nat.
+Proof.
+  intros H.
+  destruct a; destruct b; try lia.
+  + unfold subn. simpl. lia.
+  + unfold subn. simpl. unfold subn_rec. simpl. lia.
+Qed.
 
 Lemma fma_dotprod_forward_error_sparse {ty} {n : nat}:
   forall (v1 v2 : seq.seq (ftype ty)) (r : nat) (HA : is_r_sparse_aux v1 r),
   length v1 = length v2 ->
+  list_finite v1 ->
+  list_finite v2 ->
   forall (fp : ftype ty) (rp rp_abs : R),
   fma_dot_prod_rel (combine v1 v2) fp ->
   R_dot_prod_rel (combine (map FT2R v1) (map FT2R v2)) rp ->
   R_dot_prod_rel (combine (map Rabs (map FT2R v1)) (map Rabs (map FT2R v2))) rp_abs ->
   finite fp ->
   (Rabs (FT2R fp - rp) <= g ty r * Rabs rp_abs + g1 ty r (r-1)%nat)%Re.
-Proof.
+ Proof.
   intros.
+  remember (@extract_nonzero_elmt ty v1) as v1_nonzero.
+  remember (extract_elements (@extract_nonzero_idx ty v1) v2 (Zconst ty 0)) as v2_nonzero.
+  assert (length v1_nonzero = length v2_nonzero) as Hl.
+  { unfold extract_nonzero_elmt in Heqv1_nonzero.
+    subst. repeat rewrite extract_elements_length. auto. }
+  pose proof (fma_dotprod_forward_error _ _ v1_nonzero v2_nonzero Hl).
+  pose proof (fma_dot_prod_rel_holds_sparse H H0 H1 H2).
+  destruct H7 as [fp' [? ?]].
+  rewrite <- Heqv1_nonzero, <- Heqv2_nonzero in H8.
+  pose proof (R_dot_prod_rel_holds_sparse H H0 H1 H3).
+  pose proof (R_dot_prod_rel_abs_holds_sparse H H0 H1 H4).
+  pose proof (feq_finite H7 H5).
+  rewrite <- Heqv1_nonzero, <- Heqv2_nonzero in H9.
+  rewrite <- Heqv1_nonzero, <- Heqv2_nonzero in H10.
+  specialize (H6 fp' rp rp_abs H8 H9 H10 H11).
+  clear H8 H9 H10 H11.
+  rewrite (feq_to_r H7).
+  eapply Rle_trans; [apply H6 |].
+  assert (length v1_nonzero <= r)%coq_nat.
+  { rewrite Heqv1_nonzero. unfold is_r_sparse_aux, sparsity_fac_aux in HA.
+    unfold extract_nonzero_elmt. rewrite extract_elements_length. auto. }
+  assert (length v1_nonzero - 1 <= r - 1)%coq_nat. 
+  { apply le_minus_1. auto. } 
+  pose proof (@g_increasing ty (length v1_nonzero) r H8).
+  pose proof (@g1_increasing ty (length v1_nonzero) r (length v1_nonzero - 1) (r - 1) H8 H9).
+  apply Rplus_le_compat.
+  + apply Rmult_le_compat_r; auto. apply Rabs_pos.
+  + auto.
+Qed.
 
-Abort.
 
 (* Lemma vec_vec_mult_bound_sparse {n : nat} {ty}:
   forall (v1 v2 : 'cV[ftype ty]_n.+1) (r : nat) (Hv : is_r_sparse v1 r),
@@ -933,7 +1113,6 @@ apply Rle_trans with (@e_i_sparse n ty (@inord n i) A v r HA).
   rewrite size_map size_enum_ord.
   by rewrite size_map size_enum_ord in H1.
 Qed.
-Admitted.
   
 Definition FT2R_abs {m n: nat} (A : 'M[R]_(m.+1, n.+1)) :=
   \matrix_(i,j) Rabs (A i j).
