@@ -214,7 +214,7 @@ Definition is_r_sparse_aux {ty} (l : list (ftype ty)) (r : nat) :=
   le (sparsity_fac_aux l) r.
 
 Definition is_r_sparse {n : nat} {ty} (v : 'cV[ftype ty]_n.+1) (r : nat) :=
-  is_r_sparse_aux (vec_to_list_float n v) r.
+  is_r_sparse_aux (vec_to_list_float n.+1 v) r.
 
 Lemma extract_nonzero_length {ty} (l : list (ftype ty)):
   length (@extract_nonzero_elmt ty l) = length (@extract_nonzero_idx ty l).
@@ -259,8 +259,11 @@ Definition sparsity_fac_mat_row {n : nat} {ty} (A : 'M[ftype ty]_n.+1) (i : 'I_n
 (* Definition is_r_sparse_mat {ty} (A : list (list (ftype ty))) (r : nat) :=
   foldr and True [seq (is_r_sparse (nth i A []) r) | i <- iota 0 (length A)]. *)
 
+(* Definition is_r_sparse_mat {n : nat} {ty} (A : 'M[ftype ty]_n.+1) (r : nat) :=
+  foldr and True [seq (is_r_sparse (row i A)^T r) | i <- enum 'I_n.+1]. *)
+
 Definition is_r_sparse_mat {n : nat} {ty} (A : 'M[ftype ty]_n.+1) (r : nat) :=
-  foldr and True [seq (is_r_sparse (row i A)^T r) | i <- enum 'I_n.+1].
+  forall (i : 'I_n.+1), is_r_sparse (\row_j A (i) j)^T r.
 
 (* Definition sparsity_fac_mat {ty} (A : list (list (ftype ty))) :=
   foldr maxn 0%nat [seq (sparsity_fac_mat_row A i) | i <- iota 0 (length A)]. *)
@@ -302,7 +305,7 @@ Definition e_i_sparse {n : nat} {ty} (i : 'I_n.+1)
   let rs:= sum_fold prods in
   (g ty r * Rabs rs  + g1 ty r (r - 1))%Re.
 
-Definition vec_vec_mult_err_bnd_sparse {n : nat} {ty} 
+(* Definition vec_vec_mult_err_bnd_sparse {n : nat} {ty} 
   (v1 v2 : 'cV[ftype ty]_n.+1)
   (r : nat) (Hv1 : is_r_sparse v1 r) :=
   let l1 := vec_to_list_float n.+1 v1 in
@@ -310,7 +313,7 @@ Definition vec_vec_mult_err_bnd_sparse {n : nat} {ty}
   let L := combine l1 l2 in
   let prods := map (uncurry Rmult) (map Rabsp (map FR2 L)) in
   let rs:= sum_fold prods in
-  (g ty r * Rabs rs  + g1 ty r (r - 1))%Re.
+  (g ty r * Rabs rs  + g1 ty r (r - 1))%Re. *)
 
 (* Search (?A -> (seq.seq ?A) -> bool). *)
 (* Definition extract_non_zero {n : nat} {ty} (r : nat) (v : 'cV[ftype ty]_n.+1) :=
@@ -997,7 +1000,7 @@ Proof.
   + unfold subn. simpl. unfold subn_rec. simpl. lia.
 Qed.
 
-Lemma fma_dotprod_forward_error_sparse {ty} {n : nat}:
+Lemma fma_dotprod_forward_error_sparse {ty}:
   forall (v1 v2 : seq.seq (ftype ty)) (r : nat) (HA : is_r_sparse_aux v1 r),
   length v1 = length v2 ->
   list_finite v1 ->
@@ -1056,12 +1059,55 @@ Proof.
             (vec_to_list_float n.+1 v1)
              (vec_to_list_float n.+1 v2)).
 Admitted. *)
-  
+
+Lemma in_combine_inv_l {A} (l1 l2 : list A) (x : A) :
+  In x l1 ->
+  length l1 = length l2 ->
+  exists y, In (x, y) (combine l1 l2).
+Proof.
+  intros. generalize dependent l2.
+  induction l1 as [| x1 l1']; intros.
+  + inversion H.
+  + destruct l2 as [| x2 l2']; inversion H0.
+    simpl in *. destruct H.
+    - subst x1. exists x2. auto.
+    - destruct (IHl1' H l2' H2) as [y ?].
+      exists y. auto.
+Qed.
+
+Lemma in_combine_inv_r {A} (l1 l2 : list A) (y : A) :
+  In y l2 ->
+  length l1 = length l2 ->
+  exists x, In (x, y) (combine l1 l2).
+Proof.
+  intros. generalize dependent l1.
+  induction l2 as [| x2 l2']; intros.
+  + inversion H.
+  + destruct l1 as [| x1 l1']; inversion H0.
+    simpl in *. destruct H.
+    - subst. exists x1. auto.
+    - destruct (IHl2' H l1' H2) as [x ?].
+      exists x. auto.
+Qed.
+
+Lemma combine_finite {ty} (l1 l2 : seq.seq (ftype ty)) :
+  length l1 = length l2 ->
+  (forall xy , In xy (combine l1 l2) -> finite xy.1 /\ finite xy.2) ->
+  list_finite l1 /\ list_finite l2.
+Proof.
+  intros. split.
+  + unfold list_finite. intros.
+    destruct (in_combine_inv_l H1 H) as [y ?].
+    specialize (H0 (x, y) H2). auto. destruct H0. auto.
+  + unfold list_finite. intros.
+    destruct (in_combine_inv_r H1 H) as [y ?].
+    specialize (H0 (y, x) H2). auto. destruct H0. auto.
+Qed.
 
 Lemma matrix_vec_mult_bound_sparse {n : nat} {ty}:
   forall (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1)
   {r : nat} {HA : is_r_sparse_mat A r},
-  (forall (xy : ftype ty * ftype ty) (i : 'I_n.+1),
+  (forall (xy : ftype ty * ftype ty) (i : nat),
     In xy
       (combine
          (vec_to_list_float n.+1
@@ -1075,57 +1121,83 @@ Lemma matrix_vec_mult_bound_sparse {n : nat} {ty}:
   vec_inf_norm (FT2R_mat (A *f v) - (FT2R_mat A) *m (FT2R_mat v)) <=
   @mat_vec_mult_err_bnd_sparse n ty A v r HA.
 Proof.
-intros. unfold vec_inf_norm, mat_vec_mult_err_bnd_sparse.
-apply /RleP. apply bigmax_le; first by rewrite size_map size_enum_ord.
-intros. rewrite seq_equiv. 
-rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H1.
+  intros. unfold vec_inf_norm, mat_vec_mult_err_bnd_sparse.
+  apply /RleP. apply bigmax_le; first by rewrite size_map size_enum_ord.
 
+  intros. rewrite seq_equiv. 
+  rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H1.
 
-pose proof (fma_dotprod_forward_error _ ty 
-            (vec_to_list_float n.+1 (\row_j A (inord i) j)^T)
-             (vec_to_list_float n.+1 v)).
-rewrite !length_veclist in H2.
-assert (n.+1 = n.+1). { lia. } 
-specialize (H2 H3).
+  remember (vec_to_list_float n.+1 (\row_j A (inord i) j)^T) as l1.
+  remember (vec_to_list_float n.+1 (\col_j v j 0)) as l2.
+  pose proof (@fma_dotprod_forward_error_sparse ty l1 l2 r).
 
-Check (@inord n i).
-Check (@e_i_sparse n ty (@inord n i) A v r HA).
+  assert (is_r_sparse_aux l1 r).
+  { unfold is_r_sparse_mat in HA. unfold is_r_sparse in HA.
+    rewrite Heql1. specialize (HA (inord i)). apply HA. }
 
-apply Rle_trans with (@e_i_sparse n ty (@inord n i) A v r HA).
-+ unfold e_i_sparse. rewrite !mxE -RminusE.
-  rewrite !length_veclist.
-  apply H2.
-  assert (v = \col_j v j ord0).
-  {  apply matrixP.  unfold eqrel. intros. rewrite !mxE /=.
-      assert ( y = ord0). { apply ord1. } by rewrite H4.
-  } rewrite -H4.
-  - apply fma_dot_prod_rel_holds .
-  - pose proof (@R_dot_prod_rel_holds n ty n.+1 i (leqnn n.+1)).
-    specialize (H4 A v).
-    assert (\sum_(j < n.+1)
-               FT2R_mat A (inord i)
-                 (widen_ord (leqnn n.+1) j) *
-               FT2R_mat v
-                 (widen_ord (leqnn n.+1) j) 0 = 
-            \sum_j
-               FT2R_mat A (inord i) j * FT2R_mat v j 0).
-    { apply eq_big. by []. intros.
-      assert (widen_ord (leqnn n.+1) i0 = i0).
-      { unfold widen_ord. apply val_inj. by simpl. }
-      by rewrite H6.
-    } by rewrite -H5. 
-  - apply R_dot_prod_rel_abs_holds.
-  - intros. specialize (H0 (@inord n i)). 
-    rewrite inord_val in H0. apply H0. 
-+ assert (e_i (inord i) A v = 
-         [seq e_i i0 A v | i0 <- enum 'I_n.+1]`_i).
-  { rewrite seq_equiv nth_mkseq. nra. by rewrite size_map size_enum_ord in H1. } 
-  rewrite H4. apply /RleP.
-  apply (@bigmaxr_ler _  _ [seq e_i i0 A v | i0 <- enum 'I_n.+1] i).
-  rewrite size_map size_enum_ord.
-  by rewrite size_map size_enum_ord in H1.
+  assert (length l1 = length l2).
+  { rewrite Heql1. rewrite Heql2. rewrite !length_veclist. auto. }
+
+  assert (list_finite l1).
+  { pose proof (@combine_finite ty l1 l2 H4). apply H5.
+    intros. rewrite Heql1 Heql2 in H6. 
+    assert (v = \col_j v j ord0).
+    { apply matrixP.  unfold eqrel. intros. rewrite !mxE /=.
+      assert ( y = ord0). { apply ord1. } by rewrite H7. }
+    rewrite -H7 in H6. clear H7.
+    apply (H xy (i)). apply H6.
+  }
+
+  assert (list_finite l2).
+  { pose proof (@combine_finite ty l1 l2 H4). apply H6.
+    intros. rewrite Heql1 Heql2 in H7. 
+    assert (v = \col_j v j ord0).
+    { apply matrixP.  unfold eqrel. intros. rewrite !mxE /=.
+      assert ( y = ord0). { apply ord1. } by rewrite H8. }
+    rewrite -H8 in H7. clear H8.
+    apply (H xy (i)). apply H7.
+  }
+  specialize (H2 H3 H4 H5 H6).
+
+  apply Rle_trans with (@e_i_sparse n ty (@inord n i) A v r HA).
+  + unfold e_i_sparse. rewrite !mxE -RminusE.
+    apply H2.
+    - rewrite <- Heql1. rewrite <- Heql2. simpl. subst.
+      apply fma_dot_prod_rel_holds.
+    - pose proof (@R_dot_prod_rel_holds n ty n.+1 i (leqnn n.+1) A v).
+      subst.
+      assert (\sum_(j < n.+1)
+                FT2R_mat A (inord i) (widen_ord (leqnn n.+1) j) *
+                FT2R_mat v (widen_ord (leqnn n.+1) j) 0 = 
+              \sum_j
+                FT2R_mat A (inord i) j * FT2R_mat v j 0).
+      { apply eq_big. by []. intros.
+        assert (widen_ord (leqnn n.+1) i0 = i0).
+        { unfold widen_ord. apply val_inj. by simpl. }
+        by rewrite H9. }
+      rewrite -H8.
+      assert (v = \col_j v j ord0).
+      { apply matrixP.  unfold eqrel. intros. rewrite !mxE /=.
+        assert ( y = ord0). { apply ord1. } by rewrite H9.
+      } rewrite -H9. auto.
+    - pose proof (@R_dot_prod_rel_abs_holds n ty n.+1 i A v).
+      rewrite Heql1 Heql2.
+      assert (v = \col_j v j ord0).
+      { apply matrixP.  unfold eqrel. intros. rewrite !mxE /=.
+        assert ( y = ord0). { apply ord1. } rewrite H8. auto. }
+      rewrite -H8. auto.
+    - intros. specialize (H0 (@inord n i)).
+      rewrite inord_val in H0.
+      rewrite -Heql1 -Heql2. simpl. subst l1 l2. apply H0.
+  + assert (@e_i_sparse n ty (inord i) A v r HA = [seq @e_i_sparse n ty i0 A v r HA | i0 <- enum 'I_n.+1]`_i).
+    { rewrite seq_equiv nth_mkseq. nra. by rewrite size_map size_enum_ord in H1. }
+    rewrite H7. apply /RleP.
+    apply (@bigmaxr_ler _  _ [seq e_i_sparse i0 v HA | i0 <- enum 'I_n.+1] i).
+    rewrite size_map size_enum_ord.
+    rewrite size_map in H1.
+    rewrite size_enum_ord in H1. auto.
 Qed.
-  
+
 Definition FT2R_abs {m n: nat} (A : 'M[R]_(m.+1, n.+1)) :=
   \matrix_(i,j) Rabs (A i j).
 
