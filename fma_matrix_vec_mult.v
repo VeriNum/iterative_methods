@@ -725,6 +725,18 @@ Proof.
         destruct s eqn:E; destruct s0 eqn:E0; simpl; auto.
 Abort.
 
+Lemma fma_dot_prod_rel_holds_sparse {ty} :
+  forall (l1 l2 : seq.seq (ftype ty)),
+  let l1_nonzero := @extract_nonzero_elmt ty l1 in
+  let l2_nonzero := extract_elements (@extract_nonzero_idx ty l1) l2 (Zconst ty 0) in
+  length l1 = length l2 ->
+  list_finite l1 ->
+  list_finite l2 ->
+  forall fp,
+  fma_dot_prod_rel (combine l1 l2) fp ->
+  fma_dot_prod_rel (combine l1_nonzero l2_nonzero) fp.
+Abort.
+
 Lemma fma_dot_prod_rel_holds_sparse {ty} : 
   forall (l1 l2 : seq.seq (ftype ty)),
   let l1_nonzero := @extract_nonzero_elmt ty l1 in
@@ -1025,7 +1037,7 @@ Lemma fma_dotprod_forward_error_sparse {ty} {n : nat}:
   pose proof (@g1_increasing ty (length v1_nonzero) r (length v1_nonzero - 1) (r - 1) H8 H9).
   apply Rplus_le_compat.
   + apply Rmult_le_compat_r; auto. apply Rabs_pos.
-  + auto.
+  + apply H11.
 Qed.
 
 
