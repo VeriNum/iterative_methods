@@ -312,13 +312,6 @@ apply /RleP. apply bigmax_le.
   - by rewrite size_map size_enum_ord in H.
 Qed.
 
-
-(* Ltac apply_seq H0 A j n i0 i:= rewrite H0; apply /RleP; apply (@bigmaxr_ler _ 0 [seq \sum_(j < n.+1) Rabs (A i0 j)
-| i0 <- enum 'I_n.+1] i).
-
-Ltac seq_rewrite' H H0 A j n i0 i:=  rewrite seq_equiv; rewrite nth_mkseq; try by []; try by rewrite size_map size_enum_ord in H; 
-apply_seq H0 A j n i0 i; rewrite size_map size_enum_ord in H; by rewrite size_map size_enum_ord. *)
-
 Lemma matrix_norm_add {n:nat}:
   forall (A B : 'M[R]_n.+1),
   matrix_inf_norm (A + B) <= matrix_inf_norm A + matrix_inf_norm B.
