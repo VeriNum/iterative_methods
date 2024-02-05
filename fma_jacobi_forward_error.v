@@ -713,8 +713,7 @@ Definition input_bound {t} {n:nat}
 
 Lemma rho_def_power_le_one {t : type} {n : nat} (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) (k : nat) :
   let rho := rho_def A b in
-  (rho < 1)%Re ->
-  (rho ^ k <= 1)%Re.
+  (rho < 1)%Re -> (rho ^ k <= 1)%Re.
 Proof.
   intros rho H0.
   assert (1%Re = (1 ^ k)%Re) by (rewrite pow1; nra).
@@ -889,7 +888,6 @@ apply Rle_lt_trans with
     apply Rplus_le_compat.
     * apply Rplus_le_compat_l.
       apply Rmult_le_compat_r. unfold f_error. apply /RleP. apply vec_norm_pd. 
-      Check @rho_def_power_le_one.
       apply (@rho_def_power_le_one ty n A b k H0).
       * apply Rho_dmag_Bound. apply H0.
 + apply bnd4.
@@ -1611,18 +1609,6 @@ induction k.
                                 assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
                                 { lia. } rewrite H5 in Hnth. 
                                 apply (finite_BPLUS_BOPP Hnth Hlength Hfin).
-                                (* rewrite !nth_vec_to_list_float in Hnth.
-                                rewrite -Hnth /=.
-                                specialize (Hfin (@inord n j)).
-                                rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
-                                rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                                1,2,3: apply BMULT_finite_e in Hfin; destruct Hfin as [Hfin1 Hfin2]; rewrite mxE in Hfin2; apply Bminus_bplus_opp_implies in Hfin2.
-                                2: apply BPLUS_finite_e in Hfin2; rewrite finite_BOPP in Hfin2.
-                                1,2,3: try apply Hfin2.
-                                1,2,3: by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
-                                1,2: rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength;
-                                by apply /ssrnat.ltP. 
-                                by rewrite !length_veclist. *)
                              ++++ by rewrite rev_length in Hlength.
                             } apply reverse_triang_ineq in H4.
                             apply Rle_trans with 
@@ -1791,27 +1777,6 @@ induction k.
                               ---- rewrite combine_length !length_veclist Nat.min_id in Hnth.
                                    assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
                                   { lia. } rewrite H5 in Hnth. apply (finite_BPLUS_BOPP Hnth Hlength Hfin).
-                                   (* { lia. } rewrite H5 in Hnth. rewrite combine_nth in Hnth.
-                                   rewrite !nth_vec_to_list_float in Hnth.
-                                   rewrite -Hnth /=.
-                                   specialize (Hfin (@inord n j)).
-                                   rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
-                                   rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                                   apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
-                                   rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                   apply BPLUS_finite_e in Hfin2; try apply Hfin2.
-                                   apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
-                                   rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                   apply BPLUS_finite_e in Hfin2. rewrite finite_BOPP in Hfin2.  try apply Hfin2.
-                                   apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
-                                   rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                   try apply Hfin2.
-                                   by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
-                                   by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
-                                   rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
-                                   by apply /ssrnat.ltP.
-                                   rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
-                                   by apply /ssrnat.ltP. by rewrite !length_veclist. *)
                              ---- by rewrite rev_length in Hlength.
                ++++ assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
