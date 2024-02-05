@@ -1147,7 +1147,6 @@ Lemma bound_2_sparse {ty} {n:nat}
        d_mag < sqrt (fun_bnd ty r.+1))%Re.
 Proof. 
 intros.
-
 unfold input_bound in H.
 destruct H as [_ [bnd2 H]]. clear H.
 apply Rle_lt_trans with
@@ -2868,7 +2867,7 @@ Proof.
           destruct IHk as [IHk1 IHk2].
           apply (x_k_bound_sparse HA (@inord n m)) in IHk2.
           eapply Rle_lt_trans.
-          apply IHk2. by apply bound_2.
+          apply IHk2. by apply bound_2_sparse.
         - rewrite rev_length length_veclist in H51. by apply /ssrnat.ltP. 
         - rewrite rev_length in H51. apply H51.
     }
