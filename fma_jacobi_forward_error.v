@@ -245,15 +245,20 @@ apply Rlt_le_trans with
   try apply fprec_lt_femax.
 Qed.
 
-Ltac FT2R_v_max_bound v n i H0 :=
-  apply Rle_trans with ([seq Rabs (FT2R_mat v i0 0) | i0 <- enum 'I_n.+1]`_i);
-  [ rewrite seq_equiv; rewrite nth_mkseq; 
-    [ rewrite !mxE; apply Rle_refl | by rewrite size_map size_enum_ord in H0 ]
-  | apply /RleP;
-    apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v i0 0) | i0 <- enum 'I_n.+1] i);
-    rewrite size_map size_enum_ord; 
-    by rewrite size_map size_enum_ord in H0 ].
-
+Lemma column_max_bound {ty} {n:nat} (v: 'cV[ftype ty]_n.+1) : forall(i : nat), (i < n.+1)%nat ->
+(Rabs (FT2R (v (inord i) ord0)) <= bigmaxr 0%Re [seq Rabs (FT2R_mat v i0 ord0) | i0 <- enum 'I_n.+1])%Re.
+Proof. 
+intros i H0.
+apply Rle_trans with ([seq Rabs (FT2R_mat v i0 0) | i0 <- enum 'I_n.+1])`_i.
+-rewrite seq_equiv. rewrite nth_mkseq;
+    last by apply H0.
+    rewrite !mxE. apply Rle_refl.
+-apply /RleP.
+  apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v i0 0)| i0 <- enum 'I_n.+1] i).
+  rewrite size_map size_enum_ord .
+  by apply H0.
+Qed.
+ 
 
 Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (forall (xy : ftype ty * ftype ty),
@@ -329,9 +334,10 @@ apply bigmax_le.
       -- rewrite !Rabs_mult. apply Rmult_le_compat.
         ** apply Rmult_le_pos; apply Rabs_pos.
         ** apply Rabs_pos.
-        ** apply Rmult_le_compat; try apply Rabs_pos.
-            +++ FT2R_v_max_bound v1 n i H0.
-            +++ FT2R_v_max_bound v2 n i H0.
+        ** apply Rmult_le_compat; try apply Rabs_pos. 
+            1,2: rewrite size_map size_enum_ord in H0.
+            +++ apply (column_max_bound v1 H0).
+            +++ apply (column_max_bound v2 H0).
         ** unfold g. 
           eapply Rle_trans. apply Hd.
           assert (((1 + default_rel ty) ^ 1 <= (1 + default_rel ty) ^ n.+1)%Re ->
@@ -705,17 +711,32 @@ Definition input_bound {t} {n:nat}
      (bpow Zaux.radix2 (femax t) -
       default_abs t) / (1 + default_rel t))%Re.
 
-Ltac assert_rewrite_pow_apply k rho_ge_0 H0 :=
-  let H := fresh "H" in
-  assert (1%Re = (1 ^ k)%Re) by (rewrite pow1; nra);
-  rewrite H; clear H; apply pow_incr;
-  split; [apply rho_ge_0 | apply Rlt_le, H0].
+Lemma rho_def_power_le_one {t : type} {n : nat} (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) (k : nat) :
+  let rho := rho_def A b in
+  (rho < 1)%Re ->
+  (rho ^ k <= 1)%Re.
+Proof.
+  intros rho H0.
+  assert (1%Re = (1 ^ k)%Re) by (rewrite pow1; nra).
+  rewrite H. apply pow_incr.
+  split. by apply rho_ge_0.
+  apply Rlt_le. apply H0.
+Qed.
 
-Ltac apply_double_Rmult_le_compat_r_sequence d_mag_ge_0 Rinv_0_lt_compat Rlt_Rminus rho_ge_0 H0 := 
-  apply Rmult_le_compat_r; [ apply d_mag_ge_0| apply Rmult_le_compat_r;
-    [ apply Rlt_le; apply Rinv_0_lt_compat; apply Rlt_Rminus; apply H0
-    | apply Rcomplements.Rle_minus_l;
-      assert (forall a b: R, (0 <= b)%Re -> (a <= a + b)%Re) as H1 by (intros; nra); apply H1; apply pow_le; apply rho_ge_0 ]].
+Lemma Rho_dmag_Bound {t : type} {n : nat} (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) (k : nat) :
+  let rho := rho_def A b in
+  let d_mag := d_mag_def A b in
+  (rho < 1)%Re -> ((1 - rho ^ k) / (1 - rho) * d_mag <= 1 / (1 - rho) * d_mag)%Re.
+Proof.
+  intros. apply Rmult_le_compat_r.
+  apply d_mag_ge_0. apply Rmult_le_compat_r.
+  apply Rlt_le. apply Rinv_0_lt_compat.
+  apply Rlt_Rminus. apply H.
+  apply Rcomplements.Rle_minus_l.
+  assert (forall a b:R, (0 <= b)%Re -> (a <= a + b)%Re).
+  { intros. nra. } apply H0.
+  apply pow_le. by apply rho_ge_0.
+Qed. 
 
 Lemma bound_1  {t: type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
@@ -740,30 +761,30 @@ Lemma bound_1  {t: type} {n:nat}
    (1 + default_rel t) /
    (1 + default_rel t))%Re.
 Proof.
-intros. unfold input_bound in H.
-destruct H as [bnd1 H]. clear H.
-apply Rle_lt_trans with 
-(Rabs (FT2R (A (inord m) (inord m))) *
-        (1 * (1 + rho_def A b) *
-         (f_error 0 b x0
-            ((FT2R_mat A)^-1 *m 
-             FT2R_mat b) A -
-          d_mag_def A b *
-          / (1 - rho_def A b)) +
-         2 * d_mag_def A b *
-         / (1 - rho_def A b) +
-         2 *
-         vec_inf_norm
-           (x_fix
-              ((FT2R_mat A)^-1 *m FT2R_mat b)
-              (FT2R_mat b) (FT2R_mat A))))%Re.
-+ apply Rmult_le_compat_l. apply Rabs_pos.
-  unfold d_mag, rho.
-  repeat apply Rplus_le_compat_r. apply Rmult_le_compat_r. 
-  apply Rlt_le. apply H1.
-  apply Rmult_le_compat_r. apply Rplus_le_le_0_compat. nra. by apply rho_ge_0.
-  assert_rewrite_pow_apply k (rho_ge_0 A b) H0.
-+ apply bnd1.
+  intros. unfold input_bound in H.
+  destruct H as [bnd1 H]. clear H.
+  apply Rle_lt_trans with 
+  (Rabs (FT2R (A (inord m) (inord m))) *
+          (1 * (1 + rho_def A b) *
+          (f_error 0 b x0
+              ((FT2R_mat A)^-1 *m 
+              FT2R_mat b) A -
+            d_mag_def A b *
+            / (1 - rho_def A b)) +
+          2 * d_mag_def A b *
+          / (1 - rho_def A b) +
+          2 *
+          vec_inf_norm
+            (x_fix
+                ((FT2R_mat A)^-1 *m FT2R_mat b)
+                (FT2R_mat b) (FT2R_mat A))))%Re.
+  + apply Rmult_le_compat_l. apply Rabs_pos.
+    unfold d_mag, rho.
+    repeat apply Rplus_le_compat_r. apply Rmult_le_compat_r. 
+    apply Rlt_le. apply H1.
+    apply Rmult_le_compat_r. apply Rplus_le_le_0_compat. nra. by apply rho_ge_0.
+    apply (rho_def_power_le_one k H0).
+  + apply bnd1.
 Qed.
 
 Lemma  bound_2 {ty} {n:nat} 
@@ -801,8 +822,8 @@ apply Rle_lt_trans with
   apply Rplus_le_compat.
   - apply Rmult_le_compat_r.
     * unfold f_error. apply /RleP. apply vec_norm_pd.
-    * assert_rewrite_pow_apply k (rho_ge_0 A b) H0.
-  -apply_double_Rmult_le_compat_r_sequence (d_mag_ge_0 A b) Rinv_0_lt_compat Rlt_Rminus (rho_ge_0 A b) H0.
+    * apply (rho_def_power_le_one k H0).
+  - apply Rho_dmag_Bound. apply H0.
 + apply bnd2.
 Qed.
 
@@ -868,8 +889,9 @@ apply Rle_lt_trans with
     apply Rplus_le_compat.
     * apply Rplus_le_compat_l.
       apply Rmult_le_compat_r. unfold f_error. apply /RleP. apply vec_norm_pd. 
-      assert_rewrite_pow_apply k (rho_ge_0 A b) H0.
-    * apply_double_Rmult_le_compat_r_sequence (d_mag_ge_0 A b) Rinv_0_lt_compat Rlt_Rminus (rho_ge_0 A b) H0.
+      Check @rho_def_power_le_one.
+      apply (@rho_def_power_le_one ty n A b k H0).
+      * apply Rho_dmag_Bound. apply H0.
 + apply bnd4.
 Qed.
 
@@ -929,8 +951,8 @@ apply Rle_lt_trans with
     apply Rplus_le_compat.
     * apply Rplus_le_compat_l.
       apply Rmult_le_compat_r. unfold f_error. apply /RleP. apply vec_norm_pd.
-      assert_rewrite_pow_apply k (rho_ge_0 A b) H0.
-    * apply_double_Rmult_le_compat_r_sequence (d_mag_ge_0 A b) Rinv_0_lt_compat Rlt_Rminus (rho_ge_0 A b) H0.
+      apply (@rho_def_power_le_one ty n A b k H0).
+      * apply Rho_dmag_Bound. apply H0.
 + apply bnd5.
 Qed.
 
@@ -949,21 +971,32 @@ Definition forward_error_cond {ty} {n:nat}
   (forall i, finite (b i ord0)) /\
   @size_constraint ty n /\
   input_bound A x0 b.
-
-Ltac specialize_and_rewrite Hfin n i := 
-  specialize (Hfin (@inord n i));
-  rewrite mxE in Hfin;
-  rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord;
-  rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord;
-  rewrite inord_val in Hfin;
-  repeat split; try apply Hfin;
-  apply BMULT_finite_e in Hfin; destruct Hfin as [Hfin1 Hfin2];
-  rewrite mxE in Hfin2; apply Bminus_bplus_opp_implies in Hfin2;
-  apply BPLUS_finite_e in Hfin2; try apply Hfin2;
-  destruct Hfin2 as [Hfin21 Hfin22]; rewrite finite_BOPP in Hfin22;
-  rewrite mxE in Hfin22.
   
-  
+Lemma finite_BPLUS_BOPP {ty:type} {n k j:nat} {xy: ftype ty * ftype ty} {A:'M_n.+1} {b x0: 'cV_n.+1}: 
+nth (n.+1.-1 - j)%coq_nat (combine (vec_to_list_float n.+1 b)
+(vec_to_list_float n.+1 (A2_J A *f X_m_jacobi k x0 b A)))
+(Zconst ty 0, Zconst ty 0) = xy -> 
+(j <length(rev(combine(vec_to_list_float n.+1 b)
+(vec_to_list_float n.+1 (A2_J A *f X_m_jacobi k x0 b A)))))%coq_nat ->
+(forall i : 'I_n.+1, finite (X_m_jacobi k.+1 x0 b A i ord0)) -> 
+finite xy.1 /\ finite xy.2 /\ finite (BPLUS xy.1 (BOPP xy.2)).
+Proof.
+intros Hnth Hlength Hfin.
+rewrite combine_nth in Hnth.
+rewrite !nth_vec_to_list_float in Hnth. rewrite -Hnth /=.
+specialize (Hfin (@inord n j)).
+rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
+rewrite inord_val in Hfin. repeat split; try apply Hfin.
+1,2,3: apply BMULT_finite_e in Hfin; destruct Hfin as [Hfin1 Hfin2]; rewrite mxE in Hfin2; apply Bminus_bplus_opp_implies in Hfin2.
+2: apply BPLUS_finite_e in Hfin2; rewrite finite_BOPP in Hfin2.
+1,2,3: try apply Hfin2.
+admit.
+1,2: by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
+(* 1,2,3: by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength. *)
+1,2: rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength;
+by apply /ssrnat.ltP. 
+by rewrite !length_veclist.
+Admitted.
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound_aux {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
@@ -1576,8 +1609,9 @@ induction k.
                               rewrite rev_nth in Hnth.
                               ++++ rewrite combine_length !length_veclist Nat.min_id in Hnth.
                                 assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
-                                { lia. } rewrite H5 in Hnth. rewrite combine_nth in Hnth.
-                                rewrite !nth_vec_to_list_float in Hnth.
+                                { lia. } rewrite H5 in Hnth. 
+                                apply (finite_BPLUS_BOPP Hnth Hlength Hfin).
+                                (* rewrite !nth_vec_to_list_float in Hnth.
                                 rewrite -Hnth /=.
                                 specialize (Hfin (@inord n j)).
                                 rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
@@ -1588,7 +1622,7 @@ induction k.
                                 1,2,3: by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
                                 1,2: rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength;
                                 by apply /ssrnat.ltP. 
-                                by rewrite !length_veclist.
+                                by rewrite !length_veclist. *)
                              ++++ by rewrite rev_length in Hlength.
                             } apply reverse_triang_ineq in H4.
                             apply Rle_trans with 
@@ -1620,55 +1654,81 @@ induction k.
                                                  (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A))) <=
                                                ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
                                                 * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
-                                      { apply matrix_vec_mult_bound_corollary.
-                                        1,2: intros; specialize (Hfin (@inord n i)); 
-                                        rewrite mxE in Hfin; rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
-                                        1,2: rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
-                                        1,2: rewrite inord_val in Hfin; repeat split; repeat try apply Hfin.
-                                        all: apply BMULT_finite_e in Hfin; destruct Hfin as [Hfin1 Hfin2];
-                                        rewrite mxE in Hfin2; apply Bminus_bplus_opp_implies in Hfin2;
-                                        apply BPLUS_finite_e in Hfin2; try apply Hfin2; destruct Hfin2 as [Hfin21 Hfin22]; rewrite finite_BOPP in Hfin22;
-                                        rewrite mxE in Hfin22.
-                                        1,2: pose proof (@dotprod_finite_implies ty); specialize (H6 (combine  (vec_to_list_float n.+1
-                                          (\row_j0 A2_J A (inord i) j0)^T) (vec_to_list_float n.+1 (X_m_jacobi k x0 b A))));
-                                        rewrite !combine_split in H6. 
-                                        assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T,
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
-                                                       vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T). 
-                                        { by simpl. } rewrite H7 in H6. clear H7.
-                                        assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T,
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
-                                        { by simpl. } rewrite H7 in H6. clear H7. 
-                                        assert (X_m_jacobi k x0 b A = \col_j (X_m_jacobi k x0 b A j ord0)).
-                                        { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
-                                          assert (y = ord0). { by apply ord1. } by rewrite H7.
-                                        } rewrite H7 in H6. 
-                                        specialize (H6 Hfin22 xy). rewrite -H7 in H6.
-                                        specialize (H6 H5). apply H6.
-                                        by rewrite !length_veclist. 
-
-                                        assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T,
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
-                                                       vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T). 
-                                        { by simpl. } rewrite H7 in H6. clear H7.
-                                        assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T,
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
-                                        { by simpl. } rewrite H7 in H6. clear H7. 
-                                        assert (X_m_jacobi k x0 b A = \col_j (X_m_jacobi k x0 b A j ord0)).
-                                        { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
-                                          assert (y = ord0). { by apply ord1. } by rewrite H7.
-                                        } rewrite H7 in H6. 
-                                        specialize (H6 Hfin22 xy). rewrite -H7 in H6.
-                                        specialize (H6 H5). apply H6.
-                                        by rewrite !length_veclist. }
+                                                { apply matrix_vec_mult_bound_corollary. intros.
+                                                specialize (Hfin (@inord n i)). 
+                                                rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
+                                                rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
+                                                rewrite inord_val in Hfin. repeat split; try apply Hfin.
+                                                apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                                rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                                apply BPLUS_finite_e in Hfin2; try apply Hfin2.
+                                                destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
+                                                rewrite mxE in Hfin22.  
+                                                pose proof (@dotprod_finite_implies ty).
+                                                specialize (H6 (combine  (vec_to_list_float n.+1
+                                                                              (\row_j0 A2_J A (inord i) j0)^T)
+                                                                          (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
+                                                rewrite !combine_split  in H6. 
+                                                assert ((vec_to_list_float n.+1
+                                                                 (\row_j0 A2_J A  (inord i) j0)^T,
+                                                               vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
+                                                               vec_to_list_float n.+1
+                                                                 (\row_j0 A2_J A  (inord i) j0)^T). 
+                                                { by simpl. } rewrite H7 in H6. clear H7.
+                                                assert ((vec_to_list_float n.+1
+                                                                 (\row_j0 A2_J A  (inord i) j0)^T,
+                                                               vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
+                                                               vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
+                                                { by simpl. } rewrite H7 in H6. clear H7. 
+                                                assert (X_m_jacobi k x0 b A = \col_j (X_m_jacobi k x0 b A j ord0)).
+                                                { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+                                                assert (y = ord0). { by apply ord1. } by rewrite H7.
+                                              } rewrite H7 in H6. 
+                                              specialize (H6 Hfin22 xy). rewrite -H7 in H6.
+                                              specialize (H6 H5). apply H6.
+                                              by rewrite !length_veclist.
+      
+                                              apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                              rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                              apply BPLUS_finite_e in Hfin2; try apply Hfin2.
+                                              destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
+                                              rewrite mxE in Hfin22.  
+                                              pose proof (@dotprod_finite_implies ty).
+                                              specialize (H6 (combine  (vec_to_list_float n.+1
+                                                                            (\row_j0 A2_J A (inord i) j0)^T)
+                                                                        (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
+                                              rewrite !combine_split  in H6. 
+                                              assert ((vec_to_list_float n.+1
+                                                               (\row_j0 A2_J A  (inord i) j0)^T,
+                                                             vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
+                                                             vec_to_list_float n.+1
+                                                               (\row_j0 A2_J A  (inord i) j0)^T). 
+                                              { by simpl. } rewrite H7 in H6. clear H7.
+                                              assert ((vec_to_list_float n.+1
+                                                               (\row_j0 A2_J A  (inord i) j0)^T,
+                                                             vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
+                                                             vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
+                                              { by simpl. } rewrite H7 in H6. clear H7. 
+                                              assert (X_m_jacobi k x0 b A = \col_j (X_m_jacobi k x0 b A j ord0)).
+                                              { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+                                                assert (y = ord0). { by apply ord1. } by rewrite H7.
+                                              } rewrite H7 in H6. 
+                                              specialize (H6 Hfin22 xy). rewrite -H7 in H6.
+                                              specialize (H6 H5). apply H6.
+                                              by rewrite !length_veclist.
+                                        
+                                              intros.
+                                              specialize (Hfin (@inord n i)). 
+                                              rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
+                                              rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
+                                              rewrite inord_val in Hfin. repeat split; try apply Hfin.
+                                              apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
+                                              rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
+                                              apply BPLUS_finite_e in Hfin2; try apply Hfin2.
+                                              destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
+                                              by rewrite mxE in Hfin22.
+                                             
+                                            }
                                       apply Rle_trans with 
                                       ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
                                                 * (1 + g ty n.+1) + g1 ty n.+1 (n.+1 - 1))%Re.
@@ -1730,7 +1790,8 @@ induction k.
                               rewrite rev_nth in Hnth.
                               ---- rewrite combine_length !length_veclist Nat.min_id in Hnth.
                                    assert ((n.+1 - j.+1)%coq_nat = (n.+1.-1 - j)%coq_nat).
-                                   { lia. } rewrite H5 in Hnth. rewrite combine_nth in Hnth.
+                                  { lia. } rewrite H5 in Hnth. apply (finite_BPLUS_BOPP Hnth Hlength Hfin).
+                                   (* { lia. } rewrite H5 in Hnth. rewrite combine_nth in Hnth.
                                    rewrite !nth_vec_to_list_float in Hnth.
                                    rewrite -Hnth /=.
                                    specialize (Hfin (@inord n j)).
@@ -1750,7 +1811,7 @@ induction k.
                                    rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
                                    by apply /ssrnat.ltP.
                                    rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
-                                   by apply /ssrnat.ltP. by rewrite !length_veclist.
+                                   by apply /ssrnat.ltP. by rewrite !length_veclist. *)
                              ---- by rewrite rev_length in Hlength.
                ++++ assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
