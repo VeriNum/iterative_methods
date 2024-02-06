@@ -986,15 +986,79 @@ specialize (Hfin (@inord n j)).
 rewrite mxE in Hfin. rewrite !nth_vec_to_list_float in Hfin.
 rewrite inord_val in Hfin. repeat split; try apply Hfin.
 1,2,3: apply BMULT_finite_e in Hfin; destruct Hfin as [Hfin1 Hfin2]; rewrite mxE in Hfin2; apply Bminus_bplus_opp_implies in Hfin2.
-2: apply BPLUS_finite_e in Hfin2; rewrite finite_BOPP in Hfin2.
-1,2,3: try apply Hfin2.
-admit.
-1,2: by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength.
-(* 1,2,3: by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength. *)
-1,2: rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength;
-by apply /ssrnat.ltP. 
+1,2: apply BPLUS_finite_e in Hfin2; rewrite finite_BOPP in Hfin2.
+1,2,3: apply Hfin2.
+1,2: by rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength. 
+1,2: rewrite rev_length combine_length !length_veclist Nat.min_id in Hlength; by apply /ssrnat.ltP. 
 by rewrite !length_veclist.
-Admitted.
+Qed.
+
+Lemma finite_And {ty} (n k :nat) (A:'M_n.+1) (b x0: 'cV_n.+1) (xy: ftype ty * ftype ty) {i: 'I_n.+1} :
+( In xy
+(combine
+   (vec_to_list_float n.+1
+      (\row_j A2_J A (inord i) j)^T)
+   (vec_to_list_float n.+1
+      (X_m_jacobi k x0 b A)))) -> 
+(forall i : 'I_n.+1, finite (X_m_jacobi k.+1 x0 b A i ord0)) ->
+finite xy.1 /\ finite xy.2.
+Proof.
+intros H5 Hfin.
+specialize (Hfin (@inord n i)). 
+rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
+rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
+rewrite inord_val in Hfin. repeat split; try apply Hfin.
+
+all: apply BMULT_finite_e in Hfin; destruct Hfin as [Hfin1 Hfin2];
+rewrite mxE in Hfin2; apply Bminus_bplus_opp_implies in Hfin2;
+apply BPLUS_finite_e in Hfin2;
+destruct Hfin2 as [Hfin21 Hfin22]; rewrite finite_BOPP in Hfin22;
+rewrite mxE in Hfin22;
+pose proof (@dotprod_finite_implies ty) as H6;
+specialize (H6 (combine  (vec_to_list_float n.+1
+                              (\row_j0 A2_J A (inord i) j0)^T)
+                          (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
+rewrite !combine_split in H6. 
+assert ((vec_to_list_float n.+1
+                 (\row_j0 A2_J A  (inord i) j0)^T,
+               vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
+               vec_to_list_float n.+1
+                 (\row_j0 A2_J A  (inord i) j0)^T). 
+{ by simpl. } rewrite H in H6. clear H. 
+assert ((vec_to_list_float n.+1
+                 (\row_j0 A2_J A  (inord i) j0)^T,
+               vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
+               vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
+{ by simpl. } rewrite H in H6. clear H. 
+assert (X_m_jacobi k x0 b A = \col_j (X_m_jacobi k x0 b A j ord0)).
+{ apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+assert (y = ord0). { by apply ord1. } by rewrite H.
+} rewrite H in H6. 
+specialize (H6 Hfin22 xy). rewrite -H in H6.
+specialize (H6 H5). apply H6.
+by rewrite !length_veclist.
+
+rewrite !combine_split  in H6. 
+assert ((vec_to_list_float n.+1
+               (\row_j0 A2_J A  (inord i) j0)^T,
+             vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
+             vec_to_list_float n.+1
+               (\row_j0 A2_J A  (inord i) j0)^T). 
+{ by simpl. } rewrite H in H6. clear H.
+assert ((vec_to_list_float n.+1
+               (\row_j0 A2_J A  (inord i) j0)^T,
+             vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
+             vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
+{ by simpl. } rewrite H in H6. clear H. 
+assert (X_m_jacobi k x0 b A = \col_j (X_m_jacobi k x0 b A j ord0)).
+{ apply /matrixP. unfold eqrel. intros. rewrite !mxE.
+assert (y = ord0). { by apply ord1. } by rewrite H.
+} rewrite H in H6. 
+specialize (H6 Hfin22 xy). rewrite -H in H6.
+specialize (H6 H5). apply H6.
+by rewrite !length_veclist.
+Qed.
+
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound_aux {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
@@ -1640,68 +1704,8 @@ induction k.
                                                  (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A))) <=
                                                ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
                                                 * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
-                                                { apply matrix_vec_mult_bound_corollary. intros.
-                                                specialize (Hfin (@inord n i)). 
-                                                rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
-                                                rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
-                                                rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                                                apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
-                                                rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                                apply BPLUS_finite_e in Hfin2; try apply Hfin2.
-                                                destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
-                                                rewrite mxE in Hfin22.  
-                                                pose proof (@dotprod_finite_implies ty).
-                                                specialize (H6 (combine  (vec_to_list_float n.+1
-                                                                              (\row_j0 A2_J A (inord i) j0)^T)
-                                                                          (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
-                                                rewrite !combine_split  in H6. 
-                                                assert ((vec_to_list_float n.+1
-                                                                 (\row_j0 A2_J A  (inord i) j0)^T,
-                                                               vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
-                                                               vec_to_list_float n.+1
-                                                                 (\row_j0 A2_J A  (inord i) j0)^T). 
-                                                { by simpl. } rewrite H7 in H6. clear H7.
-                                                assert ((vec_to_list_float n.+1
-                                                                 (\row_j0 A2_J A  (inord i) j0)^T,
-                                                               vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
-                                                               vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
-                                                { by simpl. } rewrite H7 in H6. clear H7. 
-                                                assert (X_m_jacobi k x0 b A = \col_j (X_m_jacobi k x0 b A j ord0)).
-                                                { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
-                                                assert (y = ord0). { by apply ord1. } by rewrite H7.
-                                              } rewrite H7 in H6. 
-                                              specialize (H6 Hfin22 xy). rewrite -H7 in H6.
-                                              specialize (H6 H5). apply H6.
-                                              by rewrite !length_veclist.
-      
-                                              apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
-                                              rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                              apply BPLUS_finite_e in Hfin2; try apply Hfin2.
-                                              destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
-                                              rewrite mxE in Hfin22.  
-                                              pose proof (@dotprod_finite_implies ty).
-                                              specialize (H6 (combine  (vec_to_list_float n.+1
-                                                                            (\row_j0 A2_J A (inord i) j0)^T)
-                                                                        (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
-                                              rewrite !combine_split  in H6. 
-                                              assert ((vec_to_list_float n.+1
-                                                               (\row_j0 A2_J A  (inord i) j0)^T,
-                                                             vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
-                                                             vec_to_list_float n.+1
-                                                               (\row_j0 A2_J A  (inord i) j0)^T). 
-                                              { by simpl. } rewrite H7 in H6. clear H7.
-                                              assert ((vec_to_list_float n.+1
-                                                               (\row_j0 A2_J A  (inord i) j0)^T,
-                                                             vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
-                                                             vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
-                                              { by simpl. } rewrite H7 in H6. clear H7. 
-                                              assert (X_m_jacobi k x0 b A = \col_j (X_m_jacobi k x0 b A j ord0)).
-                                              { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
-                                                assert (y = ord0). { by apply ord1. } by rewrite H7.
-                                              } rewrite H7 in H6. 
-                                              specialize (H6 Hfin22 xy). rewrite -H7 in H6.
-                                              specialize (H6 H5). apply H6.
-                                              by rewrite !length_veclist.
+                                            { apply matrix_vec_mult_bound_corollary. intros.
+                                              apply (finite_And H5 Hfin). 
                                         
                                               intros.
                                               specialize (Hfin (@inord n i)). 
@@ -1783,68 +1787,7 @@ induction k.
                        by case: (x1 == y :> nat).
                     } rewrite H4. apply /RleP. apply matrix_vec_mult_bound_corollary.
                     intros.
-                    specialize (Hfin (@inord n i)). 
-                    rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
-                    rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
-                    rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                    apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
-                    rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                    apply BPLUS_finite_e in Hfin2; try apply Hfin2.
-                    destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
-                    rewrite mxE in Hfin22.  
-                    pose proof (@dotprod_finite_implies ty).
-                    specialize (H6 (combine  (vec_to_list_float n.+1
-                                                                      (\row_j0 A2_J A (inord i) j0)^T)
-                                                                  (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
-                    rewrite !combine_split  in H6. 
-                    assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T,
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
-                                                       vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T). 
-                    { by simpl. } rewrite H7 in H6. clear H7.
-                     assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T,
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
-                     { by simpl. } rewrite H7 in H6. clear H7. 
-                     assert (X_m_jacobi k x0 b A = \col_j (X_m_jacobi k x0 b A j ord0)).
-                     { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
-                       assert (y = ord0). { by apply ord1. } by rewrite H7.
-                     } rewrite H7 in H6. 
-                     specialize (H6 Hfin22 xy). rewrite -H7 in H6.
-                     specialize (H6 H5). apply H6.
-                     by rewrite !length_veclist.
-
-
-                     apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
-                     rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                     apply BPLUS_finite_e in Hfin2; try apply Hfin2.
-                     destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
-                     rewrite mxE in Hfin22.  
-                     pose proof (@dotprod_finite_implies ty).
-                     specialize (H6 (combine  (vec_to_list_float n.+1
-                                                                      (\row_j0 A2_J A (inord i) j0)^T)
-                                                                  (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
-                     rewrite !combine_split  in H6. 
-                     assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T,
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
-                                                       vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T). 
-                     { by simpl. } rewrite H7 in H6. clear H7.
-                     assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T,
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
-                     { by simpl. } rewrite H7 in H6. clear H7. 
-                     assert (X_m_jacobi k x0 b A = \col_j (X_m_jacobi k x0 b A j ord0)).
-                     { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
-                       assert (y = ord0). { by apply ord1. } by rewrite H7.
-                     } rewrite H7 in H6. 
-                     specialize (H6 Hfin22 xy). rewrite -H7 in H6.
-                     specialize (H6 H5). apply H6.
-                     by rewrite !length_veclist.
+                    apply (finite_And H5 Hfin). 
                                         
                      intros.
                      specialize (Hfin (@inord n i)). 
@@ -1872,70 +1815,8 @@ induction k.
                                                ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
                                                 * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
                            { apply matrix_vec_mult_bound_corollary. intros.
-
-                             specialize (Hfin  (@inord n i)). 
-                                        rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
-                                        rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
-                                        rewrite inord_val in Hfin. repeat split; try apply Hfin.
-                                        apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
-                                        rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                        apply BPLUS_finite_e in Hfin2; try apply Hfin2.
-                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
-                                        rewrite mxE in Hfin22.  
-                                        pose proof (@dotprod_finite_implies ty).
-                                        specialize (H5 (combine  (vec_to_list_float n.+1
-                                                                      (\row_j0 A2_J A (inord i) j0)^T)
-                                                                  (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
-                                        rewrite !combine_split  in H5. 
-                                        assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T,
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
-                                                       vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T). 
-                                        { by simpl. } rewrite H6 in H5. clear H6.
-                                        assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T,
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
-                                        { by simpl. } rewrite H6 in H5. clear H6. 
-                                        assert (X_m_jacobi k x0 b A = \col_j (X_m_jacobi k x0 b A j ord0)).
-                                        { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
-                                          assert (y = ord0). { by apply ord1. } by rewrite H6.
-                                        } rewrite H6 in H5. 
-                                        specialize (H5 Hfin22 xy). rewrite -H6 in H5.
-                                        specialize (H5 H4). apply H5.
-                                        by rewrite !length_veclist.
-
-
-                                        apply BMULT_finite_e in Hfin. destruct Hfin as [Hfin1 Hfin2].
-                                        rewrite mxE in Hfin2. apply Bminus_bplus_opp_implies  in Hfin2.
-                                        apply BPLUS_finite_e in Hfin2; try apply Hfin2.
-                                        destruct Hfin2 as [Hfin21 Hfin22]. rewrite finite_BOPP in Hfin22.
-                                        rewrite mxE in Hfin22.  
-                                        pose proof (@dotprod_finite_implies ty).
-                                        specialize (H5 (combine  (vec_to_list_float n.+1
-                                                                      (\row_j0 A2_J A (inord i) j0)^T)
-                                                                  (vec_to_list_float n.+1 (X_m_jacobi k x0 b A)))).
-                                        rewrite !combine_split  in H5. 
-                                        assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T,
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).1 = 
-                                                       vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T). 
-                                        { by simpl. } rewrite H6 in H5. clear H6.
-                                        assert ((vec_to_list_float n.+1
-                                                         (\row_j0 A2_J A  (inord i) j0)^T,
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)).2 = 
-                                                       vec_to_list_float n.+1 (X_m_jacobi k x0 b A)). 
-                                        { by simpl. } rewrite H6 in H5. clear H6. 
-                                        assert (X_m_jacobi k x0 b A = \col_j (X_m_jacobi k x0 b A j ord0)).
-                                        { apply /matrixP. unfold eqrel. intros. rewrite !mxE.
-                                          assert (y = ord0). { by apply ord1. } by rewrite H6.
-                                        } rewrite H6 in H5. 
-                                        specialize (H5 Hfin22 xy). rewrite -H6 in H5.
-                                        specialize (H5 H4). apply H5.
-                                        by rewrite !length_veclist.
-                                        
+                             apply (finite_And H4 Hfin). 
+                          
                                         intros.
                                         specialize (Hfin (@inord n i)). 
                                         rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
