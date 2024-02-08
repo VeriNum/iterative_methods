@@ -2883,7 +2883,7 @@ Proof.
         assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat) by lia.
         rewrite H5 in H52. rewrite nth_vec_to_list_float  in H52.
         - rewrite mxE in H52. rewrite mxE in H52. rewrite -H52. 
-          by apply bound_3 with x0 b.
+          apply bound_3_sparse with x0 b.
         - rewrite rev_length length_veclist in H51. by apply /ssrnat.ltP. 
         - rewrite rev_length in H51. apply H51.
       + destruct x1. simpl. apply in_combine_r in H4.
