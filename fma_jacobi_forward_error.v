@@ -1197,6 +1197,20 @@ apply bnd3.
 Qed.
 
 
+Lemma bound_3_sparse {ty} {n:nat} 
+  (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) (r : nat):
+  input_bound_sparse A x0 b r ->
+  forall i j, 
+  (Rabs (FT2R (A2_J A i j )) <
+    sqrt (fun_bnd ty r.+1))%Re.
+Proof.
+intros. unfold input_bound_sparse in H.
+destruct H as [_ [_ [bnd3 H]]]. clear H.
+apply bnd3. 
+Qed.
+
+
+
 Lemma bound_4 {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k i:
   let A_real := FT2R_mat A in
@@ -1352,6 +1366,23 @@ Definition forward_error_cond {ty} {n:nat}
   (forall i, finite (b i ord0)) /\
   @size_constraint ty n /\
   input_bound A x0 b.
+
+
+Definition forward_error_cond_sparse {ty} {n:nat} 
+  (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) (r : nat) :=
+  let rho := rho_def_sparse A b r in
+  let d_mag := d_mag_def_sparse A b r in
+   let A_real := FT2R_mat A in
+  (forall i, finite (A i i)) /\
+  (rho < 1)%Re /\
+  A_real \in unitmx /\
+  (forall i : 'I_n.+1, finite (BDIV (Zconst ty 1) (A i i))) /\
+  (forall i : 'I_n.+1, finite (x0 i ord0)) /\
+  (forall i, finite  (A1_inv_J A i ord0)) /\
+  (forall i j, finite (A2_J A i j)) /\ 
+  (forall i, finite (b i ord0)) /\
+  @size_constraint ty n /\
+  input_bound_sparse A x0 b r.
 
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound_aux {ty} {n:nat} 
@@ -2739,6 +2770,7 @@ induction k.
     * nra.
 Qed.
 
+
 Theorem jacobi_forward_error_bound_sparse_aux {ty} {n : nat}
   (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1)
   (r : nat) (HA : is_r_sparse_mat A r):
@@ -2776,13 +2808,13 @@ Theorem jacobi_forward_error_bound_sparse_aux {ty} {n : nat}
                      matrix_inf_norm (A2_J_real A_real)) *
                     vec_inf_norm (x_fix x b_real A_real))%Re in
   forall x0: 'cV[ftype ty]_n.+1,
-  forward_error_cond A x0 b ->
+  forward_error_cond_sparse A x0 b r ->
   (forall k:nat, 
    (forall i, finite (X_m_jacobi k x0 b A i ord0)) /\
    (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re).
 Proof.
   intros ? ? ? ? ? ? ? ? Hcond.
-  unfold forward_error_cond in Hcond.
+  unfold forward_error_cond_sparse in Hcond.
   destruct Hcond as [HAf [H [H0 [Hdivf [Hx0 [Ha1_inv [HfA2 [Hb [size_cons Hinp]]]]]]]]].
   assert (forall i : 'I_n.+1, FT2R (A i i) <> 0%Re).
   { intros. by apply BDIV_FT2R_sep_zero. }
