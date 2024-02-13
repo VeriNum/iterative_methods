@@ -1077,6 +1077,64 @@ apply Rle_lt_trans with
 Qed.
 
 
+
+Lemma bound_1_sparse  {t: type} {n:nat}
+  (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m
+  (r : nat) (HA : is_r_sparse_mat A r):
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+  let rho := rho_def_sparse A b r in 
+  let d_mag := d_mag_def_sparse A b r in 
+  input_bound A x0 b ->
+  (rho < 1)%Re ->
+  (0 < f_error 0 b x0 x A -
+         d_mag_def A b * / (1 - rho_def_sparse A b r))%Re ->
+  (Rabs (FT2R (A (inord m) (inord m))) *
+   (rho ^ k * (1 + rho) *
+    (f_error 0 b x0 x A -
+     d_mag * / (1 - rho)) +
+    2 * d_mag * / (1 - rho) +
+    2 *
+    vec_inf_norm
+      (x_fix x (FT2R_mat b) (FT2R_mat A))) <
+   (sqrt (fun_bnd t n.+1) - default_abs t) /
+   (1 + default_rel t) /
+   (1 + default_rel t))%Re.
+Proof.
+intros.
+unfold input_bound in H.
+destruct H as [bnd1 H]. clear H.
+apply Rle_lt_trans with 
+(Rabs (FT2R (A (inord m) (inord m))) *
+        (1 * (1 + rho_def_sparse A b r) *
+         (f_error 0 b x0
+            ((FT2R_mat A)^-1 *m 
+             FT2R_mat b) A -
+          d_mag_def A b *
+          / (1 - rho_def_sparse A b r)) +
+         2 * d_mag_def A b *
+         / (1 - rho_def_sparse A b r) +
+         2 *
+         vec_inf_norm
+           (x_fix
+              ((FT2R_mat A)^-1 *m FT2R_mat b)
+              (FT2R_mat b) (FT2R_mat A))))%Re.
++ apply Rmult_le_compat_l. apply Rabs_pos.
+  unfold d_mag, rho.
+  repeat apply Rplus_le_compat_r.
+  apply Rmult_le_compat_r. apply Rlt_le. apply H1.
+  apply Rmult_le_compat_r.
+  apply Rplus_le_le_0_compat. nra. by apply rho_ge_0.
+  assert ( 1%Re = (1 ^ k)%Re) by (rewrite pow1; nra).
+  rewrite H. apply pow_incr.
+  split. by apply rho_ge_0.
+  apply Rlt_le. apply H0.
++ apply bnd1.
+Qed.
+  
+
+
 Lemma  bound_2 {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) k:
   let A_real := FT2R_mat A in
@@ -1368,6 +1426,8 @@ Definition forward_error_cond {ty} {n:nat}
   input_bound A x0 b.
 
 
+
+
 Definition forward_error_cond_sparse {ty} {n:nat} 
   (A: 'M[ftype ty]_n.+1) (x0 b: 'cV[ftype ty]_n.+1) (r : nat) :=
   let rho := rho_def_sparse A b r in
@@ -1450,6 +1510,8 @@ induction k.
                              ord0) in
                dotprod_r l1 l2)).
     { pose proof (@finite_fma_from_bounded _ ty).
+      (* Need a sparse version of this shit *)
+
       specialize (H2 (vec_to_list_float n.+1
                          (\row_j A2_J A (inord i) j)^T)
                       ( vec_to_list_float n.+1
@@ -2847,6 +2909,8 @@ Proof.
                                  (\col_j X_m_jacobi k x0 b A j  ord0)))).
       specialize (H2 (@fma_dot_prod_rel_holds _ _ _ n.+1 i (A2_J A) 
                           (\col_j X_m_jacobi k x0 b A j ord0))).
+
+      (* modifications start here! *)
       assert ((g1 ty (n.+2 +1)%coq_nat n.+2 <= fmax ty)%Re).
       { by apply g1_constraint_Sn. } specialize (H2 H3).
       apply H2. intros.
