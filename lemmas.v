@@ -322,8 +322,12 @@ Lemma vec_sum_simpl {n:nat}:
   forall (a b c : 'cV[R]_n),
   a - c = a - b + b - c.
 Proof.
-intros. apply matrixP. unfold eqrel. intros. rewrite !mxE.
-rewrite -!RplusE -!RoppE. nra.
+intros. 
+apply matrixP. unfold eqrel. intros. rewrite !mxE. 
+rewrite -!RplusE -!RoppE. 
+rewrite (Rplus_assoc (a x y)).
+assert ((- b x y + b x y)%Re = 0). by rewrite Rplus_opp_l.
+rewrite H. rewrite Rplus_0_r. auto. 
 Qed.
 
 
@@ -384,7 +388,7 @@ destruct (n == 0%N).
 Qed.
 
 Lemma pow_add: 
-  forall (er : R_ringType) (n:nat), 
+  forall (er : RbaseSymbolsImpl_R__canonical__GRing_SemiRing) (n:nat), 
   (er ^ (n + 1)%N) = (er * er ^ n).
 Proof.
 intros. 
@@ -400,6 +404,18 @@ rewrite expr1z.
 repeat rewrite -RmultE. 
 nra.
 Qed.
+
+
+(* Might be an incorrect lemma. *)
+(* Lemma pow_add:
+  forall (er : R) (n : nat),
+  (er ^ (n + 1)%N) = (er * er ^ n)%Re.
+Proof.
+intros. induction n.
++ rewrite add0n //=. rewrite expr1z. rewrite Rmult_1_r. reflexivity.
++ rewrite exprzD_nat. rewrite expr1z. rewrite -!RmultE. rewrite Rmult_comm.
+  rewrite -exprnP. rewrite RpowE. reflexivity.
+Qed. *)
 
 
 Lemma error_sum_aux2 er n:
@@ -422,10 +438,13 @@ induction n.
     assert ((n - 0)%coq_nat = n). { lia. } rewrite H0 in IHn.
     rewrite -addrA.
     assert (er * er ^ n.+1 + 1 = 1 + er * er ^ n.+1).
-    { by rewrite addrC. } rewrite H1. rewrite addrA.
+    { by rewrite addrC. } 
+    rewrite -addrA. rewrite H1.
+    rewrite addrA.
     rewrite IHn. rewrite RplusE. 
     assert (er ^ n.+2 =  er * er ^ n.+1).
-    { rewrite -addn1. by rewrite pow_add. } by rewrite H2.
+    { rewrite -addn1. by rewrite pow_add. } rewrite H2.
+    rewrite addrA. reflexivity.
 Qed.
 
 
