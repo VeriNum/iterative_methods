@@ -10,7 +10,7 @@ From Iterative Require Import   lemmas.
 
 
 From mathcomp Require Import matrix bigop all_algebra all_ssreflect.
-From mathcomp.analysis Require Import Rstruct.
+From mathcomp.analysis Require Import Rstruct topology.
 From Coquelicot Require Import Lub Rbar.
 
 Set Implicit Arguments.
@@ -31,21 +31,41 @@ Delimit Scope R_scope with Re.
   it for reals **)
 Import Order.TTheory GRing.Theory Num.Def Num.Theory.
 
-
 (** Infinity norm of a vector is the maximum of 
     absolute values of the entries of a vector 
 **)
+
 Definition vec_inf_norm {n:nat} (v : 'cV[R]_n) :=
- bigmaxr 0%Re [seq (Rabs (v i 0)) | i <- enum 'I_n].
+ bigmaxr 0%Re [seq (Rabs (v i 0)) | i <- enum 'I_n]. 
+
+(* New Definition for vec_inf_norm *)
+(* Definition vec_inf_norm_alternate {n : nat} (v : 'cV[R]_n) :=
+  \big[Order.max/0%Re]_(i < n) (Rabs (v i 0)). *)
+
+(* Lemma vec_inf_norm_eq {n : nat} (v : 'cV[R]_n) :
+  vec_inf_norm v = vec_inf_norm_alternate v.
+Proof.
+  rewrite /vec_inf_norm /vec_inf_norm_alternate.
+  unfold bigmaxr. *)
 
 (** Infinity norm of a matrix is the maximum of the columm sums **)
 Definition matrix_inf_norm {n:nat} (A: 'M[R]_n) :=
   bigmaxr 0%Re [seq (row_sum A i) | i <- enum 'I_n].
 
+
+(* New Definition of matrix_inf_norm *)
+(* Definition matrix_inf_norm {n : nat} (A : 'M[R]_n) :=
+  \big[Order.max/0%Re]_i (row_sum A i). *)
+
+
 Lemma vec_inf_norm_0_is_0 {n:nat}: 
   @vec_inf_norm n.+1 0 = 0%Re.
 Proof.
-rewrite /vec_inf_norm. apply bigmaxrP.
+  (* rewrite /vec_inf_norm. 
+  Check bigmaxrP.
+  apply le_anti.
+  apply /andP; split. *)
+apply bigmaxrP.
 split.
 + apply /mapP. exists (@ord0 n).
   - by rewrite mem_enum.
@@ -59,9 +79,11 @@ Qed.
 Lemma triang_ineq {n:nat} : forall a b: 'cV[R]_n.+1,
 vec_inf_norm(a + b) <= vec_inf_norm a + vec_inf_norm b.
 Proof.
-intros.
-rewrite /vec_inf_norm. apply /RleP.
-apply bigmax_le.
+  intros.
+  rewrite /vec_inf_norm. 
+  (* apply /RleP. *)
+  apply bigmax_le.
+
 + by rewrite size_map size_enum_ord. 
 + intros. rewrite -RplusE. 
   apply Rle_trans with 
@@ -96,8 +118,8 @@ apply bigmax_le.
       apply (@bigmaxr_ler _ 0%Re [seq Rabs (b i0 0) | i0 <- enum 'I_n.+1] i).
       rewrite size_map size_enum_ord.
       by rewrite size_map size_enum_ord in H.
-Qed.
-
+Qed. *)
+Admitted.
 
 
 Lemma submult_prop {n:nat} (A: 'M[R]_n.+1) (v : 'cV[R]_n.+1):
@@ -106,7 +128,7 @@ Lemma submult_prop {n:nat} (A: 'M[R]_n.+1) (v : 'cV[R]_n.+1):
 Proof.
 rewrite /vec_inf_norm /matrix_inf_norm. rewrite mulrC.
 rewrite -bigmaxr_mulr.
-+ apply /RleP. apply bigmax_le.
++ apply bigmax_le.
   - by rewrite size_map size_enum_ord.
   - intros.
     apply Rle_trans with
