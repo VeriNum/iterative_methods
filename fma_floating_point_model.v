@@ -10,7 +10,6 @@ Set Bullet Behavior "Strict Subproofs".
 
 Require Import floatlib.
 
-
 Section WITHNANS.
 Context {NANS: Nans}. 
 
@@ -143,7 +142,6 @@ Notation "-f A" := (opp_mat A) (at level 50).
 Notation "A *f B" := (mulmx_float A B) (at level 70).
 Notation "A -f B" := (sub_mat A B) (at level 80).
 
-
 Definition A1_inv_J {ty} {n:nat} (A: 'M[ftype ty]_n.+1) : 'cV[ftype ty]_n.+1 :=
   \col_i (BDIV (Zconst ty 1) (A i i)).
 
@@ -168,21 +166,19 @@ Definition X_m_jacobi {ty} {n:nat} m x0 b (A: 'M[ftype ty]_n.+1) :
   'cV[ftype ty]_n.+1 :=
    Nat.iter m  (fun x0 => jacobi_iter x0 b A) x0.
 
-
-Definition matrix_inj' {t} (A: matrix t) m n  d d': 'M[ftype t]_(m,n):=
-    \matrix_(i < m, j < n) 
-     nth j (nth i A d) d'.
-
-Definition matrix_inj {t} (A: matrix t) m n  : 'M[ftype t]_(m,n):=
-  matrix_inj' A m n [::] (Zconst t 0).
-
-Definition vector_inj' {t} (v: vector t) n d : 'cV[ftype t]_n :=
-   \col_(i < n) nth i v d.
-
-Definition vector_inj {t} (v: vector t) n : 'cV[ftype t]_n :=
-   vector_inj' v n (Zconst t 0).
+(*unit vector with ith-element = 1*)
+Definition e_i {n : nat} {ty} (i : 'I_n.+1) : 'cV[ftype ty]_n.+1 :=
+\col_(j < n.+1) (if j == i then (Zconst ty 1) else (Zconst ty 0)).
 
 
+(* Approximate solving for a column of A^-1 using m Jacobi iterations *)
+Definition ith_col_A_inv {ty} {n : nat} m x0 (A : 'M[ftype ty]_n.+1) (i : 'I_n.+1): 'cV[ftype ty]_n.+1  :=
+  let b := e_i i in
+  X_m_jacobi m x0 b A.
+
+(* Define the approximate inverse of A after m Jacobi iterations *)
+Definition A_inv_jacobi {ty} {n : nat} m (x0 : 'cV[ftype ty]_n.+1) (A : 'M[ftype ty]_n.+1) : 'M[ftype ty]_n.+1 :=
+  (\matrix_(i < n.+1) (ith_col_A_inv m x0 A i)^T)^T.
 
 Lemma length_veclist {ty} {n m:nat} (v: 'cV[ftype ty]_n.+1):
   length (@vec_to_list_float _ n m v) = m.

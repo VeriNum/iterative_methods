@@ -40,6 +40,7 @@ Notation "A -f B" := (sub_mat A B) (at level 80).
 
 
 
+
 Definition f_error {ty} {n:nat} m b x0 x (A: 'M[ftype ty]_n.+1):=
   let x_k := X_m_jacobi m x0 b A in 
   let A_real := FT2R_mat A in
@@ -424,6 +425,69 @@ rewrite -bigmaxr_mulr.
     by rewrite size_map size_enum_ord in H1.
 + apply /RleP. apply default_rel_ge_0.
 Qed.
+Search (lift ord0 _).
+(*** Lemma for error bound on the inverse obtained by jacobi***)
+Lemma jacobi_inverse_mat_norm_bound {ty} {n:nat} k (x0 : 'cV[ftype ty]_n.+1) (A: 'M[ftype ty]_n.+1):
+  (forall i, finite (BDIV (Zconst ty 1) (A i i ))) ->
+  (forall i, finite (A i i)) ->
+  let A_real := FT2R_mat A in
+  (matrix_inf_norm (FT2R_mat (A_inv_jacobi k x0 A) - A_real^-1) <=
+    \sum_(j < n.+1) f_error k (e_i j) x0 (col j A_real^-1) A)%Re.
+Proof.
+  intros.
+  (* assert (Hneq: forall i, (FT2R (A i i) <> 0%Re)).
+  { intros. by apply BDIV_FT2R_sep_zero. } *)
+  unfold matrix_inf_norm, row_sum.
+  apply bigmax_le. 
+  +rewrite size_map.
+  rewrite size_enum_ord. 
+  auto.
+  +intros. 
+  rewrite seq_equiv. 
+  rewrite nth_mkseq. 
+  ++assert (H2: forall j, 
+    (Rabs ((FT2R_mat (A_inv_jacobi k x0 A) - A_real^-1)%Ri(inord i) j)
+    <= f_error k (e_i j) x0 (col j A_real^-1) A)%Re).
+    { intros. 
+      unfold f_error.
+      unfold vec_inf_norm.
+      assert (H3: exists i0, (FT2R_mat (A_inv_jacobi k x0 A) - A_real^-1)%Ri(inord i) j = 
+      seq.nth  ).
+      eapply bigmaxr_ler.
+
+      Search (bigmaxr).
+    
+      (* rewrite seq_equiv.   *)
+      unfold A_inv_jacobi,ith_col_A_inv.
+      unfold x_fix. unfold diag_matrix_vec_mult_R.
+      admit.
+      (* rewrite bigmaxr_ler.
+      -rewrite size_map size_enum_ord. auto.
+      -intros. rewrite seq_equiv. rewrite nth_mkseq.
+        rewrite !mxE. apply Rle_refl. *)
+    }
+    induction n as [|n' IHn']. 
+    +++ rewrite big_ord_recl.  
+        rewrite big_ord_recl.
+        rewrite big_ord0.  
+        rewrite big_ord0.  
+        rewrite addr0.
+        rewrite addr0.
+        apply H2.
+    +++ rewrite big_ord_recl.
+        setoid_rewrite big_ord_recl at 2.
+        apply Rplus_le_compat.
+        - apply H2.
+        - admit.
+          (* eapply IHn'.
+          rewrite lift0 n i0.
+          remember (FT2R_mat (A_inv_jacobi k x0 A) - A_real^-1) as delta_mat.
+          remember (\sum_(i0 < n'.+1) Rabs (delta_mat (inord i) (lift ord0 i0))) as lhs.
+          remember (\sum_(i0 < n'.+1) f_error k (e_i (lift ord0 i0)) x0 (col (lift ord0 i0) A_real^-1) A) as rhs.
+          assert (lhs <= rhs)%Re.
+          { apply IHn'. intros. apply H2. } *)
+  ++rewrite size_map size_enum_ord in H1. assumption.
+Admitted.
 
 Lemma list_split_l {T} (l : list (T * T)) (a:T * T):
   (List.split (a :: l)).1 = (a.1 :: (List.split l).1).
@@ -435,6 +499,7 @@ induction l; simpl; intros; auto.
   destruct a; simpl; auto.
 Qed.
   
+
 Lemma list_split_r {T} (l : list (T * T)) (a:T * T):
   (List.split (a :: l)).2 = (a.2 :: (List.split l).2).
 Proof.
@@ -1058,6 +1123,49 @@ specialize (H6 Hfin22 xy). rewrite -H in H6.
 specialize (H6 H5). apply H6.
 by rewrite !length_veclist.
 Qed.
+
+(** State the forward error theorem **)
+Theorem block_jacobi_forward_error_bound_aux {ty} {n:nat} (delta_D:R)
+  (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1):
+  let A_real := FT2R_mat A in
+  let b_real := FT2R_mat b in
+  let x:= A_real^-1 *m b_real in
+  let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
+  let delta := default_rel ty in
+  let rho := ((((1 + g ty n.+1) * (1 + delta) *
+  g ty n.+1 + delta * (1 + g ty n.+1) +
+  g ty n.+1) * (1 + delta) + delta) * R +
+(((1 + g ty n.+1) * (1 + delta) *
+  g ty n.+1 + delta * (1 + g ty n.+1) +
+  g ty n.+1) * default_abs ty +
+ default_abs ty) *
+matrix_inf_norm (A2_J_real A_real) + R)%Re in
+let d_mag := ((g ty n.+1 * (1 + delta) + delta) *
+    ((vec_inf_norm (A1_diag A_real) *
+      (1 + delta) + default_abs ty) *
+     vec_inf_norm b_real) +
+    (1 + g ty n.+1) * g1 ty n.+1 (n.+1 - 1) *
+    (1 + delta) *
+    (vec_inf_norm (A1_diag A_real) *
+     (1 + delta) + default_abs ty) +
+    g1 ty n.+1 (n.+1 - 1) +
+    (vec_inf_norm (A1_diag A_real) * delta +
+     default_abs ty) * vec_inf_norm b_real +
+    ((((1 + g ty n.+1) * (1 + delta) *
+       g ty n.+1 + delta * (1 + g ty n.+1) +
+       g ty n.+1) * (1 + delta) + delta) * R +
+     (((1 + g ty n.+1) * (1 + delta) *
+       g ty n.+1 + delta * (1 + g ty n.+1) +
+       g ty n.+1) * default_abs ty +
+      default_abs ty) *
+     matrix_inf_norm (A2_J_real A_real)) *
+    vec_inf_norm (x_fix x b_real A_real))%Re in
+  forall x0: 'cV[ftype ty]_n.+1,
+  forward_error_cond A x0 b ->
+  (forall k:nat, 
+   (forall i, finite (X_m_jacobi k x0 b A i ord0)) /\
+   (f_error k b x0 x A <= rho^k * (f_error 0 b x0 x A) + ((1 - rho^k) / (1 - rho))* d_mag)%Re).
+
 
 (** State the forward error theorem **)
 Theorem jacobi_forward_error_bound_aux {ty} {n:nat} 
