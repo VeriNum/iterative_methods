@@ -6,10 +6,10 @@ CFLAGS= -I$(INCLUDE) -O4
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@ 
 
 sparse/sparse.v: sparse/sparse.c sparse/sparse.h
-	clightgen -flongdouble -normalize $< -o $@ 
+	clightgen -flongdouble -normalize -DCOMPCERT $< -o $@ 
 
 sparse/jacobi.v: sparse/jacobi.c sparse/sparse.h
-	clightgen -flongdouble -normalize $< -o $@ 
+	clightgen -flongdouble -normalize -DCOMPCERT $< -o $@ 
 
 sparse/main.o: sparse/main.c sparse/parsparse.h
 sparse/test.o: sparse/test.c sparse/sparse.h

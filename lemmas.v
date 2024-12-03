@@ -139,10 +139,10 @@ Qed.
 
 Lemma nth_seq_0_is_0 {n:nat} (i:nat):
   (i < n)%N -> 
-  [seq Rabs ((0 : 'cV[R]_n) i0 0) | i0 <- enum 'I_n]`_i = 0%Re.
+  [seq Rabs ((GRing.zero : 'cV[R]_n) i0 0) | i0 <- enum 'I_n]`_i = 0%Re.
 Proof.
 intros.
-assert ([seq Rabs ((0 : 'cV[R]_n) i0 0) | i0 <- enum 'I_n] = 
+assert ([seq Rabs ((GRing.zero : 'cV[R]_n) i0 0) | i0 <- enum 'I_n] = 
           mkseq (fun _ => 0) n).
 { unfold mkseq. rewrite -val_enum_ord.
   rewrite -[in RHS]map_comp.
@@ -323,7 +323,10 @@ Lemma vec_sum_simpl {n:nat}:
   a - c = a - b + b - c.
 Proof.
 intros. apply matrixP. unfold eqrel. intros. rewrite !mxE.
-rewrite -!RplusE -!RoppE. nra.
+rewrite -!RplusE -!RoppE.
+rewrite !Rplus_assoc.
+f_equal.
+rewrite -Rplus_assoc Rplus_opp_l Rplus_0_l //.
 Qed.
 
 
@@ -383,8 +386,9 @@ destruct (n == 0%N).
   intros. by apply f_pow_ge_0.
 Qed.
 
+
 Lemma pow_add: 
-  forall (er : R_ringType) (n:nat), 
+  forall (er : R (*_ringType*) ) (n:nat), 
   (er ^ (n + 1)%N) = (er * er ^ n).
 Proof.
 intros. 
@@ -420,12 +424,7 @@ induction n.
     rewrite !RplusE. simpl in IHn. rewrite H in IHn.
     rewrite mulrDr.
     assert ((n - 0)%coq_nat = n). { lia. } rewrite H0 in IHn.
-    rewrite -addrA.
-    assert (er * er ^ n.+1 + 1 = 1 + er * er ^ n.+1).
-    { by rewrite addrC. } rewrite H1. rewrite addrA.
-    rewrite IHn. rewrite RplusE. 
-    assert (er ^ n.+2 =  er * er ^ n.+1).
-    { rewrite -addn1. by rewrite pow_add. } by rewrite H2.
+    rewrite -!addrA -(addrC 1) !addrA IHn RplusE //.
 Qed.
 
 

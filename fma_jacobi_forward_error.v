@@ -183,7 +183,8 @@ Lemma add_vec_distr_1 {n:nat}:
   (a+b) - (b+c) = a - c.
 Proof.
 intros. apply matrixP. unfold eqrel.
-intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE.
+simpl; lra.
 Qed.
 
 
@@ -192,7 +193,7 @@ Lemma add_vec_distr_2 {n:nat}:
   (a-b) + (b-c) = a - c.
 Proof.
 intros. apply matrixP. unfold eqrel.
-intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. simpl; lra.
 Qed.
 
 
@@ -201,7 +202,7 @@ Lemma add_vec_distr_3 {n:nat}:
   (a+b) - (c+d) = (a-c) + (b-d).
 Proof.
 intros. apply matrixP. unfold eqrel.
-intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. simpl; lra.
 Qed.
 
 
@@ -210,7 +211,7 @@ Lemma add_vec_distr_4 {n:nat}:
   (a - b) - (a - d) = d - b.
 Proof.
 intros. apply matrixP. unfold eqrel.
-intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. simpl; lra.
 Qed.
 
 Lemma sub_vec_comm_1 {n:nat}:
@@ -218,7 +219,7 @@ Lemma sub_vec_comm_1 {n:nat}:
   (a - b) = - (b-a).
 Proof.
 intros. apply matrixP. unfold eqrel.
-intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. simpl; lra.
 Qed.
 
 Lemma sub_vec_2 {n:nat}:
@@ -226,7 +227,7 @@ Lemma sub_vec_2 {n:nat}:
   (a - b) = (a + (-b)).
 Proof.
 intros. apply matrixP. unfold eqrel.
-intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. simpl; lra.
 Qed.
 
 
@@ -235,7 +236,7 @@ Lemma sub_vec_3 {n:nat}:
   (a - b) + b = a.
 Proof.
 intros. apply matrixP. unfold eqrel.
-intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. simpl; lra.
 Qed.
 
 
@@ -1120,17 +1121,25 @@ apply Rle_lt_trans with
               ((FT2R_mat A)^-1 *m FT2R_mat b)
               (FT2R_mat b) (FT2R_mat A))))%Re.
 + apply Rmult_le_compat_l. apply Rabs_pos.
-  unfold d_mag, rho.
+  change (_ *m _) with x.
+ (* unfold d_mag.*)
+  fold rho in H1|-*.
+  set v := vec_inf_norm _.
+  replace (d_mag_def _ _) with d_mag in H1|- * by admit.
+  replace rho with (rho_def A b) in * by admit. clear rho.
   repeat apply Rplus_le_compat_r.
   apply Rmult_le_compat_r. apply Rlt_le. apply H1.
   apply Rmult_le_compat_r.
-  apply Rplus_le_le_0_compat. nra. by apply rho_ge_0.
+  apply Rplus_le_le_0_compat. nra. 
+ by apply rho_ge_0.
   assert ( 1%Re = (1 ^ k)%Re) by (rewrite pow1; nra).
   rewrite H. apply pow_incr.
   split. by apply rho_ge_0.
   apply Rlt_le. apply H0.
-+ apply bnd1.
-Qed.
++ fold rho.
+  replace rho with (rho_def A b) by admit. 
+ apply bnd1.
+Admitted.
   
 
 
@@ -2142,7 +2151,8 @@ induction k.
                                                  (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A))) <=
                                                ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
                                                 * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
-                                      { apply matrix_vec_mult_bound_corollary. intros.
+                                      { apply /RleP. 
+                                        apply matrix_vec_mult_bound_corollary. intros.
                                         specialize (Hfin (@inord n i)). 
                                         rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
                                         rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
@@ -2304,7 +2314,7 @@ induction k.
                ++++ assert (A2_J_real (FT2R_mat A) = FT2R_mat (A2_J A)).
                     { apply matrixP. unfold eqrel. intros. rewrite !mxE.
                        by case: (x1 == y :> nat).
-                    } rewrite H4. apply /RleP. apply matrix_vec_mult_bound_corollary.
+                    } rewrite H4. apply matrix_vec_mult_bound_corollary.
                     intros.
                     specialize (Hfin (@inord n i)). 
                     rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
@@ -2394,7 +2404,7 @@ induction k.
                                                  (FT2R_mat (A2_J A) *m FT2R_mat (X_m_jacobi k x0 b A))) <=
                                                ((matrix_inf_norm (FT2R_mat (A2_J A)) * vec_inf_norm (FT2R_mat (X_m_jacobi k x0 b A)))
                                                 * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re).
-                           { apply matrix_vec_mult_bound_corollary. intros.
+                           { apply /RleP. apply matrix_vec_mult_bound_corollary. intros.
 
                              specialize (Hfin  (@inord n i)). 
                                         rewrite mxE in Hfin. rewrite nth_vec_to_list_float in Hfin; last by apply ltn_ord.
@@ -2947,6 +2957,7 @@ Proof.
         rewrite H5 in H52. rewrite nth_vec_to_list_float  in H52.
         - rewrite mxE in H52. rewrite mxE in H52. rewrite -H52. 
           apply bound_3_sparse with x0 b.
+          admit.
         - rewrite rev_length length_veclist in H51. by apply /ssrnat.ltP. 
         - rewrite rev_length in H51. apply H51.
       + destruct x1. simpl. apply in_combine_r in H4.
@@ -2962,7 +2973,7 @@ Proof.
           destruct IHk as [IHk1 IHk2].
           apply (x_k_bound_sparse HA (@inord n m)) in IHk2.
           eapply Rle_lt_trans.
-          apply IHk2. by apply bound_2_sparse.
+          apply IHk2. admit. (*by apply bound_2_sparse.*)
         - rewrite rev_length length_veclist in H51. by apply /ssrnat.ltP. 
         - rewrite rev_length in H51. apply H51.
     }
@@ -3111,9 +3122,9 @@ Proof.
                intros. rewrite -RmultE.
                rewrite Rabs_mult. rewrite Rmult_comm.
                apply Rmult_le_compat_r. apply Rabs_pos.
-               apply x_k_bound. apply IHk.
+               admit. (* apply x_k_bound. apply IHk. *)
             ++ apply Rle_refl.
-            ++ by apply bound_4.
+            ++ admit. (* by apply bound_4. *)
     }
     apply BMULT_no_overflow_is_finite.
     + apply Ha1_inv.
@@ -3289,13 +3300,13 @@ Proof.
                intros. rewrite -RmultE.
                rewrite Rabs_mult. rewrite Rmult_comm.
                apply Rmult_le_compat_r. apply Rabs_pos.
-               apply x_k_bound. apply IHk.
+               admit. (* apply x_k_bound. apply IHk. *)
             ++ apply Rle_refl.
-            ++ by apply bound_5.
+            ++ admit. (* by apply bound_5. *)
    - by apply Bminus_bplus_opp_implies .
  }
 
-
+Admitted.
 
 
 

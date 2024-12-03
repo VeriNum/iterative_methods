@@ -1,0 +1,9 @@
+VSTLIB=$(COQMF_COQLIB)/user-contrib/VSTlib
+INCLUDE=$(VSTLIB)/include
+CFLAGS= -I$(INCLUDE) -O4
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@ 
+
+cholesky.v: cholesky.c
+	clightgen -flongdouble -normalize $< -o $@ 

@@ -1,6 +1,7 @@
 From Coq Require Import ZArith Reals Psatz.
 From Flocq Require Import Binary.
-From mathcomp Require Import all_ssreflect ssralg ssrnat all_algebra seq matrix.
+
+From mathcomp Require Import all_ssreflect ssralg ssrnat (*all_algebra*) seq matrix.
 From mathcomp.analysis Require Import Rstruct.
 Import List ListNotations.
 
@@ -23,7 +24,7 @@ Open Scope ring_scope.
 Delimit Scope ring_scope with Ri.
 Delimit Scope R_scope with Re.
 
-Import Order.TTheory GRing.Theory Num.Def Num.Theory.
+Import Order.TTheory GRing.Theory (*Num.Def Num.Theory*).
 
 
 Section WITHNANS.
@@ -236,7 +237,7 @@ Lemma R_dot_prod_rel_holds {n:nat} {ty} m i (le_n_m : (m <= n.+1)%nat)
      (map FT2R (@vec_to_list_float _ n m v)))
   (\sum_(j < m)
       FT2R_mat A (inord i) (@widen_ord m n.+1 le_n_m j) * 
-      FT2R_mat v (@widen_ord m n.+1 le_n_m j) 0).
+      FT2R_mat v (@widen_ord m n.+1 le_n_m j) ord0).
 Proof.
 induction m.
 + simpl. rewrite big_ord0 //=. apply R_dot_prod_rel_nil.
@@ -252,14 +253,14 @@ induction m.
   assert (\sum_(j < m)
             FT2R_mat A (inord i)
               (widen_ord H0 j) *
-            FT2R_mat v (widen_ord H0 j) 0 = 
+            FT2R_mat v (widen_ord H0 j) ord0 = 
           \sum_(i0 < m)
                 FT2R_mat A (inord i)
                   (widen_ord le_n_m
                      (widen_ord (leqnSn m) i0)) *
                 FT2R_mat v
                   (widen_ord le_n_m
-                     (widen_ord (leqnSn m) i0)) 0).
+                     (widen_ord (leqnSn m) i0)) ord0).
   { apply eq_big. by []. intros.
     assert ((widen_ord le_n_m
                   (widen_ord (leqnSn m) i0))= 
@@ -306,13 +307,13 @@ Lemma matrix_vec_mult_bound {n:nat} {ty}:
     finite xy.1 /\finite xy.2) ->
   (forall (i : 'I_n.+1),
     finite  (let l1 := vec_to_list_float n.+1 (\row_j A (inord i) j)^T in
-         let l2 := vec_to_list_float n.+1 (\col_j v j 0) in
+         let l2 := vec_to_list_float n.+1 (\col_j v j ord0) in
          dotprod_r l1 l2)) ->
   vec_inf_norm (FT2R_mat (A *f v) - (FT2R_mat A) *m (FT2R_mat v)) <=
   mat_vec_mult_err_bnd A v.
 Proof.
 intros. unfold vec_inf_norm, mat_vec_mult_err_bnd.
-apply /RleP. apply lemmas.bigmax_le; first by rewrite size_map size_enum_ord.
+apply lemmas.bigmax_le; first by rewrite size_map size_enum_ord.
 intros. rewrite seq_equiv. 
 rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H1.
 pose proof (fma_dotprod_forward_error _ ty 
@@ -336,9 +337,9 @@ apply Rle_trans with (e_i (@inord n i) A v).
                FT2R_mat A (inord i)
                  (widen_ord (leqnn n.+1) j) *
                FT2R_mat v
-                 (widen_ord (leqnn n.+1) j) 0 = 
+                 (widen_ord (leqnn n.+1) j) ord0 = 
             \sum_j
-               FT2R_mat A (inord i) j * FT2R_mat v j 0).
+               FT2R_mat A (inord i) j * FT2R_mat v j ord0).
     { apply eq_big. by []. intros.
       assert (widen_ord (leqnn n.+1) i0 = i0).
       { unfold widen_ord. apply val_inj. by simpl. }
@@ -825,19 +826,19 @@ Lemma matrix_vec_mult_bound_sparse {n : nat} {ty}:
     finite xy.1 /\finite xy.2) ->
   (forall (i : 'I_n.+1),
     finite  (let l1 := vec_to_list_float n.+1 (\row_j A (inord i) j)^T in
-         let l2 := vec_to_list_float n.+1 (\col_j v j 0) in
+         let l2 := vec_to_list_float n.+1 (\col_j v j ord0) in
          dotprod_r l1 l2)) ->
   vec_inf_norm (FT2R_mat (A *f v) - (FT2R_mat A) *m (FT2R_mat v)) <=
   @mat_vec_mult_err_bnd_sparse n ty A v r HA.
 Proof.
   intros. unfold vec_inf_norm, mat_vec_mult_err_bnd_sparse.
-  apply /RleP. apply bigmax_le; first by rewrite size_map size_enum_ord.
+  (*apply /RleP.*) apply lemmas.bigmax_le; first by rewrite size_map size_enum_ord.
 
   intros. rewrite seq_equiv. 
   rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H1.
 
   remember (vec_to_list_float n.+1 (\row_j A (inord i) j)^T) as l1.
-  remember (vec_to_list_float n.+1 (\col_j v j 0)) as l2.
+  remember (vec_to_list_float n.+1 (\col_j v j ord0)) as l2.
   pose proof (@fma_dotprod_forward_error_sparse ty l1 l2 r).
 
   assert (is_r_sparse_aux l1 r).
@@ -871,15 +872,17 @@ Proof.
   apply Rle_trans with (@e_i_sparse n ty (@inord n i) A v r HA).
   + unfold e_i_sparse. rewrite !mxE -RminusE.
     apply H2.
-    - rewrite <- Heql1. rewrite <- Heql2. simpl. subst.
+    - rewrite <- Heql1. 
+      change GRing.zero with (@ord0 O).
+      rewrite <- Heql2. simpl. subst.
       apply fma_dot_prod_rel_holds.
     - pose proof (@R_dot_prod_rel_holds n ty n.+1 i (leqnn n.+1) A v).
       subst.
       assert (\sum_(j < n.+1)
                 FT2R_mat A (inord i) (widen_ord (leqnn n.+1) j) *
-                FT2R_mat v (widen_ord (leqnn n.+1) j) 0 = 
+                FT2R_mat v (widen_ord (leqnn n.+1) j) ord0 = 
               \sum_j
-                FT2R_mat A (inord i) j * FT2R_mat v j 0).
+                FT2R_mat A (inord i) j * FT2R_mat v j ord0).
       { apply eq_big. by []. intros.
         assert (widen_ord (leqnn n.+1) i0 = i0).
         { unfold widen_ord. apply val_inj. by simpl. }
@@ -930,7 +933,7 @@ Qed.
 Lemma sum_fold_mathcomp_equiv {n:nat} {ty} m i (le_n_m : (m <= n.+1)%nat)
   (A: 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1) :
   \sum_(j < m) FT2R_abs (FT2R_mat A) (inord i) (@widen_ord m n.+1 le_n_m j)
-               * FT2R_abs (FT2R_mat v) (@widen_ord m n.+1 le_n_m j) 0 = 
+               * FT2R_abs (FT2R_mat v) (@widen_ord m n.+1 le_n_m j) ord0 = 
    sum_fold
       (map (uncurry Rmult)
          (map Rabsp
@@ -952,12 +955,12 @@ induction m.
   assert (\sum_(j < m)
                FT2R_abs (FT2R_mat A) (inord i)
                  (widen_ord H0 j) *
-               FT2R_abs (FT2R_mat v) (widen_ord H0 j) 0 = 
+               FT2R_abs (FT2R_mat v) (widen_ord H0 j) ord0 = 
            \sum_(i0 < m)
                FT2R_abs (FT2R_mat A) (inord i)
                  (widen_ord le_n_m (widen_ord (leqnSn m) i0)) *
                FT2R_abs (FT2R_mat v)
-                 (widen_ord le_n_m (widen_ord (leqnSn m) i0)) 0).
+                 (widen_ord le_n_m (widen_ord (leqnSn m) i0)) ord0).
   { apply eq_big. by []. intros.
     assert ((widen_ord le_n_m
                   (widen_ord (leqnSn m) i0))= 
@@ -986,7 +989,7 @@ rewrite -bigmaxr_mulr.
                | y <- [seq g ty n.+1 *
                            Rabs
                              ((FT2R_abs (FT2R_mat A) *m 
-                               FT2R_abs (FT2R_mat v)) i 0)
+                               FT2R_abs (FT2R_mat v)) i ord0)
                          | i <- enum 'I_n.+1]] = 
             [seq e_i i A v | i <- enum 'I_n.+1]).
     { rewrite seq_equiv. rewrite -map_comp.
@@ -998,12 +1001,12 @@ rewrite -bigmaxr_mulr.
       rewrite -H.
       assert (\sum_j
                   FT2R_abs (FT2R_mat A) (inord x) j *
-                  FT2R_abs (FT2R_mat v) j 0 = 
+                  FT2R_abs (FT2R_mat v) j ord0 = 
               \sum_(j < n.+1)
                  FT2R_abs (FT2R_mat A) (inord x)
                    (widen_ord (leqnn n.+1) j) *
                  FT2R_abs (FT2R_mat v)
-                   (widen_ord (leqnn n.+1) j) 0).
+                   (widen_ord (leqnn n.+1) j) ord0).
       { apply eq_big. by []. intros.
         assert (widen_ord (leqnn n.+1) i = i).
         { unfold widen_ord. apply val_inj. by simpl. }
@@ -1020,7 +1023,7 @@ rewrite -bigmaxr_mulr.
     ([seq (g ty n.+1 *
          Rabs
            ((FT2R_abs (FT2R_mat A) *m 
-             FT2R_abs (FT2R_mat v)) i0 0))%Ri
+             FT2R_abs (FT2R_mat v)) i0 ord0))%Ri
       | i0 <- enum 'I_n.+1]`_i).
     * rewrite seq_equiv. rewrite nth_mkseq;
       last by rewrite size_map size_enum_ord in H.
@@ -1029,12 +1032,12 @@ rewrite -bigmaxr_mulr.
       rewrite -H0.
       assert (\sum_j
                   FT2R_abs (FT2R_mat A) (inord i) j *
-                  FT2R_abs (FT2R_mat v) j 0 = 
+                  FT2R_abs (FT2R_mat v) j ord0 = 
               \sum_(j < n.+1)
                  FT2R_abs (FT2R_mat A) (inord i)
                    (widen_ord (leqnn n.+1) j) *
                  FT2R_abs (FT2R_mat v)
-                   (widen_ord (leqnn n.+1) j) 0).
+                   (widen_ord (leqnn n.+1) j) ord0).
       { apply eq_big. by []. intros.
         assert (widen_ord (leqnn n.+1) i0 = i0).
         { unfold widen_ord. apply val_inj. by simpl. }
@@ -1044,7 +1047,7 @@ rewrite -bigmaxr_mulr.
      apply (@bigmaxr_ler _ 0%Re [seq (g ty n.+1 *
                  Rabs
                    ((FT2R_abs (FT2R_mat A) *m 
-                     FT2R_abs (FT2R_mat v)) i0 0))%Ri
+                     FT2R_abs (FT2R_mat v)) i0 ord0))%Ri
               | i0 <- enum 'I_n.+1] i).
      rewrite size_map size_enum_ord.
      by rewrite size_map size_enum_ord in H.
@@ -1058,11 +1061,17 @@ Lemma matrix_err_bound_le_rel {n:nat} {ty}
  (matrix_inf_norm (FT2R_mat A) * vec_inf_norm (FT2R_mat v)) * g ty n.+1 +
    g1 ty n.+1 (n.+1 - 1).
 Proof.
+change
+(mat_vec_mult_err_bnd A v <=
+(matrix_inf_norm (FT2R_mat A) * vec_inf_norm (FT2R_mat v) * g ty n.+1 +
+g1 ty n.+1 (n.+1 - 1))%R).
+
+
 unfold mat_vec_mult_err_bnd.
 unfold vec_inf_norm, matrix_inf_norm.
 rewrite mulrC. rewrite [in X in (_ * X + _)]mulrC.
 rewrite -bigmaxr_mulr.
-+ apply /RleP. rewrite -RplusE -RmultE.
++(* apply /RleP.*) rewrite -RplusE -RmultE.
   apply lemmas.bigmax_le.
   - by rewrite size_map size_enum_ord.
   - intros. rewrite seq_equiv. rewrite nth_mkseq;
@@ -1072,12 +1081,12 @@ rewrite -bigmaxr_mulr.
     * apply g_pos.
     * apply Rle_trans with
       [seq (bigmaxr 0%Re
-           [seq Rabs (FT2R_mat v i1 0)
+           [seq Rabs (FT2R_mat v i1 ord0)
               | i1 <- enum 'I_n.+1] *
          row_sum (FT2R_mat A) i0)%Ri
       | i0 <- enum 'I_n.+1]`_i.
       ++ assert ([seq bigmaxr 0%Re
-                    [seq Rabs (FT2R_mat v i1 0)
+                    [seq Rabs (FT2R_mat v i1 ord0)
                        | i1 <- enum 'I_n.+1] *
                     row_sum (FT2R_mat A) i0
                   | i0 <- enum 'I_n.+1] = 
@@ -1113,7 +1122,7 @@ rewrite -bigmaxr_mulr.
             apply Rmult_le_pos; apply Rabs_pos.
      ++ apply /RleP.
         apply (@bigmaxr_ler _ 0%Re [seq bigmaxr 0%Re
-                                           [seq Rabs (FT2R_mat v i1 0)
+                                           [seq Rabs (FT2R_mat v i1 ord0)
                                               | i1 <- enum 'I_n.+1] *
                                          row_sum (FT2R_mat A) i0
                                        | i0 <- enum 'I_n.+1] i).
@@ -1139,17 +1148,17 @@ Lemma matrix_vec_mult_bound_corollary {n:nat} {ty}:
   (forall (i : 'I_n.+1),
     finite
         (let l1 := vec_to_list_float n.+1 (\row_j A (inord i) j)^T in
-         let l2 := vec_to_list_float n.+1 (\col_j v j 0) in
+         let l2 := vec_to_list_float n.+1 (\col_j v j ord0) in
          dotprod_r l1 l2) ) ->
   vec_inf_norm (FT2R_mat (A *f v) - (FT2R_mat A) *m (FT2R_mat v)) <=
   (matrix_inf_norm (FT2R_mat A) * vec_inf_norm (FT2R_mat v)) * g ty n.+1 +
    g1 ty n.+1 (n.+1 - 1).
 Proof.
 intros.
-apply /RleP.
+(*apply /RleP.*)
 apply Rle_trans with (mat_vec_mult_err_bnd A v).
-+ apply /RleP. by apply matrix_vec_mult_bound.
-+ apply /RleP. apply matrix_err_bound_le_rel.
++ (*apply /RleP.*) by apply matrix_vec_mult_bound.
++ (*apply /RleP.*) apply matrix_err_bound_le_rel.
 Qed.
 
 End WITHNANS.
