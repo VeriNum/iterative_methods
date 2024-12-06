@@ -3,7 +3,7 @@ Require Import vcfloat.FPStdLib.
 Require Import vcfloat.FPStdCompCert.
 Require Import VSTlib.spec_math.
 Import FPCore FPCompCert.
-Require Import Cholesky.cholesky_model.
+From Cholesky Require Import cholesky_model.
 From libValidSDP Require cholesky_infnan.
 
 From mathcomp Require Import ssreflect ssrbool ssrfun eqtype ssrnat seq choice.
@@ -71,7 +71,7 @@ rewrite -/j''. clearbody j''. clear H1 j. rename j'' into j.
 
 rewrite /subtract_loop !Nat2Z.id.
 set Aij := matrix.fun_of_matrix A (fintype.inord i) (fintype.inord j).
-clearbody Aij.
+clearbody Aij. simpl in Aij.
 rewrite List.map_map /BMULT /BMINUS /BINOP.
 set Mult := Binary.Bmult _ _ _ _ _ _.
 set Minus := Binary.Bminus _ _ _ _ _ _.
@@ -82,34 +82,33 @@ transitivity (fold_left Minus
 2:{
 clearbody Minus.
 clearbody Mult.
-rewrite -!fold_left_rev_right -!List.map_rev (*rev_involutive*) !fold_right_map.
-induction (List.rev (iota 0 i)).
-simpl. rewrite float_of_ftype_of_float //.
-simpl. rewrite !float_of_ftype_of_float !Nat2Z.id. f_equal; auto.
+rewrite -!fold_left_rev_right -!List.map_rev !fold_right_map.
+elim: (List.rev (iota 0 i)) => [ | a l IHl];
+  by rewrite /= !float_of_ftype_of_float // !Nat2Z.id IHl.
 }
-set (i' := inord i). set (j' := inord j). clearbody i'. clearbody j'. 
-simpl in Aij.
-rename Aij into acc.
+move : (inord i) => i'.
+move : (inord j) => j'.
+move : Aij => acc.
 set fi := (@binary_infnan.binary_infnan _ _ _ _ _).
 replace Mult with (@float_infnan_spec.fimult fi).
 2:{
-subst Mult.
-simpl.
-extensionality x y.
-rewrite /binary_infnan.fimult /=. f_equal.
-apply proof_irr.
-apply NAB.
+  subst Mult; simpl.
+  extensionality x y.
+  rewrite /binary_infnan.fimult /=.
+  f_equal.
+  apply proof_irr.
+  apply NAB.
 }
 replace Minus with (@float_infnan_spec.fiminus fi).
 2:{
-subst Minus.
-extensionality x y.
-simpl.
-etransitivity.
-apply Bminus_Bplus_Bopp.
-f_equal.
-apply proof_irr.
-apply NAB.
+  subst Minus.
+  extensionality x y.
+  simpl.
+  etransitivity.
+  apply Bminus_Bplus_Bopp.
+  f_equal.
+  apply proof_irr.
+  apply NAB.
 }
 clear Mult Minus.
 change [ffun k : ordinal i => R (inord k) i']
@@ -118,7 +117,6 @@ change [ffun k : ordinal i => R (inord k) j']
   with ([ffun k : ordinal i => R (inord (O+k)) j']).
 forget O as m.
 clear.
-(*set f := (_ oo _).*)
 revert m acc; induction i; intros; auto.
 simpl.
 rewrite -{}IHi.
@@ -127,25 +125,7 @@ f_equal.
 f_equal.
 f_equal.
 1,2: rewrite ffunE; simpl; rewrite addn0 //.
-clear.
-*
-apply eq_dffun; intro k.
-rewrite ffunE.
-simpl.
-f_equal.
-f_equal.
-unfold bump.
-simpl.
-lia.
-*
-apply eq_dffun; intro k.
-rewrite ffunE.
-simpl.
-f_equal.
-f_equal.
-unfold bump.
-simpl.
-lia.
+1,2: apply eq_dffun; intro k; rewrite ffunE; simpl; f_equal; f_equal; unfold bump; simpl; lia.
 Qed.
 
 
@@ -162,96 +142,69 @@ Lemma cholesky_eqv:
    n A R,
   @cholesky_infnan.cholesky_spec_infnan (@binary_infnan.binary_infnan NanA (fprecp t) (femax t) PREC1 PREC2) n A R
   <-> @cholesky_jik_spec NanB t STD (Z.of_nat n.+1) 
-      (fun i j => ftype_of_float (matrix.fun_of_matrix A (fintype.inord (Z.to_nat i)) (fintype.inord (Z.to_nat j))))
-      (fun i j => ftype_of_float (matrix.fun_of_matrix R (fintype.inord (Z.to_nat i)) (fintype.inord (Z.to_nat j)))).
+      (fun i j => ftype_of_float (A (fintype.inord (Z.to_nat i)) (fintype.inord (Z.to_nat j))))
+      (fun i j => ftype_of_float (R (fintype.inord (Z.to_nat i)) (fintype.inord (Z.to_nat j)))).
 Proof.
 move => NanA NanB NAB t STD PREC1 PREC2 n A R.
 split.
 -
-move => [H H0] i j H1.
-split.
-+
-move => H2.
-set i' := @fintype.inord n (Z.to_nat i).
-set j' := @fintype.inord n (Z.to_nat j).
-rewrite (H j' i') {H H0}.
-2: rewrite !Rcomplements.SSR_leq /i' /j' !fintype.inordK; lia.
-rewrite /BDIV /BINOP.
-f_equal.
-simpl.
-rewrite /binary_infnan.fidiv float_of_ftype_of_float.
-f_equal.
-apply proof_irr.
-apply NAB.
-subst i' j'.
-have H3: (0 <= i < Z.of_nat n.+1) by lia.
-clear H2.
-apply stilde_infnan_subtract_loop; auto.
-+
-intro Hj; subst j.
-rewrite H0.
-clear H H0.
-rewrite /cholesky_infnan.ytildes_infnan /= /float_infnan_spec.fisqrt /binary_infnan.fisqrt /BSQRT /UNOP.
-f_equal.
-f_equal.
-apply proof_irr.
-apply NAB.
-apply stilde_infnan_subtract_loop; auto.
+ move => [H H0] i j H1.
+ split.
+ +
+  move => H2.
+  set i' := @fintype.inord n (Z.to_nat i).
+  set j' := @fintype.inord n (Z.to_nat j).
+  rewrite (H j' i') {H H0}.
+  2: rewrite !Rcomplements.SSR_leq /i' /j' !fintype.inordK; lia.
+  rewrite /BDIV /BINOP.
+  f_equal.
+  rewrite /= /binary_infnan.fidiv float_of_ftype_of_float.
+  f_equal.
+  apply proof_irr.
+  apply NAB.
+  subst i' j'.
+  have H3: (0 <= i < Z.of_nat n.+1) by lia.
+  apply stilde_infnan_subtract_loop; auto.
+ +
+  intro Hj; subst j.
+  rewrite {}H0 {H} /cholesky_infnan.ytildes_infnan /= /float_infnan_spec.fisqrt /binary_infnan.fisqrt /BSQRT /UNOP.
+  f_equal.
+  f_equal.
+  apply proof_irr.
+  apply NAB.
+  apply stilde_infnan_subtract_loop; auto.
 -
-move => H.
-split.
-+
-move => j i Hij.
-symmetry.
-have Hin: (j<n.+1)%N by apply ltn_ord.
-specialize (H (Z.of_nat i) (Z.of_nat j) ltac:(lia)).
-destruct H as [H _].
-specialize (H ltac:(lia)).
-rewrite !Nat2Z.id !inord_val in H.
-rewrite /BDIV /BINOP in H.
-apply ftype_of_float_inj in H.
-rewrite float_of_ftype_of_float in H.
-rewrite {}H /cholesky_infnan.ytilded_infnan /float_infnan_spec.fidiv /= /binary_infnan.fidiv.
-f_equal; try apply proof_irr.
-apply NAB.
-rewrite -stilde_infnan_subtract_loop; auto; try lia.
-rewrite !Nat2Z.id !inord_val.
-auto.
-+
-move => j.
-symmetry.
-have Hin: (j<n.+1)%N by apply ltn_ord.
-specialize (H (Z.of_nat j) (Z.of_nat j) ltac:(lia)).
-destruct H as [_ H].
-specialize (H ltac:(lia)).
-rewrite /BSQRT /UNOP in H.
-apply ftype_of_float_inj in H.
-rewrite !Nat2Z.id !inord_val in H.
-rewrite {}H /cholesky_infnan.ytildes_infnan /float_infnan_spec.fisqrt /= /binary_infnan.fisqrt.
-f_equal; try apply proof_irr.
-apply NAB.
-rewrite -stilde_infnan_subtract_loop; auto; try lia.
-rewrite !Nat2Z.id !inord_val.
-auto.
+ move => H.
+ split.
+ +
+  move => j i Hij.
+  symmetry.
+  have Hin: (j<n.+1)%N by apply ltn_ord.
+  specialize (H (Z.of_nat i) (Z.of_nat j) ltac:(lia)).
+  destruct H as [H _].
+  specialize (H ltac:(lia)).
+  rewrite !Nat2Z.id !inord_val in H.
+  rewrite /BDIV /BINOP in H.
+  apply ftype_of_float_inj in H.
+  rewrite float_of_ftype_of_float in H.
+  rewrite {}H /cholesky_infnan.ytilded_infnan /float_infnan_spec.fidiv /= /binary_infnan.fidiv.
+  f_equal; try apply proof_irr.
+  apply NAB.
+  rewrite -stilde_infnan_subtract_loop; auto; try lia.
+  rewrite !Nat2Z.id !inord_val //.
+ +
+  move => j.
+  symmetry.
+  have Hin: (j<n.+1)%N by apply ltn_ord.
+  specialize (H (Z.of_nat j) (Z.of_nat j) ltac:(lia)).
+  destruct H as [_ H].
+  specialize (H ltac:(lia)).
+  rewrite /BSQRT /UNOP in H.
+  apply ftype_of_float_inj in H.
+  rewrite !Nat2Z.id !inord_val in H.
+  rewrite {}H /cholesky_infnan.ytildes_infnan /float_infnan_spec.fisqrt /= /binary_infnan.fisqrt.
+  f_equal; try apply proof_irr.
+  apply NAB.
+  rewrite -stilde_infnan_subtract_loop; auto; try lia.
+  rewrite !Nat2Z.id !inord_val //.
 Qed.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
