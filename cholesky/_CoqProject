@@ -5,3 +5,4 @@ cholesky_real.v
 cholesky_equiv.v
 spec_cholesky.v
 verif_cholesky.v
+error_analysis.v

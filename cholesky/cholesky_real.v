@@ -750,6 +750,76 @@ f_equal; auto.
 contradict n0; auto.
 Qed.
 
+
+Lemma cholesky_jik_unique: forall [n] (A: 'M[F]_n.+1) R1 R2,
+  cholesky_jik_spec A R1 ->
+  cholesky_jik_spec A R2 ->
+  R1=R2.
+Proof.
+move => n A R1 R2 H1 H2.
+apply matrixP.
+red.
+Admitted.
+(*
+assert (forall 
+
+apply matrixP => i j.
+assert (H: forall i' j': 'I_n.+1, (j' < j)%N || (j'==j)%N && (i' < i)%N -> R1 i' j' = R2 i' j').
+2:{
+
+ => j.
+rewrite -(inord_val j).
+elim (nat_of_ord j) => [ | j']; clear j.
++
+move => i.
+rewrite -(inord_val i).
+elim (nat_of_ord i) => [ | i']; clear i.
+*
+rewrite H1 H2 !mxE ltnn eq_refl.
+do 3 f_equal.
+apply eq_big => i // _.
+exfalso.
+rewrite inordK in i.
+destruct i.
+move :i => /ltP; lia.
+apply /ltP; lia.
+*
+move => H.
+
+revert i
+apply /ltP in i.
+lia.
+Search 'I_0.
+destruct i.
+Search (nat_of_ord (inord _) = _).
+rewrite inord_val in i.
+destruct i.
+lia.
+simpl in i.
+rewrite ord0.
+ auto. //.
+intro.
+ reflexivity.
+apply eq_big_op.
+Search (bigop.body _ _ _ = bigop.body _ _ _).
+Search (\sum_ _ _ = \sum_ _ _).
+rewrite /widen_ik.
+f_equal.
+f_eual.
+Search (nat_of_ord (inord _) = _).
+rewrite inordK.
+rewrite big_ord0.
+simpl.
+rewrite 
+ inordK.
+Search (nat_of_ord (inord _)).
+Search ((_ < _)%N = false).
+ => [ | j''].
+Search nat_of_ord.
+
+*)
+
+
 Lemma cholesky_jik_spec_eqv: forall n (A: 'M[F]_n.+1),  cholesky_jik_spec A (cholesky A).
 Proof.
 elim => [ | n IH] A.
@@ -909,6 +979,25 @@ rewrite /widen_ord /cast_ord // /inord /insubd /odflt/oapp /insub.
 destruct idP; last by lia.
 apply ordinal_eq; reflexivity.
 Qed.
+
+Lemma cholesky_jik_correct:
+  forall [n] (A R: 'M[F]_n.+1),  
+   positive_definite A ->
+   cholesky_jik_spec A R ->
+   forall i j, A i j = \sum_k (R^T i k * R k j).
+Proof.
+move => n A R PD Cjik.
+have H := cholesky_jik_spec_eqv _ A.
+have H1 := cholesky_jik_unique A R (cholesky A) Cjik H.
+Search cholesky.
+move :(cholesky_correct PD) => [H2 [H3 H4]].
+rewrite -H1 in H4.
+clear - H4.
+move => i j.
+rewrite -{}H4.
+rewrite !mxE //.
+Qed.
+
 
 End Cholesky_jik. 
 
