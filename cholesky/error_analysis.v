@@ -30,7 +30,12 @@ Set Bullet Behavior "Strict Subproofs".
 
 Section Cholesky.
 
-Variable fs : Float_spec.
+(*Variable fi : float_infnan_spec.Float_infnan_spec.
+Let fs : Float_spec := float_infnan_spec.fis fi.
+Hypothesis eta_neq_0 : eta fs <> 0.
+Definition maxsq := Rsqr(float_infnan_spec.m fi).
+*)
+Variable fs: Float_spec.
 Hypothesis eta_neq_0 : eta fs <> 0.
 
 Notation F := (FS fs).      (* the set-predicate of floating point numbers *)
@@ -38,28 +43,94 @@ Notation frnd := (frnd fs).  (* rounding function, R -> fs *)
 Notation eps := (eps fs).  (* relative error bound *)
 Notation eta := (eta fs).  (* absolute error bound, denormalized numbers *)
 
-
 Variable n : nat.
 Variable A : 'M[F]_n.+1.
 Hypothesis SymA : MF2R A^T = MF2R A.
-Hypothesis PD: positive_definite (MF2R A).
+(*Hypothesis PD: positive_definite (MF2R A).*)
+
 Variable Rt : 'M[F]_n.+1.
 Let RteF := \matrix_(i, j) if (i <= j)%N then (Rt i j) else F0 fs.
 Let Rte := MF2R RteF.
 
 Hypothesis HAR : cholesky_success A Rt.
+Variable maxdiag : F.
+Hypothesis Hmaxdiag: forall i, Rt i i <= maxdiag.
 
 Definition γ (n: nat) := ((INR n * eps) / (1 - INR n * eps))%Re.
 
 Definition ΔA : 'M[R]_n.+1 := (Rte^T *m Rte) - MF2R A.
 
-From mathcomp.algebra_tactics Require Import ring lra.
-
-Lemma add_one: forall n: nat, n+1 = n.+1.
+Lemma gamma_approx:
+   forall (gamma_OK: INR n.+1 * eps + INR n.+1 ^ 2 * eps < 1),
+     γ (n.+1) <= (INR n.+2 * eps).
 Proof.
-intro. lia.
+  move => gamma_OK.
+  have EP: 0 <= eps by apply eps_pos.
+  rewrite /γ (S_INR n.+1).
+  apply (Rmult_le_reg_r (1-INR n.+1 * eps)).
+  Lra.nra.
+  rewrite (Rmult_assoc (INR n.+1 * eps)) Rmult_inv_l. 2:Lra.nra.
+  rewrite Rmult_1_r Rmult_assoc.
+  rewrite (Rmult_comm eps) -Rmult_assoc.
+  apply Rmult_le_compat_r. apply eps_pos.
+  ring_simplify. Lra.nra.
 Qed.
 
+Lemma higham_theorem_10_3: 
+     forall i j, (Mabs ΔA i j <= γ (n.+1+1) * (Mabs Rte^T *m Mabs Rte) i j)%Re.
+Proof.
+(* Higham's theorem 10.3 does not apply in the presence of underflow.  A.W.A.
+*)
+Abort.
+
+(* This is a variant of Theorem 4.4 from Rump & Jeannerod, 
+  "Improved Backward Error Bounds for LU and Cholesky Factorization",
+  but accounting for underflow; based on Roux's th_2_3_aux. 
+  *)
+Lemma rump_4_4u:
+  forall i j, (Mabs ΔA i j <= 
+        INR n.+2 * eps * (Mabs Rte^T *m Mabs Rte) i j
+           + (1 + INR n.+2 * eps) * eta * (INR n.+1 + maxdiag))%Re.
+Proof.
+move => i j.
+move: (@th_2_3_aux2 fs eta_neq_0 n A SymA _ HAR i j _ Hmaxdiag) => H.
+match type of H with ?L < _ => have H0: L = Mabs ΔA i j end. {
+ clear.
+ rewrite /ΔA mxE mxE.
+ replace (matrix_of_fun.body _ _) with Rte.
+   2:{ clear. apply /matrixP => i j.
+       rewrite /Rte /RteF /MF2R !mxE.
+       destruct (i<=j)%N; auto.
+   }
+ set RR := Rte^T *m Rte. clearbody RR.
+ rewrite !mxE.
+ apply Rabs_minus_sym.
+ }
+ rewrite {}H0 in H.
+ eapply Rle_trans. apply Rlt_le. apply H. clear H.
+ apply Rplus_le_compat_r.
+ set RRij := (Mabs Rte^T *m Mabs Rte) i j.
+ rewrite (_: dotprod _ _ = RRij).
+ 2:{
+   rewrite /RRij dotprod_sum !mxE.
+   apply eq_big; auto; move => k _.
+   rewrite !mxE.
+   destruct (nat_of_ord k <= nat_of_ord i)%N, (nat_of_ord k <= nat_of_ord j)%N; reflexivity.
+  }
+ have HRRij: 0 <= RRij. {
+   rewrite /RRij !mxE.
+   rewrite (eq_bigr (fun k : 'I_n.+1 => Rabs (Rte^T i k * Rte k j))).  
+   apply big_sum_Rabs_pos.
+   move => k _. rewrite !mxE Rabs_mult //.
+ }
+ apply Rmult_le_compat_r; auto.
+ apply Rmult_le_compat_r; [ apply eps_pos | ].
+ apply le_INR. do 2 apply le_n_S.
+ eapply Nat.le_trans; [apply Nat.le_min_l | ].
+ have Hn:= ltn_ord i; lia.
+Qed.
+
+From mathcomp.algebra_tactics Require Import ring lra.
 
 (*  CASE SPLIT ON i<j 
 case: (orP (leqVgt j i)); [ rewrite leq_eqVlt => /orP [Hij | Hij] | ].
@@ -71,6 +142,7 @@ admit.
 +
 *)
 
+(* Don't need this lemma, since it is subsumed by th_2_3_aux. *)
 Lemma higham_equation_10_4: 
     forall i j : 'I_n.+1, 
        (nat_of_ord i < nat_of_ord j)%N ->
@@ -78,6 +150,7 @@ Lemma higham_equation_10_4:
                 γ i * \sum_(k<i.+1) (Rabs (Rte (inord k) i) * Rabs (Rte (inord k) j)).
 Proof.
 move => i j Hij.
+have PD: positive_definite (MF2R A) by admit. (* can derive this from cholesky_success? *)
 have HCR := cholesky_correct PD.
 set Rr := cholesky (MF2R A) in HCR.
 destruct HCR as [UT [DP CC]].
@@ -210,8 +283,25 @@ have Rii_neq_0: FS_val (Rt i i) <> R0
   pattern (\sum_(k < i.+1) Rabs (Rte (inord k) i) * Rabs (Rte (inord k) j)).
   set (foo := (fun _ => _)).
   rewrite big_ord_recr;  simpl. subst foo; cbv beta.
-
-Admitted.
+  set s1 := \sum__ _. set s2 := \sum_(_<_) _. 
+  rewrite (_: s1=s2).
+2:{
+  apply eq_big; auto; move => k _; rewrite !ffunE Rabs_mult !mxE !inordK.
+    rewrite (_: (k <= j)%N=true).
+    2: apply /leP; move :Hij => /ltP; move :(ltn_ord k) => /ltP; lia.
+    rewrite (_: (k<=i)%N=true).
+    2: rewrite (ltnW (ltn_ord _):  (k<=i)%N=true) //.
+    rewrite Hinord0 //.
+    apply /ltP; move :(ltn_ord k) => /ltP; move :Hij => /ltP; move:(ltn_ord j) => /ltP; lia.
+  }
+  clear s1. clearbody s2. rewrite inord_val. rewrite Rabs_mult.
+  rewrite (addrC s2).
+  rewrite /Rte /RteF !mxE.
+  rewrite (_: (i<=i)%N=true). 2: lia.
+  rewrite (_: (i<=j)%N=true). 2: apply /leP; move:Hij=>/ltP; lia.
+  set x := _ + s2.
+  change (_ + s2)%Re with x.
+Abort.  (* provable from here, most likely, but don't need it *)
 
 End Cholesky.
 
