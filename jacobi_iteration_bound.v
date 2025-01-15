@@ -24,10 +24,10 @@ Require Import diag_invertibility.
 
 Section WITH_NANS.
 
-Context {NANS: Nans}.
+Context {NANS: FPCore.Nans}.
 
 
-Lemma matrix_vec_norm_A1_diag_mult_A {t: type} {n:nat}
+Lemma matrix_vec_norm_A1_diag_mult_A {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
 (Ha : forall i j, finite (A i j)):
@@ -47,7 +47,7 @@ Qed.
 
 
 (** relation between the non-computable and computable rho **)
-Lemma rho_def_le_alt {t: type} {n:nat}
+Lemma rho_def_le_alt {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
 (Ha : forall i j, finite (A i j)):
@@ -84,7 +84,7 @@ apply Rplus_le_compat.
 Qed.
 
 
-Lemma rho_1_implies_rho_2 {t: type} {n:nat}
+Lemma rho_1_implies_rho_2 {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
   let rho_hat := rho_def_alt A b in 
   (rho_hat < 1)%Re ->
@@ -153,7 +153,7 @@ Qed.
 
 
 (** relation between the non-computable and computable d_mag **)
-Lemma d_mag_def_le_alt {t: type} {n:nat}
+Lemma d_mag_def_le_alt {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j))
@@ -249,7 +249,7 @@ Qed.
 
 
 
-Lemma d_mag_def_alt_ge_0 {t: type} {n:nat}
+Lemma d_mag_def_alt_ge_0 {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
    (rho_def_alt A b < 1)%Re ->
    (0 <= d_mag_def_alt A b)%Re.
@@ -331,7 +331,7 @@ Qed.
 
 
 
-Lemma d_mag_alt_gt_0 {t: type} {n:nat}
+Lemma d_mag_alt_gt_0 {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1):
   (rho_def_alt A b < 1)%Re ->
   (0 < d_mag_def_alt A b)%Re .
@@ -420,7 +420,7 @@ Qed.
 (** Use: lower case gamma **)
 
 (** relation between non-computable and computable defn of e_o in reals **)
-Lemma f_error0_bnd {t: type} {n:nat} (A : 'M[ftype t]_n.+1)
+Lemma f_error0_bnd {t: FPStdLib.type} {n:nat} (A : 'M[ftype t]_n.+1)
   (b : 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j))
@@ -453,7 +453,7 @@ Qed.
 (** Replace Gamma with tau_squared  **)
 
 (** g  g1  rho d_mag : what do they mean intuitively **)
-Lemma d_mag_rel_1 {t: type} {n:nat}
+Lemma d_mag_rel_1 {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j))
@@ -487,7 +487,7 @@ by apply Ropp_lt_contravar.
 Qed.
 
 
-Lemma d_mag_rel_2 {t: type} {n:nat}
+Lemma d_mag_rel_2 {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j))
@@ -529,7 +529,7 @@ by apply d_mag_def_le_alt.
 Qed.
 
  
-Lemma input_bound_compute_implies_math {t: type} {n:nat}
+Lemma input_bound_compute_implies_math {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite  (A i j))
@@ -636,7 +636,7 @@ repeat split.
     by apply diagonal_dominance_implies_invertibility.
 Qed.
 
-Lemma ln_rho_rel {t: type} {n:nat}
+Lemma ln_rho_rel {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j)):
@@ -678,7 +678,7 @@ apply Rinv_lt_contravar.
 Qed.
 
 
-Lemma ln_rho_inv_ge_0 {t: type} {n:nat}
+Lemma ln_rho_inv_ge_0 {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j)):
@@ -726,7 +726,7 @@ apply Rlt_le_trans with
 Qed.
 
 
-Lemma tau_sqr_rel{t: type} {n:nat}
+Lemma tau_sqr_rel{t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A  i j)):
@@ -815,7 +815,7 @@ intros. apply Rlt_Rminus. repeat apply Rdiv_lt_right.
 Qed.
 
 
-Lemma tau_sqr_rel_Rcompute {t: type} {n:nat}
+Lemma tau_sqr_rel_Rcompute {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t)
   (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
   (Ha : forall i j, finite (A i j)):
@@ -915,7 +915,7 @@ Qed.
 
 
 (** Refactoring definitions to make them readable and beautiful **)
-Lemma jacobi_precond_compute_implies_math {t: type} {n:nat}
+Lemma jacobi_precond_compute_implies_math {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (accuracy: ftype t) (k: nat)
   (Hrho_gt_0: (0 < rho_def A b)%Re)
   (Hx_lb: (d_mag_def_alt A b / (1 - rho_def_alt A b) <
@@ -1071,12 +1071,12 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
                        (1 - rho_def A b)))))%Re).
   { nra. } destruct H.
   - unfold k_min. rewrite Coqlib.Z_to_nat_neg.
-    apply le_lt_trans with (k_min_alt A b accuracy); last by lia.
+    apply Nat.le_lt_trans with (k_min_alt A b accuracy); last by lia.
     unfold k_min_alt. lia.
     apply Zceil_glb. unfold Rlog. apply Rcomplements.Rmult_le_0_r.
     nra. apply ln_rho_inv_ge_0. apply Hfdiv. apply Hfa. apply Hrho. 
     apply Hrho_gt_0.
-  - apply le_lt_trans with (k_min_alt A b accuracy); last by apply Hk.
+  - apply Nat.le_lt_trans with (k_min_alt A b accuracy); last by apply Hk.
     apply sublist.Z_to_nat_monotone.
     apply Zceil_le.
     unfold Rlog. apply Rmult_le_compat. try by apply ln_rho_rel .
@@ -1133,7 +1133,7 @@ try (intros; by rewrite mxE); try (intros; apply HfA2); try (intros; apply Hfb).
 Qed.
 
 
-Definition jacobi_preconditions {t: type}
+Definition jacobi_preconditions {t: FPStdLib.type}
   (A: matrix t) (b: vector t) (accuracy: ftype t) (k: nat) : Prop :=
   (* some property of A,b,accuracy holds such that 
     jacobi_n will indeed converge within k iterations to this accuracy, 
@@ -1148,7 +1148,7 @@ Definition jacobi_preconditions {t: type}
 
 
 Lemma jacobi_iteration_bound_monotone:
-  forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k k': nat),
+  forall {t: FPStdLib.type}  (A: matrix t) (b: vector t) (acc: ftype t) (k k': nat),
    (k <= k')%nat ->
    jacobi_preconditions A b acc k ->
    jacobi_preconditions A b acc k'.
@@ -1171,7 +1171,7 @@ assert (k == k' \/ (k < k')%nat).
 Qed.
 
 Lemma jacobi_iteration_bound_corollaries:
-  forall {t: type}  (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
+  forall {t: FPStdLib.type}  (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
    matrix_cols A (matrix_rows A) /\
    Forall (Forall finite) A /\
@@ -1238,7 +1238,7 @@ Qed.
   
   
 (** finiteness of dot product **)
-Lemma dotprod_finite {t: type} (v : vector t)
+Lemma dotprod_finite {t: FPStdLib.type} (v : vector t)
 (Hg1: (g1 t ((length v).+1 + 1)%coq_nat (length v).+1 <= fmax t)%Re):
 (forall xy : ftype t,
   In xy (rev v) ->
@@ -1284,7 +1284,7 @@ Definition residual_math {t}  {n:nat}
     ((X_m_jacobi k.+1 x0 b A) -f (X_m_jacobi k x0 b A)).
 
 
-Lemma A1_equiv {t: type} :
+Lemma A1_equiv {t: FPStdLib.type} :
  forall (A: matrix t) (x : nat),
  (x < length A)%coq_nat ->
  nth x (diag_of_matrix A) (Zconst t 0) =
@@ -1307,7 +1307,7 @@ assert (Rabs x = a \/(Rabs x < a)%Re).
 + apply Rabs_def2 in H0. nra.
 Qed.
 
-Lemma res_xkp1_minus_xk  {t: type} {n:nat}
+Lemma res_xkp1_minus_xk  {t: FPStdLib.type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -1433,7 +1433,7 @@ apply H1.
 Qed.
 
 
-Lemma bound_6 {t: type} {n:nat}
+Lemma bound_6 {t: FPStdLib.type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat):
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -1482,7 +1482,7 @@ Qed.
 
 
 
-Lemma no_overflow_xkp1_minus_xk {t: type} {n:nat}
+Lemma no_overflow_xkp1_minus_xk {t: FPStdLib.type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
    let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -1609,7 +1609,7 @@ apply H1.
 Qed.
 
 
-Lemma finite_xkp1_minus_xk {t: type} {n:nat}
+Lemma finite_xkp1_minus_xk {t: FPStdLib.type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -1770,7 +1770,7 @@ apply sqrt_less_alt.
 Qed.
 
 
-Lemma finite_Bmult_res {t: type} {n:nat}
+Lemma finite_Bmult_res {t: FPStdLib.type} {n:nat}
   (A : 'M[ftype t]_n.+1) (x0 b : 'cV[ftype t]_n.+1) (k:nat) m:
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -1843,7 +1843,7 @@ apply BMULT_no_overflow_is_finite.
 Qed.
 
 
-Lemma residual_finite {t: type} {n:nat}
+Lemma residual_finite {t: FPStdLib.type} {n:nat}
   (A : 'M[ftype t]_n.+1) (b : 'cV[ftype t]_n.+1) (k:nat):
   let A_real := FT2R_mat A in
   let b_real := FT2R_mat b in
@@ -2062,7 +2062,7 @@ repeat split.
   - apply H3.
 Qed.
 
-Lemma vector_residual_equiv {t: type} :
+Lemma vector_residual_equiv {t: FPStdLib.type} :
  forall (A: matrix t) (b x0: vector t) (k:nat),
   let n := (length A).-1 in
   let A' := @matrix_inj _ A n.+1 n.+1 in
@@ -2202,10 +2202,10 @@ Lemma add_vec_distr_5 {n:nat}:
   (a- b) - (c - b) = a - c.
 Proof.
 intros. apply matrixP. unfold eqrel.
-intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. simpl; Lra.nra.
 Qed.
 
-Lemma dotprod_finite_implies {t: type} (v : vector t):
+Lemma dotprod_finite_implies {t: FPStdLib.type} (v : vector t):
   finite (dotprod (rev v) (rev v)) ->
 (forall x, In x v -> finite x).
 Proof.
@@ -2232,7 +2232,7 @@ induction v.
 Qed.
  
 
-Lemma vec_succ_err {t: type} {n:nat}
+Lemma vec_succ_err {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat) :
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
@@ -2557,7 +2557,7 @@ Qed.
 
 
 (*** Bound for the residual ***)
-Lemma residual_bound {t: type} {n:nat} 
+Lemma residual_bound {t: FPStdLib.type} {n:nat} 
   (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (k:nat):
   let rho := rho_def A b in 
   let d_mag := d_mag_def A b in
@@ -2866,7 +2866,7 @@ Qed.
 
 Close Scope Z_scope.
 
-Lemma jacobi_iteration_bound {t: type} {n : nat} :
+Lemma jacobi_iteration_bound {t: FPStdLib.type} {n : nat} :
  forall (A: 'M[ftype t]_n.+1) (b: 'cV[ftype t]_n.+1) (acc: ftype t) (k: nat),
    jacobi_preconditions_math A b acc k -> 
    let acc2 := BMULT acc acc in
@@ -3134,7 +3134,7 @@ split.
     * rewrite <- finite_is_finite; auto.
 Qed.
 
-Lemma jacobi_iteration_bound_lowlevel' {t: type} :
+Lemma jacobi_iteration_bound_lowlevel' {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
   let n := (length A).-1 in
   let A' := @matrix_inj _ A n.+1 n.+1 in
@@ -3337,7 +3337,7 @@ Qed.
 Close Scope R_scope.
 
 
-Lemma bound_each_elem_A2_x0 {t: type} :
+Lemma bound_each_elem_A2_x0 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -3396,7 +3396,7 @@ by rewrite combine_length !length_veclist Nat.min_id.
 Qed.
 
 
-Lemma finite_residual_0_aux1 {t: type} :
+Lemma finite_residual_0_aux1 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -3512,7 +3512,7 @@ induction v.
     by rewrite ?list_split_l ?list_split_r /= in H0.
 Qed.
 
-Lemma A2_mult_x0_eq_0 {t: type} :
+Lemma A2_mult_x0_eq_0 {t: FPStdLib.type} :
   forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -3565,7 +3565,7 @@ assert ((let l1 :=
 Qed. 
 
 
-Lemma no_overflow_0_aux1 {t: type} :
+Lemma no_overflow_0_aux1 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -3609,7 +3609,7 @@ apply Hinp.
 Qed.
 
 
-Lemma finite_residual_0_aux2 {t: type} :
+Lemma finite_residual_0_aux2 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -3655,7 +3655,7 @@ destruct x; try contradiction; simpl;auto.
 destruct s; auto.
 Qed.
     
-Lemma no_overflow_Bmult_A1_inv_b_minus {t: type} :
+Lemma no_overflow_Bmult_A1_inv_b_minus {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -3728,7 +3728,7 @@ rewrite inordK; (by apply /ssrnat.ltP).
 Qed.
 
 
-Lemma finite_residual_0_aux3 {t: type} :
+Lemma finite_residual_0_aux3 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -3774,7 +3774,7 @@ destruct s; auto.
 Qed.
 
 
-Lemma no_overflow_x1_minus_x0 {t: type} :
+Lemma no_overflow_x1_minus_x0 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -3853,7 +3853,7 @@ rewrite inordK; (by apply /ssrnat.ltP).
 rewrite inordK; (by apply /ssrnat.ltP).
 Qed.
 
-Lemma finite_residual_0_aux4 {t: type} :
+Lemma finite_residual_0_aux4 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -3890,7 +3890,7 @@ apply Bplus_no_ov_finite.
 + by apply no_overflow_x1_minus_x0.
 Qed.
 
-Lemma finite_residual_0_mult {t: type} :
+Lemma finite_residual_0_mult {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -3991,7 +3991,7 @@ apply BMULT_no_overflow_is_finite.
 Qed.
 
 
-Lemma finite_in{t: type}  :
+Lemma finite_in{t: FPStdLib.type}  :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -4068,7 +4068,7 @@ by rewrite combine_length !length_veclist Nat.min_id.
 Qed.
 
 
-Lemma finite_residual_0 {t: type} :
+Lemma finite_residual_0 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -4210,7 +4210,7 @@ apply dotprod_finite.
     by rewrite H2 in Hlen;(try by apply /ssrnat.ltP) .
 Qed.
 
-Lemma finite_implies_1 {t: type} :
+Lemma finite_implies_1 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -4299,7 +4299,7 @@ assert (finite (BMULT xy.1 xy.2)).
 repeat split; try apply H4; try (apply BMULT_finite_e in H4; apply H4).
 Qed.
 
-Lemma finite_implies_2 {t: type} :
+Lemma finite_implies_2 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -4455,7 +4455,7 @@ by apply /ssrnat.ltP.
 Qed.
 
 
-Lemma finite_implies_3 {t: type} :
+Lemma finite_implies_3 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -4591,7 +4591,7 @@ by apply /ssrnat.ltP.
 Qed.
 
 
-Lemma finite_implies_4 {t: type} :
+Lemma finite_implies_4 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -4744,7 +4744,7 @@ rewrite inordK; by apply /ssrnat.ltP.
 Qed.
 
 
-Lemma finite_implies_5 {t: type} :
+Lemma finite_implies_5 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -4906,7 +4906,7 @@ by rewrite combine_length !length_veclist Nat.min_id.
 Qed.
 
 
-Lemma finite_implies_6 {t: type} :
+Lemma finite_implies_6 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -5342,7 +5342,7 @@ induction v.
 Qed.
 
 
-Lemma D_inv_mult_b_is_finite {t: type} :
+Lemma D_inv_mult_b_is_finite {t: FPStdLib.type} :
   forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -5384,7 +5384,7 @@ apply BMULT_no_overflow_is_finite.
   rewrite Rabs_mult. apply H4.
 Qed.
 
-Lemma xm_1_is_finte {t: type} :
+Lemma xm_1_is_finte {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -5463,7 +5463,7 @@ assert ((let l1 :=
 Qed.
 
 
-Lemma resid_sub_0_N_0 {t: type} :
+Lemma resid_sub_0_N_0 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -5671,7 +5671,7 @@ Qed.
 
 
 
-Lemma xm_2_is_finte {t: type} :
+Lemma xm_2_is_finte {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -5756,7 +5756,7 @@ specialize (H7 i). rewrite !mxE in H7. rewrite inord_val. apply H7.
 Qed.
 
 
-Lemma finite_x2_minus_x1 {t: type} :
+Lemma finite_x2_minus_x1 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -5898,7 +5898,7 @@ apply Bplus_no_ov_finite.
 Qed.
 
 
-Lemma finite_A_mult_x2_minus_x1 {t: type} :
+Lemma finite_A_mult_x2_minus_x1 {t: FPStdLib.type} :
   forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -5937,7 +5937,7 @@ apply BMULT_no_overflow_is_finite.
 Qed.
 
 
-Lemma vec_norm_resid_N_0 {t: type} :
+Lemma vec_norm_resid_N_0 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -5986,7 +5986,7 @@ Qed.
 
 
 
-Lemma finite_residual_1 {t: type} :
+Lemma finite_residual_1 {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t),
   let x0 := (repeat  (Zconst t 0) (length b)) in
   let resid := jacobi_residual (diag_of_matrix A) (remove_diag A) b in
@@ -6084,7 +6084,7 @@ apply dotprod_finite.
 Qed.
 
 
-Lemma jacobi_iteration_bound_lowlevel_aux {t: type} :
+Lemma jacobi_iteration_bound_lowlevel_aux {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
    let acc2 := BMULT acc acc in
@@ -7062,7 +7062,7 @@ destruct H0.
                       apply H18.         
                   }
                   specialize (H16 H17 H18).
-                  apply reverse_triang_ineq in H16.
+                  move :H16 => /RleP H16; apply reverse_triang_ineq in H16; move :H16 => /RleP H16.
                   apply Rle_trans with 
                   (matrix_inf_norm
                         (FT2R_mat (A2_J A')) *
@@ -7080,7 +7080,7 @@ destruct H0.
                       vec_inf_norm (FT2R_mat x0') *
                       g t n.+1 + g1 t n.+1 (n.+1 - 1))%Re.
                    assert (forall a b c d:R, (a - b <= c + d)%Re -> (a <= b + c + d)%Re).
-                   { intros. nra. } apply H19. apply /RleP. apply H16.
+                   { intros. nra. } apply H19. (*apply /RleP.*) apply H16.
                    repeat apply Rplus_le_compat_r. apply /RleP. apply submult_prop.
                    assert ((matrix_inf_norm (FT2R_mat (A2_J A')) *
                              vec_inf_norm (FT2R_mat x0') +
@@ -7223,7 +7223,7 @@ destruct H0.
              -- rewrite <- finite_is_finite. apply H.
 Qed.
 
-Lemma jacobi_iteration_bound_lowlevel {t: type} :
+Lemma jacobi_iteration_bound_lowlevel {t: FPStdLib.type} :
  forall (A: matrix t) (b: vector t) (acc: ftype t) (k: nat),
    jacobi_preconditions A b acc k ->
    let acc2 := BMULT acc acc in

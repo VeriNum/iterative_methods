@@ -150,11 +150,11 @@ Qed.
 
 Section NAN.
 
-Definition sum_rel_F {NAN: Nans} := @sum_rel (ftype Tsingle) (-0)%F32 BPLUS.
+Definition sum_rel_F {NAN: FPCore.Nans} := @sum_rel (ftype Tsingle) (-0)%F32 BPLUS.
 
 From vcfloat Require Import IEEE754_extra.
 
-Lemma plus_zero {NAN: Nans}  a:
+Lemma plus_zero {NAN: FPCore.Nans}  a:
 Binary.is_finite _ _ a = true -> 
 (a + -0)%F32 = a.
 Proof.
@@ -164,7 +164,7 @@ destruct s;
 cbv; auto.
 Qed.
 
-Lemma sum_rel_F_single {NAN: Nans}:
+Lemma sum_rel_F_single {NAN: FPCore.Nans}:
 forall (a : ftype Tsingle) (fs : ftype Tsingle)
   (HFIN: Binary.is_finite _ _ a = true),
   sum_rel_F [a] fs -> fs = a.
@@ -203,9 +203,9 @@ fold sum_rel_R. simpl in IHl; auto.
 Qed.
 
 
-Definition sum_rel_Ft {NAN: Nans} (t: type) := @sum_rel (ftype t) neg_zero BPLUS.
+Definition sum_rel_Ft {NAN: FPCore.Nans} (t: type) := @sum_rel (ftype t) neg_zero BPLUS.
 
-Lemma sum_rel_Ft_single {NAN: Nans} t fs a:
+Lemma sum_rel_Ft_single {NAN: FPCore.Nans} t fs a:
 Binary.is_finite _ _ fs = true ->
 sum_rel_Ft t [a] fs -> fs = a.
 Proof.
@@ -218,7 +218,7 @@ destruct s; simpl; auto.
 Qed.
 
 
-Lemma is_finite_in {NAN: Nans} (t : type) :
+Lemma is_finite_in {NAN: FPCore.Nans} (t : type) :
   forall (l : list (ftype t)) fs,
   sum_rel_Ft t l fs ->
   let e  := default_abs t in
@@ -249,7 +249,7 @@ Qed.
 
 
 
-Lemma sum_rel_Ft_fold {NAN: Nans} : forall t l fs, 
+Lemma sum_rel_Ft_fold {NAN: FPCore.Nans} : forall t l fs, 
    sum_rel_Ft t l fs -> fs = fold_right BPLUS neg_zero l.
 Proof. 
 induction l.

@@ -114,11 +114,15 @@ Definition SparseASI : funspecs := [
 Lemma BFMA_eq:
    forall H H0 x y z,
   Binary.Bfma (fprec Tdouble) (femax Tdouble) H H0
-    (@FPCompCert.FMA_NAN.fma_nan_pl FPCore.Tdouble FPCore.is_standard_Tdouble) BinarySingleNaN.mode_NE x y z = 
+    (@FPCompCert.FMA_NAN.fma_nan_pl 
+          (FPCore.fprec FPCore.Tdouble) 
+          (FPCore.femax FPCore.Tdouble) (FPCore.fprec_gt_one _)) 
+     BinarySingleNaN.mode_NE x y z = 
   BFMA x y z.
 Proof.
 intros.
  unfold BFMA.
  f_equal; try apply proof_irr.
+ simpl. f_equal. apply proof_irr.
 Qed.
 

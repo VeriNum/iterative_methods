@@ -29,7 +29,7 @@ Import Order.TTheory GRing.Theory Num.Def Num.Theory.
 
 
 Section WITHNANS.
-Context {NANS: Nans}. 
+Context {NANS: FPCore.Nans}. 
 
 
 Notation "A +f B" := (addmx_float A B) (at level 80).

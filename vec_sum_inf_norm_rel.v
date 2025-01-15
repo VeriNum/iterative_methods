@@ -27,7 +27,7 @@ Import Order.TTheory GRing.Theory Num.Def Num.Theory.
 
 
 Section WITHNANS.
-Context {NANS: Nans}. 
+Context {NANS: FPCore.Nans}. 
 
 
 

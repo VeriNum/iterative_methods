@@ -8,7 +8,7 @@ Set Bullet Behavior "Strict Subproofs".
 Open Scope logic.
 
 Lemma Zlength_jacobi_iter: 
-  forall {NAN: Nans} {t} A1 (A2: matrix t) b x, 
+  forall {NAN: FPCore.Nans} {t} A1 (A2: matrix t) b x, 
    Zlength A1 = matrix_rows A2 ->
    Zlength b = matrix_rows A2 ->
    Zlength x = matrix_rows A2 ->
@@ -25,7 +25,7 @@ Proof.
       rewrite Zlength_map. unfold matrix_rows in *. lia.
 Qed.
 
-Lemma Znth_jacobi_iter {NAN: Nans}{t}:
+Lemma Znth_jacobi_iter {NAN: FPCore.Nans}{t}:
   forall i A1 A2 (b x: vector t) (y: ftype t),
   Zlength A1 = matrix_rows A2 -> 
   Zlength b = matrix_rows A2 -> 
@@ -35,7 +35,7 @@ Lemma Znth_jacobi_iter {NAN: Nans}{t}:
   feq (Znth i (jacobi_iter A1 A2 b x))
      (BMULT (BDIV (Zconst t 1) (Znth i A1))
          (BMINUS (Znth i b) y)).
-Proof.
+Proof. 
 intros. unfold matrix_rows in *.
  unfold jacobi_iter, diagmatrix_vector_mult, vector_sub, map2,
    matrix_vector_mult, invert_diagmatrix.
@@ -98,7 +98,7 @@ Require Import Setoid.
 Require Import Relation_Definitions.
 Import Morphisms.
 
-Add Parametric Morphism  {NAN: Nans}{t}: (@diagmatrix_vector_mult _ t)
+Add Parametric Morphism  {NAN:  FPCore.Nans}{t}: (@diagmatrix_vector_mult _ t)
   with signature Forall2 feq ==> Forall2 feq ==> Forall2 feq 
  as diagmatrix_vector_mult_mor.
 Proof.
@@ -112,7 +112,7 @@ unfold uncurry.
 apply BMULT_congr; auto.
 Qed.
 
-Add Parametric Morphism  {NAN: Nans}{t}:  (@jacobi_iter _ t)
+Add Parametric Morphism  {NAN:  FPCore.Nans}{t}:  (@jacobi_iter _ t)
  with signature Forall2 strict_feq ==> Forall2 (Forall2 feq) 
        ==> Forall2 feq ==> Forall2 feq ==> Forall2 feq
   as jacobi_iter_mor.
@@ -128,7 +128,7 @@ apply vector_sub_mor; auto.
 apply matrix_vector_mult_mor; auto.
 Qed.
 
-Add Parametric Morphism  {NAN: Nans}{t}:  (@jacobi_residual _ t)
+Add Parametric Morphism  {NAN:  FPCore.Nans}{t}:  (@jacobi_residual _ t)
  with signature Forall2 strict_feq ==> Forall2 (Forall2 feq) 
        ==> Forall2 feq ==> Forall2 feq ==> Forall2 feq
   as jacobi_residual_mor.
@@ -141,7 +141,7 @@ apply jacobi_iter_mor; auto.
 Qed.
 
 Lemma finite_dist2_e2: 
-  forall  {NAN: Nans}{t} (x y: vector t), 
+  forall  {NAN:  FPCore.Nans}{t} (x y: vector t), 
   Zlength x = Zlength y ->
   finite (dist2 x y) -> 
   Forall finite y.
@@ -169,7 +169,7 @@ rewrite !Zlength_correct, seq_length.
 auto.
 Qed.
 
-Add Parametric Morphism  {NAN: Nans}{t: type} : (@dist2 _ t)
+Add Parametric Morphism  {NAN:  FPCore.Nans}{t: type} : (@dist2 _ t)
   with signature Forall2 feq ==> Forall2 feq ==> feq
   as dist2_mor.
 Proof.
@@ -278,7 +278,7 @@ apply IHn; auto.
 Qed.  
 
 Lemma iter_stop_n_Zlength:
- forall  {NAN: Nans}{t} residual f N n acc x v
+ forall  {NAN:  FPCore.Nans}{t} residual f N n acc x v
     (LENf: forall x, Zlength x = N -> Zlength (f x) = Zlength x)
     (CONGR_f: forall x x' : list (ftype t),
           Zlength x = N ->
@@ -300,7 +300,7 @@ apply IHn in H1; auto.
 rewrite LENf; auto.
 Qed.
 
-Lemma finres_jacobi  {NAN: Nans}{t}: forall A1 A2 b (x: vector t),
+Lemma finres_jacobi  {NAN:  FPCore.Nans}{t}: forall A1 A2 b (x: vector t),
    Zlength A1 = Zlength x ->
    Zlength (jacobi_iter A1 A2 b x) = Zlength x ->
    Forall finite (jacobi_residual A1 A2 b x) ->
@@ -325,7 +325,7 @@ apply (IHx _ _ H3 H2 H5).
 Qed.
 
 Lemma Zlength_jacobi_residual: 
-  forall {NAN: Nans} {t} A1 (A2: matrix t) b x, 
+  forall {NAN:  FPCore.Nans} {t} A1 (A2: matrix t) b x, 
    Zlength A1 = matrix_rows A2 ->
    Zlength b = matrix_rows A2 ->
    Zlength x = matrix_rows A2 ->
@@ -419,7 +419,7 @@ Proof.
 induction i; simpl; intros; f_equal; auto.
 Qed.
 
-Lemma jacobi_returns_residual  {NAN: Nans} {t: type}:
+Lemma jacobi_returns_residual  {NAN:  FPCore.Nans} {t: type}:
   forall A (b: vector t) x0 acc2 k,
   let '(r2,xj) := jacobi A b x0 acc2 (S k) in
   r2 = norm2 (jacobi_residual (diag_of_matrix A) (remove_diag A) b xj).
@@ -431,7 +431,7 @@ destruct (going _ _); auto.
 apply (IHk (jacobi_iter (diag_of_matrix A) (remove_diag A) b x0)).
 Qed.
 
-Lemma jacobi_n_jacobi {NAN: Nans} {t: type}:
+Lemma jacobi_n_jacobi {NAN:  FPCore.Nans} {t: type}:
   forall A b acc k, 
    jacobi_preconditions A b acc k ->
   let acc2 := BMULT acc acc in
