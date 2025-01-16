@@ -21,7 +21,7 @@ Delimit Scope R_scope with Re.
 
 Section WITH_NANS.
 
-Context {NANS: Nans}.
+Context {NANS: FPCore.Nans}.
 
 (** Define the solution vector at k-th iteration **)
 Fixpoint x_k {n:nat} (k: nat) 
@@ -40,7 +40,7 @@ intros.
 by unfold Rbar_le in H.
 Qed.
 
-Lemma matrix_norm_A2_rel {t: type} {n:nat}
+Lemma matrix_norm_A2_rel {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1):
   (matrix_inf_norm
    (A2_J_real (FT2R_mat A)) <=
@@ -113,7 +113,7 @@ Qed.
 
 Close Scope Z_scope.
 
-Lemma vec_norm_A1_rel {t: type} {n:nat}
+Lemma vec_norm_A1_rel {t: FPStdLib.type} {n:nat}
   (A: 'M[ftype t]_n.+1)
 (Hinv: forall i, finite (BDIV (Zconst t 1) (A i i)))
 (Ha : forall i j, finite (A i j)):
@@ -205,7 +205,7 @@ Lemma opp_equiv {n:nat}:
 Proof.
 intros. apply matrixP. unfold eqrel.
 intros. rewrite !mxE.
-rewrite -RoppE -!RminusE. nra.
+rewrite -RoppE -!RminusE. simpl. Lra.nra.
 Qed.
 
 Lemma sub_vec_5 {n:nat}:
@@ -213,7 +213,7 @@ Lemma sub_vec_5 {n:nat}:
   a - (a - b) = b .
 Proof.
 intros. apply matrixP. unfold eqrel. intros.
-rewrite !mxE. rewrite -!RminusE. nra.
+rewrite !mxE. rewrite -!RminusE. simpl; Lra.nra.
 Qed.
 
 Lemma sub_vec_6 {n:nat}:
@@ -231,7 +231,7 @@ Lemma add_vec_distr_4 {n:nat}:
   (a - b) - (a - d) = d - b.
 Proof.
 intros. apply matrixP. unfold eqrel.
-intros. rewrite !mxE. rewrite -!RplusE -!RoppE. nra.
+intros. rewrite !mxE. rewrite -!RplusE -!RoppE. simpl; Lra.nra.
 Qed.
 
 

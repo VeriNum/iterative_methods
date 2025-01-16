@@ -72,7 +72,7 @@ Require Import floatlib fma_floating_point_model common
 
 From vcfloat Require Import FPStdLib.
 
-Lemma fma_dot_prod_norm2_holds {t} {n:nat} {NANS: Nans} m (v : 'cV[ftype t]_n.+1):
+Lemma fma_dot_prod_norm2_holds {t} {n:nat} {NANS: FPCore.Nans} m (v : 'cV[ftype t]_n.+1):
   let v_l := @vec_to_list_float _ n m v in
   fma_dot_prod_rel (combine v_l v_l) (norm2 (rev v_l)).
 Proof.
@@ -93,7 +93,7 @@ Qed.
 
 
 
-Lemma R_dot_prod_norm2_holds {t} {n:nat} {NANS: Nans} m 
+Lemma R_dot_prod_norm2_holds {t} {n:nat} {NANS: FPCore.Nans} m 
   (v : 'cV[ftype t]_n.+1) (le_n_m : (m <= n.+1)%nat):
   let v_l := @vec_to_list_float _ n m v in
    R_dot_prod_rel  (combine (map FT2R v_l) (map FT2R v_l))
@@ -133,7 +133,7 @@ induction m.
   } rewrite -H1. apply IHm.
 Qed.
 
-Lemma R_dot_prod_norm2_abs_holds {t} {n:nat} {NANS: Nans} m 
+Lemma R_dot_prod_norm2_abs_holds {t} {n:nat} {NANS: FPCore.Nans} m 
   (v : 'cV[ftype t]_n.+1) (le_n_m : (m <= n.+1)%nat):
   let v_l := @vec_to_list_float _ n m v in
   R_dot_prod_rel
@@ -185,7 +185,7 @@ Qed.
 Open Scope R_scope.
 
 (*** error between norm2 float and norm2 real **)
-Lemma norm2_error {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
+Lemma norm2_error {t} {n:nat} {NANS: FPCore.Nans} (v : 'cV[ftype t]_n.+1):
   let v_l := vec_to_list_float n.+1 v in
   (forall xy : ftype t * ftype t,
      In xy (combine v_l v_l) -> finite xy.1 /\ finite xy.2) ->
@@ -236,7 +236,7 @@ rewrite H6 in H1. rewrite sum_abs_eq in H1.
 Qed.
 
 (** Relate norm2 with inf-vec norm **)
-Lemma norm2_vec_inf_norm_rel {t} {n:nat} {NANS: Nans} (v : 'cV[ftype t]_n.+1):
+Lemma norm2_vec_inf_norm_rel {t} {n:nat} {NANS: FPCore.Nans} (v : 'cV[ftype t]_n.+1):
    let v_l := vec_to_list_float n.+1 v in
   (forall xy : ftype t * ftype t,
      In xy (combine v_l v_l) -> finite xy.1/\ finite xy.2) ->

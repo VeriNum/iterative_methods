@@ -97,7 +97,7 @@ intros.
 rewrite finite_is_finite in FINx. 
 rewrite finite_is_finite in FINy. 
 rewrite finite_is_finite.
-pose proof (Binary.Bplus_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan t) 
+pose proof (Binary.Bplus_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t)   (plus_nan (fprec t) (femax t) (fprec_gt_one t)) 
                       BinarySingleNaN.mode_NE x y FINx FINy ).
 change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
 cbv zeta in H.
@@ -191,7 +191,7 @@ rewrite finite_is_finite in Hx.
 rewrite finite_is_finite in Hy.
 rewrite finite_is_finite. 
 pose proof (Binary.Bmult_correct  (fprec t) (femax t)  
-    (fprec_gt_0 t) (fprec_lt_femax t) (mult_nan t) BinarySingleNaN.mode_NE x y) as
+    (fprec_gt_0 t) (fprec_lt_femax t) (mult_nan (fprec t) (femax t) (fprec_gt_one t)) BinarySingleNaN.mode_NE x y) as
   H0.
 unfold Bmult_no_overflow in Hnov.
 unfold rounded in Hnov.
@@ -214,7 +214,7 @@ rewrite finite_is_finite in Hx.
 rewrite finite_is_finite in Hy.
 rewrite finite_is_finite. 
 pose proof (Binary.Bplus_correct  (fprec t) (femax t)  
-    (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan t) BinarySingleNaN.mode_NE x y) as
+    (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan (fprec t) (femax t) (fprec_gt_one t)) BinarySingleNaN.mode_NE x y) as
   H0.
 unfold Bplus_no_overflow in Hnov.
 unfold rounded in Hnov.
@@ -242,13 +242,13 @@ pose proof Rle_or_lt (bpow Zaux.radix2 (femax t))
 apply Rlt_bool_false in H1; red.
 unfold rounded, FT2R  in H1.
 pose proof (Binary.Bdiv_correct  (fprec t) (femax t)  
-    (fprec_gt_0 t) (fprec_lt_femax t) (div_nan t) BinarySingleNaN.mode_NE (Zconst t 1) y) as
+    (fprec_gt_0 t) (fprec_lt_femax t) (div_nan (fprec t) (femax t) (fprec_gt_one t)) BinarySingleNaN.mode_NE (Zconst t 1) y) as
   H2.
 specialize (H2 H0).
 simpl in H2; simpl in H1;
 rewrite H1 in H2.  unfold BDIV, BINOP in HFINb.
 destruct ((Binary.Bdiv (fprec t) (femax t) (fprec_gt_0 t) 
-             (fprec_lt_femax t) (div_nan t) BinarySingleNaN.mode_NE (Zconst t 1) y));
+             (fprec_lt_femax t) (div_nan (fprec t) (femax t) (fprec_gt_one t)) BinarySingleNaN.mode_NE (Zconst t 1) y));
 simpl;  try discriminate; contradiction. 
 Qed.
 
@@ -264,7 +264,7 @@ Lemma Binv_accurate' {NAN: Nans}:
 Proof.
 intros.
 pose proof (Binary.Bdiv_correct (fprec t) (femax t) (fprec_gt_0 t) (fprec_lt_femax t) 
-                (div_nan t) BinarySingleNaN.mode_NE (Zconst t 1) y).
+                (div_nan (fprec t) (femax t) (fprec_gt_one t)) BinarySingleNaN.mode_NE (Zconst t 1) y).
 change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
 cbv zeta in H0.
 specialize (H0 H).

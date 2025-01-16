@@ -52,7 +52,8 @@ intros.
 rewrite finite_is_finite in FINx.
 rewrite finite_is_finite in FINy.
 rewrite finite_is_finite in FINz.
-pose proof (Binary.Bfma_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (fma_nan t)
+pose proof (Binary.Bfma_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t)
+                        (fma_nan (fprec t) (femax t) (fprec_gt_one t))
                       BinarySingleNaN.mode_NE x y z FINx FINy FINz).
 change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
 cbv zeta in H.
@@ -89,7 +90,7 @@ destruct (BFMA_finite_e _ _ _ HFINb) as (A & B & C).
 unfold rounded, FT2R, ov in H.
 rewrite finite_is_finite in *.
 pose proof (Binary.Bfma_correct  (fprec t) (femax t)  
-    (fprec_gt_0 t) (fprec_lt_femax t) (fma_nan t) BinarySingleNaN.mode_NE x y z A B C) as
+    (fprec_gt_0 t) (fprec_lt_femax t) (fma_nan (fprec t) (femax t) (fprec_gt_one t)) BinarySingleNaN.mode_NE x y z A B C) as
   H0.
 simpl in H0; simpl in H;
 rewrite H in H0. clear H. fold (@BFMA NAN t) in H0.
@@ -121,7 +122,7 @@ Lemma BMULT_accurate {NAN: Nans}:
 Proof.
 intros.
 pose proof (Binary.Bmult_correct (fprec t) (femax t) (fprec_gt_0 t) (fprec_lt_femax t) 
-                (mult_nan t) BinarySingleNaN.mode_NE x y).
+                (mult_nan (fprec t) (femax t) (fprec_gt_one t)) BinarySingleNaN.mode_NE x y).
 change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
 cbv zeta in H.
 pose proof (
@@ -154,12 +155,12 @@ pose proof Rle_or_lt (bpow Zaux.radix2 (femax t))
 apply Rlt_bool_false in H; red.
 unfold rounded, FT2R  in H.
 pose proof (Binary.Bmult_correct  (fprec t) (femax t)  
-    (fprec_gt_0 t) (fprec_lt_femax t) (mult_nan t) BinarySingleNaN.mode_NE x y) as
+    (fprec_gt_0 t) (fprec_lt_femax t) (mult_nan (fprec t) (femax t) (fprec_gt_one t)) BinarySingleNaN.mode_NE x y) as
   H0.
 simpl in H0; simpl in H;
 rewrite H in H0.  unfold BMULT, BINOP in HFINb.
 destruct ((Binary.Bmult (fprec t) (femax t) (fprec_gt_0 t) 
-             (fprec_lt_femax t) (mult_nan t) BinarySingleNaN.mode_NE x y));
+             (fprec_lt_femax t) (mult_nan (fprec t) (femax t) (fprec_gt_one t)) BinarySingleNaN.mode_NE x y));
 simpl;  try discriminate.
 Qed.
 
@@ -202,7 +203,7 @@ Lemma BPLUS_accurate {NAN: Nans} (t : type) :
 Proof.
 intros.
 rewrite finite_is_finite in FINx, FINy. 
-pose proof (Binary.Bplus_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan t)
+pose proof (Binary.Bplus_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan (fprec t) (femax t) (fprec_gt_one t))
                       BinarySingleNaN.mode_NE x y FINx FINy).
 change (Binary.B2R (fprec t) (femax t) ?x) with (@FT2R t x) in *.
 cbv zeta in H.
@@ -272,13 +273,13 @@ apply Rlt_bool_false in H.
 unfold rounded, FT2R in H.
 rewrite finite_is_finite in *.
 pose proof (Binary.Bplus_correct  (fprec t) (femax t)  
-    (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan t) BinarySingleNaN.mode_NE x y A B) as
+    (fprec_gt_0 t) (fprec_lt_femax t) (plus_nan (fprec t) (femax t) (fprec_gt_one t)) BinarySingleNaN.mode_NE x y A B) as
   H0;
 rewrite H in H0;
 destruct H0 as ( C & _).
 unfold BPLUS, BINOP in HFINb.
 destruct ((Binary.Bplus (fprec t) (femax t) (fprec_gt_0 t) (fprec_lt_femax t) 
-             (plus_nan t) BinarySingleNaN.mode_NE x y));
+             (plus_nan (fprec t) (femax t) (fprec_gt_one t)) BinarySingleNaN.mode_NE x y));
 simpl; try discriminate.
 Qed.
 
@@ -404,7 +405,7 @@ Lemma is_finite_fma_no_overflow' {NAN: Nans} (t : type) :
 Proof.
 intros.
 rewrite finite_is_finite in Hfinx, Hfiny, Hfinz|-*.
-pose proof (Binary.Bfma_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (fma_nan t)
+pose proof (Binary.Bfma_correct  (fprec t) (femax t)  (fprec_gt_0 t) (fprec_lt_femax t) (fma_nan (fprec t) (femax t) (fprec_gt_one t))
                       BinarySingleNaN.mode_NE x y z Hfinx Hfiny Hfinz).
 unfold fma_no_overflow, FT2R, rounded in Hov;
 apply Rlt_bool_true in Hov.

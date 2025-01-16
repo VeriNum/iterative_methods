@@ -23,7 +23,6 @@ Delimit Scope ring_scope with Ri.
 Delimit Scope R_scope with Re.
 
 From libValidSDP Require Import fsum_l2r fcmsum real_matrix cholesky.
-From Cholesky Require Import cholesky_real.
 
 Set Bullet Behavior "Strict Subproofs".
 
@@ -46,7 +45,6 @@ Notation eta := (eta fs).  (* absolute error bound, denormalized numbers *)
 Variable n : nat.
 Variable A : 'M[F]_n.+1.
 Hypothesis SymA : MF2R A^T = MF2R A.
-(*Hypothesis PD: positive_definite (MF2R A).*)
 
 Variable Rt : 'M[F]_n.+1.
 Let RteF := \matrix_(i, j) if (i <= j)%N then (Rt i j) else F0 fs.
@@ -127,7 +125,7 @@ match type of H with ?L < _ => have H0: L = Mabs ΔA i j end. {
  apply Rmult_le_compat_r; [ apply eps_pos | ].
  apply le_INR. do 2 apply le_n_S.
  eapply Nat.le_trans; [apply Nat.le_min_l | ].
- have Hn:= ltn_ord i; lia.
+ move : (ltn_ord i) => /leP Hn. lia.
 Qed.
 
 From mathcomp.algebra_tactics Require Import ring lra.
@@ -142,7 +140,9 @@ admit.
 +
 *)
 
-(* Don't need this lemma, since it is subsumed by th_2_3_aux. *)
+From Cholesky Require Import cholesky_real.
+
+(* Don't need this lemma, since it is subsumed by th_2_3_aux2. *)
 Lemma higham_equation_10_4: 
     forall i j : 'I_n.+1, 
        (nat_of_ord i < nat_of_ord j)%N ->
