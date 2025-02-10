@@ -10,7 +10,7 @@ From Iterative Require Import   lemmas.
 
 
 From mathcomp Require Import matrix bigop all_algebra all_ssreflect.
-From mathcomp.analysis Require Import Rstruct.
+From mathcomp Require Import Rstruct.
 From Coquelicot Require Import Lub Rbar.
 
 Set Implicit Arguments.

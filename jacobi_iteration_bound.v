@@ -1,6 +1,6 @@
 From vcfloat Require Import RAux FPStdLib.
 From mathcomp Require Import all_ssreflect ssralg  ssrnat all_algebra seq matrix .
-From mathcomp.analysis Require Import Rstruct.
+From mathcomp Require Import Rstruct.
 Require Import fma_is_finite dotprod_model.
 Require Import floatlib jacob_list_fun_model.
 Require Import fma_real_func_model fma_floating_point_model.

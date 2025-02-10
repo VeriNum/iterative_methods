@@ -1,7 +1,7 @@
 From Coq Require Import ZArith Reals Psatz.
 From Flocq Require Import Binary.
 From mathcomp Require Import all_ssreflect ssralg ssrnat all_algebra seq matrix.
-From mathcomp.analysis Require Import Rstruct.
+From mathcomp Require Import Rstruct.
 Import List ListNotations.
 
 
