@@ -10,7 +10,7 @@ Import List ListNotations.
 Set Bullet Behavior "Strict Subproofs". 
 
 From mathcomp Require Import matrix bigop all_algebra all_ssreflect.
-From mathcomp.analysis Require Import Rstruct.
+From mathcomp Require Import Rstruct.
 From Coquelicot Require Import Lub Rbar.
 
 Set Implicit Arguments.
@@ -213,7 +213,7 @@ induction s.
   - assert (s = head x0 s :: behead s).
     { by apply s_destruct. }
     rewrite H2. rewrite bigrmax_dflt. rewrite -H2.
-    rewrite le_maxr. apply /orP.
+    rewrite le_max. apply /orP.
     specialize (H0 0%N). simpl in H0.
     left. by apply H0. 
 Qed.
@@ -528,8 +528,8 @@ induction k.
 - repeat rewrite error_sum_equiv.
 repeat rewrite error_sum_equiv in IHk.
 repeat rewrite <- error_sum_aux2.
-apply ler_add; auto.
-apply ler_pmul; auto.
+apply lerD; auto.
+apply ler_pM; auto.
 rewrite <- error_sum_equiv.
 apply error_sum_ge_0; auto.
 Qed.
