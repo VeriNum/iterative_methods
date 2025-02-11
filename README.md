@@ -44,16 +44,18 @@ formalized in the lemma `body_jacobi2`. Another important result in this file is
 This repository also contains results on the forward error bound for naive or vanilla dot product. These files are contained in the repo: `naive_dot_product`.
 
 # Building instructions
-To build this project, install the latest release of [Coq platform](https://github.com/coq/platform) including [VST](https://github.com/PrincetonUniversity/VST).  Then install [VCFloat](https://github.com/VeriNum/vcfloat)
-and [VSTlib](https://github.com/PrincetonUniversity/VST/lib)
-as described in [sparse/README.md](sparse/README.md).
-
-Then do:
-```
-git clone https://github.com/VeriNum/iterative_methods.git
-cd iterative_methods
-git checkout generalize # or git checkout this-tag-of-the-repository
-make
+To build this project, as of February 2025, we suggest:
+- `opam update` to make sure you have the latest version of the `coq-released` archive.
+- Install the `Coq Platform 2025.01` from opam sources, following [these instructions](https://github.com/coq/platform?tab=readme-ov-file#installation).
+   In answering the questions in the install script, pick "extended" and say yes to "vst" (but you can leave out the other "large packages".
+- Make sure you're in that opam switch
+- Clone and install LAProof:
+  - `git clone git@github.com:VeriNum/LAProof.git`, then in that directory,
+  - `git checkout v1.0`
+  - `opam install --inplace-build .`
+- Now, switch back to the `iterative_methods` directory
+- `opam install --deps-only .`
+- `make`
 ```
 
 
