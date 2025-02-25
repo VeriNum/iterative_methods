@@ -37,5 +37,18 @@ void dump_crs_matrix  (struct crs_matrix *m);
 void print_crs_matrix (struct crs_matrix *m);
 double timediff(struct timeval *start, struct timeval *finish);
 
+struct coo_matrix {
+  unsigned *row_ind, *col_ind;
+  double *val;
+  unsigned n, maxn;
+  unsigned rows, cols;
+};
+
+struct coo_matrix *create_coo_matrix (unsigned maxn, unsigned rows, unsigned cols);
+void add_to_coo_matrix(struct coo_matrix *p, unsigned i, unsigned j, double x);
+struct crs_matrix *coo_to_crs_matrix(struct coo_matrix *p);
+
+
+
 
 #endif

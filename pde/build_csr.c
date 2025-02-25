@@ -1,17 +1,6 @@
-void abort(int code);
+#include "../sparse/sparse.h"
 
-struct coo_matrix {
-  unsigned *row_ind, *col_ind;
-  double *val;
-  unsigned n, maxn;
-  unsigned rows, cols;
-};
-
-void *surely_malloc(size_t n) {
-  void *p = malloc(n);
-  if (!p) abort(1);
-  return p;
-}
+void exit(int code);
 
 struct coo_matrix *create_coo_matrix (unsigned maxn, unsigned rows, unsigned cols) {
   struct coo_matrix *p = surely_malloc (sizeof (*p));
@@ -26,7 +15,7 @@ struct coo_matrix *create_coo_matrix (unsigned maxn, unsigned rows, unsigned col
 
 void add_to_coo_matrix(struct coo_matrix *p, unsigned i, unsigned j, double x) {
   unsigned n = p->n;
-  if (n>=p->maxn) abort(2);
+  if (n>=p->maxn) exit(2);
   p->row_ind[n]=i;
   p->col_ind[n]=j;
   p->val[n]=x;
@@ -35,7 +24,7 @@ void add_to_coo_matrix(struct coo_matrix *p, unsigned i, unsigned j, double x) {
 
 
 void swap(struct coo_matrix *p, unsigned a, unsigned b) {
-  unsigned i,j; double val;
+  unsigned i,j; double x;
   i=p->row_ind[a];
   j=p->col_ind[a];
   x=p->val[a];
@@ -108,12 +97,13 @@ void coo_quicksort(struct coo_matrix *p, unsigned base, unsigned n)
 }
 
 /* Count the number of distinct row/col entries in a sorted coordinate list */
-unsigned coo_count (struct_coo_matrix *p) {
+unsigned coo_count (struct coo_matrix *p) {
   unsigned i;
-  if (p->n==0) return 0;
+  unsigned n = p->n;
+  if (n==0) return 0;
   unsigned count=1;
   for (i=1; i<n; i++) {
-    if (p->row_ind[i-1]!=p->row_ind[i] || p->col_ind[i]!=p->col_ind[i])
+    if (p->row_ind[i-1]!=p->row_ind[i] || p->col_ind[i-1]!=p->col_ind[i])
       count++;
   }
   return count;
@@ -122,7 +112,8 @@ unsigned coo_count (struct_coo_matrix *p) {
 struct crs_matrix *coo_to_crs_matrix(struct coo_matrix *p) {
   struct crs_matrix *q;
   unsigned count, i;
-  int r,c, ri, ci, cols;
+  int r,c, ri, ci, cols, k, l;
+  double x;
   coo_quicksort(p, 0, p->n);
   k = coo_count(p);
   q = surely_malloc(sizeof(struct crs_matrix));

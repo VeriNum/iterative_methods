@@ -1,3 +1,5 @@
+#include "../sparse/sparse.h"
+
 struct coo_matrix *p;
 struct vertex_data;  /* abstract (opaque) */
 
@@ -7,7 +9,7 @@ struct elements {
   unsigned n_interior;             /* number of interior vertices */
   unsigned (*corner)[3];  /* variable-length array, corner[n_elements][3] */
   struct vertex_data **vdata;  /* variable-length array, vdata[n_vertices] */
-  unsigned (*count_coo_entries)(struct elements *p, unsigned elem);
+  unsigned (*count_coo_entries)(struct elements *p, unsigned elem[3]);
   void (*add_to_coo)(struct coo_matrix *m, struct elements *p, unsigned elem);
 };
 
@@ -19,9 +21,9 @@ struct coo_matrix *finite_elem_to_coo (struct elements *p) {
   unsigned (*corner)[3] = p->corner;
   for (e=0; e<n; e++)
     count += p->count_coo_entries(p, corner[e]);
-  m = create_coo_matrix(count, n_interior, n_interior);
+  m = create_coo_matrix(count, p->n_interior, p->n_interior);
   for (e=0; e<n; e++)
-    add_to_coo(m, p, corner[e]);
+    p->add_to_coo(m, p, e);
   return m;
 }
 
@@ -34,38 +36,45 @@ struct my_vertex_data {
   double x, y;
 };
 
-unsigned my_count_coo_entries(struct elements *p, unsigned elem) {
-  unsigned k = (p->corner[elem][0]<interior)+(p->corner[elem][1]<interior)+(p->corner[elem][2]<interior);
+unsigned my_count_coo_entries(struct elements *p, unsigned elem[3]) {
+  unsigned interior = p->n_interior;
+  unsigned k = (elem[0]<interior)+(elem[1]<interior)+(elem[2]<interior);
   return k*k;
 }
 
-void add_edges_to_coo(struct coo_matrix *m, struct vertex_data **vdata, unsigned a, unsigned b) {
-  if (a<interior && b < interior) {
+extern double sqr(double);
+extern double sqrt(double);
+
+double distance(struct my_vertex_data *a, struct my_vertex_data *b) {
+  return sqrt(sqr(a->x-b->x)+sqr(a->y-b->y));
+}
+
+void add_edges_to_coo(struct coo_matrix *m, struct my_vertex_data **vdata, unsigned a, unsigned b) {
     double h = distance(vdata[a],vdata[b]);
     double x = 1.0/(h*h);
     add_to_coo_matrix(p, a, b, x);
     add_to_coo_matrix(p, b, a, x);
-  }
 }
 
 void my_add_to_coo(struct coo_matrix *m, struct elements *p, unsigned elem) {
-  unsigned a = p->corner[elem][0];
-  unsigned b = p->corner[elem][1];
-  unsigned c = p->corner[elem][2];
+  unsigned *triangle = p->corner[elem];
+  unsigned a = triangle[0];
+  unsigned b = triangle[1];
+  unsigned c = triangle[2];
   unsigned interior = p->n_interior;
-  struct vertex_data **vdata = p->vdata;
-  if (a<interior) add_to_coo_matrix(p, a, a, 4.0);
-  if (b<interior) add_to_coo_matrix(p, b, b, 4.0);
-  if (c<interior) add_to_coo_matrix(p, c, c, 4.0);
-  add_edges_to_coo(m,vdata,a,b);
-  add_edges_to_coo(m,vdata,b,c);
-  add_edges_to_coo(m,vdata,c,a);
+  struct my_vertex_data **vdata = (struct my_vertex_data**) p->vdata;
+  if (a<interior) add_to_coo_matrix(m, a, a, 4.0);
+  if (b<interior) add_to_coo_matrix(m, b, b, 4.0);
+  if (c<interior) add_to_coo_matrix(m, c, c, 4.0);
+  if (a<interior && b<interior) add_edges_to_coo(m,vdata,a,b);
+  if (b<interior && c<interior) add_edges_to_coo(m,vdata,b,c);
+  if (c<interior && a<interior) add_edges_to_coo(m,vdata,c,a);
 }
 
 struct coo_matrix *planar_triangulation_to_matrix(struct elements *p, struct my_vertex_data *vdata) {
-  p->vdata = vdata;
+  p->vdata = (struct vertex_data **) vdata;
   p->count_coo_entries = &my_count_coo_entries;
-  p->add_to_coo = &my_count_coo_entries;
+  p->add_to_coo = &my_add_to_coo;
   return finite_elem_to_coo(p);
 }
 
