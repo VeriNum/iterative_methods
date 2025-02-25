@@ -24,7 +24,7 @@ struct coo_matrix *create_coo_matrix (unsigned maxn, unsigned rows, unsigned col
   return p;
 }
 
-void add_to_coo_matrix(unsigned i, unsigned j, double x) {
+void add_to_coo_matrix(struct coo_matrix *p, unsigned i, unsigned j, double x) {
   unsigned n = p->n;
   if (n>=p->maxn) abort(2);
   p->row_ind[n]=i;
