@@ -114,14 +114,15 @@ struct crs_matrix *coo_to_crs_matrix(struct coo_matrix *p) {
   unsigned count, i;
   int r,c, ri, ci, cols, k, l;
   double x;
-  coo_quicksort(p, 0, p->n);
+  int n = p->n;
+  coo_quicksort(p, 0, n);
   k = coo_count(p);
   q = surely_malloc(sizeof(struct crs_matrix));
   q->val = surely_malloc(k * sizeof(double));
   q->col_ind = surely_malloc(k * sizeof(unsigned));
-  q->row_ptr = surely_malloc ((k+1) * sizeof(unsigned));
+  q->row_ptr = surely_malloc ((p->rows+1) * sizeof(unsigned));
   r=-1; l=0;
-  for (i=0; i<k; i++) {
+  for (i=0; i<n; i++) {
     ri = p->row_ind[i];
     ci = p->col_ind[i];
     x = p->val[i];
@@ -132,16 +133,17 @@ struct crs_matrix *coo_to_crs_matrix(struct coo_matrix *p) {
 	c=ci;
 	q->col_ind[l] = ci;
 	q->val[l] = x;
+	l++;
       }
     else {
       while (r<ri) q->row_ptr[++r]=l;
       c= -1;
       q->col_ind[l] = ci;
       q->val[l] = x;
+      l++;
     }
   }
   cols=p->cols;
   q->row_ptr[cols]=k;
   return q;
 }
-
