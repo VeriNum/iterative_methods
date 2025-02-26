@@ -10,7 +10,7 @@ struct elements {
   unsigned (*corner)[3];  /* variable-length array, corner[n_elements][3] */
   struct vertex_data **vdata;  /* variable-length array, vdata[n_vertices] */
   unsigned (*count_coo_entries)(struct elements *p, unsigned elem[3]);
-  void (*add_to_coo)(struct coo_matrix *m, double *vec, struct elements *p, unsigned elem);
+  void (*add_to_coo)(struct coo_matrix *m, double *vec, struct elements *p, unsigned e);
 };
 
 struct coo_matrix *finite_elem_to_coo (struct elements *p) {
@@ -45,47 +45,25 @@ unsigned my_count_coo_entries(struct elements *p, unsigned elem[3]) {
   return k*k;
 }
 
-extern double sqr(double);
-extern double sqrt(double);
-
-double distance2(struct my_vertex_data *a, struct my_vertex_data *b) {
-  return sqr(a->x-b->x)+sqr(a->y-b->y);
-}
-
-void add_vertex(struct coo_matrix *m, double *vec,
-		       struct my_vertex_data **vdata, unsigned interior, unsigned a) {
-  if (a<interior)
-    add_to_coo_matrix(m,a,a,4.0);
-}
-
-
-void add_edge(struct coo_matrix *m, double *vec,
-		      struct my_vertex_data **vdata, unsigned interior, unsigned a, unsigned b) {
-    double h = distance2(vdata[a],vdata[b]);
-    double x = 1.0/h;
-    if (a<interior && b<interior) {
-      add_to_coo_matrix(p, a, b, x);
-      add_to_coo_matrix(p, b, a, x);
-    }
-    else if (a<interior)
-      vec[b] += x;
-    else if (b<interior)
-      vec[a] += x;
-}
-
-void my_add_to_coo(struct coo_matrix *m, double *vec, struct elements *p, unsigned elem) {
-  unsigned *triangle = p->corner[elem];
+void my_add_to_coo(struct coo_matrix *m, double *vec, struct elements *p, unsigned e) {
+  unsigned *triangle = p->corner[e];
   unsigned a = triangle[0];
   unsigned b = triangle[1];
   unsigned c = triangle[2];
   unsigned interior = p->n_interior;
   struct my_vertex_data **vdata = (struct my_vertex_data**) p->vdata;
-  add_vertex(m,vec,vdata,interior,a);
-  add_vertex(m,vec,vdata,interior,b);
-  add_vertex(m,vec,vdata,interior,c);
-  add_edge(m,vec,vdata,interior,a,b);
-  add_edge(m,vec,vdata,interior,b,c);
-  add_edge(m,vec,vdata,interior,c,a);
+  double ax=vdata[a]->x, ay=vdata[a]->y;
+  double bx=vdata[b]->x, by=vdata[b]->y;
+  double cx=vdata[b]->x, cy=vdata[c]->y;
+
+  /* Fill in quadrature here.  At this point, the vertex numbers are a,b,c,
+     and their coordinates are (ax,ay), (bx,by), (cx,cy).
+     A vertex a is interior if (a<interior), otherwise exterior.
+     To add an element (i,j,x) to the matrix, for i<interior, j<interior,
+          add_to_coo_matrix(m,i,j,x).
+     To add an element (i,x) to the vector,
+          vec[i]+=x.
+  */	  
 }
 
 struct coo_matrix *planar_triangulation_to_matrix(struct elements *p, struct my_vertex_data *vdata) {
