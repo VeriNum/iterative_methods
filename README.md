@@ -51,11 +51,10 @@ To build this project, as of February 2025, we suggest:
 - Make sure you're in that opam switch
 - Clone and install LAProof:
   - `git clone git@github.com:VeriNum/LAProof.git`, then in that directory,
-  - `git checkout v1.0`
   - `opam install --inplace-build .`
 - Now, switch back to the `iterative_methods` directory
 - `opam install --deps-only .`
 - `make`
-```
+
 
 
