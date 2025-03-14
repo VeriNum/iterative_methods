@@ -8,12 +8,16 @@ CFLAGS= -I$(INCLUDE) -O4
 sparse/sparse.v: sparse/sparse.c sparse/sparse.h
 	clightgen -flongdouble -normalize $< -o $@ 
 
+sparse/build_csr.v: sparse/build_csr.c sparse/sparse.h
+	clightgen -flongdouble -normalize $< -o $@ 
+
 sparse/jacobi.v: sparse/jacobi.c sparse/sparse.h
 	clightgen -flongdouble -normalize $< -o $@ 
 
 sparse/main.o: sparse/main.c sparse/parsparse.h
 sparse/test.o: sparse/test.c sparse/sparse.h
 sparse/sparse.o: sparse/sparse.c sparse/sparse.h
+sparse/build_csr.o: sparse/build_csr.c sparse/sparse.h
 sparse/jacobi.o: sparse/jacobi.c sparse/sparse.h
 sparse/test_jacobi.o: sparse/test_jacobi.c sparse/sparse.h sparse/jacobi.h
 sparse/example.o: sparse/example.c sparse/sparse.h

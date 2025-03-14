@@ -7,13 +7,13 @@
 typedef unsigned long long ubig;
 
 struct mtask {
-  struct crs_matrix mat;
+  struct csr_matrix mat;
   double *vec;
   double *result;
 };
 
-struct mtask *split_crs_matrix (
-      struct crs_matrix *m, double *vec, double *result, unsigned int T) {
+struct mtask *split_csr_matrix (
+      struct csr_matrix *m, double *vec, double *result, unsigned int T) {
   struct mtask *arr = (struct mtask *)surely_malloc(T * sizeof(*arr));
   unsigned delta=0, delta_next;
   unsigned t, n=m->rows;
@@ -34,13 +34,13 @@ struct mtask *split_crs_matrix (
 
 void worker(void *closure) {
   struct mtask *p = (struct mtask *)closure;
-  crs_matrix_vector_multiply(&p->mat,p->vec,p->result);
+  csr_matrix_vector_multiply(&p->mat,p->vec,p->result);
 }
 
-struct task *make_multiply_tasks (struct crs_matrix *m, double *v, double *p, unsigned T) {
+struct task *make_multiply_tasks (struct csr_matrix *m, double *v, double *p, unsigned T) {
   unsigned t;
   struct task *tasks = make_tasks(T);
-  struct mtask *arr = split_crs_matrix(m,v,p,T);
+  struct mtask *arr = split_csr_matrix(m,v,p,T);
   for (t=0; t<T; t++)
     initialize_task(tasks, t, worker, arr+t);
   return tasks;
@@ -51,8 +51,8 @@ void par_matrix_vector_multiply (struct task *jobs, unsigned T) {
 }
 
 /*
-void alt_matrix_vector_multiply (struct crs_matrix *m, double *v, double *p, unsigned T) {
-  struct mtask *arr = split_crs_matrix(m,v,p,T);
+void alt_matrix_vector_multiply (struct csr_matrix *m, double *v, double *p, unsigned T) {
+  struct mtask *arr = split_csr_matrix(m,v,p,T);
   unsigned t;
   for (t=0; t<T; t++) worker(arr+t);
 }

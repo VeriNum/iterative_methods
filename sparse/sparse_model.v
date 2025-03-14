@@ -8,24 +8,35 @@ Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
 
-Inductive crs_row_rep {t: type}: forall (cols: Z) (vals: list (ftype t)) (col_ind: list Z) (v: list  (ftype t)), Prop :=
- | crs_row_rep_nil: crs_row_rep 0%Z nil nil nil
- | crs_row_rep_zero: forall cols vals col_ind v,
-          crs_row_rep (cols-1) vals (map Z.pred col_ind) v ->
-          crs_row_rep cols vals col_ind (Zconst t 0 :: v)
- | crs_row_rep_val: forall cols x vals col_ind v,
-          crs_row_rep (cols-1) vals (map Z.pred col_ind) v ->
-          crs_row_rep cols (x::vals) (0%Z::col_ind) (x::v).
+Record csr_matrix {t: type} := {
+  csr_cols: Z;
+  csr_vals: list (ftype t);
+  csr_col_ind: list Z;
+  csr_row_ptr: list Z;
+  csr_rows: Z := Zlength (csr_row_ptr) - 1
+}.
+Arguments csr_matrix t : clear implicits.
 
-Definition crs_rep_aux {t} (mval: matrix t) (cols: Z) (vals: list (ftype t)) (col_ind: list Z) (row_ptr: list Z) : Prop :=
-  Zlength row_ptr = 1 + Zlength mval /\
-  Zlength vals = Znth (Zlength mval) row_ptr /\
-  Zlength col_ind = Znth (Zlength mval) row_ptr /\
-  sorted Z.le (0::row_ptr ++ [Int.max_unsigned]) /\ 
+Inductive csr_row_rep {t: type}: forall (cols: Z) (vals: list (ftype t)) (col_ind: list Z) (v: list  (ftype t)), Prop :=
+ | csr_row_rep_nil: csr_row_rep 0%Z nil nil nil
+ | csr_row_rep_zero: forall cols vals col_ind v,
+          csr_row_rep (cols-1) vals (map Z.pred col_ind) v ->
+          csr_row_rep cols vals col_ind (Zconst t 0 :: v)
+ | csr_row_rep_val: forall cols x vals col_ind v,
+          csr_row_rep (cols-1) vals (map Z.pred col_ind) v ->
+          csr_row_rep cols (x::vals) (0%Z::col_ind) (x::v).
+
+
+
+Definition csr_rep_aux {t} (mval: matrix t) (csr: csr_matrix t) :=
+  Zlength (csr_row_ptr csr) = 1 + Zlength mval /\
+  Zlength (csr_vals csr) = Znth (Zlength mval) (csr_row_ptr csr) /\
+  Zlength (csr_col_ind csr) = Znth (Zlength mval) (csr_row_ptr csr) /\
+  sorted Z.le (0 :: csr_row_ptr csr ++ [Int.max_unsigned]) /\ 
   forall j, 0 <= j < Zlength mval ->
-        crs_row_rep cols 
-             (sublist (Znth j row_ptr) (Znth (j+1) row_ptr) vals)
-             (sublist (Znth j row_ptr) (Znth (j+1) row_ptr) col_ind)
+        csr_row_rep (csr_cols csr) 
+             (sublist (Znth j (csr_row_ptr csr)) (Znth (j+1) (csr_row_ptr csr)) (csr_vals csr))
+             (sublist (Znth j (csr_row_ptr csr)) (Znth (j+1) (csr_row_ptr csr)) (csr_col_ind csr))
              (Znth j mval).
 
 Lemma sorted_app_e1: 
@@ -38,14 +49,17 @@ rewrite !Znth_app1 in H by lia.
 apply H; list_solve.
 Qed.
 
-Lemma crs_rep_matrix_cols {t: type}:
-   forall (mval: matrix t) cols vals col_ind row_ptr,
-   crs_rep_aux mval cols vals col_ind row_ptr -> matrix_cols mval cols.
+Lemma csr_rep_matrix_cols {t: type}:
+   forall (mval: matrix t) (csr: csr_matrix t),
+   csr_rep_aux mval csr -> matrix_cols mval (csr_cols csr).
 Proof.
-unfold crs_rep_aux.
-intros mval cols.
+unfold csr_rep_aux.
+intros mval [cols vals col_ind row_ptr].
+simpl in *.
+clear csr_rows0.
+revert vals col_ind row_ptr.
 induction mval; intros; [constructor | ].
-destruct H as [L [L0 [L1 (*[COL*) [SORT ?]]]](*]*).
+destruct H as [L [L0 [L1 [SORT ?]]]].
 constructor.
 -
 specialize (H 0 ltac:(list_solve)).
@@ -97,9 +111,9 @@ split3; [ | | split3].
        rewrite !Z.sub_add. auto.
 Qed.
 
-Lemma crs_row_rep_cols_nonneg:
+Lemma csr_row_rep_cols_nonneg:
  forall {t} cols (vals: list (ftype t)) col_ind vval,
-  crs_row_rep cols vals col_ind vval ->
+  csr_row_rep cols vals col_ind vval ->
   0 <= cols.
 Proof.
 induction 1; intros.
@@ -108,25 +122,25 @@ induction 1; intros.
 - lia.
 Qed.
 
-Lemma crs_row_rep_col_range:
+Lemma csr_row_rep_col_range:
  forall {t} cols (vals: list (ftype t)) col_ind vval,
-  crs_row_rep cols vals col_ind vval ->
+  csr_row_rep cols vals col_ind vval ->
    forall j, 0 <= j < Zlength col_ind -> 0 <= Znth j col_ind < cols.
 Proof.
 induction 1; intros.
 - list_solve.
-- specialize (IHcrs_row_rep j ltac:(list_solve)). rewrite Znth_map in * by list_solve. lia.
+- specialize (IHcsr_row_rep j ltac:(list_solve)). rewrite Znth_map in * by list_solve. lia.
 - destruct (zeq j 0).
-  + subst. rewrite Znth_0_cons. apply crs_row_rep_cols_nonneg in H. lia.
+  + subst. rewrite Znth_0_cons. apply csr_row_rep_cols_nonneg in H. lia.
   + rewrite Znth_pos_cons by lia.
-     specialize (IHcrs_row_rep (j-1) ltac:(list_solve)).
-     rewrite Znth_map in IHcrs_row_rep by list_solve. 
+     specialize (IHcsr_row_rep (j-1) ltac:(list_solve)).
+     rewrite Znth_map in IHcsr_row_rep by list_solve. 
      lia.
 Qed.
 
-Lemma crs_row_rep_property: 
+Lemma csr_row_rep_property: 
  forall {t} (P: ftype t -> Prop) cols (vals: list (ftype t)) col_ind vval,
-  crs_row_rep cols vals col_ind vval ->
+  csr_row_rep cols vals col_ind vval ->
   Forall P vval -> Forall P vals.
 Proof.
 intros.
@@ -195,9 +209,9 @@ Definition partial_row {t} (i: Z) (h: Z) (vals: list (ftype t)) (col_ind: list Z
    rowmult (Zconst t 0) vals' col_ind' vval.
 
 Lemma partial_row_start:
- forall {t} i (mval: matrix t) cols vals col_ind row_ptr vval,
-  crs_rep_aux mval cols vals col_ind row_ptr ->
-  partial_row i (Znth i row_ptr) vals col_ind row_ptr vval = Zconst t 0.
+ forall {t} i (mval: matrix t) csr (*cols vals col_ind row_ptr*) vval,
+  csr_rep_aux mval csr ->
+  partial_row i (Znth i (csr_row_ptr csr)) (csr_vals csr) (csr_col_ind csr) (csr_row_ptr csr) vval = Zconst t 0.
 Proof.
 intros.
 unfold partial_row.
@@ -218,21 +232,24 @@ Qed.
 #[export] Hint Resolve strict_feq_i strict_floatlist_eqv_i : core.
 
 Lemma partial_row_end:
- forall {t} i (mval: matrix t) cols vals col_ind row_ptr vval
+ forall {t} i (mval: matrix t) csr (*cols vals col_ind row_ptr*)  vval
   (FINvval: Forall finite vval)
   (FINmval: Forall (Forall finite) mval)
-  (LEN: Zlength vval = cols),
+  (LEN: Zlength vval = csr_cols csr),
   0 <= i < matrix_rows mval ->
-  crs_rep_aux mval cols vals col_ind row_ptr ->
-  feq (partial_row i (Znth (i+1) row_ptr) vals col_ind row_ptr vval)
+  csr_rep_aux mval csr ->
+  feq (partial_row i (Znth (i+1) (csr_row_ptr csr)) (csr_vals csr) (csr_col_ind csr) (csr_row_ptr csr) vval)
       (Znth i (matrix_vector_mult mval vval)).
 Proof.
 intros.
+destruct csr as [cols vals col_ind row_ptr _].
+simpl in *.
 unfold partial_row.
 unfold matrix_vector_mult.
-assert (COL := crs_rep_matrix_cols _ _ _ _ _ H0).
-red in COL.
+assert (COL := csr_rep_matrix_cols _ _ H0).
+red in COL. simpl in COL.
 destruct H0 as [? [? [? [? ?]]]].
+simpl in *.
 specialize (H4 _ H).
 set (vals' := sublist _ _ vals) in *. clearbody vals'. 
 set (col_ind' := sublist _ _ col_ind)  in *. clearbody col_ind'.
@@ -242,7 +259,7 @@ assert (FINrow := sublist.Forall_Znth _ _ _ H FINmval).
 set (row := Znth i mval) in *. clearbody row.
 assert (FINvals': Forall finite vals'). {
  clear - FINrow H4.
- eapply crs_row_rep_property; eauto.
+ eapply csr_row_rep_property; eauto.
 }
 clear - H4 FINvval FINvals' FINrow LEN.
 unfold dotprod.
@@ -271,8 +288,8 @@ destruct vval as [ | v0 vval'].
       BFMA (fst x12) (snd x12) s0) (combine v vval') s).
   *
    inv FINvval.
-   rewrite <- IHcrs_row_rep; clear IHcrs_row_rep; auto.
-   pose proof (crs_row_rep_col_range _ _ _ _ H4). clear H4.
+   rewrite <- IHcsr_row_rep; clear IHcsr_row_rep; auto.
+   pose proof (csr_row_rep_col_range _ _ _ _ H4). clear H4.
    rewrite Zlength_map in H by list_solve.
    rewrite Zlength_cons in H.
    assert (Forall (fun j => 1 <= j <= (Zlength vval')) col_ind).
@@ -297,7 +314,7 @@ destruct vval as [ | v0 vval'].
 -
   inv FINrow. rename H1 into FINx. rename H2 into FINrow.
   inv FINvals'. clear H1. rename H2 into FINvals.
-  specialize (IHcrs_row_rep FINrow FINvals).
+  specialize (IHcsr_row_rep FINrow FINvals).
   destruct vval as [ | v0 vval'].
  + simpl. rewrite Znth_nil. unfold default, zerof.
    transitivity  (rowmult s vals col_ind []).
@@ -310,8 +327,8 @@ destruct vval as [ | v0 vval'].
    simpl. rewrite Znth_0_cons.
    forget (BFMA x v0 s) as s1. clear s x FINx.
    inv FINvval. rename H1 into FINv0. rename H2 into FINvval.
-   rewrite <- IHcrs_row_rep; auto; clear IHcrs_row_rep.
-   pose proof (crs_row_rep_col_range _ _ _ _ H4). clear H4.
+   rewrite <- IHcsr_row_rep; auto; clear IHcsr_row_rep.
+   pose proof (csr_row_rep_col_range _ _ _ _ H4). clear H4.
    rewrite Zlength_map in H by list_solve.
    assert (Forall (fun j => 1 <= j <= Zlength vval') col_ind). {
      apply Forall_Znth. intros.
@@ -341,21 +358,82 @@ induction vals1; destruct col_ind1; simpl; intros; inv H; auto.
 Qed.
 
 Lemma partial_row_next:
- forall {t} i h (mval: matrix t) cols vals col_ind row_ptr vval,
-  0 <= Znth i row_ptr ->
-  Znth i row_ptr <= h < Zlength vals ->
-  Zlength vals = Zlength col_ind ->
-  crs_rep_aux mval cols vals col_ind row_ptr ->
-partial_row i (h + 1) vals col_ind row_ptr vval = 
-BFMA (Znth h vals) (Znth (Znth h col_ind) vval)
-  (partial_row i h vals col_ind row_ptr vval).
+ forall {t} i h (mval: matrix t) csr vval,
+  0 <= Znth i (csr_row_ptr csr) ->
+  Znth i (csr_row_ptr csr) <= h < Zlength (csr_vals csr) ->
+  Zlength (csr_vals csr) = Zlength (csr_col_ind csr) ->
+  csr_rep_aux mval csr ->
+partial_row i (h + 1) (csr_vals csr) (csr_col_ind csr) (csr_row_ptr csr) vval = 
+BFMA (Znth h (csr_vals csr)) (Znth (Znth h (csr_col_ind csr)) vval)
+  (partial_row i h (csr_vals csr) (csr_col_ind csr)  (csr_row_ptr csr) vval).
 Proof.
 intros.
 unfold partial_row.
-rewrite !(sublist_split (Znth i row_ptr) h (h+1)) by lia.
+rewrite !(sublist_split (Znth i (csr_row_ptr csr)) h (h+1)) by lia.
 rewrite rowmult_app by list_solve.
 set (s1 := rowmult (Zconst t 0) _ _ _). clearbody s1.
 rewrite !sublist_len_1 by lia.
 reflexivity.
 Qed.
+
+Inductive sum_any {t}: forall (v: vector t) (s: ftype t), Prop :=
+| Sum_Any_0: sum_any nil (Zconst t 0)
+| Sum_Any_1: forall x, sum_any [x] x
+| Sum_Any_split: forall al bl a b, sum_any al a -> sum_any bl b -> sum_any (al++bl) (BPLUS a b)
+| Sum_Any_perm: forall al bl s, Permutation al bl -> sum_any al s -> sum_any bl s.
+
+Require Iterative.StationaryMethods.common.
+
+Lemma sum_any_accuracy{t}: forall (v: vector t) (s: ftype t), 
+  let mag := fold_left Rmax (map FT2R v) R0 in
+  sum_any v s ->
+  (Rabs (fold_left Rplus (map FT2R v) R0 - FT2R s) <= common.g t (length v) * (INR (length v) * mag))%R.
+(* see Theorem fSUM in LAProof/accuracy_proofs/sum_acc.v *)
+Admitted.
+
+Record coo_matrix {t: type} := {
+  coo_rows: Z;
+  coo_cols: Z;
+  coo_entries: list (Z * Z * ftype t)
+}.
+Arguments coo_matrix t : clear implicits.
+
+
+Definition coo_matrix_wellformed {t} (coo: coo_matrix t) :=
+ Forall (fun e => 0 <= fst (fst e) < coo_rows coo /\ 0 <= snd (fst e) < coo_cols coo)
+   (coo_entries coo).
+
+Definition coo_matrix_equiv {t: type} (a b : coo_matrix t) :=
+  coo_rows a = coo_rows b /\ coo_cols a = coo_cols b
+  /\ Permutation (coo_entries a) (coo_entries b).
+
+
+Definition coo_to_matrix {t: type} (coo: coo_matrix t) (m: matrix t) : Prop :=
+  coo_rows coo = matrix_rows m /\
+  matrix_cols m (coo_cols coo) /\
+   forall i, 0 <= i < coo_rows coo ->
+    forall j, 0 <= j < coo_cols coo -> 
+     sum_any (map (fun e: Z*Z*ftype t => snd e) 
+              (filter (fun e: Z*Z*ftype t => andb (Z.eqb (fst (fst e)) i) (Z.eqb (fst (fst e)) j))
+                (coo_entries coo)))
+          (matrix_index m (Z.to_nat i) (Z.to_nat j)).
+
+(*
+Definition coo_to_csr {t: type} (coo: coo_matrix t) (csr: csr_matrix t) : Prop :=
+  coo_rows coo = csr_rows csr /\
+  coo_cols coo = csr_cols csr /\
+  exists m: matrix t,
+   csr_rep_aux m (csr_cols csr) (csr_vals csr) (csr_col_ind csr) (csr_row_ptr csr) /\
+   forall i, 0 <= i < csr_rows csr ->
+    forall j, 0 <= j < csr_cols csr -> 
+     sum_any (map (fun e: Z*Z*ftype t => snd e) 
+              (filter (fun e: Z*Z*ftype t => andb (Z.eqb (fst (fst e)) i) (Z.eqb (fst (fst e)) j))
+                (coo_entries coo)))
+          (matrix_index m (Z.to_nat i) (Z.to_nat j)).
+*)
+
+
+
+
+  
 

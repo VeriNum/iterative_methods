@@ -178,7 +178,7 @@ semax (func_tycontext f_jacobi2 Vprog Gprog [])
    temp _x xp; temp _acc (Vfloat acc);
    temp _maxiter (Vint (Int.repr maxiter)))
    SEP (FRZL FR1; data_at_ shy (tarray tdouble N) yp;
-   crs_rep shA2 (remove_diag A) A2p;
+   csr_rep shA2 (remove_diag A) A2p;
    data_at shA1 (tarray tdouble N)
      (map Vfloat (diag_of_matrix A)) A1p;
    data_at shb (tarray tdouble N) (map Vfloat b) bp;
@@ -194,7 +194,7 @@ semax (func_tycontext f_jacobi2 Vprog Gprog [])
       temp _acc (Vfloat acc); temp _s (Vfloat s))
       SEP (FRZL FR1; 
          data_at (choose n shx shy) (tarray tdouble N) (map Vfloat z) (choose n xp yp);
-         crs_rep shA2 (remove_diag A) A2p;
+         csr_rep shA2 (remove_diag A) A2p;
          data_at shb (tarray tdouble N) (map Vfloat b) bp;
          data_at (choose n shy shx) (tarray tdouble N) (map Vfloat fz) (choose n yp xp);
          data_at shA1 (tarray tdouble (matrix_rows A))
@@ -236,7 +236,7 @@ apply semax_loop_unroll1
     gvars gv; temp _A2 A2p; temp _b bp; 
     temp _x xp; temp _acc (Vfloat acc))
   SEP (data_at shA1 (tarray tdouble N) (map Vfloat A1) A1p;
-        crs_rep shA2 A2 A2p;
+        csr_rep shA2 A2 A2p;
         data_at shb (tarray tdouble N) (map Vfloat b) bp;
         data_at shx (tarray tdouble N) (map Vfloat x) xp;
         data_at shy (tarray tdouble N) (map Vfloat y) yp;
@@ -251,7 +251,7 @@ apply semax_loop_unroll1
     gvars gv; temp _A2 A2p; temp _b bp; 
     temp _x xp; temp _acc (Vfloat acc))
   SEP (data_at shA1 (tarray tdouble N) (map Vfloat A1) A1p;
-        crs_rep shA2 A2 A2p;
+        csr_rep shA2 A2 A2p;
         data_at shb (tarray tdouble N) (map Vfloat b) bp;
         data_at shx (tarray tdouble N) (map Vfloat x) xp;
         data_at shy (tarray tdouble N) (map Vfloat y) yp;
@@ -327,7 +327,7 @@ forward_if (temp _t'3 (Val.of_bool (going s acc))).
    temp _s (Vfloat s))
    SEP (FRZL FR1;
    data_at_ (choose n shx shy) (tarray tdouble N) (choose n xp yp); 
-   crs_rep shA2 A2 A2p;
+   csr_rep shA2 A2 A2p;
    data_at shb (tarray tdouble N) (map Vfloat b) bp;
    data_at (choose n shy shx) (tarray tdouble N) (map Vfloat y) (choose n yp xp);
    data_at shA1 (tarray tdouble N)  (map Vfloat A1) A1p))%assert.

@@ -30,7 +30,7 @@ forward_for_simple_bound N
        temp _N (Vint (Int.repr (matrix_rows A2))); 
        temp _A1 A1p; temp _A2 A2p; temp _b bp; 
        temp _x xp; temp _y yp)
-   SEP (crs_rep shA2 A2 A2p;
+   SEP (csr_rep shA2 A2 A2p;
    data_at shA1 (tarray tdouble N) (map Vfloat A1) A1p;
    data_at shb (tarray tdouble N) (map Vfloat b) bp;
    data_at shx (tarray tdouble N) (map Vfloat x) xp;
@@ -116,7 +116,7 @@ forward_for_simple_bound N
 -
  Intros y s. forward. Exists y s.
  rewrite Z.sub_diag, Zrepeat_0, app_nil_r.
- unfold crs_rep. Intros.
+ unfold csr_rep. Intros.
  entailer!.
  assert (LENiter := Zlength_jacobi_iter A1 A2 b x ltac:(lia) ltac:(lia) ltac:(lia)).
  assert (LENresid := Zlength_jacobi_residual A1 A2 b x ltac:(lia) ltac:(lia) ltac:(lia)).

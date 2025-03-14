@@ -40,3 +40,4 @@ sparse/sparse_model.v
 sparse/fun_model_lemmas.v
 sparse/vst_improvements.v
 sparse/main.v
+sparse/build_csr.v

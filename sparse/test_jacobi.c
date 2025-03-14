@@ -4,7 +4,7 @@
 #include "jacobi.h"
 
 int main (int argc, char **argv) {
-  struct crs_matrix *A2; double *A1, *b, *x;
+  struct csr_matrix *A2; double *A1, *b, *x;
   unsigned N, D, K, T, i;
   struct timeval start,finish,diff;
   if (argc!=5) {
