@@ -41,3 +41,5 @@ sparse/fun_model_lemmas.v
 sparse/vst_improvements.v
 sparse/main.v
 sparse/build_csr.v
+sparse/spec_build_csr.v
+sparse/verif_build_csr.v

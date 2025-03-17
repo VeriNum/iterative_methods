@@ -407,6 +407,16 @@ Definition coo_matrix_equiv {t: type} (a b : coo_matrix t) :=
   coo_rows a = coo_rows b /\ coo_cols a = coo_cols b
   /\ Permutation (coo_entries a) (coo_entries b).
 
+Lemma coo_matrix_wellformed_equiv {t: type} (a b: coo_matrix t):
+   coo_matrix_equiv a b -> coo_matrix_wellformed a -> coo_matrix_wellformed b.
+Proof.
+intros.
+destruct H as [? [? ?]].
+eapply Permutation_Forall; try apply H0.
+eassumption.
+rewrite <- H, <- H1.
+apply H0.
+Qed.
 
 Definition coo_to_matrix {t: type} (coo: coo_matrix t) (m: matrix t) : Prop :=
   coo_rows coo = matrix_rows m /\

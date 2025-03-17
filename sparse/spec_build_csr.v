@@ -176,6 +176,16 @@ Definition coo_quicksort_spec :=
     RETURN( )
     SEP (coo_rep sh coo' p).
 
+Definition coo_count_distinct {t} (entries: list (Z * Z * ftype t)) : Z :=
+ fst (match entries with
+      | nil => (0,(0,0,Zconst t 0))
+      | a :: rest => fold_left (fun u v =>
+                   let '(k, (r0,c0,_)) := u in 
+                   let '(r,c,_) := v in 
+                   (if andb (r0=?r) (c0=?c) then k else k+1, v))
+                     rest (1,a)
+      end).
+
 Definition coo_count_spec :=
  DECLARE _coo_count
  WITH sh: share, coo: coo_matrix Tdouble, p: val
@@ -185,11 +195,10 @@ Definition coo_count_spec :=
          sorted coord_le (coo_entries coo))
     PARAMS( p )
     SEP (coo_rep sh coo p)
- POST [ tdouble ]
-   EX coo': coo_matrix Tdouble, EX m: matrix Tdouble, EX q: val,
-    PROP(coo_matrix_equiv coo coo'; coo_to_matrix coo m)
-    RETURN( q )
-    SEP (coo_rep sh coo' p; csr_rep Ews m q).
+ POST [ tuint ]
+    PROP()
+    RETURN( Vint (Int.repr (coo_count_distinct (coo_entries coo))) )
+    SEP (coo_rep sh coo p).
 
 
 Definition coo_to_csr_matrix_spec :=
@@ -201,15 +210,31 @@ Definition coo_to_csr_matrix_spec :=
     PARAMS( p )
     GLOBALS (gv)
     SEP (coo_rep sh coo p; mem_mgr gv)
- POST [ tdouble ]
+ POST [ tptr t_csr ]
    EX coo': coo_matrix Tdouble, EX m: matrix Tdouble, EX q: val,
     PROP(coo_matrix_equiv coo coo'; coo_to_matrix coo m)
     RETURN( q )
     SEP (coo_rep sh coo' p; csr_rep Ews m q; mem_mgr gv).
 
+Definition surely_malloc_spec :=
+  DECLARE _surely_malloc
+   WITH t:Ctypes.type, gv: globals
+   PRE [ size_t ]
+       PROP (0 <= sizeof t <= Ptrofs.max_unsigned;
+                complete_legal_cosu_type t = true;
+                natural_aligned natural_alignment t = true)
+       PARAMS (Vptrofs (Ptrofs.repr (sizeof t))) GLOBALS (gv)
+       SEP (mem_mgr gv)
+    POST [ tptr tvoid ] EX p:_,
+       PROP ()
+       LOCAL (temp ret_temp p)
+       SEP (mem_mgr gv; malloc_token Ews t p * data_at_ Ews t p).
+
 
 
 Definition Build_CSR_ASI : funspecs := [ 
-   coo_to_csr_matrix_spec ].
+   surely_malloc_spec;
+   coo_count_spec; swap_spec; coo_quicksort_spec; 
+   add_to_coo_matrix_spec; coo_to_csr_matrix_spec ].
 
 
