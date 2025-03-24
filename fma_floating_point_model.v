@@ -83,7 +83,7 @@ elim: v1 v2 H => [ |s v1 IHv1] v2 H.
     { simpl in H. lia. } specialize (IHv1 H0).
     simpl. rewrite -IHv1.
     assert (length (rev v1) = length (rev v2)).
-    { by rewrite !rev_length. }
+    { by rewrite !length_rev. }
     clear IHv1 H H0.
     elim: (rev v1) (rev v2) H1  => [ |a1 v3 IHv3] v4 H.
     * destruct v4.

@@ -35,7 +35,7 @@ assert (nth i (invert_diagmatrix (diag_of_matrix A))
             (Zconst ty 1) = 
         BDIV (Zconst ty 1) (nth i (diag_of_matrix A) (Zconst ty 1))).
 { rewrite (nth_map_inrange (Zconst ty 1)); try by [].
-  by rewrite /diag_of_matrix map_length seq_length /matrix_rows_nat .
+  by rewrite /diag_of_matrix length_map length_seq /matrix_rows_nat .
 } rewrite H0.
 unfold diag_of_matrix.  rewrite nth_map_seq.
 by unfold matrix_index.
@@ -50,7 +50,7 @@ Lemma v_equiv {ty} (v: vector ty) size:
 Proof.
 intros. 
 apply nth_ext with (Zconst ty 0) (Zconst ty 0).
-+ rewrite rev_length length_veclist. by []. 
++ rewrite length_rev length_veclist. by []. 
 + intros. rewrite rev_nth length_veclist.
   assert ((size.+1 - n.+1)%coq_nat = (size.+1.-1 - n)%coq_nat).
   { by []. } rewrite H1.
@@ -79,9 +79,9 @@ Lemma A2_equiv {ty} (A: matrix ty) size i :
 Proof.
 intros.
 apply nth_ext with (Zconst ty 0) (Zconst ty 0).
-+ rewrite rev_length length_veclist. 
++ rewrite length_rev length_veclist. 
   unfold matrix_by_index. rewrite nth_map_seq.
-  - rewrite map_length. rewrite seq_length. by unfold matrix_rows_nat.
+  - rewrite length_map. rewrite length_seq. by unfold matrix_rows_nat.
   - unfold matrix_rows_nat. by rewrite H. 
 + intros.
   rewrite rev_nth length_veclist.
@@ -102,21 +102,21 @@ apply nth_ext with (Zconst ty 0) (Zconst ty 0).
                assert ( i == n :> nat = false). { by apply /eqP. }
                rewrite H3. by unfold matrix_index. 
          -- rewrite /matrix_by_index nth_map_seq in H1.
-            ** rewrite map_length seq_length /matrix_rows_nat H in H1.
+            ** rewrite length_map length_seq /matrix_rows_nat H in H1.
                by apply /ssrnat.ltP.
             ** unfold matrix_rows_nat. by rewrite H. 
          -- by apply /ssrnat.ltP.
       ++ rewrite /matrix_by_index nth_map_seq in H1.
-         -- rewrite map_length seq_length /matrix_rows_nat H in H1.
+         -- rewrite length_map length_seq /matrix_rows_nat H in H1.
             by rewrite /matrix_rows_nat H.
          -- unfold matrix_rows_nat. by rewrite H.
     * unfold matrix_rows_nat. by rewrite H.
   - rewrite /matrix_by_index nth_map_seq in H1.
-    -- rewrite map_length seq_length /matrix_rows_nat H in H1.
+    -- rewrite length_map length_seq /matrix_rows_nat H in H1.
        by apply /ssrnat.ltP.
     -- unfold matrix_rows_nat. by rewrite H.
   - rewrite /matrix_by_index nth_map_seq in H1.
-    -- by rewrite map_length seq_length /matrix_rows_nat H in H1.
+    -- by rewrite length_map length_seq /matrix_rows_nat H in H1.
     -- unfold matrix_rows_nat. by rewrite H.
 Qed.
 
@@ -187,9 +187,9 @@ Lemma iter_length {ty} n (A: matrix ty) (b: vector ty) (x: vector ty):
 Proof.
 induction n.
 + by simpl.
-+ simpl. repeat rewrite !map_length combine_length.
-  unfold matrix_vector_mult. rewrite map_length.
-  rewrite !map_length !seq_length /matrix_rows_nat /=.
++ simpl. repeat rewrite !length_map length_combine.
+  unfold matrix_vector_mult. rewrite length_map.
+  rewrite !length_map !length_seq /matrix_rows_nat /=.
   intros. rewrite H. by rewrite !Nat.min_id.
 Qed.
   
@@ -231,10 +231,10 @@ induction n.
              rewrite (nth_map_inrange (Zconst ty 0, Zconst ty 0)).
              + rewrite combine_nth. 
                - reflexivity.
-               - unfold matrix_vector_mult. rewrite map_length. 
-                 unfold remove_diag. rewrite map_length seq_length.
+               - unfold matrix_vector_mult. rewrite length_map. 
+                 unfold remove_diag. rewrite length_map length_seq.
                  by unfold matrix_rows_nat.
-             + rewrite combine_length. rewrite !map_length seq_length /matrix_rows_nat H0 Nat.min_id /=.
+             + rewrite length_combine. rewrite !length_map length_seq /matrix_rows_nat H0 Nat.min_id /=.
                 assert (length A = size.+1).
                 { rewrite /size. by rewrite prednK. } rewrite H2. 
                 apply /ssrnat.ltP. apply ltn_ord. 
@@ -250,9 +250,9 @@ induction n.
      * assert (length A = size.+1).
        { rewrite /size. by rewrite prednK. } rewrite H2. 
        apply /ssrnat.ltP. apply ltn_ord.
-     * rewrite  !map_length !seq_length combine_length !map_length !seq_length.
+     * rewrite  !length_map !length_seq length_combine !length_map !length_seq.
        by rewrite /matrix_rows_nat H0 Nat.min_id.
-  - rewrite  combine_length !map_length !seq_length combine_length !map_length !seq_length.
+  - rewrite  length_combine !length_map !length_seq length_combine !length_map !length_seq.
      rewrite /matrix_rows_nat H0 !Nat.min_id.
      assert (length A = size.+1).
      { rewrite /size. by rewrite prednK. } rewrite H2. 

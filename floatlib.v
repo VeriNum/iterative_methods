@@ -57,7 +57,7 @@ Lemma matrix_by_index_rows:
 Proof.
 intros.
 unfold matrix_by_index, matrix_rows_nat.
-rewrite map_length. rewrite seq_length. auto.
+rewrite length_map. rewrite length_seq. auto.
 Qed.
 
 Local Open Scope nat.
@@ -70,7 +70,7 @@ intros.
 unfold matrix_by_index, matrix_cols_nat.
 pose (k := 0). change (seq 0 rows) with (seq k rows).
 clearbody k. revert k; induction rows; intros; constructor; auto.
-rewrite map_length, seq_length. auto.
+rewrite length_map, length_seq. auto.
 Qed.
 
 Lemma nth_map_seq:
@@ -314,7 +314,7 @@ rewrite !Zlength_correct in H. apply Nat2Z.inj in H.
 unfold dotprod in H0.
 rewrite <- fold_left_rev_right in H0.
 rewrite rev_combine in H0 by auto.
-rewrite <- (rev_length x), <- (rev_length y) in H.
+rewrite <- (length_rev x), <- (length_rev y) in H.
 assert (Forall finite (rev x) /\ Forall finite (rev y)).
 2:rewrite <- (rev_involutive x), <- (rev_involutive y);
    destruct H1; split; apply Forall_rev; auto.
@@ -351,10 +351,10 @@ Proof.
 intros.
 unfold matrix_by_index.
 apply Forall_nth; intros.
-rewrite map_length, seq_length in H1.
+rewrite length_map, length_seq in H1.
 rewrite nth_map_seq by auto.
 apply Forall_nth; intros.
-rewrite map_length, seq_length in H2.
+rewrite length_map, length_seq in H2.
 rewrite nth_map_seq by auto.
 apply H0; auto.
 Qed.
@@ -374,7 +374,7 @@ Qed.
 
 Lemma Zlength_seq: forall lo n, Zlength (seq lo n) = Z.of_nat n.
 Proof.
-intros. rewrite Zlength_correct. f_equal. apply seq_length.
+intros. rewrite Zlength_correct. f_equal. apply length_seq.
 Qed.
 #[export] Hint Rewrite Zlength_seq : sublist rep_lia.
 

@@ -184,14 +184,24 @@ Definition e_i_sparse {n : nat} {ty} (i : 'I_n.+1)
   let rs:= sum_fold prods in
   (g ty r * Rabs rs  + g1 ty r (r - 1))%Re.
 
-Definition mat_vec_mult_err_bnd {n:nat} {ty}
+Definition mat_vec_mult_err_bnd {n : nat} {ty}
+  (A : 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1) :=
+  \big[Order.Def.max/0%Re]_(i <- enum 'I_n.+1) (e_i i A v).
+
+(* bigmaxr deprecated *)
+(* Definition mat_vec_mult_err_bnd {n:nat} {ty}
  (A: 'M[ftype ty]_n.+1) (v: 'cV[ftype ty]_n.+1):=
- bigmaxr 0%Re [seq (e_i i A v) | i <- enum 'I_n.+1].
+ bigmaxr 0%Re [seq (e_i i A v) | i <- enum 'I_n.+1]. *)
 
 Definition mat_vec_mult_err_bnd_sparse {n : nat} {ty}
   (A : 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1) 
+  (r : nat) (HA : is_r_sparse_mat A r) := 
+  \big[Order.Def.max/0%Re]_(i <- enum 'I_n.+1) (@e_i_sparse n ty i A v r HA).
+
+(* Definition mat_vec_mult_err_bnd_sparse {n : nat} {ty}
+  (A : 'M[ftype ty]_n.+1) (v : 'cV[ftype ty]_n.+1) 
   (r : nat) (HA : is_r_sparse_mat A r) :=
-  bigmaxr 0%Re [seq (@e_i_sparse n ty i A v r HA) | i <- enum 'I_n.+1].
+  bigmaxr 0%Re [seq (@e_i_sparse n ty i A v r HA) | i <- enum 'I_n.+1]. *)
 
 Lemma dotprod_cons {t: type} (v1 v2: list (ftype t)) (x y : ftype t): 
   length v1 = length v2 ->
@@ -352,9 +362,12 @@ apply Rle_trans with (e_i (@inord n i) A v).
          [seq e_i i0 A v | i0 <- enum 'I_n.+1]`_i).
   { rewrite seq_equiv nth_mkseq. nra. by rewrite size_map size_enum_ord in H1. } 
   rewrite H4. apply /RleP.
-  apply (@bigmaxr_ler _  _ [seq e_i i0 A v | i0 <- enum 'I_n.+1] i).
+  pose proof (@le_bigmax _ _ _ 0%Re (fun i => e_i i A v)) (inord i).
+  replace ([seq e_i i0 A v | i0 <- enum 'I_n.+1]`_i) with (e_i (inord i) A v) by auto.
+  simpl in H5. rewrite big_enum . simpl. 
+  (* apply (@bigmaxr_ler _  _ [seq e_i i0 A v | i0 <- enum 'I_n.+1] i).
   rewrite size_map size_enum_ord.
-  by rewrite size_map size_enum_ord in H1.
+  by rewrite size_map size_enum_ord in H1. *)
 Qed.
 
 Lemma bcmp_zero {ty} (x : ftype ty) :
@@ -724,7 +737,7 @@ Proof.
   intros H.
   destruct a; destruct b; try lia.
   + unfold subn. simpl. lia.
-  + unfold subn. simpl. unfold subn_rec. simpl. lia.
+  + unfold subn. simpl. unfold subn. simpl. lia.
 Qed.
 
 Lemma fma_dotprod_forward_error_sparse {ty}:
@@ -904,10 +917,10 @@ Proof.
   + assert (@e_i_sparse n ty (inord i) A v r HA = [seq @e_i_sparse n ty i0 A v r HA | i0 <- enum 'I_n.+1]`_i).
     { rewrite seq_equiv nth_mkseq. nra. by rewrite size_map size_enum_ord in H1. }
     rewrite H7. apply /RleP.
-    apply (@bigmaxr_ler _  _ [seq e_i_sparse i0 v HA | i0 <- enum 'I_n.+1] i).
-    rewrite size_map size_enum_ord.
-    rewrite size_map in H1.
-    rewrite size_enum_ord in H1. auto.
+    pose proof (@le_bigmax _ _ _ 0%Re (fun i => @e_i_sparse n ty i A v r HA)) (inord i).
+    simpl in H8.
+    replace ([seq e_i_sparse i0 v HA | i0 <- enum 'I_n.+1]`_i) with (e_i_sparse (inord i) v HA) by auto.
+    rewrite big_enum //.
 Qed.
 
 Definition FT2R_abs {m n: nat} (A : 'M[R]_(m.+1, n.+1)) :=
@@ -970,7 +983,6 @@ induction m.
     } by rewrite H2.
   } rewrite -H1. by rewrite IHm.
 Qed.
-
 
 
 
