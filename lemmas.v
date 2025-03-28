@@ -264,6 +264,52 @@ Proof.
   rewrite H3. reflexivity.
 Qed.   
 
+Lemma bigmax_addc_0head lr (x : R) :
+  (0 < size lr)%N ->
+  (x >= 0) ->
+  (forall x, x \in lr -> x >= 0) ->
+  \big[maxr/0%Re]_(i <- lr) (i + x) = (\big[maxr/0%Re]_(i <- lr) i) + x.
+Proof.
+  intros. induction lr as [|y lr'].
+  + inversion H.
+  + destruct lr' as [|z lr'].
+    - rewrite !big_cons !big_nil //=.
+      replace (maxr (y + x) 0%Re) with (y + x).
+      2:{ rewrite @max_l; auto. apply /RleP. apply Rplus_le_le_0_compat.
+        * apply /RleP. apply H1. apply mem_head.
+        * apply /RleP. auto. } 
+      replace (maxr y 0%Re) with y.
+      2:{ rewrite max_l; auto. apply H1. apply mem_head. } 
+      reflexivity.
+    - rewrite big_cons. rewrite [in RHS]big_cons. rewrite IHlr'.
+      2:{ auto. } 
+      2:{ intros. apply H1. simpl. rewrite in_cons. apply /orP. auto. } 
+      remember (\big[maxr/0%Re]_(i <- (z :: lr'))  i) as maxzlr.
+      assert ((\big[maxr/0%Re]_(j <- (z :: lr'))  j) = maxzlr).
+      { rewrite Heqmaxzlr. auto. } rewrite {}H2. 
+      rewrite /maxr. destruct (y < maxzlr) eqn:E.
+      * assert (y+x < maxzlr + x).
+        { apply /RltP. apply Rplus_lt_compat_r. apply /RltP. auto. }
+        rewrite H2. reflexivity.
+      * assert (y+x < maxzlr + x = false).
+        { apply /RltP. move /RltP in E. intro. apply E.
+          eapply Rplus_lt_reg_r. apply H2. }
+        rewrite H2. reflexivity.
+Qed.
+
+Lemma bigmaxP_0head lr (x : R) :
+  (0 < size lr)%N ->
+  (forall i:nat, (i < size lr)%N -> ((nth (0%Re) lr i) <= x)%Re) ->
+  (forall x, x \in lr -> x >= 0) ->
+  (x \in lr) ->
+  (\big[maxr/0%Re]_(i <- lr) i = x) .
+Proof.
+  intros. apply Rle_antisym.
+  + apply bigmax_le_0head; auto.
+  + apply bigmax_ler_0head; auto.
+Qed.
+
+
 (* Lemma bigmax_le_deprecated (x0:R) lr (x:R):
  (0 < size lr)%N ->
  (forall i:nat, (i < size lr)%N -> ((nth x0 lr i) <= x)%Re) ->
@@ -277,7 +323,7 @@ Qed. *)
 
 
 Lemma enum_list:
-  enum 'I_3 = [:: ord0;  1; (@inord 2 2)].
+  enum 'I_3 = [:: ord0;  1; (@inord 2 2)] .
 Proof.
   apply (inj_map val_inj). rewrite val_enum_ord.
   rewrite /iota. simpl.
@@ -461,6 +507,30 @@ Proof.
   + rewrite //= big_cons big_ord_recl //= IHlr' //=.
 Qed.
 
+Lemma bigmax_seq_enum_eq (x0 : R) lr :
+  \big[Order.Def.max/x0]_(i <- lr) i = \big[Order.Def.max/x0]_(i <- enum 'I_(size lr)) nth x0 lr i.
+Proof.
+  induction lr as [|x lr'].
+  + rewrite //= enum_ord0 !big_nil //=.
+  + rewrite //= big_cons IHlr'.
+    rewrite enum_ordSl big_cons //=.
+    f_equal. rewrite big_map //=.
+Qed.
+
+(* \big[max/0](i <- r) F i, how to transform it to \big[max/0](i <- [seq F j | j <- r]) i *)
+
+Lemma bigmax_seq_map_eq (x0 : R) lr (f : R -> R) :
+  \big[Order.Def.max/x0]_(i <- lr) (f i) = \big[Order.Def.max/x0]_(i <- [seq f j | j <- lr]) i.
+Proof.
+  by rewrite big_map.
+Qed.
+  
+Lemma bigmax_same_lr (x0 : R) lr1 lr2 :
+  lr1 = lr2 ->
+  \big[Order.Def.max/x0]_(i <- lr1) i = \big[Order.Def.max/x0]_(i <- lr2) i. 
+Proof.
+  intros. subst lr2. reflexivity.
+Qed.
 
 Lemma bigmax_le_implies (x0 : R) lr (x : R):
   (0 < size lr) %N ->
