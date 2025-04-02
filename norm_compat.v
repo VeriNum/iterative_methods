@@ -40,30 +40,25 @@ unfold vec_norm2, vec_inf_norm.
 match goal with |-context[(_ <= _ * ?a)%Re]=>
   replace a with (sqrt (Rsqr a)) 
 end.
-+ rewrite -sqrt_mult_alt.
-  - apply sqrt_le_1_alt . rewrite -sum_const .
+{ rewrite -sqrt_mult_alt.
+  + apply sqrt_le_1_alt. rewrite -sum_const.
     apply /RleP. apply big_sum_ge_ex_abstract.
-    intros. rewrite Rsqr_abs. apply  Rsqr_incr_1.
-    * apply Rle_trans with 
-      [seq Rabs (v i0 0) | i0 <- enum 'I_n.+1]`_i.
-      ++ rewrite seq_equiv. rewrite nth_mkseq. 
-         rewrite inord_val. apply Rle_refl.
-         apply ltn_ord.
-      ++ apply /RleP. 
-         apply (@bigmaxr_ler _ 0%Re 
-                    [seq Rabs (v i0 0) | i0 <- enum 'I_n.+1] i).
-    * rewrite size_map size_enum_ord. apply ltn_ord.
-    * apply Rabs_pos.
-  - apply /RleP. apply bigmax_le_0. apply /RleP. apply Rle_refl.
-    intros. rewrite seq_equiv. rewrite nth_mkseq;
-    last by rewrite size_map size_enum_ord in H0.
-    apply /RleP. apply Rabs_pos.
-  - apply pos_INR.
-+ apply sqrt_Rsqr. apply /RleP. apply bigmax_le_0.
-  - apply /RleP. apply Rle_refl.
-  - intros. rewrite seq_equiv. rewrite nth_mkseq;
-    last by rewrite size_map size_enum_ord in H.
-    apply /RleP. apply Rabs_pos.
+    intros. rewrite Rsqr_abs. apply Rsqr_incr_1.
+    2:{ apply Rabs_pos. }
+    { apply Rle_trans with [seq Rabs (v i0 0) | i0 <- enum 'I_n.+1]`_i. 
+      + rewrite seq_equiv nth_mkseq.
+        rewrite inord_val. apply Rle_refl. apply ltn_ord.
+      + apply bigmax_ler_0head. apply mem_nth. rewrite size_map size_enum_ord.
+        apply ltn_ord. intros. move /mapP in H0. destruct H0 as [i0 H0 H1]. rewrite H1.
+        apply /RleP. apply Rabs_pos. }
+    { apply /RleP. apply bigmax_le_0_0head. intros.
+      rewrite (@nth_map _ (@ord0 n) _ (@GRing.zero (Num_POrderedZmodule__to__GRing_Nmodule RbaseSymbolsImpl_R__canonical__Num_POrderedZmodule))).
+      apply /RleP. apply Rabs_pos. rewrite size_map in H0. auto. }
+  + apply pos_INR. }
+apply sqrt_Rsqr. apply /RleP. apply bigmax_le_0_0head.
+intros.
+rewrite (@nth_map _ (@ord0 n) _ (@GRing.zero (Num_POrderedZmodule__to__GRing_Nmodule RbaseSymbolsImpl_R__canonical__Num_POrderedZmodule))).
+apply /RleP. apply Rabs_pos. rewrite size_map in H. auto.
 Qed.
 
 Require Import floatlib fma_floating_point_model common 
