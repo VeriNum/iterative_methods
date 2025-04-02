@@ -1066,82 +1066,61 @@ Lemma matrix_err_bound_le_rel {n:nat} {ty}
  (matrix_inf_norm (FT2R_mat A) * vec_inf_norm (FT2R_mat v)) * g ty n.+1 +
    g1 ty n.+1 (n.+1 - 1).
 Proof.
-  
-
-
-
-change
-(mat_vec_mult_err_bnd A v <=
-(matrix_inf_norm (FT2R_mat A) * vec_inf_norm (FT2R_mat v) * g ty n.+1 +
-g1 ty n.+1 (n.+1 - 1))%R).
-
-
-unfold mat_vec_mult_err_bnd.
-unfold vec_inf_norm, matrix_inf_norm.
-rewrite mulrC. rewrite [in X in (_ * X + _)]mulrC.
-rewrite -bigmaxr_mulr.
-+(* apply /RleP.*) rewrite -RplusE -RmultE.
-  apply lemmas.bigmax_le.
-  - by rewrite size_map size_enum_ord.
-  - intros. rewrite seq_equiv. rewrite nth_mkseq;
-    last by rewrite size_map size_enum_ord in H.
-    unfold e_i. rewrite !length_veclist.
-    apply Rplus_le_compat_r. apply Rmult_le_compat_l.
-    * apply g_pos.
-    * apply Rle_trans with
-      [seq (bigmaxr 0%Re
-           [seq Rabs (FT2R_mat v i1 ord0)
-              | i1 <- enum 'I_n.+1] *
-         row_sum (FT2R_mat A) i0)%Ri
-      | i0 <- enum 'I_n.+1]`_i.
-      ++ assert ([seq bigmaxr 0%Re
-                    [seq Rabs (FT2R_mat v i1 ord0)
-                       | i1 <- enum 'I_n.+1] *
-                    row_sum (FT2R_mat A) i0
-                  | i0 <- enum 'I_n.+1] = 
-                 mkseq (fun i: nat => (bigmaxr 0%Re
-                                        [seq Rabs (FT2R_mat v i1 ord0)
-                                           | i1 <- enum 'I_n.+1] *
-                                      row_sum (FT2R_mat A) (@inord n i))%Re) n.+1).
-          { rewrite !seq_equiv. by []. } rewrite H0. clear H0.
-         rewrite nth_mkseq;
-         last by rewrite size_map size_enum_ord in H.
-         rewrite RmultE.
-         unfold row_sum. rewrite big_distrr.
-         rewrite -sum_fold_mathcomp_equiv.
-         rewrite sum_abs_eq /=.
-         -- apply /RleP. apply big_sum_ge_ex_abstract.
-            intros. rewrite -RmultE.
-            assert ((widen_ord (leqnn n.+1) i0) = i0).
-            { unfold widen_ord. apply val_inj. by simpl. }
-            rewrite H1. rewrite !mxE. rewrite mulrC.
-            rewrite -RmultE. apply Rmult_le_compat_l.
-            ** apply Rabs_pos.
-            ** apply Rle_trans with
-               [seq Rabs (FT2R_mat v i1 ord0)
-                   | i1 <- enum 'I_n.+1]`_i0.
-               +++ rewrite seq_equiv. rewrite nth_mkseq; 
-                   last by apply ltn_ord.
-                   rewrite !mxE /=. rewrite inord_val. apply Rle_refl.
-               +++ apply /RleP. 
-                   apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v i1 ord0)
-                                                | i1 <- enum 'I_n.+1] i0).
-                   rewrite size_map size_enum_ord. apply ltn_ord.
-         -- intros. rewrite !mxE. rewrite -RmultE. 
-            apply Rmult_le_pos; apply Rabs_pos.
-     ++ apply /RleP.
-        apply (@bigmaxr_ler _ 0%Re [seq bigmaxr 0%Re
-                                           [seq Rabs (FT2R_mat v i1 ord0)
-                                              | i1 <- enum 'I_n.+1] *
-                                         row_sum (FT2R_mat A) i0
-                                       | i0 <- enum 'I_n.+1] i).
-        rewrite size_map size_enum_ord.
-        by rewrite size_map size_enum_ord in H.
-+ apply bigmax_le_0.
-  - apply /RleP. apply Rle_refl.
-  - intros. rewrite seq_equiv. rewrite nth_mkseq;
-    last by rewrite size_map size_enum_ord in H.
-    apply /RleP. apply Rabs_pos.
+  change (mat_vec_mult_err_bnd A v <=
+    (matrix_inf_norm (FT2R_mat A) * vec_inf_norm (FT2R_mat v) * g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%R).
+  rewrite /mat_vec_mult_err_bnd /vec_inf_norm /matrix_inf_norm.
+  rewrite mulrC. rewrite [in X in (_ * X + _)]mulrC.
+  remember (\big[Order.Def.max/0%Re]_(i <- [seq Rabs (FT2R_mat v i ord0)  | i <- enum 'I_n.+1])  i) as vnorm.
+  rewrite -Heqvnorm -!RmultE bigmax_mulr_0head.
+  2:{ rewrite size_map size_enum_ord. auto. }
+  2:{ intros. move /mapP in H. destruct H as [i H1 H2]. rewrite H2 /row_sum.
+    apply sum_of_pos. intros. apply /RleP. apply Rabs_pos. } 
+  2:{ rewrite Heqvnorm. pose proof (@vec_inf_norm_nonneg). apply H. }
+  assert (\big[Order.Def.max/0%Re]_(i <- enum 'I_n.+1)  e_i i A v =
+    \big[Order.Def.max/0%Re]_(i <- [seq e_i i A v | i <- enum 'I_n.+1]) i).
+  { rewrite big_map_id. auto. } rewrite {}H.
+  apply bigmax_le_0head.
+  { rewrite size_map size_enum_ord. auto. }
+  2:{ intros. move /mapP in H. destruct H as [i H1 H2]. rewrite H2.
+    apply /RleP. apply e_i_pos. }
+  intros. 
+  assert (seq.nth 0%Re [seq e_i i0 A v | i0 <- enum 'I_n.+1] i = e_i (inord i) A v).
+  { rewrite (@nth_map _ ord0 _ 0%Re (fun i => e_i i A v)).
+    2:{ rewrite size_map in H. auto. }
+    rewrite -(@nth_ord_enum n.+1 ord0 (inord i)).  
+    f_equal. f_equal. rewrite inordK; auto. by rewrite size_map size_enum_ord in H. }
+  rewrite {}H0.
+  rewrite e_i_eq_form. rewrite -!RplusE. apply Rplus_le_compat_r.
+  rewrite -!RmultE. apply Rmult_le_compat_l. apply g_pos.
+  rewrite mxE. 
+  assert (Rabs (\sum_j  FT2R_abs (FT2R_mat A) (inord i) j * FT2R_abs (FT2R_mat v) j ord0) =
+    \sum_j  FT2R_abs (FT2R_mat A) (inord i) j * FT2R_abs (FT2R_mat v) j ord0).
+  { apply sum_abs_eq. intros. apply Rmult_le_pos.
+    + rewrite /FT2R_abs mxE. apply Rabs_pos.
+    + rewrite /FT2R_abs mxE. apply Rabs_pos. } 
+  rewrite {}H0.
+  apply Rle_trans with (\sum_j vnorm * FT2R_abs (FT2R_mat A) (inord i) j).
+  { pose proof (@sum_le_all_elements n (fun j => FT2R_abs (FT2R_mat A) (inord i) j * FT2R_abs (FT2R_mat v) j ord0)
+      (fun j => vnorm * FT2R_abs (FT2R_mat A) (inord i) j)).
+    simpl in H0. simpl. apply /RleP. apply H0. clear H0.
+    intros. apply /RleP. rewrite -!RmultE Rmult_comm. apply Rmult_le_compat_r.
+    + rewrite /FT2R_abs mxE. apply Rabs_pos.
+    + rewrite Heqvnorm. apply bigmax_ler_0head.
+      * apply /mapP. exists i0. apply mem_enum. 
+        rewrite /FT2R_abs /FT2R_mat !mxE. reflexivity.
+      * intros. move /mapP in H0. destruct H0 as [i1 H1 H2]. rewrite H2.
+        apply /RleP. apply Rabs_pos. } 
+  rewrite sum_mult_distrl /row_sum.
+  apply bigmax_ler_0head.
+  + apply /mapP. exists (\sum_(i0 < n.+1)  FT2R_abs (FT2R_mat A) (inord i) i0); auto.
+    apply /mapP. exists (inord i). apply mem_enum.
+    apply eq_big; auto. intros.
+    rewrite /FT2R_abs mxE //=.
+  + intros. move /mapP in H0. destruct H0 as [i1 H1 H2]. rewrite H2.
+    move /mapP in H1. destruct H1 as [i2 H1 H3]. rewrite H3.
+    apply /RleP. apply Rmult_le_pos.
+    { pose proof @vec_inf_norm_nonneg. rewrite Heqvnorm. apply /RleP. apply H0. }
+    apply /RleP. apply sum_of_pos. intros. apply /RleP. apply Rabs_pos.
 Qed.
 
 

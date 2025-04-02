@@ -425,6 +425,19 @@ Proof.
   intros. apply /RleP. apply lerD; by apply /RleP.
 Qed. 
 
+Lemma sum_le_all_elements {n : nat} (f1 f2 : 'I_n.+1 -> R) :
+  (forall i, (f1 i <= f2 i)) ->
+  \sum_i f1 i <= \sum_i f2 i.
+Proof.
+  induction n as [|n']; intros.
+  + rewrite //= !big_ord_recr //= !big_ord0 !add0r //=. 
+  + rewrite big_ord_recr //=. 
+    assert (\sum_(i < n'.+2)  f2 i = \sum_(i < n'.+1) f2 (widen_ord (leqnSn n'.+1) i) + f2 ord_max).
+    { rewrite big_ord_recr //=. } rewrite {}H0.
+    apply /RleP. apply Rplus_le_compat; auto.
+    apply /RleP. apply IHn'; auto. apply /RleP. apply H.
+Qed.
+
 Lemma Rabs_ineq {n:nat} (f : 'I_n.+1 -> R):
   Rabs (\sum_j f j) <= \sum_j (Rabs (f j)).
 Proof.
@@ -485,6 +498,13 @@ Proof.
     { rewrite big_ord_recr //=. } rewrite {}H0.
     apply /RleP. apply Rplus_le_compat; auto.
     apply /RleP. apply IHn'; auto.
+Qed.
+
+Lemma sum_all_terms_eq_nat {n : nat} (f1 f2 : nat -> R) :
+  (forall i, (i < n)%N -> f1 i = f2 i) ->
+  \sum_(i < n) f1 i = \sum_(j < n) f2 j.
+Proof.
+  intros. apply eq_big; auto.
 Qed.
 
 (* Lemma bigmax_form_eq (x0 : R) lr :
