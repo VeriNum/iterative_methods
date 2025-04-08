@@ -217,75 +217,52 @@ Lemma vec_float_sub {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   vec_inf_norm (FT2R_mat (v1 -f v2) - (FT2R_mat v1 - FT2R_mat v2)) <= 
   (vec_inf_norm (FT2R_mat v1) + vec_inf_norm (FT2R_mat v2)) * (default_rel ty) .
 Proof.
-intros Hfin.
-unfold vec_inf_norm.
-apply /RleP. apply lemmas.bigmax_le; first by rewrite size_map size_enum_ord.
-intros. rewrite seq_equiv. 
-rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
-rewrite !mxE. rewrite -!RminusE -RmultE -!RplusE.
-specialize (Hfin ((v1 (inord i) ord0), (v2 (inord i) ord0))).
-assert (Hin: In (v1 (inord i) ord0, v2 (inord i) ord0)
+  intros Hfin. unfold vec_inf_norm. apply /RleP. apply bigmax_le_0head.
+  { by rewrite size_map size_enum_ord. } 
+  2:{ intros. move /mapP in H. destruct H as [i H1 H2]. rewrite H2. apply /RleP. apply Rabs_pos. } 
+  intros. rewrite seq_equiv. rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
+  specialize (Hfin ((v1 (inord i) ord0), (v2 (inord i) ord0))).
+  assert (Hin: In (v1 (inord i) ord0, v2 (inord i) ord0)
            (combine (vec_to_list_float n.+1 v1)
               (vec_to_list_float n.+1 v2))).
-{ apply in_rev. rewrite -combine_rev; last by rewrite !length_veclist.
-  assert ((v1 (inord i) ord0, v2 (inord i) ord0) = 
+  { apply in_rev. rewrite -combine_rev; last by rewrite !length_veclist.
+    assert ((v1 (inord i) ord0, v2 (inord i) ord0) = 
            nth i (combine (rev (vec_to_list_float n.+1 v1))
                     (rev (vec_to_list_float n.+1 v2))) (Zconst ty 0, Zconst ty 0)).
-  { rewrite combine_nth. rewrite !rev_nth !length_veclist.
-    assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat).
-    { lia. } rewrite H0. rewrite !nth_vec_to_list_float; try by [].
-    by rewrite size_map size_enum_ord in H.
-    by rewrite size_map size_enum_ord in H.
-    apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H.
-    apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H.
-    by rewrite !rev_length !length_veclist.
- } rewrite H0. apply nth_In. rewrite combine_length.
- rewrite !rev_length !length_veclist Nat.min_id.
- rewrite size_map size_enum_ord in H. by apply /ssrnat.ltP.
-} specialize (Hfin Hin).
-rewrite Bminus_bplus_opp_equiv.
-+ assert ((FT2R (v1 (inord i) ord0) -  FT2R (v2 (inord i) ord0))%Re = 
+    { rewrite combine_nth. rewrite !rev_nth !length_veclist.
+      assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat).
+      { lia. } rewrite H0. rewrite !nth_vec_to_list_float; try by [].
+      by rewrite size_map size_enum_ord in H.
+      by rewrite size_map size_enum_ord in H.
+      apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H.
+      apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H.
+      by rewrite !length_rev !length_veclist.
+    } rewrite H0. apply nth_In. rewrite length_combine.
+    rewrite !length_rev !length_veclist Nat.min_id.
+    rewrite size_map size_enum_ord in H. by apply /ssrnat.ltP. } 
+  specialize (Hfin Hin). simpl in Hfin. destruct Hfin as [Hfin1 [Hfin2 Hfin12]].
+
+  pose proof (@Bminus_bplus_opp_equiv _ _ (v1 (inord i) ord0) (v2 (inord i) ord0) Hfin12).
+  rewrite !mxE. rewrite -!RminusE. rewrite {}H0.
+  assert ((FT2R (v1 (inord i) ord0) -  FT2R (v2 (inord i) ord0))%Re = 
           (FT2R (v1 (inord i) ord0) +  FT2R (BOPP (v2 (inord i) ord0)))%Re ).
-  { unfold FT2R. rewrite B2R_Bopp. nra. }
-  rewrite H0.
+  { unfold FT2R. rewrite B2R_Bopp. nra. } rewrite {}H0.
   apply Rle_trans with 
-  ((Rabs (FT2R (v1 (inord i) ord0)) + Rabs (FT2R (BOPP (v2 (inord i) ord0)))) * (default_rel ty))%Re.
-  - apply BPLUS_error_le_rel.
-    apply Hfin. 
-  - apply Rle_trans with
-    ((bigmaxr 0%Re
-          [seq Rabs (FT2R_mat v1 i0 ord0)
-             | i0 <- enum 'I_n.+1] +
-        bigmaxr 0%Re
-          [seq Rabs (FT2R_mat v2 i0 ord0)
-             | i0 <- enum 'I_n.+1]) * default_rel ty)%Re.
-    * apply Rmult_le_compat_r.
-      ++ apply default_rel_ge_0.
-      ++ apply Rplus_le_compat.
-         -- apply Rle_trans with 
-            [seq Rabs (FT2R_mat v1 i0 ord0)
-                 | i0 <- enum 'I_n.+1]`_i.
-            ** rewrite seq_equiv. rewrite nth_mkseq;
-               last by rewrite size_map size_enum_ord in H.
-               rewrite !mxE. nra.
-            ** apply /RleP. 
-               apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v1 i0 ord0)
-                                              | i0 <- enum 'I_n.+1] i).
-               rewrite size_map size_enum_ord.
-               by rewrite size_map size_enum_ord in H.
-         -- apply Rle_trans with 
-            [seq Rabs (FT2R_mat v2 i0 ord0)
-                 | i0 <- enum 'I_n.+1]`_i.
-            ** rewrite seq_equiv. rewrite nth_mkseq;
-               last by rewrite size_map size_enum_ord in H.
-               rewrite !mxE. unfold FT2R. rewrite B2R_Bopp Rabs_Ropp. nra.
-            ** apply /RleP. 
-               apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v2 i0 ord0)
-                                              | i0 <- enum 'I_n.+1] i).
-               rewrite size_map size_enum_ord.
-               by rewrite size_map size_enum_ord in H.
-    * apply Rle_refl.
-+ apply Hfin.
+    ((Rabs (FT2R (v1 (inord i) ord0)) + Rabs (FT2R (BOPP (v2 (inord i) ord0)))) * (default_rel ty))%Re.
+  { apply BPLUS_error_le_rel. apply Hfin12. } 
+  apply Rmult_le_compat_r.
+  { apply default_rel_ge_0. }
+  apply Rplus_le_compat.
+  + apply bigmax_ler_0head.
+    - apply /mapP. exists (inord i). apply mem_enum. 
+      f_equal. rewrite /FT2R_mat mxE. f_equal.
+    - intros. move /mapP in H0. destruct H0 as [i0 H1 H2]. rewrite H2.
+      apply /RleP. apply Rabs_pos.
+  + apply bigmax_ler_0head.
+    - apply /mapP. exists (inord i). apply mem_enum.
+      rewrite !mxE. unfold FT2R. rewrite B2R_Bopp Rabs_Ropp. f_equal.
+    - intros. move /mapP in H0. destruct H0 as [i0 H1 H2]. rewrite H2.
+      apply /RleP. apply Rabs_pos.
 Qed.
 
 
@@ -299,63 +276,45 @@ Lemma vec_float_sub_1 {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   vec_inf_norm (FT2R_mat (v1 -f v2) - (FT2R_mat v1 - FT2R_mat v2)) <= 
   (vec_inf_norm (FT2R_mat v1 - FT2R_mat v2)) * (default_rel ty) .
 Proof.
-intros Hfin.
-unfold vec_inf_norm.
-apply /RleP. apply lemmas.bigmax_le; first by rewrite size_map size_enum_ord.
-intros. rewrite seq_equiv. 
-rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
-rewrite !mxE. rewrite -!RminusE -RmultE.
-specialize (Hfin ((v1 (inord i) ord0), (v2 (inord i) ord0))).
-assert (Hin: In (v1 (inord i) ord0, v2 (inord i) ord0)
+  intros Hfin. unfold vec_inf_norm. apply /RleP. apply bigmax_le_0head.
+  { by rewrite size_map size_enum_ord. } 
+  2:{ intros. move /mapP in H. destruct H as [i H1 H2]. rewrite H2. apply /RleP. apply Rabs_pos. } 
+  intros. rewrite seq_equiv. rewrite nth_mkseq; last by rewrite size_map size_enum_ord in H.
+  specialize (Hfin ((v1 (inord i) ord0), (v2 (inord i) ord0))).
+  assert (Hin: In (v1 (inord i) ord0, v2 (inord i) ord0)
            (combine (vec_to_list_float n.+1 v1)
               (vec_to_list_float n.+1 v2))).
-{ apply in_rev. rewrite -combine_rev; last by rewrite !length_veclist.
-  assert ((v1 (inord i) ord0, v2 (inord i) ord0) = 
+  { apply in_rev. rewrite -combine_rev; last by rewrite !length_veclist.
+    assert ((v1 (inord i) ord0, v2 (inord i) ord0) = 
            nth i (combine (rev (vec_to_list_float n.+1 v1))
                     (rev (vec_to_list_float n.+1 v2))) (Zconst ty 0, Zconst ty 0)).
-  { rewrite combine_nth. rewrite !rev_nth !length_veclist.
-    assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat).
-    { lia. } rewrite H0. rewrite !nth_vec_to_list_float; try by [].
-    by rewrite size_map size_enum_ord in H.
-    by rewrite size_map size_enum_ord in H.
-    apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H.
-    apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H.
-    by rewrite !rev_length !length_veclist.
- } rewrite H0. apply nth_In. rewrite combine_length.
- rewrite !rev_length !length_veclist Nat.min_id.
- rewrite size_map size_enum_ord in H. by apply /ssrnat.ltP.
-} specialize (Hfin Hin).
-rewrite Bminus_bplus_opp_equiv.
-+ assert ((FT2R (v1 (inord i) ord0) -  FT2R (v2 (inord i) ord0))%Re = 
+    { rewrite combine_nth. rewrite !rev_nth !length_veclist.
+      assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat).
+      { lia. } rewrite H0. rewrite !nth_vec_to_list_float; try by [].
+      by rewrite size_map size_enum_ord in H.
+      by rewrite size_map size_enum_ord in H.
+      apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H.
+      apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H.
+      by rewrite !length_rev !length_veclist.
+    } rewrite H0. apply nth_In. rewrite length_combine.
+    rewrite !length_rev !length_veclist Nat.min_id.
+    rewrite size_map size_enum_ord in H. by apply /ssrnat.ltP. } 
+  specialize (Hfin Hin). simpl in Hfin. destruct Hfin as [Hfin1 [Hfin2 Hfin12]].
+
+  pose proof (@Bminus_bplus_opp_equiv _ _ (v1 (inord i) ord0) (v2 (inord i) ord0) Hfin12).
+  rewrite !mxE. rewrite -!RminusE. rewrite {}H0.
+  assert ((FT2R (v1 (inord i) ord0) -  FT2R (v2 (inord i) ord0))%Re = 
           (FT2R (v1 (inord i) ord0) +  FT2R (BOPP (v2 (inord i) ord0)))%Re ).
-  { unfold FT2R. rewrite B2R_Bopp. nra. }
-  rewrite H0.
+  { unfold FT2R. rewrite B2R_Bopp. nra. } rewrite {}H0.
   apply Rle_trans with 
-  (Rabs (FT2R (v1 (inord i) ord0) + (FT2R (BOPP (v2 (inord i) ord0)))) * (default_rel ty))%Re.
-  - apply BPLUS_error_le_rel'.
-    apply Hfin.
-  - apply Rmult_le_compat_r.
-    * apply default_rel_ge_0.
-    * apply Rle_trans with 
-      [seq Rabs
-          ((FT2R_mat v1 - FT2R_mat v2)%Ri i0
-             0)
-      | i0 <- enum 'I_n.+1]`_i.
-      ++ rewrite seq_equiv. rewrite nth_mkseq;
-         last by rewrite size_map size_enum_ord in H.
-         rewrite !mxE. rewrite -RminusE.
-         assert (FT2R (BOPP (v2 (inord i) ord0)) = 
-                  (- (FT2R (v2 (inord i) ord0)))%Re).
-         { unfold FT2R. rewrite B2R_Bopp. nra. }
-         rewrite H1. apply Rle_refl.
-      ++ apply /RleP. 
-         apply (@bigmaxr_ler _ 0%Re [seq Rabs
-                                           ((FT2R_mat v1 - FT2R_mat v2)%Ri i0
-                                              0)
-                                       | i0 <- enum 'I_n.+1] i).
-         rewrite size_map size_enum_ord.
-         by rewrite size_map size_enum_ord in H.
-+ apply Hfin.
+    (Rabs (FT2R (v1 (inord i) ord0) + (FT2R (BOPP (v2 (inord i) ord0)))) * (default_rel ty))%Re.
+  { apply BPLUS_error_le_rel'. apply Hfin12. }
+  apply Rmult_le_compat_r. { apply default_rel_ge_0. }
+  apply bigmax_ler_0head.
+  + apply /mapP. exists (inord i). apply mem_enum.
+    rewrite !mxE. unfold FT2R. rewrite B2R_Bopp. f_equal.
+  + intros. move /mapP in H0. destruct H0 as [i0 H1 H2]. rewrite H2.
+    apply /RleP. apply Rabs_pos.
 Qed.
 
 
