@@ -108,65 +108,6 @@ repeat apply Rplus_le_le_0_compat.
     * apply /RleP. apply matrix_norm_pd.
 Qed.
 
-Lemma rho_sparse_ge_0 {ty} {n:nat} 
-  (A: 'M[ftype ty]_n.+1) (b: 'cV[ftype ty]_n.+1) (r : nat):
-  let A_real := FT2R_mat A in
-  let b_real := FT2R_mat b in
-  let R := (vec_inf_norm (A1_diag A_real) * matrix_inf_norm (A2_J_real A_real))%Re in
-  let delta := default_rel ty in
-  let rho := ((((1 + g ty r.+1) * (1 + delta) *
-                  g ty r.+1 + delta * (1 + g ty r.+1) +
-                  g ty r.+1) * (1 + delta) + delta) * R +
-                (((1 + g ty r.+1) * (1 + delta) *
-                  g ty r.+1 + delta * (1 + g ty r.+1) +
-                  g ty r.+1) * default_abs ty +
-                 default_abs ty) *
-                matrix_inf_norm (A2_J_real A_real) + R)%Re in
- (0 <= rho)%Re.
-Proof.
- intros.
- unfold rho.
- repeat apply Rplus_le_le_0_compat.
- + apply Rmult_le_pos.
-   - apply Rplus_le_le_0_compat.
-     * apply Rmult_le_pos.
-       ++ apply Rplus_le_le_0_compat; last by apply g_pos.
-          repeat apply Rplus_le_le_0_compat; apply Rmult_le_pos. 
-          -- apply Rmult_le_pos; try apply Rplus_le_le_0_compat; 
-             try nra; try apply g_pos. unfold delta. 
-             apply default_rel_ge_0.
-          -- apply g_pos.
-          -- unfold delta. 
-             apply default_rel_ge_0.
-          -- apply Rplus_le_le_0_compat; last by apply g_pos. nra. 
-       ++ apply Rplus_le_le_0_compat. nra.  
-          unfold delta. 
-          apply default_rel_ge_0.
-     * unfold delta. 
-       apply default_rel_ge_0.
-   - unfold R2. apply Rmult_le_pos.
-     * apply /RleP. apply vec_norm_pd.
-     * apply /RleP. apply matrix_norm_pd.
- + apply Rmult_le_pos.
-   - repeat apply Rplus_le_le_0_compat; last by apply default_abs_ge_0.
-     apply Rmult_le_pos; last by apply default_abs_ge_0.
-     apply Rplus_le_le_0_compat; last by apply g_pos.
-     apply Rplus_le_le_0_compat. 
-     * repeat apply Rmult_le_pos.
-       ++ apply Rplus_le_le_0_compat; last by apply g_pos. nra. 
-       ++ apply Rplus_le_le_0_compat. nra.  
-          unfold delta. 
-          apply default_rel_ge_0.
-       ++ apply g_pos.
-     * apply Rmult_le_pos.
-       ++ unfold delta. 
-          apply default_rel_ge_0.
-       ++ apply Rplus_le_le_0_compat; last by apply g_pos. nra.
-   - apply /RleP. apply matrix_norm_pd.
- + unfold R2. apply Rmult_le_pos.
-     * apply /RleP. apply vec_norm_pd.
-     * apply /RleP. apply matrix_norm_pd.
-Qed.
 
 
 Lemma add_vec_distr {n:nat}:
@@ -325,26 +266,21 @@ Lemma vec_norm_diag {ty} {n:nat} (v1 v2 : 'cV[ftype ty]_n.+1):
   (vec_inf_norm (FT2R_mat v1) * vec_inf_norm (FT2R_mat v2)) * 
   g ty n.+1 + g1 ty n.+1 (n.+1 - 1))%Re.
 Proof.
-intros.
-unfold diag_vector_mult, diag_matrix_vec_mult_R.
-unfold vec_inf_norm.
-apply lemmas.bigmax_le.
-+ by rewrite size_map size_enum_ord.
-+ intros. rewrite seq_equiv. rewrite nth_mkseq;
-  last by rewrite size_map size_enum_ord in H0.
-  rewrite !mxE.
+  intros.
+  unfold vec_inf_norm.
+  apply bigmax_le_0head.
+  { rewrite size_map size_enum_ord. auto. } 
+  2:{ intros. move /mapP in H0. destruct H0 as [x0 H0 H1]. rewrite H1.
+    apply /RleP. apply Rabs_pos. }
+  intros. rewrite size_map size_enum_ord in H0.
+  rewrite seq_equiv nth_mkseq; auto.
+  rewrite /diag_vector_mult /diag_matrix_vec_mult_R !mxE.
   pose proof (BMULT_accurate ty 
               (nth (n.+1.-1 - @inord n i) (vec_to_list_float n.+1 v1) (Zconst ty 0))
               (nth (n.+1.-1 - @inord n i) (vec_to_list_float n.+1 v2) (Zconst ty 0))).
   assert (Bmult_no_overflow ty
-       (FT2R
-          (nth (n.+1.-1 - @inord n i)
-             (vec_to_list_float n.+1 v1)
-             (Zconst ty 0)))
-       (FT2R
-          (nth (n.+1.-1 - @inord n i)
-             (vec_to_list_float n.+1 v2)
-             (Zconst ty 0)))). 
+       (FT2R (nth (n.+1.-1 - @inord n i) (vec_to_list_float n.+1 v1) (Zconst ty 0)))
+       (FT2R (nth (n.+1.-1 - @inord n i) (vec_to_list_float n.+1 v2) (Zconst ty 0)))). 
   { apply finite_BMULT_no_overflow.  rewrite !nth_vec_to_list_float.
     + rewrite inord_val.
       specialize (H ((v1 (inord i) ord0), (v2 (inord i) ord0))).
@@ -359,18 +295,16 @@ apply lemmas.bigmax_le.
                   { rewrite combine_nth. rewrite !rev_nth !length_veclist.
                     assert ((n.+1 - i.+1)%coq_nat = (n.+1.-1 - i)%coq_nat).
                     { lia. } rewrite H2. rewrite !nth_vec_to_list_float; try by [].
-                    by rewrite size_map size_enum_ord in H0.
-                    by rewrite size_map size_enum_ord in H0.
-                    apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H0.
-                    apply /ssrnat.ltP. by rewrite size_map size_enum_ord in H0.
-                    by rewrite !rev_length !length_veclist.
-                 } rewrite H2. apply nth_In. rewrite combine_length.
-                 rewrite !rev_length !length_veclist Nat.min_id.
-                 rewrite size_map size_enum_ord in H0. by apply /ssrnat.ltP.
+                    by apply /ssrnat.leP.
+                    by apply /ssrnat.leP.
+                    by rewrite !length_rev !length_veclist.
+                 } rewrite H2. apply nth_In. rewrite length_combine.
+                 rewrite !length_rev !length_veclist Nat.min_id.
+                 by apply /ssrnat.ltP.
      } specialize (H H2). apply H.
-   + rewrite inordK; by rewrite size_map size_enum_ord in H0.
-   + rewrite inordK; by rewrite size_map size_enum_ord in H0.
-} specialize (H1 H2).
+    + rewrite inordK; auto.
+    + rewrite inordK; auto. } specialize (H1 H2).
+
   destruct H1 as [d [e [Heq [Hd [He H1]]]]].
   rewrite H1. rewrite !nth_vec_to_list_float.
   - rewrite !nth_vec_to_list_real.
@@ -389,28 +323,16 @@ apply lemmas.bigmax_le.
             ** apply Rmult_le_pos; apply Rabs_pos.
             ** apply Rabs_pos.
             ** apply Rmult_le_compat; try apply Rabs_pos.
-                +++ apply Rle_trans with  
-                    [seq Rabs (FT2R_mat v1 i0 0)
-                          | i0 <- enum 'I_n.+1]`_i.
-                    --- rewrite seq_equiv. rewrite nth_mkseq;
-                        last by rewrite size_map size_enum_ord in H0.
-                        rewrite !mxE. apply Rle_refl.
-                    --- apply /RleP.
-                        apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v1 i0 0)
-                                                    | i0 <- enum 'I_n.+1] i).
-                        rewrite size_map size_enum_ord .
-                        by rewrite size_map size_enum_ord in H0.
-                +++ apply Rle_trans with  
-                    [seq Rabs (FT2R_mat v2 i0 0)
-                          | i0 <- enum 'I_n.+1]`_i.
-                    --- rewrite seq_equiv. rewrite nth_mkseq;
-                        last by rewrite size_map size_enum_ord in H0.
-                        rewrite !mxE. apply Rle_refl.
-                    --- apply /RleP.
-                        apply (@bigmaxr_ler _ 0%Re [seq Rabs (FT2R_mat v2 i0 0)
-                                                    | i0 <- enum 'I_n.+1] i).
-                        rewrite size_map size_enum_ord .
-                        by rewrite size_map size_enum_ord in H0.
+               +++ apply bigmax_ler_0head.
+                   { apply /mapP. exists (inord i). apply mem_enum.
+                     rewrite /FT2R_mat mxE. f_equal. }
+                   intros. move /mapP in H4. destruct H4 as [x0 H4 H5]. rewrite H5. 
+                   apply /RleP. apply Rabs_pos.
+               +++ apply bigmax_ler_0head.
+                   { apply /mapP. exists (inord i). apply mem_enum.
+                     rewrite /FT2R_mat mxE. f_equal. }
+                   intros. move /mapP in H4. destruct H4 as [x0 H4 H5]. rewrite H5. 
+                   apply /RleP. apply Rabs_pos.
            ** unfold g. 
               eapply Rle_trans. apply Hd.
               assert (((1 + default_rel ty) ^ 1 <= (1 + default_rel ty) ^ n.+1)%Re ->
@@ -432,10 +354,10 @@ apply lemmas.bigmax_le.
              +++ apply default_abs_ge_0.
              +++ assert (forall x:R, (0 <= x)%Re -> (1 <= 1 + x)%Re).
                  { intros. nra. } apply H6. apply g_pos.
-  * rewrite inordK; by rewrite size_map size_enum_ord in H0.
-  * rewrite inordK; by rewrite size_map size_enum_ord in H0.
- - rewrite inordK; by rewrite size_map size_enum_ord in H0.
- - rewrite inordK; by rewrite size_map size_enum_ord in H0.
+  * rewrite inordK; auto.
+  * rewrite inordK; auto. 
+ - rewrite inordK; auto. 
+ - rewrite inordK; auto. 
 Qed.
 
 Lemma real_const_1 {ty}:
