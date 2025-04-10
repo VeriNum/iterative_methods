@@ -400,8 +400,9 @@ Arguments coo_matrix t : clear implicits.
 
 
 Definition coo_matrix_wellformed {t} (coo: coo_matrix t) :=
- Forall (fun e => 0 <= fst (fst e) < coo_rows coo /\ 0 <= snd (fst e) < coo_cols coo)
-   (coo_entries coo).
+ (0 <= coo_rows coo /\ 0 <= coo_cols coo) (* need this conjunct just in case entries=nil *)
+  /\ Forall (fun e => 0 <= fst (fst e) < coo_rows coo /\ 0 <= snd (fst e) < coo_cols coo)
+      (coo_entries coo).
 
 Definition coo_matrix_equiv {t: type} (a b : coo_matrix t) :=
   coo_rows a = coo_rows b /\ coo_cols a = coo_cols b
@@ -412,6 +413,8 @@ Lemma coo_matrix_wellformed_equiv {t: type} (a b: coo_matrix t):
 Proof.
 intros.
 destruct H as [? [? ?]].
+destruct H0 as [[Hr Hc] H0].
+split. split; lia.
 eapply Permutation_Forall; try apply H0.
 eassumption.
 rewrite <- H, <- H1.
@@ -424,7 +427,8 @@ Definition coo_to_matrix {t: type} (coo: coo_matrix t) (m: matrix t) : Prop :=
    forall i, 0 <= i < coo_rows coo ->
     forall j, 0 <= j < coo_cols coo -> 
      sum_any (map (fun e: Z*Z*ftype t => snd e) 
-              (filter (fun e: Z*Z*ftype t => andb (Z.eqb (fst (fst e)) i) (Z.eqb (fst (fst e)) j))
+              (filter (fun e: Z*Z*ftype t => 
+                 andb (Z.eqb (fst (fst e)) i) (Z.eqb (snd (fst e)) j))
                 (coo_entries coo)))
           (matrix_index m (Z.to_nat i) (Z.to_nat j)).
 

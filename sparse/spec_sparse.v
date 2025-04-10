@@ -123,23 +123,6 @@ Definition coo_rep (sh: share) (coo: coo_matrix Tdouble) (p: val) : mpred :=
     (map (fun e => Vfloat (snd e)) (coo_entries coo) 
      ++ Zrepeat Vundef (maxn-n)) vp.
 
-
-Definition coo_to_csr_matrix_spec :=
- DECLARE _coo_to_csr_matrix
- WITH sh: share, coo: coo_matrix Tdouble, p: val, gv: globals
- PRE [ tptr t_coo ]
-    PROP(writable_share sh;
-         coo_matrix_wellformed coo)
-    PARAMS( p )
-    GLOBALS (gv)
-    SEP (coo_rep sh coo p (*; mem_mgr gv *))
- POST [ tdouble ]
-   EX coo': coo_matrix Tdouble, EX m: matrix Tdouble, EX q: val,
-    PROP(coo_matrix_equiv coo coo'; coo_to_matrix coo m)
-    RETURN( q )
-    SEP (coo_rep sh coo' p; csr_rep Ews m q).
-
-
 Definition SparseASI : funspecs := [ 
    csr_matrix_rows_spec;
    csr_row_vector_multiply_spec;

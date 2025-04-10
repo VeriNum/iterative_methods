@@ -92,33 +92,25 @@ intros. rewrite !Zlength_correct. f_equal. apply Permutation_length; auto.
 Qed.
 
 
-Definition t_csr := Tstruct _csr_matrix noattr.
-
-Definition csr_rep (sh: share) (mval: matrix Tdouble) (p: val) : mpred :=
-  EX v: val, EX ci: val, EX rp: val, EX csr,
-  !! csr_rep_aux mval csr &&
-  data_at sh t_csr (v,(ci,(rp,(Vint (Int.repr (matrix_rows mval)), Vint (Int.repr (csr_cols csr)))))) p *
-  data_at sh (tarray tdouble (Zlength (csr_col_ind csr))) (map Vfloat (csr_vals csr)) v * 
-  data_at sh (tarray tuint (Zlength (csr_col_ind csr))) (map Vint (map Int.repr (csr_col_ind csr))) ci *
-  data_at sh (tarray tuint (matrix_rows mval + 1)) (map Vint (map Int.repr (csr_row_ptr csr))) rp.
-
 Definition t_coo := Tstruct _coo_matrix noattr.
 
 Definition coo_rep (sh: share) (coo: coo_matrix Tdouble) (p: val) : mpred :=
- EX (r c n maxn: Z) (rp cp vp : val), 
- !! (0 <= n <= maxn /\ maxn <= Int.max_signed /\ 0 <= r <= Int.max_signed /\
-       0 <= c <= Int.max_signed /\ coo_matrix_wellformed coo) &&
-  data_at sh t_coo (rp, (cp, (vp, (Vint (Int.repr n), (Vint (Int.repr maxn), 
-                     (Vint (Int.repr r), (Vint (Int.repr c)))))))) p *
-  data_at sh (tarray tint maxn)
+ EX (maxn: Z) (rp cp vp : val), 
+ !! (0 <= Zlength (coo_entries coo) <= maxn /\ maxn <= Int.max_signed 
+     /\ 0 <= coo_rows coo < Int.max_signed 
+     /\ 0 <= coo_cols coo < Int.max_signed /\ coo_matrix_wellformed coo) &&
+  data_at sh t_coo (rp, (cp, (vp, (Vint (Int.repr (Zlength (coo_entries coo))), (Vint (Int.repr maxn), 
+                     (Vint (Int.repr (coo_rows coo)), 
+                     (Vint (Int.repr (coo_cols coo))))))))) p *
+  data_at sh (tarray tuint maxn)
     (map (fun e => Vint (Int.repr (fst (fst e)))) (coo_entries coo) 
-     ++ Zrepeat Vundef (maxn-n)) rp *
-  data_at sh (tarray tint maxn)
+     ++ Zrepeat Vundef (maxn-(Zlength (coo_entries coo)))) rp *
+  data_at sh (tarray tuint maxn)
     (map (fun e => Vint (Int.repr (snd (fst e)))) (coo_entries coo) 
-     ++ Zrepeat Vundef (maxn-n)) cp *
-  data_at sh (tarray tint maxn)
+     ++ Zrepeat Vundef (maxn-(Zlength (coo_entries coo)))) cp *
+  data_at sh (tarray tdouble maxn)
     (map (fun e => Vfloat (snd e)) (coo_entries coo) 
-     ++ Zrepeat Vundef (maxn-n)) vp.
+     ++ Zrepeat Vundef (maxn-(Zlength (coo_entries coo)))) vp.
 
 Definition add_to_coo {t} (coo: coo_matrix t) (i j: Z) (v: ftype t): coo_matrix t :=
  {| coo_rows := coo_rows coo ;
@@ -200,6 +192,29 @@ Definition coo_count_spec :=
     RETURN( Vint (Int.repr (coo_count_distinct (coo_entries coo))) )
     SEP (coo_rep sh coo p).
 
+Definition t_csr := Tstruct _csr_matrix noattr.
+
+Definition csr_rep' sh (csr: csr_matrix Tdouble) (v: val) (ci: val) (rp: val) (p: val) :=
+  data_at sh t_csr (v,(ci,(rp,(Vint (Int.repr (csr_rows csr)), Vint (Int.repr (csr_cols csr)))))) p *
+  data_at sh (tarray tdouble (Zlength (csr_col_ind csr))) (map Vfloat (csr_vals csr)) v * 
+  data_at sh (tarray tuint (Zlength (csr_col_ind csr))) (map Vint (map Int.repr (csr_col_ind csr))) ci *
+  data_at sh (tarray tuint (csr_rows csr + 1)) (map Vint (map Int.repr (csr_row_ptr csr))) rp.
+
+Definition csr_rep (sh: share) (mval: matrix Tdouble) (p: val) : mpred :=
+  EX v: val, EX ci: val, EX rp: val, EX csr,
+  !! csr_rep_aux mval csr && csr_rep' sh csr v ci rp p.
+
+Definition csr_token' (csr: csr_matrix Tdouble) (p: val) : mpred :=
+ EX v: val, EX ci: val, EX rp: val,
+    csr_rep' Ews csr v ci rp p -*
+    (csr_rep' Ews csr v ci rp p
+     * (spec_malloc.malloc_token Ews t_csr p *
+        spec_malloc.malloc_token Ews (tarray tdouble (Zlength (csr_vals csr))) v *
+        spec_malloc.malloc_token Ews (tarray tuint (Zlength (csr_vals csr))) ci *
+        spec_malloc.malloc_token Ews (tarray tuint (csr_rows csr + 1)) rp)).
+
+Definition csr_token (m: matrix Tdouble) (p: val) : mpred :=
+ EX (csr: csr_matrix Tdouble) (H: csr_rep_aux m csr), csr_token' csr p.
 
 Definition coo_to_csr_matrix_spec :=
  DECLARE _coo_to_csr_matrix
@@ -214,7 +229,7 @@ Definition coo_to_csr_matrix_spec :=
    EX coo': coo_matrix Tdouble, EX m: matrix Tdouble, EX q: val,
     PROP(coo_matrix_equiv coo coo'; coo_to_matrix coo m)
     RETURN( q )
-    SEP (coo_rep sh coo' p; csr_rep Ews m q; mem_mgr gv).
+    SEP (coo_rep sh coo' p; csr_rep Ews m q; csr_token m q; mem_mgr gv).
 
 Definition surely_malloc_spec :=
   DECLARE _surely_malloc

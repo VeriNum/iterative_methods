@@ -112,38 +112,50 @@ unsigned coo_count (struct coo_matrix *p) {
 struct csr_matrix *coo_to_csr_matrix(struct coo_matrix *p) {
   struct csr_matrix *q;
   unsigned count, i;
-  int r,c, ri, ci, cols, k, l;
-  double x;
-  int n = p->n;
+  unsigned r,c, ri, ci, cols, k, l, rows;
+  unsigned *col_ind, *row_ptr, *prow_ind, *pcol_ind;
+  double x, *val, *pval;
+  unsigned n = p->n;
   coo_quicksort(p, 0, n);
   k = coo_count(p);
+  rows = p->rows;
+  prow_ind=p->row_ind;
+  pcol_ind=p->col_ind;
+  pval = p->val;
   q = surely_malloc(sizeof(struct csr_matrix));
-  q->val = surely_malloc(k * sizeof(double));
-  q->col_ind = surely_malloc(k * sizeof(unsigned));
-  q->row_ptr = surely_malloc ((p->rows+1) * sizeof(unsigned));
-  r=-1; l=0;
+  val = surely_malloc(k * sizeof(double));
+  col_ind = surely_malloc(k * sizeof(unsigned));
+  row_ptr = surely_malloc ((rows+1) * sizeof(unsigned));
+  r=0;
+  c=0; /* this line is unnecessary for correctness but simplifies the proof */
+  l=0;
   for (i=0; i<n; i++) {
-    ri = p->row_ind[i];
-    ci = p->col_ind[i];
-    x = p->val[i];
-    if (ri==r)
+    ri = prow_ind[i];
+    ci = pcol_ind[i];
+    x = pval[i];
+    if (ri+1==r)
       if (ci==c)
-	q->val[l] += x;
+	val[l-1] += x;
       else {
 	c=ci;
-	q->col_ind[l] = ci;
-	q->val[l] = x;
+	col_ind[l] = ci;
+	val[l] = x;
 	l++;
       }
     else {
-      while (r<ri) q->row_ptr[++r]=l;
-      c= -1;
-      q->col_ind[l] = ci;
-      q->val[l] = x;
+      while (r<=ri) row_ptr[r++]=l;
+      c= ci;
+      col_ind[l] = ci;
+      val[l] = x;
       l++;
     }
   }
-  cols=p->cols;
-  q->row_ptr[cols]=k;
+  cols = p->cols;
+  while (r+1<=rows) row_ptr[++r]=l;
+  q->val = val;
+  q->col_ind = col_ind;
+  q->row_ptr = row_ptr;
+  q->rows = rows;
+  q->cols = cols;
   return q;
 }
