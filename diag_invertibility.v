@@ -83,7 +83,9 @@ destruct H.
 + rewrite Rmax_left. by left. apply H.
 Qed.
 
-Lemma bigmax_destruct (a x0:R) s:
+(* bigmaxr deprecated *)
+(* The following three lemmas are moved to lemmas.v *)
+(* Lemma bigmax_destruct (a x0:R) s:
   bigmaxr x0 (a :: s) = a \/ 
   bigmaxr x0 (a :: s) = bigmaxr x0 s.
 Proof.
@@ -97,10 +99,10 @@ assert (s = [::] \/ s != [::]).
   { by apply s_destruct. } rewrite H0.
   rewrite bigmaxr_cons. rewrite -H0.
   rewrite -RmaxE. apply max_order.
-Qed.
+Qed. *)
 
 
-Lemma bigmax_not_0_implies_aux (x0:R) s:
+(* Lemma bigmax_not_0_implies_aux (x0:R) s:
   (0 < size s)%nat ->
   (exists i, (i < size s)%nat /\
              seq.nth x0 s i = bigmaxr x0 s).
@@ -125,9 +127,9 @@ induction s.
       exists i.+1. split.
       ++ simpl. by []. 
       ++ simpl. by rewrite H0.
-Qed. 
+Qed.  *)
   
-Lemma bigmax_not_0_implies (x0:R) s:
+(* Lemma bigmax_not_0_implies (x0:R) s:
   bigmaxr x0 s <> x0 ->
   (exists i, (i < size s)%nat /\
              seq.nth x0 s i = bigmaxr x0 s /\
@@ -148,7 +150,7 @@ assert (s = [::] \/ s != [::]).
   exists i. split.
   apply Hsize. split.
   apply H2. by rewrite H2.
-Qed.
+Qed. *)
 
 Close Scope R_scope.
 

@@ -310,6 +310,115 @@ Proof.
 Qed.
 
 
+Lemma bigmax_swap_0head a b s :
+  (a >= 0) ->
+  (b >= 0) -> 
+  (forall x, x \in s -> x >= 0) ->
+  \big[maxr/0%Re]_(i <- a :: b :: s) i = \big[maxr/0%Re]_(i <- b :: a :: s) i.
+Proof.
+  intros. rewrite !big_cons. 
+  remember (\big[maxr/0%Re]_(j <- s) j) as c. rewrite -!Heqc.
+  by rewrite -!RmaxE !Rmax_assoc (Rmax_comm a b).
+Qed.
+
+
+Lemma bigmax_destruct_0head (a : R) s :
+  (a >= 0) ->
+  (forall x, x \in s -> x >= 0) ->
+  \big[maxr/0%Re]_(i <- a :: s) i = a \/
+  \big[maxr/0%Re]_(i <- a :: s) i = \big[maxr/0%Re]_(i <- s) i.
+Proof.
+  intros. revert s H0. induction s as [|b s']; intros.
+  { left. rewrite big_cons big_nil //= /maxr.
+    assert (a < 0%Re = false).
+    { apply /RltP. move /RleP in H.
+      by apply Rle_not_lt. }
+    by rewrite {}H1. }
+  assert (Hs': forall x, x \in s' -> 0 <= x).
+  { intros. apply H0. rewrite inE. apply /orP. auto. }
+  specialize (IHs' Hs').
+  assert (Hb: b >= 0).
+  { apply H0. apply mem_head. } 
+  pose proof (@bigmax_swap_0head a b s' H Hb Hs').
+  rewrite H1. rewrite big_cons.
+  remember (\big[maxr/0%Re]_(j <- (a :: s')) j) as c. rewrite -!Heqc.
+  destruct (b < c) eqn:E.
+  { destruct IHs'; auto. 
+    + left. by rewrite /maxr E.
+    + assert (maxr b c = c). { by rewrite /maxr E. }
+      rewrite {}H3. rewrite big_cons. rewrite big_cons in Heqc.
+      remember (\big[maxr/0%Re]_(j <- s') j) as d.
+      rewrite -Heqd in Heqc. rewrite -Heqd. rewrite /maxr.
+      rewrite -H2. rewrite -H2 in Heqc.
+      right. rewrite E. auto. }
+  right. rewrite big_cons. 
+  rewrite {1}/maxr E -RmaxE.
+  rewrite Rmax_left; auto.
+  assert (c <= b). { move /RltP in E. apply /RleP. lra. }
+  assert (\big[maxr/0]_(j <- s') j <= c).
+  { rewrite Heqc big_cons. apply /RleP. rewrite -RmaxE.
+    apply Rmax_r. }
+  apply Rle_trans with c; apply /RleP; auto.
+Qed.
+
+
+Lemma bigmax_not_0_implies_aux_0head s :
+  (0 < size s)%nat ->
+  (forall x, x \in s -> x >= 0) ->
+  (exists i, (i < size s)%nat /\
+             seq.nth 0%Re s i = \big[maxr/0%Re]_(i <- s) i).
+Proof.
+  intros. induction s as [| x s'].
+  { inversion H. }
+  destruct s' as [|y s'].
+  { exists 0. split; auto.
+    rewrite nth_seq1; simpl.
+    rewrite big_cons big_nil /maxr.
+    assert (x < 0%Re = false).
+    { apply /RltP. apply Rle_not_lt. apply /RleP.
+      apply H0. apply mem_head. }
+    rewrite {}H1. reflexivity. }
+  rewrite big_cons.
+  remember (\big[maxr/0%Re]_(j <- (y :: s')) j) as ys.
+  rewrite -Heqys.
+  destruct (x < ys) eqn:E.
+  { assert ((0 < size (y :: s'))%N) by (simpl; auto).
+    specialize (IHs' H1). clear H1.
+    assert (forall x0, x0 \in y :: s' -> 0 <= x0).
+    { intros. apply H0. rewrite inE. apply /orP. auto. }
+    specialize (IHs' H1). clear H1.
+    destruct IHs' as [i0 [H1 H2]].
+    exists i0.+1. split.
+    + simpl. simpl in H1. rewrite -(addn1 i0) -(addn1 (size s').+1).
+      by rewrite ltn_add2r.
+    + simpl. by rewrite /maxr E. }
+  exists 0. split.
+  + simpl. auto. 
+  + by rewrite /maxr E.
+Qed. 
+
+
+Lemma bigmax_not_0_implies_0head s :
+  (forall x, x \in s -> x >= 0) ->
+  \big[maxr/0%Re]_(i <- s) i <> 0%Re ->
+  (exists i, (i < size s)%nat /\
+             seq.nth 0%Re s i = \big[maxr/0%Re]_(i <- s) i /\
+             seq.nth 0%Re s i <> 0%Re).
+Proof.
+  intros. destruct s as [|x s'].
+  { rewrite big_nil in H0. unfold not in H0. 
+    exfalso. apply H0. auto. } 
+  pose proof (@bigmax_not_0_implies_aux_0head (x :: s')).
+  assert (0 < size (x :: s'))%N by auto.
+  specialize (H1 H2 H); clear H2.
+  destruct H1 as [i [H1 H2]].
+  exists i. split; [|split]; auto.
+  by rewrite H2.
+Qed.
+
+
+
+
 (* Lemma bigmax_le_deprecated (x0:R) lr (x:R):
  (0 < size lr)%N ->
  (forall i:nat, (i < size lr)%N -> ((nth x0 lr i) <= x)%Re) ->
@@ -330,8 +439,6 @@ Proof.
   assert ((1 %% 3) = 1)%N. { auto. } rewrite H.
   rewrite inordK; auto.
 Qed.
-
-
 
 
 
