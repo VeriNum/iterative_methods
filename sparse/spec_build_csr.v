@@ -1,9 +1,10 @@
 Require Import VST.floyd.proofauto.
 Require Import Iterative.floatlib.
-From Iterative.sparse Require Import sparse_model build_csr.
+From Iterative.sparse Require Import sparse_model build_csr distinct.
 Require Import vcfloat.FPStdCompCert.
 Require Import vcfloat.FPStdLib.
 Require Import VSTlib.spec_math VSTlib.spec_malloc.
+Require Import Coq.Classes.RelationClasses.
 
 #[export] Instance CompSpecs : compspecs. make_compspecs prog. Defined.
 Definition Vprog : varspecs. mk_varspecs prog. Defined.
@@ -17,73 +18,51 @@ Open Scope logic.
 
 Definition coord_le {t} (a b : Z*Z*ftype t) : Prop :=
   fst (fst a) < fst (fst b) 
+ \/ fst (fst a) = fst (fst b) /\ snd (fst a) <= snd (fst b).
+
+(*
+Definition coord_lt {t} (a b : Z*Z*ftype t) : Prop :=
+  fst (fst a) < fst (fst b) 
  \/ fst (fst a) = fst (fst b) /\ snd (fst a) < snd (fst b).
+*)
 
-Inductive sorted {A} (le: A -> A -> Prop): list A -> Prop := 
-| sorted_nil:
-    sorted le nil
-| sorted_1: forall x,
-    sorted le (x::nil)
-| sorted_cons: forall x y l,
-     le x y -> sorted le (y::l) -> sorted le (x::y::l).
+Definition coord_leb {t} (a b : Z*Z*ftype t) : bool :=
+  orb (fst (fst a) <? fst (fst b))
+       (andb (fst (fst a) =? fst (fst b)) (snd (fst a) <=? snd (fst b))).
 
-Lemma sorted_app:
-  forall {A} {le: A->A->Prop} (TRANS: transitive A le)
-    pivot al bl,
-    sorted le al -> sorted le bl ->
-    Forall (fun x => le x pivot) al ->
-    Forall (le pivot) bl ->
-    sorted le (al++bl).
+(*
+Definition coord_ltb {t} (a b : Z*Z*ftype t) : bool :=
+  orb (fst (fst a) <? fst (fst b))
+       (andb (fst (fst a) =? fst (fst b)) (snd (fst a) <? snd (fst b))).
+*)
+
+Lemma reflect_coord_le {t} a b : reflect (@coord_le t a b) (@coord_leb t a b).
 Proof.
-intros.
-induction H.
-simpl; auto.
-simpl.
-inv H1. inv H5.
-inv H0.
-constructor.
-inv H2.
-constructor.
-apply TRANS with pivot; auto.
-constructor.
-inv H2.
-constructor.
-apply TRANS with pivot; auto.
-constructor; auto.
-simpl.
-constructor; auto.
-apply IHsorted.
-inv H1; auto.
+destruct (coord_leb a b) eqn:?H; [constructor 1 | constructor 2];
+ unfold coord_le, coord_leb in *; lia.
 Qed.
 
-Lemma sorted_app_e3:
-  forall {A} {le: A->A->Prop} (TRANS: transitive A le)
-    pivot al bl,
-    sorted le (al++[pivot]++bl) ->
-    sorted le al /\ sorted le bl /\ 
-    Forall (fun x => le x pivot) al /\
-    Forall (le pivot) bl.
+(*
+
+Lemma reflect_coord_lt {t} a b : reflect (@coord_lt t a b) (@coord_ltb t a b).
 Proof.
- intros.
- induction al.
- simpl in *.
- split. constructor.
- induction bl; inv  H. repeat constructor.
- spec IHbl. destruct bl; inv H4; constructor; auto. 
- eapply TRANS; eassumption.
- split3; auto. destruct IHbl as [? [? ?]]; constructor; auto.
- inv H. destruct al; inv H2. destruct al; inv H1.
- simpl in IHal. spec IHal; auto.
- destruct IHal as [_ [? [_ ?]]].
- split3. constructor. auto. split; auto.
- spec IHal; auto.
- destruct IHal as [? [? [? ?]]].
- split3; auto. constructor; auto.
- split; auto.
- constructor; auto.
- apply TRANS with a0; auto.
- inv H1; auto.
+destruct (coord_ltb a b) eqn:?H; [constructor 1 | constructor 2];
+ unfold coord_lt, coord_ltb in *; lia.
 Qed.
+*)
+
+Instance CoordBO {t}: BoolOrder (@coord_le t) := 
+  {| test := coord_leb; test_spec := reflect_coord_le |}.
+
+Instance CoordPO {t: type}: PreOrder (@coord_le t).
+Proof.
+constructor.
+- intro. unfold complement, coord_le; simpl. lia.
+- intros ? ? ? *. unfold coord_le; simpl; lia.
+Qed.
+
+Instance CoordBPO {t: type}: BPO.BoolPreOrder (@coord_le t) :=
+ {| BPO.BO := CoordBO; BPO.PO := CoordPO |}.
 
 Lemma Permutation_Zlength:
   forall {A} {al bl: list A}, Permutation al bl -> Zlength al = Zlength bl.
@@ -168,16 +147,6 @@ Definition coo_quicksort_spec :=
     RETURN( )
     SEP (coo_rep sh coo' p).
 
-Definition coo_count_distinct {t} (entries: list (Z * Z * ftype t)) : Z :=
- fst (match entries with
-      | nil => (0,(0,0,Zconst t 0))
-      | a :: rest => fold_left (fun u v =>
-                   let '(k, (r0,c0,_)) := u in 
-                   let '(r,c,_) := v in 
-                   (if andb (r0=?r) (c0=?c) then k else k+1, v))
-                     rest (1,a)
-      end).
-
 Definition coo_count_spec :=
  DECLARE _coo_count
  WITH sh: share, coo: coo_matrix Tdouble, p: val
@@ -189,7 +158,7 @@ Definition coo_count_spec :=
     SEP (coo_rep sh coo p)
  POST [ tuint ]
     PROP()
-    RETURN( Vint (Int.repr (coo_count_distinct (coo_entries coo))) )
+    RETURN( Vint (Int.repr (count_distinct (coo_entries coo))) )
     SEP (coo_rep sh coo p).
 
 Definition t_csr := Tstruct _csr_matrix noattr.
@@ -244,8 +213,6 @@ Definition surely_malloc_spec :=
        PROP ()
        LOCAL (temp ret_temp p)
        SEP (mem_mgr gv; malloc_token Ews t p * data_at_ Ews t p).
-
-
 
 Definition Build_CSR_ASI : funspecs := [ 
    surely_malloc_spec;
