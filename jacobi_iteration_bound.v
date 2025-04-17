@@ -720,9 +720,13 @@ apply Rlt_le_trans with
 [seq Rabs (v i 0) | i <- enum 'I_n.+1]`_0.
 + rewrite seq_equiv. rewrite nth_mkseq; last by [].
   specialize (H (@inord n 0)). by apply Rabs_pos_lt.
-+ apply /RleP.
-  apply (@bigmaxr_ler _ 0%Re [seq Rabs (v i 0) | i <- enum 'I_n.+1] 0).
-  by rewrite size_map size_enum_ord.
++ apply bigmax_ler_0head.
+  { apply /mapP. exists ord0. apply mem_enum.
+    rewrite (@nth_map _ ord0). f_equal. f_equal.
+    rewrite (@nth_ord_enum n.+1 ord0 0). auto.
+    by rewrite size_enum_ord. }
+  intros. move /mapP in H0. destruct H0 as [x0 ? ?]. rewrite H1.
+  apply /RleP. apply Rabs_pos.
 Qed.
 
 
@@ -1217,12 +1221,12 @@ repeat split.
     rewrite nth_map_seq.
     * unfold matrix_index. rewrite inordK in Hfdiv.
       ++ apply Hfdiv.
-      ++ rewrite Heqn prednK. rewrite !map_length seq_length /matrix_rows_nat in H.
+      ++ rewrite Heqn prednK. rewrite !length_map length_seq /matrix_rows_nat in H.
          by apply /ssrnat.ltP. by apply /ssrnat.ltP.
     * unfold matrix_rows_nat. 
-      by rewrite !map_length seq_length /matrix_rows_nat in H.
-  - rewrite !map_length seq_length.
-    by rewrite !map_length seq_length in H.
+      by rewrite !length_map length_seq /matrix_rows_nat in H.
+  - rewrite !length_map length_seq.
+    by rewrite !length_map length_seq in H.
 + apply Forall_forall. intros.
   pose proof (@In_nth _ b x (Zconst t 0)).
   specialize (H0 H). destruct H0 as [i [Hjb H0]].
@@ -1257,17 +1261,17 @@ assert (fma_dotprod t v v = dotprod v v).
 { by unfold fma_dotprod, dotprod. }
 rewrite H2 in H1. specialize (H0 H1).
 rewrite -rev_combine in H0; last by [].
-rewrite rev_length combine_length Nat.min_id in H0.
+rewrite length_rev length_combine Nat.min_id in H0.
 apply H0.
 apply Hg1.
 intros.
 repeat split;
 try (specialize (H x.1); apply in_rev in H3;
       destruct x; apply in_combine_l in H3; simpl in *;
-      apply in_rev in H3; try rewrite rev_length in H;by apply H);
+      apply in_rev in H3; try rewrite length_rev in H;by apply H);
 try (specialize (H x.2); apply in_rev in H3;
       destruct x; apply in_combine_r in H3; simpl in *;
-      apply in_rev in H3; try rewrite rev_length in H;by apply H).
+      apply in_rev in H3; try rewrite length_rev in H;by apply H).
 Qed.
 
 
@@ -1860,7 +1864,7 @@ Lemma residual_finite {t: FPStdLib.type} {n:nat}
 Proof.
 intros ? ? ? ? ? ? ? Hcond Hf0.
 unfold norm2. apply dotprod_finite.
-rewrite rev_length length_veclist.
+rewrite length_rev length_veclist.
 apply g1_constraint_Sn. 
 apply Hcond.
 intros.
@@ -1873,16 +1877,16 @@ repeat split.
                                   X_m_jacobi k x0 b A)))) xy (Zconst t 0) H).
   destruct H0 as [m [Hlenk Hmth]].
   rewrite -Hmth.
-  rewrite rev_nth; last by rewrite rev_length in Hlenk.
+  rewrite rev_nth; last by rewrite length_rev in Hlenk.
   rewrite length_veclist.
   assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat).
   { lia. } rewrite H0.
   rewrite nth_vec_to_list_float; 
-  last by (rewrite rev_length length_veclist in Hlenk; apply /ssrnat.ltP).
+  last by (rewrite length_rev length_veclist in Hlenk; apply /ssrnat.ltP).
   rewrite !mxE.
   repeat (rewrite nth_vec_to_list_float; last by 
   (rewrite inordK;
-   rewrite rev_length length_veclist in Hlenk;
+   rewrite length_rev length_veclist in Hlenk;
    apply /ssrnat.ltP)).
   rewrite mxE inord_val.
   apply BMULT_no_overflow_is_finite.
@@ -1924,7 +1928,7 @@ repeat split.
       apply Rcomplements.Rlt_div_r.
       apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
       apply no_overflow_xkp1_minus_xk; try by [].
-      by rewrite rev_length length_veclist in Hlenk.
+      by rewrite length_rev length_veclist in Hlenk.
   - unfold Bmult_no_overflow. unfold rounded.
     pose proof (@generic_round_property t 
                 (FT2R (A (inord m) (inord m)) *
@@ -1947,7 +1951,7 @@ repeat split.
     assert (finite (BPLUS (X_m_jacobi k.+1 x0 b A (inord m) ord0)
                   (BOPP  (X_m_jacobi k x0 b A (inord m) ord0)))).
     { apply finite_xkp1_minus_xk; try by [].
-      by rewrite rev_length length_veclist in Hlenk.
+      by rewrite length_rev length_veclist in Hlenk.
     }
     rewrite Bminus_bplus_opp_equiv.
     * pose proof (@BPLUS_accurate' _ t).
@@ -1969,7 +1973,7 @@ repeat split.
       apply Rplus_lt_le_0_compat; try nra; try apply default_rel_ge_0.
       pose proof (@res_xkp1_minus_xk  t n A x0 b k m).
       assert ((m < n.+1)%nat). 
-      { rewrite rev_length length_veclist in Hlenk. by apply /ssrnat.ltP. }
+      { rewrite length_rev length_veclist in Hlenk. by apply /ssrnat.ltP. }
       specialize (H4 H5 Hcond Hf0).
       eapply Rlt_trans. 
       apply H4. 
@@ -1979,7 +1983,7 @@ repeat split.
       apply Rplus_lt_compat_r.
       apply sqrt_fun_bnd_lt_fmax. apply Hcond.
     * apply H2.
-+ rewrite !rev_length  length_veclist.
++ rewrite !length_rev  length_veclist.
   rewrite rev_involutive in H.
   unfold residual_math in H.
   apply in_rev in H. 
@@ -1990,16 +1994,16 @@ repeat split.
                                   X_m_jacobi k x0 b A)))) xy (Zconst t 0) H).
   destruct H0 as [m [Hlenk Hmth]].
   rewrite -Hmth.
-  rewrite rev_nth; last by rewrite rev_length in Hlenk.
+  rewrite rev_nth; last by rewrite length_rev in Hlenk.
   rewrite length_veclist.
   assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat).
   { lia. } rewrite H0.
   rewrite nth_vec_to_list_float; 
-  last by (rewrite rev_length length_veclist in Hlenk; apply /ssrnat.ltP).
+  last by (rewrite length_rev length_veclist in Hlenk; apply /ssrnat.ltP).
   rewrite !mxE.
   repeat (rewrite nth_vec_to_list_float; last by 
   (rewrite inordK;
-   rewrite rev_length length_veclist in Hlenk;
+   rewrite length_rev length_veclist in Hlenk;
    apply /ssrnat.ltP)).
   rewrite mxE inord_val.
   pose proof (@BMULT_accurate' _ t).
@@ -2012,7 +2016,7 @@ repeat split.
                   X_m_jacobi k x0 b A) 
                    (inord m) ord0))).
   { apply finite_Bmult_res; try by [].
-    by rewrite rev_length length_veclist in Hlenk.
+    by rewrite length_rev length_veclist in Hlenk.
   }
   specialize (H1 H2).
   destruct H1 as [d5 [e5 [Hde5 [Hd5 [He5 H1]]]]].
@@ -2036,7 +2040,7 @@ repeat split.
                      (X_m_jacobi k x0 b A
                         (inord m) ord0))) ).
   { apply finite_xkp1_minus_xk; try by [].
-     by rewrite rev_length length_veclist in Hlenk.
+     by rewrite length_rev length_veclist in Hlenk.
   }
   rewrite Bminus_bplus_opp_equiv.
   - pose proof (@BPLUS_accurate' _ t).
@@ -2057,7 +2061,7 @@ repeat split.
     unfold n0.
     rewrite [in X in (_ * (Rabs (_ + X)) < _)%Re]/FT2R B2R_Bopp.
     fold (@FT2R t). apply res_xkp1_minus_xk.
-    rewrite rev_length length_veclist in Hlenk. by apply /ssrnat.ltP.
+    rewrite length_rev length_veclist in Hlenk. by apply /ssrnat.ltP.
     apply Hcond. apply Hf0.
   - apply H3.
 Qed.
@@ -2128,10 +2132,10 @@ unfold resid, jacobi_residual.
                          by apply /ssrnat.ltP.
                        } rewrite H3. apply ltn_ord.
                     ++ unfold matrix_vector_mult. 
-                       rewrite !map_length seq_length.
+                       rewrite !length_map length_seq.
                        by unfold matrix_rows_nat.
-                  * rewrite combine_length. 
-                    rewrite !map_length !seq_length /matrix_rows_nat.
+                  * rewrite length_combine. 
+                    rewrite !length_map !length_seq /matrix_rows_nat.
                     rewrite H Nat.min_id.
                     assert (length A  = n.+1).
                     { unfold n. rewrite prednK. by []. 
@@ -2141,10 +2145,10 @@ unfold resid, jacobi_residual.
                     { unfold n. rewrite prednK. by []. 
                       by apply /ssrnat.ltP.
                     } rewrite H3. apply /ssrnat.ltP. apply ltn_ord.
-                - rewrite !map_length !seq_length /matrix_rows_nat.
-                  rewrite combine_length !map_length !seq_length /matrix_rows_nat.
+                - rewrite !length_map !length_seq /matrix_rows_nat.
+                  rewrite length_combine !length_map !length_seq /matrix_rows_nat.
                   by rewrite H Nat.min_id.
-            + repeat rewrite combine_length !map_length !seq_length /matrix_rows_nat.
+            + repeat rewrite length_combine !length_map !length_seq /matrix_rows_nat.
               rewrite H !Nat.min_id.
               assert (length A  = n.+1).
                     { unfold n. rewrite prednK. by []. 
@@ -2154,16 +2158,16 @@ unfold resid, jacobi_residual.
           unfold jacobi_n, jacob_list_fun_model.jacobi_iter.
           rewrite iter_length; last by []; last by [].  
           unfold diagmatrix_vector_mult, map2, uncurry.
-          repeat rewrite !map_length !combine_length.
+          repeat rewrite !length_map !length_combine.
           unfold matrix_vector_mult.
-          rewrite !map_length. rewrite !seq_length.
+          rewrite !length_map. rewrite !length_seq.
           unfold matrix_rows_nat. by rewrite H !Nat.min_id.
-       -- rewrite combine_length. unfold jacobi_n.
+       -- rewrite length_combine. unfold jacobi_n.
           unfold jacob_list_fun_model.jacobi_iter.
           rewrite iter_length; last by []; last by [].
-          repeat rewrite !map_length !combine_length.
-          rewrite seq_length !map_length.
-          rewrite seq_length /matrix_rows_nat H !Nat.min_id.
+          repeat rewrite !length_map !length_combine.
+          rewrite length_seq !length_map.
+          rewrite length_seq /matrix_rows_nat H !Nat.min_id.
           assert (length A  = n.+1).
           { unfold n. rewrite prednK. by []. 
             by apply /ssrnat.ltP.
@@ -2173,22 +2177,22 @@ unfold resid, jacobi_residual.
          { rewrite /n prednK. by []. by apply /ssrnat.ltP. }
          rewrite H2. apply ltn_ord.
    * unfold vector_sub, map2, uncurry, jacobi_n.
-     rewrite !map_length combine_length. 
+     rewrite !length_map length_combine. 
      unfold jacob_list_fun_model.jacobi_iter.
-     repeat rewrite !map_length !combine_length iter_length;
+     repeat rewrite !length_map !length_combine iter_length;
      last by []; last by [].
-     repeat rewrite /matrix_vector_mult !map_length !combine_length .
-     rewrite !map_length /matrix_rows_nat.
-     by rewrite !seq_length H !Nat.min_id.
- - rewrite combine_length. 
-   rewrite !map_length !combine_length. 
+     repeat rewrite /matrix_vector_mult !length_map !length_combine .
+     rewrite !length_map /matrix_rows_nat.
+     by rewrite !length_seq H !Nat.min_id.
+ - rewrite length_combine. 
+   rewrite !length_map !length_combine. 
     unfold jacob_list_fun_model.jacobi_iter.
-     repeat rewrite !map_length !combine_length iter_length;
+     repeat rewrite !length_map !length_combine iter_length;
      last by []; last by [].
-    rewrite !map_length /matrix_rows_nat !combine_length.
-    repeat rewrite /matrix_vector_mult !map_length !combine_length .
-     rewrite !map_length /matrix_rows_nat.
-    rewrite !seq_length H !Nat.min_id.
+    rewrite !length_map /matrix_rows_nat !length_combine.
+    repeat rewrite /matrix_vector_mult !length_map !length_combine .
+     rewrite !length_map /matrix_rows_nat.
+    rewrite !length_seq H !Nat.min_id.
     assert (length A  = n.+1).
     { unfold n. rewrite prednK. by []. 
       by apply /ssrnat.ltP.
@@ -2306,7 +2310,7 @@ assert (forall xy : ftype t * ftype t,
                      X_m_jacobi k x0 b A))))).
   { rewrite rev_nth. apply nth_In. rewrite Heqv_l in Hm.
     rewrite length_veclist . lia. rewrite Heqv_l in Hm.
-    rewrite rev_length combine_length !length_veclist Nat.min_id in Hm.
+    rewrite length_rev length_combine !length_veclist Nat.min_id in Hm.
     by rewrite !length_veclist.
   } specialize (H3 H4).
   rewrite rev_nth in H3.
@@ -2317,20 +2321,20 @@ assert (forall xy : ftype t * ftype t,
   + rewrite !mxE in H3. 
     rewrite nth_vec_to_list_float in H3.
     - rewrite nth_vec_to_list_float in H3; last 
-      by rewrite inordK; rewrite  Heqv_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
+      by rewrite inordK; rewrite  Heqv_l  length_rev length_combine !length_veclist Nat.min_id in Hm;
       apply /ssrnat.ltP.
       apply BMULT_finite_e in H3.
       destruct H3 as [Hf1 Hf2].
       rewrite mxE in Hf2.
       apply Bminus_bplus_opp_implies in Hf2.
       rewrite Heqv_l in Hnth. rewrite rev_nth in Hnth.
-      rewrite combine_length !length_veclist Nat.min_id in Hnth.
+      rewrite length_combine !length_veclist Nat.min_id in Hnth.
       rewrite combine_nth in Hnth.
       assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat).
       { lia. } rewrite H3 in Hnth. 
       rewrite nth_vec_to_list_float in Hnth.
       * rewrite nth_vec_to_list_float in Hnth;
-        last by  rewrite  Heqv_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
+        last by  rewrite  Heqv_l  length_rev length_combine !length_veclist Nat.min_id in Hm;
            apply /ssrnat.ltP. 
         rewrite inord_val in Hf2.
         assert (finite (X_m_jacobi k.+1 x0 b A
@@ -2354,16 +2358,16 @@ assert (forall xy : ftype t * ftype t,
           destruct Hnth as [Hnth1 Hnth2].
           by rewrite Hnth2.
         } rewrite H7 H8. repeat split; try apply H6; try apply Hf2.
-      * by  rewrite  Heqv_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
+      * by  rewrite  Heqv_l  length_rev length_combine !length_veclist Nat.min_id in Hm;
         apply /ssrnat.ltP.
       * by rewrite !length_veclist.
-      * rewrite Heqv_l in Hm. by rewrite rev_length in Hm.
-    - by rewrite inordK; rewrite  Heqv_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
+      * rewrite Heqv_l in Hm. by rewrite length_rev in Hm.
+    - by rewrite inordK; rewrite  Heqv_l  length_rev length_combine !length_veclist Nat.min_id in Hm;
       apply /ssrnat.ltP.
-  + rewrite  Heqv_l rev_length combine_length !length_veclist Nat.min_id in Hm.
+  + rewrite  Heqv_l length_rev length_combine !length_veclist Nat.min_id in Hm.
     by apply /ssrnat.ltP.
   + rewrite length_veclist.
-    by rewrite  Heqv_l rev_length combine_length !length_veclist Nat.min_id in Hm.
+    by rewrite  Heqv_l length_rev length_combine !length_veclist Nat.min_id in Hm.
 } specialize (H H0).
 apply reverse_triang_ineq in H.
 apply Rle_trans with
@@ -2612,7 +2616,7 @@ eapply Rle_trans.
                    (residual_math A x0 b k)))).
     { rewrite rev_nth. apply nth_In. rewrite Heqr_l in Hm.
       rewrite length_veclist . lia. rewrite Heqr_l in Hm.
-      rewrite rev_length combine_length !length_veclist Nat.min_id in Hm.
+      rewrite length_rev length_combine !length_veclist Nat.min_id in Hm.
       by rewrite !length_veclist.
     } specialize (H2 H3). 
     rewrite Heqr_l in Hnth.
@@ -2714,7 +2718,7 @@ eapply Rle_trans.
                                  X_m_jacobi k x0 b A))))).
               { rewrite rev_nth. apply nth_In. rewrite Heqr_l in Hm.
                 rewrite length_veclist . lia. rewrite Heqr_l in Hm.
-                rewrite rev_length combine_length !length_veclist Nat.min_id in Hm.
+                rewrite length_rev length_combine !length_veclist Nat.min_id in Hm.
                 by rewrite !length_veclist.
               } specialize (H3 H4).
               rewrite rev_nth in H3.
@@ -2725,11 +2729,11 @@ eapply Rle_trans.
               + rewrite !mxE in H3.
                 rewrite nth_vec_to_list_float in H3; last 
                 by rewrite inordK;
-                 rewrite   Heqr_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
+                 rewrite   Heqr_l  length_rev length_combine !length_veclist Nat.min_id in Hm;
                   apply /ssrnat.ltP.
                 rewrite nth_vec_to_list_float in H3; last 
                 by rewrite inordK;
-                 rewrite   Heqr_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
+                 rewrite   Heqr_l  length_rev length_combine !length_veclist Nat.min_id in Hm;
                   apply /ssrnat.ltP.
                 rewrite inord_val in H3. 
                 assert (finite (A1_J A (inord m) ord0) /\
@@ -2738,11 +2742,11 @@ eapply Rle_trans.
                 { apply BMULT_finite_e  in H3.
                   split; try apply H3.
                 }  rewrite Heqr_l in Hnth. rewrite rev_nth in Hnth.
-                rewrite combine_length !length_veclist Nat.min_id in Hnth.
+                rewrite length_combine !length_veclist Nat.min_id in Hnth.
                 assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat).
                 { lia. } rewrite H7 in Hnth. rewrite combine_nth in Hnth.
                repeat (rewrite nth_vec_to_list_float in Hnth; last 
-                by rewrite   Heqr_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
+                by rewrite   Heqr_l  length_rev length_combine !length_veclist Nat.min_id in Hm;
                   apply /ssrnat.ltP).
                - assert (xy.1 =(A1_J A (inord m) ord0)).
                   { destruct xy. simpl in *. 
@@ -2758,10 +2762,10 @@ eapply Rle_trans.
                     by rewrite Hnth2.
                   } rewrite H8 H9. split. apply H6. split. apply H6. apply H3.
                - by rewrite !length_veclist.
-               - by rewrite Heqr_l rev_length in Hm. 
-             + by rewrite   Heqr_l  rev_length combine_length !length_veclist Nat.min_id in Hm;
+               - by rewrite Heqr_l length_rev in Hm. 
+             + by rewrite   Heqr_l  length_rev length_combine !length_veclist Nat.min_id in Hm;
                   apply /ssrnat.ltP.
-             + rewrite Heqr_l rev_length combine_length !length_veclist Nat.min_id in Hm.
+             + rewrite Heqr_l length_rev length_combine !length_veclist Nat.min_id in Hm.
                by rewrite length_veclist.
            (** Implied by finiteness of the residual **) } specialize (H H0).
             assert ((vec_inf_norm
@@ -3174,9 +3178,9 @@ split.
     pose proof (@v_equiv t).
     specialize (H7 (resid (jacobi_n A b x0 i)) n).
     assert (length (resid (jacobi_n A b x0 i)) = n.+1).
-    { repeat rewrite /matrix_vector_mult !map_length combine_length.
-      rewrite !map_length. unfold jacobi_n. rewrite iter_length.
-      rewrite !seq_length /matrix_rows_nat H4 !Nat.min_id.
+    { repeat rewrite /matrix_vector_mult !length_map length_combine.
+      rewrite !length_map. unfold jacobi_n. rewrite iter_length.
+      rewrite !length_seq /matrix_rows_nat H4 !Nat.min_id.
       rewrite /n prednK. by []. by apply /ssrnat.ltP.
       by []. by []. 
     }
@@ -3203,9 +3207,9 @@ split.
     pose proof (@v_equiv t).
     specialize (H6 (resid (jacobi_n A b x0 j)) n).
     assert (length (resid (jacobi_n A b x0 j)) = n.+1).
-    { repeat rewrite /matrix_vector_mult !map_length combine_length.
-      rewrite !map_length. unfold jacobi_n. rewrite iter_length.
-      rewrite !seq_length H3 !Nat.min_id.
+    { repeat rewrite /matrix_vector_mult !length_map length_combine.
+      rewrite !length_map. unfold jacobi_n. rewrite iter_length.
+      rewrite !length_seq H3 !Nat.min_id.
       rewrite -/n prednK. by []. by apply /ssrnat.ltP.
       by []. by [].
     }
@@ -3372,9 +3376,9 @@ pose proof (@In_nth _ (rev (combine
           (vec_to_list_float n.+1
              (\col_j x0' j ord0)))) x (Zconst t 0, Zconst t 0) H6).
 destruct H7 as [p [Hlenp Hnth]].
-rewrite rev_length combine_length !length_veclist Nat.min_id in Hlenp.
+rewrite length_rev length_combine !length_veclist Nat.min_id in Hlenp.
 rewrite rev_nth in Hnth.
-rewrite combine_length !length_veclist Nat.min_id in Hnth.
+rewrite length_combine !length_veclist Nat.min_id in Hnth.
 assert ((n.+1 - p.+1)%coq_nat = (n.+1.-1 - p)%coq_nat) by lia.
 rewrite H7 in Hnth. rewrite combine_nth in Hnth.
 rewrite !nth_vec_to_list_float in Hnth.
@@ -3392,7 +3396,7 @@ by apply g1_constraint.
 by apply /ssrnat.ltP.
 by apply /ssrnat.ltP.
 by rewrite !length_veclist.
-by rewrite combine_length !length_veclist Nat.min_id.
+by rewrite length_combine !length_veclist Nat.min_id.
 Qed.
 
 
@@ -3435,7 +3439,7 @@ specialize (H6 (dotprod_r
 pose proof (@fma_dot_prod_rel_holds _ n t n.+1 k (A2_J A')
                     (\col_j x0' j ord0)).
 specialize (H6 H7). clear H7.
-rewrite combine_length !length_veclist Nat.min_id in H6.
+rewrite length_combine !length_veclist Nat.min_id in H6.
 apply finite_is_finite.
 apply H6.
 + by apply g1_constraint_Sn. 
@@ -3553,12 +3557,12 @@ assert ((let l1 :=
     assert (forall l l': vector t, (l, l').2 = l').
     { intros. by simpl. } rewrite H4 in H2.
     apply H2. 
-    + rewrite combine_length !length_veclist Nat.min_id.
+    + rewrite length_combine !length_veclist Nat.min_id.
       intros. 
       rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
       rewrite mxE. rewrite mxE. 
       unfold x0. rewrite nth_repeat /=. by left.
-   + rewrite combine_length !length_veclist Nat.min_id.
+   + rewrite length_combine !length_veclist Nat.min_id.
       intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
       rewrite mxE. by rewrite mxE.
   } rewrite inord_val in H2. by rewrite H2.
@@ -4038,9 +4042,9 @@ pose proof (@In_nth _ (rev (combine
                               n.+1)))) xy (Zconst t 0, Zconst t 0)).
 specialize (H2 H1).
 destruct H2 as [k [Hlen Hnth]].
-rewrite rev_length combine_length !length_veclist Nat.min_id in Hlen.
+rewrite length_rev length_combine !length_veclist Nat.min_id in Hlen.
 rewrite rev_nth in Hnth.
-rewrite combine_length !length_veclist Nat.min_id in Hnth.
+rewrite length_combine !length_veclist Nat.min_id in Hnth.
 assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
 rewrite combine_nth in Hnth.
 destruct xy . simpl. 
@@ -4064,7 +4068,7 @@ apply Hlen.
 apply Hlen.
 by apply /ssrnat.ltP.
 by rewrite !length_veclist.
-by rewrite combine_length !length_veclist Nat.min_id.
+by rewrite length_combine !length_veclist Nat.min_id.
 Qed.
 
 
@@ -4090,9 +4094,9 @@ Proof.
 intros ? ? ? ? ? ? ? ? ? ? ? HfA2 Hfx0 Hinp HfA HfA1_inv Hfb.
 unfold norm2. 
 assert ( length (resid (jacobi_n A b x0 0)) = n.+1).
-{ repeat rewrite /matrix_vector_mult !map_length combine_length.
-    rewrite !map_length. unfold jacobi_n. rewrite iter_length.
-    rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
+{ repeat rewrite /matrix_vector_mult !length_map length_combine.
+    rewrite !length_map. unfold jacobi_n. rewrite iter_length.
+    rewrite !length_seq /matrix_rows_nat H0 !Nat.min_id.
     rewrite -/n prednK. by []. by apply /ssrnat.ltP.
     by []. by rewrite /x0 repeat_length.
 }
@@ -4125,7 +4129,7 @@ apply dotprod_finite.
     rewrite -/n. rewrite H2 in Hlen.
     rewrite inordK; try by apply /ssrnat.ltP.
     apply Hlen.
-  - intros. unfold n0. rewrite rev_length. rewrite H2.
+  - intros. unfold n0. rewrite length_rev. rewrite H2.
     pose proof (@BMULT_accurate' _ t).
     rewrite inordK.
     specialize (H7 (nth (n.+1.-1 - k)
@@ -4239,9 +4243,9 @@ specialize (H3 (rev (resid (jacobi_n A b x0 0)))).
 rewrite rev_involutive in H3.
 specialize (H3 H1).
 assert (Hrlen: length (resid (jacobi_n A b x0 0)) = n.+1).
-{ repeat rewrite /matrix_vector_mult !map_length combine_length.
-    rewrite !map_length. unfold jacobi_n. rewrite iter_length.
-    rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
+{ repeat rewrite /matrix_vector_mult !length_map length_combine.
+    rewrite !length_map. unfold jacobi_n. rewrite iter_length.
+    rewrite !length_seq /matrix_rows_nat H0 !Nat.min_id.
     rewrite /n prednK. by []. by apply /ssrnat.ltP.
     by []. by rewrite /x0 repeat_length.
 }
@@ -4256,7 +4260,7 @@ assert (finite (BMULT xy.1 xy.2)).
                             X_m_jacobi 0 x0' b' A')))) xy (Zconst t 0, Zconst t 0)).
   specialize (H4 H2).
   destruct H4 as [k [Hlen Hnth]].
-  rewrite rev_length combine_length !length_veclist Nat.min_id in Hlen.
+  rewrite length_rev length_combine !length_veclist Nat.min_id in Hlen.
   assert (BMULT xy.1 xy.2 = 
           nth k (resid (jacobi_n A b x0 0)) (Zconst t 0)).
   { assert (resid (jacobi_n A b x0 0) = 
@@ -4287,7 +4291,7 @@ assert (finite (BMULT xy.1 xy.2)).
     apply /ssrnat.ltP. apply Hlen.
     apply Hlen.
     apply Hlen.
-    by rewrite !rev_length !length_veclist.
+    by rewrite !length_rev !length_veclist.
     by rewrite !length_veclist.
     apply /ssrnat.ltP. apply Hlen.
     unfold x0. by rewrite repeat_length.
@@ -4340,13 +4344,13 @@ pose proof (@In_nth _ (rev
 specialize (H4 H2).
 destruct H4 as [k [Hlen Hnth]].
 assert (Hrlen: length (resid (jacobi_n A b x0 0)) = n.+1).
-{ repeat rewrite /matrix_vector_mult !map_length combine_length.
-    rewrite !map_length. unfold jacobi_n. rewrite iter_length.
-    rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
+{ repeat rewrite /matrix_vector_mult !length_map length_combine.
+    rewrite !length_map. unfold jacobi_n. rewrite iter_length.
+    rewrite !length_seq /matrix_rows_nat H0 !Nat.min_id.
     rewrite /n prednK. by []. by apply /ssrnat.ltP.
     by []. by rewrite /x0 repeat_length.
 }
-rewrite rev_length combine_length !length_veclist Nat.min_id in Hlen.
+rewrite length_rev length_combine !length_veclist Nat.min_id in Hlen.
 specialize (H3 (BMULT
                   (nth (n.+1.-1 - @inord n k)
                      (vec_to_list_float n.+1 (A1_J A'))
@@ -4413,7 +4417,7 @@ rewrite nth_vec_to_list_float in H32.
 rewrite mxE in H32.
 apply Bminus_bplus_opp_implies in H32.
 destruct xy.
-rewrite rev_nth combine_length !length_veclist Nat.min_id in Hnth.
+rewrite rev_nth length_combine !length_veclist Nat.min_id in Hnth.
 assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
 rewrite H3 in Hnth.
 rewrite combine_nth in Hnth.
@@ -4493,13 +4497,13 @@ pose proof (@In_nth _ (rev
 specialize (H4 H2).
 destruct H4 as [k [Hlen Hnth]].
 assert (Hrlen: length (resid (jacobi_n A b x0 0)) = n.+1).
-{ repeat rewrite /matrix_vector_mult !map_length combine_length.
-    rewrite !map_length. unfold jacobi_n. rewrite iter_length.
-    rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
+{ repeat rewrite /matrix_vector_mult !length_map length_combine.
+    rewrite !length_map. unfold jacobi_n. rewrite iter_length.
+    rewrite !length_seq /matrix_rows_nat H0 !Nat.min_id.
     rewrite /n prednK. by []. by apply /ssrnat.ltP.
     by []. by rewrite /x0 repeat_length.
 }
-rewrite rev_length combine_length !length_veclist Nat.min_id in Hlen.
+rewrite length_rev length_combine !length_veclist Nat.min_id in Hlen.
 specialize (H3 (BMULT
                   (nth (n.+1.-1 - @inord n k)
                      (vec_to_list_float n.+1 (A1_J A'))
@@ -4570,7 +4574,7 @@ apply BPLUS_finite_e in H3.
 destruct H3 as [H3 _]. rewrite mxE in H3.
 rewrite inordK in H3.
 destruct xy .
-rewrite rev_nth combine_length !length_veclist Nat.min_id in Hnth.
+rewrite rev_nth length_combine !length_veclist Nat.min_id in Hnth.
 assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
 rewrite H5 in Hnth.
 rewrite combine_nth in Hnth.
@@ -4627,13 +4631,13 @@ pose proof (@In_nth _ (rev
 specialize (H4 H2).
 destruct H4 as [k [Hlen Hnth]].
 assert (Hrlen: length (resid (jacobi_n A b x0 0)) = n.+1).
-{ repeat rewrite /matrix_vector_mult !map_length combine_length.
-    rewrite !map_length. unfold jacobi_n. rewrite iter_length.
-    rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
+{ repeat rewrite /matrix_vector_mult !length_map length_combine.
+    rewrite !length_map. unfold jacobi_n. rewrite iter_length.
+    rewrite !length_seq /matrix_rows_nat H0 !Nat.min_id.
     rewrite /n prednK. by []. by apply /ssrnat.ltP.
     by []. by rewrite /x0 repeat_length.
 }
-rewrite rev_length combine_length !length_veclist Nat.min_id in Hlen.
+rewrite length_rev length_combine !length_veclist Nat.min_id in Hlen.
 specialize (H3 (BMULT
                   (nth (n.+1.-1 - @inord n k)
                      (vec_to_list_float n.+1 (A1_J A'))
@@ -4709,7 +4713,7 @@ rewrite nth_vec_to_list_float in H3.
 rewrite mxE in H3.
 apply Bminus_bplus_opp_implies in H3.
 rewrite rev_nth in Hnth.
-rewrite combine_length !length_veclist Nat.min_id in Hnth.
+rewrite length_combine !length_veclist Nat.min_id in Hnth.
 rewrite combine_nth in Hnth.
 assert ((n.+1 - k.+1)%coq_nat = (n.+1.-1 - k)%coq_nat) by lia.
 rewrite H5 in Hnth.
@@ -4737,7 +4741,7 @@ apply H3.
 by apply /ssrnat.ltP.
 by apply /ssrnat.ltP.
 by rewrite !length_veclist.
-by rewrite combine_length !length_veclist Nat.min_id.
+by rewrite length_combine !length_veclist Nat.min_id.
 by apply /ssrnat.ltP.
 by apply /ssrnat.ltP.
 rewrite inordK; by apply /ssrnat.ltP.
@@ -4783,13 +4787,13 @@ pose proof (@In_nth _ (rev
 specialize (H4 H2).
 destruct H4 as [k [Hlen Hnth]].
 assert (Hrlen: length (resid (jacobi_n A b x0 0)) = n.+1).
-{ repeat rewrite /matrix_vector_mult !map_length combine_length.
-    rewrite !map_length. unfold jacobi_n. rewrite iter_length.
-    rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
+{ repeat rewrite /matrix_vector_mult !length_map length_combine.
+    rewrite !length_map. unfold jacobi_n. rewrite iter_length.
+    rewrite !length_seq /matrix_rows_nat H0 !Nat.min_id.
     rewrite /n prednK. by []. by apply /ssrnat.ltP.
     by []. by rewrite /x0 repeat_length.
 }
-rewrite rev_length combine_length !length_veclist Nat.min_id in Hlen.
+rewrite length_rev length_combine !length_veclist Nat.min_id in Hlen.
 specialize (H3 (BMULT
                   (nth (n.+1.-1 - i)
                      (vec_to_list_float n.+1 (A1_J A'))
@@ -4849,7 +4853,7 @@ assert (In
 }
 specialize (H3 H4).
 rewrite rev_nth in Hnth.
-rewrite combine_length !length_veclist Nat.min_id in Hnth.
+rewrite length_combine !length_veclist Nat.min_id in Hnth.
 apply BMULT_finite_e in H3.
 destruct H3 as [_ H3].
 rewrite nth_vec_to_list_float in H3.
@@ -4902,7 +4906,7 @@ apply H5.
 by rewrite !length_veclist.
 apply ltn_ord.
 apply ltn_ord.
-by rewrite combine_length !length_veclist Nat.min_id.
+by rewrite length_combine !length_veclist Nat.min_id.
 Qed.
 
 
@@ -4936,9 +4940,9 @@ specialize (H2 (rev (resid (jacobi_n A b x0 0)))).
 rewrite rev_involutive in H2.
 specialize (H2 H1). 
 assert (Hrlen: length (resid (jacobi_n A b x0 0)) = n.+1).
-{ repeat rewrite /matrix_vector_mult !map_length combine_length.
-    rewrite !map_length. unfold jacobi_n. rewrite iter_length.
-    rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
+{ repeat rewrite /matrix_vector_mult !length_map length_combine.
+    rewrite !length_map. unfold jacobi_n. rewrite iter_length.
+    rewrite !length_seq /matrix_rows_nat H0 !Nat.min_id.
     rewrite /n prednK. by []. by apply /ssrnat.ltP.
     by []. by rewrite /x0 repeat_length.
 }
@@ -5113,7 +5117,8 @@ elim: s i => [ |a s IHs] i.
   by simpl. simpl. apply IHs.
 Qed.
 
-Lemma bigmaxr_cons_0 (a:R) s :
+(* bigmax deprecated, moved to lemmas.v *)
+(* Lemma bigmaxr_cons_0 (a:R) s :
  (forall i : nat,
     (i < size (a :: s))%nat ->
     (0 <= nth i (a :: s) 0)%Re) ->
@@ -5142,10 +5147,10 @@ assert (s = [::] \/ s != [::]).
       simpl in H. apply H. apply H3.
     } specialize (H3 i). rewrite -seq_nth_equiv.
     by apply H3.
-Qed.
+Qed. *)
   
-
-Lemma bigmaxr_eq_0 s:
+(* bigmax deprecated, moved to lemmas.v *)
+(* Lemma bigmaxr_eq_0 s:
   (forall i, (i < size s)%nat -> (0 <= nth i s 0%Re)%Re) -> 
   bigmaxr 0%Re s = 0%Re ->
   (forall i, (i < size s)%nat -> nth i s 0%Re = 0%Re).
@@ -5159,7 +5164,7 @@ elim: s i H H0 H1 => [ |a s IHs] i H H0 H1.
     * apply IHs. intros. specialize (H i0.+1). simpl in H.
       apply H. apply H2. apply H0. apply H1.
   - intros. by apply H.
-Qed.
+Qed. *)
 
 
 Lemma bigsum_eq_0 {n} (f : nat ->R):
@@ -5193,52 +5198,35 @@ Lemma matrix_inf_norm_0_implies {n:nat}:
   matrix_inf_norm A = 0%Re ->
   (forall i j, A i j = 0%Re).
 Proof.
-intros.
-unfold matrix_inf_norm in H.
-pose proof bigmaxr_eq_0.
-specialize (H0 [seq row_sum A i | i <- enum 'I_n.+1]).
-assert (forall i : nat,
-        (i <
-        size
-         [seq row_sum A i0
-            | i0 <- enum
-                    'I_n.+1])%nat ->
-          (0 <=
-           nth i
-             [seq row_sum A i0
-                | i0 <- enum
-                        'I_n.+1] 0)%Re).
-{ intros. rewrite seq_equiv seq_nth_equiv. rewrite nth_mkseq.
-  unfold row_sum. apply /RleP. apply big_ge_0_ex_abstract.
-  intros. apply /RleP. apply Rabs_pos.
-  by rewrite size_map size_enum_ord in H1.
-} specialize (H0 H1 H).
-specialize (H0 i).
-rewrite seq_nth_equiv seq_equiv in H0.
-rewrite nth_mkseq in H0; last by apply ltn_ord.
-unfold row_sum in H0.
-pose proof (@bigsum_eq_0 n.+1). 
-specialize (H2 (fun j => Rabs (A i (@inord n j)))).
-assert (forall i0 : nat,
-        (i0 < n.+1)%nat ->
-        (0 <= (fun j : nat => Rabs (A i (@inord n j))) i0)%Re).
-{ intros. apply Rabs_pos. } specialize (H2 H3).
-assert (\sum_(j < n.+1)
-        (fun j0 : nat => Rabs (A i (@inord n j))) j = 0%Re).
-{ rewrite -H0. apply eq_big. by []. intros. 
-  by rewrite !inord_val. 
-  rewrite size_map. rewrite -val_enum_ord. rewrite size_map size_enum_ord.
-  apply ltn_ord.
-} specialize (H2 H4). clear H3 H4. 
-specialize (H2 j).
-assert ((j < n.+1)%nat). { by apply ltn_ord. }
-specialize (H2 H3). simpl in H2.
-rewrite inord_val in H2.
-assert ((0 <= A i j)%Re \/ (A i j < 0)%Re). nra.
-destruct H4. rewrite Rabs_right in H2; nra.
-rewrite Rabs_left in H2; try nra.
+  rewrite /matrix_inf_norm. intros.
+  pose proof (@bigmax_eq_0_0head [seq row_sum A i | i <- enum 'I_n.+1]).
+  assert (forall i0 : nat, (i0 < size [seq row_sum A i1 | i1 <- enum 'I_n.+1])%N -> 
+    (0 <= seq.nth 0 [seq row_sum A i1 | i1 <- enum 'I_n.+1] i0)%Re).
+  { intros. rewrite size_map size_enum_ord in H1.
+    rewrite (@nth_map _ ord0); last by rewrite size_enum_ord.
+    rewrite /row_sum. apply /RleP. apply big_ge_0_ex_abstract.
+    intros. apply /RleP. apply Rabs_pos. }
+  specialize (H0 H1 H). clear H1.
+  pose proof (@bigsum_eq_0 n.+1 (fun j => Rabs (A i (@inord n j)))).
+  assert (forall i0 : nat, (i0 < n.+1)%N -> (0 <= (fun j0 : nat => Rabs (A i (inord j0))) i0)%Re).
+  { intros. apply Rabs_pos. }
+  specialize (H1 H2). clear H2.
+  specialize (H0 i). assert ((i < size [seq row_sum A i0 | i0 <- enum 'I_n.+1])%N).
+  { rewrite size_map size_enum_ord. apply ltn_ord. } 
+  specialize (H0 H2). clear H2.
+  assert (\sum_(j0 < n.+1) (fun j1 : nat => Rabs (A i (inord j1))) j0 = 0%Re).
+  { rewrite (@nth_map _ ord0) in H0; 
+      last by (rewrite size_enum_ord; apply ltn_ord).
+    replace (seq.nth ord0 (enum 'I_n.+1) i) with i in H0
+      by rewrite nth_ord_enum //=.
+    rewrite /row_sum in H0. rewrite -H0.
+    apply eq_big; auto. intros. by rewrite inord_val. }
+  specialize (H1 H2 (nat_of_ord j)).
+  assert (j < n.+1)%N. { apply ltn_ord. }
+  specialize (H1 H3). clear H3. simpl in H1.
+  rewrite inord_val in H1.
+  by apply Rabs_0_implies_0.
 Qed.
-
 
 
 (** entries zero in real ==> entries zero in float **)
@@ -5440,14 +5428,14 @@ assert ((let l1 :=
     assert (forall l l': vector t, (l, l').2 = l').
     { intros. by simpl. } rewrite H13 in H11.
     apply H11. 
-    + rewrite combine_length !length_veclist Nat.min_id.
+    + rewrite length_combine !length_veclist Nat.min_id.
       intros. 
       rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
       rewrite mxE. rewrite mxE. 
       apply x_real_to_float_zero.
       by []. rewrite !inord_val. 
       specialize (H9 (@inord n i0)). by rewrite mxE in H9. 
-    + rewrite combine_length !length_veclist Nat.min_id.
+    + rewrite length_combine !length_veclist Nat.min_id.
       intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
       by rewrite mxE. 
   } rewrite H11. rewrite Bminus_x_0 .
@@ -5522,14 +5510,14 @@ assert ((let l1 :=
   assert (forall l l': vector t, (l, l').2 = l').
   { intros. by simpl. } rewrite H13 in H11.
   apply H11. intros. 
-  + rewrite combine_length !length_veclist Nat.min_id.
-    rewrite combine_length !length_veclist Nat.min_id in H14.
+  + rewrite length_combine !length_veclist Nat.min_id.
+    rewrite length_combine !length_veclist Nat.min_id in H14.
     rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
     rewrite mxE. rewrite mxE. 
     apply x_real_to_float_zero.
     by []. rewrite !inord_val. 
     specialize (H9 (@inord n i0)). by rewrite mxE in H9. 
-  + rewrite combine_length !length_veclist Nat.min_id.
+  + rewrite length_combine !length_veclist Nat.min_id.
     intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
     rewrite mxE. 
     assert (jacobi_iter x0' b' A' (@inord n i0) ord0 = X_m_jacobi 1 x0' b' A' (@inord n i0) ord0).
@@ -5562,14 +5550,14 @@ assert ((let l1 :=
   assert (forall l l': vector t, (l, l').2 = l').
   { intros. by simpl. } rewrite H14 in H12.
   apply H12. 
-  + rewrite combine_length !length_veclist Nat.min_id.
+  + rewrite length_combine !length_veclist Nat.min_id.
     intros. 
     rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
     rewrite mxE. rewrite mxE. 
     apply x_real_to_float_zero.
     by []. rewrite !inord_val. 
     specialize (H9 (@inord n i0)). by rewrite mxE in H9. 
-  + rewrite combine_length !length_veclist Nat.min_id.
+  + rewrite length_combine !length_veclist Nat.min_id.
     intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
     by rewrite mxE. 
 } rewrite H12.
@@ -5729,14 +5717,14 @@ assert ((let l1 :=
   assert (forall l l': vector t, (l, l').2 = l').
   { intros. by simpl. } rewrite H13 in H11.
   apply H11. intros. 
-  + rewrite combine_length !length_veclist Nat.min_id.
-    rewrite combine_length !length_veclist Nat.min_id in H14.
+  + rewrite length_combine !length_veclist Nat.min_id.
+    rewrite length_combine !length_veclist Nat.min_id in H14.
     rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
     rewrite mxE. rewrite mxE. 
     apply x_real_to_float_zero.
     by []. rewrite !inord_val. 
     specialize (H9 (@inord n i0)). by rewrite mxE in H9. 
-  + rewrite combine_length !length_veclist Nat.min_id.
+  + rewrite length_combine !length_veclist Nat.min_id.
     intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
     rewrite mxE.
     assert (jacobi_iter x0' b' A' (@inord n i0) ord0 = X_m_jacobi 1 x0' b' A' (@inord n i0) ord0).
@@ -5838,14 +5826,14 @@ apply Bplus_no_ov_finite.
     assert (forall l l': vector t, (l, l').2 = l').
     { intros. by simpl. } rewrite H15 in H13.
     apply H13. intros. 
-    + rewrite combine_length !length_veclist Nat.min_id.
-      rewrite combine_length !length_veclist Nat.min_id in H16.
+    + rewrite length_combine !length_veclist Nat.min_id.
+      rewrite length_combine !length_veclist Nat.min_id in H16.
       rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
       rewrite mxE. rewrite mxE. 
       apply x_real_to_float_zero.
       by []. rewrite !inord_val. 
       specialize (H11 (@inord n i0)). by rewrite mxE in H11. 
-    + rewrite combine_length !length_veclist Nat.min_id.
+    + rewrite length_combine !length_veclist Nat.min_id.
       intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
       rewrite mxE. 
       assert (jacobi_iter x0' b' A' (@inord n i0) ord0 = X_m_jacobi 1 x0' b' A' (@inord n i0) ord0).
@@ -5878,14 +5866,14 @@ apply Bplus_no_ov_finite.
     assert (forall l l': vector t, (l, l').2 = l').
     { intros. by simpl. } rewrite H16 in H14.
     apply H14. 
-    + rewrite combine_length !length_veclist Nat.min_id.
+    + rewrite length_combine !length_veclist Nat.min_id.
       intros. 
       rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
       rewrite mxE. rewrite mxE. 
       apply x_real_to_float_zero.
       by []. rewrite !inord_val. 
       specialize (H11 (@inord n i0)). by rewrite mxE in H11. 
-    + rewrite combine_length !length_veclist Nat.min_id.
+    + rewrite length_combine !length_veclist Nat.min_id.
       intros. rewrite nth_vec_to_list_float; last by apply /ssrnat.ltP.
       by rewrite mxE. 
   } rewrite H14.
@@ -5960,29 +5948,21 @@ Lemma vec_norm_resid_N_0 {t: FPStdLib.type} :
        (X_m_jacobi 2 x0' b' A' -f
         X_m_jacobi 1 x0' b' A')) = 0%Re.
 Proof.
-intros.
-unfold vec_inf_norm.
-apply bigmaxrP.
-split.
-+ assert (seq.nth 0%Re [seq Rabs
-                         (FT2R_mat
-                            (X_m_jacobi 2 x0'
-                               b' A' -f
-                             X_m_jacobi 1 x0'
-                               b' A') i 0)
-                     | i <- enum 'I_n.+1] 0%nat = 0%Re).
-  { rewrite seq_equiv. rewrite nth_mkseq; last by [].
-    rewrite mxE. rewrite resid_sub_0_N_0; try by [].
-    by rewrite Rabs_R0. 
-  } rewrite -H9. apply mem_nth.
-  by rewrite size_map size_enum_ord.
-+ intros. 
-  rewrite size_map size_enum_ord in H9.
-  rewrite seq_equiv. rewrite nth_mkseq; last by apply H9.
-  rewrite mxE. rewrite resid_sub_0_N_0; try by [].
-  rewrite Rabs_R0. apply /RleP. apply Rle_refl.
+  intros. rewrite /vec_inf_norm.
+  apply bigmaxP_0head.
+  { by rewrite size_map size_enum_ord. }
+  { intros.
+    rewrite size_map size_enum_ord in H9.
+    rewrite seq_equiv nth_mkseq; last by apply H9.
+    rewrite mxE resid_sub_0_N_0; auto.
+    rewrite Rabs_R0. apply /RleP. auto. }
+  { intros. move /mapP in H9. destruct H9 as [i0 H9 H10].
+    rewrite H10. apply /RleP. apply Rabs_pos. }
+  { apply /mapP. exists ord0. 
+    unfold enum. apply /mapP. exists ord0; auto.
+    rewrite mxE. rewrite resid_sub_0_N_0; auto.
+    by rewrite Rabs_R0. }
 Qed.
-
 
 
 
@@ -6009,9 +5989,9 @@ Proof.
 intros ? ? ? ? ? ? ? ? ? ? ? HfA2 Hfx0 Hinp HfA HfA1_inv Hfb HN0.
 unfold norm2. 
 assert ( length (resid (jacobi_n A b x0 1%nat)) = n.+1).
-{ repeat rewrite /matrix_vector_mult !map_length combine_length.
-    rewrite !map_length. unfold jacobi_n. (*rewrite iter_length. *)
-    rewrite !seq_length /matrix_rows_nat H0 !Nat.min_id.
+{ repeat rewrite /matrix_vector_mult !length_map length_combine.
+    rewrite !length_map. unfold jacobi_n. (*rewrite iter_length. *)
+    rewrite !length_seq /matrix_rows_nat H0 !Nat.min_id.
     rewrite -/n prednK. by []. by apply /ssrnat.ltP.
     (*by []. by rewrite /x0 repeat_length. *)
 }
@@ -6053,7 +6033,7 @@ apply dotprod_finite.
                    (inord k) ord0))).
   { apply finite_A_mult_x2_minus_x1; try by []. }
   specialize (H7 H8).
-  split; try apply H8. rewrite rev_length H2.
+  split; try apply H8. rewrite length_rev H2.
   intros. rewrite /n0.
   destruct H7 as [d [e [Hde [Hd [He H7]]]]].
   rewrite H7.
@@ -6184,9 +6164,9 @@ destruct H0.
             remember (length A).-1 as n.
             specialize (H5 (resid (jacobi_n A b x0 1%nat)) n).
             assert (length (resid (jacobi_n A b x0 1%nat)) = n.+1).
-            { repeat rewrite /matrix_vector_mult !map_length combine_length.
-              rewrite !map_length. unfold jacobi_n. 
-              rewrite !seq_length /matrix_rows_nat -HeqAb !Nat.min_id.
+            { repeat rewrite /matrix_vector_mult !length_map length_combine.
+              rewrite !length_map. unfold jacobi_n. 
+              rewrite !length_seq /matrix_rows_nat -HeqAb !Nat.min_id.
               rewrite Heqn prednK. by []. by apply /ssrnat.ltP.
             } specialize (H5 H6).
             rewrite H5.
@@ -6255,8 +6235,8 @@ destruct H0.
                                                   (jacobi_n A b x0
                                                     1)) n.+1)))) xy (Zconst t 0, Zconst t 0)).
                 specialize (H10 H9). destruct H10 as [m [Hlenm Hmth]].
-                rewrite rev_length combine_length !length_veclist Nat.min_id in Hlenm.
-                rewrite rev_nth combine_length !length_veclist Nat.min_id in Hmth.
+                rewrite length_rev length_combine !length_veclist Nat.min_id in Hlenm.
+                rewrite rev_nth length_combine !length_veclist Nat.min_id in Hmth.
                 assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat) by lia.
                 rewrite H10 combine_nth in Hmth. 
                 rewrite nth_vec_to_list_float in Hmth; try by [].
@@ -6364,8 +6344,8 @@ destruct H0.
                                                   X_m_jacobi 1 x0' b' A')))) xy (Zconst t 0 , Zconst t 0)).
                   specialize (H12 H11).
                   destruct H12 as [m [Hmth H12]].
-                  rewrite rev_length combine_length !length_veclist Nat.min_id in Hmth.
-                  rewrite rev_nth combine_length !length_veclist Nat.min_id in H12.
+                  rewrite length_rev length_combine !length_veclist Nat.min_id in Hmth.
+                  rewrite rev_nth length_combine !length_veclist Nat.min_id in H12.
                   assert ((n.+1 - m.+1)%coq_nat = (n.+1.-1 - m)%coq_nat) by lia.
                   rewrite H13 in H12.
                   rewrite combine_nth in H12.
@@ -6625,9 +6605,9 @@ destruct H0.
                 pose proof (@v_equiv t).
                 specialize (H6 (resid (jacobi_n A b x0 0)) n).
                 assert (length (resid (jacobi_n A b x0 0)) = n.+1).
-                { repeat rewrite /matrix_vector_mult !map_length combine_length.
-                  rewrite !map_length. unfold jacobi_n. rewrite iter_length.
-                  rewrite !seq_length /matrix_rows_nat -HeqAb !Nat.min_id.
+                { repeat rewrite /matrix_vector_mult !length_map length_combine.
+                  rewrite !length_map. unfold jacobi_n. rewrite iter_length.
+                  rewrite !length_seq /matrix_rows_nat -HeqAb !Nat.min_id.
                   rewrite Heqn prednK. by []. by apply /ssrnat.ltP.
                   by []. by rewrite /x0 repeat_length.
                 } specialize (H6 H7).
@@ -7117,7 +7097,21 @@ destruct H0.
                    apply Rplus_le_le_0_compat. nra. apply g_pos.
                    destruct H as [HfA [Hrho [HinvA [Hfbdiv [HG [Hfacc [Hk [He0 [HfA2 [Hfb [size_cons Hinp]]]]]]]]]]]. 
                    assert (vec_inf_norm (FT2R_mat x0') = 0%Re).
-                   { unfold vec_inf_norm. apply bigmaxrP.
+                   { clear HG H10 H11.
+                     unfold vec_inf_norm. apply bigmaxP_0head.
+                     + by rewrite size_map size_enum_ord.
+                     + intros. rewrite seq_equiv. rewrite nth_mkseq;
+                       last by rewrite size_map size_enum_ord in H.
+                       rewrite Heqx0'. rewrite !mxE /=. rewrite inordK; 
+                       last by rewrite size_map size_enum_ord in H.
+                       unfold x0. rewrite nth_repeat. simpl. rewrite Rabs_R0. apply Rle_refl.
+                     + intros. move /mapP in H. destruct H as [i100 H99 H100].
+                       rewrite H100. apply /RleP. apply Rabs_pos.
+                     + apply /mapP. exists ord0.
+                       unfold enum. apply /mapP. exists ord0; auto.
+                       rewrite Heqx0' !mxE //=. unfold x0. rewrite nth_repeat //=.
+                       by rewrite Rabs_R0.
+                    (* unfold vec_inf_norm. apply bigmaxrP.
                      split.
                      + assert (seq.nth 0%Re [seq Rabs (FT2R_mat x0' i 0)
                                                 | i <- enum 'I_n.+1] 0%nat = 0%Re).
@@ -7130,7 +7124,7 @@ destruct H0.
                        rewrite Heqx0'. rewrite !mxE /=. rewrite inordK; 
                        last by rewrite size_map size_enum_ord in H.
                        unfold x0. rewrite nth_repeat. simpl. rewrite Rabs_R0.
-                       apply /RleP. apply Rle_refl.
+                       apply /RleP. apply Rle_refl. *)
                    } rewrite H. rewrite  !Rmult_0_r !Rmult_0_l ?Rplus_0_r ?Rplus_0_l.
                    (** use : Heqx : x = A_real^-1 *m b_real **)
                    assert (b_real = A_real *m x).

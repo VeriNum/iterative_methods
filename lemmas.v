@@ -361,6 +361,15 @@ Proof.
   apply Rle_trans with c; apply /RleP; auto.
 Qed.
 
+Lemma bigmax_pos_0head (s :  seq R) :
+  0 <= \big[maxr/0%Re]_(i <- s) i.
+Proof.
+  induction s as [|x s'].
+  { rewrite big_nil. auto. }
+  rewrite big_cons. apply /RleP. eapply Rle_trans.
+  apply /RleP. apply IHs'. apply /RleP. apply maxr_r.
+Qed.
+
 
 Lemma bigmax_not_0_implies_aux_0head s :
   (0 < size s)%nat ->
@@ -416,8 +425,102 @@ Proof.
   by rewrite H2.
 Qed.
 
+Lemma Rmax_right_inv x y : 
+  Rmax x y = y -> x <= y.
+Proof.
+  intros. rewrite /Rmax in H. destruct Rle_dec eqn:E.
+  + apply /RleP. auto.
+  + rewrite H. auto.
+Qed.
 
+Lemma mem_ex_idx (x : R) s :
+  x \in s ->
+  exists i, (i < (size s))%N /\ nth 0 s i = x.
+Proof.
+  induction s as [|y s']; intros.
+  { inversion H. }
+  unfold in_mem in H. simpl in H. move /orP in H. destruct H.
+  { move /eqP in H. subst y. by exists 0. }
+  pose proof (IHs' H). destruct H0 as [i' H0].
+  exists i'.+1. simpl. apply H0.
+Qed.
 
+(* Lemma bigmaxr_cons_0 (a:R) s :
+ (forall i : nat,
+    (i < size (a :: s))%nat ->
+    (0 <= nth i (a :: s) 0)%Re) ->
+  bigmaxr 0%Re (a :: s) = 0%Re ->
+  a = 0%Re /\ bigmaxr 0%Re s = 0%Re. *)
+
+Lemma bigmax_cons_0_0head (a : R) s :
+  (forall i, (i < size (a :: s))%nat -> (0 <= seq.nth 0 (a :: s) i)%Re) ->
+  \big[maxr/0%Re]_(i <- a :: s) i = 0%Re ->
+  a = 0%Re /\ \big[maxr/0%Re]_(i <- s) i = 0%Re.
+Proof.
+  induction s as [|x s'].
+  { intros. split.
+    2:{ by rewrite big_nil. }
+    assert (0 < size [:: a])%N by auto.
+    specialize (H 0 H1). simpl in H.
+    rewrite big_cons big_nil in H0.
+    rewrite -RmaxE in H0. 
+    pose proof (Rmax_right_inv H0).
+    apply Rle_antisym; auto.
+    apply /RleP. auto. }
+  intros. rewrite big_cons. 
+  remember (\big[maxr/0%Re]_(i <- s') i) as maxs'.
+  rewrite -Heqmaxs'.
+  assert ((forall i : nat, (i < size (a :: s'))%N -> (0 <= nth 0 (a :: s') i)%Re)).
+  { intros. destruct i.
+    + simpl. specialize (H 0). simpl in H. apply H. auto. 
+    + simpl in H1. simpl. specialize (H i.+2). simpl in H. apply H.
+      move /ssrnat.leP in H1. apply /ssrnat.leP. lia. } 
+  specialize (IHs' H1). clear H1.
+  assert (0 <= a).
+  { specialize (H 0). simpl in H. apply /RleP. apply H. auto. }
+  assert (0 <= x).
+  { specialize (H 1). simpl in H. apply /RleP. apply H. auto. }
+  assert (\big[maxr/0%Re]_(i <- (a :: s')) i = 0%Re).
+  { rewrite bigmax_swap_0head in H0; auto.
+    2:{ intros. apply mem_ex_idx in H0. destruct H0 as [i [? ?]].
+    specialize (H i.+2).  simpl in H. rewrite -H3.
+    apply /RleP. apply H. apply /ssrnat.ltP. move /ssrnat.ltP in H0.
+    by rewrite -Nat.succ_lt_mono -Nat.succ_lt_mono. }
+    rewrite big_cons in H0. apply Rle_antisym.
+    + apply Rle_trans with (maxr x (\big[maxr/0%Re]_(j <- (a :: s')) j)).
+      { apply /RleP. apply maxr_r. }
+      rewrite H0. lra.
+    + apply /RleP. apply bigmax_pos_0head. }
+  specialize (IHs' H3). clear H3. destruct IHs'. split; auto.
+  rewrite H4. rewrite -RmaxE. apply Rmax_right. apply /RleP.
+  rewrite big_cons in H0. subst a. rewrite -RmaxE Rmax_comm in H0.
+  apply Rmax_right_inv in H0.
+  rewrite big_cons in H0. apply /RleP. 
+  apply Rle_trans with (maxr x (\big[maxr/0%Re]_(j <- s') j)).
+  rewrite -RmaxE. apply Rmax_l. apply /RleP. apply H0.
+Qed.
+
+(* Lemma bigmaxr_eq_0 s:
+  (forall i, (i < size s)%nat -> (0 <= nth i s 0%Re)%Re) -> 
+  bigmaxr 0%Re s = 0%Re ->
+  (forall i, (i < size s)%nat -> nth i s 0%Re = 0%Re). *)
+
+Lemma bigmax_eq_0_0head s:
+  (forall i, (i < size s)%nat -> (0 <= nth 0%Re s i)%Re) ->
+  \big[maxr/0%Re]_(i <- s) i = 0%Re ->
+  (forall i, (i < size s)%nat -> nth 0%Re s i = 0%Re).
+Proof.
+  induction s as [|x s']; intros. inversion H1.
+  pose proof (@bigmax_cons_0_0head x s' H H0).
+  destruct i; simpl. destruct H2; auto.
+  assert (forall i0 : nat, (i0 < size s')%N -> (0 <= nth 0 s' i0)%Re).
+  { intros. specialize (H i0.+1). simpl in H. apply H.
+    apply /ssrnat.ltP. move /ssrnat.ltP in H3. lia. }
+  destruct H2.
+  specialize (IHs' H3 H4). clear H3.
+  apply IHs'. simpl in H1. move /ssrnat.leP in H1. apply /ssrnat.leP.
+  lia.
+Qed.
 
 (* Lemma bigmax_le_deprecated (x0:R) lr (x:R):
  (0 < size lr)%N ->
