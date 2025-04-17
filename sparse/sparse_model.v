@@ -421,15 +421,16 @@ rewrite <- H, <- H1.
 apply H0.
 Qed.
 
+
+Definition coord_eqb (a b: Z * Z) :=
+       andb (Z.eqb (fst a) (fst b)) (Z.eqb (snd a) (snd b)).
+
 Definition coo_to_matrix {t: type} (coo: coo_matrix t) (m: matrix t) : Prop :=
   coo_rows coo = matrix_rows m /\
   matrix_cols m (coo_cols coo) /\
    forall i, 0 <= i < coo_rows coo ->
     forall j, 0 <= j < coo_cols coo -> 
-     sum_any (map (fun e: Z*Z*ftype t => snd e) 
-              (filter (fun e: Z*Z*ftype t => 
-                 andb (Z.eqb (fst (fst e)) i) (Z.eqb (snd (fst e)) j))
-                (coo_entries coo)))
+     sum_any (map snd (filter (coord_eqb (i,j) oo fst) (coo_entries coo)))
           (matrix_index m (Z.to_nat i) (Z.to_nat j)).
 
 (*

@@ -151,7 +151,7 @@ struct csr_matrix *coo_to_csr_matrix(struct coo_matrix *p) {
     }
   }
   cols = p->cols;
-  while (r+1<=rows) row_ptr[++r]=l;
+  while (r<=rows) row_ptr[r++]=l;
   q->val = val;
   q->col_ind = col_ind;
   q->row_ptr = row_ptr;
