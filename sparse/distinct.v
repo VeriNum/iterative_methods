@@ -119,6 +119,23 @@ Proof.
    apply IHsorted; list_solve.
 Qed.
 
+Lemma sorted_i: forall {A} `{d: Inhabitant A} (le: A -> A -> Prop) {TR: Transitive le}
+         (al: list A),
+         (forall i j, 0 <= i < j -> j < Zlength al -> le (Znth i al) (Znth j al)) ->
+         sorted le al.
+Proof.
+induction al; intros.
+constructor.
+destruct al. constructor.
+constructor.
+apply (H 0 1); list_solve.
+apply IHal.
+intros.
+specialize (H (i+1) (j+1) ltac:(lia)).
+rewrite !(Znth_pos_cons (_+_)), !Z.add_simpl_r in H by list_solve.
+apply H. list_solve.
+Qed.
+
 Lemma le1_sorted: forall {A} {le: A -> A -> Prop}
        {TR: Transitive le}
         (a b: A) (al: list A), 
