@@ -290,33 +290,33 @@ apply IHel; lia.
 apply IHel; auto.
 Qed.
 
-Lemma count_distinct_sublist:
-  forall el i, 0 <= i < Zlength el ->
-     count_distinct (sublist 0 i el) - 1 < count_distinct el.
+Lemma count_distinct_mono: 
+  forall (bl: list A) i,
+      count_distinct (sublist 0 i bl) <= count_distinct bl.
 Proof.
-intros.
-      destruct (zeq i 0). subst. autorewrite with sublist.
-      pose proof (count_distinct_bound el).  simpl; lia.
-      destruct el as [|p el]. list_solve.
-      rewrite sublist_0_cons by lia.
-      unfold count_distinct.
-      repeat change (?A - 1) with (Z.pred A).
-      set (u := 1). assert (0<u) by lia. clearbody u.
-      assert (0<i<=Zlength el) by list_solve. clear H n.
-      revert p u H0 i H1. induction el; intros. list_solve.
-      simpl.
-      destruct (zeq 1 i). subst i. autorewrite with sublist. simpl.
-      assert (forall u p, u <= fst (fold_left count_distinct_aux el (u,p))). {
-          clear.
-          induction el; simpl; intros; try lia.
-          destruct (ltb _ _); auto. specialize (IHel (u+1) a). lia.
-      } 
-      destruct (ltb _ _). specialize (H (u+1) a). lia.
-        specialize (H u a); lia.
-      rewrite sublist_0_cons by lia. simpl.
-      destruct (ltb _ _).
-      apply IHel; try lia. list_solve.
-      apply IHel. lia. list_solve.
+ intros.
+ destruct bl as [|rc bl].
+ unfold sublist. simpl. rewrite firstn_nil. simpl. lia.
+ unfold count_distinct.
+ assert (forall al u p, u <= fst (fold_left count_distinct_aux al (u, p))). {
+         clear.
+         induction al as [|rca al]; simpl. lia.
+         intros u rc.
+         destruct (BPO.ltb _ _); simpl; auto. specialize (IHal (u+1) rca); lia.
+ } 
+ destruct (zlt i 1). 
+ replace (sublist 0 i (rc::bl)) with (@nil A).
+ transitivity 1; auto. lia.
+ unfold sublist; simpl. replace (Z.to_nat i) with O by lia; reflexivity.
+ unfold sublist. simpl.
+ replace (Z.to_nat i) with (S (Z.to_nat (i-1))) by lia.
+ forget (Z.to_nat (i-1)) as i'; clear i g. rename i' into i.
+ simpl.
+ forget 1 as u.
+ revert rc u i; induction bl; intros. destruct i; simpl; auto; lia.
+ destruct i; simpl;
+ destruct (BPO.ltb _ _); simpl; auto.
+ transitivity (u+1); auto; lia.
 Qed.
 
 Lemma count_distinct_incr:
@@ -354,39 +354,6 @@ intros.
            destruct (ltb rc' rc1); apply IHbl; try list_solve.
 Qed.
 
-Lemma count_distinct_mono: 
-  forall (bl: list A) i,
-      0 <= i <= Zlength bl ->
-      count_distinct (sublist 0 i bl) <= count_distinct bl.
-Proof.
- intros.
- destruct bl as [|rc bl].
- rewrite sublist_nil' by list_solve. compute. congruence.
- unfold count_distinct.
- rewrite Zlength_cons in H.
- assert (forall al u p, u <= fst (fold_left count_distinct_aux al (u, p))). {
-         clear.
-         induction al as [|rca al]; simpl. lia.
-         intros u rc.
-         destruct (ltb _ _); simpl; auto. specialize (IHal (u+1) rca); lia.
- } 
- destruct (zeq i 0). subst. rewrite sublist_nil.
- simpl. specialize (H0 bl 1 rc); lia.
- rewrite sublist_0_cons by lia.
- assert (0 <= i-1 <= Zlength bl) by lia. clear H n.
- forget (i-1) as i'. clear i. rename i' into i.
- set (u:=1). clearbody u.
- revert i H1 rc u; induction bl as [|rcb bl]; simpl; intros.
- rewrite sublist_nil' by list_solve. simpl; lia.
- autorewrite with sublist in H1.
- destruct (zeq i 0). subst. autorewrite with sublist. simpl.
- destruct (ltb _ _); [ | auto].
- apply Z.le_trans with (u+1); try lia. auto.
- rewrite sublist_0_cons by lia.
- simpl.
- destruct (ltb _ _); apply IHbl; try lia.
-Qed.
-
 Lemma count_distinct_incr':
   forall (bl: list A) i,
       lt (Znth (i - 1) bl) (Znth i bl) ->
@@ -395,7 +362,7 @@ Lemma count_distinct_incr':
 Proof.
 intros.
   pose proof count_distinct_incr bl i H ltac:(lia).
-  pose proof count_distinct_mono bl (i+1) ltac:(lia).
+  pose proof count_distinct_mono bl (i+1).
   lia.
 Qed.
 

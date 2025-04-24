@@ -12,7 +12,7 @@ Open Scope logic.
 
 Definition Gprog: funspecs := Build_CSR_ASI ++ SparseASI ++ MathASI.
 
-Lemma coo_wellformed_e {t} [coo: coo_matrix t]:
+Lemma coo_entry_bounds {t} [coo: coo_matrix t]:
   coo_matrix_wellformed coo ->
   forall i, 
   0 <= i < Zlength (coo_entries coo) ->
@@ -181,6 +181,40 @@ build_partial_CSR:
     (partial_CSR_dbound: count_distinct (coo_entries coo) <= Int.max_unsigned),
     partial_CSR h r coo rowptr colind val.
 
+
+Lemma rowptr_sorted_e: 
+ forall row_ptr (H: list_solver.sorted Z.le (0 :: row_ptr ++ [Int.max_unsigned]))
+       (i j: Z),
+   0 <= i <= j /\ j < Zlength row_ptr ->
+   0 <= Znth i row_ptr <= Znth j row_ptr /\ Znth j row_ptr <= Int.max_unsigned.
+Proof.
+intros.
+pose proof H 0 (i+1) ltac:(list_solve).
+rewrite Znth_0_cons, Znth_pos_cons, Z.add_simpl_r in H1 by list_solve.
+rewrite Znth_app1 in H1 by list_solve.
+pose proof H (i+1) (j+1) ltac:(list_solve).
+rewrite !(Znth_pos_cons (_+_)), !Z.add_simpl_r in H2 by list_solve.
+rewrite !Znth_app1 in H2 by list_solve.
+pose proof H (j+1) (Zlength row_ptr + 1) ltac:(list_solve).
+rewrite !(Znth_pos_cons (_+_)), !Z.add_simpl_r in H3 by list_solve.
+rewrite Znth_app1 in H3 by list_solve.
+rewrite Znth_app2 in H3 by list_solve.
+autorewrite with sublist in H3.
+lia.
+Qed.
+
+Lemma rowptr_sorted_e1: 
+  forall row_ptr (H: list_solver.sorted Z.le (0 :: row_ptr ++ [Int.max_unsigned]))
+       (i: Z),
+   0 <= i < Zlength row_ptr ->
+   0 <= Znth i row_ptr <= Int.max_unsigned.
+Proof.
+intros.
+pose proof rowptr_sorted_e _ H i i ltac:(lia); lia.
+Qed.
+
+Hint Unfold csr_rows : list_solve_unfold. (* unfolds below the line but unfortunately not above the line *)
+
 Lemma partial_CSR_rowptr': forall {t} r (coo: coo_matrix t) (csr: csr_matrix t),
    coo_matrix_wellformed coo ->
    csr_matrix_wellformed csr ->
@@ -191,25 +225,16 @@ Lemma partial_CSR_rowptr': forall {t} r (coo: coo_matrix t) (csr: csr_matrix t),
 Proof.
  intros.
  inversion_clear H1.
- apply Znth_eq_ext;
  unfold csr_rows in *.
- list_solve.
+ apply Znth_eq_ext. list_solve.
  intros.
  rewrite Znth_sublist by list_solve.
  rewrite Znth_Zrepeat by list_solve.
  autorewrite with sublist in H1.
  inversion_clear H0.
- assert (Znth (i+r) (csr_row_ptr csr) <= Zlength (csr_vals csr)). {
-    rewrite CSR_wf_vals'.
-    specialize (CSR_wf_sorted (i+r+1) (csr_rows csr + 1)).
-    unfold csr_rows in *. specialize (CSR_wf_sorted ltac:(list_solve)).
-    list_solve.
- }
- assert (0 <= Znth (i+r) (csr_row_ptr csr)). {
-    specialize (CSR_wf_sorted 0 (i+r+1)).
-    unfold csr_rows in *. specialize (CSR_wf_sorted ltac:(list_solve)).
-    list_solve.
- }
+ unfold csr_rows in *.
+ pose proof rowptr_sorted_e _ CSR_wf_sorted (i+r) (Zlength (csr_row_ptr csr) - 1) ltac:(list_solve).
+ destruct H0 as [[? ?] _].
  destruct (zlt (Znth (i+r) (csr_row_ptr csr)) (Zlength (csr_vals csr))); [ | lia].
  exfalso. clear H0.
  clear CSR_wf_rowsorted.
@@ -229,13 +254,7 @@ Proof.
     intros x y [? ?].
     subst bl.
     rewrite !Znth_sublist by list_solve.
-    specialize (CSR_wf_sorted (x+r+1) (y+r+1)).
-    autorewrite with sublist in CSR_wf_sorted.
-    autorewrite with sublist in H1.
-    rewrite !Znth_pos_cons in CSR_wf_sorted by list_solve.
-    rewrite !Znth_app1 in CSR_wf_sorted by list_solve.
-    rewrite !Z.add_simpl_r in CSR_wf_sorted.
-    apply CSR_wf_sorted; lia.
+    apply (rowptr_sorted_e _ CSR_wf_sorted (x+r) (y+r) ltac:(list_solve)).
   }
   assert (0 < Zlength bl) by (subst bl; list_solve).
   clearbody bl. clear - H1 H0 H2.
@@ -295,7 +314,7 @@ assert (Hcde: 0 < cde_upto h coo). {
   apply count_distinct_bound'. autorewrite with sublist; lia.
 }
 inversion H2; clear H2.
-destruct (coo_wellformed_e partial_CSR_coo h) as [Hr Hc]; [ lia |].
+destruct (coo_entry_bounds partial_CSR_coo h) as [Hr Hc]; [ lia |].
 destruct (Znth h (coo_entries coo)) as  [[r' c] x] eqn:Hentry.
 assert (r'=r) by (rewrite Hdup in H0; simpl in H0; auto).
 subst r'. simpl in Hdup, Hr, Hc. 
@@ -458,7 +477,7 @@ apply (build_partial_CSR (h+1) (r+1) coo _ _ _ ltac:(assumption) ltac:(assumptio
      split; try lia.
      rewrite coo_csr_vals.
      unfold d, cde_upto.
-     pose proof count_distinct_mono (sublist 0 h (coo_entries coo)) (g+1) ltac:(list_solve).
+     pose proof count_distinct_mono (sublist 0 h (coo_entries coo)) (g+1).
      autorewrite with sublist in H9. lia.
  -
   simpl. unfold val'. autorewrite with sublist.
@@ -466,7 +485,7 @@ apply (build_partial_CSR (h+1) (r+1) coo _ _ _ ltac:(assumption) ltac:(assumptio
   rewrite coo_csr_vals in *.
   assert (d <= Zlength VAL). {
       rewrite partial_CSR_val'. unfold d, cde_upto; simpl.
-      apply count_distinct_mono. lia.
+      apply count_distinct_mono.
   }
   rewrite sublist_upd_Znth_lr by lia.
   rewrite partial_CSR_val.
@@ -482,6 +501,16 @@ Proof.
 intros.
 inversion_clear H0; constructor; simpl; auto.
 apply Forall_sublist; auto.
+Qed.
+
+Lemma coord_sorted_e: forall {t} (al: list (Z*Z*ftype t)) (H: sorted coord_le al)
+   (i j: Z), 0 <= i <= j /\ j < Zlength al -> coord_le (Znth i al) (Znth j al).
+Proof.
+intros.
+destruct (zeq i j).
+subst.
+clear; destruct (Znth j al) as [[??]?]; red; simpl; lia.
+apply sorted_e; auto; lia.
 Qed.
 
 Lemma partial_CSR_newcol:
@@ -500,12 +529,8 @@ Lemma partial_CSR_newcol:
 Proof.
 intros * ? ? Hrcx ? ? ?.
 inversion_clear H3.
-assert (H3: 0 <= r < coo_rows coo). {
-   clear - partial_CSR_coo partial_CSR_i Hrcx H0.
-   inversion_clear partial_CSR_coo. rewrite Forall_forall in H1.
-   destruct (H1 (Znth i (coo_entries coo))). apply Znth_In. lia.
-   rewrite Hrcx in *; simpl in *; lia.
-}
+pose proof (proj1 (coo_entry_bounds H i ltac:(lia))).
+rewrite Hrcx in H3; simpl in H3.
 clear partial_CSR_r.
 assert (Hlastrows := partial_CSR_rowptr' (r+1) (coo_upto i coo) csr
    (coo_upto_wellformed i coo ltac:(lia) partial_CSR_coo)
@@ -536,12 +561,26 @@ assert (Hrows': csr_rows csr' = csr_rows csr). {
   }
 assert (Hcde: cde_upto i coo = Zlength (csr_vals csr)). {
     unfold cde_upto.
-    pose proof (count_distinct_sublist (coo_entries coo) i) ltac:(lia).
+    pose proof (count_distinct_mono (coo_entries coo) i).
     pose proof (count_distinct_bound (sublist 0 i (coo_entries coo))).
     autorewrite with sublist in H6.
     inversion_clear partial_CSR_wf.
     inversion_clear partial_CSR_coo_csr. rewrite coo_csr_vals.
     unfold coo_upto. simpl. lia.
+}
+assert (BUMP: 0 < count_distinct (sublist 0 i (coo_entries coo)) <
+               count_distinct (sublist 0 (i + 1) (coo_entries coo))). {
+ pose proof count_distinct_incr' (sublist 0 (i+1) (coo_entries coo)) i.
+ spec H5.  {
+        autorewrite with sublist.
+        pose proof sorted_e _ partial_CSR_coo_sorted (i-1) i ltac:(lia) ltac:(lia).
+        rewrite Hrcx in *. clear - H6 H1 H2. subst. destruct (Znth _ _) as [[??]?].
+        red; unfold coord_le in *; simpl in *. lia.
+     }
+  spec H5. list_solve.
+  pose proof count_distinct_mono (sublist 0 i (coo_entries coo)) 1.
+  autorewrite with sublist in H6. rewrite (sublist_one 0 1) in H6 by lia.
+  simpl in H6. lia.
 }
 apply build_partial_CSR with (csr:=csr'); auto; try lia.
 - unfold coo_upto. simpl. rewrite (sublist_split 0 i) by lia. apply Forall_app; split; auto.
@@ -552,84 +591,60 @@ apply build_partial_CSR with (csr:=csr'); auto; try lia.
   inversion_clear partial_CSR_coo_csr.
   simpl in coo_csr_rows, coo_csr_vals, coo_csr_cols.
   assert (Zlength new_row_ptr = Zlength (csr_row_ptr csr))
-       by (unfold csr_rows in *; simpl in Hrows'; lia).    
+       by (unfold csr_rows in *; simpl in Hrows'; lia).  
   constructor; simpl; auto; try lia.
   + unfold cde_upto. list_solve.
-  + unfold cde_upto, csr', new_row_ptr, csr_rows; simpl. list_solve.
+  +  unfold cde_upto, csr', new_row_ptr, csr_rows; simpl. 
+     rewrite Zlength_app, Zlength_sublist by lia.
+     rewrite <- coo_csr_vals, CSR_wf_vals', Hrows.  
+ list_solve.
   + intros a b [??].
     pose proof CSR_wf_sorted a b ltac:(list_solve).
     unfold new_row_ptr.
     rewrite app_ass.
-    repeat change (?A :: ?B ++ ?C) with ((A::B)++C).
+    change (?A :: ?B ++ ?C) with ((A::B)++C).
     destruct (zle a (r+1)), (zle b (r+1)).    
-    -- autorewrite with sublist.
-       destruct (zeq 0 a), (zeq 0 b); try subst a; try subst b;
-        autorewrite with sublist in H8|-*; try lia; list_solve.
+    -- destruct (zeq 0 a), (zeq 0 b); list_solve.
     -- destruct (zeq 0 a).
-         subst a; simpl; repeat rewrite Znth_0_cons in *; repeat rewrite Znth_pos_cons in * by list_solve.
-         rewrite Znth_app2 by list_solve.
+      ++ pose proof count_distinct_bound (coo_entries (coo_upto (i+1) coo)). 
+         unfold cde_upto, coo_upto, csr_rows in *. list_solve.
+      ++
          destruct (zlt b (Zlength (csr_row_ptr csr)+1)); [ | list_solve].
-         autorewrite with sublist in H8|-*.
-         apply count_distinct_bound.
-         simpl. repeat rewrite Znth_pos_cons in * by list_solve.
-         rewrite (Znth_app2 _ _ _ _ (b-1)) by list_solve. 
-         destruct (zlt b (Zlength (csr_row_ptr csr)+1)); [ | list_solve].
-         autorewrite with sublist.
-         rewrite !Znth_app1 in H8 by list_solve.
-         pose proof CSR_wf_sorted a (Zlength (csr_row_ptr csr)) ltac:(list_solve).
-         rewrite !Znth_pos_cons, ?Z.add_simpl_r, ?Znth_app1 in H9 by list_solve.
-         clear - CSR_wf_vals' Hrows H9 coo_csr_vals H4. unfold cde_upto, csr_rows in *.
-         lia.
+         pose proof rowptr_sorted_e _ CSR_wf_sorted (a-1) (Zlength (csr_row_ptr csr) - 1) ltac:(list_solve).
+         unfold cde_upto, coo_upto, csr_rows in *.
+         list_solve.
     -- lia.
-    -- simpl. repeat rewrite Znth_pos_cons in H8|-* by list_solve.
-       rewrite !(Znth_app2 _ _ _ (_++_)) by list_solve. autorewrite with sublist.
+    -- simpl.
        destruct (zlt a (Zlength (csr_row_ptr csr)+1)), (zlt b (Zlength (csr_row_ptr csr)+1));
-        autorewrite with sublist; try lia.
-      ++ 
-        unfold csr_rows, cde_upto in *.
-        assert (b = Zlength (csr_row_ptr csr) + 1) by list_solve. clear g1 H7; subst b.
-        autorewrite with sublist.
-        transitivity (count_distinct (coo_entries coo)); auto.
-        apply count_distinct_mono; lia.
-      ++ assert (a = Zlength (csr_row_ptr csr) + 1) by list_solve.
-         assert (b = Zlength (csr_row_ptr csr) + 1) by list_solve.
-         rewrite H9, H10; clear; list_solve.
+       autorewrite with sublist.
+      ++ rewrite !Znth_pos_cons in H8|-* by list_solve. list_solve.
+      ++ unfold csr_rows, cde_upto in *.
+         pose proof count_distinct_mono (coo_entries coo) (i+1).
+         list_solve.
+      ++ lia.
+      ++ list_solve.
   + intros r' Hr'; pose proof CSR_wf_rowsorted r' ltac:(lia).
     apply sorted_i; [hnf; lia | ]; intros a b Ha Hb.
     pose proof (sorted_e _ H6 a b Ha).
     subst new_row_ptr.
     rewrite Hrows' in Hr'.
-    clear coo_csr_values coo_csr_zeros coo_csr_entries CSR_wf_rowsorted
+    clear coo_csr_values coo_csr_entries CSR_wf_rowsorted
          csr' Hrows' partial_CSR_rowptr partial_CSR_colind partial_CSR_val
          partial_CSR_val' partial_CSR_colind' partial_CSR_rowptr'0.
-     pose proof CSR_wf_sorted 0 (r'+1)
-            ltac:(autorewrite with sublist; simpl; lia).
-     rewrite Znth_0_cons, Znth_pos_cons, Z.add_simpl_r, Znth_app1 in H8 by list_solve.
-     pose proof CSR_wf_sorted (r'+1) (r'+1+1)
-            ltac:(autorewrite with sublist; simpl; lia).
-     rewrite !Znth_pos_cons, !Z.add_simpl_r, !Znth_app1 in H9 by list_solve.
-     pose proof CSR_wf_sorted (r'+1+1) (Zlength (csr_row_ptr csr))
-            ltac:(autorewrite with sublist; simpl; lia).
-     rewrite !Znth_pos_cons, !Z.add_simpl_r, !Znth_app1 in H10 by list_solve.
+     destruct (rowptr_sorted_e _ CSR_wf_sorted r' (r'+1) ltac:(lia)) as [? _].
+     pose proof rowptr_sorted_e _ CSR_wf_sorted (r'+1) (csr_rows csr) ltac:(lia).
+     pose proof I.
     destruct (zlt r' r); [ | destruct (zeq r' r)].
-   * rewrite Znth_app1 by list_solve.
-     rewrite !Znth_app1 in Hb|-* by list_solve.
+   * unfold cde_upto, csr_rows in *.
+     rewrite !Znth_app1 by list_solve.
+     rewrite !Znth_app1 in Hb by list_solve.
      autorewrite with sublist in H7,Hb|-*.
-     rewrite Zlength_sublist in H7
-       by (try lia; rewrite <- CSR_wf_vals, CSR_wf_vals'; unfold csr_rows; lia).
-     rewrite sublist_app1 in Hb 
-      by (try lia; autorewrite with sublist; unfold cde_upto, csr_rows in *; lia).
-     rewrite sublist_sublist, Zlength_sublist in Hb
-      by (try lia; autorewrite with sublist; unfold cde_upto, csr_rows in *; lia).
-     spec H7. lia.
-     rewrite sublist_app1, sublist_sublist, !Z.add_0_r
-      by (try lia; autorewrite with sublist; unfold cde_upto, csr_rows in *; lia).
-     auto.
+     apply H7. lia.
    * clear g. subst r'.
      autorewrite with sublist in Hb,H7|-*.
      fold (cde_upto i coo) in *. fold (cde_upto (i+1) coo) in *.
      rewrite <- H4 in *. clear H5.
-     rewrite <- Hrows in H10.
+     unfold csr_rows in *.
      rewrite sublist_app' by list_solve.
      rewrite !sublist_sublist by list_solve.
      rewrite Zlength_sublist by list_solve.
@@ -648,21 +663,46 @@ apply build_partial_CSR with (csr:=csr'); auto; try lia.
        rewrite H5 in *. apply H7. lia.
     -- rewrite (Znth_app2 _ _ _ _ b) by list_solve. autorewrite with sublist.
        destruct (zlt a (cde_upto i coo +1 - Znth r (csr_row_ptr csr))).
-       rewrite Znth_app1 in H7|-* by list_solve.
-       rewrite H5 in *. autorewrite with sublist in H7.
-       autorewrite with sublist in Hb.
-       set (d := cde_upto i coo) in *. set (m := Znth r (csr_row_ptr csr)) in *.
-       destruct (zeq b (Z.succ (d-m))).
-       ++ rewrite <- e, Z.sub_diag, Znth_0_cons.
-          admit. (* entirely plausible *)
-       ++ rewrite (Znth_pos_cons (b - _)) by lia.
-          replace (b - Z.succ(d-m)-1) with 0 by lia. rewrite Znth_0_cons.
-          pose proof (sorted_e _ H6 a (1+(d-m)) ltac:(lia) ltac:(list_solve)).
+       ++
+        rewrite Znth_app1 in H7|-* by list_solve.
+        rewrite H5 in *. autorewrite with sublist in H7.
+        autorewrite with sublist in Hb.
+        set (hi := cde_upto i coo) in *. set (lo := Znth r (csr_row_ptr csr)) in *.
+        destruct (zeq b (Z.succ (hi-lo))).
+        rewrite <- e, Z.sub_diag, Znth_0_cons.
+        clear H7 H6.
+        destruct (zeq a 0).
+          ** subst; rewrite Znth_0_cons.
+             pose proof (proj2 (coo_entry_bounds partial_CSR_coo i ltac:(lia))).
+             rewrite Hrcx in H1; simpl in H1; clear - H1; lia.
+          ** rewrite Znth_pos_cons by lia.
+            pose proof coo_csr_zeros r (lo+(a-1)) H3 ltac:(lia).
+            simpl in H6. apply In_Znth in H6. destruct H6 as [k [? ?]].
+            autorewrite with sublist in H6.
+            rewrite Znth_map in H7 by list_solve. autorewrite with sublist in H7.
+            autorewrite with sublist. rewrite Z.add_comm.
+            pose proof sorted_e _ partial_CSR_coo_sorted k i H6 ltac:(lia).
+            destruct (Znth k (coo_entries coo)) as [[rk ck] xk] eqn:Hk.
+            simpl in H7. inversion H7; clear H7.
+            red in H11. rewrite Hrcx in H11. simpl in H11.
+            destruct H11 as [H11|H11]. lia. destruct H11 as [_ H11].
+            rewrite <- H14.
+            destruct (zeq k (i-1)).
+            --- subst k. destruct (Znth (i-1) (coo_entries coo)) as [[??]?]; simpl in *. inv Hk. lia.
+            --- pose proof sorted_e _ partial_CSR_coo_sorted k (i-1) ltac:(lia) ltac:(lia).
+                red in H7. rewrite Hk in H7. 
+                destruct (Znth (i-1) (coo_entries coo)) as [[ri1 ci1] xi1] eqn:Hi1; simpl in *.
+                destruct H7; try lia. destruct H7; subst rk. subst ri1.
+                pose proof sorted_e _ partial_CSR_coo_sorted (i-1) i ltac:(lia) ltac:(lia).
+                red in H1. rewrite Hrcx,Hi1 in H1. simpl in H1. lia.
+       ** rewrite (Znth_pos_cons (b - _)) by lia.
+          replace (b - Z.succ(hi-lo)-1) with 0 by lia. rewrite Znth_0_cons.
+          pose proof (sorted_e _ H6 a (1+(hi-lo)) ltac:(lia) ltac:(list_solve)).
           change (?A :: ?B ++ ?C) with ((A::B)++C) in H11.
           rewrite Znth_app1 in H11 by list_solve.
            rewrite Znth_app2 in H11 by list_solve.
            autorewrite with sublist in H11.
-           replace (1 + (d-m) - Z.succ(d-m)) with 0 in H11 by lia.
+           replace (1 + (hi-lo) - Z.succ(hi-lo)) with 0 in H11 by lia.
            rewrite Znth_0_cons in H11. auto.
       ++ rewrite Znth_app2 by list_solve. autorewrite with sublist.
          set (u := Z.succ _). assert (a-u=0 /\ b-u=1) by list_solve.
@@ -670,26 +710,188 @@ apply build_partial_CSR with (csr:=csr'); auto; try lia.
          change (c < csr_cols csr).
          clear dependent a. clear dependent b.
          rewrite <- coo_csr_cols.
-         clear - Hrcx H0 H. inversion_clear H.
-         rewrite Forall_forall in H2. specialize (H2 (Znth i (coo_entries coo))).
-         destruct H2. apply Znth_In; lia. rewrite Hrcx in H2. simpl in H2. lia.
-   * assert (r'>r) by lia. clear g n.
-     rewrite Znth_app2 by list_solve. autorewrite with sublist.
+         clear - Hrcx H0 H.
+         pose proof (proj2 (coo_entry_bounds H i ltac:(lia))).
+         rewrite Hrcx in H1; apply H1.
+   * rewrite Znth_app2 by list_solve.
+     autorewrite with sublist.
      autorewrite with sublist in Hb.
-     assert (a=0/\b=1) by lia. destruct H12. rewrite H12, H13.
-     change (-1 < csr_cols csr). lia.
+     list_solve.
 - inversion_clear partial_CSR_coo_csr. 
   constructor; auto.
   + rewrite Hrows'. simpl. auto.
   + simpl. rewrite <- H4.
     rewrite Zlength_app. f_equal.
     unfold cde_upto in coo_csr_vals|-*. simpl in coo_csr_vals.
-    pose proof (count_distinct_sublist (coo_entries coo) i) ltac:(lia).
+    pose proof (count_distinct_mono (coo_entries coo) i).
     pose proof (count_distinct_bound (sublist 0 i (coo_entries coo))).
     list_solve.
-  + admit. (* blah, blah, blah  *)
-  + admit. (* blah, blah, blah  *)
-  + admit. (* blah, blah, blah  *)
+  + intros h Hh. simpl in Hh. autorewrite with sublist in Hh.
+    destruct (zlt h i).
+   *
+    pose proof coo_csr_entries h ltac:(simpl; list_solve). simpl.
+    unfold new_row_ptr, cde_upto, coo_upto in H5|-*. simpl in H5|-*.
+    rewrite !sublist_sublist, !Znth_sublist, !Z.add_0_r in H5|-* by list_solve.
+    destruct (Znth h (coo_entries coo)) as [[rh ch]xh] eqn:Hh'.
+    simpl in H5|-*.
+    simpl in coo_csr_rows.
+    assert (0 <= rh <= r). {
+       split.
+       - clear - partial_CSR_coo Hh' Hh H0.
+         pose proof (proj1 (coo_entry_bounds partial_CSR_coo h ltac:(lia))).
+         rewrite Hh' in H; apply H. 
+       - pose proof sorted_e _ partial_CSR_coo_sorted h i ltac:(lia) ltac:(lia).
+         red in H6. rewrite Hrcx, Hh' in H6. simpl in H6. lia.
+     }
+     rewrite !(Znth_app1 _ _ _ _ rh), Znth_sublist, Z.add_0_r by list_solve.
+     pose proof count_distinct_mono (sublist 0 i (coo_entries coo)) (h+1).
+     autorewrite with sublist in H7.
+    assert (0 <= count_distinct (sublist 0 i (coo_entries coo)) <= Zlength (csr_col_ind csr)). {
+        pose proof (count_distinct_bound (sublist 0 i (coo_entries coo))).
+         inversion_clear partial_CSR_wf. rewrite <- CSR_wf_vals. rewrite coo_csr_vals. simpl. lia.
+       }
+     rewrite (Znth_app1 _ _ _ [c]) by list_solve.
+    assert (0 <= count_distinct (sublist 0 (h + 1) (coo_entries coo)) - 1 <
+            count_distinct (sublist 0 i (coo_entries coo))). {
+       split; [ | lia].
+       destruct (zeq h 0). subst h. rewrite sublist_one by lia. simpl. lia.
+       pose proof (count_distinct_bound' (sublist 0 (h+1) (coo_entries coo))); list_solve.
+    }
+    rewrite (Znth_sublist _ (count_distinct (sublist 0 (h + 1) (coo_entries coo)) - 1)) by lia.
+    rewrite Z.add_0_r.
+    destruct H5. split; auto.
+    destruct (zeq rh r); list_solve.
+  * assert (h=i) by lia. clear Hh g; subst h.
+     simpl. autorewrite with sublist.  rewrite Hrcx. simpl.
+     unfold new_row_ptr, cde_upto, coo_upto; simpl.
+     assert (r+1 < Zlength (csr_row_ptr csr))
+        by (inversion_clear partial_CSR_wf; simpl in *; lia). 
+     assert (0 <= count_distinct (sublist 0 i (coo_entries coo)) <= Zlength (csr_col_ind csr)). {
+        pose proof (count_distinct_bound (sublist 0 i (coo_entries coo))).
+         inversion_clear partial_CSR_wf. rewrite <- CSR_wf_vals. rewrite coo_csr_vals. simpl. lia.
+       }     
+     autorewrite with sublist.
+     rewrite <- H4. replace (_ - _ - _) with 0 by lia.
+     split; [ | list_solve]. split; [ | lia].
+     rewrite Z.add_simpl_r.
+     unfold cde_upto in Hcde; rewrite Hcde.
+     simpl in coo_csr_rows.
+     clear - coo_csr_rows H5 H3 partial_CSR_wf.
+     inversion_clear partial_CSR_wf.
+     pose proof rowptr_sorted_e _ CSR_wf_sorted r (Zlength (csr_row_ptr csr) -1) ltac:(list_solve).
+     unfold csr_rows in *. list_solve.
+  + intros r' k; simpl; intros.
+    unfold new_row_ptr in H6.
+    assert (r+1 < Zlength (csr_row_ptr csr))
+        by (inversion_clear partial_CSR_wf; simpl in *; lia).
+    simpl in coo_csr_rows.
+     assert (Hr'r: r' <= r) by list_solve.
+    destruct (zlt r' r); autorewrite with sublist in H6.
+    * 
+     pose proof coo_csr_zeros r' k H5 H6. simpl in H8|-*.
+     apply In_Znth in H8. destruct H8 as [h [? ?]].
+     autorewrite with sublist in H8.
+     rewrite Znth_map in H9 by list_solve. rewrite Znth_sublist in H9 by list_solve.
+     rewrite Z.add_0_r in H9.
+     assert (0 <= Znth r' (csr_row_ptr csr) /\
+             Znth (r' + 1) (csr_row_ptr csr) <= Zlength (csr_col_ind csr)). {
+         inversion_clear partial_CSR_wf.
+         split.
+         eapply rowptr_sorted_e1; try eassumption; lia.
+         rewrite <- CSR_wf_vals, CSR_wf_vals'.
+         eapply rowptr_sorted_e; try eassumption; lia.
+      }
+     assert (k < cde_upto i coo <= Zlength (csr_col_ind csr)). {
+        inversion_clear partial_CSR_wf. 
+        pose proof sorted_e _ (CSR_wf_rowsorted r' ltac:(lia)) 0 (k+1-Znth r' (csr_row_ptr csr)) ltac:(list_solve) ltac:(list_solve).
+        list_solve.
+     }
+     autorewrite with sublist.
+     rewrite <- H9. apply in_map.
+     replace (Znth h (coo_entries coo)) with (Znth h (sublist 0 (i+1) (coo_entries coo))) by list_solve.
+     apply Znth_In. list_solve.
+    *  simpl in coo_csr_rows.
+       assert (r'=r) by list_solve. clear g Hr'r; subst r'.
+       autorewrite with sublist in H6.
+       unfold cde_upto, coo_upto.
+       assert (0 <= count_distinct (sublist 0 i (coo_entries coo)) <= Zlength (csr_col_ind csr)). {
+        pose proof (count_distinct_bound (sublist 0 i (coo_entries coo))).
+         inversion_clear partial_CSR_wf. rewrite <- CSR_wf_vals. rewrite coo_csr_vals. simpl. lia.
+       }
+       destruct (zeq k (cde_upto i coo)).
+      -- subst k. unfold cde_upto, coo_upto in *.
+         rewrite Znth_app2 by list_solve.
+         autorewrite with sublist.
+         replace (r,c) with (fst (Znth i (coo_entries coo))) by (rewrite Hrcx; auto).
+         apply in_map. replace (Znth i (coo_entries coo)) with (Znth i (sublist 0 (i+1) (coo_entries coo))) by list_solve.
+         apply Znth_In. list_solve.
+      -- unfold cde_upto, coo_upto  in *. 
+           assert (0 <= Znth r (csr_row_ptr csr) /\
+               Znth (r + 1) (csr_row_ptr csr) <= Zlength (csr_col_ind csr)). {
+         inversion_clear partial_CSR_wf.
+         rewrite <- CSR_wf_vals, CSR_wf_vals'.
+         pose proof rowptr_sorted_e _ CSR_wf_sorted r (r+1) ltac:(lia).
+         pose proof rowptr_sorted_e _ CSR_wf_sorted (r+1) (csr_rows csr) ltac:(lia).
+         lia.
+      }
+      autorewrite with sublist.
+      pose proof coo_csr_zeros r k H5 ltac:(list_solve).
+      simpl in H10. apply In_Znth in H10. destruct H10 as [h [? ?]]. 
+      autorewrite with sublist in H10,H11. rewrite <- H11.
+      rewrite Znth_map, Znth_sublist, Z.add_0_r by list_solve.
+      replace (Znth h (coo_entries coo)) with (Znth h (sublist 0 (i+1) (coo_entries coo))) by list_solve.
+      apply in_map.
+      apply Znth_In. list_solve.
+  + intros h Hh.
+    pose proof coo_csr_values h. 
+    unfold cde_upto, coo_upto in *; simpl in *.
+    autorewrite with sublist in Hh.
+    autorewrite with sublist. 
+    rewrite (sublist_split 0 i (i+1)) by lia.
+    rewrite filter_app. rewrite (sublist_one i) by lia.
+    simpl. rewrite Hrcx.
+    destruct (Znth h (coo_entries coo)) as [[rh ch] xh] eqn:?Hh. simpl.
+    destruct (zeq h i).
+   -- subst h. rewrite Hrcx in Hh0. injection Hh0. intros ? ? ?; subst rh ch xh; clear Hh0.
+      replace (coord_eqb (r,c) (r,c)) with true by (unfold coord_eqb; simpl; lia).
+      rewrite Znth_app2 by list_solve.
+      rewrite <- H4, Z.add_simpl_r.
+      autorewrite with sublist. rewrite map_app. simpl.
+      rewrite invariants.filter_none. simpl. constructor.
+      intros. apply In_Znth in H6. destruct H6 as [h [??]]. 
+      autorewrite with sublist in H6,H7.
+      subst x0.
+         pose proof coord_sorted_e _ partial_CSR_coo_sorted h (i-1) ltac:(lia).
+         pose proof coord_sorted_e _ partial_CSR_coo_sorted (i-1) i ltac:(lia).
+         rewrite Hrcx in H8.
+         clear - H7 H8 H2 H1.
+         destruct (Znth h (coo_entries coo)) as [[??]?];
+         destruct (Znth (i-1) (coo_entries coo)) as [[??]?]; 
+         unfold coord_eqb, coord_le in *; simpl in *. lia.
+   -- spec H5. list_solve.
+      assert (0 <= count_distinct (sublist 0 (h + 1) (coo_entries coo)) - 1 <
+              count_distinct (sublist 0 i (coo_entries coo))). {
+         split.
+        - pose proof count_distinct_mono (sublist 0 (h+1) (coo_entries coo)) 1.
+          autorewrite with sublist in H6. rewrite (sublist_one 0 1) in H6 by lia.
+          simpl in H6. lia.
+        - pose proof count_distinct_mono (sublist 0 i (coo_entries coo)) (h+1).
+          autorewrite with sublist in H6. clear - H6. lia.
+        }
+      autorewrite with sublist in H5.
+      autorewrite with sublist.
+      replace (coord_eqb (rh,ch) (r,c)) with false. 2:{
+        destruct (zeq h (i-1)).
+        - subst h. rewrite Hh0 in H2. simpl in H2. clear - H2.
+                  unfold coord_eqb. simpl. lia.
+        - pose proof sorted_e _ partial_CSR_coo_sorted h (i-1) ltac:(lia) ltac:(lia).
+          pose proof sorted_e _ partial_CSR_coo_sorted (i-1) i ltac:(lia) ltac:(lia).
+          clear - H8 H7 H2 Hh0 H1 Hrcx.
+          unfold coord_eqb. simpl. rewrite Hh0 in H7. unfold coord_le in *.
+          simpl in *. rewrite Hrcx in *.
+          destruct (Znth (i-1) (coo_entries coo)) as [[??]?]; simpl in *. lia.
+      }
+      rewrite app_nil_r. rewrite Hh0 in H5. simpl in H5. auto.
 -  simpl.
    inversion_clear partial_CSR_coo_csr.
    autorewrite with sublist.
@@ -697,21 +899,42 @@ apply build_partial_CSR with (csr:=csr'); auto; try lia.
    fold (cde_upto i coo) in *. set (d := cde_upto i coo) in *. 
    assert (d < Zlength VAL). {
      rewrite partial_CSR_val'.
-     admit. (* easy *)
+     unfold d, cde_upto in *.
+     pose proof count_distinct_mono (coo_entries coo) (i+1).
+     lia.
    }
+   rewrite Hrcx. simpl.
    rewrite (sublist_split 0 d) by list_solve.
    rewrite (sublist_one d) by list_solve.
    rewrite sublist_upd_Znth_l by list_solve.
    rewrite partial_CSR_val.
    rewrite map_app.
    rewrite sublist_same by list_solve. f_equal.
-   rewrite upd_Znth_same by list_solve. rewrite Hrcx; simpl; auto.
-- admit.
-- admit.
-- admit.
-- admit.
-
-Admitted.
+   rewrite upd_Znth_same by list_solve. auto.
+- simpl. 
+  inversion_clear partial_CSR_wf.
+  unfold cde_upto, coo_upto in *; simpl in *.
+   set (d := count_distinct (sublist 0 i _)) in *.
+   rewrite Zlength_app.
+   rewrite Zlength_sublist by lia.
+   change (Zlength [_]) with 1. rewrite Z.sub_0_r.
+   pose proof count_distinct_bound (coo_entries coo).
+   pose proof count_distinct_mono (coo_entries coo) (i+1).
+   rewrite (sublist_split 0 d (d+1)); [ | lia | ].
+      2:  rewrite Zlength_upd_Znth, partial_CSR_colind'; lia.
+   rewrite (sublist_one d) by list_solve.
+   rewrite map_app. rewrite upd_Znth_same by lia.
+   simpl. f_equal.
+   rewrite map_sublist.
+   rewrite sublist_upd_Znth_l by lia.
+   rewrite <- partial_CSR_colind.
+   list_solve.
+- rewrite partial_CSR_rowptr. f_equal. simpl. unfold new_row_ptr.
+  inversion_clear partial_CSR_coo_csr.
+  simpl in coo_csr_rows. list_solve.
+- list_solve.
+- list_solve.
+Qed.
 
 Lemma partial_CSR_0: forall (coo: coo_matrix Tdouble),
   coo_matrix_wellformed coo ->
@@ -731,22 +954,16 @@ inversion_clear H; lia.
   autorewrite with sublist.
   eapply Forall_impl; try apply H3.
   intros. simpl in H. lia.
--
-inversion_clear H.
-destruct H2.
-constructor; unfold csr_rows; simpl; try list_solve.
-+ intros i j [??]. list_simplify; rep_lia.
-+ intros. rewrite sublist_nil'. simpl. constructor; try lia. constructor. list_solve.
--
-constructor; simpl; try list_solve.
-+
-inversion_clear H. 
-unfold csr_rows; simpl. list_solve.
-+
- intros  h ?. exfalso. simpl in H2. list_solve.
-+
- intros  h ? ?; simpl in *. autorewrite with sublist. lia.
-+ intros h ?; simpl in *. autorewrite with sublist in H2. lia.
+- inversion_clear H.
+  destruct H2.
+  constructor; unfold csr_rows; simpl; try list_solve.
+  + intros i j [??]. list_solve.
+  + intros. rewrite sublist_nil'. simpl. constructor; try lia. constructor. list_solve.
+- constructor; simpl; try list_solve.
+  + inversion_clear H. unfold csr_rows; simpl. list_solve.
+  + intros  h ?. simpl in H2. list_solve.
+  + intros  h ? ?; simpl in *. list_solve.
+  + intros h ?; simpl in *. list_solve.
 - list_solve.
 - list_solve.
 - inversion_clear H. list_solve.
@@ -763,28 +980,456 @@ Lemma partial_CSR_skiprow:
      (Vint
         (Int.repr (count_distinct (sublist 0 i (coo_entries coo))))))
   COLIND VAL.
-Admitted.
+Proof.
+intros.
+inversion_clear H2.  
+pose (d := count_distinct (sublist 0 i (coo_entries coo))).
+pose (new_row_ptr := sublist 0 r (csr_row_ptr csr) 
+              ++ Zrepeat d (Zlength (csr_row_ptr csr)-r)).
+pose (csr' := Build_csr_matrix _ (csr_cols csr) (csr_vals csr) 
+                (csr_col_ind csr) new_row_ptr).
+assert (Hrows: csr_rows csr = Zlength (csr_row_ptr csr) - 1) by reflexivity.
+assert (Hlastrows := partial_CSR_rowptr' r (coo_upto i coo) csr
+   (coo_upto_wellformed i coo ltac:(lia) partial_CSR_coo)
+       partial_CSR_wf partial_CSR_coo_csr
+      ltac:(change (coo_rows _) with (coo_rows coo); lia)
+      partial_CSR_r'). simpl in Hlastrows.
+apply build_partial_CSR with csr'; auto.
+- inversion_clear partial_CSR_coo_csr.
+  simpl in *.
+  pose proof coo_entry_bounds partial_CSR_coo i ltac:(lia).
+  lia.
+- eapply Forall_impl; try eassumption. simpl; intros. lia.
+- rewrite Forall_forall; intros e He. apply In_Znth in He.
+  destruct He as [j [? ?]].
+  autorewrite with sublist in H2,H3. subst e.
+  pose proof coord_sorted_e _ partial_CSR_coo_sorted i (j+i) ltac:(lia).
+  clear - H1 H3 H2 H0.
+  destruct (Znth i (coo_entries coo)) as [[ri ci] xi];
+  destruct (Znth (j+i) (coo_entries coo)) as [[rj cj] xj]; 
+  red in H3; simpl in *. lia.
+- inversion_clear partial_CSR_coo_csr.
+   inversion_clear partial_CSR_wf.
+    subst csr'; subst new_row_ptr; constructor; simpl;
+   unfold csr_rows in *; clear Hrows; simpl in *; auto.
+  + list_solve.
+  + list_solve.
+  + intros a b [Ha Hb].
+    repeat change (?A :: ?B ++ ?C) with ((A::B)++C).
+    pose proof (CSR_wf_sorted a b ltac:(list_solve)).
+    destruct (zlt a (r+1)), (zlt b (r+1)).
+   * list_solve.
+   * rewrite Znth_app1 by list_solve.
+     rewrite Znth_app1 by list_solve.
+     rewrite app_ass.
+     rewrite Znth_app2 by list_solve.
+     destruct (zlt b (Zlength (csr_row_ptr csr) + 1)); [ | list_solve].
+     rewrite Znth_app1 by list_solve.
+     autorewrite with sublist.
+     destruct (zeq a 0). list_solve.
+     rewrite Znth_pos_cons by list_solve.
+     rewrite Znth_sublist by list_solve.
+     destruct Ha; clear dependent b.
+     clear dependent VAL. clear dependent COLIND. clear dependent ROWPTR.
+     clear CSR_wf_rowsorted.
+     fold d in coo_csr_vals. 
+     pose proof CSR_wf_sorted a (Zlength (csr_row_ptr csr)) ltac:(list_solve).
+     list_solve.
+   * lia.
+   * rewrite app_ass.
+     rewrite Znth_app2 by list_solve. rewrite (Znth_app2 _ _ _ _ b) by list_solve.
+     autorewrite with sublist. list_solve.
+  + intros r' Hr'.
+    assert (Znth r' (csr_row_ptr csr) <= Znth (r'+1) (csr_row_ptr csr) <= d). {
+      split. apply (rowptr_sorted_e _ CSR_wf_sorted); list_solve.
+      unfold d. rewrite <- coo_csr_vals, CSR_wf_vals'.
+      pose proof rowptr_sorted_e _ CSR_wf_sorted (r'+1) (Zlength (csr_row_ptr csr)-1) ltac:(list_solve).
+      list_solve.
+    } 
+    autorewrite with sublist in Hr'.
+    replace (r + (Zlength (csr_row_ptr csr) - r) - 1 ) with (Zlength (csr_row_ptr csr) -1) in Hr' by lia.
+    pose proof CSR_wf_rowsorted r' ltac:(lia).
+    destruct (zlt r' r); [ destruct (zeq (r'+1) r) | ].
+   * replace r' with (r-1) in * by lia. clear e l r'. rewrite Z.sub_simpl_r in *.
+     autorewrite with sublist in H3|-*.
+     assert (Znth r (csr_row_ptr csr) = d). {
+        unfold csr_rows in *.
+        rewrite coo_csr_rows, Z.sub_simpl_r in Hlastrows.
+        transitivity (Znth 0 (sublist r (Zlength (csr_row_ptr csr)) (csr_row_ptr csr))).
+        list_solve.
+        rewrite Hlastrows. list_solve.
+     }
+     fold d in coo_csr_vals. rewrite H4 in H3. auto.
+   * autorewrite with sublist. auto.
+   * autorewrite with sublist. constructor. lia. constructor.
+- inversion_clear partial_CSR_coo_csr; subst csr' new_row_ptr; constructor; simpl; auto.
+ +
+  unfold csr_rows in *; simpl in *; list_solve.
+ +
+   clear dependent VAL. clear dependent COLIND. clear dependent ROWPTR.
+   clear partial_CSR_dbound coo_csr_zeros coo_csr_values.
+   simpl in *. rewrite coo_csr_rows in partial_CSR_r.
+   unfold entries_correspond, csr_rows, cde_upto, coo_upto in *.
+   intros h Hh.
+   pose proof coo_csr_entries h Hh.
+   clear coo_csr_entries.
+   simpl Znth in H2|-*. simpl in Hh.
+   autorewrite with sublist in Hh.
+   autorewrite with sublist in H2|-*.
+   pose proof proj1 (coo_entry_bounds partial_CSR_coo h ltac:(lia)).
+   destruct (Znth h (coo_entries coo)) as [[rh ch] xh] eqn:?Hh'.
+   simpl in H2,H3|-*.
+   destruct H2. split; auto.
+   autorewrite with sublist.
+   destruct (zlt rh r); [ destruct (zeq rh (r-1)) | ].
+  * autorewrite with sublist in H2|-*.
+    split; try lia.
+    subst d.
+    pose proof count_distinct_mono (sublist 0 i (coo_entries coo)) (h+1).
+    autorewrite with sublist in H5. lia.
+  * autorewrite with sublist in H2|-*. auto.
+  * autorewrite with sublist in H2|-*.
+    exfalso.
+    rewrite Forall_forall in partial_CSR_r'.
+    specialize (partial_CSR_r' (Znth h (coo_entries coo))).
+    spec partial_CSR_r'.
+    replace (Znth h (coo_entries coo)) with (Znth h (sublist 0 i (coo_entries coo))) by list_solve.
+    apply Znth_In. list_solve.
+    rewrite Hh' in partial_CSR_r'. simpl in partial_CSR_r'.
+    lia.
+ + clear coo_csr_values coo_csr_entries.
+   clear dependent VAL. clear dependent COLIND. clear dependent ROWPTR.
+   intros r' k Hk Hk'.
+   specialize (coo_csr_zeros r' k Hk).
+   simpl in *.
+   destruct (zlt (r'+1) r).
+   * autorewrite with sublist in Hk'. auto.
+   * autorewrite with sublist in Hk'.
+     assert (Hlastrows' : Znth (r'+1) (csr_row_ptr csr) = d). {
+        rewrite coo_csr_rows in partial_CSR_r.
+        unfold csr_rows in *.
+        rewrite coo_csr_rows, Z.sub_simpl_r in Hlastrows.
+        list_solve.
+     }
+     apply coo_csr_zeros.
+     list_solve.
+- inversion_clear partial_CSR_coo_csr; 
+  inversion_clear partial_CSR_wf;
+  subst csr' new_row_ptr; simpl in *.
+  pose proof proj1 (coo_entry_bounds partial_CSR_coo i H0).
+  rewrite !(sublist_split 0 r (r+1)) by list_solve.
+  rewrite map_app. f_equal.
+  + autorewrite with sublist. 
+    rewrite sublist_upd_Znth_l by list_solve. list_solve.
+  + rewrite (sublist_one r) by list_solve. autorewrite with sublist.
+    rewrite upd_Znth_same by list_solve.
+    reflexivity.
+- list_solve.
+Qed.
 
 Lemma partial_CSR_newrow: 
-    forall i ri ci xi coo ROWPTR COLIND VAL,
+    forall i r c x coo ROWPTR COLIND VAL,
     coo_matrix_wellformed coo ->
     0 <= i < Zlength (coo_entries coo) ->
-    Znth i (coo_entries coo) = (ri,ci,xi) ->
-    partial_CSR i (ri+1) coo ROWPTR COLIND VAL ->
-    partial_CSR (i + 1) (ri+1) coo ROWPTR
+    Znth i (coo_entries coo) = (r,c,x) ->
+    (i <> 0 -> fst (fst (Znth (i - 1) (coo_entries coo))) <> r) ->
+    partial_CSR i (r+1) coo ROWPTR COLIND VAL ->
+    partial_CSR (i + 1) (r+1) coo ROWPTR
      (upd_Znth (count_distinct (sublist 0 i (coo_entries coo))) COLIND
-        (Vint (Int.repr ci)))
+        (Vint (Int.repr c)))
      (upd_Znth (count_distinct (sublist 0 i (coo_entries coo))) VAL
-        (Vfloat xi)).
-Admitted.
+        (Vfloat x)).
+Proof.
+intros * _ H Hrcx Hnew H0.
+inversion_clear H0.
+assert (Hr := proj1( coo_entry_bounds partial_CSR_coo i ltac:(lia))).
+  rewrite Hrcx in Hr; simpl in Hr; clear partial_CSR_r.
+assert (Hr1: Znth (r+1) (csr_row_ptr csr) = Znth r (csr_row_ptr csr)). {
+    inversion_clear partial_CSR_wf.
+    inversion_clear partial_CSR_coo_csr.
+    red in coo_csr_zeros.
+    unfold csr_rows in *. simpl in *.
+    pose proof proj2 (proj1 (rowptr_sorted_e _ CSR_wf_sorted r (r+1) ltac:(lia))).
+    destruct (zlt (Znth r (csr_row_ptr csr)) (Znth (r+1) (csr_row_ptr csr))); [ | lia].
+    exfalso.
+    specialize (coo_csr_zeros r (Znth r (csr_row_ptr csr)) ltac:(lia)).
+    spec coo_csr_zeros. lia.
+     apply In_Znth in coo_csr_zeros.
+     destruct coo_csr_zeros as [k [? ?]].
+     autorewrite with sublist in H1,H2.
+     Search "coord" "sort".
+     pose proof coord_sorted_e _ partial_CSR_coo_sorted k (i-1) ltac:(lia).
+     pose proof coord_sorted_e _ partial_CSR_coo_sorted (i-1) i ltac:(lia).
+     rewrite Znth_map, Znth_sublist, Z.add_0_r in H2 by list_solve.
+     specialize (Hnew ltac:(lia)). 
+     clear - H2 H3 H4 Hnew Hrcx. rewrite Hrcx in *.
+     destruct (Znth k (coo_entries coo)) as [[rk ck]xk], (Znth (i-1) (coo_entries coo)) as [[r1 c1]x1].
+     inv H2. unfold coord_le in *. simpl in *. lia.
+  }
+set (d := count_distinct (sublist 0 i (coo_entries coo))) in *.
+pose (new_row_ptr := sublist 0 (r+1) (csr_row_ptr csr) 
+              ++ Zrepeat (d+1) (Zlength (csr_row_ptr csr)-(r+1))).
+pose (csr' := {| csr_cols := csr_cols csr; 
+                 csr_vals := csr_vals csr ++ [x];
+                 csr_col_ind := csr_col_ind csr ++ [c];
+                 csr_row_ptr := new_row_ptr |}).
+assert (Hrows: csr_rows csr = Zlength (csr_row_ptr csr) - 1) by reflexivity.
+assert (Hlastrows' := partial_CSR_rowptr' (r+1) (coo_upto i coo) csr
+         (coo_upto_wellformed i coo ltac:(lia) partial_CSR_coo)
+       partial_CSR_wf partial_CSR_coo_csr
+      ltac:(change (coo_rows _) with (coo_rows coo); lia)
+      partial_CSR_r'). simpl in Hlastrows'.
+assert (Hlastrows: sublist r (coo_rows coo + 1) (csr_row_ptr csr) = Zrepeat (Zlength (csr_vals csr)) (coo_rows coo + 1 - r)). {
+  inversion_clear partial_CSR_coo_csr. unfold csr_rows in *; simpl in *.
+  rewrite (sublist_split r (r+1)) by list_solve.
+  replace (coo_rows coo + 1 - r) with (1 + (coo_rows coo - r)) by lia.
+  rewrite <- Zrepeat_app by lia.
+  f_equal.
+  rewrite sublist_one by lia. rewrite <- Hr1.
+  replace (Znth (r+1) (csr_row_ptr csr)) with (Znth 0 (sublist (r+1) (coo_rows coo + 1) (csr_row_ptr csr))) by list_solve.
+  rewrite Hlastrows'. list_solve.
+  list_solve.
+}
+clear Hlastrows'.  
+assert (Hincr: count_distinct (sublist 0 i (coo_entries coo)) + 1 =
+               count_distinct (sublist 0 (i + 1) (coo_entries coo))). {
+  destruct (zeq i 0). subst; simpl. destruct (coo_entries coo); simpl; list_solve.
+  spec Hnew. lia.
+  apply count_distinct_incr; try lia.
+  red. 
+  pose proof coord_sorted_e _ partial_CSR_coo_sorted (i-1) i ltac:(lia).
+  clear - Hnew H0 Hrcx. rewrite Hrcx in *.
+      destruct (Znth (i-1) (coo_entries coo)) as [[r1 c1] x1]; hnf; unfold coord_le in *; simpl in *; lia.
+}
+apply build_partial_CSR with csr'; auto; try lia.
+- simpl. rewrite (sublist_split 0 i) by lia. apply Forall_app. split; auto.
+  rewrite sublist_one by lia. repeat constructor. rewrite Hrcx. simpl; lia.
+- rewrite (sublist_split i (i+1)) in partial_CSR_r''  by lia.
+  rewrite Forall_app in partial_CSR_r''. apply partial_CSR_r''.
+- subst csr'; inversion_clear partial_CSR_wf; constructor; simpl; auto.
+ + inversion_clear partial_CSR_coo_csr.
+   unfold new_row_ptr, csr_rows in *; simpl in *. list_solve.
+ + list_solve.
+ + unfold new_row_ptr, csr_rows in *; simpl in *.
+   inversion_clear partial_CSR_coo_csr.
+   simpl in *. fold d in coo_csr_vals.
+   list_solve.
+ + assert (Hd': d + 1 <= Int.max_unsigned). {
+      destruct (zeq i 0).
+     - subst i. subst d. autorewrite with sublist. rep_lia.
+     - unfold d. rewrite Hincr. 
+      transitivity (count_distinct (coo_entries coo)); auto.
+      apply count_distinct_mono.
+   }
+   subst new_row_ptr.
+   inversion_clear partial_CSR_coo_csr.
+   intros a b [? ?].
+   unfold csr_rows in *; simpl in *.
+   autorewrite with sublist in H1.
+   assert (b <= Zlength (csr_row_ptr csr) + 1) by lia. clear H1.
+   destruct (zlt a b); [ | assert (a=b) by lia; subst; lia].
+   destruct H0 as [H0 _].
+   destruct (zlt 0 b); [ | list_solve].
+   destruct (zlt 0 a); [ | list_solve]. clear H0 l0.
+   destruct (zlt b (r+2)); [pose proof (CSR_wf_sorted a b ltac:(list_solve)); list_solve | ].
+   rewrite !Znth_pos_cons by lia.
+   rewrite (Znth_app1 _ _ _ _ (a-1)) by list_solve.
+   destruct (zlt a (r+2)); [ | list_solve].
+   rewrite Znth_app1 by list_solve.
+   rewrite app_ass. rewrite Znth_app2 by list_solve.
+   autorewrite with sublist.
+   destruct (zlt b (Zlength (csr_row_ptr csr) + 1)). list_solve.
+   list_solve.
+ + inversion_clear partial_CSR_coo_csr.
+   unfold csr_rows, new_row_ptr in *; simpl in *.
+   autorewrite with sublist.
+   intros r' Hr'. assert (0 <= r' < Zlength (csr_row_ptr csr) - 1) by lia. clear Hr'.
+   pose proof (CSR_wf_rowsorted _ H0).
+   pose proof proj1 (rowptr_sorted_e _ CSR_wf_sorted r' (r'+1) ltac:(list_solve)).
+   pose proof rowptr_sorted_e _ CSR_wf_sorted (r'+1) (Zlength (csr_row_ptr csr)-1) ltac:(list_solve).
+   destruct (zlt r' r); [ | destruct (zeq r' r)].
+  * autorewrite with sublist. auto.
+  * subst r'. autorewrite with sublist.
+    clear g.
+    assert (Znth (r+1) (csr_row_ptr csr) = d). {
+     replace (Znth (r+1) (csr_row_ptr csr)) with (Znth 0 (sublist (r + 1) (coo_rows coo + 1) (csr_row_ptr csr) ))
+      by list_solve. list_solve.
+    }
+    rewrite <- Hr1, H4. autorewrite with sublist. simpl.
+    assert (Hc := proj2 (coo_entry_bounds partial_CSR_coo i ltac:(lia))). rewrite Hrcx in Hc; simpl in Hc.
+    constructor; auto. lia. constructor; auto. lia. constructor.
+  * autorewrite with sublist. constructor; auto. lia. constructor.
+- inversion_clear partial_CSR_coo_csr.
+  subst csr' new_row_ptr; constructor; unfold csr_rows in *; simpl in *; auto.
+  + list_solve.
+  + rewrite <- Hincr.
+    rewrite Zlength_app. f_equal. lia.
+  + intros h Hh.
+    destruct (zlt h i).
+   * red in coo_csr_entries. unfold cde_upto, coo_upto, coo_rows in *; simpl in *.
+     pose proof (coo_csr_entries h ltac:(list_solve)).
+     autorewrite with sublist in H0|-*.
+     destruct (Znth h (coo_entries coo)) as [[rh ch] xh] eqn:Hh'.
+     simpl in *.
+     assert (0 <= rh <= r). { 
+       pose proof proj1 (coo_entry_bounds partial_CSR_coo h ltac:(lia)).
+       pose proof coord_sorted_e _ partial_CSR_coo_sorted h i ltac:(lia). 
+       rewrite Hh', Hrcx in *.
+       clear - H1 H2; red in H2; simpl in *; lia.
+     }
+     autorewrite with sublist.
+     rewrite (Znth_app1 _ _ _ _ (rh+1)) by list_solve.
+     rewrite Znth_sublist by list_solve.
+     rewrite Z.add_0_r.
+     rewrite Znth_app1. auto.
+     assert (0 <= h < i) by lia.
+     inversion_clear partial_CSR_wf.
+     rewrite <- CSR_wf_vals, coo_csr_vals.
+     pose proof count_distinct_mono (sublist 0 i (coo_entries coo)) (h+1).
+     autorewrite with sublist in H3. lia.
+   * simpl in Hh. assert (h=i) by list_solve. subst h. clear Hh g.
+     unfold cde_upto, coo_upto; simpl; autorewrite with sublist.
+     rewrite Hrcx. simpl. autorewrite with sublist.
+     rewrite coo_csr_rows, Z.sub_simpl_r in Hlastrows.
+     replace (Znth r (csr_row_ptr csr)) with (Znth 0 (sublist r (Zlength (csr_row_ptr csr)) (csr_row_ptr csr))) by list_solve.
+     rewrite Hlastrows. autorewrite with sublist.
+     rewrite coo_csr_vals.
+     rewrite <- Hincr. split. lia.
+     fold d. rewrite Z.add_simpl_r.
+     replace d with (Zlength (csr_col_ind csr)). list_solve.
+     inversion_clear partial_CSR_wf. list_solve.
+ + 
+   inversion_clear partial_CSR_wf.
+   intros r' k Hr'. specialize (coo_csr_zeros r' k Hr'). 
+   unfold cde_upto, coo_upto, csr_rows in *; simpl in *.
+   clear coo_csr_entries coo_csr_values.
+   pose proof proj2 (proj1 (rowptr_sorted_e _ CSR_wf_sorted (r'+1) (Zlength (csr_row_ptr csr) -1) ltac:(lia))).
+  
+   destruct (zlt r' r); [ | destruct (zeq r' r)].
+   *  autorewrite with sublist. intro. 
+      rewrite Znth_app1 by list_solve.
+      spec coo_csr_zeros. list_solve.
+      apply In_Znth in coo_csr_zeros.
+      destruct coo_csr_zeros as [j [? ?]].
+      autorewrite with sublist in H2.
+      rewrite Znth_map, Znth_sublist, Z.add_0_r in H3 by list_solve.
+      rewrite <- H3. apply in_map.
+      assert (In (Znth j (sublist 0 (i+1) (coo_entries coo))) (sublist 0 (i+1) (coo_entries coo))).
+      apply Znth_In; list_solve. autorewrite with sublist in H4; auto.
+   * subst r'. autorewrite with sublist.
+     intro.
+     assert (Znth 0 (sublist r (coo_rows coo + 1) (csr_row_ptr csr))  = d).
+     rewrite Hlastrows. autorewrite with sublist. lia.
+     autorewrite with sublist in H2. assert (k=d) by lia. subst k.
+     autorewrite with sublist.
+     replace (d - Zlength (csr_col_ind csr)) with 0 by list_solve. rewrite Znth_0_cons.
+     replace (r,c) with (fst (Znth i (coo_entries coo))) by (rewrite Hrcx; auto).
+     apply in_map.
+     replace (Znth i (coo_entries coo)) with (Znth i (sublist 0 (i+1) (coo_entries coo))) by list_solve.
+     apply Znth_In. list_solve.
+   * autorewrite with sublist. intro. lia.
+ + intros h Hh.
+   destruct (zlt h i).
+   * specialize (coo_csr_values h). unfold cde_upto, coo_upto, csr_rows in *; simpl in *.
+     autorewrite with sublist in Hh, coo_csr_values |-*.
+     spec coo_csr_values. lia.
+     rewrite Znth_app1.
+     rewrite (sublist_split 0 i (i+1)) by lia.
+     rewrite (sublist_one i) by lia.
+     rewrite filter_app.
+     simpl filter. replace (coord_eqb _ _) with false. rewrite app_nil_r.
+     auto.
+      {clear - Hrcx Hnew Hh l partial_CSR_coo_sorted H. spec Hnew. lia.
+       pose proof coord_sorted_e _ partial_CSR_coo_sorted h (i-1) ltac:(lia).
+       pose proof coord_sorted_e _ partial_CSR_coo_sorted (i-1) i ltac:(lia).
+       unfold coord_eqb, coord_le in *.
+       rewrite Hrcx in *.
+       destruct (Znth (i-1) (coo_entries coo)) as [[??]?];
+       destruct (Znth h (coo_entries coo)) as [[??]?];
+       simpl in *; lia.      
+     }
+     rewrite coo_csr_vals.
+     pose proof count_distinct_mono (sublist 0 i (coo_entries coo)) (h+1).
+     autorewrite with sublist in H0. lia.
+   * unfold cde_upto, coo_upto, csr_rows  in *. simpl in *.
+     assert (h=i) by list_solve. subst h.
+     autorewrite with sublist.
+     rewrite coo_csr_vals, <-Hincr, Z.add_simpl_r.
+     autorewrite with sublist.
+     rewrite (sublist_split 0 i) by list_solve.
+     rewrite filter_app.
+     rewrite invariants.filter_none. simpl.
+     rewrite sublist_one by lia. simpl.
+     replace (coord_eqb _ _) with true.
+     rewrite Hrcx.  constructor.
+     unfold coord_eqb. clear; lia.
+     intros. apply In_Znth in H0. destruct H0 as [k [? ?]].
+     autorewrite with sublist in H0,H1. subst x0.
+      {clear - Hrcx Hnew Hh H0 partial_CSR_coo_sorted H. spec Hnew. lia.
+       pose proof coord_sorted_e _ partial_CSR_coo_sorted k (i-1) ltac:(lia).
+       pose proof coord_sorted_e _ partial_CSR_coo_sorted (i-1) i ltac:(lia).
+       unfold coord_eqb, coord_le in *.
+       rewrite Hrcx in *.
+       destruct (Znth (i-1) (coo_entries coo)) as [[??]?];
+       destruct (Znth k (coo_entries coo)) as [[??]?];
+       simpl in *; lia.      
+     }
+- inversion_clear partial_CSR_wf.
+  inversion_clear partial_CSR_coo_csr.
+  unfold cde_upto, coo_upto, csr_rows in *; simpl in *.
+  subst csr' new_row_ptr; simpl in *.
+  pose proof count_distinct_bound (sublist 0 i (coo_entries coo)).
+     pose proof count_distinct_mono (coo_entries coo) (i+1).
+    rewrite (sublist_split 0 d) by list_solve.
+    rewrite sublist_upd_Znth_l by list_solve.
+    rewrite (sublist_one d) by list_solve.
+    rewrite upd_Znth_same by list_solve.
+    rewrite map_app. f_equal. list_solve.
+- inversion_clear partial_CSR_wf.
+  inversion_clear partial_CSR_coo_csr.
+  unfold cde_upto, coo_upto, csr_rows in *; simpl in *.
+  subst csr' new_row_ptr; simpl in *.
+  pose proof count_distinct_bound (sublist 0 i (coo_entries coo)).
+     pose proof count_distinct_mono (coo_entries coo) (i+1).
+    rewrite (sublist_split 0 d) by list_solve.
+    rewrite sublist_upd_Znth_l by list_solve.
+    rewrite (sublist_one d) by list_solve.
+    rewrite upd_Znth_same by list_solve.
+    rewrite map_app. f_equal. list_solve.
+- inversion_clear partial_CSR_wf.
+  inversion_clear partial_CSR_coo_csr.
+  unfold cde_upto, coo_upto, csr_rows in *; simpl in *.
+  unfold csr', new_row_ptr. simpl. rewrite partial_CSR_rowptr.
+  f_equal. list_solve.
+- list_solve.
+- list_solve.
+Qed.
 
 Lemma partial_CSR_lastrows:
    forall r coo ROWPTR COLIND VAL,
     coo_matrix_wellformed coo ->
+    r <= coo_rows coo ->
    partial_CSR (Zlength (coo_entries coo)) r coo ROWPTR COLIND VAL ->
    partial_CSR (Zlength (coo_entries coo)) (r+1) coo 
      (upd_Znth r ROWPTR (Vint (Int.repr (count_distinct (coo_entries coo))))) COLIND VAL.
-Admitted.
+Proof.
+intros.
+inversion_clear H1.
+apply build_partial_CSR with csr; auto; try lia.
+- eapply Forall_impl; try eassumption. simpl; intros. lia.
+- autorewrite with sublist. constructor.
+- replace (coo_upto (Zlength (coo_entries coo)) coo) with coo in *
+    by (unfold coo_upto;  destruct coo; simpl; f_equal; rewrite sublist_same; auto).
+ pose proof partial_CSR_rowptr' r _ _ partial_CSR_coo partial_CSR_wf partial_CSR_coo_csr ltac:(lia) ltac:(assumption).
+  inversion_clear partial_CSR_coo_csr; unfold csr_rows in *; simpl in *.
+  rewrite !(sublist_split 0 r (r+1)) by list_solve.
+  rewrite sublist_upd_Znth_l by list_solve.
+  rewrite map_app.
+  f_equal; auto.
+  rewrite !sublist_one by list_solve. rewrite upd_Znth_same by list_solve.
+  simpl. f_equal; f_equal; f_equal. list_solve.
+- list_solve.
+Qed.
 
 Fixpoint build_csr_row {t} (cols: Z) (vals: list (ftype t)) (col_ind: list Z) : list (ftype t) :=
  match vals, col_ind  with
@@ -801,7 +1446,6 @@ Lemma build_csr_row_correct:
   forall {t} cols (vals: list (ftype t)) col_ind,
      0 <= cols ->
      Zlength vals = Zlength col_ind ->
-(*     Forall (fun j => 0 <= j < cols) col_ind ->*)
      sorted Z.lt (-1 :: col_ind ++ [cols]) ->
     csr_row_rep cols vals col_ind (build_csr_row cols vals col_ind).
 Proof.
@@ -833,8 +1477,7 @@ revert cols col_ind H0 H1 H; induction n; intros.
   replace (map (fun j : Z => j - 0 - 1) col_ind) with (map Z.pred col_ind).
   2:{ clear. induction col_ind; auto. simpl. f_equal. lia. apply IHcol_ind; auto. }
   apply IHvals; auto; try list_solve.
-  *
-   pose proof sorted_e _ H1 1 (Zlength col_ind + 2) ltac:(list_solve) ltac:(list_solve). autorewrite with sublist in H2.
+  *pose proof sorted_e _ H1 1 (Zlength col_ind + 2) ltac:(list_solve) ltac:(list_solve). autorewrite with sublist in H2.
    rewrite (Znth_pos_cons 1), Z.sub_diag in H2 by lia. simpl in H2.  rewrite Znth_0_cons in H2.
    repeat change (?A :: ?B ++ ?C) with ((A::B)++C) in H2. rewrite Znth_app2 in H2 by list_solve.
    clear - H2. list_solve.
@@ -914,24 +1557,11 @@ Proof.
    assert (0 <= Znth r (k :: rowptr) <= Znth r rowptr /\
            Znth r rowptr <= Zlength (csr_col_ind csr)). {
     clear - CSR_wf_sorted H0 CSR_wf_vals CSR_wf_vals'.
-    repeat split.
-    + specialize (CSR_wf_sorted 0 (r+1)). autorewrite with sublist in *.
-      rewrite Znth_pos_cons, Z.add_simpl_r in CSR_wf_sorted by lia.
-      rewrite Znth_app1 in CSR_wf_sorted by list_solve. apply CSR_wf_sorted; list_solve.
-    + specialize (CSR_wf_sorted (r+1) (r+1+1)). simpl in CSR_wf_sorted.
-      rewrite !(Znth_pos_cons (r+1+1)), Z.add_simpl_r in CSR_wf_sorted by lia.
-      rewrite !(Znth_pos_cons (r+1)), Z.add_simpl_r in CSR_wf_sorted by lia.
-      repeat change (?A :: ?B ++ ?C) with ((A::B)++C) in CSR_wf_sorted.
-      rewrite !Znth_app1 in CSR_wf_sorted by list_solve. apply CSR_wf_sorted; list_solve.
-    + specialize (CSR_wf_sorted (r+1+1) (Zlength rowptr+1)). simpl in CSR_wf_sorted.
-      rewrite (Znth_pos_cons (r+1+1)), Z.add_simpl_r in CSR_wf_sorted by lia.
-      rewrite (Znth_pos_cons (r+1)), Z.add_simpl_r in CSR_wf_sorted by lia.
-      rewrite (Znth_pos_cons (Zlength rowptr+1)), Z.add_simpl_r in CSR_wf_sorted by lia.
-      repeat change (?A :: ?B ++ ?C) with ((A::B)++C) in CSR_wf_sorted.
-      rewrite !Znth_app1 in CSR_wf_sorted by list_solve. 
-      spec CSR_wf_sorted. list_solve. rewrite <- CSR_wf_vals, CSR_wf_vals'.  
-      autorewrite with sublist. auto.
-   }
+    rewrite <- CSR_wf_vals, CSR_wf_vals', Z.add_simpl_r.
+    pose proof rowptr_sorted_e _ CSR_wf_sorted r (r+1) ltac:(list_solve).
+    pose proof rowptr_sorted_e _ CSR_wf_sorted (r+1) (Zlength rowptr) ltac:(list_solve).
+    rewrite !(Znth_pos_cons (r+1)), !Z.add_simpl_r in * by lia. lia.
+    }
    destruct H2.
    spec H1; [list_solve | ].
    spec H1. { clear H1. 
@@ -1039,20 +1669,10 @@ assert (Hcols: matrix_cols (build_csr_matrix csr) (coo_cols coo)). {
    set (row := build_csr_row _ _ _) in H7|-*. clearbody row.
    assert (0 <= k <= a /\ a <= Zlength vals). {
      clear - CSR_wf_sorted CSR_wf_vals CSR_wf_vals'.
-     repeat split.
-     - apply (CSR_wf_sorted 0 1); list_solve.
-     - apply (CSR_wf_sorted 1 2); list_solve.
-     - pose proof CSR_wf_sorted 2 (Zlength (k::a::rowptr)).
-       spec H; [simpl; list_solve|].
-       simpl in H; autorewrite with sublist in H. rewrite CSR_wf_vals'.
-       do 2 rewrite Znth_pos_cons in H by list_solve. simpl in H.
-       rewrite Znth_0_cons in H.
-       do 2 rewrite Znth_pos_cons in H by list_solve.
-       autorewrite with sublist. unfold Z.succ in *.
-       rewrite Znth_pos_cons by list_solve.
-       rewrite !Z.add_simpl_r in *.
-       change (?A :: ?B ++ ?C) with ((A::B)++C)  in H.
-       rewrite Znth_app1 in H by list_solve. auto.
+     rewrite CSR_wf_vals'.
+     pose proof rowptr_sorted_e _ CSR_wf_sorted 0 1 ltac:(list_solve).
+     pose proof rowptr_sorted_e _ CSR_wf_sorted 1 (Zlength (a::rowptr)) ltac:(list_solve).
+     list_solve.
     }
     pose proof CSR_wf_rowsorted 0 ltac:(list_solve).
     autorewrite with sublist in H0.
@@ -1094,10 +1714,8 @@ assert (Hcols: matrix_cols (build_csr_matrix csr) (coo_cols coo)). {
    * list_solve. 
    * clear - CSR_wf_sorted.
      intros i j [? ?].
-     destruct (zeq i 0), (zeq j 0); subst; autorewrite with sublist.
-     -- lia.
-     -- specialize (CSR_wf_sorted 0 (j+1) ltac:(list_solve)). list_solve.
-     -- lia.
+     destruct (zeq i 0), (zeq j 0); subst; autorewrite with sublist; try lia.
+     -- specialize (CSR_wf_sorted 0 (j+1) ltac:(list_solve)); list_solve.
      -- specialize (CSR_wf_sorted (i+1) (j+1) ltac:(list_solve)); list_solve.
    * intros. specialize (CSR_wf_rowsorted (r+1) ltac:(list_solve)).
      clear - CSR_wf_rowsorted H.
@@ -1120,7 +1738,6 @@ split3; auto.
   specialize (H7 i ltac:(lia)).
   erewrite matrix_index_Z; try eassumption;
  [ | unfold matrix_rows; list_solve].
-(*  forget (Znth i (build_csr_matrix csr)) as rowvals.*)
   red in coo_csr_values.
   red in coo_csr_zeros, coo_csr_entries.
   assert (Hi := CSR_wf_sorted 0 (i+1) ltac:(list_solve)).
@@ -1327,9 +1944,9 @@ assert_PROP (sizeof tdouble * Zlength(coo_entries coo) <= Ptrofs.max_unsigned) a
   destruct H12 as [? [_ [? _]]]. destruct vp; try contradiction.
   simpl in H1|-*. rewrite Z.max_r in H1 by rep_lia. rep_lia.
 }
-forward.
+forward.  (* n = p->n; *)
 set (n := Zlength (coo_entries coo)).
-forward_call (sh,coo,p,0,n).
+forward_call (sh,coo,p,0,n).  (* coo_quicksort(p,0,n); *)
   unfold coo_rep; Exists maxn rp cp vp; entailer!!.
 Intros coo'.
 clear rp cp vp.
@@ -1343,41 +1960,41 @@ autorewrite with sublist in H5.
 rewrite H6 in H2. rewrite H7 in H3.
 clear H6 H7 H8.
 clear maxn H0 H1.
-forward_call.
+forward_call.  (* k = coo_count(p); *)
 set (k := count_distinct _).
-forward.
+forward. (* rows = p->rows; *)
 assert_PROP (n <= maxn <= Int.max_signed) as Hn by entailer!.
 clear H1; rename Hn into H1.  
-forward.
-forward.
-forward.
-forward_call (Tstruct _csr_matrix noattr, gv).
+forward. (* prow_ind = p->row_ind; *)
+forward. (* pcol_ind = p->col_ind; *)
+forward. (* pval = p->val; *)
+forward_call (Tstruct _csr_matrix noattr, gv).  (* q = surely_malloc(sizeof(struct csr_matrix)); *)
 Intros q. 
 assert (Hbound' := count_distinct_bound (coo_entries coo')).
 fold k in Hbound'.
-forward_call (tarray tdouble k, gv).
+forward_call (tarray tdouble k, gv).  (* val = surely_malloc(k*sizeof(double)); *)
  entailer!!.
   simpl. do 3 f_equal. rep_lia.
   simpl. rep_lia.
 Intros val_p.
-forward_call (tarray tuint k, gv).
+forward_call (tarray tuint k, gv). (* col_ind = surely_malloc(k*sizeof(uint)); *)
   entailer!!.
   simpl. do 3 f_equal. rep_lia. simpl; rep_lia.
 Intros colind_p.
-forward_call (tarray tuint (coo_rows coo+1), gv).
+forward_call (tarray tuint (coo_rows coo+1), gv). (* row_ptr = surely_malloc((rows+1)*sizeof(tuint)); *)
   entailer!!; simpl; rewrite (proj1 H4). do 3 f_equal. rep_lia.
   simpl. rewrite (proj1 H4). rep_lia. 
 rewrite (proj1 H4).
 Intros rowptr_p.
-forward.
-forward.
-forward.
+forward. (* r=0; *)
+forward. (* c=0; *)
+forward. (* l=0; *)
 freeze FR1 := (spec_malloc.mem_mgr _) 
   (spec_malloc.malloc_token _ _ rowptr_p)
   (spec_malloc.malloc_token _ _ colind_p)
   (spec_malloc.malloc_token _ _ val_p)
   (spec_malloc.malloc_token _ _ q). 
-forward_for_simple_bound n 
+forward_for_simple_bound n (* for (i=0;i<n; i++) *)
  (EX i:Z, EX l:Z, EX r:Z, EX c:Z, 
   EX ROWPTR: list val, EX COLIND: list val, EX VAL: list val,
   PROP(0<=l<=k; l<=i<=n; 0 <= r <= coo_rows coo'; 0 <= c <= coo_cols coo';
@@ -1420,13 +2037,13 @@ forward_for_simple_bound n
  entailer!!.  
   apply partial_CSR_0; auto.
   pose proof count_distinct_bound (coo_entries coo'). rep_lia.  
-- forward.
+- forward. (* ri=prow_ind[i]; *)
    entailer!!. list_solve.
   rewrite Znth_app1 by Zlength_solve; rewrite Znth_map by rep_lia.
-  forward.
+  forward. (* ci=pcol_ind[i]; *)
    entailer!!. list_solve.
   rewrite Znth_app1 by Zlength_solve; rewrite Znth_map by rep_lia.
-  forward.
+  forward. (* x = pval[i]; *)
    entailer!!.
    list_simplify. rewrite Znth_map.
    2: change (Zlength _) with n; lia. hnf; auto.
@@ -1434,11 +2051,10 @@ forward_for_simple_bound n
   rewrite Znth_map by (change (Zlength _) with n; rep_lia).
   destruct (Znth i (coo_entries coo')) as [[ri ci] xi] eqn:Hi.
   simpl snd; simpl fst.
-  generalize H; intros [_ H99]. rewrite -> Forall_forall in H99.
-  specialize (H99 (ri,ci,xi)). destruct H99 as [Hri Hci]. rewrite <- Hi; apply Znth_In; rep_lia.
-  simpl in Hri, Hci.
-    assert (Hk: 0 < k) by (apply count_distinct_bound'; lia).
-  forward_if; [forward_if | ].
+  assert (H99 := coo_entry_bounds H i ltac:(lia)).
+  rewrite  Hi in H99; simpl in H99. destruct H99 as [Hri Hci].
+  assert (Hk: 0 < k) by (apply count_distinct_bound'; lia).
+  forward_if (* if (ri+1==r) *) ; [forward_if (* if (ci==c) *)| ].
   + (* ri+1 = r, ci = c *)
     rewrite add_repr in H15. apply repr_inj_unsigned in H15; try rep_lia.
     subst r ci.
@@ -1446,8 +2062,8 @@ forward_for_simple_bound n
       by (eapply partial_CSR_VAL_defined; try eassumption; lia).
     assert (Hl: 0<>l) by (intro; subst; lia).   
     clear H13.   
-    forward.
-    forward.
+    forward. (* t' = val[l-1]; *)
+    forward. (* val[l-1] = t'+x; *)
     destruct (Znth (l-1) VAL) eqn:VALl; try contradiction. clear H15.
     pose (VAL' := upd_Znth (l-1) VAL (Vfloat (Float.add f (snd (Znth i (coo_entries coo')))))).
     Exists l (ri+1) c ROWPTR COLIND VAL'.
@@ -1490,10 +2106,10 @@ forward_for_simple_bound n
       * assert (i=0) by lia. subst. autorewrite with sublist.
         unfold count_distinct. simpl. auto.
     }
-    forward.
-    forward.
-    forward.
-    forward.
+    forward. (* c=ci; *)
+    forward. (* col_ind[l]=ci; *)
+    forward. (* val[l]=x; *)
+    forward. (* l++; *)
     Exists (l+1) (ri+1) ci ROWPTR
      (upd_Znth l COLIND (Vint (Int.repr ci))) 
      (upd_Znth l VAL (Vfloat (snd (Znth i (coo_entries coo'))))).
@@ -1513,7 +2129,8 @@ forward_for_simple_bound n
   + (* r+1 <> r *)
     deadvars!.
     rewrite add_repr in H15. assert (ri+1<>r) by (contradict H15; f_equal; auto).
-    clear H15. rename H16 into H15. 
+    clear H15. rename H16 into H15.
+  (* while (r<=rows) *) 
   forward_while (EX r: Z, EX ROWPTR: list val,
    PROP ( 0 <= r <= ri+1; partial_CSR i r coo' ROWPTR COLIND VAL )
    LOCAL (temp _x (Vfloat (snd (Znth i (coo_entries coo'))));
@@ -1554,23 +2171,19 @@ forward_for_simple_bound n
     destruct (zeq i 0).
     -- subst. rewrite sublist_nil in *. rewrite H13 by reflexivity. lia.
     -- destruct (H14 n0). rewrite H12.
-       destruct H as [H' H]; rewrite Forall_forall in H. 
-       destruct (H (Znth (i-1) (coo_entries coo'))).
-       apply Znth_In; lia.
+       pose proof coo_entry_bounds H (i-1) ltac:(lia). 
        replace ri with (fst (fst (Znth i (coo_entries coo')))) by (rewrite Hi; auto).
-       clear - n0 H6 H H5.
-    split.
-    destruct (H (Znth (i-1) (coo_entries coo'))); try lia.
-    apply Znth_In; lia.
+       clear - n0 H6 H17 H5.
+    split; try lia.
     pose proof sorted_e1 _ H5 (i-1) ltac:(lia).
-    rewrite Z.sub_add in H0.
-    destruct H0; lia. 
+    rewrite Z.sub_add in H.
+    destruct H; lia. 
   * entailer!!.
   * clear ROWPTR H11. rename ROWPTR0 into ROWPTR.
     clear dependent r. rename r0 into r.
-    forward.
-    forward.
-    forward.
+    forward. (* t' = r; *)
+    forward. (* r = t'+1; *)
+    forward. (* row_ptr[t']=l; *)
     Exists (r+1, upd_Znth r ROWPTR (Vint (Int.repr l))).
     entailer!!. split; auto. lia.
    apply partial_CSR_skiprow; auto. rewrite Hi; simpl; lia.
@@ -1578,7 +2191,7 @@ forward_for_simple_bound n
   *
    assert (r0 = ri+1) by lia. subst r0.
    clear HRE H16.
-   forward.
+   forward. (* c=ci; *)
    assert (H87: 0 <= count_distinct (sublist 0 i (coo_entries coo')) < k). {
      subst k.
      split; try lia.
@@ -1592,14 +2205,16 @@ forward_for_simple_bound n
      clear - H19 H20. unfold BPO.lt, BPO.eqv in *. tauto.
      lia.
    }
-   forward.
-   forward.
-   forward.
+   forward. (* col_ind[l]=ci; *)
+   forward. (* val[l]=x; *)
+   forward. (* l++; *)
    Exists (l+1) (ri+1) ci ROWPTR0 (upd_Znth l COLIND (Vint (Int.repr ci)))
           (upd_Znth l VAL (Vfloat (snd (Znth i (coo_entries coo'))))).
    entailer!!.
    rewrite Z.add_simpl_r, Hi. simpl.
    split3; [ | | split]; auto; try lia.
+   assert (i<>0 -> fst (fst (Znth (i-1) (coo_entries coo'))) <> ri)
+       by (clear - H14 H15; lia). 
    clear r H15 H14 H9 H11 H13.
    2:{ destruct (zeq i 0).
         - subst. autorewrite with sublist. rewrite sublist_one by lia. reflexivity. 
@@ -1616,8 +2231,9 @@ forward_for_simple_bound n
  - Intros l r c ROWPTR0 COLIND VAL.
    deadvars!.
    autorewrite with sublist in H11.
-   forward.
+   forward. (* cols = p->cols; *)
    rename r into r1.
+   (* while (r<=rows) *)
 forward_while
  (EX r:Z,
   EX ROWPTR: list val,
@@ -1652,27 +2268,27 @@ forward_while
  + Exists r1 ROWPTR0. entailer!!.
  + entailer!!.
  + clear r1 c H13 H9 H8 H10 H12.
-   forward.
-   forward.
-   forward.
+   forward. (* t'= r; *)
+   forward. (* r = t'+1; *)
+   forward. (* row_ptr[t']=l; *)
    Exists (r+1, (upd_Znth r ROWPTR (Vint (Int.repr k)))).
    entailer!!.
    split. lia.
-   apply partial_CSR_lastrows; auto.
+   apply partial_CSR_lastrows; auto. lia.
  +
    clear r1 c H13 H8 H9 H10 H12.
-   forward.
-   forward.
-   forward.
-   forward.
-   forward.
+   forward. (* q->val = val; *)
+   forward. (* q->col_ind = col_ind; *)
+   forward. (* q->row_ptr = row_ptr; *)
+   forward. (* q->rows = rows; *)
+   forward. (* c->cols = cols; *)
 Ltac entailer_for_return ::= idtac.
    assert (l=k) by lia. subst l.
    clear H7 H6 H0 H14.
    fold n in Hbound'. 
    assert (r = coo_rows coo' + 1) by lia.
    subst r. clear HRE H15 ROWPTR0 H8.
-   forward.
+   forward. (* return q; *)
    entailer!!.
    destruct (partial_CSR_properties _ _ _ _ H H16)
     as [m [csr [H6a [H6b [H6c [H6d [H6e [H6f [H6g [H6h H6i]]]]]]]]]].
