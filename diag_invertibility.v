@@ -83,7 +83,9 @@ destruct H.
 + rewrite Rmax_left. by left. apply H.
 Qed.
 
-Lemma bigmax_destruct (a x0:R) s:
+(* bigmaxr deprecated *)
+(* The following three lemmas are moved to lemmas.v *)
+(* Lemma bigmax_destruct (a x0:R) s:
   bigmaxr x0 (a :: s) = a \/ 
   bigmaxr x0 (a :: s) = bigmaxr x0 s.
 Proof.
@@ -97,10 +99,10 @@ assert (s = [::] \/ s != [::]).
   { by apply s_destruct. } rewrite H0.
   rewrite bigmaxr_cons. rewrite -H0.
   rewrite -RmaxE. apply max_order.
-Qed.
+Qed. *)
 
 
-Lemma bigmax_not_0_implies_aux (x0:R) s:
+(* Lemma bigmax_not_0_implies_aux (x0:R) s:
   (0 < size s)%nat ->
   (exists i, (i < size s)%nat /\
              seq.nth x0 s i = bigmaxr x0 s).
@@ -125,9 +127,9 @@ induction s.
       exists i.+1. split.
       ++ simpl. by []. 
       ++ simpl. by rewrite H0.
-Qed. 
+Qed.  *)
   
-Lemma bigmax_not_0_implies (x0:R) s:
+(* Lemma bigmax_not_0_implies (x0:R) s:
   bigmaxr x0 s <> x0 ->
   (exists i, (i < size s)%nat /\
              seq.nth x0 s i = bigmaxr x0 s /\
@@ -148,7 +150,7 @@ assert (s = [::] \/ s != [::]).
   exists i. split.
   apply Hsize. split.
   apply H2. by rewrite H2.
-Qed.
+Qed. *)
 
 Close Scope R_scope.
 
@@ -172,19 +174,25 @@ Lemma vec_norm_not_zero_implies {n:nat}:
   exists k, Rabs (v k ord0) = vec_inf_norm v /\
             v k ord0 <> 0%Re.
 Proof.
-intros. unfold vec_inf_norm in H.
-pose proof  bigmax_not_0_implies.
-specialize (H0 0%Re [seq Rabs (v i ord0)
-                          | i <- enum 'I_n.+1] H).
-rewrite size_map size_enum_ord in H0.
-destruct H0 as [i [Hsize H0]].
-exists (@inord n i). 
-unfold vec_inf_norm.
-rewrite seq_equiv in H0. rewrite nth_mkseq in H0; last by apply Hsize.
-destruct H0 as [H0a H0b].
-split.
-+ rewrite seq_equiv. apply H0a.
-+ by apply R0_no_Rabs.
+  intros. rewrite /vec_inf_norm in H.
+  assert (forall x, x \in [seq Rabs (v i ord0) | i <- enum 'I_n.+1] -> 0 <= x).
+  { intros. move /mapP in H0. destruct H0 as [i0 H1 H2]. rewrite H2. 
+    apply /RleP. apply Rabs_pos. }
+  pose proof (@bigmax_not_0_implies_0head 
+    [seq Rabs (v i ord0) | i <- enum 'I_n.+1] H0 H).
+  destruct H1 as [i [Hsize [H1 H2]]].
+  rewrite size_map in Hsize.
+  exists (inord i). split.
+  + rewrite /vec_inf_norm.
+    rewrite -H1 (@nth_map _ ord0); auto. f_equal. f_equal.
+    pose proof (@nth_ord_enum n.+1 ord0 (inord i)).
+    rewrite -H3. f_equal. rewrite inordK; auto. by rewrite size_enum_ord in Hsize.
+  + assert (seq.nth 0%Re [seq Rabs (v i0 ord0) | i0 <- enum 'I_n.+1] i
+      = Rabs (v (inord i) ord0)).
+    { rewrite (@nth_map _ ord0); auto. f_equal. f_equal.
+      rewrite -(@nth_ord_enum n.+1 ord0 (inord i)). f_equal. 
+      rewrite inordK; auto. by rewrite size_enum_ord in Hsize. }
+    rewrite H3 in H2. apply R0_no_Rabs. apply H2.
 Qed.
 
 Lemma Rabs_sub: 
@@ -311,10 +319,13 @@ assert (vec_inf_norm v_c = 0%Re \/ vec_inf_norm v_c <> 0%Re).
       | i0 <- enum 'I_n.+1]`_i.
     * rewrite seq_equiv. rewrite nth_mkseq; last by apply ltn_ord.
       rewrite inord_val. apply Rle_refl.
-    * apply /RleP. 
-      apply (@bigmaxr_ler _ 0%Re [seq Rabs (v_c i0 0)
-                                    | i0 <- enum 'I_n.+1] i).
-      rewrite size_map size_enum_ord. apply ltn_ord.
+    * apply bigmax_ler_0head.
+      { apply /mapP. exists i. apply mem_enum.
+        rewrite (@nth_map _ ord0).
+        f_equal. f_equal. rewrite (@nth_ord_enum n.+1 ord0 i). auto.
+        rewrite size_enum_ord. apply ltn_ord. }
+      intros.  move /mapP in H5. destruct H5 as [x0 H6 H7]. rewrite H7.
+      apply /RleP. apply Rabs_pos.
   - auto.
 Qed.
 

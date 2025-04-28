@@ -120,10 +120,11 @@ Lemma vec_norm_A1_rel {t: FPStdLib.type} {n:nat}
 (vec_inf_norm (A1_diag (FT2R_mat A))  <=
  (vec_inf_norm (FT2R_mat (A1_inv_J A)) + default_abs t) / (1 - default_rel t) )%Re.
 Proof.
-unfold vec_inf_norm.
-apply bigmax_le.
-+ by rewrite size_map size_enum_ord.
-+ intros.
+  rewrite /vec_inf_norm. apply bigmax_le_0head.
+  { rewrite size_map size_enum_ord. by []. }
+  2:{ intros. move /mapP in H. destruct H as [i H1 H2]. 
+    rewrite H2. apply /RleP. apply Rabs_pos. } 
+  intros.
   rewrite seq_equiv. rewrite nth_mkseq;
   last by rewrite size_map size_enum_ord in H.
   rewrite mxE.
@@ -154,14 +155,13 @@ apply bigmax_le.
     apply Rplus_le_compat_l. 
     apply Ropp_le_contravar. apply Hd.
     apply Ropp_le_contravar. apply He.
-  - apply /RleP.
-    apply (@bigmaxr_ler _ 0%Re [seq Rabs
-                                   (FT2R_mat (A1_inv_J A) i0 0)
-                               | i0 <- enum 'I_n.+1] i).
-    rewrite size_map size_enum_ord.
-    by rewrite size_map size_enum_ord in H.
+  - apply bigmax_ler_0head.
+    { apply /mapP. exists (inord i). apply mem_enum.
+      rewrite seq_equiv. rewrite nth_mkseq; 
+      last by rewrite size_map size_enum_ord in H. reflexivity. }
+    intros. move /mapP in H0. destruct H0 as [i0 H1 H2]. rewrite H2.
+    apply /RleP. apply Rabs_pos.
 Qed.
-
 
 Lemma R_def_lt_1_implies {t} {n:nat}
   (A : 'M[ftype t]_n.+1) 
@@ -402,20 +402,15 @@ intros.
 induction k.
 + simpl. rewrite big_ord0 /= Rmult_0_r.
   assert (vec_inf_norm x0 = 0%Re).
-  { unfold vec_inf_norm, x0. apply bigmaxrP.
-    split.
-    + assert (0%Re = [seq Rabs ((\col__ 0%Re) i 0)
-                      | i <- enum 'I_n.+1]`_0).
-      { rewrite seq_equiv. rewrite nth_mkseq.
-        rewrite !mxE. by rewrite Rabs_R0.
-        by [].
-      } rewrite [in X in (X \in _)]H1.
-      apply (@mem_nth _ 0%Re [seq Rabs ((\col__ 0%Re) i 0)
-                      | i <- enum 'I_n.+1] 0%nat).
-      by rewrite size_map size_enum_ord.
-    + intros. rewrite seq_equiv. rewrite nth_mkseq;
-      last by rewrite size_map size_enum_ord in H1.
-      rewrite !mxE Rabs_R0. apply /RleP. apply Rle_refl.
+  { unfold vec_inf_norm, x0. apply bigmaxP_0head.
+    - by rewrite size_map size_enum_ord.
+    - intros. rewrite (@nth_map 'I_n.+1 ord0).
+      rewrite !mxE. rewrite Rabs_R0. lra.
+      by rewrite size_map in H1.
+    - intros. move /mapP in H1. destruct H1 as [i2 H1 H2].
+      rewrite H2. apply /RleP. apply Rabs_pos.
+    - apply /mapP. exists ord0. apply mem_enum.
+      rewrite mxE. rewrite Rabs_R0. auto.
   } rewrite H1. nra.
 + rewrite big_ord_recr /=. rewrite -RplusE.
   unfold x_fix.

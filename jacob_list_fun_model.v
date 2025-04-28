@@ -88,7 +88,7 @@ Lemma length_diag_of_matrix: forall {t} (m: matrix t),
 Proof.
  intros.
  unfold diag_of_matrix.
- rewrite map_length. rewrite seq_length. auto.
+ rewrite length_map. rewrite length_seq. auto.
 Qed.
 
 Lemma rows_matrix_of_diag: forall {t} (v: diagmatrix t),
@@ -114,7 +114,7 @@ Proof.
 intros.
 unfold diag_of_matrix, matrix_of_diag.
 apply (all_nth_eq (Zconst t 0));
-rewrite map_length, seq_length, matrix_by_index_rows. auto.
+rewrite length_map, length_seq, matrix_by_index_rows. auto.
 intros.
 set (f := fun _ => _).
 transitivity (nth i (map f (seq 0 (length d))) (f (length d))).
@@ -124,7 +124,7 @@ unfold matrix_index.
 rewrite nth_overflow; auto.
 rewrite nth_overflow; auto.
 simpl; lia.
-rewrite map_length. rewrite seq_length. lia.
+rewrite length_map. rewrite length_seq. lia.
 rewrite map_nth.
 rewrite seq_nth by auto.
 simpl.
@@ -173,8 +173,8 @@ clear H.
 revert m2 H1; induction H0; destruct m2; simpl; intros; constructor.
 inv H1.
 unfold uncurry, map2.
-rewrite map_length.
-rewrite combine_length.
+rewrite length_map.
+rewrite length_combine.
 rewrite H4. apply  Nat.min_id.
 apply IHForall.
 inv H1; auto.
@@ -224,8 +224,8 @@ Proof.
 intros.
 unfold matrix_rows_nat in *.
 unfold map2.
-rewrite map_length.
-rewrite combine_length.
+rewrite length_map.
+rewrite length_combine.
 lia.
 Qed.
 
@@ -244,8 +244,8 @@ unfold map2 at 1.
 unfold combine; fold (combine m1 m2).
 simpl.
 constructor; auto.
-unfold map2. rewrite map_length.
-rewrite combine_length; lia.
+unfold map2. rewrite length_map.
+rewrite length_combine; lia.
 apply IHm1; auto.
 Qed.
 
@@ -257,7 +257,7 @@ Proof.
 induction 1.
 constructor.
 constructor.
-rewrite map_length. auto.
+rewrite length_map. auto.
 apply IHForall.
 Qed.
 

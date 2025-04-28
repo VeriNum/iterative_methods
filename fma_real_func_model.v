@@ -113,58 +113,45 @@ Lemma vec_inf_norm_diag_matrix_vec_mult_R {n:nat} (v1 v2 : 'cV[R]_n.+1):
   vec_inf_norm (diag_matrix_vec_mult_R v1 v2) <= 
   vec_inf_norm v1 * vec_inf_norm v2.
 Proof.
-unfold vec_inf_norm, diag_matrix_vec_mult_R.
-rewrite -bigmaxr_mulr.
-+ apply /RleP. apply lemmas.bigmax_le.
-  - by rewrite size_map size_enum_ord.
-  - intros. rewrite seq_equiv. rewrite nth_mkseq; 
-    last by rewrite size_map size_enum_ord in H.
-    apply Rle_trans with 
-    [seq (bigmaxr 0%Re
-           [seq Rabs (v1 i1 0) | i1 <- enum 'I_n.+1] *
-         Rabs (v2 i0 0))%Ri
-      | i0 <- enum 'I_n.+1]`_i.
-    * assert ([seq bigmaxr 0%Re
-                    [seq Rabs (v1 i1 0) | i1 <- enum 'I_n.+1] *
-                  Rabs (v2 i0 0)
-                | i0 <- enum 'I_n.+1] = 
-               mkseq (fun i: nat => bigmaxr 0%Re
-                            [seq Rabs (v1 i1 0) | i1 <- enum 'I_n.+1] *
-                            Rabs (v2 (@inord n i) 0))
-                             n.+1).
-      { by rewrite !seq_equiv. } rewrite H0.
-      rewrite nth_mkseq; 
-      last by rewrite size_map size_enum_ord in H.
-      rewrite !mxE. rewrite -!RmultE. rewrite Rabs_mult.
-      rewrite !nth_vec_to_list_real; try rewrite inord_val.
-      ++ apply Rmult_le_compat_r; try apply Rabs_pos.
-         apply Rle_trans with 
-         [seq Rabs (v1 i1 0) | i1 <- enum 'I_n.+1]`_i.
-         -- rewrite seq_equiv. rewrite nth_mkseq; 
-            last by rewrite size_map size_enum_ord in H.
-            apply Rle_refl.
-         -- apply /RleP.
-            apply (@bigmaxr_ler _ 0%Re [seq Rabs (v1 i1 0) | i1 <- enum 'I_n.+1] i).
-            rewrite size_map size_enum_ord.
-            by rewrite size_map size_enum_ord in H.
-      ++ by rewrite size_map size_enum_ord in H.
-      ++ by rewrite size_map size_enum_ord in H.
-    * apply /RleP.
-      apply (@bigmaxr_ler _ 0%Re [seq bigmaxr 0%Re
-                     [seq Rabs (v1 i1 0) | i1 <- enum 'I_n.+1] *
-                   Rabs (v2 i0 0)
-                 | i0 <- enum 'I_n.+1] i).
-       rewrite size_map size_enum_ord.
-       by rewrite size_map size_enum_ord in H.
-+ apply bigmax_le_0.
-  - apply /RleP. apply Rle_refl.
-  - intros. rewrite seq_equiv. rewrite nth_mkseq;
-    last by rewrite size_map size_enum_ord in H.
-    apply /RleP. apply Rabs_pos.
+  rewrite /vec_inf_norm /diag_matrix_vec_mult_R.
+  remember (\big[maxr/0%Re]_(i <- [seq Rabs (v1 i 0)  | i <- enum 'I_n.+1])  i) as v1norm.
+  rewrite -RmultE. rewrite bigmax_mulr_0head.
+  2:{ rewrite size_map size_enum_ord //=. } 
+  2:{ intros. move /mapP in H. destruct H as [ix H1 H2]. rewrite H2.
+      apply /RleP. apply Rabs_pos. } 
+  2:{ rewrite Heqv1norm. pose proof (vec_inf_norm_nonneg v1). apply H. } 
+  apply /RleP. apply bigmax_le_0head.
+  { rewrite size_map size_enum_ord //=. }
+  2:{ intros. move /mapP in H. destruct H as [ix H1 H2]. rewrite H2.
+    apply /RleP. apply Rabs_pos. }
+  intros. rewrite (@nth_map _ 0).
+  2:{ rewrite size_enum_ord. rewrite size_map size_enum_ord in H. apply H. }
+  rewrite enum_inord.
+  2:{ rewrite size_map size_enum_ord in H. apply H. }
+  rewrite !mxE Rabs_mult seq_sum_mult_distrl.
+  remember (inord i) as ik.
+  apply Rle_trans with (v1norm * Rabs (nth (n.+1.-1 - ik) (vec_to_list_real n.+1 v2) 0)).
+  { apply Rmult_le_compat_r. apply Rabs_pos.
+    rewrite Heqv1norm. apply bigmax_ler_0head.
+    2:{ intros. move /mapP in H0. destruct H0 as [ix H1 H2]. rewrite H2.
+        apply /RleP. apply Rabs_pos. }
+    rewrite nth_vec_to_list_real.
+    2:{ rewrite Heqik. rewrite inordK. rewrite size_map size_enum_ord in H; auto.
+        rewrite size_map size_enum_ord in H; auto. }
+    apply /mapP. exists ik. 
+    2:{ rewrite Heqik. rewrite inordK; rewrite size_map size_enum_ord in H; auto. }
+    rewrite Heqik. apply mem_enum. }
+  apply bigmax_ler_0head.
+  2:{ intros. move /mapP in H0. destruct H0 as [ix H1 H2]. rewrite H2.
+      apply /RleP. apply Rmult_le_pos; try apply Rabs_pos.
+      rewrite Heqv1norm. pose proof (vec_inf_norm_nonneg v1). 
+      apply /RleP. auto. } 
+  apply /mapP. exists ik. apply mem_enum.
+  f_equal. f_equal. rewrite nth_vec_to_list_real. 
+  2:{ rewrite Heqik. rewrite inordK; rewrite size_map size_enum_ord in H; auto. } 
+  rewrite inord_val. auto.
 Qed.
-
-
-
+    
 Lemma x_fixpoint {n:nat} x b (A: 'M[R]_n.+1):
   A *m x = b ->
   (forall i, A i i <> 0%Re) ->
