@@ -5,94 +5,6 @@ Import ListNotations.
 
 
 
-Class BoolOrder {A: Type} (R: relation A): Type := {
-    test : A -> A -> bool;
-    test_spec: forall x y, reflect (R x y) (test x y)
-}.
-
-Arguments test {A} R {BoolOrder}.
-
-Module BPO.
-
-Local Lemma mkteststrictspec {A} {R: relation A} {B: BoolOrder R}{P: PreOrder R}:
-  let strict x y := R x y /\ ~R y x in
-  let teststrict x y := andb (test R x y) (negb (test R y x)) in
-   forall x y : A, reflect (strict x y) (teststrict x y).
-Proof.
-intros.
-unfold strict, teststrict.
-destruct (test_spec x y), (test_spec y x); simpl.
-- apply ReflectF. intros [? ?]; contradiction.
-- apply ReflectT. split; auto.
-- apply ReflectF. intros [? ?]; contradiction.
-- apply ReflectF. intros [? ?]; contradiction.
-Qed.
-
-Local Lemma StrictOrderstrict {A}{R: relation A}{P: PreOrder R}:
- let strict x y := R x y /\ ~ R y x in
-   StrictOrder strict.
-Proof.
-constructor.
-intro x; red; tauto.
-intros x y z [??] [??]; split.
-   transitivity y; auto.
-   contradict H2. transitivity x; auto.
-Qed.
-
-Local Lemma mktesteqvspec {A} {R: relation A}{BO: BoolOrder R}: 
-  let eqv x y := R x y /\ R y x in
-  let testeqv x y := andb (test R x y) (test R y x) in
-  forall x y : A, reflect (eqv x y) (testeqv x y).
-Proof.
-intros.
-subst eqv testeqv; simpl.
-destruct (test_spec x y), (test_spec y x); simpl; constructor; tauto.
-Qed.
-
-Local Lemma mkEqv {A}{R: relation A}{PO: PreOrder R}:
-  let eqv x y := R x y /\ R y x in
-  Equivalence eqv.
-Proof.
-intros. subst eqv. constructor; hnf; intros.
-- split; reflexivity.
-- tauto.
-- split; transitivity y; tauto.
-Qed.
-
-Class BoolPreOrder {A: Type} (R: relation A) : Type := {
-    #[export] BO :: BoolOrder R (* | 2 *)  ;
-    #[export] PO :: PreOrder R (* | 2 *);
-    lt : relation A := fun x y => R x y /\ ~R y x;
-    ltb: A -> A -> bool := fun x y => andb (test R x y) (negb (test R y x));
-    ltb_spec: forall x y, reflect (lt x y) (ltb x y) := 
-              mkteststrictspec;
-    #[export] Strict :: StrictOrder lt := StrictOrderstrict;
-    eqv: relation A := fun x y => R x y /\ R y x;
-    eqvb: A -> A -> bool := fun x y => andb (test R x y) (test R y x);
-    eqvbspec: forall x y, reflect (eqv x y) (eqvb x y) :=
-              mktesteqvspec;
-    Eqv :: Equivalence eqv := mkEqv
- }.
-
-Arguments lt [A] [R] {_}.
-Arguments ltb [A] [R] {_}.
-Arguments eqv [A] [R] {_}.
-Arguments eqvb [A] [R] {_}.
-
-End BPO.
-Import BPO.
-
-(*
-#[export] Instance or_eq_trans {A} {R: relation A} {TR: Transitive R} : Transitive (or_eq R).
-Proof.
-intros x y z ? ?.
-destruct H; subst; auto.
-destruct H0; subst; auto.
-right; auto.
-right; eapply TR; eauto.
-Qed.
-*)
-
 Inductive sorted {A} (le: relation A): list A -> Prop := 
 | sorted_nil:
     sorted le nil
@@ -245,6 +157,95 @@ Proof.
  apply IHsorted; try list_solve.
 Qed.
 
+
+
+Class BoolOrder {A: Type} (R: relation A): Type := {
+    test : A -> A -> bool;
+    test_spec: forall x y, reflect (R x y) (test x y)
+}.
+
+Arguments test {A} R {BoolOrder}.
+
+Module BPO.
+
+Local Lemma mkteststrictspec {A} {R: relation A} {B: BoolOrder R}{P: PreOrder R}:
+  let strict x y := R x y /\ ~R y x in
+  let teststrict x y := andb (test R x y) (negb (test R y x)) in
+   forall x y : A, reflect (strict x y) (teststrict x y).
+Proof.
+intros.
+unfold strict, teststrict.
+destruct (test_spec x y), (test_spec y x); simpl.
+- apply ReflectF. intros [? ?]; contradiction.
+- apply ReflectT. split; auto.
+- apply ReflectF. intros [? ?]; contradiction.
+- apply ReflectF. intros [? ?]; contradiction.
+Qed.
+
+Local Lemma StrictOrderstrict {A}{R: relation A}{P: PreOrder R}:
+ let strict x y := R x y /\ ~ R y x in
+   StrictOrder strict.
+Proof.
+constructor.
+intro x; red; tauto.
+intros x y z [??] [??]; split.
+   transitivity y; auto.
+   contradict H2. transitivity x; auto.
+Qed.
+
+Local Lemma mktesteqvspec {A} {R: relation A}{BO: BoolOrder R}: 
+  let eqv x y := R x y /\ R y x in
+  let testeqv x y := andb (test R x y) (test R y x) in
+  forall x y : A, reflect (eqv x y) (testeqv x y).
+Proof.
+intros.
+subst eqv testeqv; simpl.
+destruct (test_spec x y), (test_spec y x); simpl; constructor; tauto.
+Qed.
+
+Local Lemma mkEqv {A}{R: relation A}{PO: PreOrder R}:
+  let eqv x y := R x y /\ R y x in
+  Equivalence eqv.
+Proof.
+intros. subst eqv. constructor; hnf; intros.
+- split; reflexivity.
+- tauto.
+- split; transitivity y; tauto.
+Qed.
+
+Class BoolPreOrder {A: Type} (R: relation A) : Type := {
+    #[export] BO :: BoolOrder R (* | 2 *)  ;
+    #[export] PO :: PreOrder R (* | 2 *);
+    lt : relation A := fun x y => R x y /\ ~R y x;
+    ltb: A -> A -> bool := fun x y => andb (test R x y) (negb (test R y x));
+    ltb_spec: forall x y, reflect (lt x y) (ltb x y) := 
+              mkteststrictspec;
+    #[export] Strict :: StrictOrder lt := StrictOrderstrict;
+    eqv: relation A := fun x y => R x y /\ R y x;
+    eqvb: A -> A -> bool := fun x y => andb (test R x y) (test R y x);
+    eqvbspec: forall x y, reflect (eqv x y) (eqvb x y) :=
+              mktesteqvspec;
+    Eqv :: Equivalence eqv := mkEqv
+ }.
+
+Arguments lt [A] [R] {_}.
+Arguments ltb [A] [R] {_}.
+Arguments eqv [A] [R] {_}.
+Arguments eqvb [A] [R] {_}.
+
+End BPO.
+Import BPO.
+
+(*
+#[export] Instance or_eq_trans {A} {R: relation A} {TR: Transitive R} : Transitive (or_eq R).
+Proof.
+intros x y z ? ?.
+destruct H; subst; auto.
+destruct H0; subst; auto.
+right; auto.
+right; eapply TR; eauto.
+Qed.
+*)
 Section SBO.
 
 Context {A: Type} {le: relation A} {SBO: BoolPreOrder le}.

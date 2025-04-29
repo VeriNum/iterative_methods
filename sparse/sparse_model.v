@@ -3,6 +3,7 @@ Require Import vcfloat.VCFloat.
 Require Import vcfloat.FPStdCompCert.
 Require Import VSTlib.spec_math.
 Require Import Iterative.floatlib.
+Require Import Iterative.sparse.distinct.
 
 Set Bullet Behavior "Strict Subproofs".
 
@@ -32,7 +33,7 @@ Definition csr_rep_aux {t} (mval: matrix t) (csr: csr_matrix t) :=
   Zlength (csr_row_ptr csr) = 1 + Zlength mval /\
   Zlength (csr_vals csr) = Znth (Zlength mval) (csr_row_ptr csr) /\
   Zlength (csr_col_ind csr) = Znth (Zlength mval) (csr_row_ptr csr) /\
-  sorted Z.le (0 :: csr_row_ptr csr ++ [Int.max_unsigned]) /\ 
+  list_solver.sorted Z.le (0 :: csr_row_ptr csr ++ [Int.max_unsigned]) /\ 
   forall j, 0 <= j < Zlength mval ->
         csr_row_rep (csr_cols csr) 
              (sublist (Znth j (csr_row_ptr csr)) (Znth (j+1) (csr_row_ptr csr)) (csr_vals csr))
@@ -41,7 +42,7 @@ Definition csr_rep_aux {t} (mval: matrix t) (csr: csr_matrix t) :=
 
 Lemma sorted_app_e1: 
  forall {A} {HA: Inhabitant A} (le: A -> A -> Prop) al bl,
-  sorted le (al++bl) -> sorted le al.
+  list_solver.sorted le (al++bl) -> list_solver.sorted le al.
 Proof.
 intros.
 intros i j [??]. specialize (H i j).
@@ -148,6 +149,197 @@ induction H; auto.
 inversion H0; auto.
 inversion H0; constructor; auto.
 Qed.
+
+Inductive csr_matrix_wellformed {t} (csr: csr_matrix t) : Prop :=
+ build_csr_matrix_wellformed:
+ forall (CSR_wf_rows: 0 <= csr_rows csr)
+        (CSR_wf_cols: 0 <= csr_cols csr)
+        (CSR_wf_vals: Zlength (csr_vals csr) = Zlength (csr_col_ind csr))
+        (CSR_wf_vals': Zlength (csr_vals csr) = Znth (csr_rows csr) (csr_row_ptr csr))
+        (CSR_wf_sorted: list_solver.sorted Z.le (0 :: csr_row_ptr csr ++ [Int.max_unsigned]))
+        (CSR_wf_rowsorted: forall r, 0 <= r < csr_rows csr -> 
+              sorted Z.lt 
+                (-1 :: sublist (Znth r (csr_row_ptr csr)) (Znth (r+1) (csr_row_ptr csr)) (csr_col_ind csr) ++ [csr_cols csr])),
+    csr_matrix_wellformed csr.
+
+
+Lemma rowptr_sorted_e: 
+ forall row_ptr (H: list_solver.sorted Z.le (0 :: row_ptr ++ [Int.max_unsigned]))
+       (i j: Z),
+   0 <= i <= j /\ j < Zlength row_ptr ->
+   0 <= Znth i row_ptr <= Znth j row_ptr /\ Znth j row_ptr <= Int.max_unsigned.
+Proof.
+intros.
+pose proof H 0 (i+1) ltac:(list_solve).
+rewrite Znth_0_cons, Znth_pos_cons, Z.add_simpl_r in H1 by list_solve.
+rewrite Znth_app1 in H1 by list_solve.
+pose proof H (i+1) (j+1) ltac:(list_solve).
+rewrite !(Znth_pos_cons (_+_)), !Z.add_simpl_r in H2 by list_solve.
+rewrite !Znth_app1 in H2 by list_solve.
+pose proof H (j+1) (Zlength row_ptr + 1) ltac:(list_solve).
+rewrite !(Znth_pos_cons (_+_)), !Z.add_simpl_r in H3 by list_solve.
+rewrite Znth_app1 in H3 by list_solve.
+rewrite Znth_app2 in H3 by list_solve.
+autorewrite with sublist in H3.
+lia.
+Qed.
+
+Lemma rowptr_sorted_e1: 
+  forall row_ptr (H: list_solver.sorted Z.le (0 :: row_ptr ++ [Int.max_unsigned]))
+       (i: Z),
+   0 <= i < Zlength row_ptr ->
+   0 <= Znth i row_ptr <= Int.max_unsigned.
+Proof.
+intros.
+pose proof rowptr_sorted_e _ H i i ltac:(lia); lia.
+Qed.
+
+Fixpoint build_csr_row {t} (cols: Z) (vals: list (ftype t)) (col_ind: list Z) : list (ftype t) :=
+ match vals, col_ind  with
+ | v::vals', c::col_ind' => Zrepeat (Zconst t 0) c ++ v :: 
+                            build_csr_row (cols-c-1) vals' (map (fun j => j-c-1) col_ind')
+
+ | _, _ => Zrepeat (Zconst t 0) cols
+ end.
+
+Fixpoint build_csr_rows {t} (csr: csr_matrix t) (k: Z) (row_ptr: list Z) : list (list (ftype t)) :=
+ match row_ptr with
+ | [] => nil
+ | k'::row_ptr' => build_csr_row (csr_cols csr) (sublist k k' (csr_vals csr)) 
+                  (sublist k k' (csr_col_ind csr)) ::
+                  build_csr_rows csr k' row_ptr'
+ end.
+
+Definition build_csr_matrix {t} (csr: csr_matrix t) : matrix t :=
+ match csr_row_ptr csr with
+ | k::row_ptr' => build_csr_rows csr k row_ptr'
+ | [] => []
+ end.
+
+Lemma build_csr_row_correct:
+  forall {t} cols (vals: list (ftype t)) col_ind,
+     0 <= cols ->
+     Zlength vals = Zlength col_ind ->
+     sorted Z.lt (-1 :: col_ind ++ [cols]) ->
+    csr_row_rep cols vals col_ind (build_csr_row cols vals col_ind).
+Proof.
+intros.
+pose proof I.
+revert col_ind cols H H0 H1; induction vals; destruct col_ind; intros; try list_solve.
+-
+unfold build_csr_row.
+rewrite <- (Z2Nat.id cols) by auto.
+clear H H1 H2.
+induction (Z.to_nat cols). constructor.
+replace (Z.of_nat (S n)) with (1+Z.of_nat n) by lia.
+rewrite <- Zrepeat_app by lia.
+simpl.
+constructor.
+replace (1 + Z.of_nat n - 1) with (Z.of_nat n) by lia.
+simpl. auto.
+-
+assert (0<=z) by (inversion H1; clear H1; subst; lia).
+rewrite <- (Z2Nat.id z) in H0,H1|-* by lia.
+forget (Z.to_nat z) as n.
+clear z H3 H2.
+autorewrite with sublist in H0.
+simpl.
+revert cols col_ind H0 H1 H; induction n; intros.
+ + simpl Z.of_nat in *.
+  rewrite !Z.sub_0_r.
+  constructor.
+  replace (map (fun j : Z => j - 0 - 1) col_ind) with (map Z.pred col_ind).
+  2:{ clear. induction col_ind; auto. simpl. f_equal. lia. apply IHcol_ind; auto. }
+  apply IHvals; auto; try list_solve.
+  *pose proof sorted_e _ H1 1 (Zlength col_ind + 2) ltac:(list_solve) ltac:(list_solve). autorewrite with sublist in H2.
+   rewrite (Znth_pos_cons 1), Z.sub_diag in H2 by lia. simpl in H2.  rewrite Znth_0_cons in H2.
+   repeat change (?A :: ?B ++ ?C) with ((A::B)++C) in H2. rewrite Znth_app2 in H2 by list_solve.
+   clear - H2. list_solve.
+  * simpl in H1. inv H1. inv H6. list_solve.
+    replace (map Z.pred col_ind ++ [cols-1]) with (map Z.pred (y::l))
+      by (rewrite H2; apply map_app). clear - H3 H5. simpl. constructor. lia.
+    clear H3. change (sorted Z.lt (map Z.pred (y::l))). forget (y::l) as al.
+    induction H5; constructor; auto. lia.
+ + rewrite inj_S.
+   replace (Z.succ (Z.of_nat n)) with (1 + Z.of_nat n) by lia.
+   rewrite <- Zrepeat_app by lia.
+   change (Zrepeat (Zconst t 0) 1) with [Zconst t 0].
+   simpl.
+   apply csr_row_rep_zero.
+   specialize (IHn (cols-1) (map Z.pred col_ind)).
+   simpl map. replace (Z.pred (1+Z.of_nat n)) with (Z.of_nat n) by lia.
+   replace (cols - (1+Z.of_nat n) -1 ) with (cols - 1 - Z.of_nat n - 1) by lia.
+   replace (map (fun j : Z => j - (1 + Z.of_nat n) - 1) col_ind)
+     with (map (fun j : Z => j - Z.of_nat n - 1) (map Z.pred col_ind)). 2: {
+     clear. induction col_ind; simpl; auto. f_equal. lia. auto. 
+   } 
+   apply IHn; try list_solve.
+   * clear - H1. rewrite inj_S in H1. simpl in *. inv H1. constructor. lia.
+     replace (Z.of_nat n :: map Z.pred col_ind ++ [cols - 1])
+          with (map Z.pred (Z.succ (Z.of_nat n) :: col_ind ++ [cols]))
+       by (simpl; f_equal; [lia | apply map_app]).
+     forget (Z.succ (Z.of_nat n) :: col_ind ++ [cols]) as al.
+     induction H4; constructor; auto; lia.
+   * clear - H1. rewrite inj_S in H1. inv H1.
+     pose proof (sorted_e _ H4 0 (Zlength col_ind + 1) ltac:(list_solve) ltac:(list_solve)).
+     rewrite Znth_0_cons in H. clear H4. list_solve.
+Qed.
+
+Lemma build_csr_matrix_correct:
+  forall {t} (csr: csr_matrix t),
+  csr_matrix_wellformed csr ->
+  csr_rep_aux (build_csr_matrix csr) csr.
+Proof.
+ intros.
+ inversion_clear H.
+ unfold build_csr_matrix.
+ unfold csr_rep_aux.
+ unfold csr_rows in *.
+ destruct (csr_row_ptr csr) as [| k rowptr]. list_solve.
+ assert (Zlength rowptr = Zlength (build_csr_rows csr k rowptr)). {
+   clear.
+   revert k; induction rowptr; simpl; intros. auto.
+   autorewrite with sublist. f_equal. auto.
+ }
+ split3; [ | | split3].
+ - list_solve.
+ - rewrite <- H. rewrite CSR_wf_vals'. f_equal. list_solve.
+ - rewrite <- H. list_solve.
+ - auto.
+ - rewrite <- H.
+   intros r ?.
+   rewrite !(Znth_pos_cons (r+1)), Z.add_simpl_r by lia.
+   pose proof @build_csr_row_correct t (csr_cols csr)
+    (sublist (Znth r (k :: rowptr)) (Znth r rowptr) (csr_vals csr))
+    (sublist (Znth r (k :: rowptr)) (Znth r  rowptr) (csr_col_ind csr))
+     ltac:(lia).
+   autorewrite with sublist in CSR_wf_vals'. unfold Z.succ  in CSR_wf_vals'.
+   assert (0 <= Znth r (k :: rowptr) <= Znth r rowptr /\
+           Znth r rowptr <= Zlength (csr_col_ind csr)). {
+    clear - CSR_wf_sorted H0 CSR_wf_vals CSR_wf_vals'.
+    rewrite <- CSR_wf_vals, CSR_wf_vals', Z.add_simpl_r.
+    pose proof rowptr_sorted_e _ CSR_wf_sorted r (r+1) ltac:(list_solve).
+    pose proof rowptr_sorted_e _ CSR_wf_sorted (r+1) (Zlength rowptr) ltac:(list_solve).
+    rewrite !(Znth_pos_cons (r+1)), !Z.add_simpl_r in * by lia. lia.
+    }
+   destruct H2.
+   spec H1; [list_solve | ].
+   spec H1. { clear H1. 
+      assert (H1 := CSR_wf_rowsorted r ltac:(list_solve)); simpl in H1.
+      rewrite !(Znth_pos_cons (r+1)), Z.add_simpl_r in H1 by lia. auto.
+   }
+   assert (Znth r (build_csr_rows csr k rowptr) =
+       build_csr_row (csr_cols csr)
+       (sublist (Znth r (k :: rowptr)) (Znth r rowptr) (csr_vals csr))
+       (sublist (Znth r (k :: rowptr)) (Znth r rowptr) (csr_col_ind csr))); [clear H1 | rewrite H4; auto].
+   clear - H0.
+   revert k r H0; induction rowptr; simpl; intros; [list_solve | ].
+   destruct (zeq r 0).
+      + list_solve. 
+      + rewrite !(Znth_pos_cons r) by lia.
+        apply (IHrowptr a (r-1) ltac:(list_solve)).
+Qed.
+
 
 Fixpoint rowmult {t} (s: ftype t)
             (vals: list (ftype t)) (col_ind: list Z) (vval: list (ftype t)) :=
@@ -432,6 +624,48 @@ Definition coo_to_matrix {t: type} (coo: coo_matrix t) (m: matrix t) : Prop :=
     forall j, 0 <= j < coo_cols coo -> 
      sum_any (map snd (filter (coord_eqb (i,j) oo fst) (coo_entries coo)))
           (matrix_index m (Z.to_nat i) (Z.to_nat j)).
+
+Lemma coo_to_matrix_equiv:
+  forall {t} (m: matrix t) (coo coo': coo_matrix t),
+    coo_matrix_equiv coo coo' -> coo_to_matrix coo m -> coo_to_matrix coo' m.
+Proof.
+intros.
+destruct H0 as [? [? ?]].
+destruct H as [? [? ?]].
+split3; try congruence.
+intros.
+rewrite <- H in H5. rewrite <- H3 in H6.
+specialize (H2 i H5 j H6).
+econstructor 4; try apply H2.
+apply Permutation_map.
+apply Permutation_filter.
+auto.
+Qed.
+
+Lemma coo_matrix_equiv_refl:
+  forall {t} (a : coo_matrix t), coo_matrix_equiv a a.
+Proof.
+intros.
+split3; auto.
+Qed.
+
+Lemma coo_matrix_equiv_symm:
+  forall {t} (a b : coo_matrix t), coo_matrix_equiv a b -> coo_matrix_equiv b a.
+Proof.
+intros.
+destruct H as [? [? ?]].
+split3; auto.
+apply Permutation_sym; auto.
+Qed.
+
+Lemma coo_matrix_equiv_trans:
+  forall {t} (a b c : coo_matrix t), coo_matrix_equiv a b -> coo_matrix_equiv b c -> coo_matrix_equiv a c.
+Proof.
+intros.
+destruct H as [? [? ?]], H0 as [? [? ?]].
+split3; try congruence.
+eapply Permutation_trans; eassumption.
+Qed.
 
 (*
 Definition coo_to_csr {t: type} (coo: coo_matrix t) (csr: csr_matrix t) : Prop :=
