@@ -129,33 +129,34 @@ struct csr_matrix *coo_to_csr_matrix(struct coo_matrix *p) {
   r=0;
   c=0; /* this line is unnecessary for correctness but simplifies the proof */
   l=0;
+  /* partial_csr_0 */
   for (i=0; i<n; i++) {
     ri = prow_ind[i];
     ci = pcol_ind[i];
     x = pval[i];
     if (ri+1==r)
       if (ci==c)
-	val[l-1] += x;
+	val[l-1] += x; /* partial_CSR_duplicate */
       else {
 	c=ci;
 	col_ind[l] = ci;
 	val[l] = x;
-	l++;
+	l++;           /* partial_CSR_newcol */
       }
     else {
-      while (r<=ri) row_ptr[r++]=l;
+      while (r<=ri) row_ptr[r++]=l; /* partial_CSR_skiprow */
       c= ci;
       col_ind[l] = ci;
       val[l] = x;
-      l++;
+      l++;            /* partial_CSR_newrow */
     }
   }
   cols = p->cols;
-  while (r<=rows) row_ptr[r++]=l;
+  while (r<=rows) row_ptr[r++]=l;  /* partial_CSR_lastrows */
   q->val = val;
   q->col_ind = col_ind;
   q->row_ptr = row_ptr;
   q->rows = rows;
   q->cols = cols;
-  return q;
+  return q;          /* partial_CSR_properties */
 }

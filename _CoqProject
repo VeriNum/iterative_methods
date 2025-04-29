@@ -43,3 +43,4 @@ sparse/main.v
 sparse/distinct.v
 sparse/build_csr.v
 sparse/spec_build_csr.v
+sparse/verif_build_csr.v
