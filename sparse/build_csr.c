@@ -126,7 +126,7 @@ struct csr_matrix *coo_to_csr_matrix(struct coo_matrix *p) {
   val = surely_malloc(k * sizeof(double));
   col_ind = surely_malloc(k * sizeof(unsigned));
   row_ptr = surely_malloc ((rows+1) * sizeof(unsigned));
-  r=0;
+  r=-1;
   c=0; /* this line is unnecessary for correctness but simplifies the proof */
   l=0;
   /* partial_csr_0 */
@@ -134,7 +134,7 @@ struct csr_matrix *coo_to_csr_matrix(struct coo_matrix *p) {
     ri = prow_ind[i];
     ci = pcol_ind[i];
     x = pval[i];
-    if (ri+1==r)
+    if (ri==r)
       if (ci==c)
 	val[l-1] += x; /* partial_CSR_duplicate */
       else {
@@ -144,7 +144,7 @@ struct csr_matrix *coo_to_csr_matrix(struct coo_matrix *p) {
 	l++;           /* partial_CSR_newcol */
       }
     else {
-      while (r<=ri) row_ptr[r++]=l; /* partial_CSR_skiprow */
+      while (r+1<=ri) row_ptr[++r]=l; /* partial_CSR_skiprow */
       c= ci;
       col_ind[l] = ci;
       val[l] = x;
@@ -152,7 +152,7 @@ struct csr_matrix *coo_to_csr_matrix(struct coo_matrix *p) {
     }
   }
   cols = p->cols;
-  while (r<=rows) row_ptr[r++]=l;  /* partial_CSR_lastrows */
+  while (r+1<=rows) row_ptr[++r]=l;  /* partial_CSR_lastrows */
   q->val = val;
   q->col_ind = col_ind;
   q->row_ptr = row_ptr;

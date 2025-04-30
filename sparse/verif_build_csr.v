@@ -60,6 +60,8 @@ Inductive coo_csr {t} (coo: coo_matrix t) (csr: csr_matrix t) : Prop :=
     (coo_csr_zeros: no_extra_zeros coo csr),
     coo_csr coo csr.
 
+
+
 Inductive partial_CSR (h: Z) (r: Z) (coo: coo_matrix Tdouble)
       (rowptr: list val) (colind: list val) (val: list val) : Prop :=
 build_partial_CSR:
@@ -67,15 +69,15 @@ build_partial_CSR:
     (partial_CSR_coo: coo_matrix_wellformed coo)
     (partial_CSR_coo_sorted: sorted coord_le (coo_entries coo))
     (partial_CSR_i: 0 <= h <= Zlength (coo_entries coo))
-    (partial_CSR_r: 0 <= r <= coo_rows coo + 1)
-    (partial_CSR_r': Forall (fun e => fst (fst e) < r) (coo_entries (coo_upto h coo)))
-    (partial_CSR_r'': Forall (fun e => fst (fst e) >= r-1) (sublist h (Zlength (coo_entries coo)) (coo_entries coo)))
+    (partial_CSR_r: -1 <= r <= coo_rows coo)
+    (partial_CSR_r': Forall (fun e => fst (fst e) <= r) (coo_entries (coo_upto h coo)))
+    (partial_CSR_r'': Forall (fun e => fst (fst e) >= r) (sublist h (Zlength (coo_entries coo)) (coo_entries coo)))
     (csr: csr_matrix Tdouble)
     (partial_CSR_wf: csr_matrix_wellformed csr)
     (partial_CSR_coo_csr: coo_csr (coo_upto h coo) csr)
     (partial_CSR_val: sublist 0 (Zlength (csr_vals csr)) val = map Vfloat (csr_vals csr))
     (partial_CSR_colind: sublist 0 (Zlength (csr_col_ind csr)) colind = map (Vint oo Int.repr) (csr_col_ind csr))
-    (partial_CSR_rowptr: sublist 0 r rowptr = map (Vint oo Int.repr) (sublist 0 r (csr_row_ptr csr)))
+    (partial_CSR_rowptr: sublist 0 (r+1) rowptr = map (Vint oo Int.repr) (sublist 0 (r+1) (csr_row_ptr csr)))
     (partial_CSR_val': Zlength val = count_distinct (coo_entries coo))
     (partial_CSR_colind': Zlength colind = count_distinct (coo_entries coo))
     (partial_CSR_rowptr': Zlength rowptr = coo_rows coo + 1)
@@ -88,9 +90,9 @@ Lemma partial_CSR_rowptr': forall {t} r (coo: coo_matrix t) (csr: csr_matrix t),
    coo_matrix_wellformed coo ->
    csr_matrix_wellformed csr ->
    coo_csr coo csr ->
-   0 <= r <= coo_rows coo + 1 ->
-   Forall (fun e => fst (fst e) < r) (coo_entries coo) ->
-   sublist r (coo_rows coo + 1) (csr_row_ptr csr) = Zrepeat (Zlength (csr_vals csr)) (coo_rows coo + 1 - r).
+   -1 <= r <= coo_rows coo ->
+   Forall (fun e => fst (fst e) <= r) (coo_entries coo) ->
+   sublist (r+1) (coo_rows coo + 1) (csr_row_ptr csr) = Zrepeat (Zlength (csr_vals csr)) (coo_rows coo - r).
 Proof.
  intros.
  inversion_clear H1.
@@ -102,18 +104,18 @@ Proof.
  autorewrite with sublist in H1.
  inversion_clear H0.
  unfold csr_rows in *.
- pose proof rowptr_sorted_e _ CSR_wf_sorted (i+r) (Zlength (csr_row_ptr csr) - 1) ltac:(list_solve).
+ pose proof rowptr_sorted_e _ CSR_wf_sorted (i+(r+1)) (Zlength (csr_row_ptr csr) - 1) ltac:(list_solve).
  destruct H0 as [[? ?] _].
- destruct (zlt (Znth (i+r) (csr_row_ptr csr)) (Zlength (csr_vals csr))); [ | lia].
+ destruct (zlt (Znth (i+(r+1)) (csr_row_ptr csr)) (Zlength (csr_vals csr))); [ | lia].
  exfalso. clear H0.
  clear CSR_wf_rowsorted.
- assert (exists i', i + r <= i' < coo_rows coo /\ Znth i' (csr_row_ptr csr) < Znth (i'+1) (csr_row_ptr csr)). {
+ assert (exists i', i + (r+1) <= i' < coo_rows coo /\ Znth i' (csr_row_ptr csr) < Znth (i'+1) (csr_row_ptr csr)). {
   rewrite CSR_wf_vals' in l. rewrite coo_csr_rows in H1|-*.
   clear -H1 CSR_wf_sorted l H2. destruct H2 as [H2 _].
   unfold csr_rows in *.
   forget (csr_row_ptr csr) as al.
-  assert (0 <= i+r < Zlength al) by lia; clear H1 H2.
-  forget (i+r) as r'. clear r i. rename r' into r.
+  assert (0 <= i+(r+1) < Zlength al) by lia; clear H1 H2.
+  forget (i+(r+1)) as r'. clear r i. rename r' into r.
   pose (bl := sublist r (Zlength al) al).
   assert (Znth 0 bl < Znth (Zlength bl - 1) bl) by (subst bl; list_solve).
   assert (exists i, 0 <= i < Zlength bl-1 /\ Znth i bl < Znth (i+1) bl). 
@@ -173,8 +175,8 @@ Lemma partial_CSR_duplicate:
     fst (Znth (h-1) (coo_entries coo)) = fst (Znth h (coo_entries coo)) ->
     r = fst (fst (Znth (h-1) (coo_entries coo))) ->
     Znth (cd_upto h coo - 1) VAL = Vfloat f ->
-    partial_CSR h (r+1) coo ROWPTR COLIND VAL ->
-    partial_CSR (h+1) (r+1) coo ROWPTR COLIND 
+    partial_CSR h r coo ROWPTR COLIND VAL ->
+    partial_CSR (h+1) r coo ROWPTR COLIND 
       (upd_Znth (cd_upto h coo - 1) VAL
          (Vfloat (Float.add f (snd (Znth h (coo_entries coo)))))).
 Proof.
@@ -194,7 +196,7 @@ assert (coo_matrix_wellformed (coo_upto h coo)). {
   unfold coo_upto; simpl.
   apply Forall_sublist; auto.
 }
-assert (HR := partial_CSR_rowptr' (r+1) (coo_upto h coo) csr H0 partial_CSR_wf partial_CSR_coo_csr ltac:(simpl; lia) ltac:(auto)).
+assert (HR := partial_CSR_rowptr' r (coo_upto h coo) csr H0 partial_CSR_wf partial_CSR_coo_csr ltac:(simpl; lia) ltac:(auto)).
 clear H0.
 inversion_clear partial_CSR_coo_csr.
 simpl in coo_csr_rows, coo_csr_cols.
@@ -206,7 +208,7 @@ pose (csr' := Build_csr_matrix _ (csr_cols csr) val'
                 (csr_col_ind csr) (csr_row_ptr csr)).
 clear partial_CSR_r.
 inversion_clear partial_CSR_wf.
-apply (build_partial_CSR (h+1) (r+1) coo _ _ _ ltac:(assumption) ltac:(assumption) ltac:(lia)) with 
+apply (build_partial_CSR (h+1) r coo _ _ _ ltac:(assumption) ltac:(assumption) ltac:(lia)) with 
       (csr:=csr'); auto; try lia.
 - simpl.  rewrite (sublist_split 0 h) by rep_lia. apply Forall_app; split; auto.
   rewrite sublist_one by lia. constructor; auto. rewrite Hentry; simpl. lia.
@@ -235,10 +237,6 @@ apply (build_partial_CSR (h+1) (r+1) coo _ _ _ ltac:(assumption) ltac:(assumptio
    subst val'.
    intros g ?. simpl in H0. autorewrite with sublist in H0.
    simpl. autorewrite with sublist.
-(*   replace (cd_upto (g + 1) (coo_upto (h + 1) coo) - 1)
-    with (cd_upto (g+1) coo - 1) 
-     by  (unfold cd_upto; simpl; autorewrite with sublist; auto).
-*)
    rewrite (sublist_split 0 h) by lia. rewrite (sublist_one h) by lia.
    rewrite Hentry.
    destruct (zeq g h).
@@ -356,24 +354,22 @@ Lemma partial_CSR_newcol:
    Znth i (coo_entries coo) = (r, c, x) ->
    r = fst (fst (Znth (i-1) (coo_entries coo))) ->
    c <> snd (fst (Znth (i-1) (coo_entries coo))) ->
-   partial_CSR i (r+1) coo ROWPTR COLIND VAL ->
-   partial_CSR (i + 1) (r+1) coo ROWPTR
-  (upd_Znth (count_distinct (sublist 0 i (coo_entries coo))) COLIND
-     (Vint (Int.repr c)))
-  (upd_Znth (count_distinct (sublist 0 i (coo_entries coo))) VAL
-     (Vfloat x)).
+   partial_CSR i r coo ROWPTR COLIND VAL ->
+   partial_CSR (i + 1) r coo ROWPTR
+  (upd_Znth (count_distinct (sublist 0 i (coo_entries coo))) COLIND (Vint (Int.repr c)))
+  (upd_Znth (count_distinct (sublist 0 i (coo_entries coo))) VAL (Vfloat x)).
 Proof.
 intros *. pose proof I. intros ? Hrcx ? ? ?.
 inversion_clear H3.
 pose proof (proj1 (coo_entry_bounds partial_CSR_coo i ltac:(lia))).
 rewrite Hrcx in H3; simpl in H3.
 clear partial_CSR_r.
-assert (Hlastrows := partial_CSR_rowptr' (r+1) (coo_upto i coo) csr
+assert (Hlastrows := partial_CSR_rowptr' r (coo_upto i coo) csr
    (coo_upto_wellformed i coo ltac:(lia) partial_CSR_coo)
        partial_CSR_wf partial_CSR_coo_csr
       ltac:(change (coo_rows _) with (coo_rows coo); lia)
       partial_CSR_r'). change (coo_rows _) with (coo_rows coo) in Hlastrows.
-      replace (coo_rows coo + 1 - (r + 1)) with (coo_rows coo - r) in Hlastrows by lia.
+(*      replace (coo_rows coo + 1 - (r + 1)) with (coo_rows coo - r) in Hlastrows by lia.*)
 pose (new_row_ptr := sublist 0 (r+1) (csr_row_ptr csr) ++ Zrepeat (cd_upto (i+1) coo) (Zlength (csr_row_ptr csr) - (r+1))).
 pose (csr' := Build_csr_matrix _ (csr_cols csr) 
        (sublist 0 (cd_upto i coo) (csr_vals csr) ++ [snd (Znth i (coo_entries coo))])
@@ -769,7 +765,7 @@ Lemma partial_CSR_0: forall (coo: coo_matrix Tdouble),
     sorted coord_le (coo_entries coo) ->
  let k := count_distinct (coo_entries coo)
  in k <= Int.max_unsigned ->
-   partial_CSR 0 0 coo (Zrepeat Vundef (coo_rows coo + 1))
+   partial_CSR 0 (-1) coo (Zrepeat Vundef (coo_rows coo + 1))
   (Zrepeat Vundef k) (Zrepeat Vundef k).
 Proof.
 intros. rename H1 into Hk.
@@ -800,8 +796,8 @@ Lemma partial_CSR_skiprow:
     forall i r coo ROWPTR COLIND VAL,
     0 <= i < Zlength (coo_entries coo) ->
     r <= fst (fst (Znth i (coo_entries coo))) ->
-    partial_CSR i r coo ROWPTR COLIND VAL ->
-    partial_CSR i (r+1) coo 
+    partial_CSR i (r-1) coo ROWPTR COLIND VAL ->
+    partial_CSR i r coo 
   (upd_Znth r ROWPTR
      (Vint
         (Int.repr (count_distinct (sublist 0 i (coo_entries coo))))))
@@ -815,11 +811,11 @@ pose (new_row_ptr := sublist 0 r (csr_row_ptr csr)
 pose (csr' := Build_csr_matrix _ (csr_cols csr) (csr_vals csr) 
                 (csr_col_ind csr) new_row_ptr).
 assert (Hrows: csr_rows csr = Zlength (csr_row_ptr csr) - 1) by reflexivity.
-assert (Hlastrows := partial_CSR_rowptr' r (coo_upto i coo) csr
+assert (Hlastrows := partial_CSR_rowptr' (r-1) (coo_upto i coo) csr
    (coo_upto_wellformed i coo ltac:(lia) partial_CSR_coo)
-       partial_CSR_wf partial_CSR_coo_csr
+      partial_CSR_wf partial_CSR_coo_csr
       ltac:(change (coo_rows _) with (coo_rows coo); lia)
-      partial_CSR_r'). simpl in Hlastrows.
+      partial_CSR_r'). rewrite Z.sub_simpl_r in Hlastrows. simpl in Hlastrows.
 apply build_partial_CSR with csr'; auto.
 - inversion_clear partial_CSR_coo_csr.
   simpl in *.
@@ -958,8 +954,8 @@ Lemma partial_CSR_newrow:
     0 <= i < Zlength (coo_entries coo) ->
     Znth i (coo_entries coo) = (r,c,x) ->
     (i <> 0 -> fst (fst (Znth (i - 1) (coo_entries coo))) <> r) ->
-    partial_CSR i (r+1) coo ROWPTR COLIND VAL ->
-    partial_CSR (i + 1) (r+1) coo ROWPTR
+    partial_CSR i r coo ROWPTR COLIND VAL ->
+    partial_CSR (i + 1) r coo ROWPTR
      (upd_Znth (count_distinct (sublist 0 i (coo_entries coo))) COLIND
         (Vint (Int.repr c)))
      (upd_Znth (count_distinct (sublist 0 i (coo_entries coo))) VAL
@@ -998,7 +994,7 @@ pose (csr' := {| csr_cols := csr_cols csr;
                  csr_col_ind := csr_col_ind csr ++ [c];
                  csr_row_ptr := new_row_ptr |}).
 assert (Hrows: csr_rows csr = Zlength (csr_row_ptr csr) - 1) by reflexivity.
-assert (Hlastrows' := partial_CSR_rowptr' (r+1) (coo_upto i coo) csr
+assert (Hlastrows' := partial_CSR_rowptr' r (coo_upto i coo) csr
          (coo_upto_wellformed i coo ltac:(lia) partial_CSR_coo)
        partial_CSR_wf partial_CSR_coo_csr
       ltac:(change (coo_rows _) with (coo_rows coo); lia)
@@ -1218,8 +1214,8 @@ Qed.
 Lemma partial_CSR_lastrows:
    forall r coo ROWPTR COLIND VAL,
     r <= coo_rows coo ->
-   partial_CSR (Zlength (coo_entries coo)) r coo ROWPTR COLIND VAL ->
-   partial_CSR (Zlength (coo_entries coo)) (r+1) coo 
+   partial_CSR (Zlength (coo_entries coo)) (r-1) coo ROWPTR COLIND VAL ->
+   partial_CSR (Zlength (coo_entries coo)) r coo 
      (upd_Znth r ROWPTR (Vint (Int.repr (count_distinct (coo_entries coo))))) COLIND VAL.
 Proof.
 intros.
@@ -1229,11 +1225,12 @@ apply build_partial_CSR with csr; auto; try lia.
 - autorewrite with sublist. constructor.
 - replace (coo_upto (Zlength (coo_entries coo)) coo) with coo in *
     by (unfold coo_upto;  destruct coo; simpl; f_equal; rewrite sublist_same; auto).
- pose proof partial_CSR_rowptr' r _ _ partial_CSR_coo partial_CSR_wf partial_CSR_coo_csr ltac:(lia) ltac:(assumption).
+ pose proof partial_CSR_rowptr' (r-1) _ _ partial_CSR_coo partial_CSR_wf partial_CSR_coo_csr ltac:(lia) ltac:(assumption).
   inversion_clear partial_CSR_coo_csr; unfold csr_rows in *; simpl in *.
   rewrite !(sublist_split 0 r (r+1)) by list_solve.
   rewrite sublist_upd_Znth_l by list_solve.
   rewrite map_app.
+  rewrite Z.sub_simpl_r in *.
   f_equal; auto.
   rewrite !sublist_one by list_solve. rewrite upd_Znth_same by list_solve.
   simpl. f_equal; f_equal; f_equal. list_solve.
@@ -1517,7 +1514,7 @@ Qed.
 
 Lemma partial_CSR_properties:
   forall coo ROWPTR COLIND VAL,
-    partial_CSR (Zlength (coo_entries coo)) (coo_rows coo + 1) coo ROWPTR COLIND VAL ->
+    partial_CSR (Zlength (coo_entries coo)) (coo_rows coo) coo ROWPTR COLIND VAL ->
     exists (m: matrix Tdouble) (csr: csr_matrix Tdouble),
             csr_rep_aux m csr /\ coo_to_matrix coo m
             /\ coo_rows coo = matrix_rows m 
@@ -1671,7 +1668,7 @@ forward_call (tarray tuint (coo_rows coo+1), gv). (* row_ptr = surely_malloc((ro
   simpl. rewrite (proj1 H4). rep_lia. 
 rewrite (proj1 H4).
 Intros rowptr_p.
-forward. (* r=0; *)
+forward. (* r=-1; *)
 forward. (* c=0; *)
 forward. (* l=0; *)
 freeze FR1 := (spec_malloc.mem_mgr _) 
@@ -1682,11 +1679,11 @@ freeze FR1 := (spec_malloc.mem_mgr _)
 forward_for_simple_bound n (* for (i=0;i<n; i++) *)
  (EX i:Z, EX l:Z, EX r:Z, EX c:Z, 
   EX ROWPTR: list val, EX COLIND: list val, EX VAL: list val,
-  PROP(0<=l<=k; l<=i<=n; 0 <= r <= coo_rows coo'; 0 <= c <= coo_cols coo';
+  PROP(0<=l<=k; l<=i<=n; -1 <= r < coo_rows coo'; 0 <= c <= coo_cols coo';
        partial_CSR i r coo' ROWPTR COLIND VAL;
        l = count_distinct (sublist 0 i (coo_entries coo'));
-       l=0 -> r=0;
-       i<>0 -> r=(fst (fst (Znth (i-1) (coo_entries coo')))+1)%Z /\ c = snd (fst (Znth (i-1) (coo_entries coo')))) 
+       l=0 -> r=-1;
+       i<>0 -> r=(fst (fst (Znth (i-1) (coo_entries coo'))))%Z /\ c = snd (fst (Znth (i-1) (coo_entries coo')))) 
  LOCAL (temp _l (Vint (Int.repr l));
        temp _r (Vint (Int.repr r)); temp _c (Vint (Int.repr c));
        temp _row_ptr rowptr_p; temp _col_ind colind_p; temp _val val_p;
@@ -1717,7 +1714,7 @@ forward_for_simple_bound n (* for (i=0;i<n; i++) *)
          (map (fun e : Z * Z * float => Vfloat (snd e)) (coo_entries coo') ++
           Zrepeat Vundef (maxn - Zlength (coo_entries coo'))) vp))%assert.
 -
- Exists 0 0 0
+ Exists 0 (-1) 0
      (Zrepeat Vundef (coo_rows coo' + 1)) (Zrepeat Vundef k) (Zrepeat Vundef k).
  entailer!!.  
   apply partial_CSR_0; auto.
@@ -1739,9 +1736,8 @@ forward_for_simple_bound n (* for (i=0;i<n; i++) *)
   assert (H99 := coo_entry_bounds H i ltac:(lia)).
   rewrite  Hi in H99; simpl in H99. destruct H99 as [Hri Hci].
   assert (Hk: 0 < k) by (apply count_distinct_bound'; lia).
-  forward_if (* if (ri+1==r) *) ; [forward_if (* if (ci==c) *)| ].
-  + (* ri+1 = r, ci = c *)
-    rewrite add_repr in H15. apply repr_inj_unsigned in H15; try rep_lia.
+  forward_if (* if (ri==r) *) ; [forward_if (* if (ci==c) *)| ].
+  + (* ri = r, ci = c *)
     subst r ci.
     assert (is_float (Znth (l-1) VAL))
       by (eapply partial_CSR_VAL_defined; try eassumption; lia).
@@ -1751,13 +1747,12 @@ forward_for_simple_bound n (* for (i=0;i<n; i++) *)
     forward. (* val[l-1] = t'+x; *)
     destruct (Znth (l-1) VAL) eqn:VALl; try contradiction. clear H15.
     pose (VAL' := upd_Znth (l-1) VAL (Vfloat (Float.add f (snd (Znth i (coo_entries coo')))))).
-    Exists l (ri+1) c ROWPTR COLIND VAL'.
+    Exists l ri c ROWPTR COLIND VAL'.
     entailer!!.
     assert (i<>0). { intro; subst. rewrite sublist_nil in *. compute in Hl. auto. }
     specialize (H14 H12). destruct H14.
-    rewrite Z.add_simpl_r. rewrite Hi. simpl. split3; auto.
-    2:{ clear - H13 H14 Hi H12 H6. rewrite <- !(Z.add_comm 1) in H13. 
-        apply Z.add_reg_l in H13. subst.
+    rewrite Z.add_simpl_r. rewrite Hi. simpl. split3; auto.    
+    2:{ clear - H13 H14 Hi H12 H6. subst.
         forget (coo_entries coo') as al.
         assert (0<i<n) by lia. clear H6 H12.
         assert (fst (Znth (i-1) al) = fst (Znth i al))
@@ -1768,9 +1763,8 @@ forward_for_simple_bound n (* for (i=0;i<n; i++) *)
         }
      eapply partial_CSR_duplicate; try eassumption; try lia.
      destruct (Znth (i-1) (coo_entries coo')) as [[??]?].
-     rewrite Hi. simpl in *; subst. f_equal. lia.
-  + (* ri+1 = r, ci <> c *)
-    rewrite add_repr in H15. apply repr_inj_unsigned in H15; try rep_lia.
+     rewrite Hi. simpl in *; subst. auto.
+  + (* ri = r, ci <> c *)
     subst r.
     assert (Hl: 0<>l) by (intro; subst; lia).   
     assert (Hi': i<>0). { intro; subst. rewrite sublist_nil in *. compute in Hl. auto. }
@@ -1795,7 +1789,7 @@ forward_for_simple_bound n (* for (i=0;i<n; i++) *)
     forward. (* col_ind[l]=ci; *)
     forward. (* val[l]=x; *)
     forward. (* l++; *)
-    Exists (l+1) (ri+1) ci ROWPTR
+    Exists (l+1) ri ci ROWPTR
      (upd_Znth l COLIND (Vint (Int.repr ci))) 
      (upd_Znth l VAL (Vfloat (snd (Znth i (coo_entries coo'))))).
     entailer!!.
@@ -1811,13 +1805,11 @@ forward_for_simple_bound n (* for (i=0;i<n; i++) *)
       clear - H12 H14. unfold BPO.lt, BPO.eqv in *; tauto.
     * rewrite Z.add_simpl_r, Hi; auto.
     * rewrite Z.add_simpl_r, Hi; auto. 
-  + (* r+1 <> r *)
+  + (* ri <> r *)
     deadvars!.
-    rewrite add_repr in H15. assert (ri+1<>r) by (contradict H15; f_equal; auto).
-    clear H15. rename H16 into H15.
   (* while (r<=rows) *) 
   forward_while (EX r: Z, EX ROWPTR: list val,
-   PROP ( 0 <= r <= ri+1; partial_CSR i r coo' ROWPTR COLIND VAL )
+   PROP ( -1 <= r <= ri; partial_CSR i r coo' ROWPTR COLIND VAL )
    LOCAL (temp _x (Vfloat (snd (Znth i (coo_entries coo'))));
    temp _ci (Vint (Int.repr ci)); temp _ri (Vint (Int.repr ri));
    temp _i (Vint (Int.repr i)); temp _l (Vint (Int.repr l));
@@ -1869,12 +1861,13 @@ forward_for_simple_bound n (* for (i=0;i<n; i++) *)
     forward. (* t' = r; *)
     forward. (* r = t'+1; *)
     forward. (* row_ptr[t']=l; *)
-    Exists (r+1, upd_Znth r ROWPTR (Vint (Int.repr l))).
+    Exists (r+1, upd_Znth (r+1) ROWPTR (Vint (Int.repr l))).
     entailer!!. split; auto. lia.
    apply partial_CSR_skiprow; auto. rewrite Hi; simpl; lia.
+   rewrite Z.add_simpl_r; auto.
 
   *
-   assert (r0 = ri+1) by lia. subst r0.
+   assert (r0 = ri) by lia. subst r0.
    clear HRE H16.
    forward. (* c=ci; *)
    assert (H87: 0 <= count_distinct (sublist 0 i (coo_entries coo')) < k). {
@@ -1893,7 +1886,7 @@ forward_for_simple_bound n (* for (i=0;i<n; i++) *)
    forward. (* col_ind[l]=ci; *)
    forward. (* val[l]=x; *)
    forward. (* l++; *)
-   Exists (l+1) (ri+1) ci ROWPTR0 (upd_Znth l COLIND (Vint (Int.repr ci)))
+   Exists (l+1) ri ci ROWPTR0 (upd_Znth l COLIND (Vint (Int.repr ci)))
           (upd_Znth l VAL (Vfloat (snd (Znth i (coo_entries coo'))))).
    entailer!!.
    rewrite Z.add_simpl_r, Hi. simpl.
@@ -1922,7 +1915,7 @@ forward_for_simple_bound n (* for (i=0;i<n; i++) *)
 forward_while
  (EX r:Z,
   EX ROWPTR: list val,
-  PROP(k<=n; 0 <= r <= coo_rows coo'+1;
+  PROP(k<=n; -1 <= r <= coo_rows coo';
        partial_CSR n r coo' ROWPTR COLIND VAL)
   LOCAL (temp _l (Vint (Int.repr k));
        temp _r (Vint (Int.repr r)); temp _cols (Vint (Int.repr (coo_cols coo')));
@@ -1956,10 +1949,11 @@ forward_while
    forward. (* t'= r; *)
    forward. (* r = t'+1; *)
    forward. (* row_ptr[t']=l; *)
-   Exists (r+1, (upd_Znth r ROWPTR (Vint (Int.repr k)))).
+   Exists (r+1, (upd_Znth (r+1) ROWPTR (Vint (Int.repr k)))).
    entailer!!.
    split. lia.
    apply partial_CSR_lastrows; auto. lia.
+   rewrite Z.add_simpl_r; auto.
  +
    clear r1 c H13 H8 H9 H10 H12.
    forward. (* q->val = val; *)
@@ -1971,7 +1965,7 @@ Ltac entailer_for_return ::= idtac.
    assert (l=k) by lia. subst l.
    clear H7 H6 H0 H14.
    fold n in Hbound'. 
-   assert (r = coo_rows coo' + 1) by lia.
+   assert (r = coo_rows coo') by lia.
    subst r. clear HRE H15 ROWPTR0 H8.
    forward. (* return q; *)
    entailer!!.
