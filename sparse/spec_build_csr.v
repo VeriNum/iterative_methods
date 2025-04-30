@@ -169,9 +169,9 @@ Definition csr_rep' sh (csr: csr_matrix Tdouble) (v: val) (ci: val) (rp: val) (p
   data_at sh (tarray tuint (Zlength (csr_col_ind csr))) (map Vint (map Int.repr (csr_col_ind csr))) ci *
   data_at sh (tarray tuint (csr_rows csr + 1)) (map Vint (map Int.repr (csr_row_ptr csr))) rp.
 
-Definition csr_rep (sh: share) (mval: matrix Tdouble) (p: val) : mpred :=
-  EX v: val, EX ci: val, EX rp: val, EX csr,
-  !! csr_rep_aux mval csr && csr_rep' sh csr v ci rp p.
+Definition csr_rep (sh: share) (csr: csr_matrix Tdouble) (p: val) : mpred :=
+  EX v: val, EX ci: val, EX rp: val,
+  csr_rep' sh csr v ci rp p.
 
 Definition csr_token' (csr: csr_matrix Tdouble) (p: val) : mpred :=
  EX v: val, EX ci: val, EX rp: val,
@@ -183,7 +183,7 @@ Definition csr_token' (csr: csr_matrix Tdouble) (p: val) : mpred :=
         spec_malloc.malloc_token Ews (tarray tuint (csr_rows csr + 1)) rp)).
 
 Definition csr_token (m: matrix Tdouble) (p: val) : mpred :=
- EX (csr: csr_matrix Tdouble) (H: csr_rep_aux m csr), csr_token' csr p.
+ EX (csr: csr_matrix Tdouble) (H: csr_to_matrix csr m), csr_token' csr p.
 
 Definition coo_to_csr_matrix_spec :=
  DECLARE _coo_to_csr_matrix
@@ -195,10 +195,10 @@ Definition coo_to_csr_matrix_spec :=
     GLOBALS (gv)
     SEP (coo_rep sh coo p; mem_mgr gv)
  POST [ tptr t_csr ]
-   EX coo': coo_matrix Tdouble, EX m: matrix Tdouble, EX q: val,
-    PROP(coo_matrix_equiv coo coo'; coo_to_matrix coo m)
+   EX coo': coo_matrix Tdouble, EX csr: csr_matrix Tdouble, EX m: matrix Tdouble, EX q: val,
+    PROP(coo_matrix_equiv coo coo'; coo_to_matrix coo m; csr_to_matrix csr m)
     RETURN( q )
-    SEP (coo_rep sh coo' p; csr_rep Ews m q; csr_token m q; mem_mgr gv).
+    SEP (coo_rep sh coo' p; csr_rep Ews csr q; csr_token m q; mem_mgr gv).
 
 Definition surely_malloc_spec :=
   DECLARE _surely_malloc

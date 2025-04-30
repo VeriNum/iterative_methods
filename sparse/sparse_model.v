@@ -29,7 +29,7 @@ Inductive csr_row_rep {t: type}: forall (cols: Z) (vals: list (ftype t)) (col_in
 
 
 
-Definition csr_rep_aux {t} (mval: matrix t) (csr: csr_matrix t) :=
+Definition csr_to_matrix {t} (csr: csr_matrix t) (mval: matrix t) :=
   Zlength (csr_row_ptr csr) = 1 + Zlength mval /\
   Zlength (csr_vals csr) = Znth (Zlength mval) (csr_row_ptr csr) /\
   Zlength (csr_col_ind csr) = Znth (Zlength mval) (csr_row_ptr csr) /\
@@ -50,11 +50,21 @@ rewrite !Znth_app1 in H by lia.
 apply H; list_solve.
 Qed.
 
-Lemma csr_rep_matrix_cols {t: type}:
+Lemma csr_to_matrix_rows {t: type}:
    forall (mval: matrix t) (csr: csr_matrix t),
-   csr_rep_aux mval csr -> matrix_cols mval (csr_cols csr).
+   csr_to_matrix csr mval -> 
+  csr_rows csr = matrix_rows mval.
 Proof.
-unfold csr_rep_aux.
+intros.
+destruct H.
+unfold csr_rows, matrix_rows; lia.
+Qed.
+
+Lemma csr_to_matrix_cols {t: type}:
+   forall (mval: matrix t) (csr: csr_matrix t),
+   csr_to_matrix csr mval -> matrix_cols mval (csr_cols csr).
+Proof.
+unfold csr_to_matrix.
 intros mval [cols vals col_ind row_ptr].
 simpl in *.
 clear csr_rows0.
@@ -288,12 +298,12 @@ Qed.
 Lemma build_csr_matrix_correct:
   forall {t} (csr: csr_matrix t),
   csr_matrix_wellformed csr ->
-  csr_rep_aux (build_csr_matrix csr) csr.
+  csr_to_matrix csr (build_csr_matrix csr).
 Proof.
  intros.
  inversion_clear H.
  unfold build_csr_matrix.
- unfold csr_rep_aux.
+ unfold csr_to_matrix.
  unfold csr_rows in *.
  destruct (csr_row_ptr csr) as [| k rowptr]. list_solve.
  assert (Zlength rowptr = Zlength (build_csr_rows csr k rowptr)). {
@@ -402,7 +412,7 @@ Definition partial_row {t} (i: Z) (h: Z) (vals: list (ftype t)) (col_ind: list Z
 
 Lemma partial_row_start:
  forall {t} i (mval: matrix t) csr (*cols vals col_ind row_ptr*) vval,
-  csr_rep_aux mval csr ->
+  csr_to_matrix csr mval ->
   partial_row i (Znth i (csr_row_ptr csr)) (csr_vals csr) (csr_col_ind csr) (csr_row_ptr csr) vval = Zconst t 0.
 Proof.
 intros.
@@ -429,7 +439,7 @@ Lemma partial_row_end:
   (FINmval: Forall (Forall finite) mval)
   (LEN: Zlength vval = csr_cols csr),
   0 <= i < matrix_rows mval ->
-  csr_rep_aux mval csr ->
+  csr_to_matrix csr mval ->
   feq (partial_row i (Znth (i+1) (csr_row_ptr csr)) (csr_vals csr) (csr_col_ind csr) (csr_row_ptr csr) vval)
       (Znth i (matrix_vector_mult mval vval)).
 Proof.
@@ -438,7 +448,7 @@ destruct csr as [cols vals col_ind row_ptr _].
 simpl in *.
 unfold partial_row.
 unfold matrix_vector_mult.
-assert (COL := csr_rep_matrix_cols _ _ H0).
+assert (COL := csr_to_matrix_cols _ _ H0).
 red in COL. simpl in COL.
 destruct H0 as [? [? [? [? ?]]]].
 simpl in *.
@@ -554,7 +564,7 @@ Lemma partial_row_next:
   0 <= Znth i (csr_row_ptr csr) ->
   Znth i (csr_row_ptr csr) <= h < Zlength (csr_vals csr) ->
   Zlength (csr_vals csr) = Zlength (csr_col_ind csr) ->
-  csr_rep_aux mval csr ->
+  csr_to_matrix csr mval ->
 partial_row i (h + 1) (csr_vals csr) (csr_col_ind csr) (csr_row_ptr csr) vval = 
 BFMA (Znth h (csr_vals csr)) (Znth (Znth h (csr_col_ind csr)) vval)
   (partial_row i h (csr_vals csr) (csr_col_ind csr)  (csr_row_ptr csr) vval).
@@ -672,7 +682,7 @@ Definition coo_to_csr {t: type} (coo: coo_matrix t) (csr: csr_matrix t) : Prop :
   coo_rows coo = csr_rows csr /\
   coo_cols coo = csr_cols csr /\
   exists m: matrix t,
-   csr_rep_aux m (csr_cols csr) (csr_vals csr) (csr_col_ind csr) (csr_row_ptr csr) /\
+   csr_to_matrix m (csr_cols csr) (csr_vals csr) (csr_col_ind csr) (csr_row_ptr csr) /\
    forall i, 0 <= i < csr_rows csr ->
     forall j, 0 <= j < csr_cols csr -> 
      sum_any (map (fun e: Z*Z*ftype t => snd e) 

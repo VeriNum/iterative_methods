@@ -35,7 +35,7 @@ Lemma csr_multiply_loop_body:
   (H3 : 0 <= matrix_rows mval)
   (vp ci rp : val)
   (csr : csr_matrix Tdouble)
-  (H4 : csr_rep_aux mval csr)
+  (H4 : csr_to_matrix csr mval)
   (FRAME: mpred)
   (H5 : 0 <= 0 < Zlength (csr_row_ptr csr))
   (i : Z)
@@ -78,7 +78,7 @@ intros.
 unfold the_loop_body.
 abbreviate_semax.
 assert (CRS := H4).
-assert (COLS := csr_rep_matrix_cols _ _ H4).
+assert (COLS := csr_to_matrix_cols _ _ H4).
 destruct H4 as [? [? [? [? ?]]]].
 forward.
 forward.
@@ -199,7 +199,8 @@ Qed.
 Lemma body_csr_matrix_vector_multiply: semax_body Vprog Gprog f_csr_matrix_vector_multiply csr_matrix_vector_multiply_spec.
 Proof.
 start_function.
-rename H3 into FINmval.
+rename H into H'. rename H0 into H; rename H1 into H0; rename H2 into H1;
+rename H3 into H2; rename H4 into FINmval.
 assert (0 <= matrix_rows mval) by (unfold matrix_rows; rep_lia).
 forward.
 forward.
@@ -207,15 +208,17 @@ forward.
 forward.
 freeze FR1 := (data_at sh1 _ _ _).
 rename v0 into vp.
-assert_PROP (0 <= 0 < Zlength (csr_row_ptr csr))
-  by (entailer!; rewrite !Zlength_map in H12; rewrite H12; clear -H3; lia). 
+(*assert_PROP (0 <= 0 < csr_rows csr + 1)
+ by (entailer!!; rewrite (csr_to_matrix_rows _ _ H'); lia).*)
+assert_PROP (0 <= 0 < Zlength (csr_row_ptr csr)) as H4'
+  by (entailer!; rewrite !Zlength_map in H11; rewrite H11, (csr_to_matrix_rows _ _ H');lia). 
 forward.
+  entailer!!. rewrite (csr_to_matrix_rows _ _ H'); lia.
 forward_for_simple_bound (matrix_rows mval)
   (EX i:Z, EX result: list (ftype Tdouble),
    PROP(Forall2 feq result (sublist 0 i (matrix_vector_mult mval vval))) 
    LOCAL (temp _next (Vint (Int.repr (Znth i (csr_row_ptr csr)))); 
    temp _row_ptr rp; temp _col_ind ci; temp _val vp;
-(*   temp _cols (Vint (Int.repr cols));*)
    temp _rows (Vint (Int.repr (matrix_rows mval))); 
    temp _m m; temp _v v; temp _p p)
    SEP (FRZL FR1;
@@ -229,30 +232,32 @@ forward_for_simple_bound (matrix_rows mval)
       (map Vfloat result ++ Zrepeat Vundef (matrix_rows mval - i)) p))%assert.
 -
 Exists (@nil (ftype Tdouble)). simpl app.
-entailer!.
-apply derives_refl.
+entailer!!.
+   f_equal; f_equal; symmetry; apply csr_to_matrix_rows; auto.
+   rewrite (csr_to_matrix_rows _ _ H'). cancel.  
 -
 Intros.
 eapply semax_post_flipped'.
 eapply csr_multiply_loop_body; eassumption; auto.
 Intros r.
 Exists (result ++ [r]).
-entailer!.
-clear - H7 H8 H6.
-assert (matrix_rows mval = Zlength (matrix_vector_mult mval vval)). {
- unfold matrix_vector_mult. rewrite Zlength_map. reflexivity.
+entailer!!. {
+  clear - H4 H5 H6.
+  assert (matrix_rows mval = Zlength (matrix_vector_mult mval vval)). {
+    unfold matrix_vector_mult. rewrite Zlength_map. reflexivity.
+  }
+  rewrite (sublist_split 0 i (i+1)) by list_solve.
+  rewrite sublist_len_1 by list_solve.
+  apply Forall2_app; auto.
+  constructor; auto.
+  unfold matrix_vector_mult. rewrite Znth_map by auto. auto.
 }
-rewrite (sublist_split 0 i (i+1)) by list_solve.
-rewrite sublist_len_1 by list_solve.
-apply Forall2_app; auto.
-constructor; auto.
-unfold matrix_rows in H6.
-unfold matrix_vector_mult. rewrite Znth_map by auto. auto.
 apply derives_refl'. f_equal.
-assert (Zlength result = i).
- apply Forall2_Zlength in H7. 
- clear - H7 H6. unfold matrix_rows, matrix_vector_mult in *. list_solve.
-clear - H24 H6.
+assert (Zlength result = i). {
+ apply Forall2_Zlength in H5. 
+ clear - H5 H4. unfold matrix_rows, matrix_vector_mult in *. list_solve.
+}
+clear - H7 H4.
 unfold matrix_rows in *.
 rewrite upd_Znth_app2
  by list_solve.
@@ -266,11 +271,11 @@ Exists result.
 rewrite Z.sub_diag, Zrepeat_0, app_nil_r.
 thaw FR1.
 entailer!.
-clear - H6.
+clear - H4.
 unfold matrix_rows, matrix_vector_mult in *.
-rewrite sublist_same in H6 by list_solve. auto.
+rewrite sublist_same in H4 by list_solve. auto.
 unfold csr_rep.
-Exists vp ci rp csr.
-rewrite prop_true_andp by auto.
+Exists vp ci rp.
+rewrite (csr_to_matrix_rows _ _ H').
 cancel.
 Qed.

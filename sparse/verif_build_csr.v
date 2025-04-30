@@ -1280,7 +1280,7 @@ Lemma coo_to_matrix_build_csr_matrix:
   (partial_CSR_coo : coo_matrix_wellformed coo)
   (partial_CSR_wf : csr_matrix_wellformed csr)
   (partial_CSR_coo_csr : coo_csr coo csr),
-  csr_rep_aux (build_csr_matrix csr) csr ->
+  csr_to_matrix csr (build_csr_matrix csr) ->
   coo_to_matrix coo (build_csr_matrix csr).
 Proof.
 intros.
@@ -1516,7 +1516,7 @@ Lemma partial_CSR_properties:
   forall coo ROWPTR COLIND VAL,
     partial_CSR (Zlength (coo_entries coo)) (coo_rows coo) coo ROWPTR COLIND VAL ->
     exists (m: matrix Tdouble) (csr: csr_matrix Tdouble),
-            csr_rep_aux m csr /\ coo_to_matrix coo m
+            csr_to_matrix csr m /\ coo_to_matrix coo m
             /\ coo_rows coo = matrix_rows m 
             /\ coo_cols coo = csr_cols csr 
             /\ map Vfloat (csr_vals csr) = VAL
@@ -1971,8 +1971,8 @@ Ltac entailer_for_return ::= idtac.
    entailer!!.
    destruct (partial_CSR_properties _ _ _ _ H16)
     as [m [csr [H6a [H6b [H6c [H6d [H6e [H6f [H6g [H6h H6i]]]]]]]]]].
-   fold k in H6f, H6i .
-   Exists coo' m q.
+   fold k in H6f, H6i.
+   Exists coo' csr m q.
    assert (Hcoo: coo_to_matrix coo m). {
      eapply coo_to_matrix_equiv; try eassumption.
      apply coo_matrix_equiv_symm; auto.
@@ -1992,8 +1992,7 @@ Ltac entailer_for_return ::= idtac.
    sep_apply fold_csr_rep'.
    unfold csr_token, csr_rep.
    Exists csr H6a.
-   Exists val_p colind_p rowptr_p csr.
-   rewrite prop_true_andp by auto.
+   Exists val_p colind_p rowptr_p.
    unfold csr_token'.
    Exists val_p colind_p rowptr_p.
    cancel.

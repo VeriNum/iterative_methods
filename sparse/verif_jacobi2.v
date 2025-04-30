@@ -170,7 +170,9 @@ Lemma jacobi2_the_loop: forall {Espec : OracleKind}
   (Hmaxiter : 0 < maxiter <= Int.max_unsigned)
   (HN : 0 < N < Int.max_unsigned)
   (yp : val)
-  (FR1 : list mpred),
+  (FR1 : list mpred)
+  (csr: csr_matrix Tdouble)
+  (Hcsr : csr_to_matrix csr (remove_diag A)),
 semax (func_tycontext f_jacobi2 Vprog Gprog [])
   (PROP ( )
    LOCAL (temp _y yp; temp _z xp; temp _N (Vint (Int.repr N));
@@ -178,7 +180,7 @@ semax (func_tycontext f_jacobi2 Vprog Gprog [])
    temp _x xp; temp _acc (Vfloat acc);
    temp _maxiter (Vint (Int.repr maxiter)))
    SEP (FRZL FR1; data_at_ shy (tarray tdouble N) yp;
-   csr_rep shA2 (remove_diag A) A2p;
+   csr_rep shA2 csr A2p;
    data_at shA1 (tarray tdouble N)
      (map Vfloat (diag_of_matrix A)) A1p;
    data_at shb (tarray tdouble N) (map Vfloat b) bp;
@@ -194,7 +196,7 @@ semax (func_tycontext f_jacobi2 Vprog Gprog [])
       temp _acc (Vfloat acc); temp _s (Vfloat s))
       SEP (FRZL FR1; 
          data_at (choose n shx shy) (tarray tdouble N) (map Vfloat z) (choose n xp yp);
-         csr_rep shA2 (remove_diag A) A2p;
+         csr_rep shA2 csr A2p;
          data_at shb (tarray tdouble N) (map Vfloat b) bp;
          data_at (choose n shy shx) (tarray tdouble N) (map Vfloat fz) (choose n yp xp);
          data_at shA1 (tarray tdouble (matrix_rows A))
@@ -236,7 +238,7 @@ apply semax_loop_unroll1
     gvars gv; temp _A2 A2p; temp _b bp; 
     temp _x xp; temp _acc (Vfloat acc))
   SEP (data_at shA1 (tarray tdouble N) (map Vfloat A1) A1p;
-        csr_rep shA2 A2 A2p;
+        csr_rep shA2 csr A2p;
         data_at shb (tarray tdouble N) (map Vfloat b) bp;
         data_at shx (tarray tdouble N) (map Vfloat x) xp;
         data_at shy (tarray tdouble N) (map Vfloat y) yp;
@@ -251,13 +253,13 @@ apply semax_loop_unroll1
     gvars gv; temp _A2 A2p; temp _b bp; 
     temp _x xp; temp _acc (Vfloat acc))
   SEP (data_at shA1 (tarray tdouble N) (map Vfloat A1) A1p;
-        csr_rep shA2 A2 A2p;
+        csr_rep shA2 csr A2p;
         data_at shb (tarray tdouble N) (map Vfloat b) bp;
         data_at shx (tarray tdouble N) (map Vfloat x) xp;
         data_at shy (tarray tdouble N) (map Vfloat y) yp;
      FRZL FR1))%assert).
 -
-forward_call (shA1,shA2,shb,  shx, shy, A1p, A1, A2p, A2, bp, b, xp, x, yp).
+forward_call (shA1,shA2,shb,  shx, shy, A1p, A1, A2p, A2, csr, bp, b, xp, x, yp).
 Intros a; destruct a as [y s]. unfold fst,snd in H,H0|-*.
 forward. forward. forward. forward.
 Exists y s; entailer!!.
@@ -327,7 +329,7 @@ forward_if (temp _t'3 (Val.of_bool (going s acc))).
    temp _s (Vfloat s))
    SEP (FRZL FR1;
    data_at_ (choose n shx shy) (tarray tdouble N) (choose n xp yp); 
-   csr_rep shA2 A2 A2p;
+   csr_rep shA2 csr A2p;
    data_at shb (tarray tdouble N) (map Vfloat b) bp;
    data_at (choose n shy shx) (tarray tdouble N) (map Vfloat y) (choose n yp xp);
    data_at shA1 (tarray tdouble N)  (map Vfloat A1) A1p))%assert.
@@ -354,7 +356,7 @@ progress change float with (ftype Tdouble) in *.
 rename H2 into FINy.
 destruct (iter_stop_n norm2 resid f n acc x) eqn:?K; inv H1.
 forward_call (shA1,shA2,shb, choose n shy shx, choose n shx shy,
-                       A1p, A1, A2p, A2, bp, b, choose n yp xp,
+                       A1p, A1, A2p, A2, csr, bp, b, choose n yp xp,
                          y,   choose n xp yp).
 unfold choose; destruct (Nat.odd n); auto.
 clear s.
@@ -468,7 +470,9 @@ Qed.
 Lemma body_jacobi2: semax_body Vprog Gprog f_jacobi2 jacobi2_spec.
 Proof.
 start_function.
-forward_call.
+unfold csr_rep_abstract. 
+Intros csr. rename H7 into Hcsr.
+forward_call (shA2,A2p, remove_diag A,csr).
 rewrite matrix_rows_remove_diag; lia.
 forward.
 rewrite matrix_rows_remove_diag.
@@ -533,6 +537,7 @@ apply semax_seq' with
  forward.
  Exists z s.
  entailer!!.
+ unfold csr_rep_abstract; Exists csr; entailer!!. 
 Qed.
 
 
