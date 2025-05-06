@@ -677,21 +677,32 @@ split3; try congruence.
 eapply Permutation_trans; eassumption.
 Qed.
 
-(*
-Definition coo_to_csr {t: type} (coo: coo_matrix t) (csr: csr_matrix t) : Prop :=
-  coo_rows coo = csr_rows csr /\
-  coo_cols coo = csr_cols csr /\
-  exists m: matrix t,
-   csr_to_matrix m (csr_cols csr) (csr_vals csr) (csr_col_ind csr) (csr_row_ptr csr) /\
-   forall i, 0 <= i < csr_rows csr ->
-    forall j, 0 <= j < csr_cols csr -> 
-     sum_any (map (fun e: Z*Z*ftype t => snd e) 
-              (filter (fun e: Z*Z*ftype t => andb (Z.eqb (fst (fst e)) i) (Z.eqb (fst (fst e)) j))
-                (coo_entries coo)))
-          (matrix_index m (Z.to_nat i) (Z.to_nat j)).
-*)
+Definition coord_le {t} (a b : Z*Z*ftype t) : Prop :=
+  fst (fst a) < fst (fst b) 
+ \/ fst (fst a) = fst (fst b) /\ snd (fst a) <= snd (fst b).
 
+Definition coord_leb {t} (a b : Z*Z*ftype t) : bool :=
+  orb (fst (fst a) <? fst (fst b))
+       (andb (fst (fst a) =? fst (fst b)) (snd (fst a) <=? snd (fst b))).
 
+Lemma reflect_coord_le {t} a b : reflect (@coord_le t a b) (@coord_leb t a b).
+Proof.
+destruct (coord_leb a b) eqn:?H; [constructor 1 | constructor 2];
+ unfold coord_le, coord_leb in *; lia.
+Qed.
+
+Instance CoordBO {t}: BoolOrder (@coord_le t) := 
+  {| test := coord_leb; test_spec := reflect_coord_le |}.
+
+Instance CoordPO {t: type}: PreOrder (@coord_le t).
+Proof.
+constructor.
+- intro. unfold complement, coord_le; simpl. lia.
+- intros ? ? ? *. unfold coord_le; simpl; lia.
+Qed.
+
+Instance CoordBPO {t: type}: BPO.BoolPreOrder (@coord_le t) :=
+ {| BPO.BO := CoordBO; BPO.PO := CoordPO |}.
 
 
   

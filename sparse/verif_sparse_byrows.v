@@ -11,28 +11,6 @@ Open Scope logic.
 
 Definition Gprog: funspecs := SparseASI ++ MathASI.
 
-(*
-Lemma fold_csr_rep:
-  forall sh  (p v ci rp: val) mval (csr: csr_matrix Tdouble),
-     csr_to_matrix csr mval ->
-     data_at sh t_csr
-          (v, (ci, (rp, (Vint (Int.repr (matrix_rows mval)),
-                      Vint (Int.repr (csr_cols csr)))))) p *
-     data_at sh (tarray tdouble (Zlength (csr_col_ind csr))) (map Vfloat (csr_vals csr)) v *
-     data_at sh (tarray tuint (Zlength (csr_col_ind csr)))
-                     (map Vint (map Int.repr (csr_col_ind csr))) ci *
-     data_at sh (tarray tuint (matrix_rows mval + 1))
-            (map Vint (map Int.repr (csr_row_ptr csr))) rp
-     |-- csr_rep sh mval p.
-Proof.
-intros.
-unfold csr_rep.
-Exists v ci rp csr.
-rewrite prop_true_andp by auto.
-cancel.
-Qed.
-*)
-
 Lemma body_csr_matrix_rows: semax_body Vprog Gprog f_csr_matrix_rows csr_matrix_rows_spec.
 Proof.
 start_function.
@@ -126,6 +104,7 @@ eapply partial_row_next; try eassumption; lia.
  unfold csr_rep.
  thaw FR1.
  Exists vp ci rp.
+ rewrite (csr_to_matrix_rows _ _ CRS).
  entailer!.
 Qed.
 

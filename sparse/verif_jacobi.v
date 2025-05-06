@@ -14,12 +14,12 @@ Definition Gprog: funspecs := JacobiASI ++ SparseASI ++ MathASI.
 Lemma body_jacobi2_oneiter: semax_body Vprog Gprog f_jacobi2_oneiter jacobi2_oneiter_spec.
 Proof.
 start_function.
-rename H3 into H4; rename H2 into H3; rename H1 into H2; pose proof I.
-forward_call.
+(*rename H3 into H4; rename H2 into H3; rename H1 into H2; pose proof I.*)
+forward_call (shA2,A2p,A2,csr).
 forward. 
 set (N := matrix_rows A2) in *.
 assert (0 <= N < Int.max_unsigned) by (unfold matrix_rows in N; rep_lia).
-clear H0 H1; rename H5 into H0.
+rename H0 into Hcols; clear H1; rename H5 into H0.
 assert_PROP (Zlength A1 = N /\ Zlength b = N /\ Zlength x = N).
   entailer!. rewrite Zlength_map in *. auto. 
 forward_for_simple_bound N
@@ -30,16 +30,17 @@ forward_for_simple_bound N
        temp _N (Vint (Int.repr (matrix_rows A2))); 
        temp _A1 A1p; temp _A2 A2p; temp _b bp; 
        temp _x xp; temp _y yp)
-   SEP (csr_rep shA2 A2 A2p;
+   SEP (csr_rep shA2 csr A2p;
    data_at shA1 (tarray tdouble N) (map Vfloat A1) A1p;
    data_at shb (tarray tdouble N) (map Vfloat b) bp;
    data_at shx (tarray tdouble N) (map Vfloat x) xp;
    data_at shy (tarray tdouble N) (map Vfloat y ++ Zrepeat Vundef (N-i)) yp))%assert.
 - Exists (@nil (ftype Tdouble)) (Zconst Tdouble 0). entailer!.
    apply derives_refl.
-- forward_call (shA2,shx,shy, A2p, A2, xp, x, i).
+- forward_call (shA2,shx,shy, A2p, A2, csr, xp, x, i).
    replace (Zlength x) with N by (clear - H1; lia).  cancel.
-   replace (Zlength x) with N by (clear - H1; lia).  auto.
+   replace (Zlength x) with N by (clear - H1; lia).
+   apply csr_to_matrix_cols in H; auto.
    replace (Zlength x) with N by (clear - H1; lia).
    Intros y'.
    forward.
@@ -116,7 +117,6 @@ forward_for_simple_bound N
 -
  Intros y s. forward. Exists y s.
  rewrite Z.sub_diag, Zrepeat_0, app_nil_r.
- unfold csr_rep. Intros.
  entailer!.
  assert (LENiter := Zlength_jacobi_iter A1 A2 b x ltac:(lia) ltac:(lia) ltac:(lia)).
  assert (LENresid := Zlength_jacobi_residual A1 A2 b x ltac:(lia) ltac:(lia) ltac:(lia)).

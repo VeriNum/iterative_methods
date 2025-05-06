@@ -13,56 +13,7 @@ Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
 
-
 #[export] Declare Instance M: MallocAPD.
-
-Definition coord_le {t} (a b : Z*Z*ftype t) : Prop :=
-  fst (fst a) < fst (fst b) 
- \/ fst (fst a) = fst (fst b) /\ snd (fst a) <= snd (fst b).
-
-(*
-Definition coord_lt {t} (a b : Z*Z*ftype t) : Prop :=
-  fst (fst a) < fst (fst b) 
- \/ fst (fst a) = fst (fst b) /\ snd (fst a) < snd (fst b).
-*)
-
-Definition coord_leb {t} (a b : Z*Z*ftype t) : bool :=
-  orb (fst (fst a) <? fst (fst b))
-       (andb (fst (fst a) =? fst (fst b)) (snd (fst a) <=? snd (fst b))).
-
-(*
-Definition coord_ltb {t} (a b : Z*Z*ftype t) : bool :=
-  orb (fst (fst a) <? fst (fst b))
-       (andb (fst (fst a) =? fst (fst b)) (snd (fst a) <? snd (fst b))).
-*)
-
-Lemma reflect_coord_le {t} a b : reflect (@coord_le t a b) (@coord_leb t a b).
-Proof.
-destruct (coord_leb a b) eqn:?H; [constructor 1 | constructor 2];
- unfold coord_le, coord_leb in *; lia.
-Qed.
-
-(*
-
-Lemma reflect_coord_lt {t} a b : reflect (@coord_lt t a b) (@coord_ltb t a b).
-Proof.
-destruct (coord_ltb a b) eqn:?H; [constructor 1 | constructor 2];
- unfold coord_lt, coord_ltb in *; lia.
-Qed.
-*)
-
-Instance CoordBO {t}: BoolOrder (@coord_le t) := 
-  {| test := coord_leb; test_spec := reflect_coord_le |}.
-
-Instance CoordPO {t: type}: PreOrder (@coord_le t).
-Proof.
-constructor.
-- intro. unfold complement, coord_le; simpl. lia.
-- intros ? ? ? *. unfold coord_le; simpl; lia.
-Qed.
-
-Instance CoordBPO {t: type}: BPO.BoolPreOrder (@coord_le t) :=
- {| BPO.BO := CoordBO; BPO.PO := CoordPO |}.
 
 Lemma Permutation_Zlength:
   forall {A} {al bl: list A}, Permutation al bl -> Zlength al = Zlength bl.
