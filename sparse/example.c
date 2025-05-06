@@ -7,7 +7,7 @@
 #include "parsparse.h"
 #include <assert.h>
 
-void dump_crs_matrix  (struct crs_matrix *m) {
+void dump_csr_matrix  (struct csr_matrix *m) {
   int i,j;
   printf("    val: ");
   for (i=0; i<m->row_ptr[m->rows]; i++) printf ("xx ");
@@ -18,7 +18,7 @@ void dump_crs_matrix  (struct crs_matrix *m) {
   printf("\n");
 }
 
-void print_crs_matrix (struct crs_matrix *m) {
+void print_csr_matrix (struct csr_matrix *m) {
   unsigned i,j;
   for (i=0; i<m->rows; i++) {
     unsigned j=0;
@@ -33,9 +33,9 @@ void print_crs_matrix (struct crs_matrix *m) {
   }
 }
 
-struct crs_matrix *make_example(unsigned N, unsigned D, double diag) {
+struct csr_matrix *make_example(unsigned N, unsigned D, double diag) {
   unsigned entries = N*(D+1);
-  struct crs_matrix *m = (struct crs_matrix*)surely_malloc(sizeof (*m));
+  struct csr_matrix *m = (struct csr_matrix*)surely_malloc(sizeof (*m));
   double *val = (double *)surely_malloc(entries*sizeof(double));
   unsigned *col_ind = (unsigned *)surely_malloc(entries*sizeof(unsigned));
   unsigned *row_ptr = (unsigned *)surely_malloc((N+1)*sizeof(unsigned));
@@ -77,7 +77,7 @@ struct crs_matrix *make_example(unsigned N, unsigned D, double diag) {
   return m;
 }
 
-double *eigenvector(struct crs_matrix *m, unsigned iterations) {
+double *eigenvector(struct csr_matrix *m, unsigned iterations) {
   unsigned N=m->rows;
   unsigned i;
   double *vec1 = (double *)surely_malloc(N*sizeof(double));
@@ -85,14 +85,14 @@ double *eigenvector(struct crs_matrix *m, unsigned iterations) {
   double *p;
   for (i=0; i<N; i++) vec1[i]=1.0;
   for (i=0; i<iterations; i++) {
-    crs_matrix_vector_multiply(m,vec1,vec2);
+    csr_matrix_vector_multiply(m,vec1,vec2);
     p=vec1; vec1=vec2; vec2=p;
   }
   free(vec2);
   return vec1;
 }
 
-double *par_eigenvector(struct crs_matrix *m, unsigned iterations, unsigned T) {
+double *par_eigenvector(struct csr_matrix *m, unsigned iterations, unsigned T) {
   unsigned N=m->rows;
   unsigned i;
   double *vec1 = (double *)surely_malloc(N*sizeof(double));

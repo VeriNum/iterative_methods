@@ -8,7 +8,7 @@
 #include <assert.h>
 
 int main (int argc, char **argv) {
-  struct crs_matrix *m; double *v;
+  struct csr_matrix *m; double *v;
   unsigned N, D, K, T;
   struct timeval start,finish,diff;
   if (argc!=5) {
@@ -22,9 +22,9 @@ int main (int argc, char **argv) {
   K=atoi(argv[3]);
   T=atoi(argv[4]);
   m = make_example(N, D, 1.0);
-  /*  dump_crs_matrix(m);
+  /*  dump_csr_matrix(m);
   printf("\n");
-  print_crs_matrix(m); */
+  print_csr_matrix(m); */
   gettimeofday(&start,NULL);
   v=par_eigenvector(m,K,T);  
   gettimeofday(&finish,NULL);
