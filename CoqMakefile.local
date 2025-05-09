@@ -11,6 +11,9 @@ sparse/sparse.v: sparse/sparse.c sparse/sparse.h
 sparse/build_csr.v: sparse/build_csr.c sparse/sparse.h
 	clightgen -flongdouble -normalize $< -o $@ 
 
+sparse/build_csr2.v: sparse/build_csr2.c sparse/sparse.h
+	clightgen -flongdouble -normalize $< -o $@ 
+
 sparse/jacobi.v: sparse/jacobi.c sparse/sparse.h
 	clightgen -flongdouble -normalize $< -o $@ 
 

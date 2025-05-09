@@ -98,13 +98,19 @@ void coo_quicksort(struct coo_matrix *p, unsigned base, unsigned n)
 
 /* Count the number of distinct row/col entries in a sorted coordinate list */
 unsigned coo_count (struct coo_matrix *p) {
-  unsigned i;
-  unsigned n = p->n;
-  if (n==0) return 0;
-  unsigned count=1;
-  for (i=1; i<n; i++) {
-    if (p->row_ind[i-1]!=p->row_ind[i] || p->col_ind[i-1]!=p->col_ind[i])
+  unsigned i,r,c,ri,ci,n,count;
+  unsigned *row_ind = p->row_ind, *col_ind = p->col_ind;
+  n = p->n;
+  count=0;
+  r=-1;
+  c=0;
+  for (i=0; i<n; i++) {
+    ri=row_ind[i]; 
+    ci=col_ind[i];
+    if (ri!=r || ci!=c) {
       count++;
+      r=ri; c=ci;
+    }
   }
   return count;
 }

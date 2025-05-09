@@ -12,6 +12,146 @@ Open Scope logic.
 
 Definition Gprog: funspecs := Build_CSR_ASI ++ SparseASI ++ MathASI.
 
+
+Lemma body_coo_count: semax_body Vprog Gprog f_coo_count coo_count_spec.
+Proof.
+start_function.
+forward.
+forward.
+forward.
+forward.
+forward.
+forward.
+assert (WF := H).
+destruct H as [_ H]. rewrite Forall_Znth in H.
+set (el := coo_entries coo) in *.
+freeze FR1 := - (data_at _ _ _ rp) (data_at _ _ _ cp).
+set (rest := Zrepeat _ _).
+set (n := Zlength el) in *.
+forward_for_simple_bound n (* for (i=0;i<n; i++) *)
+ (EX i:Z, EX count:Z, EX r:Z, EX c:Z, 
+  PROP(0 <= i <= n; 
+       count = count_distinct (sublist 0 i el);
+       i=0 -> (r,c)=(-1,0);
+       i<>0 -> (r,c)= fst (Znth (i-1) el))
+  LOCAL(temp _r (Vint (Int.repr r)); temp _c (Vint (Int.repr c)); 
+        temp _count (Vint (Int.repr count));
+        temp _n (Vint (Int.repr n)); 
+        temp _row_ind rp; temp _col_ind cp)
+  SEP(FRZL FR1;
+   data_at sh (tarray tuint maxn)
+     (map (fun e => Vint (Int.repr (fst (fst e)))) el ++ rest) rp;
+   data_at sh (tarray tuint maxn)
+     (map (fun e => Vint (Int.repr (snd (fst e)))) el ++ rest) cp))%assert.
+- Exists 0 (-1) 0.
+  entailer!!.
+- forward. 
+    { rewrite Znth_app1, Znth_map by list_solve. entailer!!. }
+  rewrite Znth_app1, Znth_map by list_solve.
+  set (ri := fst _).
+  forward.
+    { rewrite Znth_app1, Znth_map by list_solve. entailer!!. }
+  rewrite Znth_app1, Znth_map by list_solve.
+  set (ci := snd _). 
+ assert (i<>0 -> 0 <= r <= Int.max_unsigned). {
+      intro n0. destruct (H (i-1) ltac:(lia)).
+      specialize (H9 n0). rewrite <- H9 in  H10. simpl in H10.
+      rep_lia.
+   }
+ assert (0 <= c <= Int.max_unsigned). {
+      destruct (zeq i 0). specialize (H8 e); inv H8; rep_lia.
+      destruct (H (i-1) ltac:(lia)).
+      specialize (H9 n0). rewrite <- H9 in  H12. simpl in H12.
+      rep_lia.
+   }
+ assert (0 <= ri < Int.max_unsigned). {
+     subst ri; destruct (H i ltac:(lia)). rep_lia.
+   }
+ assert (0 <= ci < Int.max_unsigned). {
+     subst ci; destruct (H i ltac:(lia)). rep_lia.
+   }
+  forward_if 
+  (PROP ( )
+   LOCAL (temp _ci (Vint (Int.repr ci));
+   temp _ri (Vint (Int.repr ri));
+   temp _i (Vint (Int.repr i));
+   temp _r (Vint (Int.repr r));
+   temp _c (Vint (Int.repr c));
+   temp _count (Vint (Int.repr count));
+   temp _n (Vint (Int.repr n)); temp _row_ind rp;
+   temp _col_ind cp;
+   temp _t'1 (Vint (Int.repr (Z.b2z (negb (Z.eqb ri r) || negb (Z.eqb ci c))))))
+   SEP (FRZL FR1;
+   data_at sh (tarray tuint maxn)
+     (map (fun e => Vint (Int.repr (fst (fst e)))) el ++ rest) rp;
+   data_at sh (tarray tuint maxn)
+     (map (fun e => Vint (Int.repr (snd (fst e)))) el ++ rest) cp)).
+ + forward.
+   entailer!!.
+   destruct (Z.eqb_spec ri r). congruence. reflexivity.
+ + forward.
+   entailer!!.
+   assert (ri=r). {
+     destruct (zeq i 0).
+     2: specialize (H10 n0); apply repr_inj_unsigned; try rep_lia; auto.
+     specialize (H8 e). inv H8.
+     exfalso. clearbody ri. clear - H14 H12.
+     rewrite (modulo_samerepr (-1) Int.max_unsigned) in H14 by reflexivity.
+     apply repr_inj_unsigned in H14; rep_lia.
+   }
+   subst r. rewrite Z.eqb_refl. simpl.
+   destruct (zeq ci c). subst c. rewrite Z.eqb_refl. reflexivity.
+   simpl.
+   rewrite <- Z.eqb_neq in n0. rewrite n0; reflexivity.
+ + forward_if.
+  * forward.
+    forward.
+    forward.
+    Exists (count+1) ri ci.
+    entailer!!.
+    split.
+    -- destruct (zeq i 0). subst.
+       rewrite (sublist_one 0 (0+1)) by lia. reflexivity.
+       apply count_distinct_incr; try lia.
+       red.
+       assert (coord_le (Znth (i - 1) el) (Znth i el))
+         by (apply coord_sorted_e; auto; lia).
+       split; auto.
+       assert (ri<>r \/ ci<>c) by (clear - H14; lia).
+       intro.
+       red in H7,H16.  fold ri in H7,H16.
+       rewrite <- (H9 n0) in H7,H16. simpl in H7,H16.
+       clear - H7 H15 H16. lia.
+    -- intros. rewrite Z.add_simpl_r.
+       unfold ri,ci. clear; destruct (Znth i el) as [[??]?]; auto.
+  * assert (ri=r /\ ci=c) by (clear - H14; lia). clear H14.
+    destruct H15; subst r c.
+    forward.
+    Exists count ri ci.
+    entailer!!.
+    split. 
+    -- assert (i<>0)
+        by (intro; subst i; specialize (H8 eq_refl); inv H8; lia).
+       specialize (H10 H7).
+       apply count_distinct_noincr. rep_lia.
+       intro. destruct H14.
+       specialize (H9 H7).
+       unfold coord_le in H14,H15.
+       rewrite <- H9 in H14,H15.
+       unfold ri,ci in H14,H15. simpl in H14, H15.
+       clear - H14 H15; lia.
+    -- rewrite Z.add_simpl_r. intro.
+       unfold ri,ci. destruct (Znth i el) as [[??]?]; simpl; auto.
+-
+ Intros count r c.
+ thaw FR1.
+ forward.
+ unfold coo_rep.
+ Exists maxn rp cp vp.
+ entailer!!.
+ autorewrite with sublist. auto.
+Qed.
+
 Lemma fold_coo_rep:
   forall sh (coo: coo_matrix Tdouble) p (maxn: Z) (rp cp vp : val), 
   !! (0 <= Zlength (coo_entries coo) <= maxn /\ maxn <= Int.max_signed 

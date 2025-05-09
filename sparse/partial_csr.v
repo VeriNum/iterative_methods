@@ -1,6 +1,6 @@
 Require Import VST.floyd.proofauto.
 Require Import Iterative.floatlib.
-From Iterative.sparse Require Import build_csr sparse_model distinct.
+From Iterative.sparse Require Import sparse_model distinct.
 Require Import vcfloat.FPStdCompCert.
 Require Import vcfloat.FPStdLib.
 Require Import Coq.Classes.RelationClasses.
