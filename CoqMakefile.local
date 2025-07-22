@@ -5,6 +5,8 @@ CFLAGS= -I$(INCLUDE) -O4
 %.o: %.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@ 
 
+sparse: sparse/verif_sparse.vo sparse/verif_build_csr.vo sparse/verif_build_csr2.vo sparse/verif_jacobi.vo
+
 sparse/sparse.v: sparse/sparse.c sparse/sparse.h
 	clightgen -flongdouble -normalize $< -o $@ 
 
