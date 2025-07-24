@@ -157,7 +157,68 @@ Proof.
  apply IHsorted; try list_solve.
 Qed.
 
+Lemma sorted_app_inv {A : Type} {d : Inhabitant A} {le : relation A} {leT : Transitive le} :
+  forall (al bl : list A),
+  sorted le (al ++ bl) ->
+  sorted le al /\ sorted le bl.
+Proof.
+  intros. split.
+  + apply sorted_i; auto.
+    intros. pose proof (sorted_e _ H i j ltac:(lia) ltac:(list_solve)) .
+    rewrite Znth_app1 in H2 by list_solve.
+    rewrite Znth_app1 in H2 by list_solve. exact H2.
+  + apply sorted_i; auto.
+    intros.
+    pose proof (sorted_e _ H (i + Zlength al) (j + Zlength al)).  
+    spec H2. pose proof (Zlength_nonneg al). lia.
+    spec H2. list_solve.
+    rewrite Znth_app2 in H2 by list_solve.
+    rewrite Znth_app2 in H2 by list_solve. list_solve.
+Qed.
 
+Lemma sorted_app_no_pivot {A : Type} {d : Inhabitant A} {lt : relation A} {ltT : Transitive le} :
+  forall (al bl : list A),
+  al <> nil -> bl <> nil ->
+  sorted lt al ->
+  sorted lt bl ->
+  lt (last al default) (hd default bl) ->
+  sorted lt (al ++ bl).
+Proof.
+  intros.
+  induction H1.
+  + destruct H. reflexivity.
+  + simpl in H3. destruct bl as [|y bl'].
+    - destruct H0. reflexivity.
+    - simpl in H3. replace ([x] ++ y :: bl') with (x :: y :: bl') by list_solve.
+      constructor; auto.
+  + spec IHsorted. intro. inversion H5.
+    rewrite last_cons in H3 by (intro contra; inversion contra).
+    specialize (IHsorted H3).
+    replace ((x :: y :: l) ++ bl) with (x :: y :: (l ++ bl)) by list_solve.
+    constructor; auto.
+Qed.
+
+Lemma sorted_pivot {A : Type} {d : Inhabitant A} {lt : relation A} {ltT : Transitive lt} :
+  forall (pivot : A) (al bl : list A),
+  al <> nil -> bl <> nil ->
+  lt (last al default) pivot ->
+  lt pivot (hd default bl) ->
+  sorted lt (al ++ bl) ->
+  sorted lt (al ++ [pivot] ++ bl).
+Proof.
+  intros.
+  assert (sorted lt (pivot :: bl)).
+  { destruct bl as [|b bl'].
+    + constructor.
+    + apply sorted_cons.
+      - simpl in H2. exact H2.
+      - apply sorted_app_inv in H3. destruct H3. exact H4. }
+  apply sorted_app_no_pivot; auto.
+  + replace ([pivot] ++ bl) with (pivot :: bl) by list_solve.
+    intro contra; inversion contra.
+  + apply sorted_app_inv in H3.
+    destruct H3. apply H3.
+Qed.
 
 Class BoolOrder {A: Type} (R: relation A): Type := {
     test : A -> A -> bool;
