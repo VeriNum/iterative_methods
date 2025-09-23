@@ -489,8 +489,30 @@ Proof.
         + apply (rowptr_sorted_e (csr_row_ptr csr) CSR_wf_sorted). list_solve.
         + unfold d. rewrite <- coog_csr_vals, CSR_wf_vals'.
           apply (rowptr_sorted_e (csr_row_ptr csr) CSR_wf_sorted). list_solve. }
+      autorewrite with sublist in Hr'.
+      replace (r + (Zlength (csr_row_ptr csr) - r) - 1 ) with (Zlength (csr_row_ptr csr) -1) in Hr' by lia.
+      pose proof (CSR_wf_rowsorted r' ltac:(lia)).
+      destruct (r' <? r) eqn:Er'r; [destruct ((r'+1) =? r) eqn:ESr'r | ].
+      * replace r' with (r-1) in * by lia.
+        rewrite Z.sub_simpl_r in *.
+        autorewrite with sublist in H3 |-*.
+        assert (Znth r (csr_row_ptr csr) = d).
+        { unfold csr_rows in *.
+          rewrite coog_csr_rows in Hlastrows.
+          replace (Znth r (csr_row_ptr csr)) with (Znth 0 (sublist r (Zlength (csr_row_ptr csr)) (csr_row_ptr csr))) by list_solve. 
+          replace (Zlength (csr_row_ptr csr) - 1 + 1) with (Zlength (csr_row_ptr csr)) in Hlastrows by lia.
+          rewrite Hlastrows. list_solve. }
+        fold d in coog_csr_vals. rewrite H4 in H3. auto.
+      * autorewrite with sublist. auto.
+      * autorewrite with sublist. constructor. lia. constructor.
+  + (* partial_CSRG_coog_csr *)
+    inversion_clear partial_CSRG_coog_csr;
+    subst csr' new_row_ptr; constructor; simpl; auto.
+    - (* coog_csr_rows *)
+      unfold csr_rows in *. simpl in *. list_solve.
+    - (* coog_csr_entries *)
       
-          
+        
 
 
 Lemma partial_CSRG_newcol:
