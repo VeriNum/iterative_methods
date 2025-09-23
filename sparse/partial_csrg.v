@@ -511,9 +511,65 @@ Proof.
     - (* coog_csr_rows *)
       unfold csr_rows in *. simpl in *. list_solve.
     - (* coog_csr_entries *)
-      
-        
-
+      clear dependent COLIND. clear dependent ROWPTR.
+      simpl in *. rewrite coog_csr_rows in partial_CSRG_r. 
+      unfold entries_correspond_coog, csr_rows, cd_upto, coog_upto in *.
+      intros h Hh.
+      pose proof (coog_csr_entries h Hh).
+      (* clear coo_csr_entries. *)
+      simpl Znth in H2|-*. simpl in Hh.
+      autorewrite with sublist in Hh.
+      autorewrite with sublist in H2|-*.
+      pose proof proj1 (coog_entry_bounds partial_CSRG_coog h ltac:(lia)).
+      destruct (Znth h (coog_entries coog)) as [rh ch] eqn:?Hh'.
+      simpl in H2,H3|-*.
+      destruct H2. split; auto.
+      autorewrite with sublist.
+      destruct (zlt rh r); [ destruct (zeq rh (r-1)) | ].
+      * autorewrite with sublist in H2|-*.
+        split; try lia.
+        subst d.
+        pose proof count_distinct_mono (sublist 0 i (coog_entries coog)) (h+1).
+        autorewrite with sublist in H5. list_solve. 
+      * autorewrite with sublist in H2|-*. auto.
+      * autorewrite with sublist in H2|-*.
+        exfalso.
+        rewrite Forall_forall in partial_CSRG_r'.
+        specialize (partial_CSRG_r' (Znth h (coog_entries coog))).
+        spec partial_CSRG_r'.
+        replace (Znth h (coog_entries coog)) with 
+          (Znth h (sublist 0 i (coog_entries coog))) by list_solve.
+        apply Znth_In. list_solve.
+        rewrite Hh' in partial_CSRG_r'. simpl in partial_CSRG_r'. lia.
+    - (* coog_csr_zeros *)
+      unfold no_extra_zeros_coog.
+      intros r' k Hk Hk'. simpl in Hk' |- *.
+      unfold no_extra_zeros_coog in coog_csr_zeros.
+      specialize (coog_csr_zeros r' k Hk). simpl in *.
+      destruct (r'+1 <? r) eqn:Er.
+      * autorewrite with sublist in Hk'. apply (coog_csr_zeros Hk').
+      * autorewrite with sublist in Hk'.
+        assert (Hlastrows' : Znth (r'+1) (csr_row_ptr csr) = d).
+        { rewrite coog_csr_rows in partial_CSRG_r.
+          unfold csr_rows in *.
+          rewrite coog_csr_rows, Z.sub_simpl_r in Hlastrows.
+          list_solve. }
+        apply coog_csr_zeros. list_solve.
+  + (* partial_CSRG_rowptr *)
+    inversion_clear partial_CSRG_coog_csr.
+    inversion_clear partial_CSRG_wf.
+    subst csr' new_row_ptr; simpl in *.
+    pose proof (proj1 (coog_entry_bounds partial_CSRG_coog i H0)).
+    rewrite !(sublist_split 0 r (r + 1)) by list_solve.
+    rewrite map_app. f_equal.
+    - autorewrite with sublist.
+      rewrite sublist_upd_Znth_l by list_solve. list_solve.
+    - rewrite (sublist_one r) by list_solve. 
+      autorewrite with sublist.
+      rewrite upd_Znth_same by list_solve.
+      auto.
+  + list_solve.
+Qed.
 
 Lemma partial_CSRG_newcol:
    forall i r c coog ROWPTR COLIND,
