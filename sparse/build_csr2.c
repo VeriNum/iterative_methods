@@ -13,6 +13,7 @@
 void exit(int code);
 void free(void *p);
 
+/* not really used in this file */
 struct coo_matrix *create_coo_matrix (unsigned maxn, unsigned rows, unsigned cols) {
   struct coo_matrix *p = surely_malloc (sizeof (*p));
   p->row_ind = (unsigned *)surely_malloc(maxn * sizeof(unsigned));
@@ -56,6 +57,7 @@ int coo_less (struct rowcol *p, unsigned a, unsigned b) {
    https://github.com/cverified/cbench/blob/master/src/qsort/qsort3.c */
 
 /* sort the coordinate elements of a coo_matrix */
+/* different input types; adjust the funspec */
 void coo_quicksort(struct rowcol *p, unsigned base, unsigned n)
 {
   unsigned lo, hi, left, right, mid;
@@ -106,6 +108,7 @@ void coo_quicksort(struct rowcol *p, unsigned base, unsigned n)
 }
 
 /* Count the number of distinct row/col entries in a sorted coordinate list */
+/* Only called when the rowcol is sorted */
 unsigned coo_count (unsigned n, struct rowcol *p) {
   unsigned i,r,c,ri,ci,count;
   count=0;
@@ -126,6 +129,8 @@ struct rowcol *start_coo_shell(unsigned n) {
   return (struct rowcol *) surely_malloc(n * sizeof(struct rowcol));
 }
 
+/* Think about whether to change the data structure list rowcol */
+/* Only add to the end of the list */
 void add_to_coo_shell(struct rowcol *rc, unsigned i, unsigned r, unsigned c) {
   rc[i].row = r;
   rc[i].col = c;

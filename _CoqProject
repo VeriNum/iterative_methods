@@ -1,3 +1,5 @@
+-arg "-async-proofs-j 8"
+
 -R . Iterative
 lemmas.v
 inf_norm_properties.v
