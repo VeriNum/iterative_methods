@@ -571,6 +571,8 @@ Proof.
   + list_solve.
 Qed.
 
+(*
+
 Lemma partial_CSRG_newcol:
    forall i r c coog ROWPTR COLIND,
    0 < i < Zlength (coog_entries coog) ->
@@ -1274,7 +1276,7 @@ Proof.
 
 
           
-        
+        *)
         
         
         

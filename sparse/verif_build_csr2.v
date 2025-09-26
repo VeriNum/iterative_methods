@@ -1,6 +1,6 @@
 Require Import VST.floyd.proofauto.
 Require Import Iterative.floatlib.
-From Iterative.sparse Require Import build_csr sparse_model spec_sparse spec_build_csr distinct partial_csr.
+From Iterative.sparse Require Import build_csr2 sparse_model spec_sparse spec_build_csr2 distinct partial_csr.
 Require Import VSTlib.spec_math.
 Require Import vcfloat.FPStdCompCert.
 Require Import vcfloat.FPStdLib.
@@ -10,7 +10,12 @@ Set Bullet Behavior "Strict Subproofs".
 
 Open Scope logic.
 
-Definition Gprog: funspecs := Build_CSR_ASI ++ SparseASI ++ MathASI.
+Definition Gprog: funspecs := Build_CSR2_ASI ++ SparseASI ++ MathASI.
+
+Lemma body_swap : semax_body Vprog Gprog f_swap swap_spec.
+Proof.
+  start_function.
+  
 
 
 Lemma body_coo_count: semax_body Vprog Gprog f_coo_count coo_count_spec.

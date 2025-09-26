@@ -47,6 +47,8 @@ sparse/build_csr.v
 sparse/build_csr2.v
 sparse/spec_build_csr.v
 sparse/partial_csr.v
+sparse/partial_csrg.v
+sparse/spec_build_csr2.v
 sparse/verif_build_csr.v
 # sparse/verif_build_csr2.v
 # sparse/verif_quicksort.v

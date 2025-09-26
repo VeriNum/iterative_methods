@@ -46,7 +46,7 @@ void swap(struct rowcol *p, unsigned a, unsigned b) {
   p[b].col=j;
 }
 
-int coo_less (struct rowcol *p, unsigned a, unsigned b) {
+int coog_less (struct rowcol *p, unsigned a, unsigned b) {
   unsigned ra = p[a].row, rb = p[b].row;
   if (ra<rb) return 1;
   if (ra>rb) return 0;
@@ -58,7 +58,7 @@ int coo_less (struct rowcol *p, unsigned a, unsigned b) {
 
 /* sort the coordinate elements of a coo_matrix */
 /* different input types; adjust the funspec */
-void coo_quicksort(struct rowcol *p, unsigned base, unsigned n)
+void coog_quicksort(struct rowcol *p, unsigned base, unsigned n)
 {
   unsigned lo, hi, left, right, mid;
 
@@ -69,19 +69,19 @@ void coo_quicksort(struct rowcol *p, unsigned base, unsigned n)
   while (lo < hi) {
     mid = lo + ((hi - lo) >> 1);
     
-    if (coo_less(p, mid,lo))
+    if (coog_less(p, mid,lo))
       swap(p, mid, lo);
-    if (coo_less(p, hi,mid)) {
+    if (coog_less(p, hi,mid)) {
       swap(p, mid, hi);
-      if (coo_less(p,mid,lo))
+      if (coog_less(p,mid,lo))
         swap(p, mid, lo);
     }
     left = lo + 1;
     right = hi - 1;
     do {
-      while (coo_less(p,left,mid))
+      while (coog_less(p,left,mid))
         left++;
-      while (coo_less(p,mid,right))
+      while (coog_less(p,mid,right))
         right--;
       if (left < right) {
 	swap(p, left, right);
@@ -98,10 +98,10 @@ void coo_quicksort(struct rowcol *p, unsigned base, unsigned n)
       }
     } while (left <= right);
     if (right - lo > hi - left) {
-      coo_quicksort(p, left, hi - left + 1);
+      coog_quicksort(p, left, hi - left + 1);
       hi = right;
     } else {
-      coo_quicksort(p, lo, right - lo + 1);
+      coog_quicksort(p, lo, right - lo + 1);
       lo = left;
     }
   }
@@ -109,7 +109,7 @@ void coo_quicksort(struct rowcol *p, unsigned base, unsigned n)
 
 /* Count the number of distinct row/col entries in a sorted coordinate list */
 /* Only called when the rowcol is sorted */
-unsigned coo_count (unsigned n, struct rowcol *p) {
+unsigned coog_count (unsigned n, struct rowcol *p) {
   unsigned i,r,c,ri,ci,count;
   count=0;
   r=-1;
@@ -125,24 +125,24 @@ unsigned coo_count (unsigned n, struct rowcol *p) {
   return count;
 }
 
-struct rowcol *start_coo_shell(unsigned n) {
+struct rowcol *start_coog(unsigned n) {
   return (struct rowcol *) surely_malloc(n * sizeof(struct rowcol));
 }
 
 /* Think about whether to change the data structure list rowcol */
 /* Only add to the end of the list */
-void add_to_coo_shell(struct rowcol *rc, unsigned i, unsigned r, unsigned c) {
+void add_to_coog(struct rowcol *rc, unsigned i, unsigned r, unsigned c) {
   rc[i].row = r;
   rc[i].col = c;
 }
 
-struct csr_matrix *coo_shell_to_csr_shell(struct rowcol *rc, unsigned n, unsigned rows, unsigned cols) {
+struct csr_matrix *coog_to_csrg(struct rowcol *rc, unsigned n, unsigned rows, unsigned cols) {
   struct csr_matrix *q;
   unsigned count, i;
   unsigned r,c, ri, ci, k, l;
   unsigned *col_ind, *row_ptr;
-  coo_quicksort(rc, 0, n);
-  k = coo_count(n,rc);
+  coog_quicksort(rc, 0, n);
+  k = coog_count(n,rc);
   q = surely_malloc(sizeof(struct csr_matrix));
   col_ind = surely_malloc(k * sizeof(unsigned));
   row_ptr = surely_malloc ((rows+1) * sizeof(unsigned));
