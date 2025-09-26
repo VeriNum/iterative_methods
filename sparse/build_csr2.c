@@ -34,6 +34,8 @@ void add_to_coo_matrix(struct coo_matrix *p, unsigned i, unsigned j, double x) {
   p->n = n+1;
 }
 
+/* end of not used code */
+
 struct rowcol {unsigned row,col;};
 
 void swap(struct rowcol *p, unsigned a, unsigned b) {

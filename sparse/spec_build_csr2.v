@@ -31,7 +31,7 @@ Definition swap_spec :=
  WITH sh: share, coog: list (int * int), p: val, a: Z, b: Z
  PRE [ tptr (Tstruct _rowcol noattr), tuint, tuint ]
     PROP(writable_share sh;
-         (* coo_matrix_wellformed coo; *)
+         Zlength coog < Int.max_unsigned;
          0 <= a < Zlength coog;
          0 <= b < Zlength coog)
     PARAMS( p; Vint (Int.repr a); Vint (Int.repr b))
