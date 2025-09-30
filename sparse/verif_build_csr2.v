@@ -73,6 +73,87 @@ Proof.
 Qed.
 
 
+Lemma body_coog_count : semax_body Vprog Gprog f_coog_count coog_count_spec.
+Proof.
+  start_function.
+  forward. forward. forward.
+  forward_for_simple_bound (Zlength coog) 
+  (EX i : Z, EX r : Z, EX c : Z,
+    PROP (0 <= i <= Zlength coog;
+          i = 0 -> (r, c) = (-1, 0);
+          i <> 0 -> (r, c) = intpair_to_Zpair (Znth (i-1) coog)) 
+    LOCAL (temp _c (Vint (Int.repr c)); temp _r (Vint (Int.repr r));
+      temp _count (Vint (Int.repr (@count_distinct _ _ (Coord2BPO) (map intpair_to_Zpair (sublist 0 i coog)))));
+      temp _n (Vint (Int.repr (Zlength coog))); temp _p p)
+    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map intpair_to_valpair coog) p))%assert.
+  { (* entering the proof *)
+    Exists (-1). Exists 0. entailer!!. }
+  { (* loop body *)
+    forward.
+    { entailer!!. rewrite Znth_map by list_solve.
+      destruct (Znth i coog). simpl. auto. }
+    forward.
+    { entailer!!. rewrite Znth_map by list_solve.
+      destruct (Znth i coog). simpl. auto. }
+    rewrite !Znth_map by list_solve. 
+    destruct (Znth i coog) as [ri ci] eqn:Ecoogi. simpl.
+    set (riZ := Int.unsigned ri).
+    set (ciZ := Int.unsigned ci).
+    assert (Hrrange: i <> 0 -> 0 <= r <= Int.max_unsigned).
+    { intro n0. specialize (H4 n0).
+      unfold intpair_to_Zpair in H4.
+      destruct (Znth (i-1) coog) as [xi yi].
+      replace r with (Int.intval xi) by (inversion H4; auto).
+      pose proof (Int.intrange xi). rep_lia. } 
+    assert (Hcrange : 0 <= c <= Int.max_unsigned).
+    { destruct (i =? 0) eqn:Ei0.
+      + spec H3. lia. inversion H3. rep_lia. 
+      + spec H4. lia. destruct (Znth (i-1) coog) as [xi yi].
+        inversion H4. pose proof (Int.intrange yi). rep_lia. }
+    assert (Hrirange : 0 <= riZ <= Int.max_unsigned) by rep_lia.
+    assert (Hcirange : 0 <= ciZ <= Int.max_unsigned) by rep_lia.
+    
+    forward_if   (PROP ( )
+      LOCAL (temp _ci (Vint ci);
+             temp _ri (Vint ri);
+             temp _i (Vint (Int.repr i)); temp _c (Vint (Int.repr c));
+             temp _r (Vint (Int.repr r));
+             temp _count (Vint (Int.repr (count_distinct (map intpair_to_Zpair (sublist 0 i coog)))));
+             temp _n (Vint (Int.repr (Zlength coog))); temp _p p;
+             temp _t'1 (Vint (Int.repr (Z.b2z (negb (Z.eqb riZ r) || negb (Z.eqb ciZ c))))))
+      SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr)
+          (map intpair_to_valpair coog) p)).
+    + (* if true *)
+      assert (riZ <> r). 
+      { subst riZ. intro. rewrite <- H6 in H5. apply H5. 
+        rewrite Int.repr_unsigned. auto. }
+      forward. entailer!!. 
+      destruct (Z.eqb_spec riZ r). contradiction. reflexivity.
+    + (* if false *)
+      destruct (Z.eqb_spec i 0).
+      - (* i = 0 *)
+        forward. entailer!!. spec H3. lia. inversion H3. subst r c.
+        subst riZ ciZ. simpl in *. rep_lia.
+        
+         admit.
+      - (* i <> 0 *) 
+        assert (riZ = r).
+        { subst riZ. rewrite H5. apply Int.unsigned_repr. rep_lia. }
+        forward. entailer!!.
+        replace (Int.unsigned ri =? Int.unsigned ri) with true by rep_lia. simpl. 
+        destruct (Z.eqb_spec ciZ c); simpl. 
+        * subst c ciZ. rewrite Int.repr_unsigned. rewrite Int.eq_true. reflexivity.
+        * subst ciZ. unfold Int.eq. 
+          Search (Int.eq _ (Int.repr _)).
+        
+      
+      
+      
+      
+
+
+
+
 Lemma body_coo_count: semax_body Vprog Gprog f_coo_count coo_count_spec.
 Proof.
 start_function.

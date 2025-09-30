@@ -61,11 +61,13 @@ Definition coog_quicksort_spec :=
 Definition coog_count_spec :=
  DECLARE _coog_count
  WITH sh: share, coog: list (int * int), p: val
- PRE [ tptr (Tstruct _rowcol noattr) ]
+ (* do Z * Z instead with a side condition *)
+ PRE [ tuint, tptr (Tstruct _rowcol noattr) ]
     PROP(writable_share sh;
+         0 <= Zlength coog <= Int.max_unsigned;
          (* coo_matrix_wellformed coo; *)
          sorted coord2_le (map intpair_to_Zpair coog))
-    PARAMS( p )
+    PARAMS(Vint (Int.repr (Zlength coog)); p)
     SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map intpair_to_valpair coog) p)
  POST [ tuint ]
     PROP()
