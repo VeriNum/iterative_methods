@@ -26,20 +26,31 @@ Definition intpair_to_Zpair (a : int * int) : Z * Z :=
   | (x, y) => (Int.intval x, Int.intval y)
   end.
 
+Definition Zpair_to_valpair (a : Z * Z) : val * val :=
+  match a with 
+  | (x, y) => (Vint (Int.repr x), Vint (Int.repr y))
+  end.
+
+Definition rowcol_range (rowcol : Z * Z) :=
+  match rowcol with 
+  | (r, c) => 0 <= r < Int.max_unsigned /\ 0 <= c < Int.max_unsigned
+  end.
+
 Definition swap_spec :=
  DECLARE _swap
- WITH sh: share, coog: list (int * int), p: val, a: Z, b: Z
+ WITH sh: share, coog: list (Z * Z), p: val, a: Z, b: Z
  PRE [ tptr (Tstruct _rowcol noattr), tuint, tuint ]
     PROP(writable_share sh;
          Zlength coog < Int.max_unsigned;
+         Forall rowcol_range coog;
          0 <= a < Zlength coog;
          0 <= b < Zlength coog)
     PARAMS( p; Vint (Int.repr a); Vint (Int.repr b))
-    SEP (data_at sh (Tarray (Tstruct  _rowcol noattr) (Zlength coog) noattr) (map intpair_to_valpair coog) p)
+    SEP (data_at sh (Tarray (Tstruct  _rowcol noattr) (Zlength coog) noattr) (map Zpair_to_valpair coog) p)
  POST [ tvoid ]
     PROP ()
     RETURN( )
-    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map intpair_to_valpair (upd_Znth a (upd_Znth b coog (Znth a coog)) (Znth b coog))) p).
+    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map Zpair_to_valpair (upd_Znth a (upd_Znth b coog (Znth a coog)) (Znth b coog))) p).
 
 (* compare with the one in the repo that's verified *)
 Definition coog_quicksort_spec :=
@@ -60,19 +71,18 @@ Definition coog_quicksort_spec :=
 
 Definition coog_count_spec :=
  DECLARE _coog_count
- WITH sh: share, coog: list (int * int), p: val
- (* do Z * Z instead with a side condition *)
+ WITH sh: share, coog: list (Z * Z), p: val
  PRE [ tuint, tptr (Tstruct _rowcol noattr) ]
     PROP(writable_share sh;
          0 <= Zlength coog <= Int.max_unsigned;
-         (* coo_matrix_wellformed coo; *)
-         sorted coord2_le (map intpair_to_Zpair coog))
+         Forall rowcol_range coog;
+         sorted coord2_le coog)
     PARAMS(Vint (Int.repr (Zlength coog)); p)
-    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map intpair_to_valpair coog) p)
+    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map Zpair_to_valpair coog) p)
  POST [ tuint ]
     PROP()
-    RETURN( Vint (Int.repr (count_distinct (map intpair_to_Zpair coog))) )
-    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map intpair_to_valpair coog) p).
+    RETURN( Vint (Int.repr (count_distinct  coog)) )
+    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map Zpair_to_valpair coog) p).
 
 Definition start_coog_spec :=
   DECLARE _start_coog

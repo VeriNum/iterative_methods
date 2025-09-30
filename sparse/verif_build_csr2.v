@@ -15,62 +15,39 @@ Definition Gprog: funspecs := Build_CSR2_ASI ++ SparseASI ++ MathASI.
 Lemma body_swap : semax_body Vprog Gprog f_swap swap_spec.
 Proof.
   start_function.
-  forward. 
-  { entailer!!. rewrite Znth_map by list_solve. 
-    destruct (Znth a coog). simpl. auto. }
-  forward. 
-  { entailer!!. rewrite Znth_map by list_solve.
-    destruct (Znth a coog). simpl. auto. } 
   forward.
   { entailer!!. rewrite Znth_map by list_solve.
-    destruct (Znth b coog). simpl. auto. }
-  forward. forward.
+    destruct (Znth a coog). reflexivity. }
+  forward.
   { entailer!!. rewrite Znth_map by list_solve.
-    destruct (Znth b coog). simpl. 
-    destruct (a =? b) eqn:E.
-    + assert (a = b) by lia. subst a.
-      rewrite upd_Znth_same by list_solve.  
+    destruct (Znth a coog). reflexivity. }
+  forward.
+  { entailer!!. rewrite Znth_map by list_solve.
+    destruct (Znth b coog). reflexivity. }
+  forward. forward.
+  { entailer!!. rewrite !Znth_map by list_solve.
+    destruct (Z.eqb_spec a b).
+    + subst b. rewrite upd_Znth_same by list_solve.
+      destruct (Znth a coog). simpl. auto.
+    + destruct (Znth a coog) as [a1 a2] eqn:Ea.
+      destruct (Znth b coog) as [b1 b2] eqn:Eb.
+      simpl. rewrite upd_Znth_diff by list_solve. 
       rewrite Znth_map by list_solve.
-      destruct (Znth b coog). simpl. auto.
-    + rewrite upd_Znth_diff by list_solve.
-      rewrite Znth_map by list_solve.
-      destruct (Znth b coog). simpl. auto. }
+      rewrite Eb. simpl. auto. }
   forward. forward. forward. 
-  destruct (a =? b) eqn:E.
-  + assert (a = b) by lia. subst a.
-    rewrite upd_Znth_same by list_solve.
-    rewrite upd_Znth_same by list_solve.
-    rewrite upd_Znth_same by list_solve.
-    rewrite upd_Znth_twice by list_solve.
-    rewrite upd_Znth_twice by list_solve.
-    rewrite upd_Znth_twice by list_solve.
-    rewrite upd_Znth_twice by list_solve.
-    assert (upd_Znth b coog (Znth b coog) = coog) by list_solve. 
-    rewrite H2. entailer!!.
-    rewrite Znth_map by list_solve.
-    destruct (Znth b coog) eqn:Eb. simpl.
-    replace (Vint i, Vint i0) with (intpair_to_valpair (Znth b coog)).
-    2:{ unfold intpair_to_valpair. rewrite Eb. auto. }
-    replace (upd_Znth b (map intpair_to_valpair coog) (intpair_to_valpair (Znth b coog)))
-      with (map intpair_to_valpair coog) by list_solve.
-    entailer!!.
-  + assert (a <> b) by lia. 
-    rewrite !Znth_map by list_solve.
-    destruct (Znth a coog) as [a1 a2] eqn:Ea; simpl snd; simpl fst.
-    destruct (Znth b coog) as [b1 b2] eqn:Eb; simpl snd; simpl fst.
-    rewrite !upd_Znth_diff by list_solve.
-    rewrite !upd_Znth_same by list_solve.
-    rewrite !upd_Znth_diff by list_solve. 
-    rewrite !Znth_map by list_solve. simpl snd; simpl fst.
-    rewrite !Eb. simpl snd; simpl fst.
-    rewrite !upd_Znth_twice by list_solve. 
-    replace (upd_Znth b (upd_Znth a (map intpair_to_valpair coog) (Vint b1, Vint b2))
-           (Vint a1, Vint a2))
-      with (map intpair_to_valpair
-                          (upd_Znth a (upd_Znth b coog (a1, a2)) (b1, b2)))
-      by list_solve.
-    entailer!!. apply derives_refl'. f_equal. list_solve.
+  destruct (Z.eqb_spec a b).
+  + subst b. rewrite !upd_Znth_same, !Znth_map by list_solve.
+    destruct (Znth a coog) as [a1 a2] eqn:Ea. simpl fst; simpl snd.
+    rewrite !upd_Znth_twice by list_solve. entailer!!. simpl.
+    apply derives_refl'. f_equal. list_solve.
+  + rewrite !upd_Znth_diff, !Znth_map by list_solve.
+    destruct (Znth a coog) as [a1 a2] eqn:Ea.
+    destruct (Znth b coog) as [b1 b2] eqn:Eb.
+    simpl fst; simpl snd.
+    rewrite !upd_Znth_twice by list_solve.
+    entailer!!. apply derives_refl'; f_equal. list_solve.
 Qed.
+
 
 
 Lemma body_coog_count : semax_body Vprog Gprog f_coog_count coog_count_spec.
