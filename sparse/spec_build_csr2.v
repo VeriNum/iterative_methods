@@ -86,31 +86,36 @@ Definition coog_count_spec :=
 
 Definition start_coog_spec :=
   DECLARE _start_coog
-  WITH sh : share, n : int 
+  WITH n : Z, gv : globals
   PRE [tuint]
-    PROP ()
-    PARAMS (Vint n)
-    SEP ()
+    PROP (0 <= n <= Int.max_unsigned)
+    PARAMS (Vint (Int.repr n))
+    GLOBALS (gv)
+    SEP (mem_mgr gv)
   POST [tptr (Tstruct _rowcol noattr)]
     EX p : val,
     PROP ()
     RETURN (p)
-    SEP (data_at_ sh (Tarray (Tstruct _rowcol noattr) (Int.intval n) noattr) p)
+    SEP (mem_mgr gv; 
+      malloc_token Ews (Tarray (Tstruct _rowcol noattr) n noattr) p;
+      data_at_ Ews (Tarray (Tstruct _rowcol noattr) n noattr) p)
     .
 
 Definition add_to_coog_spec :=
   DECLARE _add_to_coog
-  WITH sh : share, coog : list (int * int), p : val, r : int, c : int, n : Z
+  WITH sh : share, coog : list (Z * Z), p : val, r : Z, c : Z, maxn : Z
   PRE [tptr (Tstruct _rowcol noattr), tuint, tuint, tuint]
-    PROP ()
-    PARAMS (p)
-    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) n noattr) (map intpair_to_valpair coog ++ Zrepeat (Vundef, Vundef) (n - Zlength coog)) p)
+    PROP (0 <= Zlength coog < maxn;
+      0 <= maxn <= Int.max_unsigned;
+      Forall rowcol_range coog;
+      writable_share sh)
+    PARAMS (p; Vint (Int.repr (Zlength coog)); Vint (Int.repr r); Vint (Int.repr c))
+    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) maxn noattr) (map Zpair_to_valpair coog ++ Zrepeat (Vundef, Vundef) (maxn - Zlength coog)) p)
   POST [tvoid]
     PROP ()
     RETURN ()
-    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) 
-    (map intpair_to_valpair coog ++ [intpair_to_valpair (r, c)] ++ (Zrepeat (Vundef, Vundef) (n - Zlength coog - 1))) p ).
-
+    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) maxn noattr) 
+    (map Zpair_to_valpair coog ++ [Zpair_to_valpair (r, c)] ++ (Zrepeat (Vundef, Vundef) (maxn - Zlength coog - 1))) p ).
 
 
 Definition t_csr := Tstruct _csr_matrix noattr.
