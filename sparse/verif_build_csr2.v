@@ -52,81 +52,126 @@ Qed.
 
 Lemma body_coog_count : semax_body Vprog Gprog f_coog_count coog_count_spec.
 Proof.
-  start_function.
-  forward. forward. forward.
-  forward_for_simple_bound (Zlength coog) 
+  start_function. forward. forward. forward.
+  forward_for_simple_bound (Zlength coog)
   (EX i : Z, EX r : Z, EX c : Z,
     PROP (0 <= i <= Zlength coog;
-          i = 0 -> (r, c) = (-1, 0);
-          i <> 0 -> (r, c) = intpair_to_Zpair (Znth (i-1) coog)) 
-    LOCAL (temp _c (Vint (Int.repr c)); temp _r (Vint (Int.repr r));
-      temp _count (Vint (Int.repr (@count_distinct _ _ (Coord2BPO) (map intpair_to_Zpair (sublist 0 i coog)))));
-      temp _n (Vint (Int.repr (Zlength coog))); temp _p p)
-    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map intpair_to_valpair coog) p))%assert.
-  { (* entering the proof *)
+      i = 0 -> (r, c) = (-1, 0);
+      i <> 0 -> (r, c) = Znth (i-1) coog)
+    LOCAL (temp _c (Vint (Int.repr c));
+      temp _r (Vint (Int.repr r));
+      temp _count (Vint (Int.repr (count_distinct (sublist 0 i coog))));
+      temp _n (Vint (Int.repr (Zlength coog)));
+      temp _p p)
+    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr)
+          (map Zpair_to_valpair coog) p))%assert.
+  { (* entering the loop *)
     Exists (-1). Exists 0. entailer!!. }
   { (* loop body *)
     forward.
-    { entailer!!. rewrite Znth_map by list_solve.
-      destruct (Znth i coog). simpl. auto. }
+    { entailer!!. rewrite Znth_map by list_solve. 
+      destruct (Znth i coog). simpl. auto. } 
     forward.
-    { entailer!!. rewrite Znth_map by list_solve.
-      destruct (Znth i coog). simpl. auto. }
-    rewrite !Znth_map by list_solve. 
-    destruct (Znth i coog) as [ri ci] eqn:Ecoogi. simpl.
-    set (riZ := Int.unsigned ri).
-    set (ciZ := Int.unsigned ci).
+    { entailer!!. rewrite Znth_map by list_solve. 
+      destruct (Znth i coog). simpl. auto. } 
+    rewrite !Znth_map by list_solve.
+    destruct (Znth i coog) as [ri ci] eqn:Ei; simpl.
     assert (Hrrange: i <> 0 -> 0 <= r <= Int.max_unsigned).
-    { intro n0. specialize (H4 n0).
-      unfold intpair_to_Zpair in H4.
-      destruct (Znth (i-1) coog) as [xi yi].
-      replace r with (Int.intval xi) by (inversion H4; auto).
-      pose proof (Int.intrange xi). rep_lia. } 
-    assert (Hcrange : 0 <= c <= Int.max_unsigned).
-    { destruct (i =? 0) eqn:Ei0.
-      + spec H3. lia. inversion H3. rep_lia. 
-      + spec H4. lia. destruct (Znth (i-1) coog) as [xi yi].
-        inversion H4. pose proof (Int.intrange yi). rep_lia. }
-    assert (Hrirange : 0 <= riZ <= Int.max_unsigned) by rep_lia.
-    assert (Hcirange : 0 <= ciZ <= Int.max_unsigned) by rep_lia.
-    
-    forward_if   (PROP ( )
-      LOCAL (temp _ci (Vint ci);
-             temp _ri (Vint ri);
-             temp _i (Vint (Int.repr i)); temp _c (Vint (Int.repr c));
-             temp _r (Vint (Int.repr r));
-             temp _count (Vint (Int.repr (count_distinct (map intpair_to_Zpair (sublist 0 i coog)))));
-             temp _n (Vint (Int.repr (Zlength coog))); temp _p p;
-             temp _t'1 (Vint (Int.repr (Z.b2z (negb (Z.eqb riZ r) || negb (Z.eqb ciZ c))))))
+    { intros. specialize (H5 H6).
+      rewrite Forall_Znth in H0.
+      specialize (H0 (i-1)). spec H0. list_solve.
+      unfold rowcol_range in H0. 
+      rewrite <- H5 in H0. lia. }
+    assert (Hcrange: 0 <= c <= Int.max_unsigned).
+    { destruct (Z.eqb_spec i 0).
+      + specialize (H4 e). inversion H4. lia.
+      + specialize (H5 n).
+        rewrite Forall_Znth in H0.
+        specialize (H0 (i-1)). spec H0. list_solve.
+        unfold rowcol_range in H0.
+        rewrite <- H5 in H0. lia. } 
+    assert (Hrirange: 0 <= ri < Int.max_unsigned).
+    { rewrite Forall_Znth in H0. 
+      specialize (H0 i). spec H0. list_solve.
+      unfold rowcol_range in H0. rewrite Ei in H0. lia. }
+    assert (Hcirange: 0 <= ci < Int.max_unsigned).
+    { rewrite Forall_Znth in H0. 
+      specialize (H0 i). spec H0. list_solve.
+      unfold rowcol_range in H0. rewrite Ei in H0. lia. }
+    forward_if (
+      PROP ( )
+      LOCAL (temp _ci (Vint (Int.repr ci)); temp _ri (Vint (Int.repr ri));
+        temp _i (Vint (Int.repr i)); temp _c (Vint (Int.repr c));
+        temp _r (Vint (Int.repr r));
+        temp _count (Vint (Int.repr (count_distinct (sublist 0 i coog))));
+        temp _n (Vint (Int.repr (Zlength coog))); temp _p p;
+        temp _t'1 (Vint (Int.repr (Z.b2z (negb (Z.eqb ri r) || negb (Z.eqb ci c))))))
       SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr)
-          (map intpair_to_valpair coog) p)).
-    + (* if true *)
-      assert (riZ <> r). 
-      { subst riZ. intro. rewrite <- H6 in H5. apply H5. 
-        rewrite Int.repr_unsigned. auto. }
-      forward. entailer!!. 
-      destruct (Z.eqb_spec riZ r). contradiction. reflexivity.
-    + (* if false *)
+          (map Zpair_to_valpair coog) p)).
+    { (* if true *)
+      forward. entailer!.
+      destruct (Z.eqb_spec ri r).
+      + rewrite e in H6. exfalso. apply H6. reflexivity.
+      + simpl. reflexivity. }
+    { (* if false *)
+      forward. entailer!. destruct (Z.eqb_spec ri r).
+      + subst ri. simpl. destruct (Z.eqb_spec ci c).
+        - subst ci. simpl. unfold zeq. destruct (Z.eq_dec c c); simpl.
+          * unfold bool2val. reflexivity.
+          * contradiction.
+        - simpl. unfold zeq. destruct (Z.eq_dec ci c); simpl.
+          * subst ci. contradiction.
+          * unfold bool2val. reflexivity. 
+      + destruct (Z.eqb_spec i 0).
+        - specialize (H4 e). inversion H4. subst r c i. simpl.
+          rewrite (modulo_samerepr (-1) Int.max_unsigned) in H6 by auto.
+          apply repr_inj_unsigned in H6; rep_lia.
+        - specialize (H5 n0). 
+          apply repr_inj_unsigned in H6; rep_lia. }
+    (* after if *)
+    forward_if.
+    + (* if true, count is incremented *)
+      forward. forward. forward. 
+      Exists (fst (Znth i coog)). Exists (snd (Znth i coog)).
+      rewrite Ei. entailer!!. split. 
+      - intros. replace (i + 1 - 1) with i by lia. auto.
+      - f_equal. f_equal. 
+        destruct (Z.eqb_spec i 0).
+        { subst i. rewrite sublist_nil. 
+          rewrite sublist_one by list_solve.
+          simpl. reflexivity. }
+        pose proof (count_distinct_incr coog i).
+        assert (ri <> r \/ ci <> c) by lia.
+        spec H7.
+        { unfold BPO.lt. unfold coord2_le. 
+          rewrite Ei, <-(H5 n). simpl. 
+          pose proof (sorted_e _ H1 (i-1) i).
+          spec H9. list_solve. spec H9. list_solve.
+          unfold coord2_le in H9.
+          rewrite Ei, <-(H5 n) in H9. simpl in H9.
+          lia. }
+        spec H7. list_solve. rewrite H7. reflexivity.
+    + (* if false, count is not incremented *)
+      forward. 
+      assert (ri = r /\ ci = c) by lia.
       destruct (Z.eqb_spec i 0).
-      - (* i = 0 *)
-        forward. entailer!!. spec H3. lia. inversion H3. subst r c.
-        subst riZ ciZ. simpl in *. rep_lia.
-        
-         admit.
-      - (* i <> 0 *) 
-        assert (riZ = r).
-        { subst riZ. rewrite H5. apply Int.unsigned_repr. rep_lia. }
-        forward. entailer!!.
-        replace (Int.unsigned ri =? Int.unsigned ri) with true by rep_lia. simpl. 
-        destruct (Z.eqb_spec ciZ c); simpl. 
-        * subst c ciZ. rewrite Int.repr_unsigned. rewrite Int.eq_true. reflexivity.
-        * subst ciZ. unfold Int.eq. 
-          Search (Int.eq _ (Int.repr _)).
-        
-      
-      
-      
-      
+      { subst i. specialize (H4 eq_refl).
+        inversion H4; subst. destruct H7; subst ri ci. lia. }
+      Exists r. Exists c. clear H6. destruct H7; subst ri ci.
+      entailer!!. split.
+      - intros. replace (i + 1 - 1) with i by lia.
+        rewrite Ei. reflexivity.
+      - f_equal. f_equal.
+        pose proof (count_distinct_noincr coog i).
+        spec H6. list_solve.
+        spec H6.
+        { unfold BPO.lt. unfold coord2_le. 
+          rewrite <-(H5 n), Ei. simpl. lia. }
+        rewrite H6. reflexivity. }
+  (* after the loop *)
+  Intros r c. forward. entailer!!.
+  f_equal. f_equal. f_equal. list_solve.
+Qed.
 
 
 
