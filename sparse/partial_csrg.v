@@ -367,6 +367,36 @@ Lemma partial_CSRG_newcol:
    partial_CSRG (i + 1) r coog ROWPTR
   (upd_Znth (count_distinct (sublist 0 i (coog_entries coog))) COLIND (Vint (Int.repr c))).
 Proof.
+  intros *. pose proof I. intros ? Hrc ? ? ?.
+  inversion_clear H3.
+  pose proof (proj1 (coog_entry_bounds partial_CSRG_coog i ltac:(lia))).
+  rewrite Hrc in H3; simpl in H3.
+  
+  assert (Hlastrows : sublist (r + 1) (coog_rows (coog_upto i coog) + 1) (csr_row_ptr csr) 
+    = Zrepeat (Zlength (csr_vals csr)) (coog_rows (coog_upto i coog) - r)).
+  { apply partial_CSRG_rowptr'; auto.
+    apply coog_upto_wellformed. list_solve. auto. }
+  change (coog_rows _) with (coog_rows coog) in Hlastrows.
+  
+  pose (new_row_ptr := sublist 0 (r+1) (csr_row_ptr csr) ++ 
+    Zrepeat (cd_upto_coog (i+1) coog) (Zlength (csr_row_ptr csr) - (r+1))).
+  pose (csr' := Build_csr_matrix Tdouble (csr_cols csr) 
+       (Zrepeat (Zconst Tdouble 0) (cd_upto_coog i coog) ++ [Zconst Tdouble 0]) 
+       (sublist 0 (cd_upto_coog i coog) (csr_col_ind csr) ++ [c])
+       new_row_ptr).
+  
+  assert (H4 : count_distinct (sublist 0 i (coog_entries coog)) + 1 =
+    count_distinct (sublist 0 (i + 1) (coog_entries coog))).
+  { apply count_distinct_incr; [|lia].
+    pose proof (sorted_e _ partial_CSRG_coog_sorted (i-1) i ltac:(lia) ltac:(lia)).
+    unfold BPO.lt. unfold coord2_le in H4 |- *.
+    rewrite Hrc in H4|-*. simpl in H4|-*. lia. }
+        
+  assert (Hrows: csr_rows csr = Zlength (csr_row_ptr csr) - 1) by reflexivity.
+  assert (Hrows': csr_rows csr' = csr_rows csr).
+  { inversion_clear partial_CSRG_coog_csr.
+  
+  
   
 Admitted.
 
