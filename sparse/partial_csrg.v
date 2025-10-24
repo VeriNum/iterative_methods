@@ -715,16 +715,37 @@ Proof.
         apply Znth_In. list_solve.
 
   + (* partial_CSRG_colind *)
+    simpl. inversion_clear partial_CSRG_coog_csr.
+    autorewrite with sublist.
+    fold (cd_upto_coog i coog) in *.
+    set (d := cd_upto_coog i coog) in *.
+    replace (Z.succ 0) with 1 by lia.
+    assert (d = Zlength (csr_col_ind csr)).
+    { rewrite Hcde. simpl in *.
+      inversion_clear partial_CSRG_wf. lia. }
+    assert (d+1 <= Zlength COLIND).
+    { simpl in *.
+      rewrite partial_CSRG_colind'. rewrite H4.
+      apply count_distinct_mono. }
+    rewrite Zlength_sublist by list_solve.
+    replace (d - 0 + 1) with (d + 1) by list_solve.
+    rewrite (sublist_split 0 d (d+1)) by list_solve.
+    rewrite (sublist_one d) by list_solve.
+    rewrite upd_Znth_same by list_solve.
+    rewrite map_app. simpl. f_equal.
+    replace (sublist 0 d (csr_col_ind csr)) with (csr_col_ind csr) by list_solve.
+    rewrite <- partial_CSRG_colind. list_solve.
 
-
-        
-          
-        
-        
+  + (* partial_CSRG_rowptr *)
+    rewrite partial_CSRG_rowptr. 
+    unfold csr', new_row_ptr. simpl.
+    f_equal.
+    inversion_clear partial_CSRG_coog_csr.
+    simpl in coog_csr_rows. list_solve.
     
-   
-  
-Admitted.
+  + (* partial_CSRG_colind' *)
+    list_solve.
+Qed.
 
 
 
