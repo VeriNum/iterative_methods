@@ -1228,9 +1228,28 @@ Proof.
         autorewrite with sublist. intros. lia.
   
   + (* partial_CSRG_colind *)
+    inversion_clear partial_CSRG_wf.
+    inversion_clear partial_CSRG_coog_csr.
+    unfold cd_upto_coog, coog_upto, csr_rows in *; simpl in *.
+    subst csr' new_row_ptr; simpl in *.
+    pose proof (count_distinct_bound (sublist 0 i (coog_entries coog))).
+    pose proof (count_distinct_mono (coog_entries coog) (i+1)).
+    rewrite (sublist_split 0 d) by list_solve.
+    rewrite (sublist_upd_Znth_l) by list_solve.
+    rewrite (sublist_one d) by list_solve.
+    rewrite upd_Znth_same by list_solve.
+    rewrite map_app by list_solve. simpl. f_equal. list_solve.
     
-        
-      
+  + (* partial_CSRG_rowptr *)
+    inversion_clear partial_CSRG_wf.
+    inversion_clear partial_CSRG_coog_csr.
+    unfold cd_upto_coog, coog_upto, csr_rows in *; simpl in *.
+    subst csr' new_row_ptr; simpl in *.
+    rewrite partial_CSRG_rowptr.
+    f_equal. list_solve.
+
+  + list_solve. 
+Qed.
       
         
         
