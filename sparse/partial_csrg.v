@@ -1250,7 +1250,32 @@ Proof.
 
   + list_solve. 
 Qed.
-      
+
+Lemma partial_CSRG_lastrows:
+  forall r coog ROWPTR COLIND,
+  r <= coog_rows coog ->
+  partial_CSRG (Zlength (coog_entries coog)) (r-1) coog ROWPTR COLIND ->
+  partial_CSRG (Zlength (coog_entries coog)) r coog 
+    (upd_Znth r ROWPTR (Vint (Int.repr (count_distinct (coog_entries coog))))) COLIND.
+Proof.
+  intros.
+  inversion_clear H0.
+  apply build_partial_CSRG with csr; auto; try lia.
+  + eapply Forall_impl; try eassumption. simpl; intros. lia.
+  + autorewrite with sublist. constructor.
+  + replace (coog_upto (Zlength (coog_entries coog)) coog) with coog in *
+      by (unfold coog_upto;  destruct coog; simpl; f_equal; rewrite sublist_same; auto).
+    pose proof partial_CSRG_rowptr' (r-1) _ _ partial_CSRG_coog partial_CSRG_wf partial_CSRG_coog_csr ltac:(lia) ltac:(assumption).
+    inversion_clear partial_CSRG_coog_csr; unfold csr_rows in *; simpl in *.
+    rewrite !(sublist_split 0 r (r+1)) by list_solve.
+    rewrite sublist_upd_Znth_l by list_solve.
+    rewrite map_app.
+    rewrite Z.sub_simpl_r in *.
+    f_equal; auto.
+    rewrite !sublist_one by list_solve. rewrite upd_Znth_same by list_solve.
+    simpl. f_equal; f_equal; f_equal. list_solve.
+  + list_solve.
+Qed.
         
         
           
