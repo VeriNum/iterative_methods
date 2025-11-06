@@ -1276,11 +1276,8 @@ Proof.
     simpl. f_equal; f_equal; f_equal. list_solve.
   + list_solve.
 Qed.
-        
-        
-          
-        
-  
+
+
 
 (*
 
