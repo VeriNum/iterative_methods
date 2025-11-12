@@ -55,19 +55,20 @@ Definition swap_spec :=
 (* compare with the one in the repo that's verified *)
 Definition coog_quicksort_spec :=
  DECLARE _coog_quicksort
- WITH sh: share, coog: list (int * int), p: val, base: Z, n: Z
+ WITH sh: share, coog: list (Z * Z), p: val, base: Z, n: Z
  PRE [ tptr (Tstruct _rowcol noattr), tuint, tuint ]
     PROP(writable_share sh;
          (* coo_matrix_wellformed coo; *)
+         Zlength coog <= Int.max_unsigned;
          0 <= base; base <= base+n <= Zlength coog)
     PARAMS( p; Vint (Int.repr base); Vint (Int.repr n))
-    SEP (data_at sh (Tarray (Tstruct  _rowcol noattr) (Zlength coog) noattr) (map intpair_to_valpair coog) p)
+    SEP (data_at sh (Tarray (Tstruct  _rowcol noattr) (Zlength coog) noattr) (map Zpair_to_valpair coog) p)
  POST [ tvoid ]
-   EX coog': list (int * int),
+   EX coog': list (Z * Z),
     PROP(Permutation coog coog'; 
-         sorted coord2_le (map intpair_to_Zpair (sublist base (base+n) coog')))
+         sorted coord2_le ((sublist base (base+n) coog')))
     RETURN( )
-    SEP (data_at sh (Tarray (Tstruct  _rowcol noattr) (Zlength coog) noattr) (map intpair_to_valpair coog') p).
+    SEP (data_at sh (Tarray (Tstruct  _rowcol noattr) (Zlength coog) noattr) (map Zpair_to_valpair coog') p).
 
 Definition coog_count_spec :=
  DECLARE _coog_count
@@ -173,6 +174,28 @@ Inductive coog_csr {t} (coog : coog_matrix) (csr : csr_matrix t) : Prop :=
     (coog_csr_zeros : no_extra_zeros_coog coog csr),
     coog_csr coog csr. *)
 (* End of copied code *)
+
+Definition coog_to_csrg_assembly_spec := 
+  DECLARE _coog_to_csrg_assembly
+  WITH sh : share, coog : list (Z * Z), p : val, rows : Z, pc : val, pr : val, gv : globals
+  PRE [tptr (Tstruct _rowcol noattr), tuint, tuint, tptr tuint, tptr, tuint]
+    PROP ((* TODO *))
+    PARAMS (p; (Zlength coog); rows; pc; pr)
+    GLOBALS (gv)
+    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map intpair_to_valpair coog) p;
+         data_at_ sh (Tarray tuint (count_distinct coog) noattr) pc;
+         data_at_ sh (Tarray tuint (rows + 1) noattr) pr; 
+         mem_mgr gv)
+  POST [Tvoid]
+    EX rowptr : list val,
+    EX colind : list val,
+    PROP (partial_CSRG (Zlength coog) rows coog rowptr colind)
+    RETURN ()
+    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map intpair_to_valpair coog) p;
+         data_at sh (Tarray tuint (count_distinct coog) noattr) colind pc;
+         data_at sh (Tarray tuint (rows + 1) noattr) rowptr pr;
+         mem_mgr gv).
+
 
 Definition coog_to_csrg_spec :=
   DECLARE _coo_shell_to_csr_shell
