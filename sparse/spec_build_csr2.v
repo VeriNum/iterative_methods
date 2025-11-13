@@ -143,61 +143,49 @@ Definition csr_token' (csr: csr_matrix Tdouble) (p: val) : mpred :=
 Definition csr_token (m: matrix Tdouble) (p: val) : mpred :=
  EX (csr: csr_matrix Tdouble) (H: csr_to_matrix csr m), csr_token' csr p.
 
-(* Just copied here so that I don't have to compile everything *)
-(*
-Definition coog_upto (i : Z) (coog : coog_matrix) :=
-  Build_coog_matrix (coog_rows coog) (coog_cols coog) (sublist 0 i (coog_entries coog)).
-
-Definition cd_upto_coog (i : Z) (coog : coog_matrix) : Z :=
-  count_distinct (sublist 0 i (coog_entries coog)).
-
-Definition entries_correspond_coog {t} (coog : coog_matrix) (csr : csr_matrix t) :=
-  forall h,
-  0 <= h < Zlength (coog_entries coog) ->
-  let '(r, c) := Znth h (coog_entries coog) in 
-  let k := cd_upto_coog (h + 1) coog - 1 in 
-    Znth r (csr_row_ptr csr) <= k < Znth (r + 1) (csr_row_ptr csr) /\
-    Znth k (csr_col_ind csr) = c.
-
-Definition no_extra_zeros_coog {t} (coog : coog_matrix) (csr : csr_matrix t) :=
-  forall r k, 0 <= r < coog_rows coog ->
-    Znth r (csr_row_ptr csr) <= k < Znth (r+1) (csr_row_ptr csr) ->
-    let c := Znth k (csr_col_ind csr) in 
-    In (r, c) (coog_entries coog).
-
-Inductive coog_csr {t} (coog : coog_matrix) (csr : csr_matrix t) : Prop :=
-  build_coog_csr : forall 
-    (coog_csr_rows : coog_rows coog = csr_rows csr)
-    (coog_csr_cols : coog_cols coog = csr_cols csr)
-    (coog_csr_vals : Zlength (csr_vals csr) = count_distinct (coog_entries coog))
-    (coog_csr_entries : entries_correspond_coog coog csr)
-    (coog_csr_zeros : no_extra_zeros_coog coog csr),
-    coog_csr coog csr. *)
-(* End of copied code *)
-
-Definition coog_to_csrg_assembly_spec := 
-  DECLARE _coog_to_csrg_assembly
-  WITH sh : share, coog : list (Z * Z), p : val, rows : Z, pc : val, pr : val, gv : globals
-  PRE [tptr (Tstruct _rowcol noattr), tuint, tuint, tptr tuint, tptr, tuint]
-    PROP ((* TODO *))
-    PARAMS (p; (Zlength coog); rows; pc; pr)
+Definition coog_to_csrg_aux_spec := 
+  DECLARE _coog_to_csrg_aux
+  WITH sh : share, coog : coog_matrix, p : val, pc : val, pr : val, gv : globals
+  PRE [tptr (Tstruct _rowcol noattr), tuint, tuint, tptr tuint, tptr tuint]
+    PROP (coog_matrix_wellformed coog;
+      coog_rows coog < Int.max_unsigned; 
+      coog_cols coog < Int.max_unsigned)
+    PARAMS (p; Vint (Int.repr (Zlength (coog_entries coog))); Vint (Int.repr (coog_rows coog)); pc; pr)
     GLOBALS (gv)
-    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map intpair_to_valpair coog) p;
-         data_at_ sh (Tarray tuint (count_distinct coog) noattr) pc;
-         data_at_ sh (Tarray tuint (rows + 1) noattr) pr; 
+    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength (coog_entries coog)) noattr) (map Zpair_to_valpair (coog_entries coog)) p;
+         data_at_ sh (Tarray tuint (count_distinct (coog_entries coog)) noattr) pc;
+         data_at_ sh (Tarray tuint ((coog_rows coog) + 1) noattr) pr; 
          mem_mgr gv)
   POST [Tvoid]
     EX rowptr : list val,
     EX colind : list val,
-    PROP (partial_CSRG (Zlength coog) rows coog rowptr colind)
+    PROP (partial_CSRG (Zlength (coog_entries coog)) (coog_rows coog) coog rowptr colind)
     RETURN ()
-    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map intpair_to_valpair coog) p;
-         data_at sh (Tarray tuint (count_distinct coog) noattr) colind pc;
-         data_at sh (Tarray tuint (rows + 1) noattr) rowptr pr;
+    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength (coog_entries coog)) noattr) (map Zpair_to_valpair (coog_entries coog)) p;
+         data_at sh (Tarray tuint (count_distinct (coog_entries coog)) noattr) colind pc;
+         data_at sh (Tarray tuint (coog_rows coog + 1) noattr) rowptr pr;
          mem_mgr gv).
 
-
 Definition coog_to_csrg_spec :=
+  DECLARE _coog_to_csrg 
+  WITH sh : share, coog : list (Z * Z), p : val, rows : Z, cols : Z, gv : globals
+  PRE [tptr (Tstruct _rowcol noattr), tuint, tuint, tuint]
+    PROP (0 <= rows < Int.max_unsigned; 0 <= cols < Int.max_unsigned; Forall (fun e : Z * Z => 0 < fst e < rows /\ 0 <= snd e < cols) coog)
+    (* same as before: <= or < *)
+    PARAMS (p; Vint (Int.repr (Zlength coog)); Vint (Int.repr rows); Vint (Int.repr cols))
+    GLOBALS (gv)
+    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map Zpair_to_valpair coog) p; mem_mgr gv)
+  POST [tptr (Tstruct _csr_matrix noattr)]
+    EX coog' : list (Z * Z),
+    EX csrg : csr_matrix Tdouble,
+    EX q : val,
+    PROP (Permutation coog coog';
+      coog_csr (Build_coog_matrix rows cols coog) csrg)
+    RETURN (q)
+    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog') noattr) (map Zpair_to_valpair coog') p; csr_rep sh csrg q; mem_mgr gv).
+
+
+(* Definition coog_to_csrg_spec :=
   DECLARE _coo_shell_to_csr_shell
   WITH sh : share, coog : list (int * int), p : val, rows : int, cols : int, gv : globals
   PRE [tptr (Tstruct _rowcol noattr), tuint, tuint, tuint]
@@ -214,7 +202,7 @@ Definition coog_to_csrg_spec :=
     RETURN (q)
     SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map intpair_to_valpair coog') p;
       csr_rep Ews csr q;
-      mem_mgr gv).
+      mem_mgr gv). *)
 
 Definition surely_malloc_spec :=
   DECLARE _surely_malloc

@@ -138,7 +138,7 @@ void add_to_coog(struct rowcol *rc, unsigned i, unsigned r, unsigned c) {
   rc[i].col = c;
 }
 
-void coog_to_csrg_assembly(struct rowcol *rc, unsigned n, unsigned rows, unsigned *col_ind, unsigned *row_ptr)
+void coog_to_csrg_aux(struct rowcol *rc, unsigned n, unsigned rows, unsigned *col_ind, unsigned *row_ptr)
 {
   unsigned r, c, ri, ci, l, i;
   r = -1; 
@@ -169,12 +169,13 @@ struct csr_matrix *coog_to_csrg(struct rowcol *rc, unsigned n, unsigned rows, un
   struct csr_matrix *q;
   unsigned k;
   unsigned *col_ind, *row_ptr;
+  coog_quicksort(rc, 0, n);
   k = coog_count(n, rc);
   col_ind = surely_malloc(k * sizeof(unsigned));
   row_ptr = surely_malloc((rows+1) * sizeof(unsigned));
 
-  coog_to_csrg_assembly(rc, n, rows, col_ind, row_ptr);
-  free(rc);
+  coog_to_csrg_aux(rc, n, rows, col_ind, row_ptr);
+  // free(rc);
   q->val = surely_malloc(k * sizeof(double));
   q->col_ind = col_ind;
   q->row_ptr = row_ptr;
