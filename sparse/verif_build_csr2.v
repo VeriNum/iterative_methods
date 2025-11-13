@@ -1,6 +1,6 @@
 Require Import VST.floyd.proofauto.
 Require Import Iterative.floatlib.
-From Iterative.sparse Require Import build_csr2 sparse_model spec_sparse spec_build_csr2 distinct partial_csr.
+From Iterative.sparse Require Import build_csr2 sparse_model spec_sparse spec_build_csr2 distinct partial_csrg.
 Require Import VSTlib.spec_math.
 Require Import vcfloat.FPStdCompCert.
 Require Import vcfloat.FPStdLib.
@@ -202,6 +202,102 @@ Proof.
   { list_solve. }
   rewrite H2. entailer!.
 Qed.
+
+Lemma body_coog_quicksort : semax_body Vprog Gprog f_coog_quicksort coog_quicksort_spec.
+Proof.
+Admitted.
+  
+Lemma body_coog_to_csrg_aux : semax_body Vprog Gprog f_coog_to_csrg_aux coog_to_csrg_aux_spec.
+Proof.
+  start_function.
+  forward. forward. forward. (* three initializations *)
+  set (k := count_distinct (coog_entries coog)).
+  set (n := Zlength (coog_entries coog)).
+  Intros.
+  forward_for_simple_bound n (* for (i = 0; i < n; i++) *)
+  ( EX i : Z, EX l : Z, EX r : Z, EX c : Z,
+    EX ROWPTR : list val, EX COLIND : list val, 
+    PROP (0 <= l <= k; l <= i <= n; -1 <= r < coog_rows coog; 0 <= c <= coog_cols coog;
+      partial_CSRG i r coog ROWPTR COLIND;
+      l = count_distinct (sublist 0 i (coog_entries coog));
+      (l = 0 -> r = -1);
+      (i <> 0 -> r = (fst (Znth (i-1) (coog_entries coog)))%Z /\ c = snd (Znth (r-1) (coog_entries coog))))
+    LOCAL (temp _l (Vint (Int.repr l));
+      temp _r (Vint (Int.repr r));
+      temp _c (Vint (Int.repr c));
+      temp _row_ptr pr;
+      temp _col_ind pc;
+      temp _rc p;
+      temp _n (Vint (Int.repr (Zlength (coog_entries coog))));
+      temp _rows (Vint (Int.repr (coog_rows coog))))
+    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (n) noattr)
+      (map Zpair_to_valpair (coog_entries coog)) p;
+      data_at sh (tarray tuint k) COLIND pc;
+      data_at sh (tarray tuint (coog_rows coog + 1)) ROWPTR pr;
+      spec_malloc.mem_mgr gv))%assert.
+  { (* entering the loop *)
+    Exists 0. Exists (-1). Exists 0. 
+    Exists (Zrepeat Vundef (coog_rows coog + 1)).
+    Exists (Zrepeat Vundef k).
+    unfold coog_matrix_wellformed in H.
+    entailer!!.
+    split.
+    { pose proof (count_distinct_bound (coog_entries coog)). lia. }
+    pose proof (count_distinct_bound (coog_entries coog)).
+    apply partial_CSRG_0; auto.
+    transitivity (Zlength (coog_entries coog)); lia. }
+  { (* loop body *)
+    Intros.
+    destruct (Znth i (coog_entries coog)) as [ri ci] eqn:Ei.
+    assert (Hri : 0 <= ri < Int.max_unsigned).
+    { unfold coog_matrix_wellformed in H. destruct H.
+      rewrite Forall_Znth in H13.
+      specialize (H13 i). spec H13. list_solve.
+      rewrite Ei in H13. simpl in H13. lia. }
+    assert (Hci : 0 <= ci < Int.max_unsigned).
+    { unfold coog_matrix_wellformed in H. destruct H.
+      rewrite Forall_Znth in H13.
+      specialize (H13 i). spec H13. list_solve.
+      rewrite Ei in H13. simpl in H13. lia. }
+    forward. (* ri = rc[i].row *)
+    { entailer!!. rewrite Znth_map, Ei by list_solve. reflexivity. } 
+    forward. (* ci = rc[i].row *)
+    { entailer!!. rewrite Znth_map, Ei by list_solve. reflexivity. }
+    rewrite !Znth_map by list_solve. rewrite Ei. simpl.
+    forward_if (* if (ri==r) *) ; [forward_if (* if (ci==c) *)| ].
+    + (* ri = r; ci = c *)
+      forward. 
+      assert (0 <> l).
+      { intro. rewrite <-H15 in *. spec H11. lia. subst.
+        Search (Int.repr _ = Int.repr _).
+        inversion H13. 
+        rewrite Int.Z_mod_modulus_eq in H14.
+        replace (4294967295) with (Int.max_unsigned) in H14 by rep_lia.
+        replace (Int.modulus) with (Int.max_unsigned + 1) in H14 by rep_lia.
+        
+        
+        
+        unfold coog_matrix_wellformed in H.
+      Exists l r c COLIND ROWPTR.
+      entailer!!.
+      { (* i = 0 *)
+        subst i. 
+      
+      split.
+      { apply partial_CSRG_duplicate; auto.
+        + split;[|list_solve]. 
+      assert (ri = r).
+      { apply repr_inj_unsigned; auto.
+        
+    
+  
+    
+    
+    
+    
+    
+    
+    
 
 
 Lemma fold_coo_rep:

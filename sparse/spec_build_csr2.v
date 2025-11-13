@@ -147,9 +147,12 @@ Definition coog_to_csrg_aux_spec :=
   DECLARE _coog_to_csrg_aux
   WITH sh : share, coog : coog_matrix, p : val, pc : val, pr : val, gv : globals
   PRE [tptr (Tstruct _rowcol noattr), tuint, tuint, tptr tuint, tptr tuint]
-    PROP (coog_matrix_wellformed coog;
+    PROP ( writable_share sh;
+      coog_matrix_wellformed coog;
       coog_rows coog < Int.max_unsigned; 
-      coog_cols coog < Int.max_unsigned)
+      coog_cols coog < Int.max_unsigned;
+      Zlength (coog_entries coog) < Int.max_unsigned;
+      sorted coord2_le (coog_entries coog))
     PARAMS (p; Vint (Int.repr (Zlength (coog_entries coog))); Vint (Int.repr (coog_rows coog)); pc; pr)
     GLOBALS (gv)
     SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength (coog_entries coog)) noattr) (map Zpair_to_valpair (coog_entries coog)) p;
@@ -170,8 +173,11 @@ Definition coog_to_csrg_spec :=
   DECLARE _coog_to_csrg 
   WITH sh : share, coog : list (Z * Z), p : val, rows : Z, cols : Z, gv : globals
   PRE [tptr (Tstruct _rowcol noattr), tuint, tuint, tuint]
-    PROP (0 <= rows < Int.max_unsigned; 0 <= cols < Int.max_unsigned; Forall (fun e : Z * Z => 0 < fst e < rows /\ 0 <= snd e < cols) coog)
-    (* same as before: <= or < *)
+    PROP ( writable_share sh; 
+      coog_matrix_wellformed (Build_coog_matrix rows cols coog);
+      rows < Int.max_unsigned;
+      cols < Int.max_unsigned;
+      Zlength coog < Int.max_unsigned)
     PARAMS (p; Vint (Int.repr (Zlength coog)); Vint (Int.repr rows); Vint (Int.repr cols))
     GLOBALS (gv)
     SEP (data_at sh (Tarray (Tstruct _rowcol noattr) (Zlength coog) noattr) (map Zpair_to_valpair coog) p; mem_mgr gv)
