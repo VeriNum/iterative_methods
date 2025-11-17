@@ -221,7 +221,7 @@ Proof.
       partial_CSRG i r coog ROWPTR COLIND;
       l = count_distinct (sublist 0 i (coog_entries coog));
       (l = 0 -> r = -1);
-      (i <> 0 -> r = (fst (Znth (i-1) (coog_entries coog)))%Z /\ c = snd (Znth (r-1) (coog_entries coog))))
+      (i <> 0 -> r = (fst (Znth (i-1) (coog_entries coog)))%Z /\ c = snd (Znth (i-1) (coog_entries coog))))
     LOCAL (temp _l (Vint (Int.repr l));
       temp _r (Vint (Int.repr r));
       temp _c (Vint (Int.repr c));
@@ -268,32 +268,165 @@ Proof.
     + (* ri = r; ci = c *)
       forward. 
       assert (0 <> l).
-      { intro. rewrite <-H15 in *. spec H11. lia. subst.
-        Search (Int.repr _ = Int.repr _).
+      { intro. rewrite <-H15 in *. spec H11. lia. subst. 
         inversion H13. 
         rewrite Int.Z_mod_modulus_eq in H14.
         replace (4294967295) with (Int.max_unsigned) in H14 by rep_lia.
         replace (Int.modulus) with (Int.max_unsigned + 1) in H14 by rep_lia.
-        
-        
-        
-        unfold coog_matrix_wellformed in H.
-      Exists l r c COLIND ROWPTR.
-      entailer!!.
-      { (* i = 0 *)
-        subst i. 
-      
-      split.
-      { apply partial_CSRG_duplicate; auto.
-        + split;[|list_solve]. 
+        clear -Hri H14.
+        rewrite (Z.mod_small ri (Int.max_unsigned + 1) ltac:(lia)) in H14. lia. }
+      assert (0 <> n) by lia.
+      specialize (H12 ltac:(lia)).
       assert (ri = r).
-      { apply repr_inj_unsigned; auto.
-        
-    
+      { apply repr_inj_unsigned; try lia; auto.
+        inversion H. rewrite Forall_Znth in H18. specialize (H18 (i-1) ltac:(lia)). lia. }
+      subst ri. subst ci.
+      Exists l. Exists r. Exists c. 
+      Exists ROWPTR. Exists COLIND. entailer!!. split.
+      { apply partial_CSRG_duplicate; auto.
+        + list_solve.
+        + rewrite Ei.
+          destruct (Znth (i-1) (coog_entries coog)) as [r0 c0] eqn:E0. simpl in H12. 
+          destruct H12. rewrite H10, H12. auto.
+        + lia. }
+      split.
+      { apply count_distinct_noincr.
+        + list_solve.
+        + replace (Znth (i-1) (coog_entries coog)) with ((r, c)).
+          rewrite Ei. unfold BPO.lt. unfold coord2_le. lia.
+          destruct H12. destruct (Znth (i-1) (coog_entries coog)). simpl in *. auto. }
+      intros.
+      replace (i+1-1) with i by lia. rewrite Ei. auto.
+    + (* ri = r; ci <> c *)
+      assert (0 <> l).
+      { intro. rewrite <-H15 in *. spec H11. lia. subst. 
+        inversion H13. 
+        rewrite Int.Z_mod_modulus_eq in H15.
+        replace (4294967295) with (Int.max_unsigned) in H15 by rep_lia.
+        replace (Int.modulus) with (Int.max_unsigned + 1) in H15 by rep_lia.
+        clear -Hri H15.
+        rewrite (Z.mod_small ri (Int.max_unsigned + 1) ltac:(lia)) in H15. lia. }
+      assert (0 <> n) by lia.
+      assert (0 <> i) by lia.
+      assert (ri = r).
+      { apply repr_inj_unsigned; try lia; auto.
+        inversion H. rewrite Forall_Znth in H19. specialize (H19 (i-1)). lia. } subst ri.
+      assert (l < k).
+      { assert (0 < i) by lia. clear H17.
+        specialize (H12 ltac:(lia)). destruct H12.
+        subst l k. apply count_distinct_incr'.
+        + rewrite Ei. 
+          pose proof (sorted_e _ H3 (i-1) i ltac:(lia) ltac:(list_solve)).
+          unfold coord2_le in H10. rewrite Ei in H10. simpl in H10.
+          destruct (Znth (i-1) (coog_entries coog)). simpl in H10, H12, H17. subst z z0.
+          unfold BPO.lt. unfold coord2_le. simpl. lia.
+        + list_solve. } 
+      forward. forward. forward.
+      Exists (l+1). Exists r. Exists ci.
+      Exists ROWPTR. 
+      Exists (upd_Znth (count_distinct (sublist 0 i (coog_entries coog))) COLIND (Vint (Int.repr ci))).
+      entailer!!.
+      split.
+      { inversion H. rewrite Forall_Znth in H19.
+        specialize (H19 i ltac:(lia)). rewrite Ei in H19. simpl in H19. lia. }
+      split.
+      { apply partial_CSRG_newcol; try lia; auto. }
+      split.
+      { apply count_distinct_incr; [|list_solve].
+        pose proof (sorted_e _ H3 (i-1) i ltac:(lia) ltac:(list_solve)).
+        unfold coord2_le in H10. rewrite Ei in H10.
+        rewrite Ei. spec H12. lia. destruct H12.
+        destruct (Znth (i-1) (coog_entries coog)). simpl in H10, H12, H19. subst z z0.
+        unfold BPO.lt, coord2_le. simpl. lia. }
+      intros. replace (i+1-1) with i by lia.
+      rewrite Ei. simpl. lia.
+    + (* r <> ri *)
+      deadvars!.
+      forward_while (EX r : Z, EX ROWPTR : list val,
+        PROP (-1 <= r <= ri; partial_CSRG i r coog ROWPTR COLIND)
+        LOCAL (temp _ci (Vint (Int.repr ci)); 
+          temp _ri (Vint (Int.repr ri)); temp _i (Vint (Int.repr i));
+          temp _l (Vint (Int.repr l)); temp _r (Vint (Int.repr r)); 
+          temp _row_ptr pr; temp _col_ind pc; 
+          temp _rc p; temp _n (Vint (Int.repr (Zlength (coog_entries coog)))); 
+          temp _rows (Vint (Int.repr (coog_rows coog))))
+        SEP (data_at sh (Tarray (Tstruct _rowcol noattr) n noattr) (map Zpair_to_valpair (coog_entries coog)) p;
+          data_at sh (tarray tuint k) COLIND pc; data_at sh (tarray tuint (coog_rows coog + 1)) ROWPTR pr; 
+          spec_malloc.mem_mgr gv))%assert.
+      { (* entering while loop *)
+        Exists r. Exists ROWPTR. entailer!!.
+        split;[lia|]. destruct (zeq i 0).
+        + subst i. spec H11.
+          { autorewrite with sublist. simpl. lia. }
+          subst r. lia.
+        + specialize (H12 n0).
+          pose proof (sorted_e _ H3 (i-1) i ltac:(lia) ltac:(lia)).
+          rewrite Ei in H10. 
+          destruct (Znth (i-1) (coog_entries coog)). simpl in H12. destruct H12. subst z z0. 
+          unfold coord2_le in H10. simpl in H10. lia. }
+      { (* loop guard *)
+        entailer!!. }
+      { (* loop body *)
+        forward. forward. clear dependent ROWPTR. rename ROWPTR0 into ROWPTR.
+        clear dependent r. rename r0 into r.
+        forward. 
+        { entailer!!. inversion H. 
+          rewrite Forall_Znth in H9.
+          specialize (H9 i ltac:(list_solve)).
+          rewrite Ei in H9. simpl in H9. lia. }
+        Exists (r+1, upd_Znth (r+1) ROWPTR (Vint (Int.repr l))).
+        entailer!!. split; auto. lia.
+        apply partial_CSRG_skiprow; try lia; auto.
+        + rewrite Ei. simpl. lia.
+        + replace (r+1-1) with r by lia. auto.
+      }
+      (* after the loop *)
+      assert (l < k).
+      { destruct (zeq i 0).
+        + subst i. subst l k. autorewrite with sublist. simpl.
+          apply count_distinct_bound'. lia.
+        + subst l k. specialize (H12 ltac:(lia)).
+          apply count_distinct_incr'; [| list_solve].
+          unfold BPO.lt. pose proof (sorted_e _ H3 (i-1) i ltac:(lia) ltac:(lia)).
+          rewrite Ei in *. destruct (Znth (i-1) (coog_entries coog)).
+          simpl in H12. destruct H12. subst z z0. unfold coord2_le in *. simpl in *. 
+          pose proof (repr_neq_e _ _ H13). lia. }
+      forward. forward. forward.
+      Exists (l+1). Exists r0. Exists ci. Exists ROWPTR0. 
+      Exists (upd_Znth (count_distinct (sublist 0 i (coog_entries coog))) COLIND (Vint (Int.repr ci))).
+      entailer!!.
+      inversion H. rewrite Forall_Znth in H17.
+      specialize (H17 i ltac:(list_solve)). rewrite Ei in H17. simpl in H17.
+      split. lia. split. lia. split.
+      { apply partial_CSRG_newrow; try lia; auto.
+        + assert (r0 = ri) by lia. rewrite Ei. rewrite H18. auto.
+        + intros. specialize (H12 H18). destruct (Znth (i-1) (coog_entries coog)).
+          simpl in H12. destruct H12. subst z z0. simpl. 
+          apply repr_neq_e. auto. assert (r0 = ri) by lia. rewrite H12. auto. }
+      split.
+      { destruct (zeq i 0).
+        + subst i. autorewrite with sublist. 
+          rewrite sublist_one by list_solve. simpl. lia.
+        + apply count_distinct_incr;[| list_solve].
+          pose proof (sorted_e _ H3 (i-1) i ltac:(lia) ltac:(lia)).
+          rewrite Ei in *. destruct (Znth (i-1) (coog_entries coog)).
+          specialize (H12 n0). simpl in H12. destruct H12. subst z z0.
+          pose proof (repr_neq_e _ _ H13).
+          unfold BPO.lt. unfold coord2_le in *. simpl in *. lia. }
+      intros. replace (i+1-1) with i by lia.
+      rewrite Ei. simpl. split; lia.
+  }
+  (* after the for loop *) 
   
-    
-    
-    
+          
+
+
+        
+
+      )
+
+
+
     
     
     
