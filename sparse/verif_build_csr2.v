@@ -417,18 +417,35 @@ Proof.
       rewrite Ei. simpl. split; lia.
   }
   (* after the for loop *) 
-  
-          
-
-
-        
-
-      )
-
-
-
-    
-    
+  Intros l r c ROWPTR COLIND.
+  forward_while (EX r : Z, EX ROWPTR : list val,
+    PROP (k <= n; -1 <= r <= coog_rows coog;
+      partial_CSRG n r coog ROWPTR COLIND)
+    LOCAL (temp _i (Vint (Int.repr n)); temp _l (Vint (Int.repr l)); temp _r (Vint (Int.repr r));
+      temp _c (Vint (Int.repr c)); temp _row_ptr pr; temp _col_ind pc; temp _rc p;
+      temp _n (Vint (Int.repr (Zlength (coog_entries coog)))); temp _rows (Vint (Int.repr (coog_rows coog))))
+    SEP (data_at sh (Tarray (Tstruct _rowcol noattr) n noattr) (map Zpair_to_valpair (coog_entries coog)) p;
+      data_at sh (tarray tuint k) COLIND pc; data_at sh (tarray tuint (coog_rows coog + 1)) ROWPTR pr; 
+      spec_malloc.mem_mgr gv))%assert.
+  { (* entering the loop *)
+    Exists r. Exists ROWPTR. entailer!!.
+    subst k n.
+    apply count_distinct_bound. }
+  { (* loop guard *)
+    entailer!!. }
+  { (* loop body *)
+    forward. forward. forward.
+    Exists (r0+1, (upd_Znth (r0+1) ROWPTR0 (Vint (Int.repr k)))).
+    entailer!!.
+    2:{ subst n k. autorewrite with sublist. entailer!!. }
+    split. lia.
+    apply partial_CSRG_lastrows. lia.
+    replace (r0 + 1 - 1) with r0 by lia. auto. }
+  (* after the loop *)
+  forward. Exists ROWPTR0. Exists COLIND. entailer!!.
+  subst n.
+  assert (r0 = coog_rows coog) by lia. rewrite <-H9. auto.
+Qed.
     
     
 
